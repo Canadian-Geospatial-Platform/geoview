@@ -1,5 +1,5 @@
 // Repositry URL for GitHub
-export const GITUHUB_REPO = 'https://github.com/jolevesq/test-react';
+export const GITUHUB_REPO = 'https://github.com/Canadian-Geospatial-Platform/GeoView';
 
 // Classes used by Leaflet to position controls
 export const LEAFLET_POSITION_CLASSES = {
