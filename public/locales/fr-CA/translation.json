@@ -1,0 +1,26 @@
+{
+    "close": "Fermer",
+    "mapnav": {
+        "ariaNavbar": "groupe de buttons vertical pour navigation sur la carte",
+        "fullscreen": "Plein Écran",
+        "home": "Maison",
+        "zoomIn": "Zoom avant",
+        "zoomOut": "Zoom arrière"
+    },
+    "mapctrl": {
+        "mouseposition": {
+            "east": "E",
+            "west": "O",
+            "north": "N",
+            "south": "S"
+        }
+    },
+    "appbar": {
+        "export": "Exporter",
+        "fullscreen": "Plein écran",
+        "help": "Aide",
+        "layers": "Couches",
+        "share": "Partager",
+        "version": "Accéder au repo sur GitHub"
+    }
+}
