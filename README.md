@@ -13,7 +13,7 @@ GeoView mapping capabilites are based on [Leafet](https://github.com/Leaflet/Lea
 
 ## Developpement
 
-Developement is made with VisualStudio Code and uses few extentions to help linting and formating
+Developement is made with [Visual Studio Code](https://code.visualstudio.com/) and uses few extentions to help linting and formating
 * Prettier
 * ESLint
 * Better Comments
@@ -26,5 +26,66 @@ To install the project, just run
 To serve the project, just run
 `npm run serve` and GeoView will be serve from http://localhost:8080/
 
+## Deploy to gh-pages
+
+To deploy the project, just run
+`npm run build`
+
+Then push the dist folder to your gh-pages
+`npm run deploy`
+
+The project is now serve inside your GitHub gh-pages at
+`https://<<GitHub user name>>.github.io/GeoView/index.html
+
+_Make sure GitHub pages are active inside your origin repository_
+
+## Usage
+
+We'll go through the simplest way to use the Canadian Geospatial Platform Viewer.
+
+First, grab the most recent release from the [github releases](https://github.com/Canadian-Geospatial-Platform/GeoView/releases). Place the files cgpv-main.js and cgpv-styles.css within your webpage's folder structure. Place also the img and locales folder at the same place. We usually put.
+
+Then you want to include those files on your page
+
+Within head
+```html
+    <link rel="stylesheet" href="/cgpv-styles.css" />
+```
+
+Near the end of the body
+```html
+    <script src="/cgpv-main.js"></script>
+```
+
+Now that you have the required files on your page we should add the map element. There is 3 ways to do this
+* Map div element
+    ```html
+        <div id="mapLCC" class="llwp-map" data-leaflet="{ 'projection': 3978, 'zoom': 12, 'center': [45,-75], 'language': 'fr-CA', layers:[] }"></div>
+    ```
+* _Work in progress_ -> Url: The url will have parameters to setup the map. The map div, a div element with class __llwp-map__, must be on the page
+    ```html
+        <div id="mapLCC" class="llwp-map"></div>
+    ```
+* _Work in progress_ -> Code: call the create map function from cgpv-main.js with needed parameters
+
+#### Parameters
+* projection: The basemap projection to use for the map. Accepted values are 3857 (Web Mercator) or 3978 (LCC)
+* zoom: The basemap zomm level. Accepted value is a number between 0 and 20
+* center: The default center extent when the map loads. Accepted value is a pair of coordinates [lattitude, longitude]
+* language: The map language for labels and tooltips. Accepted values are en-CA and fr-CA
+* layers: Array of layers to add to the map
+    * url: The service url
+    * type: The layer type. Accepted values are esriFeature, esriDynamic, ogcWMS
+    * entries: For esriDynamic and ogcWMS a list of entries must be specified
+
+    ```
+        'layers':[
+            { 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
+            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/Investing_Energy_Canada_en/MapServer', 'type': 'esriDynamic', 'entries': '0, 2' },
+            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' },
+            { 'url': 'https://geo.weather.gc.ca/geomet', 'type': 'ogcWMS', 'entries': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }
+        ]}
+    ```
+
 ## Contributing to the project
-_Work in progress_
+see our [wiki](https://github.com/Canadian-Geospatial-Platform/GeoView/wiki/contributingGuideline)

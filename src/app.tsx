@@ -20,7 +20,7 @@ const DefaultIcon = new Icon({
 Marker.prototype.options.icon = DefaultIcon;
 
 // loop trought all the maps and create an app for it.
-const maps: Element[] = [...document.getElementsByClassName('llwb-map')];
+const maps: Element[] = [...document.getElementsByClassName('llwp-map')];
 [...maps].forEach((map: Element) => {
     // get the inline configuration
     // TODO: get config from CGP API, script mapping API and inline HTML
