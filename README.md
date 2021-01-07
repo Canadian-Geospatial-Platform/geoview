@@ -35,7 +35,7 @@ Then push the dist folder to your gh-pages
 `npm run deploy`
 
 The project is now serve inside your GitHub gh-pages at
-`https://<<GitHub user name>>.github.io/GeoView/index.html
+`https://[GITHUB-USERNAME].github.io/GeoView/index.html
 
 _Make sure GitHub pages are active inside your origin repository_
 
@@ -84,8 +84,8 @@ Now that you have the required files on your page we should add the map element.
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/Investing_Energy_Canada_en/MapServer', 'type': 'esriDynamic', 'entries': '0, 2' },
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' },
             { 'url': 'https://geo.weather.gc.ca/geomet', 'type': 'ogcWMS', 'entries': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }
-        ]}
+        ]
     ```
 
 ## Contributing to the project
-see our [wiki](https://github.com/Canadian-Geospatial-Platform/GeoView/wiki/contributingGuideline)
+see our [wiki](https://github.com/Canadian-Geospatial-Platform/GeoView/wiki/Contributing-Guideline)
