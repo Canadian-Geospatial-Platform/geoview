@@ -1,12 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { Map, CRS, DomEvent } from 'leaflet';
-import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
+import { MapConsumer, MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import { useEventHandlers } from '@react-leaflet/core';
 
 import { BasemapOptions } from '../../common/basemap';
 
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
+import { useEffect } from 'react';
 
 function MinimapBounds(props: MiniboundProps) {
     const { parentMap, zoomFactor } = props;
@@ -24,7 +25,7 @@ function MinimapBounds(props: MiniboundProps) {
     // Keep track of bounds in state to trigger renders
     const [bounds, setBounds] = useState({ height: 0, width: 0, top: 0, left: 0 });
 
-    const onChange = useCallback(() => {
+    function updateMap(): void {
         // Update the minimap's view to match the parent map's center and zoom
         const newZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
         minimap.flyTo(parentMap.getCenter(), newZoom);
@@ -36,6 +37,14 @@ function MinimapBounds(props: MiniboundProps) {
             const pMax = minimap.latLngToContainerPoint(parentMap.getBounds().getNorthEast());
             setBounds({ height: pMin.y - pMax.y, width: pMax.x - pMin.x, top: pMax.y, left: pMin.x });
         }, 500);
+    }
+
+    useEffect(() => {
+        updateMap();
+    }, []);
+
+    const onChange = useCallback(() => {
+        updateMap();
     }, [minimap, parentMap, zoomFactor]);
 
     // Listen to events on the parent map
@@ -84,7 +93,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
                     DomEvent.disableScrollPropagation(cgpMap.getContainer());
                 }}
             >
-                {basemaps.map((base: { id: string | number | null | undefined; url: string; }) => (
+                {basemaps.map((base: { id: string | number | null | undefined; url: string }) => (
                     <TileLayer key={base.id} url={base.url} />
                 ))}
                 <MinimapBounds parentMap={parentMap} zoomFactor={zoomFactor} />
