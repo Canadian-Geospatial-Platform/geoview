@@ -1,13 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 
 import { Map, CRS, DomEvent } from 'leaflet';
-import { MapConsumer, MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import { useEventHandlers } from '@react-leaflet/core';
 
 import { BasemapOptions } from '../../common/basemap';
 
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
-import { useEffect } from 'react';
 
 function MinimapBounds(props: MiniboundProps) {
     const { parentMap, zoomFactor } = props;

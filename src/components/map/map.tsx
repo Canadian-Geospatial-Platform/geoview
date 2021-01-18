@@ -1,5 +1,8 @@
+/* eslint-disable react/require-default-props */
 import { Suspense, StrictMode } from 'react';
 import { render } from 'react-dom';
+
+import { i18n } from 'i18next';
 
 import { I18nextProvider } from 'react-i18next';
 
@@ -15,6 +18,15 @@ import { MousePosition } from '../mapctrl/mouse-position';
 import { OverviewMap } from '../mapctrl/overview-map';
 import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
+
+interface MapProps {
+    id?: string;
+    center: LatLngTuple;
+    zoom: number;
+    projection: number;
+    language: string;
+    layers?: LayerConfig[];
+}
 
 function Map(props: MapProps): JSX.Element {
     const { id, center, zoom, projection, language, layers } = props;
@@ -74,7 +86,7 @@ function Map(props: MapProps): JSX.Element {
     );
 }
 
-export function createMap(element: Element, config: MapConfig, i18nInstance: any): void {
+export function createMap(element: Element, config: MapProps, i18nInstance: i18n): void {
     const center: LatLngTuple = [config.center[0], config.center[1]];
 
     // * strict mode rendering twice explanation: https://mariosfakiolas.com/blog/my-react-components-render-twice-and-drive-me-crazy/
@@ -95,23 +107,4 @@ export function createMap(element: Element, config: MapConfig, i18nInstance: any
         </StrictMode>,
         element
     );
-}
-
-// TODO: place configuration interface and manipulation in it's own class
-// TODO: map props and config props are similar, combine to have one
-interface MapConfig {
-    center: number[];
-    zoom: number;
-    projection: number;
-    language: string;
-    layers?: LayerConfig[];
-}
-
-interface MapProps {
-    id: string;
-    center: LatLngTuple;
-    zoom: number;
-    projection: number;
-    language: string;
-    layers?: LayerConfig[];
 }
