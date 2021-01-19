@@ -7,10 +7,10 @@ body {
 }
 
 .leaflet-container {
-    width: 1500px;
+    display: flex;
+    width: 90%;
     margin: auto;
     height: 700px;
-    display: flex;
 }
 
 .cgp-appbar {

@@ -9,7 +9,7 @@ import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import '../node_modules/leaflet/dist/leaflet.css';
 import '../public/css/style.css';
 
-import AppStart from './app-start';
+import AppStart from './core/app-start';
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
@@ -19,9 +19,4 @@ const DefaultIcon = new Icon({
 });
 Marker.prototype.options.icon = DefaultIcon;
 
-ReactDOM.render(
-    <>
-        <AppStart />
-    </>,
-    document.getElementById('root')
-);
+ReactDOM.render(<AppStart />, document.getElementById('root'));
