@@ -10,13 +10,19 @@ import ButtonApp from '../button';
 
 import { theme } from '../../../assests/style/theme';
 
-export default function Layers(): JSX.Element {
+type LayerProps = {
+    closeDrawer: () => void;
+};
+
+export default function Layers(props: LayerProps): JSX.Element {
+    const { closeDrawer } = props;
+
     const map = useMap();
 
     function handleclick() {
         render(
             <ThemeProvider theme={theme}>
-                <LayersPanel />
+                <LayersPanel closeDrawer={closeDrawer} />
             </ThemeProvider>,
             map.getContainer().getElementsByClassName('cgp-apppanel')[0]
         );

@@ -8,6 +8,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 import { DomEvent } from 'leaflet';
+import { useMap } from 'react-leaflet';
 
 import Layers from './buttons/layers';
 import Version from './buttons/version';
@@ -18,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
         height: '100%',
-        width: '60px',
+        margin: theme.spacing(2, 2),
         border: '2px solid rgba(0, 0, 0, 0.2)',
     },
     drawer: {
@@ -61,6 +62,8 @@ export function Appbar(props: AppBarProps): JSX.Element {
     const { t } = useTranslation();
     const classes = useStyles();
 
+    const map = useMap();
+
     const appBar = useRef();
     useEffect(() => {
         // disable events on container
@@ -74,8 +77,18 @@ export function Appbar(props: AppBarProps): JSX.Element {
     // const items = [{ divider: true }, { id: 'layers' }, { divider: true }, { id: 'fullscreen' }, { id: 'help' }];
     const items = [{ id: 'legend' }];
 
+    const closeDrawer = () => {
+        setOpen(false);
+    };
+
     const handleDrawerClose = () => {
         setOpen(!open);
+
+        if (!open) {
+            const panel = map.getContainer().getElementsByClassName('cgp-apppanel')[0];
+            panel.style.display = 'none';
+            // appBar.current.children[1].style.display = 'hidden';
+        }
     };
 
     return (
@@ -93,7 +106,7 @@ export function Appbar(props: AppBarProps): JSX.Element {
                 <Divider />
                 <List>
                     {items.map((item) => (
-                        <Layers key={`${id}-${item.id}`} />
+                        <Layers closeDrawer={closeDrawer} key={`${id}-${item.id}`} />
                     ))}
                 </List>
                 <Divider className={classes.spacer} />
