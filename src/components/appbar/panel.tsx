@@ -1,32 +1,29 @@
 import { useRef, useEffect } from 'react';
-import { render } from 'react-dom';
 
 import { useTranslation } from 'react-i18next';
 
-import { makeStyles, createStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, Divider, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
 import { DomEvent } from 'leaflet';
 
-const useStyles = makeStyles(() =>
-    createStyles({
-        root: {
-            width: 300,
-            height: '100%',
-            margin: '0px 2px',
-            borderRadius: 0,
-        },
-        avatar: {
-            color: '#666666',
-            padding: '4px 10px',
-        },
-    })
-);
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: 300,
+        height: '100%',
+        margin: theme.spacing(0, 1),
+        borderRadius: 0,
+    },
+    avatar: {
+        color: theme.palette.primary.contrastText,
+        padding: theme.spacing(2, 6),
+    },
+}));
 
 export default function PanelApp(props: PanelAppProps): JSX.Element {
     const { title, icon, content } = props;
-    const classes = useStyles();
+    const classes = useStyles(props);
     const { t } = useTranslation();
 
     const panel = useRef();

@@ -9,6 +9,9 @@ import { I18nextProvider } from 'react-i18next';
 import { LatLngTuple, CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl, AttributionControl } from 'react-leaflet';
 
+import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+
 import { MapOptions, getMapOptions } from '../../common/map';
 import { Basemap, BasemapOptions } from '../../common/basemap';
 import { Layer, LayerConfig } from '../../common/layer';
@@ -18,6 +21,8 @@ import { MousePosition } from '../mapctrl/mouse-position';
 import { OverviewMap } from '../mapctrl/overview-map';
 import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
+
+import { theme } from '../../assests/style/theme';
 
 interface MapProps {
     id?: string;
@@ -92,18 +97,21 @@ export function createMap(element: Element, config: MapProps, i18nInstance: i18n
     // * strict mode rendering twice explanation: https://mariosfakiolas.com/blog/my-react-components-render-twice-and-drive-me-crazy/
     render(
         <StrictMode>
-            <Suspense fallback="">
-                <I18nextProvider i18n={i18nInstance}>
-                    <Map
-                        id={element.id}
-                        center={center}
-                        zoom={config.zoom}
-                        projection={config.projection}
-                        language={config.language}
-                        layers={config.layers}
-                    />
-                </I18nextProvider>
-            </Suspense>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Suspense fallback="">
+                    <I18nextProvider i18n={i18nInstance}>
+                        <Map
+                            id={element.id}
+                            center={center}
+                            zoom={config.zoom}
+                            projection={config.projection}
+                            language={config.language}
+                            layers={config.layers}
+                        />
+                    </I18nextProvider>
+                </Suspense>
+            </ThemeProvider>
         </StrictMode>,
         element
     );

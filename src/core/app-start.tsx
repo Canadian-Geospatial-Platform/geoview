@@ -1,9 +1,13 @@
 import React, { useEffect } from 'react';
 
-import './assests/i18n/i18n';
+import '../assests/i18n/i18n';
 import i18n from 'i18next';
 
-import { createMap } from './components/map/map';
+import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+
+import { createMap } from '../components/map/map';
+import { theme } from '../assests/style/theme';
 
 /**
  * Inialize the app with maps from inline html configs, url params
@@ -36,7 +40,11 @@ const AppStart = (): JSX.Element => {
         getInlineMaps();
     }, []);
 
-    return <></>;
+    return (
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+        </ThemeProvider>
+    );
 };
 
 export default AppStart;

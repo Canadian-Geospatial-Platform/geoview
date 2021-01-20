@@ -1,4 +1,3 @@
-
 import { useTranslation } from 'react-i18next';
 
 import { ButtonGroup } from '@material-ui/core';
@@ -15,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
         '& > *': {
-            margin: theme.spacing(1),
+            margin: theme.spacing(3),
         },
         '& .MuiButtonGroup-vertical': {
             width: '32px',
@@ -27,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'column',
         bottom: '30px',
         pointerEvents: 'auto',
-    }
+    },
 }));
 
 export function NavBar(): JSX.Element {

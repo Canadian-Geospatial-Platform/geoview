@@ -49,10 +49,10 @@ const useStyles = makeStyles((theme) => ({
     },
     spacer: {
         flexGrow: 1,
-        backgroundColor: 'white',
+        backgroundColor: theme.palette.primary.main,
     },
     githubSection: {
-        paddingBottom: '30px',
+        paddingBottom: theme.spacing(13),
     },
 }));
 

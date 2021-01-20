@@ -7,24 +7,23 @@ import { AppVersion, GITUHUB_REPO } from '../../../common/constant';
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: AppVersion;
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
     github: {
         textAlign: 'center',
-        margin: '5px',
+        margin: theme.spacing(3),
         '& .cgp-version': {
             fontWeight: 'bold',
             display: 'block',
-            fontSize: '0.8rem',
-
+            fontSize: theme.typography.subtitle1,
             '& .cgp-hash': {
                 display: 'inline',
                 fontWeight: 'normal',
-                fontSize: '0.7rem',
+                fontSize: theme.typography.subtitle2,
             },
         },
         '& .cgp-timestamp': {
             fontWeight: 'normal',
-            fontSize: '0.7rem',
+            fontSize: theme.typography.subtitle2,
         },
     },
 }));
