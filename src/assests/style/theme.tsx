@@ -50,7 +50,7 @@ const themeOptions = {
             fontWeight: 500,
         },
     },
-    spacing: [0, 2, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 30],
+    spacing: [0, 1, 2, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 30],
     breakpoints: {
         values: {
             xs: 0,

@@ -10,19 +10,19 @@ import { DomEvent } from 'leaflet';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: 300,
+        maxWidth: 300,
         height: '100%',
-        margin: theme.spacing(0, 1),
+        marginLeft: theme.spacing(2),
         borderRadius: 0,
     },
     avatar: {
         color: theme.palette.primary.contrastText,
-        padding: theme.spacing(2, 6),
+        padding: theme.spacing(3, 7),
     },
 }));
 
 export default function PanelApp(props: PanelAppProps): JSX.Element {
-    const { title, icon, content } = props;
+    const { title, icon, content, closeDrawer } = props;
     const classes = useStyles(props);
     const { t } = useTranslation();
 
@@ -33,10 +33,16 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
         DomEvent.disableScrollPropagation((panel.current as unknown) as HTMLElement);
     }, []);
 
-    // TODO: first draf to open close the custom appbar pnael component. Make this cleaner
-    if (typeof panel.current !== 'undefined') {
-        panel.current.parentElement.style.display = 'block';
-    }
+    useEffect(() => {
+        // TODO: first draf to open close the custom appbar pnael component. Make this cleaner
+        if (typeof panel.current !== 'undefined') {
+            panel.current.parentElement.style.display = 'block';
+
+            // close drawer when panel opens
+            closeDrawer();
+        }
+    });
+
     function closePanel(): void {
         panel.current.parentElement.style.display = 'none';
     }
@@ -64,4 +70,5 @@ interface PanelAppProps {
     // eslint-disable-next-line react/require-default-props
     icon?: React.ReactNode;
     content: Element;
+    closeDrawer: () => void;
 }

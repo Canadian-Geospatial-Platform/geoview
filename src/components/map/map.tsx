@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { Suspense, StrictMode } from 'react';
+import { Suspense } from 'react';
 import { render } from 'react-dom';
 
 import { i18n } from 'i18next';
@@ -9,7 +9,8 @@ import { I18nextProvider } from 'react-i18next';
 import { LatLngTuple, CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl, AttributionControl } from 'react-leaflet';
 
-import { ThemeProvider } from '@material-ui/core/styles';
+import { useMediaQuery } from '@material-ui/core';
+import { ThemeProvider, useTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MapOptions, getMapOptions } from '../../common/map';
@@ -35,6 +36,11 @@ interface MapProps {
 
 function Map(props: MapProps): JSX.Element {
     const { id, center, zoom, projection, language, layers } = props;
+
+    const defaultTheme = useTheme();
+
+    // if screen size is medium and up
+    const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
     // get the needed projection. Web Mercator is out of the box but we need to create LCC
     // the projection will work with CBMT basemap. If another basemap would be use, update...
@@ -80,11 +86,17 @@ function Map(props: MapProps): JSX.Element {
                 <TileLayer key={base.id} url={base.url} attribution={attribution} />
             ))}
             <NavBar />
-            <MousePosition />
+            {deviceSizeMedUp && <MousePosition />}
             <ScaleControl position="bottomright" imperial={false} />
-            <AttributionControl position="bottomleft" />
-            <OverviewMap crs={crs} basemaps={basemaps} zoomFactor={mapOptions.zoomFactor} />
-            <div className="leaflet-control cgp-appbar">
+            {deviceSizeMedUp && <AttributionControl position="bottomleft" />}
+            {deviceSizeMedUp && <OverviewMap crs={crs} basemaps={basemaps} zoomFactor={mapOptions.zoomFactor} />}
+            <div
+                className="leaflet-control cgp-appbar"
+                style={{
+                    boxSizing: 'content-box',
+                    zIndex: defaultTheme.zIndex.appBar,
+                }}
+            >
                 <Appbar id={id} />
             </div>
         </MapContainer>
@@ -96,23 +108,21 @@ export function createMap(element: Element, config: MapProps, i18nInstance: i18n
 
     // * strict mode rendering twice explanation: https://mariosfakiolas.com/blog/my-react-components-render-twice-and-drive-me-crazy/
     render(
-        <StrictMode>
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <Suspense fallback="">
-                    <I18nextProvider i18n={i18nInstance}>
-                        <Map
-                            id={element.id}
-                            center={center}
-                            zoom={config.zoom}
-                            projection={config.projection}
-                            language={config.language}
-                            layers={config.layers}
-                        />
-                    </I18nextProvider>
-                </Suspense>
-            </ThemeProvider>
-        </StrictMode>,
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Suspense fallback="">
+                <I18nextProvider i18n={i18nInstance}>
+                    <Map
+                        id={element.id}
+                        center={center}
+                        zoom={config.zoom}
+                        projection={config.projection}
+                        language={config.language}
+                        layers={config.layers}
+                    />
+                </I18nextProvider>
+            </Suspense>
+        </ThemeProvider>,
         element
     );
 }
