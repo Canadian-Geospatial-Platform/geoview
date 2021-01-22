@@ -6,7 +6,7 @@ import { i18n } from 'i18next';
 
 import { I18nextProvider } from 'react-i18next';
 
-import { LatLngTuple, CRS } from 'leaflet';
+import { Map as LeafletMap, LatLngTuple, CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl, AttributionControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
@@ -24,6 +24,7 @@ import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
 
 import { theme } from '../../assests/style/theme';
+import api, { EVENT_NAMES } from '../../api/api';
 
 interface MapProps {
     id?: string;
@@ -54,6 +55,21 @@ function Map(props: MapProps): JSX.Element {
     // get map option from slected basemap projection
     const mapOptions: MapOptions = getMapOptions(projection);
 
+    /**
+     * Get the center position of the map when move / drag has ended
+     * then emit it as an api event
+     * @param event Move end event container a reference to the map
+     */
+    function mapMoveEnd(event: Record<string, LeafletMap>): void {
+        // get a map reference from the moveend event
+        const map: LeafletMap = event.target;
+
+        // emit the moveend event to the api
+        api.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
+            position: map.getCenter(),
+        });
+    }
+
     return (
         <MapContainer
             center={center}
@@ -80,6 +96,14 @@ function Map(props: MapProps): JSX.Element {
                         createdLayers.push(layer.addEsriDynamic(cgpMap, item));
                     }
                 });
+
+                // emit the initial map position
+                api.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
+                    position: cgpMap.getCenter(),
+                });
+
+                // listen to map move end events
+                cgpMap.on('moveend', mapMoveEnd);
             }}
         >
             {basemaps.map((base) => (
@@ -89,7 +113,7 @@ function Map(props: MapProps): JSX.Element {
             {deviceSizeMedUp && <MousePosition />}
             <ScaleControl position="bottomright" imperial={false} />
             {deviceSizeMedUp && <AttributionControl position="bottomleft" />}
-            {deviceSizeMedUp && <OverviewMap crs={crs} basemaps={basemaps} zoomFactor={mapOptions.zoomFactor} />}
+            {deviceSizeMedUp && <OverviewMap id={id} crs={crs} basemaps={basemaps} zoomFactor={mapOptions.zoomFactor} />}
             <div
                 className="leaflet-control cgp-appbar"
                 style={{
@@ -106,7 +130,6 @@ function Map(props: MapProps): JSX.Element {
 export function createMap(element: Element, config: MapProps, i18nInstance: i18n): void {
     const center: LatLngTuple = [config.center[0], config.center[1]];
 
-    // * strict mode rendering twice explanation: https://mariosfakiolas.com/blog/my-react-components-render-twice-and-drive-me-crazy/
     render(
         <ThemeProvider theme={theme}>
             <CssBaseline />
