@@ -53,9 +53,6 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
         backgroundColor: theme.palette.primary.main,
     },
-    githubSection: {
-        paddingBottom: theme.spacing(13),
-    },
 }));
 
 export function Appbar(props: AppBarProps): JSX.Element {
@@ -118,7 +115,7 @@ export function Appbar(props: AppBarProps): JSX.Element {
                 </List>
                 <Divider className={classes.spacer} />
                 <Divider />
-                <List className={classes.githubSection}>
+                <List>
                     <Version />
                 </List>
             </Drawer>

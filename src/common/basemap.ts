@@ -62,8 +62,8 @@ export class Basemap {
 
     // attribution to add the the map
     private attributionVal: Attribution = {
-        'en-CA': '&copy Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
-        'fr-CA': '&copy Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
+        'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
+        'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
     };
 
     get lccCBMT(): BasemapOptions[] {
