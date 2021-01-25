@@ -13,6 +13,9 @@
             "west": "W",
             "north": "N",
             "south": "S"
+        },
+        "overviewmap": {
+            "toggle": "Toggle minimap"
         }
     },
     "appbar": {

@@ -73,6 +73,10 @@ const themeOptions = {
         borderRadius: 6,
     },
     overrides: {
+        button: {
+            width: 32,
+            height: 32,
+        },
         MuiFab: {
             extended: {
                 padding: '0 24px',
