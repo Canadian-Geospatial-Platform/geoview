@@ -20,6 +20,7 @@ import { Projection } from '../../common/projection';
 
 import { MousePosition } from '../mapctrl/mouse-position';
 import { OverviewMap } from '../mapctrl/overview-map';
+import { Attribution } from '../mapctrl/attribution';
 import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
 
@@ -112,7 +113,7 @@ function Map(props: MapProps): JSX.Element {
             <NavBar />
             {deviceSizeMedUp && <MousePosition />}
             <ScaleControl position="bottomright" imperial={false} />
-            {deviceSizeMedUp && <AttributionControl position="bottomleft" />}
+            {deviceSizeMedUp && <Attribution attribution={attribution} />}
             {deviceSizeMedUp && <OverviewMap id={id} crs={crs} basemaps={basemaps} zoomFactor={mapOptions.zoomFactor} />}
             <div
                 className="leaflet-control cgp-appbar"
