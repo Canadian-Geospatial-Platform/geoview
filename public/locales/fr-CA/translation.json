@@ -13,6 +13,9 @@
             "west": "O",
             "north": "N",
             "south": "S"
+        },
+        "overviewmap": {
+            "toggle": "Basculer la mini-carte"
         }
     },
     "appbar": {

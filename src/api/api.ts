@@ -8,6 +8,10 @@ export const EVENT_NAMES = {
      */
     EVENT_MAP_MOVE_END: 'map/moveend',
     /**
+     * Event triggered when the overview map is toggled
+     */
+    EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',
+    /**
      * Event triggered when a drawer opens/closes
      */
     EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
