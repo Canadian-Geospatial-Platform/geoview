@@ -46,6 +46,8 @@ const config = {
         new HtmlWebpackPlugin({
             template: './public/index.html',
             title: 'Canadian Geospatial Platform Viewer',
+            inject: 'head',
+            scriptLoading: 'blocking',
         }),
         new webpack.DefinePlugin({
             __VERSION__: {

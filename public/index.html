@@ -4,7 +4,9 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title><%= htmlWebpackPlugin.options.title %></title>
-        <link rel="stylesheet" href="/css/style.css" />
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="shortcut icon" href="favicon.ico" />
+
         <link
             href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather"
             rel="stylesheet"
@@ -17,10 +19,20 @@
             #mapid {
                 height: 1000px;
             }
+
+            .panel {
+                display: inline-block;
+                background: #ffffff;
+                box-shadow: 0px 0px 5px 5px #666666;
+                -webkit-box-shadow: 2px 2px 5px 5x #666666;
+                -moz-box-shadow: 2px 2px 5px 5px #666666;
+                margin: 10px;
+                padding: 10px;
+                font-size: 12px;
+            }
         </style>
     </head>
     <body>
-        <div id="root"></div>
         <div>
             <h3>The Atlas of Canada - Clean Energy Resources and Projects (CERP)</h3>
             <div
@@ -37,6 +49,10 @@
             <p>
                 This map is an example of a Leaflet map done with React. This map is in Web Mercator projection with an English interface.
             </p>
+            <div class="panel">
+                <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
+                <div class="maps-position"></div>
+            </div>
         </div>
         <hr />
         <div>
@@ -57,6 +73,35 @@
                 Cette carte est un exemple d'une carte créée à partir de Leaflet et React. La projection LCC est utilisée et l'interface est
                 en français.
             </p>
+            <div class="panel">
+                <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
+                <div class="maps-position"></div>
+            </div>
         </div>
+
+        <script>
+            const mapsPosition = document.getElementsByClassName('maps-position');
+
+            // initialize cgpv and api events
+            cgpv.init();
+
+            // listen to an event emitted by mapWM
+            cgpv.api.on(
+                'map/moveend',
+                (args) => {
+                    console.log(args);
+                },
+                'mapWM'
+            );
+
+            // listen to all events emitted with same event name
+            cgpv.api.all('map/moveend', (args) => {
+                mapsPosition[0].innerHTML = mapsPosition[1].innerHTML = args
+                    .map((map) => {
+                        return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
+                    })
+                    .join(' ');
+            });
+        </script>
     </body>
 </html>
