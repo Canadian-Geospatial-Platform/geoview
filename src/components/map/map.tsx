@@ -7,7 +7,7 @@ import { i18n } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 
 import { Map as LeafletMap, LatLngTuple, CRS } from 'leaflet';
-import { MapContainer, TileLayer, ScaleControl, AttributionControl } from 'react-leaflet';
+import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
 import { ThemeProvider, useTheme } from '@material-ui/core/styles';
@@ -15,7 +15,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MapOptions, getMapOptions } from '../../common/map';
 import { Basemap, BasemapOptions } from '../../common/basemap';
-import { Layer, LayerConfig } from '../../common/layer';
+import { Layer, LayerConfig, LayerTypes } from '../../common/layers/layer';
+
 import { Projection } from '../../common/projection';
 
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -82,19 +83,22 @@ function Map(props: MapProps): JSX.Element {
             maxZoom={mapOptions.maxZooom}
             maxBounds={mapOptions.maxBounds}
             whenCreated={(cgpMap) => {
+                // initialize the layer object
+                const layer = new Layer(cgpMap);
+
                 // reset the view when created so overview map is moved at the right place
                 cgpMap.setView(center, zoom);
 
-                // TODO: put this a t the right place. This is temporary to show we can add different layer type to the map
-                const layer = new Layer();
-                const createdLayers = [];
+                // TODO: put this at the right place. This is temporary to show we can add different layer type to the map, need to refactor, check issue #45
                 layers?.forEach((item) => {
-                    if (item.type === 'ogcWMS') {
-                        createdLayers.push(layer.addWMS(cgpMap, item));
-                    } else if (item.type === 'esriFeature') {
-                        createdLayers.push(layer.addEsriFeature(cgpMap, item));
-                    } else if (item.type === 'esriDynamic') {
-                        createdLayers.push(layer.addEsriDynamic(cgpMap, item));
+                    if (item.type === LayerTypes.GEOJSON) {
+                        layer.createGeoJSONLayer(item);
+                    } else if (item.type === LayerTypes.WMS) {
+                        layer.createWmsLayer(item);
+                    } else if (item.type === LayerTypes.ESRI_FEATURE) {
+                        layer.createFeatureLayer(item);
+                    } else if (item.type === LayerTypes.ESRI_DYNAMIC) {
+                        layer.createDynamicLayer(item);
                     }
                 });
 

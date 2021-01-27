@@ -43,6 +43,9 @@
             { 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/Investing_Energy_Canada_en/MapServer', 'type': 'esriDynamic', 'entries': '0, 2' },
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' },
+            { 'url': './geojson/lines.json', 'type': 'geoJSON' },
+            { 'url': './geojson/points.json', 'type': 'geoJSON' },
+            { 'url': './geojson/polygons.json', 'type': 'geoJSON' },
             { 'url': 'https://geo.weather.gc.ca/geomet', 'type': 'ogcWMS', 'entries': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }
         ]}"
             ></div>
@@ -53,6 +56,7 @@
                 <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
                 <div class="maps-position"></div>
             </div>
+            <button id="add-geojson">Add GeoJSON Layer</button>
         </div>
         <hr />
         <div>
@@ -101,6 +105,19 @@
                         return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
                     })
                     .join(' ');
+            });
+
+            // find the button element by ID
+            var addGeoJSONButton = document.getElementById('add-geojson');
+
+            // add an event listener when a button is clicked
+            addGeoJSONButton.addEventListener('click', function (e) {
+                // emit a new event to a geojson layer from url
+                // adding a geojson layer requires a type of geojson and url
+                cgpv.api.emit('layer/add', null, {
+                    type: 'geojson',
+                    url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+                });
             });
         </script>
     </body>
