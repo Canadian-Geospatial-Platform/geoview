@@ -2,6 +2,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import EventEmitter from 'eventemitter3';
 
+/**
+ * constant contains event names
+ */
 export const EVENT_NAMES = {
     /**
      * Event triggered when a user stops moving the map
@@ -15,6 +18,18 @@ export const EVENT_NAMES = {
      * Event triggered when a drawer opens/closes
      */
     EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
+    /**
+     * Event triggered when adding a new layer
+     */
+    EVENT_LAYER_ADD: 'layer/add',
+    /**
+     * Event triggered when removing a layer
+     */
+    EVENT_REMOVE_LAYER: 'layer/remove',
+    /**
+     * Event triggered when getting all layers
+     */
+    EVENT_GET_LAYERS: 'layer/get_layers',
 };
 
 /**
