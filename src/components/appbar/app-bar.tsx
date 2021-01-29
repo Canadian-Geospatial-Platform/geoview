@@ -12,7 +12,9 @@ import { useMap } from 'react-leaflet';
 
 import Layers from './buttons/layers';
 import Version from './buttons/version';
-import api, { EVENT_NAMES } from '../../api/api';
+
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 const drawerWidth = 200;
 
@@ -89,7 +91,7 @@ export function Appbar(props: AppBarProps): JSX.Element {
         }
 
         // emit an api event when drawer opens/closes
-        api.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, id, {
+        api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, id, {
             id,
             status: open,
         });
