@@ -13,7 +13,9 @@ import { useEventHandlers } from '@react-leaflet/core';
 import { BasemapOptions } from '../../common/basemap';
 
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
-import api, { EVENT_NAMES } from '../../api/api';
+
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 const MINIMAP_SIZE = {
     width: '150px',
@@ -91,7 +93,7 @@ function MinimapToggle(): JSX.Element {
         }
 
         // trigger a new event when overview map is toggled
-        api.emit(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, null, {
+        api.event.emit(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, null, {
             status,
         });
     }
@@ -153,7 +155,7 @@ function MinimapBounds(props: MiniboundProps) {
         updateMap();
 
         // listen to API event when the overview map is toggled
-        api.on(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, (payload) => {
+        api.event.on(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, (payload) => {
             updateMap();
 
             setToggle(payload.status);
@@ -161,7 +163,7 @@ function MinimapBounds(props: MiniboundProps) {
 
         // remove the listener when the component unmounts
         return () => {
-            api.off(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE);
+            api.event.off(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE);
         };
     }, []);
 

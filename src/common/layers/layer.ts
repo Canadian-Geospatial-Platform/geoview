@@ -5,7 +5,9 @@ import { EsriFeature } from './esri-feature';
 import { WMS } from './wms';
 import { GeoJSON } from './geojson';
 
-import api, { EVENT_NAMES } from '../../api/api';
+import { api } from '../../api/api';
+
+import { EVENT_NAMES } from '../../api/event';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 import 'esri-leaflet-renderers';
@@ -79,7 +81,7 @@ export class Layer {
         this.wms = new WMS();
 
         // listen to outside events to add layers
-        api.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
+        api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
             if (payload.type === LayerTypes.GEOJSON) {
                 this.geoJSON.add(this.map, payload, this.layers);
             } else if (payload.type === LayerTypes.WMS) {
@@ -92,7 +94,7 @@ export class Layer {
         });
 
         // listen to outside events to remove layers
-        api.on(EVENT_NAMES.EVENT_REMOVE_LAYER, (payload) => {
+        api.event.on(EVENT_NAMES.EVENT_REMOVE_LAYER, (payload) => {
             // remove layer from outside
             this.remove(payload.id);
         });

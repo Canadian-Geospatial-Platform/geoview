@@ -26,7 +26,9 @@ import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
 
 import { theme } from '../../assests/style/theme';
-import api, { EVENT_NAMES } from '../../api/api';
+
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 interface MapProps {
     id?: string;
@@ -67,7 +69,7 @@ function Map(props: MapProps): JSX.Element {
         const map: LeafletMap = event.target;
 
         // emit the moveend event to the api
-        api.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
+        api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
             position: map.getCenter(),
         });
     }
@@ -103,7 +105,7 @@ function Map(props: MapProps): JSX.Element {
                 });
 
                 // emit the initial map position
-                api.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
+                api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
                     position: cgpMap.getCenter(),
                 });
 

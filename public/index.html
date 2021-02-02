@@ -70,6 +70,9 @@
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/services/MMS/T100EP_E/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' },
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 28, 29, 37' },
+            { 'url': './geojson/lines.json', 'type': 'geoJSON' },
+            { 'url': './geojson/points.json', 'type': 'geoJSON' },
+            { 'url': './geojson/polygons.json', 'type': 'geoJSON' },
             { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' }
         ]}"
             ></div>
@@ -81,6 +84,7 @@
                 <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
                 <div class="maps-position"></div>
             </div>
+            <button id="add-geojson-lcc">Add GeoJSON Layer</button>
         </div>
 
         <script>
@@ -115,7 +119,19 @@
                 // emit a new event to a geojson layer from url
                 // adding a geojson layer requires a type of geojson and url
                 cgpv.api.emit('layer/add', null, {
-                    type: 'geojson',
+                    type: 'geoJSON',
+                    url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+                });
+            });
+
+            // find the button element to add a geojson on an LCC map
+            var addGeoJSONButtonLCC = document.getElementById('add-geojson-lcc');
+
+            // add an event listener when the button is clicked
+            addGeoJSONButtonLCC.addEventListener('click', function (e) {
+                // add geojson to the lcc map
+                cgpv.api.emit('layer/add', null, {
+                    type: 'geoJSON',
                     url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
                 });
             });
