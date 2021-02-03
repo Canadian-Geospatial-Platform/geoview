@@ -48,7 +48,6 @@
                 <button class="add-polygon-btn">Add Polygon</button>
                 <button class="add-circle-btn">Add Circle</button>
                 <button class="add-circle-marker-btn">Add Circle Marker</button>
-                <button class="delete-polyline-btn">Delete Polyline</button>
                 <button class="delete-group-btn">Delete Group</button>
             </div>
             <div
@@ -112,67 +111,9 @@
         <script>
             const mapsPosition = document.getElementsByClassName('maps-position');
 
-            // initialize cgpv and api events
-            cgpv.init();
-
-            // listen to an event emitted by mapWM
-            cgpv.api.on(
-                'map/moveend',
-                (args) => {
-                    console.log(args);
-                },
-                'mapWM'
-            );
-
-            // listen to all events emitted with same event name
-            cgpv.api.all('map/moveend', (args) => {
-                mapsPosition[0].innerHTML = mapsPosition[1].innerHTML = args
-                    .map((map) => {
-                        return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
-                    })
-                    .join(' ');
-            });
-
-            // find the button element by ID
-            var addGeoJSONButton = document.getElementById('add-geojson');
-
-            // add an event listener when a button is clicked
-            addGeoJSONButton.addEventListener('click', function (e) {
-                // emit a new event to a geojson layer from url
-                // adding a geojson layer requires a type of geojson and url
-                cgpv.api.emit('layer/add', null, {
-                    type: 'geoJSON',
-                    url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
-                });
-            });
-
-            // find the button element to add a geojson on an LCC map
-            var addGeoJSONButtonLCC = document.getElementById('add-geojson-lcc');
-
-            // add an event listener when the button is clicked
-            addGeoJSONButtonLCC.addEventListener('click', function (e) {
-                // add geojson to the lcc map
-                cgpv.api.emit('layer/add', null, {
-                    type: 'geoJSON',
-                    url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
-                });
-            });
-
-            // used to store the created polyline geometry
-            var polyline = null;
-
-            // get addPolyline button element for WM map
-            var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
-
-            // add polyline btn click event handler
-            addPolylineBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-
+            function addPolyline(map) {
                 // call an api function to draw a polyline
-                polyline = cgpv.api.map('mapWM').addPolyline(
+                const polyline = cgpv.api.map(map).addPolyline(
                     [
                         [45, -100],
                         [50, -105],
@@ -185,21 +126,12 @@
                     }
                 );
 
-                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', polyline);
-            });
+                cgpv.api.map(map).addToGeometryGroup('myGroup', polyline);
+            }
 
-            // get addPolygon button element for WM map
-            var addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[0];
-
-            // add polygon btn click event handler
-            addPolygonBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-
+            function addPolygon(map) {
                 // call an api function to draw a polygon
-                const polygon = cgpv.api.map('mapWM').addPolygon(
+                const polygon = cgpv.api.map(map).addPolygon(
                     [
                         [50, -109.05],
                         [54, -109.03],
@@ -214,153 +146,161 @@
                     }
                 );
 
-                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', polygon);
-            });
+                cgpv.api.map(map).addToGeometryGroup('myGroup', polygon);
+            }
 
-            // get addCircle button element for WM map
-            var addCircleBtn = document.getElementsByClassName('add-circle-btn')[0];
-
-            // add circle btn click event handler
-            addCircleBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-
+            function addCircle(map) {
                 // call an api function to draw a polygon
-                const circle = cgpv.api.map('mapWM').addCircle(50, -109, 200, {
+                const circle = cgpv.api.map(map).addCircle(50, -109, 200, {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
 
-                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', circle);
-            });
+                cgpv.api.map(map).addToGeometryGroup('myGroup', circle);
+            }
 
-            // get add circle marker button element for WM map
-            var addCircleMarkerBtn = document.getElementsByClassName('add-circle-marker-btn')[0];
-
-            // add circle marker btn click event handler
-            addCircleMarkerBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-
+            function addCircleMarker(map) {
                 // call an api function to draw a polygon
-                const circleMarker = cgpv.api.map('mapWM').addCircleMarker(70, -109, 5, {
+                const circleMarker = cgpv.api.map(map).addCircleMarker(70, -109, 5, {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
 
-                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', circleMarker);
-            });
+                cgpv.api.map(map).addToGeometryGroup('myGroup', circleMarker);
+            }
 
-            // get deletePolyline button element for WM map
-            var deletePolylineBtn = document.getElementsByClassName('delete-polyline-btn')[0];
+            // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+            cgpv.init(function () {
+                console.log('api is ready');
 
-            // add polyline btn click event handler
-            deletePolylineBtn.addEventListener('click', function (e) {
-                // call an api function to draw a polyline
-                cgpv.api.map('mapWM').deleteGeometry(polyline.id);
-            });
-
-            // get deleteGeomtryGroup button element for WM map
-            var deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[0];
-
-            // add polyline btn click event handler
-            deleteGeomtryGroup.addEventListener('click', function (e) {
-                // call an api function to draw a polyline
-                cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');
-            });
-
-            // get addPolyline button element for LCC map
-            addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[1];
-
-            // add polyline btn click event handler
-            addPolylineBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapLCC').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapLCC').createGeometryGroup('myGroup');
-                }
-
-                // call an api function to draw a polyline
-                const polyline = cgpv.api.map('mapLCC').addPolyline(
-                    [
-                        [45, -100],
-                        [50, -105],
-                    ],
-                    {
-                        stroke: true,
-                        color: '#000',
-                        weight: 5,
-                        opacity: '0.8',
-                    }
+                // listen to an event emitted by mapWM
+                cgpv.api.on(
+                    'map/moveend',
+                    (args) => {
+                        console.log(args);
+                    },
+                    'mapWM'
                 );
 
-                cgpv.api.map('mapLCC').addToGeometryGroup('myGroup', polyline);
-            });
-
-            // get addPolygon button element for LCC map
-            addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[1];
-
-            // add polygon btn click event handler
-            addPolygonBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapLCC').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapLCC').createGeometryGroup('myGroup');
-                }
-
-                // call an api function to draw a polygon
-                const polygon = cgpv.api.map('mapLCC').addPolygon(
-                    [
-                        [50, -109.05],
-                        [54, -109.03],
-                        [54, -102.05],
-                        [50, -102.04],
-                    ],
-                    {
-                        stroke: true,
-                        color: '#000',
-                        weight: 5,
-                        opacity: '0.8',
-                    }
-                );
-
-                cgpv.api.map('mapLCC').addToGeometryGroup('myGroup', polygon);
-            });
-
-            // get addCircle button element for LCC map
-            addCircleBtn = document.getElementsByClassName('add-circle-btn')[1];
-
-            // add circle btn click event handler
-            addCircleBtn.addEventListener('click', function (e) {
-                // check if a group already exists
-                if (!cgpv.api.map('mapLCC').getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapLCC').createGeometryGroup('myGroup');
-                }
-
-                // call an api function to draw a polygon
-                const circle = cgpv.api.map('mapLCC').addCircle(50, -109, 200, {
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.5,
-                    radius: 50.0,
+                // listen to all events emitted with same event name
+                cgpv.api.all('map/moveend', (args) => {
+                    mapsPosition[0].innerHTML = mapsPosition[1].innerHTML = args
+                        .map((map) => {
+                            return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
+                        })
+                        .join(' ');
                 });
 
-                cgpv.api.map('mapLCC').addToGeometryGroup('myGroup', circle);
-            });
+                // find the button element by ID
+                var addGeoJSONButton = document.getElementById('add-geojson');
 
-            // get deleteGeomtryGroup button element for LCC map
-            deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[1];
+                // add an event listener when a button is clicked
+                addGeoJSONButton.addEventListener('click', function (e) {
+                    // emit a new event to a geojson layer from url
+                    // adding a geojson layer requires a type of geojson and url
+                    cgpv.api.emit('layer/add', null, {
+                        type: 'geoJSON',
+                        url:
+                            'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+                    });
+                });
 
-            // add polyline btn click event handler
-            deleteGeomtryGroup.addEventListener('click', function (e) {
-                // call an api function to draw a polyline
-                cgpv.api.map('mapLCC').deleteGeometryGroup('myGroup');
+                // find the button element to add a geojson on an LCC map
+                var addGeoJSONButtonLCC = document.getElementById('add-geojson-lcc');
+
+                // add an event listener when the button is clicked
+                addGeoJSONButtonLCC.addEventListener('click', function (e) {
+                    // add geojson to the lcc map
+                    cgpv.api.emit('layer/add', null, {
+                        type: 'geoJSON',
+                        url:
+                            'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+                    });
+                });
+
+                // used to store the created polyline geometry
+                var polyline = null;
+
+                // check if a group already exists
+                cgpv.api.map('mapWM').createGeometryGroup('myGroup');
+
+                // get addPolyline button element for WM map
+                var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
+
+                // add polyline btn click event handler
+                addPolylineBtn.addEventListener('click', function (e) {
+                    addPolyline('mapWM');
+                });
+
+                // get addPolygon button element for WM map
+                var addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[0];
+
+                // add polygon btn click event handler
+                addPolygonBtn.addEventListener('click', function (e) {
+                    addPolygon('mapWM');
+                });
+
+                // get addCircle button element for WM map
+                var addCircleBtn = document.getElementsByClassName('add-circle-btn')[0];
+
+                // add circle btn click event handler
+                addCircleBtn.addEventListener('click', function (e) {
+                    addCircle('mapWM');
+                });
+
+                // get add circle marker button element for WM map
+                var addCircleMarkerBtn = document.getElementsByClassName('add-circle-marker-btn')[0];
+
+                // add circle marker btn click event handler
+                addCircleMarkerBtn.addEventListener('click', function (e) {
+                    addCircleMarker('mapWM');
+                });
+
+                // get deleteGeomtryGroup button element for WM map
+                var deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[0];
+
+                // add polyline btn click event handler
+                deleteGeomtryGroup.addEventListener('click', function (e) {
+                    // call an api function to draw a polyline
+                    cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');
+                });
+
+                // get addPolyline button element for LCC map
+                addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[1];
+
+                // add polyline btn click event handler
+                addPolylineBtn.addEventListener('click', function (e) {
+                    addPolyline('mapLCC');
+                });
+
+                // get addPolygon button element for LCC map
+                addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[1];
+
+                // add polygon btn click event handler
+                addPolygonBtn.addEventListener('click', function (e) {
+                    addPolygon('mapLCC');
+                });
+
+                // get addCircle button element for LCC map
+                addCircleBtn = document.getElementsByClassName('add-circle-btn')[1];
+
+                // add circle btn click event handler
+                addCircleBtn.addEventListener('click', function (e) {
+                    addCircle('mapLCC');
+                });
+
+                // get deleteGeomtryGroup button element for LCC map
+                deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[1];
+
+                // add polyline btn click event handler
+                deleteGeomtryGroup.addEventListener('click', function (e) {
+                    // call an api function to draw a polyline
+                    cgpv.api.map('mapLCC').deleteGeometryGroup('myGroup');
+                });
             });
         </script>
     </body>

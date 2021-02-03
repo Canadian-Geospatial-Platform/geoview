@@ -116,6 +116,9 @@ function Map(props: MapProps): JSX.Element {
 
                 // add map instance to api
                 api.maps.push(new MapViewer({ map: cgpMap, id: id || '' }));
+
+                // call the ready function since rendering of this map instance is done
+                api.ready();
             }}
         >
             {basemaps.map((base) => (
