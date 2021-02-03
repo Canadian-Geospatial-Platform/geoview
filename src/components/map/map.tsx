@@ -38,11 +38,13 @@ interface MapProps {
     zoom: number;
     projection: number;
     language: string;
+    basemapID:string;
     layers?: LayerConfig[];
+
 }
 
 function Map(props: MapProps): JSX.Element {
-    const { id, center, zoom, projection, language, layers } = props;
+    const { id, center, zoom, projection, language,basemapID, layers } = props;
 
     const defaultTheme = useTheme();
 
@@ -54,7 +56,7 @@ function Map(props: MapProps): JSX.Element {
     const crs = projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
 
     // get basemaps with attribution
-    const basemap: Basemap = new Basemap(language);
+    const basemap: Basemap = new Basemap(language, basemapID);
     const basemaps: BasemapOptions[] = projection === 3857 ? basemap.wmCBMT : basemap.lccCBMT;
     const attribution = language === 'en-CA' ? basemap.attribution['en-CA'] : basemap.attribution['fr-CA'];
 
@@ -156,6 +158,7 @@ export function createMap(element: Element, config: MapProps, i18nInstance: i18n
                         zoom={config.zoom}
                         projection={config.projection}
                         language={config.language}
+                        basemapID={config.basemapID}
                         layers={config.layers}
                     />
                 </I18nextProvider>
