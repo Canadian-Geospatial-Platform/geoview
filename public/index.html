@@ -30,11 +30,27 @@
                 padding: 10px;
                 font-size: 12px;
             }
+
+            .toolbar {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                width: 100%;
+                margin: 10px;
+            }
         </style>
     </head>
     <body>
         <div>
             <h3>The Atlas of Canada - Clean Energy Resources and Projects (CERP)</h3>
+            <div class="toolbar">
+                <button class="add-polyline-btn">Add Polyline</button>
+                <button class="add-polygon-btn">Add Polygon</button>
+                <button class="add-circle-btn">Add Circle</button>
+                <button class="add-circle-marker-btn">Add Circle Marker</button>
+                <button class="delete-polyline-btn">Delete Polyline</button>
+                <button class="delete-group-btn">Delete Group</button>
+            </div>
             <div
                 id="mapWM"
                 class="llwp-map"
@@ -61,6 +77,12 @@
         <hr />
         <div>
             <h3>L'Atlas du Canada - Ressources et projets d'énergie propre (RPEP)</h3>
+            <div class="toolbar">
+                <button class="add-polyline-btn">Add Polyline</button>
+                <button class="add-polygon-btn">Add Polygon</button>
+                <button class="add-circle-btn">Add Circle</button>
+                <button class="delete-group-btn">Delete Group</button>
+            </div>
             <div
                 id="mapLCC"
                 class="llwp-map"
@@ -134,6 +156,211 @@
                     type: 'geoJSON',
                     url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
                 });
+            });
+
+            // used to store the created polyline geometry
+            var polyline = null;
+
+            // get addPolyline button element for WM map
+            var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
+
+            // add polyline btn click event handler
+            addPolylineBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polyline
+                polyline = cgpv.api.map('mapWM').addPolyline(
+                    [
+                        [45, -100],
+                        [50, -105],
+                    ],
+                    {
+                        stroke: true,
+                        color: '#000',
+                        weight: 5,
+                        opacity: '0.8',
+                    }
+                );
+
+                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', polyline);
+            });
+
+            // get addPolygon button element for WM map
+            var addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[0];
+
+            // add polygon btn click event handler
+            addPolygonBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polygon
+                const polygon = cgpv.api.map('mapWM').addPolygon(
+                    [
+                        [50, -109.05],
+                        [54, -109.03],
+                        [54, -102.05],
+                        [50, -102.04],
+                    ],
+                    {
+                        stroke: true,
+                        color: '#000',
+                        weight: 5,
+                        opacity: '0.8',
+                    }
+                );
+
+                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', polygon);
+            });
+
+            // get addCircle button element for WM map
+            var addCircleBtn = document.getElementsByClassName('add-circle-btn')[0];
+
+            // add circle btn click event handler
+            addCircleBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polygon
+                const circle = cgpv.api.map('mapWM').addCircle(50, -109, 200, {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: 50.0,
+                });
+
+                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', circle);
+            });
+
+            // get add circle marker button element for WM map
+            var addCircleMarkerBtn = document.getElementsByClassName('add-circle-marker-btn')[0];
+
+            // add circle marker btn click event handler
+            addCircleMarkerBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapWM').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polygon
+                const circleMarker = cgpv.api.map('mapWM').addCircleMarker(70, -109, 5, {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: 50.0,
+                });
+
+                cgpv.api.map('mapWM').addToGeometryGroup('myGroup', circleMarker);
+            });
+
+            // get deletePolyline button element for WM map
+            var deletePolylineBtn = document.getElementsByClassName('delete-polyline-btn')[0];
+
+            // add polyline btn click event handler
+            deletePolylineBtn.addEventListener('click', function (e) {
+                // call an api function to draw a polyline
+                cgpv.api.map('mapWM').deleteGeometry(polyline.id);
+            });
+
+            // get deleteGeomtryGroup button element for WM map
+            var deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[0];
+
+            // add polyline btn click event handler
+            deleteGeomtryGroup.addEventListener('click', function (e) {
+                // call an api function to draw a polyline
+                cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');
+            });
+
+            // get addPolyline button element for LCC map
+            addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[1];
+
+            // add polyline btn click event handler
+            addPolylineBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapLCC').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapLCC').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polyline
+                const polyline = cgpv.api.map('mapLCC').addPolyline(
+                    [
+                        [45, -100],
+                        [50, -105],
+                    ],
+                    {
+                        stroke: true,
+                        color: '#000',
+                        weight: 5,
+                        opacity: '0.8',
+                    }
+                );
+
+                cgpv.api.map('mapLCC').addToGeometryGroup('myGroup', polyline);
+            });
+
+            // get addPolygon button element for LCC map
+            addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[1];
+
+            // add polygon btn click event handler
+            addPolygonBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapLCC').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapLCC').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polygon
+                const polygon = cgpv.api.map('mapLCC').addPolygon(
+                    [
+                        [50, -109.05],
+                        [54, -109.03],
+                        [54, -102.05],
+                        [50, -102.04],
+                    ],
+                    {
+                        stroke: true,
+                        color: '#000',
+                        weight: 5,
+                        opacity: '0.8',
+                    }
+                );
+
+                cgpv.api.map('mapLCC').addToGeometryGroup('myGroup', polygon);
+            });
+
+            // get addCircle button element for LCC map
+            addCircleBtn = document.getElementsByClassName('add-circle-btn')[1];
+
+            // add circle btn click event handler
+            addCircleBtn.addEventListener('click', function (e) {
+                // check if a group already exists
+                if (!cgpv.api.map('mapLCC').getGeometryGroup('myGroup')) {
+                    cgpv.api.map('mapLCC').createGeometryGroup('myGroup');
+                }
+
+                // call an api function to draw a polygon
+                const circle = cgpv.api.map('mapLCC').addCircle(50, -109, 200, {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: 50.0,
+                });
+
+                cgpv.api.map('mapLCC').addToGeometryGroup('myGroup', circle);
+            });
+
+            // get deleteGeomtryGroup button element for LCC map
+            deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[1];
+
+            // add polyline btn click event handler
+            deleteGeomtryGroup.addEventListener('click', function (e) {
+                // call an api function to draw a polyline
+                cgpv.api.map('mapLCC').deleteGeometryGroup('myGroup');
             });
         </script>
     </body>

@@ -30,6 +30,8 @@ import { theme } from '../../assests/style/theme';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
+import { MapViewer } from '../../common/map-viewer';
+
 interface MapProps {
     id?: string;
     center: LatLngTuple;
@@ -111,6 +113,9 @@ function Map(props: MapProps): JSX.Element {
 
                 // listen to map move end events
                 cgpMap.on('moveend', mapMoveEnd);
+
+                // add map instance to api
+                api.maps.push(new MapViewer({ map: cgpMap, id: id || '' }));
             }}
         >
             {basemaps.map((base) => (

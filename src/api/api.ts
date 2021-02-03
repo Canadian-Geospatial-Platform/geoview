@@ -1,8 +1,11 @@
+/* eslint-disable no-plusplus */
 import { Event, EVENT_NAMES } from './event';
 
 import { Projection, PROJECTION_NAMES } from './projection';
 
 import { LayerTypes } from '../common/layers/layer';
+
+import { MapViewer } from '../common/map-viewer';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -26,6 +29,12 @@ export class API {
     // available layer types
     layerTypes = LayerTypes;
 
+    // list of available maps
+    maps: MapViewer[] = [];
+
+    // set selected map instance / app
+    selectedMapInstance!: MapViewer;
+
     /**
      * Initiate the event and projection objects
      */
@@ -33,6 +42,25 @@ export class API {
         this.event = new Event();
         this.projection = new Projection();
     }
+
+    /**
+     * Get the instance of a map by it's ID to access API functions
+     *
+     * @param {string} id the map id
+     *
+     * @returns an instance of map
+     */
+    map = (id: string): unknown => {
+        for (let i = 0; i < this.maps.length; i++) {
+            if (this.maps[i].mapInstance.id === id) {
+                this.selectedMapInstance = this.maps[i];
+
+                break;
+            }
+        }
+
+        return { ...this.selectedMapInstance, ...this.selectedMapInstance.vector };
+    };
 }
 
 export const api = new API();
