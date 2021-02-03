@@ -35,6 +35,12 @@ export class API {
     // set selected map instance / app
     selectedMapInstance!: MapViewer;
 
+    // timeout number used to check if everything is ready to make API calls
+    isReady: number = 0;
+
+    // callback function to call after everything is ready
+    readyCallback: () => void = () => {};
+
     /**
      * Initiate the event and projection objects
      */
@@ -42,6 +48,24 @@ export class API {
         this.event = new Event();
         this.projection = new Projection();
     }
+
+    /**
+     * Check if map rendering / drawing is ready then run the callback function
+     * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
+     * so timing of rendering will be based on device specs.
+     *
+     */
+    ready = () => {
+        // Clear our timeout throughout the event change
+        window.clearTimeout(this.isReady);
+
+        // Set a timeout to run after render ends
+        // this will only be called after the last map renders so no delay in rendering and performance will happen
+        this.isReady = window.setTimeout(() => {
+            // Run the callback
+            if (this.readyCallback) this.readyCallback();
+        }, 1000);
+    };
 
     /**
      * Get the instance of a map by it's ID to access API functions
