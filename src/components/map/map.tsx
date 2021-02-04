@@ -38,13 +38,12 @@ interface MapProps {
     zoom: number;
     projection: number;
     language: string;
-    basemapID:string;
+    basemapOptions: BasemapOptions;
     layers?: LayerConfig[];
-
 }
 
 function Map(props: MapProps): JSX.Element {
-    const { id, center, zoom, projection, language,basemapID, layers } = props;
+    const { id, center, zoom, projection, language, basemapOptions, layers } = props;
 
     const defaultTheme = useTheme();
 
@@ -56,8 +55,7 @@ function Map(props: MapProps): JSX.Element {
     const crs = projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
 
     // get basemaps with attribution
-    const basemap: Basemap = new Basemap(language, basemapID);
-    const basemaps: BasemapOptions[] = projection === 3857 ? basemap.wmCBMT : basemap.lccCBMT;
+    const basemap: Basemap = new Basemap(basemapOptions);
     const attribution = language === 'en-CA' ? basemap.attribution['en-CA'] : basemap.attribution['fr-CA'];
 
     // get map option from slected basemap projection
@@ -123,14 +121,21 @@ function Map(props: MapProps): JSX.Element {
                 api.ready();
             }}
         >
-            {basemaps.map((base) => (
-                <TileLayer key={base.id} url={base.url} attribution={attribution} />
+            {basemap.getBasemapLayers(language, projection).map((base) => (
+                <TileLayer key={base.id} url={base.url} attribution={attribution} opacity={base.opacity} />
             ))}
             <NavBar />
             {deviceSizeMedUp && <MousePosition />}
             <ScaleControl position="bottomright" imperial={false} />
             {deviceSizeMedUp && <Attribution attribution={attribution} />}
-            {deviceSizeMedUp && <OverviewMap id={id} crs={crs} basemaps={basemaps} zoomFactor={mapOptions.zoomFactor} />}
+            {deviceSizeMedUp && (
+                <OverviewMap
+                    id={id}
+                    crs={crs}
+                    basemaps={basemap.getBasemapLayers(language, projection)}
+                    zoomFactor={mapOptions.zoomFactor}
+                />
+            )}
             <div
                 className="leaflet-control cgp-appbar"
                 style={{
@@ -158,7 +163,7 @@ export function createMap(element: Element, config: MapProps, i18nInstance: i18n
                         zoom={config.zoom}
                         projection={config.projection}
                         language={config.language}
-                        basemapID={config.basemapID}
+                        basemapOptions={config.basemapOptions}
                         layers={config.layers}
                     />
                 </I18nextProvider>
