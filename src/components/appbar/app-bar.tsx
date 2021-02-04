@@ -16,9 +16,11 @@ import ButtonApp from './button';
 import PanelApp from '../panel/panel';
 
 import { MapInterface } from '../../common/map-viewer';
-import { PanelType } from '../../common/panel';
+
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
+
+import { ButtonPanel, ButtonPanelType, PANEL_TYPES } from '../../common/button-panel';
 
 const drawerWidth = 200;
 
@@ -65,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
 
 export function Appbar(): JSX.Element {
     const [open, setOpen] = useState(false);
-    const [panel, setPanel] = useState<PanelType>();
+    const [panel, setPanel] = useState<ButtonPanelType>();
     const [panelOpen, setPanelOpen] = useState(false);
     const [, setPanelCount] = useState(0);
 
@@ -95,24 +97,25 @@ export function Appbar(): JSX.Element {
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
             (payload) => {
-                if (payload && payload.handlerId === mapId) setPanelOpen(payload.status);
+                if (payload && payload.handlerId === mapId && payload.panelType === PANEL_TYPES.APPBAR) setPanelOpen(payload.status);
             },
             mapId
         );
 
         // listen to new panel creation
-        api.event.on(EVENT_NAMES.EVENT_PANEL_CREATE, () => {
+        api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, () => {
             updatePanelCount();
         });
 
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
-            api.event.off(EVENT_NAMES.EVENT_PANEL_CREATE);
+            api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
         };
     }, []);
 
     const openClosePanel = (status: boolean): void => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
+            panelType: PANEL_TYPES.APPBAR,
             handlerId: mapId,
             status,
         });
@@ -153,14 +156,14 @@ export function Appbar(): JSX.Element {
                 </div>
                 <Divider />
                 <List>
-                    {api.mapInstance(map).panels.map((sPanel: PanelType) => {
+                    {(api.mapInstance(map) as ButtonPanel).appBarButtonPanels.map((buttonPanel: ButtonPanelType) => {
                         return (
                             <ButtonApp
-                                key={sPanel.id}
-                                tooltip={sPanel.buttonTooltip}
-                                icon={sPanel.buttonIcon}
+                                key={buttonPanel.button.id}
+                                tooltip={buttonPanel.button.tooltip}
+                                icon={buttonPanel.button.icon}
                                 onClickFunction={() => {
-                                    setPanel(sPanel);
+                                    setPanel(buttonPanel);
                                     openClosePanel(true);
                                 }}
                             />
@@ -173,7 +176,7 @@ export function Appbar(): JSX.Element {
                     <Version />
                 </List>
             </Drawer>
-            {panel && panelOpen && <PanelApp panel={panel} />}
+            {panel && panelOpen && <PanelApp panel={panel.panel} />}
         </div>
     );
 }

@@ -12,15 +12,27 @@ import CloseIcon from '@material-ui/icons/Close';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { PanelType } from '../../common/panel';
+
+import { MapInterface } from '../../common/map-viewer';
+
+import { PanelProps } from '../../common/button-panel';
+import { HtmlToReact } from '../../common/containers/html-to-react';
+
+interface PanelAppProps {
+    panel: PanelProps;
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: 300,
-        minWidth: 200,
+        maxWidth: 600,
+        minWidth: 300,
         height: '100%',
         marginLeft: theme.spacing(2),
         borderRadius: 0,
+        [theme.breakpoints.down('sm')]: {
+            width: 'auto !important',
+            minWidth: 100,
+        },
     },
     avatar: {
         color: theme.palette.primary.contrastText,
@@ -36,7 +48,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     const map = useMap();
 
-    const mapId = api.mapInstance(map).id;
+    const mapId = (api.mapInstance(map) as MapInterface).id;
 
     const panelRef = useRef();
     useEffect(() => {
@@ -47,6 +59,8 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     function closePanel(): void {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
+            // used to tell which panel type has been closed
+            panelType: panel.type,
             // used when checking which panel was closed from which map
             handlerId: mapId,
             // status of panel (false = closed)
@@ -59,15 +73,13 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             className={classes.root}
             ref={panelRef}
             style={{
-                width: panel.panelWidth,
+                width: panel.width,
             }}
         >
             <CardHeader
                 className={classes.avatar}
-                avatar={
-                    typeof panel.panelIcon === 'string' ? <div dangerouslySetInnerHTML={{ __html: panel.panelIcon }} /> : panel.panelIcon
-                }
-                title={t(panel.panelTitle)}
+                avatar={typeof panel.icon === 'string' ? <HtmlToReact htmlContent={panel.icon} /> : panel.icon}
+                title={t(panel.title)}
                 action={
                     <IconButton aria-label={t('appbar.close')} onClick={closePanel}>
                         <CloseIcon />
@@ -75,17 +87,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                 }
             />
             <Divider />
-            <CardContent>
-                {typeof panel.panelContent === 'string' ? (
-                    <div dangerouslySetInnerHTML={{ __html: panel.panelContent }} />
-                ) : (
-                    panel.panelContent
-                )}
-            </CardContent>
+            <CardContent>{typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}</CardContent>
         </Card>
     );
-}
-
-interface PanelAppProps {
-    panel: PanelType;
 }

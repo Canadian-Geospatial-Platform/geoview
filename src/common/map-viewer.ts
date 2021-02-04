@@ -1,7 +1,8 @@
 import { Map } from 'leaflet';
 
+import { ButtonPanel } from './button-panel';
+
 import { Vector } from './vectors/vector';
-import { Panel } from './panel';
 
 /**
  * interface used to store created maps
@@ -24,8 +25,8 @@ export class MapViewer {
     // used to access vector API to create and manage geometries
     vector: Vector;
 
-    // used to access panel API to create panels
-    panel: Panel;
+    // used to access button panel API to create buttons and button panels
+    buttonPanel: ButtonPanel;
 
     /**
      * Initialize a new map instance and map APIs
@@ -37,6 +38,6 @@ export class MapViewer {
 
         this.vector = new Vector(mapInstance.map);
 
-        this.panel = new Panel();
+        this.buttonPanel = new ButtonPanel();
     }
 }

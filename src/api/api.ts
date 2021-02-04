@@ -85,7 +85,12 @@ export class API {
             }
         }
 
-        return { ...this.selectedMapInstance, ...this.selectedMapInstance.vector, ...this.selectedMapInstance.panel };
+        return {
+            ...this.selectedMapInstance,
+            ...this.selectedMapInstance.mapInstance,
+            ...this.selectedMapInstance.vector,
+            ...this.selectedMapInstance.buttonPanel,
+        };
     };
 
     /**
@@ -108,7 +113,7 @@ export class API {
             ...this.selectedMapInstance,
             ...this.selectedMapInstance.mapInstance,
             ...this.selectedMapInstance.vector,
-            ...this.selectedMapInstance.panel,
+            ...this.selectedMapInstance.buttonPanel,
         };
     };
 }

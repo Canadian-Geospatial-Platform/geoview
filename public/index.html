@@ -310,18 +310,20 @@
 
                 // add panel btn click event handler
                 addPanelBtn.addEventListener('click', function (e) {
+                    const button = {
+                        tooltip: 'Test',
+                        icon: '<div>Icon</div>',
+                    };
+
                     const panel = {
-                        buttonTooltip: 'Test',
-                        buttonIcon: `<div>Icon</div>`,
-                        status: false,
-                        panelTitle: 'Test',
-                        panelIcon: `<div>Icon</div>`,
-                        panelContent: `<div>Test content</div>`,
-                        panelWidth: 100,
+                        title: 'Test',
+                        icon: `<div>Icon</div>`,
+                        content: `<div>Test content</div>`,
+                        width: 200,
                     };
 
                     // call an api function to add a panel with a button
-                    cgpv.api.map('mapWM').createPanel(panel);
+                    cgpv.api.map('mapWM').createAppbarButtonPanel(button, panel, null);
                 });
             });
         </script>

@@ -10,22 +10,36 @@ export const EVENT_NAMES = {
      * Event triggered when a user stops moving the map
      */
     EVENT_MAP_MOVE_END: 'map/moveend',
+
     /**
      * Event triggered when the overview map is toggled
      */
     EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',
+
     /**
      * Event triggered when a drawer opens/closes
      */
     EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
+
+    /**
+     * Event triggered when a new appbar panel has been created
+     */
+    EVENT_APPBAR_PANEL_CREATE: 'appbar_panel/create',
+
+    /**
+     * Event triggered when a new navbar panel has been created
+     */
+    EVENT_NAVBAR_PANEL_CREATE: 'navbar_panel/create',
+    /**
+     * Event triggered when a new navbar button has been created
+     */
+    EVENT_NAVBAR_BUTTON_CREATE: 'navbar_panel/create',
+
     /**
      * Event triggered when a panel has been opened or closed
      */
-    EVENT_PANEL_OPEN_CLOSE: 'panel/open_close',
-    /**
-     * Event triggered when a new panel has been created
-     */
-    EVENT_PANEL_CREATE: 'panel/create',
+    EVENT_PANEL_OPEN_CLOSE: 'navbar_panel/open_close',
+
     /**
      * Event triggered when adding a new layer
      */
