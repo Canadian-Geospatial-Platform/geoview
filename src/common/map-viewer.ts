@@ -1,6 +1,7 @@
 import { Map } from 'leaflet';
 
 import { Vector } from './vectors/vector';
+import { Panel } from './panel';
 
 /**
  * interface used to store created maps
@@ -23,6 +24,9 @@ export class MapViewer {
     // used to access vector API to create and manage geometries
     vector: Vector;
 
+    // used to access panel API to create panels
+    panel: Panel;
+
     /**
      * Initialize a new map instance and map APIs
      *
@@ -30,6 +34,9 @@ export class MapViewer {
      */
     constructor(mapInstance: MapInterface) {
         this.mapInstance = mapInstance;
+
         this.vector = new Vector(mapInstance.map);
+
+        this.panel = new Panel();
     }
 }

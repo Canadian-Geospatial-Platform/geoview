@@ -5,6 +5,8 @@ import { Polygon } from './polygon';
 import { Polyline } from './polyline';
 import { Circle } from './circle';
 
+import { generateId } from '../constant';
+
 /**
  * constant used to specify available vectors to draw
  */
@@ -79,19 +81,6 @@ export class Vector {
     }
 
     /**
-     * Generate a unique id to use in a geometry if an id was not specified
-     *
-     * @param {string} id an id to return if it was already passed
-     *
-     * @returns the generated id
-     */
-    private generateGeometryId(id: string | undefined): string {
-        return id !== null && id !== undefined && id.length > 0
-            ? id
-            : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
-    }
-
-    /**
      * Create a polyline using an array of lat/lng points
      *
      * @param {LatLngExpression[] | LatLngExpression[][]} points points of lat/lng to draw a polyline
@@ -101,7 +90,7 @@ export class Vector {
      * @returns a geometry containing the id and the created layer
      */
     addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: Record<string, unknown>, id?: string): GeometryType => {
-        const lId = this.generateGeometryId(id);
+        const lId = generateId(id);
 
         const polyline = this.polyline.createPolyline(lId, points, options);
 
@@ -129,7 +118,7 @@ export class Vector {
         options: Record<string, unknown>,
         id?: string
     ): GeometryType => {
-        const lId = this.generateGeometryId(id);
+        const lId = generateId(id);
 
         const polygon = this.polygon.createPolygon(lId, points, options);
 
@@ -155,7 +144,7 @@ export class Vector {
      * @returns a geometry containing the id and the created layer
      */
     addCircle = (latitude: number, longitude: number, radius: number, options: Record<string, unknown>, id?: string): GeometryType => {
-        const lId = this.generateGeometryId(id);
+        const lId = generateId(id);
 
         const circle = this.circle.createCircle(lId, latitude, longitude, radius, options);
 
@@ -187,7 +176,7 @@ export class Vector {
         options: Record<string, unknown>,
         id?: string
     ): GeometryType => {
-        const lId = this.generateGeometryId(id);
+        const lId = generateId(id);
 
         const circleMarker = this.circle.createCircleMarker(lId, latitude, longitude, radius, options);
 

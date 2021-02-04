@@ -22,3 +22,16 @@ export interface AppVersion {
     patch: number;
     timestamp: string;
 }
+
+/**
+ * Generate a unique id if an id was not provided
+ *
+ * @param {string} id an id to return if it was already passed
+ *
+ * @returns the generated id
+ */
+export const generateId = (id: string | undefined): string => {
+    return id !== null && id !== undefined && id.length > 0
+        ? id
+        : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
+};

@@ -19,6 +19,14 @@ export const EVENT_NAMES = {
      */
     EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
     /**
+     * Event triggered when a panel has been opened or closed
+     */
+    EVENT_PANEL_OPEN_CLOSE: 'panel/open_close',
+    /**
+     * Event triggered when a new panel has been created
+     */
+    EVENT_PANEL_CREATE: 'panel/create',
+    /**
      * Event triggered when adding a new layer
      */
     EVENT_LAYER_ADD: 'layer/add',
@@ -65,10 +73,10 @@ export class Event {
          * @param args payload being passed when emitted
          */
         const listen = (args: unknown) => {
-            let data = null;
+            let data;
 
             // if a handler name was specified, callback will return that data if found
-            if (handlerName) {
+            if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
                 data = this.events[eventName][handlerName];
             } else {
                 data = args;
@@ -93,10 +101,10 @@ export class Event {
          * @param args payload being passed when emitted
          */
         const listen = (args: unknown) => {
-            let data = null;
+            let data;
 
             // if a handler name was specefieid, callback will return that data if found
-            if (handlerName) {
+            if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
                 data = this.events[eventName][handlerName];
             } else {
                 data = args;

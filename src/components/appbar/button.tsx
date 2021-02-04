@@ -24,8 +24,16 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
     return (
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>
             <ListItem button onClick={onClickFunction} className={classes.listItem}>
-                <ListItemIcon className={classes.listItemColor}>{icon}</ListItemIcon>
-                {typeof content === 'undefined' ? <ListItemText className={classes.listItemColor} primary={t(tooltip)} /> : content}
+                <ListItemIcon className={classes.listItemColor}>
+                    {typeof icon === 'string' ? <div dangerouslySetInnerHTML={{ __html: icon }} /> : icon}
+                </ListItemIcon>
+                {typeof content === 'undefined' ? (
+                    <ListItemText className={classes.listItemColor} primary={t(tooltip)} />
+                ) : typeof content === 'string' ? (
+                    <div dangerouslySetInnerHTML={{ __html: content }} />
+                ) : (
+                    content
+                )}
             </ListItem>
         </Tooltip>
     );

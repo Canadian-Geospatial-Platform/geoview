@@ -50,6 +50,9 @@
                 <button class="add-circle-marker-btn">Add Circle Marker</button>
                 <button class="delete-group-btn">Delete Group</button>
             </div>
+            <div class="toolbar">
+                <button class="add-panel-btn">Add Panel</button>
+            </div>
             <div
                 id="mapWM"
                 class="llwp-map"
@@ -296,10 +299,29 @@
                 // get deleteGeomtryGroup button element for LCC map
                 deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[1];
 
-                // add polyline btn click event handler
+                // delete geometry group btn click event handler
                 deleteGeomtryGroup.addEventListener('click', function (e) {
                     // call an api function to draw a polyline
                     cgpv.api.map('mapLCC').deleteGeometryGroup('myGroup');
+                });
+
+                // get add panel button element for WM map
+                addPanelBtn = document.getElementsByClassName('add-panel-btn')[0];
+
+                // add panel btn click event handler
+                addPanelBtn.addEventListener('click', function (e) {
+                    const panel = {
+                        buttonTooltip: 'Test',
+                        buttonIcon: `<div>Icon</div>`,
+                        status: false,
+                        panelTitle: 'Test',
+                        panelIcon: `<div>Icon</div>`,
+                        panelContent: `<div>Test content</div>`,
+                        panelWidth: 100,
+                    };
+
+                    // call an api function to add a panel with a button
+                    cgpv.api.map('mapWM').createPanel(panel);
                 });
             });
         </script>
