@@ -1,6 +1,6 @@
 import { Map } from 'leaflet';
 
-import { ButtonPanel } from './button-panel';
+import { ButtonPanel } from './ui/button-panel';
 
 import { Vector } from './vectors/vector';
 
@@ -19,8 +19,11 @@ export interface MapInterface {
  * @class MapViewer
  */
 export class MapViewer {
-    // used to access the instance of a map
-    mapInstance: MapInterface;
+    // the id of the map
+    id: string;
+
+    // the leaflet map
+    map: Map;
 
     // used to access vector API to create and manage geometries
     vector: Vector;
@@ -34,10 +37,12 @@ export class MapViewer {
      * @param mapInstance map instance containing ID and Leaflet map instance
      */
     constructor(mapInstance: MapInterface) {
-        this.mapInstance = mapInstance;
+        this.id = mapInstance.id;
+
+        this.map = mapInstance.map;
 
         this.vector = new Vector(mapInstance.map);
 
-        this.buttonPanel = new ButtonPanel();
+        this.buttonPanel = new ButtonPanel(mapInstance.map);
     }
 }

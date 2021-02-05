@@ -2,11 +2,9 @@ import HomeIcon from '@material-ui/icons/Home';
 
 import { useMap } from 'react-leaflet';
 
-import { ButtonMapNav, OtherProps } from '../button';
+import { ButtonMapNav } from '../button';
 
-export default function Home(props: OtherProps): JSX.Element {
-    const { ...otherProps } = props;
-
+export default function Home(): JSX.Element {
     // get map and set initial bounds to use in zoom home
     const map = useMap();
     const initBounds = map.getBounds();
@@ -15,5 +13,5 @@ export default function Home(props: OtherProps): JSX.Element {
         map.fitBounds(initBounds);
     }
 
-    return <ButtonMapNav tooltip="mapnav.home" icon={<HomeIcon />} onClickFunction={setHome} parentClass={otherProps.className} />;
+    return <ButtonMapNav tooltip="mapnav.home" icon={<HomeIcon />} onClickFunction={setHome} />;
 }

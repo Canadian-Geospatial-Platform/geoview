@@ -2,11 +2,9 @@ import ZoomInIcon from '@material-ui/icons/Add';
 
 import { useMap } from 'react-leaflet';
 
-import { ButtonMapNav, OtherProps } from '../button';
+import { ButtonMapNav } from '../button';
 
-export default function ZoomIn(props: OtherProps): JSX.Element {
-    const { ...otherProps } = props;
-
+export default function ZoomIn(): JSX.Element {
     // get map to use in zoom function
     const map = useMap();
 
@@ -14,5 +12,5 @@ export default function ZoomIn(props: OtherProps): JSX.Element {
         map.zoomIn();
     }
 
-    return <ButtonMapNav tooltip="mapnav.zoomIn" icon={<ZoomInIcon />} onClickFunction={zoomIn} parentClass={otherProps.className} />;
+    return <ButtonMapNav tooltip="mapnav.zoomIn" icon={<ZoomInIcon />} onClickFunction={zoomIn} />;
 }

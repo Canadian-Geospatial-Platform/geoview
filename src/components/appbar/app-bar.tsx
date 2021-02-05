@@ -20,7 +20,8 @@ import { MapInterface } from '../../common/map-viewer';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { ButtonPanel, ButtonPanelType, PANEL_TYPES } from '../../common/button-panel';
+import { ButtonPanel, ButtonPanelType } from '../../common/ui/button-panel';
+import { PANEL_TYPES } from '../../common/ui/panel';
 
 const drawerWidth = 200;
 
@@ -88,31 +89,6 @@ export function Appbar(): JSX.Element {
         setPanelCount((count) => count + 1);
     }, []);
 
-    useEffect(() => {
-        // disable events on container
-        DomEvent.disableClickPropagation(appBar.current.children[0] as HTMLElement);
-        DomEvent.disableScrollPropagation(appBar.current.children[0] as HTMLElement);
-
-        // listen to panel open/close events
-        api.event.on(
-            EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
-            (payload) => {
-                if (payload && payload.handlerId === mapId && payload.panelType === PANEL_TYPES.APPBAR) setPanelOpen(payload.status);
-            },
-            mapId
-        );
-
-        // listen to new panel creation
-        api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, () => {
-            updatePanelCount();
-        });
-
-        return () => {
-            api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
-            api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
-        };
-    }, []);
-
     const openClosePanel = (status: boolean): void => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
             panelType: PANEL_TYPES.APPBAR,
@@ -136,6 +112,52 @@ export function Appbar(): JSX.Element {
         });
     };
 
+    useEffect(() => {
+        // disable events on container
+        DomEvent.disableClickPropagation(appBar.current.children[0] as HTMLElement);
+        DomEvent.disableScrollPropagation(appBar.current.children[0] as HTMLElement);
+
+        // listen to panel open/close events
+        api.event.on(
+            EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
+            (payload) => {
+                if (payload && payload.handlerId === mapId && payload.panelType === PANEL_TYPES.APPBAR) setPanelOpen(payload.status);
+            },
+            mapId
+        );
+
+        // listen to new panel creation
+        api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, () => {
+            updatePanelCount();
+        });
+
+        // listen to event when a request to open a panel
+        api.event.on(
+            EVENT_NAMES.EVENT_PANEL_OPEN,
+            (args) => {
+                if (args.handlerId === mapId) {
+                    const buttonPanel = Object.keys((api.map(mapId) as ButtonPanel).appBarButtonPanels).map((groupName: string) => {
+                        const buttonPanels: ButtonPanelType[] = (api.map(mapId) as ButtonPanel).appBarButtonPanels[groupName];
+
+                        return buttonPanels.filter((bPanel: ButtonPanelType) => {
+                            return args.buttonId === bPanel.button.id;
+                        })[0];
+                    })[0];
+
+                    setPanel(buttonPanel);
+                    openClosePanel(true);
+                }
+            },
+            mapId
+        );
+
+        return () => {
+            api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
+            api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
+            api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
+        };
+    }, []);
+
     return (
         <div className={classes.appBar} ref={appBar}>
             <Drawer
@@ -156,17 +178,33 @@ export function Appbar(): JSX.Element {
                 </div>
                 <Divider />
                 <List>
-                    {(api.mapInstance(map) as ButtonPanel).appBarButtonPanels.map((buttonPanel: ButtonPanelType) => {
+                    {Object.keys((api.mapInstance(map) as ButtonPanel).appBarButtonPanels).map((groupName: string, index: number) => {
+                        // get button panels from group
+                        const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarButtonPanels[groupName];
+
+                        // display the button panels in the list
                         return (
-                            <ButtonApp
-                                key={buttonPanel.button.id}
-                                tooltip={buttonPanel.button.tooltip}
-                                icon={buttonPanel.button.icon}
-                                onClickFunction={() => {
-                                    setPanel(buttonPanel);
-                                    openClosePanel(true);
-                                }}
-                            />
+                            <div key={groupName}>
+                                {buttonPanels.map((buttonPanel: ButtonPanelType) => {
+                                    return (
+                                        <ButtonApp
+                                            key={buttonPanel.button.id}
+                                            tooltip={buttonPanel.button.tooltip}
+                                            icon={buttonPanel.button.icon}
+                                            onClickFunction={() => {
+                                                setPanel(buttonPanel);
+                                                openClosePanel(true);
+                                            }}
+                                        />
+                                    );
+                                })}
+                                {index > 1 && (
+                                    <>
+                                        <Divider className={classes.spacer} />
+                                        <Divider />
+                                    </>
+                                )}
+                            </div>
                         );
                     })}
                 </List>

@@ -29,16 +29,24 @@ export const EVENT_NAMES = {
     /**
      * Event triggered when a new navbar panel has been created
      */
-    EVENT_NAVBAR_PANEL_CREATE: 'navbar_panel/create',
+    EVENT_NAVBAR_PANEL_CREATE: 'navbar_panel/panel_create',
     /**
      * Event triggered when a new navbar button has been created
      */
-    EVENT_NAVBAR_BUTTON_CREATE: 'navbar_panel/create',
+    EVENT_NAVBAR_BUTTON_CREATE: 'navbar_panel/button_create',
 
     /**
      * Event triggered when a panel has been opened or closed
      */
-    EVENT_PANEL_OPEN_CLOSE: 'navbar_panel/open_close',
+    EVENT_PANEL_OPEN_CLOSE: 'panel/open_close',
+    /**
+     * Event triggered when a request is made to open a panel
+     */
+    EVENT_PANEL_OPEN: 'panel/open',
+    /**
+     * Event triggered when a request is made to close a panel
+     */
+    EVENT_PANEL_CLOSE: 'panel/close',
 
     /**
      * Event triggered when adding a new layer

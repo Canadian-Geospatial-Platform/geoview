@@ -15,21 +15,17 @@ import { EVENT_NAMES } from '../../api/event';
 
 import { MapInterface } from '../../common/map-viewer';
 
-import { PanelProps } from '../../common/button-panel';
 import { HtmlToReact } from '../../common/containers/html-to-react';
-
-interface PanelAppProps {
-    panel: PanelProps;
-}
+import { Panel } from '../../common/ui/panel';
 
 const useStyles = makeStyles((theme) => ({
     root: {
         maxWidth: 600,
         minWidth: 300,
-        height: '100%',
+        height: 'auto',
         marginLeft: theme.spacing(2),
         borderRadius: 0,
-        [theme.breakpoints.down('sm')]: {
+        [theme.breakpoints.down('xs')]: {
             width: 'auto !important',
             minWidth: 100,
         },
@@ -39,6 +35,10 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(3, 7),
     },
 }));
+
+interface PanelAppProps {
+    panel: Panel;
+}
 
 export default function PanelApp(props: PanelAppProps): JSX.Element {
     const { panel } = props;
@@ -51,11 +51,6 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
     const mapId = (api.mapInstance(map) as MapInterface).id;
 
     const panelRef = useRef();
-    useEffect(() => {
-        // disable events on container
-        DomEvent.disableClickPropagation((panelRef.current as unknown) as HTMLElement);
-        DomEvent.disableScrollPropagation((panelRef.current as unknown) as HTMLElement);
-    }, []);
 
     function closePanel(): void {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
@@ -67,6 +62,24 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             status: false,
         });
     }
+
+    useEffect(() => {
+        // disable events on container
+        DomEvent.disableClickPropagation((panelRef.current as unknown) as HTMLElement);
+        DomEvent.disableScrollPropagation((panelRef.current as unknown) as HTMLElement);
+
+        api.event.on(
+            EVENT_NAMES.EVENT_PANEL_CLOSE,
+            (args) => {
+                if (args.buttonId === panel.buttonId) closePanel();
+            },
+            mapId
+        );
+
+        return () => {
+            api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
+        };
+    }, []);
 
     return (
         <Card

@@ -1,8 +1,8 @@
 import { Typography } from '@material-ui/core';
 import LayersIcon from '@material-ui/icons/Layers';
-import { ButtonPanelType } from '../../common/button-panel';
+import { ButtonPanelProps } from '../../common/ui/button-panel';
 
-export const LayersPanel: ButtonPanelType = {
+export const LayersPanel: ButtonPanelProps = {
     button: {
         tooltip: 'appbar.layers',
         icon: <LayersIcon />,

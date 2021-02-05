@@ -78,7 +78,7 @@ export class API {
      */
     map = (id: string): unknown => {
         for (let i = 0; i < this.maps.length; i++) {
-            if (this.maps[i].mapInstance.id === id) {
+            if (this.maps[i].id === id) {
                 this.selectedMapInstance = this.maps[i];
 
                 break;
@@ -87,7 +87,6 @@ export class API {
 
         return {
             ...this.selectedMapInstance,
-            ...this.selectedMapInstance.mapInstance,
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
         };
@@ -102,7 +101,7 @@ export class API {
      */
     mapInstance = (map: Map): unknown => {
         for (let i = 0; i < this.maps.length; i++) {
-            if (this.maps[i].mapInstance.map === map) {
+            if (this.maps[i].map === map) {
                 this.selectedMapInstance = this.maps[i];
 
                 break;
@@ -111,7 +110,6 @@ export class API {
 
         return {
             ...this.selectedMapInstance,
-            ...this.selectedMapInstance.mapInstance,
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
         };

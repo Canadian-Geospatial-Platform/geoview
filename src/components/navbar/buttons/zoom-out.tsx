@@ -2,11 +2,9 @@ import ZoomOutIcon from '@material-ui/icons/Remove';
 
 import { useMap } from 'react-leaflet';
 
-import { ButtonMapNav, OtherProps } from '../button';
+import { ButtonMapNav } from '../button';
 
-export default function ZoomOut(props: OtherProps): JSX.Element {
-    const { ...otherProps } = props;
-
+export default function ZoomOut(): JSX.Element {
     // get map to use in zoom function
     const map = useMap();
 
@@ -14,5 +12,5 @@ export default function ZoomOut(props: OtherProps): JSX.Element {
         map.zoomOut();
     }
 
-    return <ButtonMapNav tooltip="mapnav.zoomOut" icon={<ZoomOutIcon />} onClickFunction={zoomOut} parentClass={otherProps.className} />;
+    return <ButtonMapNav tooltip="mapnav.zoomOut" icon={<ZoomOutIcon />} onClickFunction={zoomOut} />;
 }

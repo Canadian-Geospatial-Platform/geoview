@@ -30,7 +30,7 @@ export interface AppVersion {
  *
  * @returns the generated id
  */
-export const generateId = (id: string | undefined): string => {
+export const generateId = (id: string | undefined | null): string => {
     return id !== null && id !== undefined && id.length > 0
         ? id
         : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
