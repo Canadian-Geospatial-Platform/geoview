@@ -27,6 +27,8 @@ export interface ButtonPanelType {
     groupName?: string | null | undefined;
 }
 
+// TODO: look at code duplication
+
 /**
  * Class used to manage creating buttons and button panels
  *

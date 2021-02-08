@@ -19,6 +19,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * Create a button with an icon and text
+ * @param {ButtonAppProps} props Button properties
+ */
 export default function ButtonApp(props: ButtonAppProps): JSX.Element {
     const { tooltip, icon, onClickFunction, content } = props;
     const classes = useStyles();

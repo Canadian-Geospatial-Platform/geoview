@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         flexDirection: 'row',
         marginBottom: theme.spacing(14),
+        zIndex: theme.zIndex.appBar,
     },
     root: {
         display: 'flex',
@@ -47,6 +48,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * Create a navbar with buttons that can call functions or open custom panels
+ */
 export function NavBar(): JSX.Element {
     const [panel, setPanel] = useState<ButtonPanelType>();
     const [panelOpen, setPanelOpen] = useState(false);
@@ -69,6 +73,11 @@ export function NavBar(): JSX.Element {
         setButtonCount((count) => count + 1);
     }, []);
 
+    /**
+     * Open or close the panel
+     *
+     * @param {boolean} status the status of the panel
+     */
     const openClosePanel = (status: boolean): void => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
             panelType: PANEL_TYPES.NAVBAR,
@@ -77,6 +86,9 @@ export function NavBar(): JSX.Element {
         });
     };
 
+    /**
+     * listen to events to open/close the panel and to create the buttons
+     */
     useEffect(() => {
         // disable events on container
         DomEvent.disableClickPropagation(navBar.current.children[0] as HTMLElement);
@@ -86,7 +98,6 @@ export function NavBar(): JSX.Element {
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
             (payload) => {
-                console.log(payload);
                 if (payload && payload.handlerId === mapId && payload.panelType === PANEL_TYPES.NAVBAR) setPanelOpen(payload.status);
             },
             mapId

@@ -36,10 +36,17 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * interface for panel properties
+ */
 interface PanelAppProps {
     panel: Panel;
 }
 
+/**
+ * Create a panel with a header title, icon and content
+ * @param {PanelAppProps} props panel properties
+ */
 export default function PanelApp(props: PanelAppProps): JSX.Element {
     const { panel } = props;
 
@@ -52,6 +59,9 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     const panelRef = useRef();
 
+    /**
+     * Close the panel
+     */
     function closePanel(): void {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
             // used to tell which panel type has been closed
@@ -83,7 +93,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     return (
         <Card
-            className={classes.root}
+            className={`leaflet-control ${classes.root}`}
             ref={panelRef}
             style={{
                 width: panel.width,

@@ -66,6 +66,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * Create an appbar with buttons that can open a panel
+ */
 export function Appbar(): JSX.Element {
     const [open, setOpen] = useState(false);
     const [panel, setPanel] = useState<ButtonPanelType>();
@@ -89,6 +92,10 @@ export function Appbar(): JSX.Element {
         setPanelCount((count) => count + 1);
     }, []);
 
+    /**
+     * Open / Close the panel
+     * @param {boolean} status status of the panel
+     */
     const openClosePanel = (status: boolean): void => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
             panelType: PANEL_TYPES.APPBAR,
@@ -178,32 +185,30 @@ export function Appbar(): JSX.Element {
                 </div>
                 <Divider />
                 <List>
-                    {Object.keys((api.mapInstance(map) as ButtonPanel).appBarButtonPanels).map((groupName: string, index: number) => {
+                    {Object.keys((api.mapInstance(map) as ButtonPanel).appBarButtonPanels).map((groupName: string) => {
                         // get button panels from group
                         const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarButtonPanels[groupName];
 
                         // display the button panels in the list
                         return (
                             <div key={groupName}>
-                                {buttonPanels.map((buttonPanel: ButtonPanelType) => {
+                                {buttonPanels.map((buttonPanel: ButtonPanelType, index: number) => {
                                     return (
-                                        <ButtonApp
-                                            key={buttonPanel.button.id}
-                                            tooltip={buttonPanel.button.tooltip}
-                                            icon={buttonPanel.button.icon}
-                                            onClickFunction={() => {
-                                                setPanel(buttonPanel);
-                                                openClosePanel(true);
-                                            }}
-                                        />
+                                        <>
+                                            <ButtonApp
+                                                key={buttonPanel.button.id}
+                                                tooltip={buttonPanel.button.tooltip}
+                                                icon={buttonPanel.button.icon}
+                                                onClickFunction={() => {
+                                                    setPanel(buttonPanel);
+                                                    openClosePanel(true);
+                                                }}
+                                            />
+                                            <Divider className={classes.spacer} />
+                                            <Divider />
+                                        </>
                                     );
                                 })}
-                                {index > 1 && (
-                                    <>
-                                        <Divider className={classes.spacer} />
-                                        <Divider />
-                                    </>
-                                )}
                             </div>
                         );
                     })}
