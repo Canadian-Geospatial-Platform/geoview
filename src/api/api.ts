@@ -1,3 +1,5 @@
+import { Map } from 'leaflet';
+
 /* eslint-disable no-plusplus */
 import { Event, EVENT_NAMES } from './event';
 
@@ -36,10 +38,10 @@ export class API {
     selectedMapInstance!: MapViewer;
 
     // timeout number used to check if everything is ready to make API calls
-    isReady: number = 0;
+    isReady = 0;
 
     // callback function to call after everything is ready
-    readyCallback: () => void = () => {};
+    readyCallback: () => void = () => undefined;
 
     /**
      * Initiate the event and projection objects
@@ -55,7 +57,7 @@ export class API {
      * so timing of rendering will be based on device specs.
      *
      */
-    ready = () => {
+    ready = (): void => {
         // Clear our timeout throughout the event change
         window.clearTimeout(this.isReady);
 
@@ -72,18 +74,45 @@ export class API {
      *
      * @param {string} id the map id
      *
-     * @returns an instance of map
+     * @returns map api functions
      */
     map = (id: string): unknown => {
         for (let i = 0; i < this.maps.length; i++) {
-            if (this.maps[i].mapInstance.id === id) {
+            if (this.maps[i].id === id) {
                 this.selectedMapInstance = this.maps[i];
 
                 break;
             }
         }
 
-        return { ...this.selectedMapInstance, ...this.selectedMapInstance.vector };
+        return {
+            ...this.selectedMapInstance,
+            ...this.selectedMapInstance.vector,
+            ...this.selectedMapInstance.buttonPanel,
+        };
+    };
+
+    /**
+     * Get the instance of a map by a leaflet instance to access API functions
+     *
+     * @param {Map} map the leaflet map instance
+     *
+     * @returns map api functions
+     */
+    mapInstance = (map: Map): unknown => {
+        for (let i = 0; i < this.maps.length; i++) {
+            if (this.maps[i].map === map) {
+                this.selectedMapInstance = this.maps[i];
+
+                break;
+            }
+        }
+
+        return {
+            ...this.selectedMapInstance,
+            ...this.selectedMapInstance.vector,
+            ...this.selectedMapInstance.buttonPanel,
+        };
     };
 }
 

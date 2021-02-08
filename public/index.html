@@ -50,6 +50,12 @@
                 <button class="add-circle-marker-btn">Add Circle Marker</button>
                 <button class="delete-group-btn">Delete Group</button>
             </div>
+            <div class="toolbar">
+                <button class="add-appbar-panel-btn">Add Appbar Panel</button>
+                <button class="add-navbar-panel-btn">Add Navbar Panel</button>
+                <button class="add-navbar-button-btn">Add Navbar Button</button>
+                <button class="add-navbar-button-group-btn">Add Navbar Panel New Group</button>
+            </div>
             <div
                 id="mapWM"
                 class="llwp-map"
@@ -81,6 +87,9 @@
                 <button class="add-polygon-btn">Add Polygon</button>
                 <button class="add-circle-btn">Add Circle</button>
                 <button class="delete-group-btn">Delete Group</button>
+            </div>
+            <div class="toolbar">
+                <button class="add-navbar-panel-btn">Add Navbar Panel</button>
             </div>
             <div
                 id="mapLCC"
@@ -296,10 +305,111 @@
                 // get deleteGeomtryGroup button element for LCC map
                 deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[1];
 
-                // add polyline btn click event handler
+                // delete geometry group btn click event handler
                 deleteGeomtryGroup.addEventListener('click', function (e) {
                     // call an api function to draw a polyline
                     cgpv.api.map('mapLCC').deleteGeometryGroup('myGroup');
+                });
+
+                // get add panel button element for WM map
+                var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
+
+                // add appbar panel btn click event handler
+                addAppbarPanelBtn.addEventListener('click', function (e) {
+                    const button = {
+                        tooltip: 'Test',
+                        icon: '<div>Icon</div>',
+                    };
+
+                    const panel = {
+                        title: 'Test',
+                        icon: `<div>Icon</div>`,
+                        content: `<div>Test content</div>`,
+                        width: 200,
+                    };
+
+                    // call an api function to add a panel with a button
+                    cgpv.api.map('mapWM').createAppbarButtonPanel(button, panel, null);
+                });
+
+                // get add navbar panel button element for WM map
+                var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
+
+                // add navbar panel btn click event handler
+                addNavbarPanelBtn.addEventListener('click', function (e) {
+                    const button = {
+                        tooltip: 'Test',
+                        icon: '<div>I</div>',
+                    };
+
+                    const panel = {
+                        title: 'Test',
+                        icon: `<div>Icon</div>`,
+                        content: `<div>Test content</div>`,
+                        width: 200,
+                    };
+
+                    // call an api function to add a panel with a button
+                    cgpv.api.map('mapWM').createNavbarButtonPanel(button, panel, null);
+                });
+
+                // get add navbar button element for WM map
+                var addNavbarButtonBtn = document.getElementsByClassName('add-navbar-button-btn')[0];
+
+                // add navbar button btn click event handler
+                addNavbarButtonBtn.addEventListener('click', function (e) {
+                    const button = {
+                        tooltip: 'Test',
+                        icon: '<div>B</div>',
+                        callback: function () {
+                            alert('test function');
+                        },
+                    };
+
+                    // call an api function to add a panel with a button
+                    cgpv.api.map('mapWM').createNavbarButton(button, null);
+                });
+
+                // get add navbar button group element for WM map
+                var addNavbarButtonGroupBtn = document.getElementsByClassName('add-navbar-button-group-btn')[0];
+
+                // add navbar button group btn click event handler
+                addNavbarButtonGroupBtn.addEventListener('click', function (e) {
+                    const button = {
+                        tooltip: 'Group',
+                        icon: '<div>G</div>',
+                    };
+
+                    const panel = {
+                        title: 'Group',
+                        icon: `<div>Icon</div>`,
+                        content: `<div>Test content</div>`,
+                        width: 400,
+                    };
+
+                    // call an api function to add a new button panel in the navbar in a new group
+                    cgpv.api.map('mapWM').createNavbarButtonPanel(button, panel, 'newGroup');
+                });
+
+                // get add navbar panel button element for LCC map
+                addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[1];
+
+                // add navbar panel btn click event handler
+                addNavbarPanelBtn.addEventListener('click', function (e) {
+                    const button = {
+                        tooltip: 'Test',
+                        icon: '<div>I</div>',
+                    };
+
+                    const panel = {
+                        title: 'Test',
+                        icon: `<div>Icon</div>`,
+                        content: `<div>Test content</div>`,
+                        width: 200,
+                    };
+
+                    // call an api function to add a panel with a button
+                    cgpv.api.map('mapLCC').createNavbarButtonPanel(button, panel, null);
                 });
             });
         </script>

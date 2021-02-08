@@ -10,14 +10,44 @@ export const EVENT_NAMES = {
      * Event triggered when a user stops moving the map
      */
     EVENT_MAP_MOVE_END: 'map/moveend',
+
     /**
      * Event triggered when the overview map is toggled
      */
     EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',
+
     /**
      * Event triggered when a drawer opens/closes
      */
     EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
+
+    /**
+     * Event triggered when a new appbar panel has been created
+     */
+    EVENT_APPBAR_PANEL_CREATE: 'appbar_panel/create',
+
+    /**
+     * Event triggered when a new navbar panel has been created
+     */
+    EVENT_NAVBAR_PANEL_CREATE: 'navbar_panel/panel_create',
+    /**
+     * Event triggered when a new navbar button has been created
+     */
+    EVENT_NAVBAR_BUTTON_CREATE: 'navbar_panel/button_create',
+
+    /**
+     * Event triggered when a panel has been opened or closed
+     */
+    EVENT_PANEL_OPEN_CLOSE: 'panel/open_close',
+    /**
+     * Event triggered when a request is made to open a panel
+     */
+    EVENT_PANEL_OPEN: 'panel/open',
+    /**
+     * Event triggered when a request is made to close a panel
+     */
+    EVENT_PANEL_CLOSE: 'panel/close',
+
     /**
      * Event triggered when adding a new layer
      */
@@ -65,10 +95,10 @@ export class Event {
          * @param args payload being passed when emitted
          */
         const listen = (args: unknown) => {
-            let data = null;
+            let data;
 
             // if a handler name was specified, callback will return that data if found
-            if (handlerName) {
+            if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
                 data = this.events[eventName][handlerName];
             } else {
                 data = args;
@@ -93,10 +123,10 @@ export class Event {
          * @param args payload being passed when emitted
          */
         const listen = (args: unknown) => {
-            let data = null;
+            let data;
 
             // if a handler name was specefieid, callback will return that data if found
-            if (handlerName) {
+            if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
                 data = this.events[eventName][handlerName];
             } else {
                 data = args;

@@ -1,7 +1,10 @@
+/* eslint-disable no-nested-ternary */
 import { useTranslation } from 'react-i18next';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Tooltip, Fade, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+
+import { HtmlToReact } from '../../common/containers/html-to-react';
 
 const useStyles = makeStyles((theme) => ({
     listItem: {
@@ -16,6 +19,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * Create a button with an icon and text
+ * @param {ButtonAppProps} props Button properties
+ */
 export default function ButtonApp(props: ButtonAppProps): JSX.Element {
     const { tooltip, icon, onClickFunction, content } = props;
     const classes = useStyles();
@@ -24,8 +31,16 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
     return (
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>
             <ListItem button onClick={onClickFunction} className={classes.listItem}>
-                <ListItemIcon className={classes.listItemColor}>{icon}</ListItemIcon>
-                {typeof content === 'undefined' ? <ListItemText className={classes.listItemColor} primary={t(tooltip)} /> : content}
+                <ListItemIcon className={classes.listItemColor}>
+                    {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : icon}
+                </ListItemIcon>
+                {typeof content === 'undefined' ? (
+                    <ListItemText className={classes.listItemColor} primary={t(tooltip)} />
+                ) : typeof content === 'string' ? (
+                    <HtmlToReact htmlContent={content} />
+                ) : (
+                    content
+                )}
             </ListItem>
         </Tooltip>
     );
