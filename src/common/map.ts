@@ -1,5 +1,4 @@
 import { LatLngBounds } from 'leaflet';
-
 import screenfull from 'screenfull';
 
 // LCC map options
@@ -41,7 +40,6 @@ export function toggleFullscreen(element: HTMLElement): void {
         // TODO: check if needed
         // DomUtil.hasClass(mapElem, 'leaflet-pseudo-fullscreen') ? DomUtil.removeClass(mapElem, 'leaflet-pseudo-fullscreen') : DomUtil.addClass(mapElem, 'leaflet-pseudo-fullscreen');
         // DomUtil.hasClass(mapElem, 'leaflet-fullscreen-on') ? DomUtil.removeClass(mapElem, 'leaflet-fullscreen-on') : DomUtil.addClass(mapElem, 'leaflet-fullscreen-on');
-
         // toogle fullscreen
         screenfull.toggle(element);
     }

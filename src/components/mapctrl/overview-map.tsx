@@ -10,7 +10,7 @@ import L, { Map, CRS, DomEvent } from 'leaflet';
 import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import { useEventHandlers } from '@react-leaflet/core';
 
-import { BasemapOptions } from '../../common/basemap';
+import { BasemapLayer } from '../../common/basemap';
 
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
 
@@ -242,7 +242,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
 
 interface OverviewProps {
     crs: CRS;
-    basemaps: BasemapOptions[];
+    basemaps: BasemapLayer[];
     zoomFactor: number;
 }
 
