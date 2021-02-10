@@ -1,6 +1,6 @@
 import L, { LatLngExpression } from 'leaflet';
 
-import { GeometryType } from './vector';
+import { GeometryType, VectorTypes } from './vector';
 
 /**
  * Class used to create and manage polygons
@@ -28,6 +28,7 @@ export class Polygon {
         return {
             id,
             layer: polygon,
+            type: VectorTypes.POLYGON,
         };
     };
 }

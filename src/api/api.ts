@@ -1,3 +1,7 @@
+import React from 'react';
+
+import * as Babel from '@babel/standalone';
+
 import { Map } from 'leaflet';
 
 /* eslint-disable no-plusplus */
@@ -113,6 +117,45 @@ export class API {
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
         };
+    };
+
+    /**
+     * Load a react component file from url
+     *
+     * @param {string} url the url of the react component file
+     * @param {Record<string, unknown>} props an optional properties to be passed to the component
+     *
+     * @returns a React Component
+     */
+    loadRemoteComponent = async (url: string, props?: Record<string, unknown>): Promise<React.ReactNode> => {
+        return fetch(url)
+            .then((res) => res.text())
+            .then((source) => {
+                const exports = {};
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                function require(name: string) {
+                    switch (name) {
+                        case 'react':
+                            return React;
+                        default:
+                            return React;
+                    }
+
+                    // eslint-disable-next-line no-throw-literal
+                    throw `can't use modules other than "react" in remote component.`;
+                }
+                const transformedSource = Babel.transform(source, {
+                    presets: ['react', 'es2015', ['stage-2', { decoratorsLegacy: true }]],
+                }).code;
+
+                // eslint-disable-next-line no-eval
+                eval(transformedSource || '');
+
+                const plugin = exports.__esModule ? exports.default : exports;
+
+                // eslint-disable-next-line no-underscore-dangle
+                return React.createElement(plugin, props || {});
+            });
     };
 }
 

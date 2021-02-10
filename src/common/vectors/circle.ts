@@ -1,6 +1,6 @@
 import L from 'leaflet';
 
-import { GeometryType } from './vector';
+import { GeometryType, VectorTypes } from './vector';
 
 /**
  * Class used to create and manage circles and circle markers
@@ -30,6 +30,7 @@ export class Circle {
         return {
             id,
             layer: circle,
+            type: VectorTypes.CIRCLE,
         };
     };
 
@@ -59,6 +60,7 @@ export class Circle {
         return {
             id,
             layer: circleMarker,
+            type: VectorTypes.CIRCLE_MARKER,
         };
     };
 }

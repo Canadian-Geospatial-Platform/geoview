@@ -196,7 +196,7 @@
             }
 
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-            cgpv.init(function () {
+            cgpv.init(async function () {
                 console.log('api is ready');
 
                 // listen to an event emitted by mapWM
@@ -328,16 +328,21 @@
                 var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
 
                 // add appbar panel btn click event handler
-                addAppbarPanelBtn.addEventListener('click', function (e) {
+                addAppbarPanelBtn.addEventListener('click', async function (e) {
                     const button = {
                         tooltip: 'Test',
                         icon: '<div>Icon</div>',
                     };
 
+                    // load a plugin to get the panel content
+                    const panelContent = await cgpv.api.loadRemoteComponent('./plugins/panel/panel-content.js', {
+                        mapId: 'mapWM',
+                    });
+
                     const panel = {
                         title: 'Test',
                         icon: `<div>Icon</div>`,
-                        content: `<div>Test content</div>`,
+                        content: panelContent,
                         width: 200,
                     };
 

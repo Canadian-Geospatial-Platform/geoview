@@ -1,6 +1,6 @@
 import L, { LatLngExpression } from 'leaflet';
 
-import { GeometryType } from './vector';
+import { GeometryType, VectorTypes } from './vector';
 
 /**
  * Class used to create and manage polylines
@@ -24,6 +24,7 @@ export class Polyline {
         return {
             id,
             layer: polyline,
+            type: VectorTypes.POLYLINE,
         };
     };
 }

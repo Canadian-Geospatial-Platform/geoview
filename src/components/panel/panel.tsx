@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { useRef, useEffect } from 'react';
 
 import { DomEvent } from 'leaflet';
@@ -110,7 +111,15 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                 }
             />
             <Divider />
-            <CardContent>{typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}</CardContent>
+            <CardContent>
+                {typeof panel.content === 'string' ? (
+                    <HtmlToReact htmlContent={panel.content} />
+                ) : typeof panel.content === 'object' ? (
+                    panel.content
+                ) : (
+                    <panel.content />
+                )}
+            </CardContent>
         </Card>
     );
 }
