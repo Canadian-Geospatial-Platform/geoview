@@ -13,11 +13,11 @@ export const LayersPanel: ButtonPanelProps = {
     panel: {
         title: 'appbar.layers',
         icon: <LayersIcon />,
-        content: ((
+        content: (
             <Typography variant="body2" color="textSecondary" component="p">
                 This is a place holder panel for the layers componennt
             </Typography>
-        ) as unknown) as Element,
+        ),
         width: 300,
     },
 };

@@ -5,15 +5,20 @@ import { Polygon } from './polygon';
 import { Polyline } from './polyline';
 import { Circle } from './circle';
 
+import { MapInterface } from '../map-viewer';
+
 import { generateId } from '../constant';
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 /**
  * constant used to specify available vectors to draw
  */
-export const VECTOR_TYPES = {
+export const VectorTypes = {
     POLYLINE: 'polyline',
     POLYGON: 'polygon',
     CIRCLE: 'circle',
+    CIRCLE_MARKER: 'circle_marker',
 };
 
 /**
@@ -22,6 +27,7 @@ export const VECTOR_TYPES = {
 export interface GeometryType {
     id: string;
     layer: L.Layer;
+    type: string;
 }
 
 /**
@@ -61,7 +67,7 @@ export class Vector {
     featurGroup: L.FeatureGroup;
 
     /**
-     * Initialize map, vectors
+     * Initialize map, vectors, and listen to add vector events
      *
      * @param {Map} map leaflet map object
      */
@@ -78,6 +84,25 @@ export class Vector {
 
         // add feature group to the map
         this.map.addLayer(this.featurGroup);
+
+        // listen to add vector events
+        api.event.on(EVENT_NAMES.EVENT_VECTOR_ADD, (payload) => {
+            if (payload.type === VectorTypes.CIRCLE) {
+                this.addCircle(payload.latitude, payload.longitude, payload.radius, payload.options);
+            } else if (payload.type === VectorTypes.POLYGON) {
+                this.addPolygon(payload.points, payload.options);
+            } else if (payload.type === VectorTypes.POLYLINE) {
+                this.addPolyline(payload.points, payload.options);
+            } else if (payload.type === VectorTypes.CIRCLE_MARKER) {
+                this.addCircleMarker(payload.latitude, payload.longitude, payload.radius, payload.options);
+            }
+        });
+
+        // listen to outside events to remove layers
+        api.event.on(EVENT_NAMES.EVENT_VECTOR_REMOVE, (payload) => {
+            // remove layer from outside
+            this.deleteGeometry(payload.id);
+        });
     }
 
     /**
@@ -94,12 +119,12 @@ export class Vector {
 
         const polyline = this.polyline.createPolyline(lId, points, options);
 
-        this.layers.push({
-            id: lId,
-            layer: polyline.layer,
-        });
-
         polyline.layer.addTo(this.featurGroup);
+
+        this.layers.push(polyline);
+
+        // emit an event that a polyline vector has been added
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, (api.mapInstance(this.map) as MapInterface).id, { ...polyline });
 
         return polyline;
     };
@@ -122,12 +147,12 @@ export class Vector {
 
         const polygon = this.polygon.createPolygon(lId, points, options);
 
-        this.layers.push({
-            id: lId,
-            layer: polygon.layer,
-        });
-
         polygon.layer.addTo(this.featurGroup);
+
+        this.layers.push(polygon);
+
+        // emit an event that a polygon vector has been added
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, (api.mapInstance(this.map) as MapInterface).id, { ...polygon });
 
         return polygon;
     };
@@ -148,12 +173,12 @@ export class Vector {
 
         const circle = this.circle.createCircle(lId, latitude, longitude, radius, options);
 
-        this.layers.push({
-            id: lId,
-            layer: circle.layer,
-        });
+        this.layers.push(circle);
 
         circle.layer.addTo(this.featurGroup);
+
+        // emit an event that a circle vector has been added
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, (api.mapInstance(this.map) as MapInterface).id, { ...circle });
 
         return circle;
     };
@@ -180,12 +205,14 @@ export class Vector {
 
         const circleMarker = this.circle.createCircleMarker(lId, latitude, longitude, radius, options);
 
-        this.layers.push({
-            id: lId,
-            layer: circleMarker.layer,
-        });
+        this.layers.push(circleMarker);
 
         circleMarker.layer.addTo(this.featurGroup);
+
+        // emit an event that a circleMarker vector has been added
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, (api.mapInstance(this.map) as MapInterface).id, {
+            ...circleMarker,
+        });
 
         return circleMarker;
     };
@@ -207,7 +234,15 @@ export class Vector {
      * @param {string} id the id of the geometry to delete
      */
     deleteGeometry = (id: string): void => {
-        this.layers.filter((layer) => layer.id === id)[0].layer.remove();
+        for (let i = 0; i < this.layers.length; i++) {
+            if (this.layers[i].id === id) {
+                this.layers[i].layer.remove();
+
+                this.layers.splice(i, 1);
+
+                break;
+            }
+        }
     };
 
     /**

@@ -192,11 +192,10 @@ export function Appbar(): JSX.Element {
                         // display the button panels in the list
                         return (
                             <div key={groupName}>
-                                {buttonPanels.map((buttonPanel: ButtonPanelType, index: number) => {
+                                {buttonPanels.map((buttonPanel: ButtonPanelType) => {
                                     return (
-                                        <>
+                                        <div key={buttonPanel.button.id}>
                                             <ButtonApp
-                                                key={buttonPanel.button.id}
                                                 tooltip={buttonPanel.button.tooltip}
                                                 icon={buttonPanel.button.icon}
                                                 onClickFunction={() => {
@@ -206,7 +205,7 @@ export function Appbar(): JSX.Element {
                                             />
                                             <Divider className={classes.spacer} />
                                             <Divider />
-                                        </>
+                                        </div>
                                     );
                                 })}
                             </div>

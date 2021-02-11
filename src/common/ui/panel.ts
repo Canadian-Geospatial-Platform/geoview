@@ -24,7 +24,7 @@ export interface PanelProps {
     // panel header title
     title: string;
     // panel body content
-    content: Element;
+    content: React.ReactNode | Element;
 }
 
 /**
@@ -50,7 +50,7 @@ export class Panel {
     title: string;
 
     // panel body content
-    content: Element;
+    content: React.ReactNode | Element;
 
     // the linked button id that will open/close the panel
     buttonId: string;

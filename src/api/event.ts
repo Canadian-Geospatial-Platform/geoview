@@ -60,6 +60,19 @@ export const EVENT_NAMES = {
      * Event triggered when getting all layers
      */
     EVENT_GET_LAYERS: 'layer/get_layers',
+
+    /**
+     * Event triggered when a request is made to add a vector
+     */
+    EVENT_VECTOR_ADD: 'vector/add',
+    /**
+     * Event triggered when a request is made to remove a vector
+     */
+    EVENT_VECTOR_REMOVE: 'vector/remove',
+    /**
+     * Event is triggered when a vector has been added
+     */
+    EVENT_VECTOR_ADDED: 'vector/added',
 };
 
 /**
