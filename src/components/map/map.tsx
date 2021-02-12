@@ -31,6 +31,7 @@ import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
 import { MapViewer } from '../../common/map-viewer';
+import { NorthArrow } from '../mapctrl/north-arrow';
 
 interface MapProps {
     id?: string;
@@ -145,6 +146,7 @@ function Map(props: MapProps): JSX.Element {
             >
                 <Appbar id={id} />
             </div>
+            <NorthArrow projection={crs} />
         </MapContainer>
     );
 }
