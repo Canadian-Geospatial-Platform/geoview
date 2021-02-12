@@ -71,11 +71,18 @@ const themeOptions = {
     },
     shape: {
         borderRadius: 6,
+        left: '0%',
+        center: '50%',
+        right: '100%',
     },
     overrides: {
         button: {
             width: 32,
             height: 32,
+        },
+        northArrow: {
+            width: 42,
+            height: 42,
         },
         MuiFab: {
             extended: {
