@@ -30,8 +30,8 @@ export class Projection {
      * @returns {projection is object}
      */
     private static getLCCProjection(): L.CRS {
-        // tile layer extent, expressed in local projection
-        const bbox = [-4282638.061501402, -5153821.09213678, 4852210.175566408, 4376714.442097411];
+        // tile layer extent, expressed in local projection (xmin-left, ymin-bottom, xmax-right, ymax-top)
+        const bbox = [-6211271, -5367092, 5972815, 4761177];
 
         // tile layer scale and resolution
         const scale = [
@@ -80,9 +80,14 @@ export class Projection {
         ];
 
         // transformation matrix
-        const transformation = new L.Transformation(1, -bbox[0], -1, bbox[3]);
-        const p1 = L.point(4376714.442097411, -4282638.061501402);
-        const p2 = L.point(-5153821.09213678, 4852210.175566408);
+        // TODO: check if the transformation matrix is required
+        const transformation = () => {
+            const scaleIn = 0.5 / (Math.PI * 6378137);
+            return new L.Transformation(scaleIn, 0.5, -scaleIn, 0.5);
+        };
+
+        const p1 = L.point(bbox[1], bbox[0]); // minx, miny
+        const p2 = L.point(bbox[3], bbox[2]); // maxx, maxy
 
         // LCC projection
         const projection = new (L as unknown).Proj.CRS(

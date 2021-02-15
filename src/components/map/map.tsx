@@ -16,7 +16,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { MapOptions, getMapOptions } from '../../common/map';
 import { Basemap, BasemapOptions } from '../../common/basemap';
 import { Layer, LayerConfig, LayerTypes } from '../../common/layers/layer';
-
 import { Projection } from '../../common/projection';
 
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -31,7 +30,7 @@ import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
 import { MapViewer } from '../../common/map-viewer';
-import { NorthArrow } from '../mapctrl/north-arrow';
+import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 
 interface MapProps {
     id?: string;
@@ -153,6 +152,7 @@ function Map(props: MapProps): JSX.Element {
                         <Appbar id={id} />
                     </div>
                     <NorthArrow projection={crs} />
+                    <NorthPoleFlag projection={crs} />
                 </>
             )}
         </MapContainer>
