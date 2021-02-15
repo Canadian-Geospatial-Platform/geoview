@@ -23,13 +23,16 @@ const useStyles = makeStyles((theme) => ({
     root: {
         maxWidth: 600,
         minWidth: 300,
-        height: 'auto',
+        height: '100%',
         marginLeft: theme.spacing(2),
         borderRadius: 0,
         [theme.breakpoints.down('xs')]: {
             width: 'auto !important',
             minWidth: 100,
         },
+    },
+    cardContainer: {
+        height: '100%',
     },
     avatar: {
         color: theme.palette.primary.contrastText,
@@ -42,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
  */
 interface PanelAppProps {
     panel: Panel;
+    panelOpen: boolean;
 }
 
 /**
@@ -49,7 +53,7 @@ interface PanelAppProps {
  * @param {PanelAppProps} props panel properties
  */
 export default function PanelApp(props: PanelAppProps): JSX.Element {
-    const { panel } = props;
+    const { panel, panelOpen } = props;
 
     const classes = useStyles(props);
     const { t } = useTranslation();
@@ -75,9 +79,11 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
     }
 
     useEffect(() => {
-        // disable events on container
-        DomEvent.disableClickPropagation((panelRef.current as unknown) as HTMLElement);
-        DomEvent.disableScrollPropagation((panelRef.current as unknown) as HTMLElement);
+        if (panelRef && panelRef.current) {
+            // disable events on container
+            DomEvent.disableClickPropagation((panelRef.current as unknown) as HTMLElement);
+            DomEvent.disableScrollPropagation((panelRef.current as unknown) as HTMLElement);
+        }
 
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_CLOSE,
@@ -94,10 +100,11 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     return (
         <Card
-            className={`leaflet-control ${classes.root}`}
             ref={panelRef}
+            className={`leaflet-control ${classes.root}`}
             style={{
                 width: panel.width,
+                display: panelOpen ? 'block' : 'none',
             }}
         >
             <CardHeader

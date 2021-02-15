@@ -1,5 +1,9 @@
 import React from 'react';
 
+import * as ReactTranslate from 'react-i18next';
+
+import * as MaterialUI from '@material-ui/core/styles';
+
 import * as Babel from '@babel/standalone';
 
 import { Map } from 'leaflet';
@@ -93,6 +97,7 @@ export class API {
             ...this.selectedMapInstance,
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
+            ...this.selectedMapInstance.basemap,
         };
     };
 
@@ -116,6 +121,7 @@ export class API {
             ...this.selectedMapInstance,
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
+            ...this.selectedMapInstance.basemap,
         };
     };
 
@@ -128,34 +134,43 @@ export class API {
      * @returns a React Component
      */
     loadRemoteComponent = async (url: string, props?: Record<string, unknown>): Promise<React.ReactNode> => {
-        return fetch(url)
-            .then((res) => res.text())
-            .then((source) => {
-                const exports = {};
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                function require(name: string) {
-                    switch (name) {
-                        case 'react':
-                            return React;
-                        default:
-                            return React;
-                    }
+        const result = await fetch(url);
 
-                    // eslint-disable-next-line no-throw-literal
-                    throw `can't use modules other than "react" in remote component.`;
-                }
-                const transformedSource = Babel.transform(source, {
-                    presets: ['react', 'es2015', ['stage-2', { decoratorsLegacy: true }]],
-                }).code;
+        if (!result.ok) {
+            return result.status === 404 ? 'plugin file not found / fichier plugin introuvable' : result.statusText;
+        }
 
-                // eslint-disable-next-line no-eval
-                eval(transformedSource || '');
+        const source = await result.text();
 
-                const plugin = exports.__esModule ? exports.default : exports;
+        const exports = {};
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        function require(name: string) {
+            switch (name) {
+                case 'react':
+                    return React;
+                case 'react-i18next':
+                    return ReactTranslate;
+                case '@material-ui/core/styles':
+                    return MaterialUI;
+                default:
+                    return React;
+            }
 
-                // eslint-disable-next-line no-underscore-dangle
-                return React.createElement(plugin, props || {});
-            });
+            // eslint-disable-next-line no-throw-literal
+            throw `can't use modules other than "react" in remote component.`;
+        }
+        const transformedSource = Babel.transform(source, {
+            presets: ['react', 'es2015', ['stage-2', { decoratorsLegacy: true }]],
+        }).code;
+
+        // eslint-disable-next-line no-eval
+        eval(transformedSource || '');
+
+        // eslint-disable-next-line no-underscore-dangle
+        const plugin = exports.__esModule ? exports.default : exports;
+
+        // eslint-disable-next-line no-underscore-dangle
+        return React.createElement(plugin, props || {});
     };
 }
 

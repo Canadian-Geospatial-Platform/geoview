@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 
 import { i18n } from 'i18next';
@@ -14,7 +14,7 @@ import { ThemeProvider, useTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MapOptions, getMapOptions } from '../../common/map';
-import { Basemap, BasemapOptions } from '../../common/basemap';
+import { Basemap, BasemapOptions, BasemapLayer } from '../../common/basemap';
 import { Layer, LayerConfig, LayerTypes } from '../../common/layers/layer';
 
 import { Projection } from '../../common/projection';
@@ -32,8 +32,9 @@ import { EVENT_NAMES } from '../../api/event';
 
 import { MapViewer } from '../../common/map-viewer';
 import { NorthArrow } from '../mapctrl/north-arrow';
+import { generateId } from '../../common/constant';
 
-interface MapProps {
+export interface MapProps {
     id?: string;
     center: LatLngTuple;
     zoom: number;
@@ -41,12 +42,19 @@ interface MapProps {
     language: string;
     basemapOptions: BasemapOptions;
     layers?: LayerConfig[];
+    basemapSwitcher: boolean;
 }
 
 function Map(props: MapProps): JSX.Element {
     const { id, center, zoom, projection, language, basemapOptions, layers } = props;
 
+    const [basemapLayers, setBasemapLayers] = useState([]);
+    const [isLoaded, setIsLoaded] = useState(false);
+
     const defaultTheme = useTheme();
+
+    // create a new map viewer instance
+    const viewer = new MapViewer(props);
 
     // if screen size is medium and up
     const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
@@ -56,8 +64,8 @@ function Map(props: MapProps): JSX.Element {
     const crs = projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
 
     // get basemaps with attribution
-    const basemap: Basemap = new Basemap(basemapOptions);
-    const attribution = language === 'en-CA' ? basemap.attribution['en-CA'] : basemap.attribution['fr-CA'];
+    const basemap: Basemap = new Basemap(basemapOptions || null, language, projection);
+    const attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
 
     // get map option from slected basemap projection
     const mapOptions: MapOptions = getMapOptions(projection);
@@ -76,6 +84,21 @@ function Map(props: MapProps): JSX.Element {
             position: map.getCenter(),
         });
     }
+
+    useEffect(() => {
+        // listen to adding a new basemap events
+        api.event.on(
+            EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
+            (payload) => {
+                if (payload && payload.handlerName === id) setBasemapLayers(payload.layers);
+            },
+            id
+        );
+
+        return () => {
+            api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE);
+        };
+    }, []);
 
     return (
         <MapContainer
@@ -115,38 +138,57 @@ function Map(props: MapProps): JSX.Element {
                 // listen to map move end events
                 cgpMap.on('moveend', mapMoveEnd);
 
+                // initialize the map viewer and load plugins
+                viewer.init({
+                    map: cgpMap,
+                    id: id || generateId(id),
+                });
+
                 // add map instance to api
-                api.maps.push(new MapViewer({ map: cgpMap, id: id || '' }));
+                api.maps.push(viewer);
 
                 // call the ready function since rendering of this map instance is done
                 api.ready();
+
+                setIsLoaded(true);
             }}
         >
-            {basemap.getBasemapLayers(language, projection).map((base) => (
-                <TileLayer key={base.id} url={base.url} attribution={attribution} opacity={base.opacity} />
-            ))}
-            <NavBar />
-            {deviceSizeMedUp && <MousePosition />}
-            <ScaleControl position="bottomright" imperial={false} />
-            {deviceSizeMedUp && <Attribution attribution={attribution} />}
-            {deviceSizeMedUp && (
-                <OverviewMap
-                    id={id}
-                    crs={crs}
-                    basemaps={basemap.getBasemapLayers(language, projection)}
-                    zoomFactor={mapOptions.zoomFactor}
-                />
+            {isLoaded && (
+                <>
+                    {basemapLayers.map((basemapLayer: BasemapLayer) => {
+                        return (
+                            <TileLayer
+                                key={basemapLayer.id}
+                                url={basemapLayer.url}
+                                attribution={attribution}
+                                opacity={basemapLayer.opacity}
+                            />
+                        );
+                    })}
+                    <NavBar />
+                    {deviceSizeMedUp && <MousePosition />}
+                    <ScaleControl position="bottomright" imperial={false} />
+                    {deviceSizeMedUp && <Attribution attribution={attribution} />}
+                    {deviceSizeMedUp && (
+                        <OverviewMap
+                            id={id}
+                            crs={crs}
+                            basemaps={basemap.getBasemapLayers(language, projection)}
+                            zoomFactor={mapOptions.zoomFactor}
+                        />
+                    )}
+                    <div
+                        className="leaflet-control cgp-appbar"
+                        style={{
+                            boxSizing: 'content-box',
+                            zIndex: defaultTheme.zIndex.appBar,
+                        }}
+                    >
+                        <Appbar id={id} />
+                    </div>
+                    <NorthArrow projection={crs} />
+                </>
             )}
-            <div
-                className="leaflet-control cgp-appbar"
-                style={{
-                    boxSizing: 'content-box',
-                    zIndex: defaultTheme.zIndex.appBar,
-                }}
-            >
-                <Appbar id={id} />
-            </div>
-            <NorthArrow projection={crs} />
         </MapContainer>
     );
 }
@@ -167,6 +209,7 @@ export function createMap(element: Element, config: MapProps, i18nInstance: i18n
                         language={config.language}
                         basemapOptions={config.basemapOptions}
                         layers={config.layers}
+                        basemapSwitcher={config.basemapSwitcher || false}
                     />
                 </I18nextProvider>
             </Suspense>

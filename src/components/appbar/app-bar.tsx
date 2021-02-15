@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Appbar(): JSX.Element {
     const [open, setOpen] = useState(false);
-    const [panel, setPanel] = useState<ButtonPanelType>();
+    const [buttonPanelId, setButtonPanelId] = useState<string>();
     const [panelOpen, setPanelOpen] = useState(false);
     const [, setPanelCount] = useState(0);
 
@@ -151,7 +151,7 @@ export function Appbar(): JSX.Element {
                         })[0];
                     })[0];
 
-                    setPanel(buttonPanel);
+                    setButtonPanelId(buttonPanel.button.id);
                     openClosePanel(true);
                 }
             },
@@ -199,7 +199,7 @@ export function Appbar(): JSX.Element {
                                                 tooltip={buttonPanel.button.tooltip}
                                                 icon={buttonPanel.button.icon}
                                                 onClickFunction={() => {
-                                                    setPanel(buttonPanel);
+                                                    setButtonPanelId(buttonPanel.button.id);
                                                     openClosePanel(true);
                                                 }}
                                             />
@@ -218,7 +218,21 @@ export function Appbar(): JSX.Element {
                     <Version />
                 </List>
             </Drawer>
-            {panel && panelOpen && <PanelApp panel={panel.panel} />}
+            {Object.keys((api.mapInstance(map) as ButtonPanel).appBarButtonPanels).map((groupName: string) => {
+                // get button panels from group
+                const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarButtonPanels[groupName];
+
+                // display the panels in the list
+                return (
+                    <div key={groupName}>
+                        {buttonPanels.map((buttonPanel: ButtonPanelType) => {
+                            const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
+
+                            return <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />;
+                        })}
+                    </div>
+                );
+            })}
         </div>
     );
 }

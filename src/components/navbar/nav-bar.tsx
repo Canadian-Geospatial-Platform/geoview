@@ -22,6 +22,7 @@ import { EVENT_NAMES } from '../../api/event';
 import { Button } from '../../common/ui/button';
 import { PANEL_TYPES } from '../../common/ui/panel';
 import PanelApp from '../panel/panel';
+import { MapInterface } from '../../common/map-viewer';
 
 const useStyles = makeStyles((theme) => ({
     navBar: {
@@ -52,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function NavBar(): JSX.Element {
-    const [panel, setPanel] = useState<ButtonPanelType>();
+    const [buttonPanelId, setButtonPanelId] = useState<string>();
     const [panelOpen, setPanelOpen] = useState(false);
 
     const [, setButtonCount] = useState(0);
@@ -116,7 +117,7 @@ export function NavBar(): JSX.Element {
                         })[0];
                     })[0];
 
-                    setPanel(buttonPanel);
+                    setButtonPanelId(buttonPanel.button.id);
                     openClosePanel(true);
                 }
             },
@@ -143,7 +144,20 @@ export function NavBar(): JSX.Element {
 
     return (
         <div ref={navBar} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBar}`}>
-            {panel && panelOpen && <PanelApp panel={panel.panel} />}
+            {Object.keys((api.mapInstance(map) as ButtonPanel).navBarButtons).map((groupName) => {
+                const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
+
+                // display the panels in the list
+                return (
+                    <div key={groupName}>
+                        {buttons.map((buttonPanel: ButtonPanelType) => {
+                            const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
+
+                            return <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />;
+                        })}
+                    </div>
+                );
+            })}
             <div className={classes.root}>
                 {Object.keys((api.mapInstance(map) as ButtonPanel).navBarButtons).map((groupName) => {
                     const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
@@ -166,7 +180,7 @@ export function NavBar(): JSX.Element {
                                         tooltip={buttonPanel.button.tooltip}
                                         icon={buttonPanel.button.icon}
                                         onClickFunction={() => {
-                                            setPanel(buttonPanel);
+                                            setButtonPanelId(buttonPanel.button.id);
                                             openClosePanel(true);
                                         }}
                                     />

@@ -73,6 +73,11 @@ export const EVENT_NAMES = {
      * Event is triggered when a vector has been added
      */
     EVENT_VECTOR_ADDED: 'vector/added',
+
+    /**
+     * Event is triggered when updating the basemap layers
+     */
+    EVENT_BASEMAP_LAYERS_UPDATE: 'basemap/layers_update',
 };
 
 /**
