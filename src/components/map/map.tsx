@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { render } from 'react-dom';
 
 import { i18n } from 'i18next';
@@ -45,6 +45,8 @@ interface MapProps {
 
 function Map(props: MapProps): JSX.Element {
     const { id, center, zoom, projection, language, basemapOptions, layers } = props;
+
+    const [isLoaded, setIsLoaded] = useState(false);
 
     const defaultTheme = useTheme();
 
@@ -120,33 +122,39 @@ function Map(props: MapProps): JSX.Element {
 
                 // call the ready function since rendering of this map instance is done
                 api.ready();
+
+                setIsLoaded(true);
             }}
         >
-            {basemap.getBasemapLayers(language, projection).map((base) => (
-                <TileLayer key={base.id} url={base.url} attribution={attribution} opacity={base.opacity} />
-            ))}
-            <NavBar />
-            {deviceSizeMedUp && <MousePosition />}
-            <ScaleControl position="bottomright" imperial={false} />
-            {deviceSizeMedUp && <Attribution attribution={attribution} />}
-            {deviceSizeMedUp && (
-                <OverviewMap
-                    id={id}
-                    crs={crs}
-                    basemaps={basemap.getBasemapLayers(language, projection)}
-                    zoomFactor={mapOptions.zoomFactor}
-                />
+            {isLoaded && (
+                <>
+                    {basemap.getBasemapLayers(language, projection).map((base) => (
+                        <TileLayer key={base.id} url={base.url} attribution={attribution} opacity={base.opacity} />
+                    ))}
+                    <NavBar />
+                    {deviceSizeMedUp && <MousePosition />}
+                    <ScaleControl position="bottomright" imperial={false} />
+                    {deviceSizeMedUp && <Attribution attribution={attribution} />}
+                    {deviceSizeMedUp && (
+                        <OverviewMap
+                            id={id}
+                            crs={crs}
+                            basemaps={basemap.getBasemapLayers(language, projection)}
+                            zoomFactor={mapOptions.zoomFactor}
+                        />
+                    )}
+                    <div
+                        className="leaflet-control cgp-appbar"
+                        style={{
+                            boxSizing: 'content-box',
+                            zIndex: defaultTheme.zIndex.appBar,
+                        }}
+                    >
+                        <Appbar id={id} />
+                    </div>
+                    <NorthArrow projection={crs} />
+                </>
             )}
-            <div
-                className="leaflet-control cgp-appbar"
-                style={{
-                    boxSizing: 'content-box',
-                    zIndex: defaultTheme.zIndex.appBar,
-                }}
-            >
-                <Appbar id={id} />
-            </div>
-            <NorthArrow projection={crs} />
         </MapContainer>
     );
 }
