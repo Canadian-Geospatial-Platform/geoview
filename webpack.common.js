@@ -3,8 +3,9 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const childProcess = require('child_process');
+const glob = require('glob');
 const package = require('./package.json');
 
 // get version numbers and the hash of the current commit
@@ -12,8 +13,22 @@ const [major, minor, patch] = package.version.split('.');
 const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString().trim());
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch}`);
 
+// inject all sample files
+const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) => {
+    return new HtmlWebpackPlugin({
+        template: `${name}`,
+        filename: `${name.substring(name.lastIndexOf('/') + 1, name.length)}`,
+        title: 'Canadian Geospatial Platform Viewer',
+        inject: 'head',
+        scriptLoading: 'blocking',
+        chunks: ['app'],
+    });
+});
+
 const config = {
-    entry: path.resolve(__dirname, 'src/app.tsx'),
+    entry: {
+        app: path.resolve(__dirname, 'src/app.tsx'),
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'gcpv-main.js',
@@ -49,6 +64,15 @@ const config = {
             inject: 'head',
             scriptLoading: 'blocking',
         }),
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: './public/img', to: 'img' },
+                { from: './public/locales', to: 'locales' },
+                { from: './public/css', to: 'css' },
+                { from: './public/geojson', to: 'geojson' },
+                { from: './public/favicon.ico' },
+            ],
+        }),
         new webpack.DefinePlugin({
             __VERSION__: {
                 major,
@@ -58,7 +82,7 @@ const config = {
                 hash,
             },
         }),
-    ],
+    ].concat(multipleHtmlPlugins),
 };
 
 module.exports = config;
