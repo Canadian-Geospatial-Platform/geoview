@@ -3,25 +3,23 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>
-            <%= htmlWebpackPlugin.options.title %>
-        </title>
-        <link rel="shortcut icon" href="./favicon.ico">
-                <style>
-                    .logo{
-                             height:160px; 
-                             width: 160px; 
-                    }
-                    .center {
-                            display: block;
-                            margin-left: auto;
-                            margin-right: auto;
-                            text-align: center;
-                    }
-                    .samplePage-Text{
-                            margin-left: 80px;
-                    }
-                </style>
+        <title><%= htmlWebpackPlugin.options.title %></title>
+        <link rel="shortcut icon" href="./favicon.ico" />
+        <style>
+            .logo {
+                height: 160px;
+                width: 160px;
+            }
+            .center {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
+            }
+            .samplePage-Text {
+                margin-left: 80px;
+            }
+        </style>
     </head>
     <body>
         <div>
@@ -31,15 +29,18 @@
                         <img class="center logo" alt="logo" src="./img/Logo.png" />
                     </tr>
                     <tr>
-                        <h1 class="center" ><strong>Plateforme Géospatiale Canadienne (PGC)</strong></h1>
+                        <h1 class="center"><strong>Plateforme Géospatiale Canadienne (PGC)</strong></h1>
                         <h1 class="center"><strong>Canadian Geospatial Platform (CGP)</strong></h1>
                         <h1 class="center"><strong>GeoView project</strong></h1>
-                        </td>
                     </tr>
                     <tr>
-                        <td><a class=samplePage-Text href="./usecases.html">Use Cases</a></td>
+                        <td><a class="samplePage-Text" href="./usecases.html">Use Cases</a></td>
+                    </tr>
+                    <tr>
+                        <td><a class="samplePage-Text" href="./basemaps.html">Basemaps</a></td>
                     </tr>
                 </tbody>
             </table>
         </div>
-</body>
+    </body>
+</html>
