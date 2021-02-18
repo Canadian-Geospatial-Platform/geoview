@@ -35,3 +35,6 @@ export const generateId = (id: string | undefined | null): string => {
         ? id
         : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
 };
+
+// The north pole position use for north arrow marker and get north arrow rotation angle
+export const northPolePosition: number[] = [90, -95];
