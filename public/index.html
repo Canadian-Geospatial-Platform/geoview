@@ -4,432 +4,46 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title><%= htmlWebpackPlugin.options.title %></title>
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="shortcut icon" href="favicon.ico" />
-
-        <link
-            href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather"
-            rel="stylesheet"
-            type="text/css"
-        />
-
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-
+        <link rel="shortcut icon" href="./favicon.ico" />
         <style>
-            #mapid {
-                height: 1000px;
+            .logo {
+                height: 160px;
+                width: 160px;
             }
-
-            .panel {
-                display: inline-block;
-                background: #ffffff;
-                box-shadow: 0px 0px 5px 5px #666666;
-                -webkit-box-shadow: 2px 2px 5px 5x #666666;
-                -moz-box-shadow: 2px 2px 5px 5px #666666;
-                margin: 10px;
-                padding: 10px;
-                font-size: 12px;
+            .center {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                text-align: center;
             }
-
-            .toolbar {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                width: 100%;
-                margin: 10px;
+            .samplePage-Text {
+                margin-left: 80px;
             }
         </style>
     </head>
     <body>
         <div>
-            <h3>The Atlas of Canada - Clean Energy Resources and Projects (CERP)</h3>
-            <div class="toolbar">
-                <button class="add-polyline-btn">Add Polyline</button>
-                <button class="add-polygon-btn">Add Polygon</button>
-                <button class="add-circle-btn">Add Circle</button>
-                <button class="add-circle-marker-btn">Add Circle Marker</button>
-                <button class="delete-group-btn">Delete Group</button>
-            </div>
-            <div class="toolbar">
-                <button class="add-appbar-panel-btn">Add Appbar Panel</button>
-                <button class="add-navbar-panel-btn">Add Navbar Panel</button>
-                <button class="add-navbar-button-btn">Add Navbar Button</button>
-                <button class="add-navbar-button-group-btn">Add Navbar Panel New Group</button>
-            </div>
-            <div
-                id="mapWM"
-                class="llwp-map"
-                data-leaflet="{ 'name': 'Web Mercator', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA','basemapOptions':{'id':'transport','shaded':false},
-        'layers':[
-            { 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/Investing_Energy_Canada_en/MapServer', 'type': 'esriDynamic', 'entries': '0, 2' },
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' },
-            { 'url': './geojson/lines.json', 'type': 'geoJSON' },
-            { 'url': './geojson/points.json', 'type': 'geoJSON' },
-            { 'url': './geojson/polygons.json', 'type': 'geoJSON' },
-            { 'url': 'https://geo.weather.gc.ca/geomet', 'type': 'ogcWMS', 'entries': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }
-        ] }"
-            ></div>
-            <p>
-                This map is an example of a Leaflet map done with React. This map is in Web Mercator projection with an English interface.
-            </p>
-            <div class="panel">
-                <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
-                <div class="maps-position"></div>
-            </div>
-            <button id="add-geojson">Add GeoJSON Layer</button>
+            <table>
+                <tbody>
+                    <tr>
+                        <img class="center logo" alt="logo" src="./img/Logo.png" />
+                    </tr>
+                    <tr>
+                        <h1 class="center"><strong>Plateforme Géospatiale Canadienne (PGC)</strong></h1>
+                        <h1 class="center"><strong>Canadian Geospatial Platform (CGP)</strong></h1>
+                        <h1 class="center"><strong>GeoView project</strong></h1>
+                    </tr>
+                    <tr>
+                        <td><a class="samplePage-Text" href="./usecases.html">Use Cases</a></td>
+                    </tr>
+                    <tr>
+                        <td><a class="samplePage-Text" href="./basemaps.html">Basemaps</a></td>
+                    </tr>
+                    <tr>
+                        <td><a class="samplePage-Text" href="./basemap-switcher.html">Basemap Switcher Plugin</a></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <hr />
-        <div>
-            <h3>L'Atlas du Canada - Ressources et projets d'énergie propre (RPEP)</h3>
-            <div class="toolbar">
-                <button class="add-polyline-btn">Add Polyline</button>
-                <button class="add-polygon-btn">Add Polygon</button>
-                <button class="add-circle-btn">Add Circle</button>
-                <button class="delete-group-btn">Delete Group</button>
-            </div>
-            <div class="toolbar">
-                <button class="add-navbar-panel-btn">Add Navbar Panel</button>
-            </div>
-            <div
-                id="mapLCC"
-                class="llwp-map"
-                data-leaflet="{ 'name': 'LCC', 'projection': 3978, 'zoom': 12, 'center': [45,-75], 'language': 'fr-CA', 'basemapOptions':{'id':'transport','shaded':true,'labeled':true}, 'basemapSwitcher': true,
-            'layers':[
-            { 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/services/MMS/T100EP_E/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' },
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 28, 29, 37' },
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' }
-        ]}"
-            ></div>
-            <p>
-                Cette carte est un exemple d'une carte créée à partir de Leaflet et React. La projection LCC est utilisée et l'interface est
-                en français.
-            </p>
-            <div class="panel">
-                <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
-                <div class="maps-position"></div>
-            </div>
-        </div>
-        <div>
-            <h3>L'Atlas du Canada - Ressources et projets d'énergie propre (RPEP)</h3>
-            <div
-                id="simpleMapLCC"
-                class="llwp-map"
-                data-leaflet="{ 'name': 'LCC_SHADED', 'projection': 3978, 'zoom': 12, 'center': [45,-75], 'language': 'fr-CA','basemapOptions':{'id':'simple','shaded':true,'labeled':false} ,
-        'layers':[]}"
-            ></div>
-            <p>
-                Cette carte est un exemple d'une carte créée à partir de Leaflet et React. La projection LCC est utilisée et l'interface est
-                en français.
-            </p>
-            <div class="panel">
-                <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
-                <div class="maps-position"></div>
-            </div>
-            <button id="add-geojson-lcc">Add GeoJSON Layer</button>
-        </div>
-        <script>
-            const mapsPosition = document.getElementsByClassName('maps-position');
-
-            function addPolyline(map) {
-                // call an api function to draw a polyline
-                const polyline = cgpv.api.map(map).addPolyline(
-                    [
-                        [45, -100],
-                        [50, -105],
-                    ],
-                    {
-                        stroke: true,
-                        color: '#000',
-                        weight: 5,
-                        opacity: '0.8',
-                    }
-                );
-
-                cgpv.api.map(map).addToGeometryGroup('myGroup', polyline);
-            }
-
-            function addPolygon(map) {
-                // call an api function to draw a polygon
-                const polygon = cgpv.api.map(map).addPolygon(
-                    [
-                        [50, -109.05],
-                        [54, -109.03],
-                        [54, -102.05],
-                        [50, -102.04],
-                    ],
-                    {
-                        stroke: true,
-                        color: '#000',
-                        weight: 5,
-                        opacity: '0.8',
-                    }
-                );
-
-                cgpv.api.map(map).addToGeometryGroup('myGroup', polygon);
-            }
-
-            function addCircle(map) {
-                // call an api function to draw a polygon
-                const circle = cgpv.api.map(map).addCircle(50, -109, 200, {
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.5,
-                    radius: 50.0,
-                });
-
-                cgpv.api.map(map).addToGeometryGroup('myGroup', circle);
-            }
-
-            function addCircleMarker(map) {
-                // call an api function to draw a polygon
-                const circleMarker = cgpv.api.map(map).addCircleMarker(70, -109, 5, {
-                    color: 'red',
-                    fillColor: '#f03',
-                    fillOpacity: 0.5,
-                    radius: 50.0,
-                });
-
-                cgpv.api.map(map).addToGeometryGroup('myGroup', circleMarker);
-            }
-
-            // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-            cgpv.init(async function () {
-                console.log('api is ready');
-
-                // listen to an event emitted by mapWM
-                cgpv.api.on(
-                    'map/moveend',
-                    (args) => {
-                        console.log(args);
-                    },
-                    'mapWM'
-                );
-
-                // listen to all events emitted with same event name
-                cgpv.api.all('map/moveend', (args) => {
-                    mapsPosition[0].innerHTML = mapsPosition[1].innerHTML = args
-                        .map((map) => {
-                            return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
-                        })
-                        .join(' ');
-                });
-
-                // find the button element by ID
-                var addGeoJSONButton = document.getElementById('add-geojson');
-
-                // add an event listener when a button is clicked
-                addGeoJSONButton.addEventListener('click', function (e) {
-                    // emit a new event to a geojson layer from url
-                    // adding a geojson layer requires a type of geojson and url
-                    cgpv.api.emit('layer/add', null, {
-                        type: 'geoJSON',
-                        url:
-                            'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
-                    });
-                });
-
-                // find the button element to add a geojson on an LCC map
-                var addGeoJSONButtonLCC = document.getElementById('add-geojson-lcc');
-
-                // add an event listener when the button is clicked
-                addGeoJSONButtonLCC.addEventListener('click', function (e) {
-                    // add geojson to the lcc map
-                    cgpv.api.emit('layer/add', null, {
-                        type: 'geoJSON',
-                        url:
-                            'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
-                    });
-                });
-
-                // used to store the created polyline geometry
-                var polyline = null;
-
-                // check if a group already exists
-                cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-
-                // get addPolyline button element for WM map
-                var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
-
-                // add polyline btn click event handler
-                addPolylineBtn.addEventListener('click', function (e) {
-                    addPolyline('mapWM');
-                });
-
-                // get addPolygon button element for WM map
-                var addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[0];
-
-                // add polygon btn click event handler
-                addPolygonBtn.addEventListener('click', function (e) {
-                    addPolygon('mapWM');
-                });
-
-                // get addCircle button element for WM map
-                var addCircleBtn = document.getElementsByClassName('add-circle-btn')[0];
-
-                // add circle btn click event handler
-                addCircleBtn.addEventListener('click', function (e) {
-                    addCircle('mapWM');
-                });
-
-                // get add circle marker button element for WM map
-                var addCircleMarkerBtn = document.getElementsByClassName('add-circle-marker-btn')[0];
-
-                // add circle marker btn click event handler
-                addCircleMarkerBtn.addEventListener('click', function (e) {
-                    addCircleMarker('mapWM');
-                });
-
-                // get deleteGeomtryGroup button element for WM map
-                var deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[0];
-
-                // add polyline btn click event handler
-                deleteGeomtryGroup.addEventListener('click', function (e) {
-                    // call an api function to draw a polyline
-                    cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');
-                });
-
-                // get addPolyline button element for LCC map
-                addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[1];
-
-                // add polyline btn click event handler
-                addPolylineBtn.addEventListener('click', function (e) {
-                    addPolyline('mapLCC');
-                });
-
-                // get addPolygon button element for LCC map
-                addPolygonBtn = document.getElementsByClassName('add-polygon-btn')[1];
-
-                // add polygon btn click event handler
-                addPolygonBtn.addEventListener('click', function (e) {
-                    addPolygon('mapLCC');
-                });
-
-                // get addCircle button element for LCC map
-                addCircleBtn = document.getElementsByClassName('add-circle-btn')[1];
-
-                // add circle btn click event handler
-                addCircleBtn.addEventListener('click', function (e) {
-                    addCircle('mapLCC');
-                });
-
-                // get deleteGeomtryGroup button element for LCC map
-                deleteGeomtryGroup = document.getElementsByClassName('delete-group-btn')[1];
-
-                // delete geometry group btn click event handler
-                deleteGeomtryGroup.addEventListener('click', function (e) {
-                    // call an api function to draw a polyline
-                    cgpv.api.map('mapLCC').deleteGeometryGroup('myGroup');
-                });
-
-                // get add panel button element for WM map
-                var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
-
-                // add appbar panel btn click event handler
-                addAppbarPanelBtn.addEventListener('click', async function (e) {
-                    const button = {
-                        tooltip: 'Test',
-                        icon: '<div>Icon</div>',
-                    };
-
-                    // load a plugin to get the panel content
-                    const panelContent = await cgpv.api.loadRemoteComponent('./plugins/panel/panel-content.js', {
-                        mapId: 'mapWM',
-                    });
-
-                    const panel = {
-                        title: 'Test',
-                        icon: `<div>Icon</div>`,
-                        content: panelContent,
-                        width: 200,
-                    };
-
-                    // call an api function to add a panel with a button
-                    cgpv.api.map('mapWM').createAppbarButtonPanel(button, panel, null);
-                });
-
-                // get add navbar panel button element for WM map
-                var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
-
-                // add navbar panel btn click event handler
-                addNavbarPanelBtn.addEventListener('click', function (e) {
-                    const button = {
-                        tooltip: 'Test',
-                        icon: '<div>I</div>',
-                    };
-
-                    const panel = {
-                        title: 'Test',
-                        icon: `<div>Icon</div>`,
-                        content: `<div>Test content</div>`,
-                        width: 200,
-                    };
-
-                    // call an api function to add a panel with a button
-                    cgpv.api.map('mapWM').createNavbarButtonPanel(button, panel, null);
-                });
-
-                // get add navbar button element for WM map
-                var addNavbarButtonBtn = document.getElementsByClassName('add-navbar-button-btn')[0];
-
-                // add navbar button btn click event handler
-                addNavbarButtonBtn.addEventListener('click', function (e) {
-                    const button = {
-                        tooltip: 'Test',
-                        icon: '<div>B</div>',
-                        callback: function () {
-                            alert('test function');
-                        },
-                    };
-
-                    // call an api function to add a panel with a button
-                    cgpv.api.map('mapWM').createNavbarButton(button, null);
-                });
-
-                // get add navbar button group element for WM map
-                var addNavbarButtonGroupBtn = document.getElementsByClassName('add-navbar-button-group-btn')[0];
-
-                // add navbar button group btn click event handler
-                addNavbarButtonGroupBtn.addEventListener('click', function (e) {
-                    const button = {
-                        tooltip: 'Group',
-                        icon: '<div>G</div>',
-                    };
-
-                    const panel = {
-                        title: 'Group',
-                        icon: `<div>Icon</div>`,
-                        content: `<div>Test content</div>`,
-                        width: 400,
-                    };
-
-                    // call an api function to add a new button panel in the navbar in a new group
-                    cgpv.api.map('mapWM').createNavbarButtonPanel(button, panel, 'newGroup');
-                });
-
-                // get add navbar panel button element for LCC map
-                addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[1];
-
-                // add navbar panel btn click event handler
-                addNavbarPanelBtn.addEventListener('click', function (e) {
-                    const button = {
-                        tooltip: 'Test',
-                        icon: '<div>I</div>',
-                    };
-
-                    const panel = {
-                        title: 'Test',
-                        icon: `<div>Icon</div>`,
-                        content: `<div>Test content</div>`,
-                        width: 200,
-                    };
-
-                    // call an api function to add a panel with a button
-                    cgpv.api.map('mapLCC').createNavbarButtonPanel(button, panel, null);
-                });
-            });
-        </script>
     </body>
 </html>

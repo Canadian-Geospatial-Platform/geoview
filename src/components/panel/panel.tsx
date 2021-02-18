@@ -109,7 +109,15 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
         >
             <CardHeader
                 className={classes.avatar}
-                avatar={typeof panel.icon === 'string' ? <HtmlToReact htmlContent={panel.icon} /> : panel.icon}
+                avatar={
+                    typeof panel.icon === 'string' ? (
+                        <HtmlToReact htmlContent={panel.icon} />
+                    ) : typeof panel.icon === 'object' ? (
+                        <panel.icon />
+                    ) : (
+                        <panel.icon />
+                    )
+                }
                 title={t(panel.title)}
                 action={
                     <IconButton aria-label={t('appbar.close')} onClick={closePanel}>

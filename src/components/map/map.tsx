@@ -14,9 +14,8 @@ import { ThemeProvider, useTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { MapOptions, getMapOptions } from '../../common/map';
-import { Basemap, BasemapOptions, BasemapLayer } from '../../common/basemap';
+import { BasemapOptions, BasemapLayer } from '../../common/basemap';
 import { Layer, LayerConfig, LayerTypes } from '../../common/layers/layer';
-
 import { Projection } from '../../common/projection';
 
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -31,8 +30,8 @@ import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
 import { MapViewer } from '../../common/map-viewer';
-import { NorthArrow } from '../mapctrl/north-arrow';
 import { generateId } from '../../common/constant';
+import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 
 export interface MapProps {
     id?: string;
@@ -42,11 +41,10 @@ export interface MapProps {
     language: string;
     basemapOptions: BasemapOptions;
     layers?: LayerConfig[];
-    basemapSwitcher: boolean;
 }
 
 function Map(props: MapProps): JSX.Element {
-    const { id, center, zoom, projection, language, basemapOptions, layers } = props;
+    const { id, center, zoom, projection, language, layers } = props;
 
     const [basemapLayers, setBasemapLayers] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -63,8 +61,7 @@ function Map(props: MapProps): JSX.Element {
     // the projection will work with CBMT basemap. If another basemap would be use, update...
     const crs = projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
 
-    // get basemaps with attribution
-    const basemap: Basemap = new Basemap(basemapOptions || null, language, projection);
+    // get attribution
     const attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
 
     // get map option from slected basemap projection
@@ -169,14 +166,7 @@ function Map(props: MapProps): JSX.Element {
                     {deviceSizeMedUp && <MousePosition />}
                     <ScaleControl position="bottomright" imperial={false} />
                     {deviceSizeMedUp && <Attribution attribution={attribution} />}
-                    {deviceSizeMedUp && (
-                        <OverviewMap
-                            id={id}
-                            crs={crs}
-                            basemaps={basemap.getBasemapLayers(language, projection)}
-                            zoomFactor={mapOptions.zoomFactor}
-                        />
-                    )}
+                    {deviceSizeMedUp && <OverviewMap crs={crs} basemaps={basemapLayers} zoomFactor={mapOptions.zoomFactor} />}
                     <div
                         className="leaflet-control cgp-appbar"
                         style={{
@@ -187,6 +177,7 @@ function Map(props: MapProps): JSX.Element {
                         <Appbar id={id} />
                     </div>
                     <NorthArrow projection={crs} />
+                    <NorthPoleFlag projection={crs} />
                 </>
             )}
         </MapContainer>
@@ -209,7 +200,6 @@ export function createMap(element: Element, config: MapProps, i18nInstance: i18n
                         language={config.language}
                         basemapOptions={config.basemapOptions}
                         layers={config.layers}
-                        basemapSwitcher={config.basemapSwitcher || false}
                     />
                 </I18nextProvider>
             </Suspense>

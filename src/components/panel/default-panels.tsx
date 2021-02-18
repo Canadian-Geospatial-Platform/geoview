@@ -1,6 +1,5 @@
 import { Typography } from '@material-ui/core';
 import LayersIcon from '@material-ui/icons/Layers';
-import MapIcon from '@material-ui/icons/Map';
 
 import { ButtonPanelProps } from '../../common/ui/button-panel';
 
@@ -14,28 +13,12 @@ export const LayersPanel: ButtonPanelProps = {
     },
     panel: {
         title: 'appbar.layers',
-        icon: <LayersIcon />,
+        icon: LayersIcon,
         content: (
             <Typography variant="body2" color="textSecondary" component="p">
                 This is a place holder panel for the layers componennt
             </Typography>
         ),
-        width: 300,
-    },
-};
-
-/**
- * Create a basemap switcher button panel for the appbar
- */
-export const BasemapSwitcherPanel: ButtonPanelProps = {
-    button: {
-        tooltip: 'appbar.basemapSwitcher',
-        icon: <MapIcon />,
-    },
-    panel: {
-        title: 'appbar.basemapSwitcher',
-        icon: <MapIcon />,
-        content: null,
         width: 300,
     },
 };

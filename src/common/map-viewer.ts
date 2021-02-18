@@ -5,8 +5,6 @@ import { Map } from 'leaflet';
 import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';
 import { MapProps } from '../components/map/map';
-import { api } from '../api/api';
-import { BasemapSwitcherPanel } from '../components/panel/default-panels';
 import { Basemap } from './basemap';
 
 /**
@@ -42,6 +40,12 @@ export class MapViewer {
     // used to access basemap functions
     basemap: Basemap;
 
+    // get used language
+    language: string;
+
+    // get used projection
+    projection: number;
+
     /**
      * Initialize map props and basemaps
      *
@@ -49,6 +53,9 @@ export class MapViewer {
      */
     constructor(mapProps: MapProps) {
         this.mapProps = mapProps;
+
+        this.language = mapProps.language;
+        this.projection = mapProps.projection;
 
         this.basemap = new Basemap(mapProps.basemapOptions, mapProps.language, mapProps.projection);
     }
@@ -68,40 +75,6 @@ export class MapViewer {
         this.buttonPanel = new ButtonPanel(mapInstance.map);
 
         // init basemap
-        this.basemap.init(this.id, this.mapProps.basemapSwitcher);
-
-        this.loadCorePlugins();
-    };
-
-    /**
-     * functional that will load the basemap switcher plugin
-     */
-    private loadBasemapSwitcherPlugin = async () => {
-        if (this.mapProps.basemapSwitcher) {
-            // load the basemap switcher plugin
-            const basemapSwitcher = await api.loadRemoteComponent('./plugins/basemap/basemap-switcher.js', {
-                mapId: this.id,
-                language: this.mapProps.language,
-            });
-
-            // if plugin file exists
-            if (basemapSwitcher) {
-                // get default values for basemap switcher
-                const basemapSwitcherPanel = BasemapSwitcherPanel;
-
-                // set panel content from the plugin
-                basemapSwitcherPanel.panel.content = basemapSwitcher;
-
-                // create the button panel
-                this.buttonPanel.createAppbarButtonPanel(basemapSwitcherPanel.button, basemapSwitcherPanel.panel, null);
-            }
-        }
-    };
-
-    /**
-     * load core plugins
-     */
-    private loadCorePlugins = () => {
-        if (this.mapProps.basemapSwitcher) this.loadBasemapSwitcherPlugin();
+        this.basemap.init(this.id);
     };
 }

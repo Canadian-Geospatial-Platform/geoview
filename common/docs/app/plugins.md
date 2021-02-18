@@ -45,4 +45,25 @@ const panel = {
 cgpv.api.map('mapWM').createAppbarButtonPanel(button, panel, null);
 ```
 
+## Core Plugins
+
+The viewer supports loading core plugins that are integrated with the core viewer. You can download a core plugin and place it under the `plugins` folder created at the root of your project folder. The file path must match `plugin_folder_name/plugin-filename` for example `plugins/basemap/basemap-switcher.js`
+
+### List of supported core plugins out of the box
+
+#### Basemap Switcher
+
+To use the basemap switcher you need to download it from
+`public/plugins/basemap/basemap-switcher.js`
+
+Then place the file under a folder called `plugins`
+
+Full path should look like
+`plugins/basemap/basemap-switcher.js`
+
+To enable the basemap switcher plugin you need to provide the `basemapSwitcher` property in the map config when creating the map, please see an example showcase at
+`public/templates/basemap-switcher.html`
+
 > TODO: Add support for loading plugins with third party libraries
+> TODO: Add support for more core plugins
+> TODO: Add the ability to specify where to load the plugins from

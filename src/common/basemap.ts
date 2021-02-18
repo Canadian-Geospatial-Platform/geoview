@@ -109,12 +109,11 @@ export class Basemap {
      * init the basemap and load default basemap layers if provided in map configs
      *
      * @param {string} mapId the map id
-     * @param {boolean} basemapSwitcher value to check if the basemap switcher plugin is enabled/disabled
      */
-    init = (mapId: string, basemapSwitcher: boolean): void => {
+    init = (mapId: string): void => {
         this.mapId = mapId;
 
-        if (this.basemapOptions && !basemapSwitcher) {
+        if (this.basemapOptions) {
             this.loadDefaultBasemaps();
         }
     };

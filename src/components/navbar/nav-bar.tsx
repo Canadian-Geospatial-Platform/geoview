@@ -117,8 +117,10 @@ export function NavBar(): JSX.Element {
                         })[0];
                     })[0];
 
-                    setButtonPanelId(buttonPanel.button.id);
-                    openClosePanel(true);
+                    if (buttonPanel) {
+                        setButtonPanelId(buttonPanel.button.id);
+                        openClosePanel(true);
+                    }
                 }
             },
             mapId
