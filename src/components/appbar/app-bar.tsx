@@ -20,7 +20,7 @@ import { MapInterface } from '../../common/map-viewer';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { ButtonPanel, ButtonPanelType } from '../../common/ui/button-panel';
+import { ButtonPanel } from '../../common/ui/button-panel';
 import { PANEL_TYPES } from '../../common/ui/panel';
 
 const drawerWidth = 200;
@@ -138,17 +138,20 @@ export function Appbar(): JSX.Element {
             updatePanelCount();
         });
 
+        // listen on panel removal
+        api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, () => {
+            updatePanelCount();
+        });
+
         // listen to event when a request to open a panel
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_OPEN,
             (args) => {
                 if (args.handlerId === mapId) {
-                    const buttonPanel = Object.keys((api.map(mapId) as ButtonPanel).appBarButtonPanels).map((groupName: string) => {
-                        const buttonPanels: ButtonPanelType[] = (api.map(mapId) as ButtonPanel).appBarButtonPanels[groupName];
+                    const buttonPanel = Object.keys((api.map(mapId) as ButtonPanel).appBarPanels).map((groupName: string) => {
+                        const buttonPanels = (api.map(mapId) as ButtonPanel).appBarPanels[groupName];
 
-                        return buttonPanels.filter((bPanel: ButtonPanelType) => {
-                            return args.buttonId === bPanel.button.id;
-                        })[0];
+                        return buttonPanels[args.buttonId];
                     })[0];
 
                     if (buttonPanel) {
@@ -164,6 +167,7 @@ export function Appbar(): JSX.Element {
             api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
             api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
             api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
+            api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE);
         };
     }, []);
 
@@ -187,14 +191,16 @@ export function Appbar(): JSX.Element {
                 </div>
                 <Divider />
                 <List>
-                    {Object.keys((api.mapInstance(map) as ButtonPanel).appBarButtonPanels).map((groupName: string) => {
+                    {Object.keys((api.mapInstance(map) as ButtonPanel).appBarPanels).map((groupName: string) => {
                         // get button panels from group
-                        const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarButtonPanels[groupName];
+                        const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarPanels[groupName];
 
                         // display the button panels in the list
                         return (
                             <div key={groupName}>
-                                {buttonPanels.map((buttonPanel: ButtonPanelType) => {
+                                {Object.keys(buttonPanels).map((buttonId) => {
+                                    const buttonPanel = buttonPanels[buttonId];
+
                                     return (
                                         <div key={buttonPanel.button.id}>
                                             <ButtonApp
@@ -220,17 +226,21 @@ export function Appbar(): JSX.Element {
                     <Version />
                 </List>
             </Drawer>
-            {Object.keys((api.mapInstance(map) as ButtonPanel).appBarButtonPanels).map((groupName: string) => {
+            {Object.keys((api.mapInstance(map) as ButtonPanel).appBarPanels).map((groupName: string) => {
                 // get button panels from group
-                const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarButtonPanels[groupName];
+                const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarPanels[groupName];
 
                 // display the panels in the list
                 return (
                     <div key={groupName}>
-                        {buttonPanels.map((buttonPanel: ButtonPanelType) => {
+                        {Object.keys(buttonPanels).map((buttonId) => {
+                            const buttonPanel = buttonPanels[buttonId];
+
                             const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
 
-                            return <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />;
+                            return buttonPanel.panel ? (
+                                <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />
+                            ) : null;
                         })}
                     </div>
                 );

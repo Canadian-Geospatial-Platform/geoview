@@ -1,9 +1,3 @@
-import React from 'react';
-
-import * as ReactTranslate from 'react-i18next';
-
-import * as MaterialUI from '@material-ui/core/styles';
-
 import { Map } from 'leaflet';
 
 /* eslint-disable no-plusplus */

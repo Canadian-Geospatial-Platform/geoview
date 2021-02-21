@@ -62,8 +62,6 @@
                 text-align: left;
             }
         </style>
-
-        <script src="./plugins/basemap/basemap-switcher.js"></script>
     </head>
     <body>
         <div calss="header-table">
@@ -72,48 +70,62 @@
                     <tr>
                         <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
                         <td class="titleheader">
-                            <h1><strong>Basemap Switcher Plugin</strong></h1>
+                            <h1><strong>Basemaps</strong></h1>
                         </td>
                     </tr>
                     <tr>
-                        <td><a href="./index.html">Main</a><br /></td>
+                        <td>
+                            <a href="./index.html">Main</a><br />
+                            <a href="#HPRJ1">1. Web Mercator Projection</a><br />
+                            <a href="#HPRJ2">2. LCC Projection</a><br />
+                        </td>
                     </tr>
                 </tbody>
             </table>
             <table>
                 <tbody>
                     <tr>
-                        <td>
-                            This page is used to showcase the basemap switcher plugin. To add a basemap switcher you need to provide the
-                            'basemapSwitcher' property and set it to true in the map config, see config snippet below. If basemap switcher
-                            is enabled then basemapOptions will be ignored.
-                        </td>
+                        <td>This page is used to showcase how the viewer may show different map Projections</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div>
+            <h3 id="HPRJ1">1. Web Mercator Projection</h3>
+            <h3><a href="#top">Top of the page</a></h3>
             <div
-                id="UC1"
+                id="PRJ1"
                 class="llwp-map"
-                data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true },
+                data-leaflet=" { 'name': 'Web Mercator', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true } ,
             'layers': [
             ] } "
             ></div>
-            <p>This map is in LLC projection with an English interface.</p>
+            <p>This map is in Web Mercator projection with Transport basemap, with labeling.</p>
             <p><strong>Configuraion Snippet:</strong></p>
-            <div id="UC1CS" class="panel"></div>
+            <div id="PRJ1CS" class="panel"></div>
+        </div>
+        <hr />
+        <div>
+            <h3 id="HPRJ2">2. LCC Projection</h3>
+            <h3><a href="#top">Top of the page</a></h3>
+            <div
+                id="PRJ2"
+                class="llwp-map"
+                data-leaflet="{'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true } ,
+            'layers':[]}"
+            ></div>
+            <p>
+                This map is in LLC projection with Trasnport basemap with shaded background and labeling. When in LCC, the map will show a
+                north arrow to help user knows where the north is when zoomed in.
+            </p>
+            <p><strong>Configuraion Snippet:</strong></p>
+            <div id="PRJ2CS" class="panel"></div>
         </div>
         <script>
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
-
-                cgpv.api.plugin.add('basemapSwitcher', window.plugins['basemapSwitcher'], {
-                    mapId: 'UC1',
-                });
-
-                // inject cofiguration snippet insdie panel
+                // inject cofiguration snippet inside panel
                 for (j = 0; j < document.getElementsByClassName('llwp-map').length; j++) {
                     let configSnippet = '';
                     let mapID = document.getElementsByClassName('llwp-map')[j].id;

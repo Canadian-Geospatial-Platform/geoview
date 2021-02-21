@@ -5,63 +5,62 @@
      * BasemapSwitcher plugin that will create a react component to list basemaps and switch them
      */
     class BasemapSwitcher {
-        translations = () => {
-            return {
-                'en-CA': {
-                    'basemap-transport-label': {
-                        name: 'Transport with Labels',
-                        desc: '',
-                    },
-                    'basemap-transport': {
-                        name: 'Transport without labels',
-                        desc: '',
-                    },
-                    'basemap-shaded': {
-                        name: 'Shaded Relief',
-                        desc: '',
-                    },
-                    'basemap-shaded-label': {
-                        name: 'Shaded Relief with Labels',
-                        desc: '',
-                    },
-                    layer: {
-                        type: 'CBMT',
-                    },
-                },
-                'fr-CA': {
-                    'basemap-transport-label': {
-                        name: 'Transport avec des étiquettes',
-                        desc: '',
-                    },
-                    'basemap-transport': {
-                        name: 'Transport sans étiquettes',
-                        desc: '',
-                    },
-                    'basemap-shaded': {
-                        name: 'Relief ombré',
-                        desc: '',
-                    },
-                    'basemap-shaded-label': {
-                        name: 'Relief ombré avec étiquettes',
-                        desc: '',
-                    },
+        panel = null;
 
-                    layer: {
-                        type: 'CBCT',
-                    },
+        // define a translations object to extend the core translations
+        translations = {
+            'en-CA': {
+                'basemap-transport-label': {
+                    name: 'Transport with Labels',
+                    desc: '',
                 },
-            };
+                'basemap-transport': {
+                    name: 'Transport without labels',
+                    desc: '',
+                },
+                'basemap-shaded': {
+                    name: 'Shaded Relief',
+                    desc: '',
+                },
+                'basemap-shaded-label': {
+                    name: 'Shaded Relief with Labels',
+                    desc: '',
+                },
+                layer: {
+                    type: 'CBMT',
+                },
+            },
+            'fr-CA': {
+                'basemap-transport-label': {
+                    name: 'Transport avec des étiquettes',
+                    desc: '',
+                },
+                'basemap-transport': {
+                    name: 'Transport sans étiquettes',
+                    desc: '',
+                },
+                'basemap-shaded': {
+                    name: 'Relief ombré',
+                    desc: '',
+                },
+                'basemap-shaded-label': {
+                    name: 'Relief ombré avec étiquettes',
+                    desc: '',
+                },
+
+                layer: {
+                    type: 'CBCT',
+                },
+            },
         };
 
+        // hook is called right after the plugin has been added
         added = () => {
             const { api, react, makeStyles, translate } = this;
             const { mapId } = this.props;
 
             // used to create react element
             const h = this.createElement;
-
-            // get the map language
-            const language = api.map(mapId);
 
             const { useState, useEffect } = react;
             const { useTranslation } = translate;
@@ -108,7 +107,7 @@
                 },
             }));
 
-            const component = () => {
+            const Component = () => {
                 const [basemapList, setBasemapList] = useState([]);
 
                 const classes = useStyles();
@@ -122,7 +121,7 @@
                  * @param {Object} basemapProps basemap properties
                  */
                 const createBasemap = (id, basemapProps) => {
-                    // check if basemap with provded ID exists
+                    // check if basemap with provided ID exists
                     const exists = basemapList.filter((basemap) => basemap.id === id);
 
                     // if basemap does not exist then create a new one
@@ -156,6 +155,7 @@
                     // create a new basemap with transport and label layers
                     createBasemap('transportWithLabels', {
                         name: t('basemap-transport-label.name'),
+                        type: 'transport_label',
                         description:
                             'This Canadian basemap provides geographic context with bilingual labels and an emphasis on transportation networks. From Natural Resources Canada.',
                         descSummary: '',
@@ -176,7 +176,7 @@
                                     'xxxx',
                                     t('layer.type')
                                 ),
-                                opacity: 0.75,
+                                opacity: 1,
                             },
                         ],
                         attribution: 'test attribution',
@@ -189,6 +189,7 @@
                     // create a new basemap with only transport layer
                     createBasemap('transportWithNoLabels', {
                         name: t('basemap-transport.name'),
+                        type: 'transport',
                         description:
                             'This Canadian basemap provides geographic context that emphasis on transportation networks. From Natural Resources Canada.',
                         descSummary: '',
@@ -213,6 +214,7 @@
                     // create a new basemap with shaded relief layer
                     createBasemap('shadedRelief', {
                         name: t('basemap-shaded.name'),
+                        type: 'shaded',
                         description:
                             '":"This Canadian base map provides geographic context using shaded relief. From Natural Resources Canada.',
                         descSummary: '',
@@ -237,6 +239,7 @@
                     // create a new basemap with shaded relief and labels layer
                     createBasemap('shadedLabel', {
                         name: t('basemap-shaded-label.name'),
+                        type: 'shaded_label',
                         description:
                             '":"This Canadian base map provides geographic context using shaded relief with labels. From Natural Resources Canada.',
                         descSummary: '',
@@ -255,7 +258,7 @@
                                 type: 'label',
                                 url: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg'.replaceAll(
                                     'xxxx',
-                                    language === 'en-CA' ? 'CBMT' : 'CBCT'
+                                    t('layer.type')
                                 ),
                                 opacity: 1,
                             },
@@ -306,12 +309,19 @@
             const panel = {
                 title: 'Basemap Switcher',
                 icon: '<i class="material-icons">map</i>',
-                content: component,
+                content: Component,
                 width: 200,
             };
 
             // create a new button panel on the appbar
-            api.map(mapId).createAppbarButtonPanel(button, panel, null);
+            this.panel = api.map(mapId).createAppbarPanel(button, panel, null);
+        };
+
+        // hook is called once the plugin has been unmounted, remove any added components
+        removed = () => {
+            const { mapId } = this.props;
+
+            this.api.map(mapId).removeAppbarPanel(this.panel.id);
         };
     }
 

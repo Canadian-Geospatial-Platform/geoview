@@ -1,3 +1,4 @@
+/* eslint-disable no-multi-assign */
 /* eslint-disable lines-between-class-members */
 import L from 'leaflet';
 
@@ -54,9 +55,10 @@ export interface BasemapOptions {
 /**
  * interface used to define a new basemap
  */
-interface BasemapType {
+interface BasemapProps {
     id: string;
     name: string;
+    type: string;
     description: string;
     descSummary: string;
     altText: string;
@@ -76,7 +78,7 @@ interface BasemapType {
  */
 export class Basemap {
     // used to hold all created basemaps for a map
-    basemaps: BasemapType[] = [];
+    basemaps: BasemapProps[] = [];
 
     // the basemap options passed from the map config
     private basemapOptions: BasemapOptions | null | undefined;
@@ -217,32 +219,48 @@ export class Basemap {
     /**
      * Create a new basemap
      *
-     * @param basemapProps basemap properties
+     * @param {BasemapProps} basemapProps basemap properties
      */
-    createBasemap = (basemapProps: BasemapType): void => {
+    createBasemap = (basemapProps: BasemapProps): void => {
         // generate an id if none provided
         // eslint-disable-next-line no-param-reassign
         if (!basemapProps.id) basemapProps.id = generateId(basemapProps.id);
 
-        const thumbnailUrls = [];
+        const thumbnailUrls: string[] = [];
 
         // set thumbnail if not provided
         if (!basemapProps.thumbnailUrl || basemapProps.thumbnailUrl.length === 0) {
-            if (this.projection === 3978) {
-                thumbnailUrls.push(
-                    this.basemapsList[this.projection].transport.replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
-                );
-                thumbnailUrls.push(
-                    this.basemapsList[this.projection].transport.replace('{z}', '8').replace('{y}', '285').replace('{x}', '269')
-                );
-            } else {
-                thumbnailUrls.push(
-                    this.basemapsList[this.projection].transport.replace('{z}', '8').replace('{y}', '91').replace('{x}', '74')
-                );
-                thumbnailUrls.push(
-                    this.basemapsList[this.projection].transport.replace('{z}', '8').replace('{y}', '91').replace('{x}', '75')
-                );
-            }
+            basemapProps.layers.forEach((layer) => {
+                const { type } = layer;
+
+                if (type === 'transport') {
+                    thumbnailUrls.push(
+                        this.basemapsList[this.projection].transport
+                            .replace('{z}', '8')
+                            .replace('{y}', this.projection === 3978 ? '285' : '91')
+                            .replace('{x}', this.projection === 3978 ? '268' : '74')
+                    );
+                }
+
+                if (type === 'shaded') {
+                    thumbnailUrls.push(
+                        this.basemapsList[this.projection].shaded
+                            .replace('{z}', '8')
+                            .replace('{y}', this.projection === 3978 ? '285' : '91')
+                            .replace('{x}', this.projection === 3978 ? '268' : '74')
+                    );
+                }
+
+                if (type === 'label') {
+                    thumbnailUrls.push(
+                        this.basemapsList[this.projection].label
+                            .replace('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT')
+                            .replace('{z}', '8')
+                            .replace('{y}', this.projection === 3978 ? '285' : '91')
+                            .replace('{x}', this.projection === 3978 ? '268' : '74')
+                    );
+                }
+            });
 
             // eslint-disable-next-line no-param-reassign
             basemapProps.thumbnailUrl = thumbnailUrls;
@@ -261,7 +279,7 @@ export class Basemap {
      */
     setBasemap = (id: string): void => {
         // get basemap by id
-        const basemap = this.basemaps.filter((basemapType: BasemapType) => basemapType.id === id)[0];
+        const basemap = this.basemaps.filter((basemapType: BasemapProps) => basemapType.id === id)[0];
 
         // emit an event to update the basemap layers on the map
         api.event.emit(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, {
