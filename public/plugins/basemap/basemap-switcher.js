@@ -108,7 +108,7 @@
                 },
             }));
 
-            const component = () => {
+            const Component = () => {
                 const [basemapList, setBasemapList] = useState([]);
 
                 const classes = useStyles();
@@ -122,7 +122,7 @@
                  * @param {Object} basemapProps basemap properties
                  */
                 const createBasemap = (id, basemapProps) => {
-                    // check if basemap with provded ID exists
+                    // check if basemap with provided ID exists
                     const exists = basemapList.filter((basemap) => basemap.id === id);
 
                     // if basemap does not exist then create a new one
@@ -306,7 +306,7 @@
             const panel = {
                 title: 'Basemap Switcher',
                 icon: '<i class="material-icons">map</i>',
-                content: component,
+                content: Component,
                 width: 200,
             };
 
