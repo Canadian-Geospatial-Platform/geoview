@@ -44,6 +44,7 @@ const cgpv = {
         ...api,
         ...api.event,
         ...api.projection,
+        ...api.plugin,
     },
 };
 

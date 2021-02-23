@@ -24,16 +24,21 @@ export const EVENT_NAMES = {
     /**
      * Event triggered when a new appbar panel has been created
      */
-    EVENT_APPBAR_PANEL_CREATE: 'appbar_panel/create',
+    EVENT_APPBAR_PANEL_CREATE: 'appbar/panel_create',
 
     /**
-     * Event triggered when a new navbar panel has been created
+     * Event triggered when an appbar button panel has been removed
      */
-    EVENT_NAVBAR_PANEL_CREATE: 'navbar_panel/panel_create',
+    EVENT_APPBAR_PANEL_REMOVE: 'appbar/panel_remove',
+
     /**
-     * Event triggered when a new navbar button has been created
+     * Event triggered when a new navbar button or panel has been created
      */
-    EVENT_NAVBAR_BUTTON_CREATE: 'navbar_panel/button_create',
+    EVENT_NAVBAR_BUTTON_PANEL_CREATE: 'navbar/button_panel_create',
+    /**
+     * Event triggered when a navbar button or button panel has been removed
+     */
+    EVENT_NAVBAR_BUTTON_PANEL_REMOVE: 'navbar/button_panel_remove',
 
     /**
      * Event triggered when a panel has been opened or closed
@@ -73,6 +78,11 @@ export const EVENT_NAMES = {
      * Event is triggered when a vector has been added
      */
     EVENT_VECTOR_ADDED: 'vector/added',
+
+    /**
+     * Event is triggered when updating the basemap layers
+     */
+    EVENT_BASEMAP_LAYERS_UPDATE: 'basemap/layers_update',
 };
 
 /**

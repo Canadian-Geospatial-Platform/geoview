@@ -2,45 +2,173 @@
 
 ## Plugin Support
 
-Currently the viewer supports loading plugins as a React component template file
+The viewer allows loading plugins to extend the viewer's functionalities.
 
 You can see an example plugin below
 
-`public/plugins/panel/panel-content.js`
+`public/plugins/basemap/basemap-switcher.js`
 
 ## Creating a plugin
 
-A plugin can be created as a javascript file and can only import React, you will not be able to use third party libraries with this type of plugin.
+To create a plugin, start by creating a JavaScript file preferably with the plugins name.
 
-The plugin can be either a function or a React component that returns a JSX element
+The plugin requires to be written inside an immediately invoked function expression [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE)
 
-See https://reactjs.org/docs/react-component.html for creating a component that returns a jsx element<br/>
-See https://reactjs.org/docs/hooks-overview.html for creating a React function that returns a jsx element
+```js
+(function () {
+    // create plugin class
+})();
+```
 
-The plugin file can be called anything but it's best to follow the name of the React function / component so if a component is called `PanelContent`, a file could be called `panel-content.js`
+Inside this function you need to create a class that will be used to initialize the plugin
+
+```js
+(function () {
+    class Test {}
+})();
+```
+
+The class implements 1 constant `translations` and 2 hooks `added, removed` that will be accessed and called directly from the viewer, it will also automatically get access to `api`, `createElement`, `react`, `props`, `translate` and `makeStyles`.
+
+The `translations` constant is an optional object, if defined then any translations provided will be passed to the core viewer translation instance (i18next) and will extend the current translations. Supported translations are for languages English and French and written as `en-CA` and `fr-CA` keys.
+
+```js
+(function () {
+    class Test {
+        translations = {
+            'en-CA': {
+                testMessage: 'Hello',
+            },
+            'fr-CA': {
+                testMessage: 'Bonjour',
+            },
+        };
+    }
+})();
+```
+
+The `added` hook is a required function that is called from the viewer immediately after the plugin has been loaded. In this function you can create a react component and use the core viewer API calls.
+
+As mentioned this class will automatically get access to few objects
+
+`api` is an object used to call any available API function from the core viewer.
+
+`createElement` is an essential function to create React HTML elements [see](#creating-a-react-component) for an example usage, `createElement` is part of `React` which takes 3 arguments, the first is the HTML element to create, an example would be a `button`, the second argument is the element attributes for example `onClick` or `className` or `style`..., the third argument is the element content / children for example `Click here`.
+
+`react` is the an object to use React functions and hooks such as useState, useEffect etc... [see](https://reactjs.org/docs/hooks-intro.html) for more information.
+
+`props` is an object containing the plugin properties passed when loading the plugin [see](#loading-a-plugin) for more information.
+
+`translate` is an object to access `react-i18next` functions including `useTranslation` which will allow for accessing the viewer translations [see](https://react.i18next.com/latest/usetranslation-hook) for more information.
+
+`makeStyles` is an object that will allow the plugin to use material ui themeing and access the core viewer theme [see](https://material-ui.com/styles/basics/)
+
+The `removed` hook is a required function that is called from the viewer when a call has been made to remove the plugin. Any cleanup code should be written here, for example removing added components.
+
+## Creating a React component
+
+Using the `added` hook you can create and load a react component in the viewer
+
+A react component can be a functional component or a class component [see](https://reactjs.org/docs/hooks-state.html) for more information on how to use each one.
+
+Below is a simple example of a funcational component that will add a panel to the viewer on the appbar that will have a counter as it's content
+
+```js
+// counter.js
+(function () {
+    class Counter {
+        // added panel
+        panel = null;
+
+        // optional
+        translations = {
+            'en-CA': {
+                count: 'Count',
+            },
+            'fr-CA': {
+                count: 'Compter',
+            },
+        };
+
+        // required, called immediately after plugin loads
+        added = {
+            const { api, react, translate } = this;
+
+            // get mapId passed from plugin properties when created
+            const { mapId } = this.props;
+
+            // used to create react element
+            const h = this.createElement;
+
+            const { useState } = react;
+            const { useTranslation } = translate;
+
+            // create a react functional component
+            const Component = () => {
+                const [count, setCount] = useState(0);
+
+                // access translations
+                const { t } = useTranslation();
+
+                return h('button', {
+                    onClick: () => setCount(count + 1)
+                }, `${t('count')} ${count})`;
+            }
+
+            // button props
+            const button = {
+                tooltip: 'Counter',
+                icon: '<i class="material-icons">add</i>',
+            };
+
+            // panel props
+            const panel = {
+                title: 'Counter',
+                icon: '<i class="material-icons">add</i>',
+                content: Component,
+                width: 200,
+            };
+
+            // create a new button panel on the appbar
+            this.panel = api.map(mapId).createAppbarPanel(button, panel, null);
+        };
+
+        // removed is a function called when removing a plugin to cleanup
+        removed = () => {
+            const { mapId } = this.props;
+
+            this.api.map(mapId).removeAppbarPanel(this.panel.id);
+        };
+    }
+
+    // export this plugin
+    window.plugins = window.plugins || {};
+    window.plugins.counter = Counter;
+})();
+```
+
+A plugin needs to be exported before it can be loaded to the viewer. To export the plugin add this at the bottom of the plugin class, see example above for the example plugin.
+
+```js
+// export this plugin
+window.plugins = window.plugins || {};
+window.plugins.counter = Counter;
+```
 
 ## Loading a plugin
 
-You can load a plugin by calling the `loadRemoteComponent` function from the viewer API. This will return a promise with a React component
+You can load a plugin by first import it in a script tag in the `<head>` element of the page
+
+` <script src="./counter.js"></script>`
+
+Then after the core viewer API is ready you can add the plugin to the viewer init callback using the `add` API function. This function takes 3 arguments, the first is the plugin name (should be unique name), the second is the exported plugin class, the third is the plugin properties.
+
+`cgpv.api.plugin.add(name, pluginClass, props)`
 
 ```js
-const examplePlugin = await cgpv.api.loadRemoteComponent('example-plugin.js', {
-    exampleProperty: 'exampleValue',
+cgpv.init(function () {
+    cgpv.api.addPlugin('counter', window.plugins['counter'], {
+        mapId: 'mapLCC',
+    });
 });
 ```
-
-The loaded plugin can be then rendered by the viewer by passing it to available core viewer components. Currently creating a panel accepts a React component loaded from a plugin with a React template.
-
-```js
-const panel = {
-    title: 'Test',
-    icon: `<div>Icon</div>`,
-    content: examplePlugin,
-    width: 200,
-};
-
-// call an api function to add a panel with a button
-cgpv.api.map('mapWM').createAppbarButtonPanel(button, panel, null);
-```
-
-> TODO: Add support for loading plugins with third party libraries

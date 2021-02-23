@@ -1,5 +1,6 @@
 import { Typography } from '@material-ui/core';
 import LayersIcon from '@material-ui/icons/Layers';
+
 import { ButtonPanelProps } from '../../common/ui/button-panel';
 
 /**
@@ -12,7 +13,7 @@ export const LayersPanel: ButtonPanelProps = {
     },
     panel: {
         title: 'appbar.layers',
-        icon: <LayersIcon />,
+        icon: LayersIcon,
         content: (
             <Typography variant="body2" color="textSecondary" component="p">
                 This is a place holder panel for the layers componennt

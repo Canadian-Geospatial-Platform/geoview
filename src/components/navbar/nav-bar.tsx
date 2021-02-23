@@ -19,9 +19,9 @@ import { api } from '../../api/api';
 import { ButtonPanel, ButtonPanelType } from '../../common/ui/button-panel';
 import { ButtonMapNav } from './button';
 import { EVENT_NAMES } from '../../api/event';
-import { Button } from '../../common/ui/button';
 import { PANEL_TYPES } from '../../common/ui/panel';
 import PanelApp from '../panel/panel';
+import { MapInterface } from '../../common/map-viewer';
 
 const useStyles = makeStyles((theme) => ({
     navBar: {
@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function NavBar(): JSX.Element {
-    const [panel, setPanel] = useState<ButtonPanelType>();
+    const [buttonPanelId, setButtonPanelId] = useState<string>();
     const [panelOpen, setPanelOpen] = useState(false);
 
     const [, setButtonCount] = useState(0);
@@ -109,55 +109,73 @@ export function NavBar(): JSX.Element {
             (args) => {
                 if (args.handlerId === mapId) {
                     const buttonPanel = Object.keys((api.map(mapId) as ButtonPanel).navBarButtons).map((groupName: string) => {
-                        const buttonPanels: ButtonPanelType[] = (api.map(mapId) as ButtonPanel).navBarButtons[groupName];
+                        const buttonPanels = (api.map(mapId) as ButtonPanel).navBarButtons[groupName];
 
-                        return buttonPanels.filter((bPanel: ButtonPanelType) => {
-                            return args.buttonId === bPanel.button.id;
-                        })[0];
+                        return buttonPanels[args.buttonId];
                     })[0];
 
-                    setPanel(buttonPanel);
-                    openClosePanel(true);
+                    if (buttonPanel) {
+                        setButtonPanelId(buttonPanel.button.id);
+                        openClosePanel(true);
+                    }
                 }
             },
             mapId
         );
 
         // listen to new navbar panel creation
-        api.event.on(EVENT_NAMES.EVENT_NAVBAR_PANEL_CREATE, () => {
+        api.event.on(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, () => {
             updatePanelCount();
         });
 
-        // listen to new navbar button creation
-        api.event.on(EVENT_NAMES.EVENT_NAVBAR_BUTTON_CREATE, () => {
+        // listen to new navbar panel removal
+        api.event.on(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, () => {
             updatePanelCount();
         });
 
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
             api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
-            api.event.off(EVENT_NAMES.EVENT_NAVBAR_PANEL_CREATE);
-            api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_CREATE);
+            api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE);
+            api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE);
         };
     }, []);
 
     return (
         <div ref={navBar} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBar}`}>
-            {panel && panelOpen && <PanelApp panel={panel.panel} />}
+            {Object.keys((api.mapInstance(map) as ButtonPanel).navBarButtons).map((groupName) => {
+                const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
+
+                // display the panels in the list
+                return (
+                    <div key={groupName}>
+                        {Object.keys(buttons).map((buttonId) => {
+                            const buttonPanel = buttons[buttonId];
+
+                            const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
+
+                            return buttonPanel.panel ? (
+                                <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />
+                            ) : null;
+                        })}
+                    </div>
+                );
+            })}
             <div className={classes.root}>
                 {Object.keys((api.mapInstance(map) as ButtonPanel).navBarButtons).map((groupName) => {
                     const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
 
                     return (
                         <ButtonGroup key={groupName} orientation="vertical" aria-label={t('mapnav.ariaNavbar')} variant="contained">
-                            {buttons.map((buttonPanel: Button | ButtonPanelType) => {
-                                return buttonPanel instanceof Button ? (
+                            {Object.keys(buttons).map((buttonId) => {
+                                const buttonPanel: ButtonPanelType = buttons[buttonId];
+                                return !buttonPanel.panel ? (
                                     <ButtonMapNav
-                                        key={buttonPanel.id}
-                                        tooltip={buttonPanel.tooltip}
-                                        icon={buttonPanel.icon}
+                                        key={buttonPanel.button.id}
+                                        tooltip={buttonPanel.button.tooltip}
+                                        icon={buttonPanel.button.icon}
                                         onClickFunction={() => {
-                                            if (buttonPanel.callback) buttonPanel.callback();
+                                            if (buttonPanel.button.callback) buttonPanel.button.callback();
                                         }}
                                     />
                                 ) : (
@@ -166,7 +184,7 @@ export function NavBar(): JSX.Element {
                                         tooltip={buttonPanel.button.tooltip}
                                         icon={buttonPanel.button.icon}
                                         onClickFunction={() => {
-                                            setPanel(buttonPanel);
+                                            setButtonPanelId(buttonPanel.button.id);
                                             openClosePanel(true);
                                         }}
                                     />

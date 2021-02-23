@@ -1,4 +1,6 @@
 /* eslint-disable no-nested-ternary */
+import React from 'react';
+
 import { useTranslation } from 'react-i18next';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -28,11 +30,13 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
     const classes = useStyles();
     const { t } = useTranslation();
 
+    const Icon = icon.type;
+
     return (
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>
             <ListItem button id={id} onClick={onClickFunction} className={classes.listItem}>
                 <ListItemIcon className={classes.listItemColor}>
-                    {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : icon}
+                    {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : <Icon />}
                 </ListItemIcon>
                 {typeof content === 'undefined' ? (
                     <ListItemText className={classes.listItemColor} primary={t(tooltip)} />
@@ -49,7 +53,7 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
 interface ButtonAppProps {
     id: string;
     tooltip: string;
-    icon: React.ReactNode;
+    icon: React.ReactNode | Element;
     onClickFunction: () => void;
     // eslint-disable-next-line react/require-default-props
     content?: Element;
