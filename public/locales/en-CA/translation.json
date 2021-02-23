@@ -24,7 +24,6 @@
         "help": "Help",
         "layers": "Layers",
         "share": "Share",
-        "version": "Access GitHub repo",
-        "basemapSwitcher": "Basemaps"
+        "version": "Access GitHub repo"
     }
 }

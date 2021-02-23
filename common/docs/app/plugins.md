@@ -167,7 +167,7 @@ Then after the core viewer API is ready you can add the plugin to the viewer ini
 
 ```js
 cgpv.init(function () {
-    cgpv.api.plugin.add('counter', window.plugins['counter'], {
+    cgpv.api.addPlugin('counter', window.plugins['counter'], {
         mapId: 'mapLCC',
     });
 });

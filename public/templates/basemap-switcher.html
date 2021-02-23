@@ -83,11 +83,7 @@
             <table>
                 <tbody>
                     <tr>
-                        <td>
-                            This page is used to showcase the basemap switcher plugin. To add a basemap switcher you need to provide the
-                            'basemapSwitcher' property and set it to true in the map config, see config snippet below. If basemap switcher
-                            is enabled then basemapOptions will be ignored.
-                        </td>
+                        <td>This page is used to showcase the basemap switcher plugin.</td>
                     </tr>
                 </tbody>
             </table>
@@ -109,7 +105,7 @@
             cgpv.init(function () {
                 console.log('api is ready');
 
-                cgpv.api.plugin.add('basemapSwitcher', window.plugins['basemapSwitcher'], {
+                cgpv.api.addPlugin('basemapSwitcher', window.plugins['basemapSwitcher'], {
                     mapId: 'UC1',
                 });
 

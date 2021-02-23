@@ -48,7 +48,6 @@
         "i18next-http-backend": "1.0.21",
         "immutable": "^4.0.0-rc.12",
         "leaflet": "1.7.1",
-        "leaflet-image": "^0.4.0",
         "proj4": "^2.7.0",
         "proj4leaflet": "1.0.2",
         "react": "^17.0.1",

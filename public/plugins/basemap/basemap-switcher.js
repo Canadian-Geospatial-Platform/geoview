@@ -10,6 +10,7 @@
         // define a translations object to extend the core translations
         translations = {
             'en-CA': {
+                basemapSwitcher: 'Basemaps',
                 'basemap-transport-label': {
                     name: 'Transport with Labels',
                     desc: '',
@@ -31,6 +32,7 @@
                 },
             },
             'fr-CA': {
+                basemapSwitcher: 'Fond de carte',
                 'basemap-transport-label': {
                     name: 'Transport avec des étiquettes',
                     desc: '',
@@ -60,10 +62,14 @@
             const { mapId } = this.props;
 
             // used to create react element
+            // use h so instead of calling this.createElement just call h
             const h = this.createElement;
 
             const { useState, useEffect } = react;
             const { useTranslation } = translate;
+
+            // get used language
+            const { language } = api.map(mapId);
 
             const useStyles = makeStyles((theme) => ({
                 listContainer: {
@@ -271,6 +277,9 @@
                     });
                 }, []);
 
+                // h is a reference to this.createElement
+                // createElement is a React function to create React HTML elements
+                // It takes 3 arguments, the tag element name, the attributes of the element and the content of the element
                 return h(
                     'div',
                     {
@@ -301,13 +310,13 @@
 
             // button props
             const button = {
-                tooltip: 'Basemap Switcher',
+                tooltip: this.translations[language].basemapSwitcher,
                 icon: '<i class="material-icons">map</i>',
             };
 
             // panel props
             const panel = {
-                title: 'Basemap Switcher',
+                title: this.translations[language].basemapSwitcher,
                 icon: '<i class="material-icons">map</i>',
                 content: Component,
                 width: 200,

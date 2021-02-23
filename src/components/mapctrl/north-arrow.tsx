@@ -163,7 +163,6 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
                 setOffset(map, angleDegrees);
             }
         }
-        console.log('test');
     }
 
     /**

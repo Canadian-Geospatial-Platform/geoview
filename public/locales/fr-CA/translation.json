@@ -24,7 +24,6 @@
         "help": "Aide",
         "layers": "Couches",
         "share": "Partager",
-        "version": "Accéder au repo sur GitHub",
-        "basemapSwitcher": "fond de carte"
+        "version": "Accéder au repo sur GitHub"
     }
 }

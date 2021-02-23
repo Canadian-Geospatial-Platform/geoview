@@ -7,7 +7,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Tooltip, Fade, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 
 import { HtmlToReact } from '../../common/containers/html-to-react';
-import { Map } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
     listItem: {
@@ -27,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {ButtonAppProps} props Button properties
  */
 export default function ButtonApp(props: ButtonAppProps): JSX.Element {
-    const { tooltip, icon, onClickFunction, content } = props;
+    const { id, tooltip, icon, onClickFunction, content } = props;
     const classes = useStyles();
     const { t } = useTranslation();
 
@@ -35,7 +34,7 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
 
     return (
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>
-            <ListItem button onClick={onClickFunction} className={classes.listItem}>
+            <ListItem button id={id} onClick={onClickFunction} className={classes.listItem}>
                 <ListItemIcon className={classes.listItemColor}>
                     {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : <Icon />}
                 </ListItemIcon>
@@ -52,6 +51,7 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
 }
 
 interface ButtonAppProps {
+    id: string;
     tooltip: string;
     icon: React.ReactNode | Element;
     onClickFunction: () => void;

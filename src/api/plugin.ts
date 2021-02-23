@@ -36,7 +36,7 @@ export class Plugin {
      * @param {Class} constructor the plugin class (React Component)
      * @param {Object} props the plugin properties
      */
-    add = (id: string, constructor: any, props: Record<string, unknown>): void => {
+    addPlugin = (id: string, constructor: any, props: Record<string, unknown>): void => {
         let plugin: any;
 
         if (constructor) {
@@ -84,7 +84,7 @@ export class Plugin {
      *
      * @param {string} id the id of the plugin to delete
      */
-    remove = (id: string): void => {
+    removePlugin = (id: string): void => {
         if (this.plugins[id] && this.plugins[id].plugin) {
             const { plugin } = this.plugins[id];
 
