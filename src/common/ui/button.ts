@@ -3,7 +3,7 @@
  */
 export interface ButtonProps {
     // generated button id
-    id?: string;
+    id: string;
     // button tooltip
     tooltip: string;
     // button icon
@@ -20,7 +20,7 @@ export interface ButtonProps {
  */
 export class Button {
     // generated button id
-    id: string | undefined;
+    id: string;
 
     // button tooltip
     tooltip: string;

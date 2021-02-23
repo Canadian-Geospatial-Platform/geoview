@@ -24,13 +24,13 @@ const useStyles = makeStyles((theme) => ({
  * @param {ButtonAppProps} props Button properties
  */
 export default function ButtonApp(props: ButtonAppProps): JSX.Element {
-    const { tooltip, icon, onClickFunction, content } = props;
+    const { id, tooltip, icon, onClickFunction, content } = props;
     const classes = useStyles();
     const { t } = useTranslation();
 
     return (
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>
-            <ListItem button onClick={onClickFunction} className={classes.listItem}>
+            <ListItem button id={id} onClick={onClickFunction} className={classes.listItem}>
                 <ListItemIcon className={classes.listItemColor}>
                     {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : icon}
                 </ListItemIcon>
@@ -47,6 +47,7 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
 }
 
 interface ButtonAppProps {
+    id: string;
     tooltip: string;
     icon: React.ReactNode;
     onClickFunction: () => void;

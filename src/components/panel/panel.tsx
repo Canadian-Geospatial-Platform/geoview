@@ -8,7 +8,7 @@ import { useMap } from 'react-leaflet';
 import { useTranslation } from 'react-i18next';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardHeader, CardContent, Divider, IconButton } from '@material-ui/core';
+import { Card, CardHeader, CardContent, Divider, IconButton, Tooltip, Fade } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
 import { api } from '../../api/api';
@@ -72,12 +72,16 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             // status of panel (false = closed)
             status: false,
         });
+
+        // put back focus on calling button
+        document.getElementById(panel.buttonId)?.focus();
     }
 
     useEffect(() => {
         // disable events on container
-        DomEvent.disableClickPropagation((panelRef.current as unknown) as HTMLElement);
-        DomEvent.disableScrollPropagation((panelRef.current as unknown) as HTMLElement);
+        const panelElement = (panelRef.current as unknown) as HTMLElement;
+        DomEvent.disableClickPropagation(panelElement);
+        DomEvent.disableScrollPropagation(panelElement);
 
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_CLOSE,
@@ -86,6 +90,9 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             },
             mapId
         );
+
+        // set focus on close button
+        (panelElement.getElementsByClassName('cgpv-panel-close')[0] as HTMLElement).focus();
 
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
@@ -99,15 +106,22 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             style={{
                 width: panel.width,
             }}
+            onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                    closePanel();
+                }
+            }}
         >
             <CardHeader
                 className={classes.avatar}
                 avatar={typeof panel.icon === 'string' ? <HtmlToReact htmlContent={panel.icon} /> : panel.icon}
                 title={t(panel.title)}
                 action={
-                    <IconButton aria-label={t('appbar.close')} onClick={closePanel}>
-                        <CloseIcon />
-                    </IconButton>
+                    <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
+                        <IconButton className="cgpv-panel-close" aria-label={t('close')} onClick={closePanel}>
+                            <CloseIcon />
+                        </IconButton>
+                    </Tooltip>
                 }
             />
             <Divider />

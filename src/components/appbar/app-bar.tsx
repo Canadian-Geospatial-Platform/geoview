@@ -198,9 +198,10 @@ export function Appbar(): JSX.Element {
                                             <ButtonApp
                                                 tooltip={buttonPanel.button.tooltip}
                                                 icon={buttonPanel.button.icon}
+                                                id={buttonPanel.button.id}
                                                 onClickFunction={() => {
                                                     setPanel(buttonPanel);
-                                                    openClosePanel(true);
+                                                    openClosePanel(!panelOpen);
                                                 }}
                                             />
                                             <Divider className={classes.spacer} />
