@@ -1,4 +1,5 @@
 import { createMuiTheme } from '@material-ui/core/styles';
+import { CSSProperties } from 'react';
 
 const headingStyles = {
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
@@ -47,6 +48,7 @@ const themeOptions = {
             letterSpacing: 2,
         },
         button: {
+            fontSize: 24,
             fontWeight: 500,
         },
     },
@@ -92,6 +94,20 @@ const themeOptions = {
                 fontSize: '1rem',
             },
         },
+    },
+};
+
+export const styles: Record<string, CSSProperties> = {
+    buttonIcon: {
+        width: '1em',
+        height: '1em',
+        display: 'inherit',
+        fontSize: themeOptions.typography.button.fontSize,
+        alignItems: 'inherit',
+        justifyContent: 'inherit',
+        transition: 'fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+        flexShrink: 0,
+        userSelect: 'none',
     },
 };
 

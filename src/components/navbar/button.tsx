@@ -9,6 +9,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { HtmlToReact } from '../../common/containers/html-to-react';
 
+import { styles } from '../../assests/style/theme';
+
 const useStyles = makeStyles((theme) => ({
     buttonClass: {
         margin: theme.spacing(2, 0),
@@ -45,7 +47,11 @@ export function ButtonMapNav(props: ButtonMapNavProps): JSX.Element {
     return (
         <Tooltip title={t(tooltip)} placement="left" TransitionComponent={Fade} ref={newButton}>
             <Button className={`${classes.buttonClass} ${classes.color}`} onClick={onClickFunction}>
-                {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : icon}
+                {typeof icon === 'string' ? (
+                    <HtmlToReact style={styles.buttonIcon} htmlContent={icon} />
+                ) : (
+                    <div style={styles.buttonIcon}>{icon}</div>
+                )}
             </Button>
         </Tooltip>
     );
