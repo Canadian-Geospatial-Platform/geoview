@@ -70,6 +70,7 @@ const config = {
                 { from: './public/locales', to: 'locales' },
                 { from: './public/css', to: 'css' },
                 { from: './public/geojson', to: 'geojson' },
+                { from: './public/plugins', to: 'plugins' },
                 { from: './public/favicon.ico' },
             ],
         }),
