@@ -18,6 +18,7 @@ import { MapInterface } from '../../common/map-viewer';
 
 import { HtmlToReact } from '../../common/containers/html-to-react';
 import { Panel } from '../../common/ui/panel';
+import { styles } from '../../assests/style/theme';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -121,7 +122,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                 className={classes.avatar}
                 avatar={
                     typeof panel.icon === 'string' ? (
-                        <HtmlToReact htmlContent={panel.icon} />
+                        <HtmlToReact style={styles.buttonIcon} htmlContent={panel.icon} />
                     ) : typeof panel.icon === 'object' ? (
                         <panel.icon />
                     ) : (

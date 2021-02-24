@@ -7,6 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Tooltip, Fade, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 
 import { HtmlToReact } from '../../common/containers/html-to-react';
+import { styles } from '../../assests/style/theme';
 
 const useStyles = makeStyles((theme) => ({
     listItem: {
@@ -36,7 +37,11 @@ export default function ButtonApp(props: ButtonAppProps): JSX.Element {
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>
             <ListItem button id={id} onClick={onClickFunction} className={classes.listItem}>
                 <ListItemIcon className={classes.listItemColor}>
-                    {typeof icon === 'string' ? <HtmlToReact htmlContent={icon} /> : <Icon />}
+                    {typeof icon === 'string' ? (
+                        <HtmlToReact style={styles.buttonIcon} htmlContent={icon} />
+                    ) : (
+                        <Icon style={styles.buttonIcon} />
+                    )}
                 </ListItemIcon>
                 {typeof content === 'undefined' ? (
                     <ListItemText className={classes.listItemColor} primary={t(tooltip)} />

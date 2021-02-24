@@ -1,12 +1,15 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable react/no-danger */
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 interface HtmlToReactProps {
     htmlContent: string;
+    className?: string | undefined;
+    style?: CSSProperties | undefined;
 }
 
 export const HtmlToReact = (props: HtmlToReactProps): JSX.Element => {
-    const { htmlContent } = props;
+    const { htmlContent, className, style } = props;
 
-    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+    return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: htmlContent }} />;
 };
