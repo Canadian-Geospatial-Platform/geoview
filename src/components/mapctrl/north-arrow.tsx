@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 
 import L, { Map, LatLng, LatLngExpression } from 'leaflet';
 import { useMapEvent, Marker, useMap } from 'react-leaflet';
@@ -45,6 +45,9 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     const [rotationAngle, setRotationAngle] = useState({ angle: 0 });
     const [isNorthVisible, setIsNorthVisible] = useState(false);
     const [northOffset, setNorthOffset] = useState(0);
+
+    // access transitions
+    const defaultTheme = useTheme();
 
     /**
      * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
@@ -129,8 +132,8 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
                 ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * 0.01745329252) * z) - arrowWidth / 2
                 : screenNorthPoint.x - arrowWidth;
 
-        // Limit the arrow to the bounds of the inner shell
-        screenX = Math.max(offsetX - mapWidth, Math.min(screenX, offsetX + mapWidth));
+        // Limit the arrow to the bounds of the inner shell (+/- 25% from center)
+        screenX = Math.max(offsetX - mapWidth * 0.25, Math.min(screenX, offsetX + mapWidth * 0.25));
         setNorthOffset(screenX);
     }
 
@@ -166,7 +169,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     }
 
     /**
-     * map moveend event callback
+     * Map moveend event callback
      */
     const onMapMoveEnd = useCallback((e) => {
         const map = e.target as Map;
@@ -188,7 +191,15 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
         <div
             ref={northArrowRef}
             className={`leaflet-control leaflet-top leaflet-left ${classes.northArrowContainer}`}
-            style={{ transform: `rotate(${rotationAngle.angle}deg)`, visibility: isNorthVisible ? 'hidden' : 'visible', left: northOffset }}
+            style={{
+                transition: defaultTheme.transitions.create(['all', 'transform'], {
+                    duration: defaultTheme.transitions.duration.standard,
+                    easing: defaultTheme.transitions.easing.easeOut,
+                }),
+                transform: `rotate(${rotationAngle.angle}deg)`,
+                visibility: isNorthVisible ? 'hidden' : 'visible',
+                left: northOffset,
+            }}
         >
             <NorthArrowIcon classes={classes} />
         </div>
