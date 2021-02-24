@@ -10,7 +10,7 @@ body {
     display: flex;
     width: 90%;
     margin: auto;
-    height: 700px;
+    height: 100%;
 }
 
 .cgp-navbar {
