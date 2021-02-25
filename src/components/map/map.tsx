@@ -44,7 +44,7 @@ export interface MapProps {
 }
 
 function Map(props: MapProps): JSX.Element {
-    const { id, center, zoom, projection, language, layers } = props;
+    const { id, center, zoom, projection, language } = props;
 
     const [basemapLayers, setBasemapLayers] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -108,24 +108,8 @@ function Map(props: MapProps): JSX.Element {
             maxZoom={mapOptions.maxZooom}
             maxBounds={mapOptions.maxBounds}
             whenCreated={(cgpMap) => {
-                // initialize the layer object
-                const layer = new Layer(cgpMap);
-
                 // reset the view when created so overview map is moved at the right place
                 cgpMap.setView(center, zoom);
-
-                // TODO: put this at the right place. This is temporary to show we can add different layer type to the map, need to refactor, check issue #45
-                layers?.forEach((item) => {
-                    if (item.type === LayerTypes.GEOJSON) {
-                        layer.createGeoJSONLayer(item);
-                    } else if (item.type === LayerTypes.WMS) {
-                        layer.createWmsLayer(item);
-                    } else if (item.type === LayerTypes.ESRI_FEATURE) {
-                        layer.createFeatureLayer(item);
-                    } else if (item.type === LayerTypes.ESRI_DYNAMIC) {
-                        layer.createDynamicLayer(item);
-                    }
-                });
 
                 // emit the initial map position
                 api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {

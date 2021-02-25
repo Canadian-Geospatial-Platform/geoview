@@ -71,8 +71,9 @@ export class Layer {
      * Initialize layer types and listen to add/remove layer events from outside
      *
      * @param {Map} map a reference to the map
+     * @param {LayerConfig[]} layers an optional array containing layers passed within the map config
      */
-    constructor(map: Map) {
+    constructor(map: Map, layers?: LayerConfig[] | undefined | null) {
         this.map = map;
 
         this.geoJSON = new GeoJSON();
@@ -98,56 +99,77 @@ export class Layer {
             // remove layer from outside
             this.remove(payload.id);
         });
+
+        if (layers && layers.length > 0) this.loadDefaultLayers(layers);
     }
+
+    /**
+     * Load layers that was passed in with the map config
+     *
+     * @param {LayerConfig[]} layers an array containing passed in layers from map config
+     */
+    private loadDefaultLayers = (layers: LayerConfig[]): void => {
+        layers?.forEach((item) => {
+            if (item.type === LayerTypes.GEOJSON) {
+                this.createGeoJSONLayer(item);
+            } else if (item.type === LayerTypes.WMS) {
+                this.createWmsLayer(item);
+            } else if (item.type === LayerTypes.ESRI_FEATURE) {
+                this.createFeatureLayer(item);
+            } else if (item.type === LayerTypes.ESRI_DYNAMIC) {
+                this.createDynamicLayer(item);
+            }
+        });
+    };
 
     /**
      * Remove a layer from the map
      *
      * @param {string} id the id of the layer to be removed
      */
-    remove(id: string): void {
+    remove = (id: string): void => {
         // return items not matching the id
         this.layers = this.layers.filter((item: LayerData) => {
             if (item.id === id) item.layer.removeFrom(this.map);
             return item.id !== id;
         });
-    }
+    };
 
     /**
      * Create a new GeoJSON layer on the map
      *
      * @param layerConfig the layer configuration
      */
-    createGeoJSONLayer(layerConfig: LayerConfig): void {
+    createGeoJSONLayer = (layerConfig: LayerConfig): void => {
         this.geoJSON.add(this.map, layerConfig, this.layers);
-    }
+    };
 
     /**
      * Create a new WMS layer on the map
      *
      * @param layerConfig the layer configuration
      */
-    createWmsLayer(layerConfig: LayerConfig): void {
+    createWmsLayer = (layerConfig: LayerConfig): void => {
         this.wms.add(this.map, layerConfig, this.layers);
-    }
+    };
 
     /**
      * Create a new feature layer on the map
      *
      * @param layerConfig the layer configuration
      */
-    createFeatureLayer(layerConfig: LayerConfig): void {
+    createFeatureLayer = (layerConfig: LayerConfig): void => {
         this.esriFeature.add(this.map, layerConfig, this.layers);
-    }
+    };
 
     /**
      * Create a new dynamic layer on the map
      *
      * @param layerConfig the layer configuration
      */
-    createDynamicLayer(layerConfig: LayerConfig): void {
+    createDynamicLayer = (layerConfig: LayerConfig): void => {
         this.esriDynamic.add(this.map, layerConfig, this.layers);
-    }
+    };
 
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS
 }
