@@ -18,7 +18,7 @@ export class EsriDynamic {
      * @param {LayerConfig} layer the layer configuration
      * @param {Array<LayerData>} layers a reference to the layers array
      */
-    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): void {
+    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): string {
         const feat = dynamicMapLayer({
             url: layer.url,
             layers: layer.entries.split(',').map((item: string) => {
@@ -26,7 +26,7 @@ export class EsriDynamic {
             }),
             attribution: '',
         });
-
+        const layerid = new Date().getTime().toString();
         feat.addTo(map);
 
         layers.push({
@@ -35,5 +35,6 @@ export class EsriDynamic {
             type: layer.type,
             layer: feat,
         });
+        return layerid;
     }
 }

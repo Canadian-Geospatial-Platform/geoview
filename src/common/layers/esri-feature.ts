@@ -18,11 +18,11 @@ export class EsriFeature {
      * @param {LayerConfig} layer the layer configuration
      * @param {Array<LayerData>} layers a reference to the layers array
      */
-    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): void {
+    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): string {
         const feat = featureLayer({
             url: layer.url,
         });
-
+        const layerid = new Date().getTime().toString();
         feat.addTo(map);
 
         layers.push({
@@ -31,5 +31,6 @@ export class EsriFeature {
             type: layer.type,
             layer: feat,
         });
+        return layerid;
     }
 }

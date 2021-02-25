@@ -140,8 +140,9 @@ export class Layer {
      *
      * @param layerConfig the layer configuration
      */
-    createGeoJSONLayer = (layerConfig: LayerConfig): void => {
-        this.geoJSON.add(this.map, layerConfig, this.layers);
+    createGeoJSONLayer = (layerConfig: LayerConfig): string => {
+        const layerid = this.geoJSON.add(this.map, layerConfig, this.layers);
+        return layerid;
     };
 
     /**
@@ -149,8 +150,9 @@ export class Layer {
      *
      * @param layerConfig the layer configuration
      */
-    createWmsLayer = (layerConfig: LayerConfig): void => {
-        this.wms.add(this.map, layerConfig, this.layers);
+    createWmsLayer = (layerConfig: LayerConfig): string => {
+        const layerid = this.wms.add(this.map, layerConfig, this.layers);
+        return layerid;
     };
 
     /**
@@ -158,8 +160,9 @@ export class Layer {
      *
      * @param layerConfig the layer configuration
      */
-    createFeatureLayer = (layerConfig: LayerConfig): void => {
-        this.esriFeature.add(this.map, layerConfig, this.layers);
+    createFeatureLayer = (layerConfig: LayerConfig): string => {
+        const layerid = this.esriFeature.add(this.map, layerConfig, this.layers);
+        return layerid;
     };
 
     /**
@@ -167,8 +170,9 @@ export class Layer {
      *
      * @param layerConfig the layer configuration
      */
-    createDynamicLayer = (layerConfig: LayerConfig): void => {
-        this.esriDynamic.add(this.map, layerConfig, this.layers);
+    createDynamicLayer = (layerConfig: LayerConfig): string => {
+        const layerid = this.esriDynamic.add(this.map, layerConfig, this.layers);
+        return layerid;
     };
 
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS

@@ -33,7 +33,8 @@ export class GeoJSON {
      * @param {string} layer the layer configuration
      * @param {Array<LayerData>} layers a reference to the layers array
      */
-    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): void {
+    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): string {
+        const layerid = new Date().getTime().toString();
         this.load(layer.url, (data) => {
             // parse the json string and convert it to a json object
             const featureCollection = JSON.parse(data);
@@ -66,13 +67,13 @@ export class GeoJSON {
 
             // add layer to map
             geojson.addTo(map);
-
             layers.push({
                 // TODO generate an ID with better format
-                id: new Date().getTime().toString(),
+                id: layerid,
                 type: layer.type,
                 layer: geojson,
             });
         });
+        return layerid;
     }
 }

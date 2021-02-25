@@ -20,14 +20,14 @@ export class WMS {
      * @param {LayerConfig} layer the layer configuration
      * @param {Array<LayerData>} layers a reference to the layers array
      */
-    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): void {
+    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): string {
         const wms = L.tileLayer.wms(layer.url, {
             layers: layer.entries,
             format: 'image/png',
             transparent: true,
             attribution: '',
         });
-
+        const layerid = new Date().getTime().toString();
         wms.addTo(map);
 
         layers.push({
@@ -36,5 +36,6 @@ export class WMS {
             type: layer.type,
             layer: wms,
         });
+        return layerid;
     }
 }

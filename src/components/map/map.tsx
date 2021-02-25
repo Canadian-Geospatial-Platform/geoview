@@ -111,6 +111,10 @@ function Map(props: MapProps): JSX.Element {
                 // reset the view when created so overview map is moved at the right place
                 cgpMap.setView(center, zoom);
 
+                // create new pane for basemaps
+                cgpMap.createPane('basemapsPane');
+                cgpMap.getPane('basemapsPane').style.zIndex = '10';
+
                 // emit the initial map position
                 api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
                     position: cgpMap.getCenter(),
@@ -143,6 +147,7 @@ function Map(props: MapProps): JSX.Element {
                                 url={basemapLayer.url}
                                 attribution={attribution}
                                 opacity={basemapLayer.opacity}
+                                pane="basemapsPane" // send basemap layers to the basmap pane
                             />
                         );
                     })}
