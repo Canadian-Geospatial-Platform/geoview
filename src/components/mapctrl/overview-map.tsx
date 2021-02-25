@@ -6,7 +6,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { IconButton } from '@material-ui/core';
 import ChevronLeft from '@material-ui/icons/ChevronLeft';
 
-import L, { Map, CRS, DomEvent } from 'leaflet';
+import { Map, CRS, DomEvent } from 'leaflet';
 import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import { useEventHandlers } from '@react-leaflet/core';
 
@@ -20,11 +20,6 @@ import { EVENT_NAMES } from '../../api/event';
 const MINIMAP_SIZE = {
     width: '150px',
     height: '150px',
-};
-
-const TOGGLE_BTN_SIZE = {
-    width: '35px',
-    height: '35px',
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -62,6 +57,27 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+/**
+ * Interface for overview map properties
+ */
+interface OverviewProps {
+    crs: CRS;
+    basemaps: BasemapLayer[];
+    zoomFactor: number;
+}
+
+/**
+ * Interface for bound polygon properties
+ */
+interface MiniboundProps {
+    parentMap: Map;
+    zoomFactor: number;
+}
+
+/**
+ * Create a toggle element to expand/collapse the overview map
+ * @return {JSX.Element} the toggle control
+ */
 function MinimapToggle(): JSX.Element {
     const divRef = useRef(null);
 
@@ -99,7 +115,7 @@ function MinimapToggle(): JSX.Element {
     }
 
     useEffect(() => {
-        L.DomEvent.disableClickPropagation(divRef.current);
+        DomEvent.disableClickPropagation(divRef.current);
     }, []);
 
     return (
@@ -119,6 +135,10 @@ function MinimapToggle(): JSX.Element {
     );
 }
 
+/**
+ * Create and update the bound polygon of the parent's map extent
+ * @param {MiniboundProps} props bound properties
+ */
 function MinimapBounds(props: MiniboundProps) {
     const { parentMap, zoomFactor } = props;
     const minimap = useMap();
@@ -193,6 +213,11 @@ function MinimapBounds(props: MiniboundProps) {
     ) : null;
 }
 
+/**
+ * Create the overview map component
+ * @param {OverviewProps} props the overview map properties
+ * @return {JSX.Element} the overview map component
+ */
 export function OverviewMap(props: OverviewProps): JSX.Element {
     const { crs, basemaps, zoomFactor } = props;
 
@@ -202,6 +227,17 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
 
     const parentMap = useMap();
     const mapZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
+
+    const overviewRef = useRef(null);
+    useEffect(() => {
+        // disable events on container
+        const overviewElement = (overviewRef.current as unknown) as HTMLElement;
+        DomEvent.disableClickPropagation(overviewElement);
+        DomEvent.disableScrollPropagation(overviewElement);
+
+        // remove ability to tab to the overview map
+        overviewElement.children[0].setAttribute('tabIndex', '-1');
+    }, []);
 
     // Memorize the minimap so it's not affected by position changes
     const minimap = useMemo(
@@ -227,7 +263,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
                     <TileLayer key={base.id} url={base.url} />
                 ))}
                 <MinimapBounds parentMap={parentMap} zoomFactor={zoomFactor} />
-                <MinimapToggle parentMap={parentMap} />
+                <MinimapToggle />
             </MapContainer>
         ),
         [parentMap, crs, mapZoom, basemaps, zoomFactor]
@@ -235,18 +271,9 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
 
     return (
         <div className={LEAFLET_POSITION_CLASSES.topright}>
-            <div className="leaflet-control leaflet-bar">{minimap}</div>
+            <div ref={overviewRef} className="leaflet-control leaflet-bar">
+                {minimap}
+            </div>
         </div>
     );
-}
-
-interface OverviewProps {
-    crs: CRS;
-    basemaps: BasemapLayer[];
-    zoomFactor: number;
-}
-
-interface MiniboundProps {
-    parentMap: Map;
-    zoomFactor: number;
 }

@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * interface for panel properties
+ * Interface for panel properties
  */
 interface PanelAppProps {
     panel: Panel;
@@ -60,10 +60,10 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
     const { t } = useTranslation();
 
     const map = useMap();
-
     const mapId = (api.mapInstance(map) as MapInterface).id;
 
     const panelRef = useRef();
+    const closeBtnRef = useRef();
 
     /**
      * Close the panel
@@ -96,13 +96,15 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             mapId
         );
 
-        // set focus on close button
-        (panelElement.getElementsByClassName('cgpv-panel-close')[0] as HTMLElement).focus();
-
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
         };
     }, []);
+
+    useEffect(() => {
+        // set focus on close button on panel open
+        ((closeBtnRef.current as unknown) as HTMLElement).focus();
+    });
 
     return (
         <Card
@@ -132,7 +134,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                 title={t(panel.title)}
                 action={
                     <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
-                        <IconButton className="cgpv-panel-close" aria-label={t('close')} onClick={closePanel}>
+                        <IconButton ref={closeBtnRef} className="cgpv-panel-close" aria-label={t('close')} onClick={closePanel}>
                             <CloseIcon />
                         </IconButton>
                     </Tooltip>
