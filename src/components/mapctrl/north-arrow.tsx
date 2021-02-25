@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 
-import L, { Map, LatLng, LatLngExpression } from 'leaflet';
+import { Map, LatLng, LatLngExpression, CRS, Point, Icon } from 'leaflet';
 import { useMapEvent, Marker, useMap } from 'react-leaflet';
+
+import { debounce } from 'lodash';
 
 import { PROJECTION_NAMES } from '../../api/projection';
 
@@ -16,8 +18,8 @@ const useStyles = makeStyles((theme) => ({
         left: theme.shape.center,
     },
     northArrow: {
-        width: theme.overrides.northArrow.width,
-        height: theme.overrides.northArrow.height,
+        width: theme.overrides?.northArrow.width,
+        height: theme.overrides?.northArrow.height,
     },
 }));
 
@@ -26,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
  */
 interface NorthArrowProps {
     // projection is used when checking which projection is being used in the Map
-    projection: L.CRS;
+    projection: CRS;
 }
 
 /**
@@ -62,7 +64,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
             const pointA = { x: northPolePosition[1], y: northPolePosition[0] };
 
             // map center
-            const pointB = L.point(center.lng, center.lat);
+            const pointB = new Point(center.lng, center.lat);
 
             // set info on longitude and latitude
             const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
@@ -89,7 +91,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     function checkNorth(map: Map): boolean {
         // Check the container value for top middle of the screen
         // Convert this value to a lat long coordinate
-        const pointXY = L.point(map.getSize().x / 2, 1);
+        const pointXY = new Point(map.getSize().x / 2, 1);
         const pt = map.containerPointToLatLng(pointXY);
 
         // If user is pass north, long value will start to be positive (other side of the earth).
@@ -171,10 +173,13 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     /**
      * Map moveend event callback
      */
-    const onMapMoveEnd = useCallback((e) => {
-        const map = e.target as Map;
-        manageArrow(map);
-    }, []);
+    const onMapMoveEnd = useCallback(
+        debounce((e) => {
+            const map = e.target as Map;
+            manageArrow(map);
+        }, 500),
+        []
+    );
 
     // listen to map moveend event
     useMapEvent('moveend', onMapMoveEnd);
@@ -223,7 +228,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
 
     // Create the icon
     const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace('#', '%23');
-    const northPoleIcon = L.icon({
+    const northPoleIcon = new Icon({
         iconUrl,
         iconSize: [24, 24],
         iconAnchor: [6, 18],

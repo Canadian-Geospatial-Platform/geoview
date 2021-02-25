@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const childProcess = require('child_process');
 const glob = require('glob');
 const package = require('./package.json');
@@ -55,9 +56,23 @@ const config = {
                     },
                 ],
             },
+            {
+                test: /.(ts|tsx|js|jsx)$/,
+                exclude: /node_modules/,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            plugins: ['lodash'],
+                            presets: ['@babel/preset-env'],
+                        },
+                    },
+                ],
+            },
         ],
     },
     plugins: [
+        new LodashWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: './public/index.html',
             title: 'Canadian Geospatial Platform Viewer',
