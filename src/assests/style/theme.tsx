@@ -1,5 +1,5 @@
-import { createMuiTheme } from '@material-ui/core/styles';
 import { CSSProperties } from 'react';
+import { createMuiTheme } from '@material-ui/core/styles';
 
 const headingStyles = {
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
@@ -134,7 +134,7 @@ export const styles: Record<string, CSSProperties> = {
         transition: 'fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         flexShrink: 0,
         userSelect: 'none',
-    },
+    }
 };
 
 export const theme = createMuiTheme(themeOptions);
