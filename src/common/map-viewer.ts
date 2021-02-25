@@ -6,6 +6,7 @@ import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';
 import { MapProps } from '../components/map/map';
 import { Basemap } from './basemap';
+import { Layer } from './layers/layer';
 
 /**
  * interface used to store created maps
@@ -40,6 +41,9 @@ export class MapViewer {
     // used to access basemap functions
     basemap: Basemap;
 
+    // used to access layers functions
+    layer: Layer;
+
     // get used language
     language: string;
 
@@ -71,6 +75,9 @@ export class MapViewer {
         this.map = mapInstance.map;
 
         this.vector = new Vector(mapInstance.map);
+
+        // initialize layers and load the layers passed in from map config if any
+        this.layer = new Layer(mapInstance.map, this.mapProps.layers);
 
         this.buttonPanel = new ButtonPanel(mapInstance.map);
 

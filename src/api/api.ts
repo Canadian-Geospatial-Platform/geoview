@@ -96,6 +96,7 @@ export class API {
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
             ...this.selectedMapInstance.basemap,
+            ...this.selectedMapInstance.layer,
         };
     };
 
@@ -120,6 +121,7 @@ export class API {
             ...this.selectedMapInstance.vector,
             ...this.selectedMapInstance.buttonPanel,
             ...this.selectedMapInstance.basemap,
+            ...this.selectedMapInstance.layer,
         };
     };
 }

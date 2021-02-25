@@ -39,7 +39,7 @@ interface VectorType {
 }
 
 /**
- * Class used to manage vector layers (Polyline, Polygon, Circle...)
+ * Class used to manage vector geometries (Polyline, Polygon, Circle...)
  *
  * @export
  * @class Vector
@@ -57,13 +57,13 @@ export class Vector {
     // used to handle crearting a circle
     circle: Circle;
 
-    // used to store layer groups
+    // used to store geometry groups
     geometryGroups: VectorType[] = [];
 
-    // contains all the added layers
-    layers: GeometryType[] = [];
+    // contains all the added geometries
+    geometries: GeometryType[] = [];
 
-    // feature group will contain the created layers in the map
+    // feature group will contain the created geometries in the map
     featurGroup: L.FeatureGroup;
 
     /**
@@ -98,9 +98,9 @@ export class Vector {
             }
         });
 
-        // listen to outside events to remove layers
+        // listen to outside events to remove geometries
         api.event.on(EVENT_NAMES.EVENT_VECTOR_REMOVE, (payload) => {
-            // remove layer from outside
+            // remove geometry from outside
             this.deleteGeometry(payload.id);
         });
     }
@@ -110,9 +110,9 @@ export class Vector {
      *
      * @param {LatLngExpression[] | LatLngExpression[][]} points points of lat/lng to draw a polyline
      * @param options polyline options including styling
-     * @param {string} id an optional id to be used to manage this layer
+     * @param {string} id an optional id to be used to manage this geometry
      *
-     * @returns a geometry containing the id and the created layer
+     * @returns a geometry containing the id and the created geometry
      */
     addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: Record<string, unknown>, id?: string): GeometryType => {
         const lId = generateId(id);
@@ -121,7 +121,7 @@ export class Vector {
 
         polyline.layer.addTo(this.featurGroup);
 
-        this.layers.push(polyline);
+        this.geometries.push(polyline);
 
         // emit an event that a polyline vector has been added
         api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, (api.mapInstance(this.map) as MapInterface).id, { ...polyline });
@@ -134,9 +134,9 @@ export class Vector {
      *
      * @param {LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][]} points array of points to create the polygon
      * @param {Record<string, unknown>} options polygon options including styling
-     * @param {string} id an optional id to be used to manage this layer
+     * @param {string} id an optional id to be used to manage this geometry
      *
-     * @returns a geometry containing the id and the created layer
+     * @returns a geometry containing the id and the created geometry
      */
     addPolygon = (
         points: LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][],
@@ -149,7 +149,7 @@ export class Vector {
 
         polygon.layer.addTo(this.featurGroup);
 
-        this.layers.push(polygon);
+        this.geometries.push(polygon);
 
         // emit an event that a polygon vector has been added
         api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, (api.mapInstance(this.map) as MapInterface).id, { ...polygon });
@@ -164,16 +164,16 @@ export class Vector {
      * @param {number} longitude the longitude position of the circle
      * @param {number} radius the radius of the circle (in kilometers)
      * @param {Record<string, unknown>} options circle options including styling
-     * @param {string} id an optional id to be used to manage this layer
+     * @param {string} id an optional id to be used to manage this geometry
      *
-     * @returns a geometry containing the id and the created layer
+     * @returns a geometry containing the id and the created geometry
      */
     addCircle = (latitude: number, longitude: number, radius: number, options: Record<string, unknown>, id?: string): GeometryType => {
         const lId = generateId(id);
 
         const circle = this.circle.createCircle(lId, latitude, longitude, radius, options);
 
-        this.layers.push(circle);
+        this.geometries.push(circle);
 
         circle.layer.addTo(this.featurGroup);
 
@@ -190,9 +190,9 @@ export class Vector {
      * @param {number} longitude the longitude position of the circle marker
      * @param {number} radius the radius of the circle marker (in meters)
      * @param {Record<string, unknown>} options circle marker options including styling
-     * @param {string} id an optional id to be used to manage this layer
+     * @param {string} id an optional id to be used to manage this geometry
      *
-     * @returns a geometry containing the id and the created layer
+     * @returns a geometry containing the id and the created geometry
      */
     addCircleMarker = (
         latitude: number,
@@ -205,7 +205,7 @@ export class Vector {
 
         const circleMarker = this.circle.createCircleMarker(lId, latitude, longitude, radius, options);
 
-        this.layers.push(circleMarker);
+        this.geometries.push(circleMarker);
 
         circleMarker.layer.addTo(this.featurGroup);
 
@@ -222,23 +222,25 @@ export class Vector {
      *
      * @param {string} id the id of the geometry to return
      *
-     * @returns a geometry with a layer and id
+     * @returns a geometry with a geometry and id
      */
     getGeometry = (id: string): GeometryType => {
-        return this.layers.filter((layer) => layer.id === id)[0];
+        return this.geometries.filter((layer) => layer.id === id)[0];
     };
 
     /**
-     * Delete a geometry and the layer from the map using the id
+     * Delete a geometry and the geometry from the map using the id
      *
      * @param {string} id the id of the geometry to delete
      */
     deleteGeometry = (id: string): void => {
-        for (let i = 0; i < this.layers.length; i++) {
-            if (this.layers[i].id === id) {
-                this.layers[i].layer.remove();
+        for (let i = 0; i < this.geometries.length; i++) {
+            if (this.geometries[i].id === id) {
+                this.geometries[i].layer.remove();
 
-                this.layers.splice(i, 1);
+                this.deleteGeometryFromGroups(this.geometries[i].id);
+
+                this.geometries.splice(i, 1);
 
                 break;
             }
@@ -266,10 +268,10 @@ export class Vector {
     };
 
     /**
-     * Add a new layer to the group that was created with an id
+     * Add a new geometry to the group that was created with an id
      *
-     * @param {string} id the id of the group to add the layer to
-     * @param {GeometryType} layer the layer to be added to the group
+     * @param {string} id the id of the group to add the geometry to
+     * @param {GeometryType} layer the geometry to be added to the group
      */
     addToGeometryGroup = (id: string, layer: GeometryType): void => {
         for (let i = 0; i < this.geometryGroups.length; i++) {
@@ -280,7 +282,56 @@ export class Vector {
     };
 
     /**
-     * Delete a geometry group and all the layers from the map
+     * Find the group that the geometry exists in and delete the geometry from that group
+     *
+     * @param {string} geometryId the geometry id
+     */
+    deleteGeometryFromGroups = (geometryId: string): void => {
+        for (let i = 0; i < this.geometryGroups.length; i++) {
+            this.geometryGroups[i].geometryGroup.forEach((geometry, index) => {
+                if (geometry.id === geometryId) {
+                    this.geometryGroups[i].geometryGroup.splice(index, 1);
+                }
+            });
+        }
+    };
+
+    /**
+     * Delete a specific geometry from a group using the geometry id
+     *
+     * @param {string} geometryId the geometry id to be deleted
+     * @param {string} groupId the group id
+     */
+    deleteGeometryFromGroup = (geometryId: string, groupId: string): void => {
+        for (let i = 0; i < this.geometryGroups.length; i++) {
+            if (this.geometryGroups[i].id === groupId) {
+                this.geometryGroups[i].geometryGroup.forEach((geometry, index) => {
+                    if (geometry.id === geometryId) {
+                        geometry.layer.remove();
+                        this.geometryGroups[i].geometryGroup.splice(index, 1);
+                    }
+                });
+            }
+        }
+    };
+
+    /**
+     * Delete all geometries from the geometry group but keep the group
+     *
+     * @param {string} id group id
+     */
+    deleteGeometriesFromGroup = (id: string): void => {
+        for (let i = 0; i < this.geometryGroups.length; i++) {
+            if (this.geometryGroups[i].id === id) {
+                this.geometryGroups[i].geometryGroup.forEach((geometry) => {
+                    geometry.layer.remove();
+                });
+            }
+        }
+    };
+
+    /**
+     * Delete a geometry group and all the geometries from the map
      *
      * @param {string} id the id of the geometry group to delete
      */
