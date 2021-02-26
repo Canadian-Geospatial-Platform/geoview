@@ -1,0 +1,42 @@
+/*
+Hold all third party libraries override
+*/
+
+/* LEAFLET */
+.leaflet-container {
+    display: flex;
+    width: 90%;
+    margin: auto;
+    height: 100%;
+}
+
+.leaflet-control-scale {
+    z-index: 30;
+    position: absolute;
+    width: 120px;
+    height: 20px;
+    padding-left: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.8);
+    right: 0px;
+    bottom: 0px;
+    margin-bottom: 0px !important;
+    margin-right: 0px !important;
+}
+
+.leaflet-control-scale-line {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #000 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    margin: auto !important;
+}
+
+.leaflet-control-attribution {
+    font-size: 11px;
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    height: 20px !important;
+}

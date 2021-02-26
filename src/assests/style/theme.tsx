@@ -51,6 +51,10 @@ const themeOptions = {
             fontSize: 24,
             fontWeight: 500,
         },
+        control: {
+            fontSize: 11,
+            fontWeight: 500,
+        },
     },
     spacing: [0, 1, 2, 4, 5, 6, 8, 10, 12, 14, 15, 16, 18, 20, 30],
     breakpoints: {
@@ -70,6 +74,7 @@ const themeOptions = {
         modal: 1300,
         snackbar: 1400,
         tooltip: 1500,
+        leafletControl: 500,
     },
     transitions: {
         duration: {
@@ -120,6 +125,9 @@ const themeOptions = {
                 fontSize: '1rem',
             },
         },
+        MuiDrawer: {
+            paper: { position: 'relative' },
+        },
     },
 };
 
@@ -134,7 +142,7 @@ export const styles: Record<string, CSSProperties> = {
         transition: 'fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         flexShrink: 0,
         userSelect: 'none',
-    }
+    },
 };
 
 export const theme = createMuiTheme(themeOptions);

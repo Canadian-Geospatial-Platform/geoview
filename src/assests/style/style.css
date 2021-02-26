@@ -1,3 +1,6 @@
+/*
+Hold viewer specific css not inside theme
+*/
 .keyboardFocused {
     outline: revert !important;
 }

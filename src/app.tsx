@@ -8,9 +8,9 @@ import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 import { api } from './api/api';
 
-import './assests/style/style.css';
 import '../node_modules/leaflet/dist/leaflet.css';
-import '../public/css/style.css';
+import './assests/style/style.css';
+import './assests/style/vendor.css';
 
 import AppStart from './core/app-start';
 import { manageKeyboardFocus } from './common/utilities';
