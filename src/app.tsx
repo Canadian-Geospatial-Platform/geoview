@@ -29,6 +29,10 @@ Marker.prototype.options.icon = DefaultIcon;
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
 function init(callback: () => void) {
+    const html = document.body.innerHTML;
+
+    document.body.innerHTML = '';
+
     const root = document.createElement('div');
     root.setAttribute('id', 'root');
     document.body.appendChild(root);
@@ -36,7 +40,7 @@ function init(callback: () => void) {
     // set the API callback if a callback is provided
     if (callback) api.readyCallback = callback;
 
-    ReactDOM.render(<AppStart />, document.getElementById('root'));
+    ReactDOM.render(<AppStart html={html} />, document.getElementById('root'));
 }
 
 // cgpv object to be exported with the api for outside use
