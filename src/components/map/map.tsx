@@ -1,21 +1,15 @@
 /* eslint-disable react/require-default-props */
-import { Suspense, useEffect, useState } from 'react';
-import { render } from 'react-dom';
-
-import { i18n } from 'i18next';
-
-import { I18nextProvider } from 'react-i18next';
+import { useEffect, useState } from 'react';
 
 import { Map as LeafletMap, LatLngTuple, CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
-import { ThemeProvider, useTheme } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import { useTheme } from '@material-ui/core/styles';
 
 import { MapOptions, getMapOptions } from '../../common/map';
 import { BasemapOptions, BasemapLayer } from '../../common/basemap';
-import { Layer, LayerConfig, LayerTypes } from '../../common/layers/layer';
+import { LayerConfig } from '../../common/layers/layer';
 import { Projection } from '../../common/projection';
 
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -23,8 +17,6 @@ import { OverviewMap } from '../mapctrl/overview-map';
 import { Attribution } from '../mapctrl/attribution';
 import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
-
-import { theme } from '../../assests/style/theme';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
@@ -43,7 +35,7 @@ export interface MapProps {
     layers?: LayerConfig[];
 }
 
-function Map(props: MapProps): JSX.Element {
+export function Map(props: MapProps): JSX.Element {
     const { id, center, zoom, projection, language } = props;
 
     const [basemapLayers, setBasemapLayers] = useState([]);
@@ -165,29 +157,5 @@ function Map(props: MapProps): JSX.Element {
                 </>
             )}
         </MapContainer>
-    );
-}
-
-export function createMap(element: Element, config: MapProps, i18nInstance: i18n): void {
-    const center: LatLngTuple = [config.center[0], config.center[1]];
-
-    render(
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Suspense fallback="">
-                <I18nextProvider i18n={i18nInstance}>
-                    <Map
-                        id={element.id}
-                        center={center}
-                        zoom={config.zoom}
-                        projection={config.projection}
-                        language={config.language}
-                        basemapOptions={config.basemapOptions}
-                        layers={config.layers}
-                    />
-                </I18nextProvider>
-            </Suspense>
-        </ThemeProvider>,
-        element
     );
 }

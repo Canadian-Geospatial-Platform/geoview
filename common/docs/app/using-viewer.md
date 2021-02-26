@@ -1,53 +1,35 @@
-# GeoView
-
-The Canadian Geospatial Platform intends to deploy new infrastructure, tools and web integration of GeoCore, a new geospatial metadata lake library capable of supporting multiple metadata standards. In recognition of these desired capabilities, it needs a lightweight viewer to incorporate in their infrastructure. The need is to have a simple and flexible viewer to display geospatial data from GeoCore metadata lake on a map with limited functionalities.
-
-[Demo](https://jolevesq.github.io/GeoView/index.html)
-
-## Solution
-
-GeoView mapping capabilites are based on [Leafet](https://github.com/Leaflet/Leaflet) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
-
--   [react-leaflet](https://react-leaflet.js.org/) version 3+ to make the link between Leafelt and React
--   [i18next](https://www.i18next.com/) to do localization in English and French
--   [material-ui](https://material-ui.com/) to do the layout
-
-## Developpement
-
-Developement is made with [Visual Studio Code](https://code.visualstudio.com/) and uses few extentions to help linting and formating
-
--   Prettier
--   ESLint
--   Better Comments
+# Using the core viewer
 
 ## Building the project
 
-To install the project, just run
+First clone the project
+`git clone https://github.com/Canadian-Geospatial-Platform/GeoView.git`
+
+Then go to the GeoView folder
+`cd GeoView`
+
+To install the project, run
 `npm install`
 
-To serve the project, just run
+If you want to run the project type
 `npm run serve` and GeoView will be serve from http://localhost:8080/
 
-## Deploy to gh-pages
-
-To deploy the project, just run
+To build the project type
 `npm run build`
 
-Then push the dist folder to your gh-pages
-`npm run deploy`
-
-The project is now serve inside your GitHub gh-pages at
-`https://[GITHUB-USERNAME].github.io/GeoView/index.html
-
-_Make sure GitHub pages are active inside your origin repository_
-
-## Usage
+## Creating a new page to display a map
 
 We'll go through the simplest way to use the Canadian Geospatial Platform Viewer.
 
 First, grab the most recent release from the [github releases](https://github.com/Canadian-Geospatial-Platform/GeoView/releases). Place the files cgpv-main.js and cgpv-styles.css within your webpage's folder structure. Place also the img and locales folder at the same place. We usually put.
 
-Then you want to include those files on your page
+Then you want to include those files on your html page
+
+Within head
+
+```html
+<link rel="stylesheet" href="/cgpv-styles.css" />
+```
 
 Within head, should be before including any other libraries
 
@@ -55,7 +37,7 @@ Within head, should be before including any other libraries
 <script src="/cgpv-main.js"></script>
 ```
 
-Now that you have the required files on your page we should add the map element. There is 3 ways to do this
+Now that you have the required files on your page we should add the map element.
 
 -   Map div element
     ```html
@@ -65,11 +47,6 @@ Now that you have the required files on your page we should add the map element.
         data-leaflet="{ 'projection': 3978, 'zoom': 12, 'center': [45,-75], 'language': 'fr-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true }, layers:[] }"
     ></div>
     ```
--   _Work in progress_ -> Url: The url will have parameters to setup the map. The map div, a div element with class **llwp-map**, must be on the page
-    ```html
-    <div id="mapLCC" class="llwp-map"></div>
-    ```
--   _Work in progress_ -> Code: call the create map function from cgpv-main.js with needed parameters
 
 #### Parameters
 
@@ -96,6 +73,14 @@ Now that you have the required files on your page we should add the map element.
         ]
     ```
 
-## Contributing to the project
+Now to display the map need to call the init function, create a script tag before the closing body tag
 
-see our [wiki](https://github.com/Canadian-Geospatial-Platform/GeoView/wiki/Contributing-Guideline)
+### Note
+
+Only one init function should be called per page, you can't have multiple init functions on the same page
+
+```js
+<script>cgpv.init(function () {})</script>
+```
+
+Please see `public/templates` for sample pages
