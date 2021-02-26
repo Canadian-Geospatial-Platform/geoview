@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useMapEvent } from 'react-leaflet';
 
+import { debounce } from 'lodash';
+
 const deg = String.fromCharCode(176);
 
 function coordFormnat(value: number, card: string): string {
@@ -19,11 +21,11 @@ export function MousePosition(): JSX.Element {
     const [position, setPosition] = useState({ lat: '--', lng: '--' });
 
     const onMouseMove = useCallback(
-        (e) => {
+        debounce((e) => {
             const lat = coordFormnat(e.latlng.lat, e.latlng.lat > 0 ? t('mapctrl.mouseposition.north') : t('mapctrl.mouseposition.south'));
             const lng = coordFormnat(e.latlng.lng, e.latlng.lng < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east'));
             setPosition({ lat, lng });
-        },
+        }, 250),
         [t]
     );
     useMapEvent('mousemove', onMouseMove);
