@@ -5,7 +5,10 @@ import { Map as LeafletMap, LatLngTuple, CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
-import { useTheme } from '@material-ui/core/styles';
+import { useTheme, makeStyles } from '@material-ui/core/styles';
+
+import { SnackbarProvider } from 'notistack';
+import { Snackbar } from '../mapctrl/snackbar';
 
 import { MapOptions, getMapOptions } from '../../common/map';
 import { BasemapOptions, BasemapLayer } from '../../common/basemap';
@@ -25,6 +28,12 @@ import { MapViewer } from '../../common/map-viewer';
 import { generateId } from '../../common/constant';
 import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 
+const useStyles = makeStyles((theme) => ({
+    snackBar: {
+        '& .MuiButton-text': { color: theme.palette.primary.light },
+    },
+}));
+
 export interface MapProps {
     id?: string;
     center: LatLngTuple;
@@ -42,6 +51,7 @@ export function Map(props: MapProps): JSX.Element {
     const [isLoaded, setIsLoaded] = useState(false);
 
     const defaultTheme = useTheme();
+    const classes = useStyles();
 
     // create a new map viewer instance
     const viewer = new MapViewer(props);
@@ -151,10 +161,22 @@ export function Map(props: MapProps): JSX.Element {
                             zIndex: defaultTheme.zIndex.appBar,
                         }}
                     >
-                        <Appbar id={id} />
+                        <Appbar />
                     </div>
                     <NorthArrow projection={crs} />
                     <NorthPoleFlag projection={crs} />
+                    <SnackbarProvider
+                        maxSnack={1}
+                        dense
+                        autoHideDuration={4000}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                        className={`${classes.snackBar}`}
+                    >
+                        <Snackbar id={id} />
+                    </SnackbarProvider>
                 </>
             )}
         </MapContainer>

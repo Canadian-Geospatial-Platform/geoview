@@ -83,6 +83,11 @@ export const EVENT_NAMES = {
      * Event is triggered when updating the basemap layers
      */
     EVENT_BASEMAP_LAYERS_UPDATE: 'basemap/layers_update',
+
+    /**
+     * Event is triggered when a snackbar notification opens
+     */
+    EVENT_SNACKBAR_OPEN: 'snackbar/open',
 };
 
 /**
