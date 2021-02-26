@@ -1,72 +1,14 @@
+/* 
+This file is use to hold styles relative ti sample page
+No style for React viewer component should be here. To add style specific to the viewer go to src/assests/style
+  - theme.tsx for Material-UI
+  - style.css for specific viewer style
+  - vendor.css to override a third party library style 
+*/
 html {
     font-family: 'Montserrat', sans-serif;
 }
 
 body {
     margin: 0;
-}
-
-.leaflet-container {
-    display: flex;
-    width: 90%;
-    margin: auto;
-    height: 100%;
-}
-
-.cgp-navbar {
-    height: 100%;
-}
-
-.cgp-appbar {
-    height: 100%;
-}
-
-.MuiDrawer-paper {
-    position: relative !important;
-}
-
-.leaflet-control-scale {
-    z-index: 30;
-    position: absolute;
-    width: 120px;
-    height: 20px;
-    padding-left: 2px;
-    font-size: 11px;
-    font-weight: 500;
-    background-color: rgba(255, 255, 255, 0.8);
-    right: 0px;
-    bottom: 0px;
-    margin-bottom: 0px !important;
-    margin-right: 0px !important;
-}
-
-.leaflet-control-scale-line {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid #000 !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-top: none !important;
-    margin: auto !important;
-}
-
-.leaflet-control-attribution {
-    font-size: 11px;
-    font-weight: 500;
-    background-color: rgba(255, 255, 255, 0.8) !important;
-    height: 20px !important;
-}
-
-.leaflet-control-mouseposition {
-    position: absolute !important;
-    right: 120px !important;
-    z-index: 800;
-    text-align: center;
-    bottom: 0px;
-    margin-bottom: 0px !important;
-    padding: 2px;
-    display: flex !important;
-    flex-direction: column;
-    font-size: 11px;
-    font-weight: 500;
-    background-color: rgba(255, 255, 255, 0.8);
 }

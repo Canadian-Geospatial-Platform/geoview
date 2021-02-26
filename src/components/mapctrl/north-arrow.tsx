@@ -33,7 +33,6 @@ interface NorthArrowProps {
 
 /**
  * Create a north arrow
- *
  * @param {NorthArrowProps} props north arrow properties
  * @return {JSX.Element} the north arrow component
  */
