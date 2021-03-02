@@ -1,5 +1,5 @@
 import L, { Map } from 'leaflet';
-
+import { generateId } from '../constant';
 import { EsriDynamic } from './esri-dynamic';
 import { EsriFeature } from './esri-feature';
 import { WMS } from './wms';
@@ -84,13 +84,13 @@ export class Layer {
         // listen to outside events to add layers
         api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
             if (payload.type === LayerTypes.GEOJSON) {
-                this.geoJSON.add(this.map, payload, this.layers);
+                this.geoJSON.add(this.map, payload, generateId(''), this.layers);
             } else if (payload.type === LayerTypes.WMS) {
-                this.wms.add(this.map, payload, this.layers);
+                this.wms.add(this.map, payload, generateId(''), this.layers);
             } else if (payload.type === LayerTypes.ESRI_DYNAMIC) {
-                this.esriDynamic.add(this.map, payload, this.layers);
+                this.esriDynamic.add(this.map, payload, generateId(''), this.layers);
             } else if (payload.type === LayerTypes.ESRI_FEATURE) {
-                this.esriFeature.add(this.map, payload, this.layers);
+                this.esriFeature.add(this.map, payload, generateId(''), this.layers);
             }
         });
 
@@ -139,36 +139,52 @@ export class Layer {
      * Create a new GeoJSON layer on the map
      *
      * @param layerConfig the layer configuration
+     * @returns {string} for the layerID
      */
-    createGeoJSONLayer = (layerConfig: LayerConfig): void => {
-        this.geoJSON.add(this.map, layerConfig, this.layers);
+    createGeoJSONLayer = (layerConfig: LayerConfig): string => {
+        const layerID = generateId('');
+        this.geoJSON.add(this.map, layerConfig, layerID, this.layers);
+
+        return layerID;
     };
 
     /**
      * Create a new WMS layer on the map
      *
      * @param layerConfig the layer configuration
+     * @returns {string} for the layerID
      */
-    createWmsLayer = (layerConfig: LayerConfig): void => {
-        this.wms.add(this.map, layerConfig, this.layers);
+    createWmsLayer = (layerConfig: LayerConfig): string => {
+        const layerID = generateId('');
+        this.wms.add(this.map, layerConfig, layerID, this.layers);
+
+        return layerID;
     };
 
     /**
      * Create a new feature layer on the map
      *
      * @param layerConfig the layer configuration
+     * @returns {string} for the layerID
      */
-    createFeatureLayer = (layerConfig: LayerConfig): void => {
-        this.esriFeature.add(this.map, layerConfig, this.layers);
+    createFeatureLayer = (layerConfig: LayerConfig): string => {
+        const layerID = generateId('');
+        this.esriFeature.add(this.map, layerConfig, layerID, this.layers);
+
+        return layerID;
     };
 
     /**
      * Create a new dynamic layer on the map
      *
      * @param layerConfig the layer configuration
+     * @returns {string} for the layerID
      */
-    createDynamicLayer = (layerConfig: LayerConfig): void => {
-        this.esriDynamic.add(this.map, layerConfig, this.layers);
+    createDynamicLayer = (layerConfig: LayerConfig): string => {
+        const layerID = generateId('');
+        this.esriDynamic.add(this.map, layerConfig, layerID, this.layers);
+
+        return layerID;
     };
 
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS

@@ -81,7 +81,14 @@ export class MapViewer {
 
         this.buttonPanel = new ButtonPanel(mapInstance.map);
 
-        // init basemap
-        this.basemap.init(this.id);
+        // create new pane to host basemap layers
+        const basemapsPaneName = 'basemapsPane';
+        this.map.createPane(basemapsPaneName);
+
+        // set low index for basemap layers to they go to the bottom
+        this.map.getPane(basemapsPaneName).style.zIndex = '10';
+
+        // init basemap using map viewer ID and ther basemap pane name
+        this.basemap.init(this.id, basemapsPaneName);
     };
 }

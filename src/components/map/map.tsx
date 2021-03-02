@@ -135,6 +135,7 @@ export function Map(props: MapProps): JSX.Element {
                                 url={basemapLayer.url}
                                 attribution={attribution}
                                 opacity={basemapLayer.opacity}
+                                pane={basemapLayer.basemapPaneName}
                             />
                         );
                     })}

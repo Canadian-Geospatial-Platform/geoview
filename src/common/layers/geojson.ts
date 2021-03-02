@@ -30,10 +30,11 @@ export class GeoJSON {
      * Add a geojson to the map
      *
      * @param {Map} map a reference to the leaflet map
-     * @param {string} layer the layer configuration
+     * @param {LayerConfig} layer the layer configuration
+     * @param {string} layerID the layer id
      * @param {Array<LayerData>} layers a reference to the layers array
      */
-    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): void {
+    add(map: Map, layer: LayerConfig, layerID: string, layers: Array<LayerData>): void {
         this.load(layer.url, (data) => {
             // parse the json string and convert it to a json object
             const featureCollection = JSON.parse(data);
@@ -66,10 +67,8 @@ export class GeoJSON {
 
             // add layer to map
             geojson.addTo(map);
-
             layers.push({
-                // TODO generate an ID with better format
-                id: new Date().getTime().toString(),
+                id: layerID,
                 type: layer.type,
                 layer: geojson,
             });

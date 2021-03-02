@@ -25,6 +25,7 @@ export interface BasemapLayer {
     type: string;
     options: BasemapLayerOptions;
     opacity: number;
+    basemapPaneName: string;
 }
 
 /**
@@ -92,6 +93,9 @@ export class Basemap {
     // the map id to be used in events
     private mapId!: string;
 
+    // Pane Name for all basemap layers
+    private basemapsPaneName: string;
+
     /**
      * initialize basemap
      *
@@ -112,8 +116,9 @@ export class Basemap {
      *
      * @param {string} mapId the map id
      */
-    init = (mapId: string): void => {
+    init = (mapId: string, basemapsPaneName: string): void => {
         this.mapId = mapId;
+        this.basemapsPaneName = basemapsPaneName;
 
         if (this.basemapOptions) {
             this.loadDefaultBasemaps();
@@ -177,6 +182,7 @@ export class Basemap {
                     url: this.basemapsList[this.projection].shaded,
                     options: this.basemapLayerOptions,
                     opacity: mainBasemapOpacity,
+                    basemapPaneName: this.basemapsPaneName,
                 });
                 mainBasemapOpacity = 0.75;
             }
@@ -187,6 +193,7 @@ export class Basemap {
                 url: this.basemapsList[this.projection][this.basemapOptions.id] || this.basemapsList[this.projection].transport,
                 options: this.basemapLayerOptions,
                 opacity: mainBasemapOpacity,
+                basemapPaneName: this.basemapsPaneName,
             });
 
             if (this.basemapOptions.labeled !== false) {
@@ -197,6 +204,7 @@ export class Basemap {
                     url: this.basemapsList[this.projection].label.replaceAll('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT'),
                     options: this.basemapLayerOptions,
                     opacity: 1,
+                    basemapPaneName: this.basemapsPaneName,
                 });
             }
         }
