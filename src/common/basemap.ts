@@ -5,6 +5,7 @@ import L from 'leaflet';
 import { api } from '../api/api';
 import { generateId } from './constant';
 import { EVENT_NAMES } from '../api/event';
+import { MapInterface } from './map-viewer';
 
 /**
  * basemap basic properties
@@ -94,7 +95,7 @@ export class Basemap {
     private mapId!: string;
 
     // Pane Name for all basemap layers
-    private basemapsPaneName: string;
+    private basemapsPaneName!: string;
 
     /**
      * initialize basemap
@@ -116,9 +117,14 @@ export class Basemap {
      *
      * @param {string} mapId the map id
      */
-    init = (mapId: string, basemapsPaneName: string): void => {
+    init = (mapId: string): void => {
         this.mapId = mapId;
-        this.basemapsPaneName = basemapsPaneName;
+
+        const { map } = api.map(this.mapId) as MapInterface;
+
+        // create new pane to host basemap layers
+        this.basemapsPaneName = 'basemapsPane';
+        map.createPane(this.basemapsPaneName).style.zIndex = '10';
 
         if (this.basemapOptions) {
             this.loadDefaultBasemaps();
