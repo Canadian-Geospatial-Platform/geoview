@@ -18,9 +18,10 @@ export class WMS {
      *
      * @param {object} map the Leaflet map
      * @param {LayerConfig} layer the layer configuration
+     * @param {string} layerID the layer id
      * @param {Array<LayerData>} layers a reference to the layers array
      */
-    add(map: Map, layer: LayerConfig, layers: Array<LayerData>): void {
+    add(map: Map, layer: LayerConfig, layerID: string, layers: Array<LayerData>): void {
         const wms = L.tileLayer.wms(layer.url, {
             layers: layer.entries,
             format: 'image/png',
@@ -28,11 +29,10 @@ export class WMS {
             attribution: '',
         });
 
+        // add layer to map
         wms.addTo(map);
-
         layers.push({
-            // TODO generate an ID with better format
-            id: new Date().getTime().toString(),
+            id: layerID,
             type: layer.type,
             layer: wms,
         });
