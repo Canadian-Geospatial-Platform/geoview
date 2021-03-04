@@ -110,6 +110,9 @@ export function Map(props: MapProps): JSX.Element {
             maxZoom={mapOptions.maxZooom}
             maxBounds={mapOptions.maxBounds}
             whenCreated={(cgpMap) => {
+                // add map instance to api
+                api.maps.push(viewer);
+
                 // reset the view when created so overview map is moved at the right place
                 cgpMap.setView(center, zoom);
 
@@ -126,9 +129,6 @@ export function Map(props: MapProps): JSX.Element {
                     map: cgpMap,
                     id: id || generateId(id),
                 });
-
-                // add map instance to api
-                api.maps.push(viewer);
 
                 // call the ready function since rendering of this map instance is done
                 api.ready();
