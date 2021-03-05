@@ -4,7 +4,6 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title><%= htmlWebpackPlugin.options.title %></title>
-        <link rel="stylesheet" href="css/style.css" />
         <link rel="shortcut icon" href="./favicon.ico" />
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -17,59 +16,15 @@
             type="text/css"
         />
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-        <style>
-            #LNG1 {
-                height: 800px;
-            }
-
-            .panel {
-                display: inline-block;
-                background: #ffffff;
-                box-shadow: 0px 0px 5px 5px #666666;
-                -webkit-box-shadow: 2px 2px 5px 5x #666666;
-                -moz-box-shadow: 2px 2px 5px 5px #666666;
-                margin: 10px;
-                padding: 10px;
-                font-size: 12px;
-            }
-
-            .toolbar {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                width: 100%;
-                margin: 10px;
-            }
-
-            body {
-                padding: 50px;
-            }
-
-            .titleheader {
-                width: 979px;
-                text-align: center;
-            }
-
-            .header-table {
-                width: 1180px;
-                text-align: left;
-                margin: 0 auto;
-            }
-
-            .logo {
-                height: 120px;
-                width: 120px;
-                text-align: left;
-            }
-        </style>
+        <link rel="stylesheet" href="css/style.css" />
     </head>
     <body>
         <div calss="header-table">
             <table>
                 <tbody>
                     <tr>
-                        <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
-                        <td class="titleheader">
+                        <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+                        <td class="header-title">
                             <h1><strong>Events</strong></h1>
                         </td>
                     </tr>
@@ -141,7 +96,7 @@ setInterval(() => {
 
                 // snackbar notification
                 window.cgpv.api.event.emit('snackbar/open', 'LNG1', {
-                    message: 'This is my first snackbar!'
+                    message: 'This is my first snackbar!',
                 });
 
                 setInterval(() => {
@@ -149,8 +104,10 @@ setInterval(() => {
                         message: 'I can even apply a function',
                         button: {
                             label: 'Click me!',
-                            action: () => { alert('You clicked me!')}
-                        }
+                            action: () => {
+                                alert('You clicked me!');
+                            },
+                        },
                     });
                 }, 20000);
             });

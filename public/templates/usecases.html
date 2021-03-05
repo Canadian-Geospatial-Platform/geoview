@@ -4,7 +4,6 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title><%= htmlWebpackPlugin.options.title %></title>
-        <link rel="stylesheet" href="css/style.css" />
         <link rel="shortcut icon" href="./favicon.ico" />
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="msapplication-config" content="./img/browserconfig.xml" />
@@ -17,72 +16,22 @@
             type="text/css"
         />
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-        <style>
-            #UC1 {
-                height: 800px;
-            }
-
-            #UC2 {
-                height: 800px;
-            }
-            #UC3 {
-                height: 800px;
-            }
-            #UC4 {
-                height: 800px;
-            }
-
-            .panel {
-                display: inline-block;
-                background: #ffffff;
-                box-shadow: 0px 0px 5px 5px #666666;
-                -webkit-box-shadow: 2px 2px 5px 5x #666666;
-                -moz-box-shadow: 2px 2px 5px 5px #666666;
-                margin: 10px;
-                padding: 10px;
-                font-size: 12px;
-            }
-
-            .toolbar {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                width: 100%;
-                margin: 10px;
-            }
-
-            body {
-                padding: 50px;
-            }
-
-            .titleheader {
-                width: 979px;
-                text-align: center;
-            }
-
-            .header-table {
-                width: 1180px;
-                text-align: left;
-                margin: 0 auto;
-            }
-
-            .logo {
-                height: 120px;
-                width: 120px;
-                text-align: left;
-            }
-        </style>
+        <link rel="stylesheet" href="css/style.css" />
     </head>
     <body>
         <div calss="header-table">
             <table>
                 <tbody>
                     <tr>
-                        <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
-                        <td class="titleheader">
+                        <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+                        <td class="header-title">
                             <h1><strong>Use Case</strong></h1>
                         </td>
                     </tr>
+                </tbody>
+            </table>
+            <table>
+                <tbody>
                     <tr>
                         <td>
                             <a href="./index.html">Main</a><br />
@@ -108,13 +57,15 @@
         <div>
             <h3 id="HUC1">1.Display Metedata</h3>
             <h3><a href="#top">Top of the page</a></h3>
-            <div
-                id="UC1"
-                class="llwp-map"
-                data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'fr-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true } ,
+            <div>
+                <div
+                    id="UC1"
+                    class="llwp-map"
+                    data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'fr-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true } ,
             'layers': [
             ] } "
-            ></div>
+                ></div>
+            </div>
             <p>This map is in LLC projection with an English interface.</p>
             <p><strong>Configuraion Snippet:</strong></p>
             <div id="UC1CS" class="panel"></div>
