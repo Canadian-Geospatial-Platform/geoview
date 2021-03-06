@@ -247,6 +247,9 @@ export class Basemap {
             basemapProps.layers.forEach((layer) => {
                 const { type } = layer;
 
+                // eslint-disable-next-line no-param-reassign
+                layer.basemapPaneName = this.basemapsPaneName;
+
                 if (type === 'transport') {
                     thumbnailUrls.push(
                         this.basemapsList[this.projection].transport
