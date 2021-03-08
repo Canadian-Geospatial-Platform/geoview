@@ -201,7 +201,7 @@ export function Appbar(): JSX.Element {
                                 {Object.keys(buttonPanels).map((buttonId) => {
                                     const buttonPanel = buttonPanels[buttonId];
 
-                                    return (
+                                    return buttonPanel.button.visible ? (
                                         <div key={buttonPanel.button.id}>
                                             <ButtonApp
                                                 tooltip={buttonPanel.button.tooltip}
@@ -215,7 +215,7 @@ export function Appbar(): JSX.Element {
                                             <Divider className={classes.spacer} />
                                             <Divider />
                                         </div>
-                                    );
+                                    ) : null;
                                 })}
                             </div>
                         );
@@ -240,7 +240,12 @@ export function Appbar(): JSX.Element {
                             const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
 
                             return buttonPanel.panel ? (
-                                <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />
+                                <PanelApp
+                                    key={buttonPanel.button.id}
+                                    panel={buttonPanel.panel}
+                                    button={buttonPanel.button}
+                                    panelOpen={isOpen}
+                                />
                             ) : null;
                         })}
                     </div>

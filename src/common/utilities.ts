@@ -59,3 +59,20 @@ export function isJsonString(str: string): boolean {
     }
     return true;
 }
+
+/**
+ * Return the map server url from a layer service
+ *
+ * @param {string} url the service url for a wms / dynamic or feature layers
+ * @param {boolean} rest boolean value to add rest services if not present (default false)
+ * @returns the map server url
+ */
+export function getMapServerUrl(url: string, rest = false): string {
+    let mapServerUrl = url.slice(0, url.indexOf('MapServer') + 'MapServer'.length);
+
+    if (rest) {
+        mapServerUrl = `${mapServerUrl.slice(0, url.indexOf('services/'))}rest${mapServerUrl.slice(url.indexOf('/services'))}`;
+    }
+
+    return mapServerUrl;
+}
