@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Map } from 'leaflet';
 
+import queryString from 'query-string';
+
 import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';
 import { MapProps } from '../components/map/map';
@@ -81,7 +83,46 @@ export class MapViewer {
 
         this.buttonPanel = new ButtonPanel(mapInstance.map);
 
+        // check if geometries are provided from url
+        this.loadGeometries();
+
         // init basemap and pass in the map id to be able to access the map instance
         this.basemap.init(this.id);
     };
+
+    /**
+     * Check if geometries needs to be loaded from a URL geoms parameter
+     */
+    loadGeometries(): void {
+        // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
+        const servEndpoint = this.map.getContainer().parentElement?.getAttribute('data-geometry-endpoint') || '';
+        // eslint-disable-next-line no-restricted-globals
+        const parsed = queryString.parse(location.search);
+
+        if (parsed.geoms && servEndpoint !== '') {
+            const geoms = (parsed.geoms as string).split(',');
+
+            // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
+            geoms.forEach((key: string) => {
+                fetch(`${servEndpoint}${key}`).then((response) => {
+                    // only process valid response
+                    if (response.status === 200) {
+                        response.json().then((data) => {
+                            if (typeof data.geometry !== 'undefined') {
+                                // reverse the array because they are x, y instead of default lat long couple y, x
+                                // TODO: check if we can know and set this info from outside
+                                data.geometry.coordinates.forEach((r: Array<Array<number>>) =>
+                                    r.forEach((c: Array<number>) => c.reverse())
+                                );
+
+                                // add the geometry
+                                // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
+                                this.vector.addPolygon(data.geometry.coordinates, {});
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    }
 }

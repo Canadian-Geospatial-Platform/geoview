@@ -10,7 +10,7 @@ import parse, { attributesToProps } from 'html-react-parser';
 
 import { LatLngTuple } from 'leaflet';
 
-import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { Map, MapProps } from '../components/map/map';
