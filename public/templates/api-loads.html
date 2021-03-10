@@ -50,12 +50,11 @@
             <div
                 id="LNG1"
                 class="llwp-map"
-                data-geometry-endpoint="http://pygeoapi.geocat.live/collections/nrcan-geocore/items/"
-                data-leaflet=" { 'name': 'LCCEN', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true } ,
+                data-geometry-endpoint="https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/"
+                data-leaflet=" { 'name': 'LCCEN', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true } ,
             'layers': [
             ] } "
             ></div>
-            <p><strong>Do not work when deploy on GitHub because the API is not served from https...</strong></p>
             <p>This map will call pygeoapi.geocat.live/collections/nrcan-geocore API to gather the geometry from id provided by URL geoms parameter and load them on the map.</p>
             <p><strong>Configuration Snippet:</strong></p>
             <div id="LNG1CS" class="panel"></div>
