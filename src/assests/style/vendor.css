@@ -5,8 +5,6 @@ Hold all third party libraries override
 /* LEAFLET */
 .leaflet-container {
     display: flex;
-    width: 90%;
-    margin: auto;
     height: 100%;
 }
 

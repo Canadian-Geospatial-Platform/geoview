@@ -16,7 +16,8 @@
         },
         "overviewmap": {
             "toggle": "Toggle minimap"
-        }
+        },
+        "crosshair": "Use <strong>arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigation the map, and <strong>Enter</strong> to select."
     },
     "appbar": {
         "export": "Export",

@@ -16,7 +16,8 @@
         },
         "overviewmap": {
             "toggle": "Basculer la mini-carte"
-        }
+        },
+        "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte et <strong>Entrée</strong> pour sélectionner."
     },
     "appbar": {
         "export": "Exporter",

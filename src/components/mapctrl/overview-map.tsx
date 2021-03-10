@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
             height: 0,
             borderTop: '32px solid hsla(0,0%,98%,0.9)',
             borderLeft: '32px solid transparent',
-            zIndex: theme.zIndex.mobileStepper,
+            zIndex: theme.zIndex.appBar,
             right: 0,
             top: 0,
         },
