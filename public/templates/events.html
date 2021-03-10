@@ -121,12 +121,12 @@ setInterval(() => {
                 }
 
                 // snackbar notification
-                window.cgpv.api.event.emit('snackbar/open', 'LNG1', {
+                window.cgpv.api.event.emit('snackbar/open', 'EVNT1', {
                     message: 'This is my first snackbar!',
                 });
 
                 setInterval(() => {
-                    window.cgpv.api.event.emit('snackbar/open', 'LNG1', {
+                    window.cgpv.api.event.emit('snackbar/open', 'EVNT1', {
                         message: 'I can even apply a function',
                         button: {
                             label: 'Click me!',
