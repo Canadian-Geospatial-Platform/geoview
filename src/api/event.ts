@@ -12,6 +12,11 @@ export const EVENT_NAMES = {
     EVENT_MAP_MOVE_END: 'map/moveend',
 
     /**
+     * Event triggered when a user focus the map with keyboard (WCAG)
+     */
+    EVENT_MAP_IN_KEYFOCUS: 'map/inkeyfocus',
+
+    /**
      * Event triggered when the overview map is toggled
      */
     EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',

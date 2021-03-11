@@ -117,6 +117,10 @@ const themeOptions = {
             width: 42,
             height: 42,
         },
+        crosshair: {
+            width: 275,
+            height: 275,
+        },
         MuiFab: {
             extended: {
                 padding: '0 24px',

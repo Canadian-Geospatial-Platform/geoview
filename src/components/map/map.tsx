@@ -8,16 +8,17 @@ import { useMediaQuery } from '@material-ui/core';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
 
 import { SnackbarProvider } from 'notistack';
-import { Snackbar } from '../mapctrl/snackbar';
 
 import { MapOptions, getMapOptions } from '../../common/map';
 import { BasemapOptions, BasemapLayer } from '../../common/basemap';
 import { LayerConfig } from '../../common/layers/layer';
 import { Projection } from '../../common/projection';
 
+import { Crosshair } from '../mapctrl/crosshair';
 import { MousePosition } from '../mapctrl/mouse-position';
 import { OverviewMap } from '../mapctrl/overview-map';
 import { Attribution } from '../mapctrl/attribution';
+import { Snackbar } from '../mapctrl/snackbar';
 import { Appbar } from '../appbar/app-bar';
 import { NavBar } from '../navbar/nav-bar';
 
@@ -113,6 +114,9 @@ export function Map(props: MapProps): JSX.Element {
                 // add map instance to api
                 api.maps.push(viewer);
 
+                // add a class to map container to easely find the container
+                cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
+
                 // reset the view when created so overview map is moved at the right place
                 cgpMap.setView(center, zoom);
 
@@ -165,6 +169,7 @@ export function Map(props: MapProps): JSX.Element {
                     </div>
                     <NorthArrow projection={crs} />
                     <NorthPoleFlag projection={crs} />
+                    <Crosshair id={id} />
                     <SnackbarProvider
                         maxSnack={1}
                         dense
