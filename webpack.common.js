@@ -87,6 +87,7 @@ const config = {
                 { from: './public/geojson', to: 'geojson' },
                 { from: './public/plugins', to: 'plugins' },
                 { from: './public/favicon.ico' },
+                { from: './public/templates/codedoc.js' },
             ],
         }),
         new webpack.DefinePlugin({

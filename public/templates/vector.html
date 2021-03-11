@@ -62,98 +62,9 @@
         <p><strong>Configuration Snippet:</strong></p>
         <div id="mapWMCS" class="panel"></div>
         <p><strong>Code Snippet:</strong></p>
-        <div class="panel">
-            cgpv.init(function () {<br />
-            // create new geometry group<br />
-            cgpv.api.map('mapWM').createGeometryGroup('myGroup');<br />
-            deleteGeomtryGroup.addEventListener('click', function (e) {<br />
-            // call an api function to delete the geometry group <br />
-            cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');<br />
-            }); <br />
-            function addPolyline(map) {<br />
-            } <br />// call an api function to draw a polyline<br />
-            const polyline = cgpv.api.map(map).addPolyline(<br />
-            [<br />
-            [45, -100],<br />
-            [50, -105],<br />
-            ],<br />
-            {<br />
-            stroke: true,<br />
-            color: '#000',<br />
-            weight: 5,<br />
-            opacity: '0.8',<br />
-            }<br />
-            );<br />
-            <br />
-            <br />
-            // check if a group already exists if not , create one <br />
-            if (!cgpv.api.map(map).getGeometryGroup('myGroup')) { <br />
-            cgpv.api.map('mapWM').createGeometryGroup('myGroup'); <br />
-            } <br />
-            cgpv.api.map(map).addToGeometryGroup('myGroup', polyline);<br />
-            }<br />
-            <br />
-            function addPolygon(map) {<br />
-            // call an api function to draw a polygon<br />
-            const polygon = cgpv.api.map(map).addPolygon(<br />
-            [<br />
-            [50, -109.05],<br />
-            [54, -109.03],<br />
-            [54, -102.05],<br />
-            [50, -102.04],<br />
-            ],<br />
-            {<br />
-            stroke: true,<br />
-            color: '#000',<br />
-            weight: 5,<br />
-            opacity: '0.8',<br />
-            }<br />
-            );<br />
-            <br />
-            <br />
-            // check if a group already exists if not , create one <br />
-            if (!cgpv.api.map(map).getGeometryGroup('myGroup')) { <br />
-            cgpv.api.map('mapWM').createGeometryGroup('myGroup'); <br />
-            } <br />
-            cgpv.api.map(map).addToGeometryGroup('myGroup', polygon);<br />
-            }<br />
-            <br />
-            function addCircle(map) {<br />
-            // call an api function to draw a polygon<br />
-            const circle = cgpv.api.map(map).addCircle(50, -109, 200, {<br />
-            color: 'red',<br />
-            fillColor: '#f03',<br />
-            fillOpacity: 0.5,<br />
-            radius: 50.0,<br />
-            });<br />
-            <br />
-            <br />
-            // check if a group already exists if not , create one <br />
-            if (!cgpv.api.map(map).getGeometryGroup('myGroup')) { <br />
-            cgpv.api.map('mapWM').createGeometryGroup('myGroup'); <br />
-            } <br />
-            cgpv.api.map(map).addToGeometryGroup('myGroup', circle);<br />
-            }<br />
-            <br />
-            function addCircleMarker(map) {<br />
-            // call an api function to draw a polygon<br />
-            const circleMarker = cgpv.api.map(map).addCircleMarker(70, -109, 5, {<br />
-            color: 'red',<br />
-            fillColor: '#f03',<br />
-            fillOpacity: 0.5,<br />
-            radius: 50.0,<br />
-            });<br />
-            <br />
-            <br />
-            // check if a group already exists if not , create one <br />
-            if (!cgpv.api.map(map).getGeometryGroup('myGroup')) { <br />
-            cgpv.api.map('mapWM').createGeometryGroup('myGroup'); <br />
-            } <br />
-            cgpv.api.map(map).addToGeometryGroup('myGroup', circleMarker);<br />
-            }<br />
-        </div>
+        <div id="codeSnippet" class="panel"></div>
         <br />
-
+        <script src="codedoc.js"></script>
         <script>
             function addPolyline(map) {
                 // call an api function to draw a polyline
@@ -237,7 +148,11 @@
             cgpv.init(function () {
                 console.log('api is ready');
 
-                // create new geometry group
+                //create snippets
+                createCodeSnippet();
+                createConfigSnippet();
+
+                // create new geometry group 1
                 cgpv.api.map('mapWM').createGeometryGroup('myGroup');
 
                 // get addPolyline button element for WM map
@@ -280,20 +195,6 @@
                     // call an api function to  delete the geometry group
                     cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');
                 });
-
-                // inject configuration snippet inside panel
-                for (j = 0; j < document.getElementsByClassName('llwp-map').length; j++) {
-                    let configSnippet = '';
-                    let mapID = document.getElementsByClassName('llwp-map')[j].id;
-                    for (i = 0; i < document.getElementById(mapID).attributes.length; i++) {
-                        configSnippet +=
-                            document.getElementById(mapID).attributes[i].nodeName +
-                            ': "' +
-                            document.getElementById(mapID).attributes[i].nodeValue +
-                            '" ';
-                    }
-                    document.getElementById(mapID + 'CS').innerHTML = configSnippet;
-                }
             });
         </script>
     </body>

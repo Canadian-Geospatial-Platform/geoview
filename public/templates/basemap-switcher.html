@@ -54,28 +54,20 @@
             <p><strong>Configuraion Snippet:</strong></p>
             <div id="UC1CS" class="panel"></div>
         </div>
+        <div id="codeSnippet" class="panel"></div>
+        <script src="codedoc.js"></script>
         <script>
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
 
+                //create snippets
+                createCodeSnippet();
+                createConfigSnippet();
+
                 cgpv.api.addPlugin('basemapSwitcher', window.plugins['basemapSwitcher'], {
                     mapId: 'UC1',
                 });
-
-                // inject cofiguration snippet insdie panel
-                for (j = 0; j < document.getElementsByClassName('llwp-map').length; j++) {
-                    let configSnippet = '';
-                    let mapID = document.getElementsByClassName('llwp-map')[j].id;
-                    for (i = 0; i < document.getElementById(mapID).attributes.length; i++) {
-                        configSnippet +=
-                            document.getElementById(mapID).attributes[i].nodeName +
-                            ': "' +
-                            document.getElementById(mapID).attributes[i].nodeValue +
-                            '" ';
-                    }
-                    document.getElementById(mapID + 'CS').innerHTML = configSnippet;
-                }
             });
         </script>
     </body>
