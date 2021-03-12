@@ -11,7 +11,6 @@ import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import { useEventHandlers } from '@react-leaflet/core';
 
 import { Basemap } from '../../common/basemap';
-
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
 
 import { api } from '../../api/api';
@@ -64,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
  * Interface for overview map properties
  */
 interface OverviewProps {
+    id: string;
     crs: CRS;
     language: string;
     zoomFactor: number;
@@ -73,15 +73,26 @@ interface OverviewProps {
  * Interface for bound polygon properties
  */
 interface MiniboundProps {
+    parentId: string;
     parentMap: Map;
     zoomFactor: number;
 }
 
 /**
+ * Interface for the minimap toggle properties
+ */
+interface MinimapToggleProps {
+    parentId: string;
+}
+
+/**
  * Create a toggle element to expand/collapse the overview map
+ * @param {MinimapToggleProps} props toggle properties
  * @return {JSX.Element} the toggle control
  */
-function MinimapToggle(): JSX.Element {
+function MinimapToggle(props: MinimapToggleProps): JSX.Element {
+    const { parentId } = props;
+
     const divRef = useRef(null);
 
     const { t } = useTranslation();
@@ -112,7 +123,7 @@ function MinimapToggle(): JSX.Element {
         }
 
         // trigger a new event when overview map is toggled
-        api.event.emit(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, null, {
+        api.event.emit(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, parentId, {
             status,
         });
     }
@@ -143,7 +154,7 @@ function MinimapToggle(): JSX.Element {
  * @param {MiniboundProps} props bound properties
  */
 function MinimapBounds(props: MiniboundProps) {
-    const { parentMap, zoomFactor } = props;
+    const { parentId, parentMap, zoomFactor } = props;
     const minimap = useMap();
 
     const [toggle, setToggle] = useState<boolean>(false);
@@ -179,9 +190,10 @@ function MinimapBounds(props: MiniboundProps) {
 
         // listen to API event when the overview map is toggled
         api.event.on(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, (payload) => {
-            updateMap();
-
-            setToggle(payload.status);
+            if (payload && parentId === payload.handlerName) {
+                updateMap();
+                setToggle(payload.status);
+            }
         });
 
         // remove the listener when the component unmounts
@@ -222,7 +234,7 @@ function MinimapBounds(props: MiniboundProps) {
  * @return {JSX.Element} the overview map component
  */
 export function OverviewMap(props: OverviewProps): JSX.Element {
-    const { crs, language, zoomFactor } = props;
+    const { id, crs, language, zoomFactor } = props;
 
     const classes = useStyles();
 
@@ -266,8 +278,8 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
                 {basemaps.getBasemapLayers().map((base: { id: string | number | null | undefined; url: string }) => (
                     <TileLayer key={base.id} url={base.url} />
                 ))}
-                <MinimapBounds parentMap={parentMap} zoomFactor={zoomFactor} />
-                <MinimapToggle />
+                <MinimapBounds parentId={id} parentMap={parentMap} zoomFactor={zoomFactor} />
+                <MinimapToggle parentId={id} />
             </MapContainer>
         ),
         [parentMap, crs, mapZoom, basemaps, zoomFactor]
