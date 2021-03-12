@@ -166,7 +166,7 @@ export function NavBar(): JSX.Element {
                     const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
 
                     return (
-                        <ButtonGroup key={groupName} orientation="vertical" aria-label={t('mapnav.ariaNavbar')} variant="contained">
+                        <ButtonGroup key={groupName} orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained">
                             {Object.keys(buttons).map((buttonId) => {
                                 const buttonPanel: ButtonPanelType = buttons[buttonId];
                                 return !buttonPanel.panel ? (
@@ -193,11 +193,11 @@ export function NavBar(): JSX.Element {
                         </ButtonGroup>
                     );
                 })}
-                <ButtonGroup orientation="vertical" aria-label={t('mapnav.ariaNavbar')} variant="contained">
+                <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained">
                     <ZoomIn />
                     <ZoomOut />
                 </ButtonGroup>
-                <ButtonGroup orientation="vertical" aria-label={t('mapnav.ariaNavbar', '')} variant="contained">
+                <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar', '')} variant="contained">
                     <Fullscreen />
                     <Home />
                 </ButtonGroup>

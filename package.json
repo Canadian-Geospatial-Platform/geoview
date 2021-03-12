@@ -44,6 +44,7 @@
         "esri-leaflet": "2.5.1",
         "esri-leaflet-renderers": "2.0.6",
         "eventemitter3": "^4.0.7",
+        "focus-trap-react": "8.4.2",
         "html-react-parser": "^1.2.4",
         "i18next": "19.8.4",
         "i18next-http-backend": "1.0.21",

@@ -6,6 +6,7 @@ import * as createTypography from '@material-ui/core/styles/createTypography';
 declare module '@material-ui/core/styles/zIndex' {
     interface ZIndex {
         leafletControl: number;
+        focusDialog: number;
     }
 }
 

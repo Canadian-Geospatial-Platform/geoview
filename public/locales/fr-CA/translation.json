@@ -1,7 +1,7 @@
 {
     "close": "Fermer",
     "mapnav": {
-        "ariaNavbar": "groupe de buttons vertical pour navigation sur la carte",
+        "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
         "fullscreen": "Plein Écran",
         "home": "Maison",
         "zoomIn": "Zoom avant",
@@ -26,5 +26,14 @@
         "layers": "Couches",
         "share": "Partager",
         "version": "Accéder au repo sur GitHub"
+    },
+    "keyboardnav": {
+        "start": "Aller après l'élément carte",
+        "end": "Aller avant l'élément carte",
+        "focusdialog": {
+            "ariadesc": "Boîte de dialog pour verrouiller le focus",
+            "toactivate": "Presser <strong>ENTER</strong> pour activer ou sauter avec <strong>TAB</strong>",
+            "main": "Nous allons garder le focus verrouillé sur le visualiseur - sortir à l'aide de <strong>CTRL + ESCAPE</strong>"
+        }
     }
 }

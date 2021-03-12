@@ -6,6 +6,7 @@ Hold all third party libraries override
 .leaflet-container {
     display: flex;
     height: 100%;
+    pointer-events: all;
 }
 
 .leaflet-control-scale {

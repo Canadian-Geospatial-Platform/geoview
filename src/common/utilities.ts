@@ -10,11 +10,11 @@ export function manageKeyboardFocus(): void {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass() {
         const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
-        if (previouslyFocusedElement) previouslyFocusedElement.classList.remove('keyboard-focused');
+        if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle('keyboard-focused');
     }
 
     // Add event listener for when tab pressed
-    document.addEventListener('keyup', (e) => {
+    document.addEventListener('keyup', (e: KeyboardEvent) => {
         if (e.key !== 'Tab') return;
 
         // get array of map elements
@@ -24,12 +24,14 @@ export function manageKeyboardFocus(): void {
         if (elements.some((element) => element.contains(activeEl))) {
             // Remove class on previous element then add the 'keyboard-focused' class to the currently focused element
             removeFocusedClass();
-            activeEl?.classList.add('keyboard-focused');
+            activeEl?.classList.toggle('keyboard-focused');
 
             // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
             if (activeEl?.className.match(/leaflet-map-*/g) !== null) {
                 activeEl?.classList.forEach((item) => {
-                    if (item.includes('leaflet-map-')) api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, item, {});
+                    if (item.includes('leaflet-map-')) {
+                        api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, item, {});
+                    }
                 });
             }
         }

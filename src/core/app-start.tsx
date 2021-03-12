@@ -8,12 +8,11 @@ import { I18nextProvider } from 'react-i18next';
 
 import parse, { attributesToProps } from 'html-react-parser';
 
-import { LatLngTuple } from 'leaflet';
-
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import { Map, MapProps } from '../components/map/map';
+import { Shell } from '../components/layout/shell';
+import { MapProps } from '../components/map/map';
 import { theme } from '../assests/style/theme';
 
 /**
@@ -38,6 +37,7 @@ const AppStart = (props: AppStartProps): JSX.Element => {
             replace: (domNode) => {
                 // parse map config and create maps
                 if (domNode.attribs && domNode.attribs.class && domNode.attribs.class === 'llwp-map') {
+                    // TODO: validate config before, if not complete, fill with defaiult values
                     const config: MapProps = JSON.parse((domNode.attribs['data-leaflet'] || '')?.replace(/'/g, '"'));
 
                     const i18nInstance = i18n.cloneInstance({
@@ -45,21 +45,11 @@ const AppStart = (props: AppStartProps): JSX.Element => {
                         fallbackLng: config.language,
                     });
 
-                    const center: LatLngTuple = [config.center[0], config.center[1]];
-
                     return (
                         // eslint-disable-next-line react/jsx-props-no-spreading
                         <div {...attributesToProps(domNode.attribs)}>
                             <I18nextProvider i18n={i18nInstance}>
-                                <Map
-                                    id={domNode.attribs.id}
-                                    center={center}
-                                    zoom={config.zoom}
-                                    projection={config.projection}
-                                    language={config.language}
-                                    layers={config.layers}
-                                    basemapOptions={config.basemapOptions}
-                                />
+                                <Shell id={domNode.attribs.id} config={config} />
                             </I18nextProvider>
                         </div>
                     );

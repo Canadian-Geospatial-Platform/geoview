@@ -29,6 +29,9 @@ Marker.prototype.options.icon = DefaultIcon;
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
 function init(callback: () => void) {
+    // apply focus to element when keyboard navigation is use
+    manageKeyboardFocus();
+
     const html = document.body.innerHTML;
 
     document.body.innerHTML = '';
@@ -53,9 +56,6 @@ const cgpv = {
         ...api.plugin,
     },
 };
-
-// apply focus to element when keyboard navigation is use
-manageKeyboardFocus();
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
