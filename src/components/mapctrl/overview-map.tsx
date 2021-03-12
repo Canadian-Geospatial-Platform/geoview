@@ -10,7 +10,7 @@ import { Map, CRS, DomEvent } from 'leaflet';
 import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
 import { useEventHandlers } from '@react-leaflet/core';
 
-import { BasemapLayer } from '../../common/basemap';
+import { Basemap } from '../../common/basemap';
 
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
 
@@ -26,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
     toggleBtn: {
         transform: 'rotate(45deg)',
         color: theme.palette.primary.contrastText,
+        zIndex: theme.zIndex.tooltip,
+    },
+    toggleBtnContainer: {
         zIndex: theme.zIndex.tooltip,
     },
     minimapOpen: {
@@ -62,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
  */
 interface OverviewProps {
     crs: CRS;
-    basemaps: BasemapLayer[];
+    language: string;
     zoomFactor: number;
 }
 
@@ -119,7 +122,7 @@ function MinimapToggle(): JSX.Element {
     }, []);
 
     return (
-        <div ref={divRef} className={LEAFLET_POSITION_CLASSES.topright}>
+        <div ref={divRef} className={[LEAFLET_POSITION_CLASSES.topright, classes.toggleBtnContainer].join(' ')}>
             <IconButton
                 className={['leaflet-control', classes.toggleBtn, !status ? classes.minimapOpen : classes.minimapClosed].join(' ')}
                 style={{
@@ -219,7 +222,7 @@ function MinimapBounds(props: MiniboundProps) {
  * @return {JSX.Element} the overview map component
  */
 export function OverviewMap(props: OverviewProps): JSX.Element {
-    const { crs, basemaps, zoomFactor } = props;
+    const { crs, language, zoomFactor } = props;
 
     const classes = useStyles();
 
@@ -227,6 +230,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
 
     const parentMap = useMap();
     const mapZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
+    const basemaps = new Basemap({ id: 'transport', shaded: false, labeled: true }, language, Number(crs.code?.split(':')[1]));
 
     const overviewRef = useRef(null);
     useEffect(() => {
@@ -259,7 +263,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
                     cgpMap.getContainer().parentElement.style.margin = `${theme.spacing(3)}px`;
                 }}
             >
-                {basemaps.map((base: { id: string | number | null | undefined; url: string }) => (
+                {basemaps.getBasemapLayers().map((base: { id: string | number | null | undefined; url: string }) => (
                     <TileLayer key={base.id} url={base.url} />
                 ))}
                 <MinimapBounds parentMap={parentMap} zoomFactor={zoomFactor} />

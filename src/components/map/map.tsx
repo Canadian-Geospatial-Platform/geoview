@@ -157,7 +157,7 @@ export function Map(props: MapProps): JSX.Element {
                     {deviceSizeMedUp && <MousePosition />}
                     <ScaleControl position="bottomright" imperial={false} />
                     {deviceSizeMedUp && <Attribution attribution={attribution} />}
-                    {deviceSizeMedUp && <OverviewMap crs={crs} basemaps={basemapLayers} zoomFactor={mapOptions.zoomFactor} />}
+                    {deviceSizeMedUp && <OverviewMap crs={crs} language={language} zoomFactor={mapOptions.zoomFactor} />}
                     <div
                         className="leaflet-control cgp-appbar"
                         style={{
