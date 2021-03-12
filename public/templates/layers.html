@@ -110,37 +110,17 @@
             <p><strong>Configuration Snippet:</strong></p>
             <div id="LYR4CS" class="panel"></div>
             <p><strong>Code Snippet:</strong></p>
-            <div class="panel">
-                // call an api function to add GeoJson layer<br />
-                const layerID = cgpv.api.map('LYR4').createGeoJSONLayer({ {<br />
-                type: 'geoJSON',<br />
-                url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',<br />
-                });<br />
-            </div>
-            <br />
-            <div class="panel">
-                // removing a geojson layer using the ID <br />
-                cgpv.api.map('LYR4').remove(document.getElementById('new-layer-id').innerText);<br />
-            </div>
+            <div id="codeSnippet" class="panel"></div>
         </div>
+        <script src="codedoc.js"></script>
         <script>
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
 
-                // inject configuration snippet inside panel
-                for (j = 0; j < document.getElementsByClassName('llwp-map').length; j++) {
-                    let configSnippet = '';
-                    let mapID = document.getElementsByClassName('llwp-map')[j].id;
-                    for (i = 0; i < document.getElementById(mapID).attributes.length; i++) {
-                        configSnippet +=
-                            document.getElementById(mapID).attributes[i].nodeName +
-                            ': "' +
-                            document.getElementById(mapID).attributes[i].nodeValue +
-                            '" ';
-                    }
-                    document.getElementById(mapID + 'CS').innerHTML = configSnippet;
-                }
+                //create snippets
+                createCodeSnippet();
+                createConfigSnippet();
             });
 
             // find the button element by ID

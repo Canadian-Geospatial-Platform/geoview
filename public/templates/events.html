@@ -58,43 +58,23 @@
             <p><strong>Configuration Snippet:</strong></p>
             <div id="EVNT1CS" class="panel"></div>
             <br />
-            <div class="panel">
+            <div id="codeSnippet" class="panel">
                 <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
                 <div class="maps-position"></div>
             </div>
-            <br />
-            <div class="panel">
-                <pre><code>
-
-// listen to all events emitted with same event name
-cgpv.api.all('map/moveend', (args) => {
-    mapsPosition[0].innerHTML = mapsPosition[0].innerHTML = args
-        .map((map) => {
-            return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
-        })
-        .join(' ');
-});
-
-// snackbar notification
-window.cgpv.api.event.emit('snackbar/open', 'LNG1', {
-        message: 'This is my first snackbar!'
-    });
-setInterval(() => {
-    window.cgpv.api.event.emit('snackbar/open', 'LNG1', {
-        message: 'I can even apply a function',
-        button: {
-            label: 'Click me!',
-            action: () => { alert('You clicked me!')}
-        }
-    });
-}, 20000);
-            </code></pre>
-            </div>
         </div>
+        <script src="codedoc.js"></script>
         <script>
+
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
+
+                //create snippets
+                createCodeSnippet();
+                createConfigSnippet();
+
+                //get map posiion panel
                 const mapsPosition = document.getElementsByClassName('maps-position');
 
                 // listen to all events emitted with same event name
@@ -105,20 +85,6 @@ setInterval(() => {
                         })
                         .join(' ');
                 });
-
-                // inject configuration snippet inside panel
-                for (j = 0; j < document.getElementsByClassName('llwp-map').length; j++) {
-                    let configSnippet = '';
-                    let mapID = document.getElementsByClassName('llwp-map')[j].id;
-                    for (i = 0; i < document.getElementById(mapID).attributes.length; i++) {
-                        configSnippet +=
-                            document.getElementById(mapID).attributes[i].nodeName +
-                            ': "' +
-                            document.getElementById(mapID).attributes[i].nodeValue +
-                            '" ';
-                    }
-                    document.getElementById(mapID + 'CS').innerHTML = configSnippet;
-                }
 
                 // snackbar notification
                 window.cgpv.api.event.emit('snackbar/open', 'EVNT1', {
