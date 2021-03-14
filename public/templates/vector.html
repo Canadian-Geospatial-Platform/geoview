@@ -45,13 +45,19 @@
                 </tbody>
             </table>
         </div>
+        <button class="create-group-btn">Create Geometry Group</button>
+        <input type="text" id="groupname" /> <label>If not provided, default group will be used</label>
         <div class="toolbar">
             <button class="add-polyline-btn">Add Polyline</button>
             <button class="add-polygon-btn">Add Polygon</button>
             <button class="add-circle-btn">Add Circle</button>
             <button class="add-circle-marker-btn">Add Circle Marker</button>
-            <button class="delete-group-btn">Delete Group</button>
         </div>
+        <button class="delete-group-btn">Delete Group</button>
+        <label>
+            The Delete Group button will delete remove the group if group name was provided above. if not will clear all geometries from
+            default group
+        </label>
         <div
             id="mapWM"
             class="llwp-map"
@@ -81,11 +87,7 @@
                     }
                 );
 
-                // check if a group already exists if not , create one
-                if (!cgpv.api.map(map).getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-                cgpv.api.map(map).addToGeometryGroup('myGroup', polyline);
+                cgpv.api.map(map).addToGeometryGroup(polyline, document.getElementById('groupname').value);
             }
 
             function addPolygon(map) {
@@ -104,12 +106,7 @@
                         opacity: '0.8',
                     }
                 );
-
-                // check if a group already exists if not , create one
-                if (!cgpv.api.map(map).getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-                cgpv.api.map(map).addToGeometryGroup('myGroup', polygon);
+                cgpv.api.map(map).addToGeometryGroup(polygon, document.getElementById('groupname').value);
             }
 
             function addCircle(map) {
@@ -121,11 +118,7 @@
                     radius: 50.0,
                 });
 
-                // check if a group already exists if not , create one
-                if (!cgpv.api.map(map).getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-                cgpv.api.map(map).addToGeometryGroup('myGroup', circle);
+                cgpv.api.map(map).addToGeometryGroup(circle, document.getElementById('groupname').value);
             }
 
             function addCircleMarker(map) {
@@ -136,12 +129,7 @@
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
-
-                // check if a group already exists if not , create one
-                if (!cgpv.api.map(map).getGeometryGroup('myGroup')) {
-                    cgpv.api.map('mapWM').createGeometryGroup('myGroup');
-                }
-                cgpv.api.map(map).addToGeometryGroup('myGroup', circleMarker);
+                cgpv.api.map(map).addToGeometryGroup(circleMarker, document.getElementById('groupname').value);
             }
 
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
@@ -151,9 +139,6 @@
                 //create snippets
                 createCodeSnippet();
                 createConfigSnippet();
-
-                // create new geometry group 1
-                cgpv.api.map('mapWM').createGeometryGroup('myGroup');
 
                 // get addPolyline button element for WM map
                 var addPolylineBtn = document.getElementsByClassName('add-polyline-btn')[0];
@@ -193,7 +178,17 @@
                 //  add event handler to the delete geometry group button
                 deleteGeomtryGroup.addEventListener('click', function (e) {
                     // call an api function to  delete the geometry group
-                    cgpv.api.map('mapWM').deleteGeometryGroup('myGroup');
+                    cgpv.api.map('mapWM').deleteGeometryGroup(document.getElementById('groupname').value);
+                });
+
+                // get deleteGeomtryFromGroup button element for WM map
+                var createGeomtryFromGroup = document.getElementsByClassName('create-group-btn')[0];
+
+                //  add event handler to the delete geometry group button
+                createGeomtryFromGroup.addEventListener('click', function (e) {
+                    // call an api function to  delete the geometry group
+                    cgpv.api.map('mapWM').createGeometryGroup(document.getElementById('groupname').value);
+                    alert('Geometry Group Created');
                 });
             });
         </script>

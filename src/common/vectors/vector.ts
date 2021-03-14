@@ -66,6 +66,9 @@ export class Vector {
     // feature group will contain the created geometries in the map
     featurGroup: L.FeatureGroup;
 
+    // default geometry group name
+    defaultGroupID = 'defaultGeomGroup';
+
     /**
      * Initialize map, vectors, and listen to add vector events
      *
@@ -81,6 +84,9 @@ export class Vector {
 
         // initialize a feature group
         this.featurGroup = new L.FeatureGroup();
+
+        // create default geometry group
+        this.createGeometryGroup(this.defaultGroupID);
 
         // add feature group to the map
         this.map.addLayer(this.featurGroup);
@@ -253,7 +259,9 @@ export class Vector {
      * @param {string} id the id of the group to use when managing this group
      */
     createGeometryGroup = (id: string): void => {
-        this.geometryGroups.push({ id, geometryGroup: [] });
+        if (!this.getGeometryGroup(id)) {
+            this.geometryGroups.push({ id, geometryGroup: [] });
+        }
     };
 
     /**
@@ -270,12 +278,18 @@ export class Vector {
     /**
      * Add a new geometry to the group that was created with an id
      *
-     * @param {string} id the id of the group to add the geometry to
      * @param {GeometryType} layer the geometry to be added to the group
+     * @param {string} id optional id of the group to add the geometry to
      */
-    addToGeometryGroup = (id: string, layer: GeometryType): void => {
+    addToGeometryGroup = (layer: GeometryType, id?: string): void => {
+        // if group name not given, add to default group
+        const groupName = id || this.defaultGroupID;
+
+        // create geometry group if it does not exist
+        this.createGeometryGroup(groupName);
+
         for (let i = 0; i < this.geometryGroups.length; i++) {
-            if (this.geometryGroups[i].id === id) {
+            if (this.geometryGroups[i].id === groupName) {
                 this.geometryGroups[i].geometryGroup.push(layer);
             }
         }
@@ -300,11 +314,13 @@ export class Vector {
      * Delete a specific geometry from a group using the geometry id
      *
      * @param {string} geometryId the geometry id to be deleted
-     * @param {string} groupId the group id
+     * @param {string} groupId optional group id
      */
-    deleteGeometryFromGroup = (geometryId: string, groupId: string): void => {
+    deleteGeometryFromGroup = (geometryId: string, groupId?: string): void => {
+        // if group name not give, add to default group
+        const groupName = groupId || this.defaultGroupID;
         for (let i = 0; i < this.geometryGroups.length; i++) {
-            if (this.geometryGroups[i].id === groupId) {
+            if (this.geometryGroups[i].id === groupName) {
                 this.geometryGroups[i].geometryGroup.forEach((geometry, index) => {
                     if (geometry.id === geometryId) {
                         geometry.layer.remove();
@@ -318,11 +334,13 @@ export class Vector {
     /**
      * Delete all geometries from the geometry group but keep the group
      *
-     * @param {string} id group id
+     * @param {string} id optional group id
      */
-    deleteGeometriesFromGroup = (id: string): void => {
+    deleteGeometriesFromGroup = (id?: string): void => {
+        // if group name not give, add to default group
+        const groupName = id || this.defaultGroupID;
         for (let i = 0; i < this.geometryGroups.length; i++) {
-            if (this.geometryGroups[i].id === id) {
+            if (this.geometryGroups[i].id === groupName) {
                 this.geometryGroups[i].geometryGroup.forEach((geometry) => {
                     geometry.layer.remove();
                 });
@@ -333,17 +351,19 @@ export class Vector {
     /**
      * Delete a geometry group and all the geometries from the map
      *
-     * @param {string} id the id of the geometry group to delete
+     * @param {string} id optional id of the geometry group to delete
      */
-    deleteGeometryGroup = (id: string): void => {
+    deleteGeometryGroup = (id?: string): void => {
         for (let i = 0; i < this.geometryGroups.length; i++) {
             if (this.geometryGroups[i].id === id) {
                 this.geometryGroups[i].geometryGroup.forEach((geometry) => {
                     geometry.layer.remove();
                 });
-
                 this.geometryGroups.splice(i, 1);
             }
+        }
+        if (id === this.defaultGroupID || id === '') {
+            this.deleteGeometriesFromGroup();
         }
     };
 }

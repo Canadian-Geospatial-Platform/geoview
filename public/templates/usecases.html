@@ -136,7 +136,7 @@
                         opacity: '0.8',
                     }
                 );
-                cgpv.api.map(map).addToGeometryGroup('myGroup', polyline);
+                cgpv.api.map(map).addToGeometryGroup(polyline);
             }
 
             function addPolygon(map) {
@@ -155,7 +155,7 @@
                         opacity: '0.8',
                     }
                 );
-                cgpv.api.map(map).addToGeometryGroup('myGroup', polygon);
+                cgpv.api.map(map).addToGeometryGroup(polygon);
             }
 
             function addCircle(map) {
@@ -166,7 +166,7 @@
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
-                cgpv.api.map(map).addToGeometryGroup('myGroup', circle);
+                cgpv.api.map(map).addToGeometryGroup(circle);
             }
 
             function addCircleMarker(map) {
@@ -177,7 +177,7 @@
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
-                cgpv.api.map(map).addToGeometryGroup('myGroup', circleMarker);
+                cgpv.api.map(map).addToGeometryGroup(circleMarker);
             }
 
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
