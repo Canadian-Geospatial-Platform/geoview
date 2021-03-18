@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { makeStyles } from '@material-ui/core/styles';
 
-import { LatLngTuple } from 'leaflet';
-
 import FocusTrap from 'focus-trap-react';
 
-import { Map, MapProps } from '../map/map';
+import { MapConfigProps } from '../../api/config';
+import { Map } from '../map/map';
 import { FocusTrapDialog } from './focus-trap';
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
  */
 interface ShellProps {
     id: string;
-    config: MapProps;
+    config: MapConfigProps;
 }
 
 /**
@@ -58,8 +57,6 @@ export function Shell(props: ShellProps): JSX.Element {
 
     const classes = useStyles();
     const { t } = useTranslation();
-
-    const center: LatLngTuple = [config.center[0], config.center[1]];
 
     // set the active trap value for FocusTrap and pass the callback to the dialog window
     const [activeTrap, setActivetrap] = useState(false);
@@ -80,7 +77,7 @@ export function Shell(props: ShellProps): JSX.Element {
                 </a>
                 <Map
                     id={id}
-                    center={center}
+                    center={config.center}
                     zoom={config.zoom}
                     projection={config.projection}
                     language={config.language}

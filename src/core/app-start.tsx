@@ -11,8 +11,8 @@ import parse, { attributesToProps } from 'html-react-parser';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
+import { Config } from '../api/config';
 import { Shell } from '../components/layout/shell';
-import { MapProps } from '../components/map/map';
 import { theme } from '../assests/style/theme';
 
 /**
@@ -37,19 +37,18 @@ const AppStart = (props: AppStartProps): JSX.Element => {
             replace: (domNode) => {
                 // parse map config and create maps
                 if (domNode.attribs && domNode.attribs.class && domNode.attribs.class === 'llwp-map') {
-                    // TODO: validate config before, if not complete, fill with defaiult values
-                    const config: MapProps = JSON.parse((domNode.attribs['data-leaflet'] || '')?.replace(/'/g, '"'));
-
+                    // validate configuration and appply default if problem occurs then setup language
+                    const configObj = new Config(domNode.attribs.id || '', (domNode.attribs['data-leaflet'] || '')?.replace(/'/g, '"'));
                     const i18nInstance = i18n.cloneInstance({
-                        lng: config.language,
-                        fallbackLng: config.language,
+                        lng: configObj.language,
+                        fallbackLng: configObj.language,
                     });
 
                     return (
                         // eslint-disable-next-line react/jsx-props-no-spreading
                         <div {...attributesToProps(domNode.attribs)}>
                             <I18nextProvider i18n={i18nInstance}>
-                                <Shell id={domNode.attribs.id} config={config} />
+                                <Shell id={configObj.id} config={configObj.configuration} />
                             </I18nextProvider>
                         </div>
                     );

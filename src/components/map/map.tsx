@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { useEffect, useState } from 'react';
 
-import { Map as LeafletMap, LatLngTuple, CRS } from 'leaflet';
+import { Map as LeafletMap, CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
@@ -10,9 +10,9 @@ import { useTheme, makeStyles } from '@material-ui/core/styles';
 import { SnackbarProvider } from 'notistack';
 
 import { MapOptions, getMapOptions } from '../../common/map';
-import { BasemapOptions, BasemapLayer } from '../../common/basemap';
-import { LayerConfig } from '../../common/layers/layer';
+import { BasemapLayer } from '../../common/basemap';
 import { Projection } from '../../common/projection';
+import { MapConfigProps } from '../../api/config';
 
 import { Crosshair } from '../mapctrl/crosshair';
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -35,17 +35,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export interface MapProps {
-    id?: string;
-    center: LatLngTuple;
-    zoom: number;
-    projection: number;
-    language: string;
-    basemapOptions: BasemapOptions;
-    layers?: LayerConfig[];
-}
-
-export function Map(props: MapProps): JSX.Element {
+export function Map(props: MapConfigProps): JSX.Element {
     const { id, center, zoom, projection, language } = props;
 
     const [basemapLayers, setBasemapLayers] = useState([]);

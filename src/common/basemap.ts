@@ -1,14 +1,13 @@
 /* eslint-disable no-multi-assign */
 /* eslint-disable lines-between-class-members */
-import L from 'leaflet';
-
 import { api } from '../api/api';
+import { BasemapOptions } from '../api/config';
 import { generateId } from './constant';
 import { EVENT_NAMES } from '../api/event';
 import { MapInterface } from './map-viewer';
 
 /**
- * basemap basic properties
+ * interface for basemap basic properties
  */
 interface BasemapLayerOptions {
     tms: boolean;
@@ -38,20 +37,11 @@ interface ZoomLevels {
 }
 
 /**
- * Attribution value
+ * interface for attribution value
  */
 export interface Attribution {
     'en-CA': string;
     'fr-CA': string;
-}
-
-/**
- * basemap options interface
- */
-export interface BasemapOptions {
-    id: string;
-    shaded: boolean;
-    labeled: boolean;
 }
 
 /**

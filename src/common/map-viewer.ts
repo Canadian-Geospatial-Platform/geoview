@@ -6,7 +6,7 @@ import queryString from 'query-string';
 
 import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';
-import { MapProps } from '../components/map/map';
+import { MapConfigProps } from '../api/config';
 import { Basemap } from './basemap';
 import { Layer } from './layers/layer';
 
@@ -26,7 +26,7 @@ export interface MapInterface {
  */
 export class MapViewer {
     // map config properties
-    mapProps: MapProps;
+    mapProps: MapConfigProps;
 
     // the id of the map
     id!: string;
@@ -55,9 +55,9 @@ export class MapViewer {
     /**
      * Initialize map props and basemaps
      *
-     * @param {MapProps} mapProps map properties
+     * @param {MapConfigProps} mapProps map properties
      */
-    constructor(mapProps: MapProps) {
+    constructor(mapProps: MapConfigProps) {
         this.mapProps = mapProps;
 
         this.language = mapProps.language;
@@ -95,7 +95,7 @@ export class MapViewer {
      */
     loadGeometries(): void {
         // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-        const servEndpoint = this.map.getContainer().parentElement?.getAttribute('data-geometry-endpoint') || '';
+        const servEndpoint = this.map.getContainer()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
         // eslint-disable-next-line no-restricted-globals
         const parsed = queryString.parse(location.search);
 
