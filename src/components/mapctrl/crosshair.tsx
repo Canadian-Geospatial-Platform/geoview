@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
         top: theme.spacing(0),
         right: theme.spacing(0),
         left: theme.spacing(0),
-        bottom: 0,
+        bottom: theme.spacing(0),
         paddingBottom: theme.spacing(6),
         display: 'flex',
         alignItems: 'center',
@@ -92,12 +92,6 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
     function removeCrosshair(): void {
         // remove simulate click event listener
         mapContainer.removeEventListener('keydown', simulateClick);
-
-        // do nothing if the keyboard mode is not enabled or the last action was already compeleted using a mouse
-        if (!isCrosshairsActive || !mapContainer.classList.contains('keyboard-focused')) {
-            return;
-        }
-
         setCrosshairsActive(false);
     }
 
@@ -105,13 +99,19 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
     mapContainer.addEventListener('mousemove', removeCrosshair);
     mapContainer.addEventListener('blur', removeCrosshair);
 
-    // on map keyboard focus, add crosshair
-    api.event.on(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, (payload) => {
-        if (payload && payload.handlerName.includes(id)) {
-            setCrosshairsActive(true);
-            mapContainer.addEventListener('keydown', simulateClick);
-        }
-    });
+    useEffect(() => {
+        // on map keyboard focus, add crosshair
+        api.event.on(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, (payload) => {
+            if (payload && payload.handlerName.includes(id)) {
+                setCrosshairsActive(true);
+                mapContainer.addEventListener('keydown', simulateClick);
+            }
+        });
+
+        return () => {
+            api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
+        };
+    }, []);
 
     return (
         <div

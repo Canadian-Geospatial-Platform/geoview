@@ -1,7 +1,7 @@
 {
     "close": "Close",
     "mapnav": {
-        "ariaNavbar": "vertical button group for map navigation",
+        "arianavbar": "vertical button group for map navigation",
         "fullscreen": "Full Screen",
         "home": "Home",
         "zoomIn": "Zoom in",
@@ -26,5 +26,14 @@
         "layers": "Layers",
         "share": "Share",
         "version": "Access GitHub repo"
+    },
+    "keyboardnav": {
+        "start": "Skip after map element",
+        "end": "Skip before map element",
+        "focusdialog": {
+            "ariadesc": "Focus trap dialog box",
+            "toactivate": "Press <strong>ENTER</strong> to activate or skip with <strong>TAB</strong>",
+            "main": "We'll keep focus locked on the viewer - exit with <strong>CTRL + ESCAPE</strong>"
+        }
     }
 }

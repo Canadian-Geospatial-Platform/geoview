@@ -7,6 +7,11 @@ import EventEmitter from 'eventemitter3';
  */
 export const EVENT_NAMES = {
     /**
+     * Event triggered when map is loaded and api ready
+     */
+    EVENT_MAP_LOADED: 'map/loaded',
+
+    /**
      * Event triggered when a user stops moving the map
      */
     EVENT_MAP_MOVE_END: 'map/moveend',

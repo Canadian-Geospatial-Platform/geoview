@@ -75,6 +75,7 @@ const themeOptions = {
         snackbar: 1400,
         tooltip: 1500,
         leafletControl: 500,
+        focusDialog: 100,
     },
     transitions: {
         duration: {
