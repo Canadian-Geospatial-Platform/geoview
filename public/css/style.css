@@ -1,5 +1,5 @@
 /* 
-This file is use to hold styles relative ti sample page
+This file is use to hold styles relative to sample page
 No style for React viewer component should be here. To add style specific to the viewer go to src/assests/style
   - theme.tsx for Material-UI
   - style.css for specific viewer style
@@ -12,6 +12,10 @@ html {
 body {
     margin: 0;
     padding: 50px;
+}
+
+td {
+    width: 100%;
 }
 
 .map-continer {
@@ -37,9 +41,14 @@ body {
     margin: 10px;
 }
 
-.header-title {
-    width: 100%;
+.index-header-title {
     text-align: center;
+}
+
+.header-title {
+    text-align: center;
+    position: absolute;
+    left: 0;
 }
 
 .header-table {

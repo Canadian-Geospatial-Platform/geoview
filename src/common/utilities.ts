@@ -41,3 +41,21 @@ export function manageKeyboardFocus(): void {
     document.addEventListener('click', removeFocusedClass);
     document.addEventListener('focusout', removeFocusedClass);
 }
+
+/**
+ * Validate if a JSON string is well formatted
+ * @param {string} str the string to test
+ * @returns {bollean} true if the JSON is valid, false otherwise
+ */
+export function isJsonString(str: string): boolean {
+    try {
+        if (str !== '') {
+            JSON.parse(str);
+        } else {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    return true;
+}

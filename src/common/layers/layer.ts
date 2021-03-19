@@ -28,7 +28,7 @@ export const LayerTypes = {
 export interface LayerConfig {
     url: string;
     type: string;
-    entries: string;
+    entries?: string;
 }
 
 /**
