@@ -187,5 +187,15 @@ export class Layer {
         return layerID;
     };
 
+    /**
+     * Search for a layer using it's id and return the layer data
+     *
+     * @param {string} id the layer id to look for
+     * @returns the found layer data object
+     */
+    getLayerById = (id: string): LayerData | null => {
+        return this.layers.filter((layer: LayerData) => layer.id === id)[0];
+    };
+
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS
 }
