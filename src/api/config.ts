@@ -17,6 +17,7 @@ export interface MapConfigProps {
     language: string;
     basemapOptions: BasemapOptions;
     layers?: LayerConfig[];
+    plugins?: string[];
 }
 
 /**
@@ -45,6 +46,7 @@ export class Config {
         language: 'en-CA',
         basemapOptions: { id: 'transport', shaded: true, labeled: true },
         layers: [],
+        plugins: [],
     };
 
     // validations values
@@ -91,7 +93,8 @@ export class Config {
         this._config.id = id !== '' ? id : this._config.id;
         this._config = config !== '' && isJsonString(config) ? this.validate(id, config) : this._config;
 
-        if (config === '' || !isJsonString(config)) console.log(`- map: ${id} - Invalid or empty JSON configuration object, using default -`);
+        if (config === '' || !isJsonString(config))
+            console.log(`- map: ${id} - Invalid or empty JSON configuration object, using default -`);
     }
 
     /**
