@@ -83,6 +83,7 @@ export function Shell(props: ShellProps): JSX.Element {
                     language={config.language}
                     layers={config.layers}
                     basemapOptions={config.basemapOptions}
+                    plugins={config.plugins}
                 />
                 <FocusTrapDialog id={id} callback={handleCallback} />
                 <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip}>

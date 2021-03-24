@@ -1,3 +1,4 @@
+import { api } from './../api/api';
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Map } from 'leaflet';
@@ -88,6 +89,15 @@ export class MapViewer {
 
         // init basemap and pass in the map id to be able to access the map instance
         this.basemap.init(this.id);
+
+        // load plugins if provided in the config
+        if (this.mapProps.plugins && this.mapProps.plugins.length > 0) {
+            this.mapProps.plugins.forEach((plugin) => {
+                api.plugin.addPlugin(plugin, null, {
+                    mapId: this.id,
+                });
+            });
+        }
     };
 
     /**
