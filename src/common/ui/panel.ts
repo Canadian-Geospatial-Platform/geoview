@@ -1,3 +1,5 @@
+import { createElement } from 'react';
+
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
@@ -66,7 +68,7 @@ export class Panel {
         this.type = panel.type;
         this.title = panel.title;
         this.icon = panel.icon;
-        this.content = panel.content;
+        this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement('div');
         this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;
         this.width = panel.width;
     }
@@ -102,7 +104,7 @@ export class Panel {
      * @param {string} title the title of the action button, will display in the tooltip
      * @param {string | ReactElement | Element} icon the icon of the action button
      * @param {Function} action a function that will be triggered when clicking this action
-     * @returns the panel
+     * @returns {Panel} the panel
      */
     addActionButton = (id: string, title: string, icon: string & React.ReactElement & Element, action: () => void): Panel => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, api.selectedMapInstance.id, {
@@ -120,10 +122,29 @@ export class Panel {
     };
 
     /**
+     * Change the content of the panel
+     *
+     * @param {React Element} content the content to update to
+     *
+     * @returns {Panel} this panel
+     */
+    changeContent = (content: React.ReactNode | Element): Panel => {
+        this.content = content;
+
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, api.selectedMapInstance.id, {
+            handlerId: api.selectedMapInstance.id,
+            buttonId: this.buttonId,
+            content,
+        });
+
+        return this;
+    };
+
+    /**
      * Remove action button
      *
      * @param {string} id the id of the action button to be removed
-     * @returns this panel
+     * @returns {Panel} this panel
      */
     removeActionButton = (id: string): Panel => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, api.selectedMapInstance.id, {

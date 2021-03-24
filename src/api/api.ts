@@ -72,9 +72,6 @@ export class API {
         this.isReady = window.setTimeout(() => {
             // Run the callback
             if (this.readyCallback) this.readyCallback();
-
-            // load internal plugins
-            this.plugin.loadInternalPlugins();
         }, 1000);
     };
 
