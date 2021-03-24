@@ -67,7 +67,7 @@ export class Panel {
         this.title = panel.title;
         this.icon = panel.icon;
         this.content = panel.content;
-        this.status = panel.status;
+        this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;
         this.width = panel.width;
     }
 
@@ -79,6 +79,8 @@ export class Panel {
             handlerId: api.selectedMapInstance.id,
             buttonId: this.buttonId,
         });
+
+        this.status = true;
     };
 
     /**
@@ -89,5 +91,47 @@ export class Panel {
             handlerId: api.selectedMapInstance.id,
             buttonId: this.buttonId,
         });
+
+        this.status = false;
+    };
+
+    /**
+     * Add a new action button to the header of the panel before the close button
+     *
+     * @param {string} id an id for the new action button to be used later to delete this button
+     * @param {string} title the title of the action button, will display in the tooltip
+     * @param {string | ReactElement | Element} icon the icon of the action button
+     * @param {Function} action a function that will be triggered when clicking this action
+     * @returns the panel
+     */
+    addActionButton = (id: string, title: string, icon: string & React.ReactElement & Element, action: () => void): Panel => {
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, api.selectedMapInstance.id, {
+            handlerId: api.selectedMapInstance.id,
+            buttonId: this.buttonId,
+            actionButton: {
+                id: `${this.buttonId}_${id}`,
+                title,
+                icon,
+                action,
+            },
+        });
+
+        return this;
+    };
+
+    /**
+     * Remove action button
+     *
+     * @param {string} id the id of the action button to be removed
+     * @returns this panel
+     */
+    removeActionButton = (id: string): Panel => {
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, api.selectedMapInstance.id, {
+            handlerId: api.selectedMapInstance.id,
+            buttonId: this.buttonId,
+            actionButtonId: `${this.buttonId}_${id}`,
+        });
+
+        return this;
     };
 }

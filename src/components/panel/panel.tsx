@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import { useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 import { DomEvent } from 'leaflet';
 
@@ -19,6 +19,7 @@ import { MapInterface } from '../../common/map-viewer';
 import { HtmlToReact } from '../../common/containers/html-to-react';
 import { Panel } from '../../common/ui/panel';
 import { styles } from '../../assests/style/theme';
+import { Button } from '../../common/ui/button';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,6 +35,10 @@ const useStyles = makeStyles((theme) => ({
     },
     cardContainer: {
         height: '100%',
+        overflow: 'hidden',
+        overflowY: 'auto',
+        paddingBottom: '60px !important',
+        boxSizing: 'border-box',
     },
     avatar: {
         color: theme.palette.primary.contrastText,
@@ -47,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
 interface PanelAppProps {
     panel: Panel;
     panelOpen: boolean;
+    button: Button;
 }
 
 /**
@@ -54,7 +60,9 @@ interface PanelAppProps {
  * @param {PanelAppProps} props panel properties
  */
 export default function PanelApp(props: PanelAppProps): JSX.Element {
-    const { panel, panelOpen } = props;
+    const { panel, button, panelOpen } = props;
+
+    const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
 
     const classes = useStyles(props);
     const { t } = useTranslation();
@@ -69,6 +77,9 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
      * Close the panel
      */
     function closePanel(): void {
+        // set panel status to false
+        panel.status = false;
+
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
             // used to tell which panel type has been closed
             panelType: panel.type,
@@ -78,8 +89,14 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             status: false,
         });
 
-        // put back focus on calling button
-        document.getElementById(panel.buttonId)?.focus();
+        const buttonElement = document.getElementById(panel.buttonId);
+
+        if (buttonElement) {
+            // put back focus on calling button
+            document.getElementById(panel.buttonId)?.focus();
+        } else {
+            map.getContainer().focus();
+        }
     }
 
     useEffect(() => {
@@ -96,14 +113,70 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             mapId
         );
 
+        // listen to add action button event
+        api.event.on(
+            EVENT_NAMES.EVENT_PANEL_ADD_ACTION,
+            (args) => {
+                if (args.buttonId === panel.buttonId) {
+                    const { actionButton } = args;
+
+                    setActionButtons((prev) => [
+                        ...prev,
+                        <Tooltip
+                            id={actionButton.id}
+                            key={actionButton.id}
+                            title={actionButton.title}
+                            placement="right"
+                            TransitionComponent={Fade}
+                        >
+                            <IconButton
+                                id={actionButton.id}
+                                className="cgpv-panel-close"
+                                aria-label={actionButton.title}
+                                onClick={actionButton.action}
+                            >
+                                {typeof actionButton.icon === 'string' ? (
+                                    <HtmlToReact
+                                        style={{
+                                            display: 'flex',
+                                        }}
+                                        htmlContent={actionButton.icon}
+                                    />
+                                ) : typeof actionButton.icon === 'object' ? (
+                                    actionButton.icon
+                                ) : (
+                                    <actionButton.icon />
+                                )}
+                            </IconButton>
+                        </Tooltip>,
+                    ]);
+                }
+            },
+            mapId
+        );
+
+        // listen to remove action button event
+        api.event.on(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, (args) => {
+            if (args.buttonId === panel.buttonId) {
+                const { actionButtonId } = args;
+                setActionButtons((list) =>
+                    list.filter((item) => {
+                        return item.props.id !== actionButtonId;
+                    })
+                );
+            }
+        });
+
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
+            api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION);
+            api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION);
         };
     }, []);
 
     useEffect(() => {
         // set focus on close button on panel open
-        ((closeBtnRef.current as unknown) as HTMLElement).focus();
+        if (button.visible) ((closeBtnRef.current as unknown) as HTMLElement).focus();
     });
 
     return (
@@ -119,6 +192,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                     closePanel();
                 }
             }}
+            {...{ 'data-id': panel.buttonId }}
         >
             <CardHeader
                 className={classes.avatar}
@@ -133,15 +207,18 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                 }
                 title={t(panel.title)}
                 action={
-                    <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
-                        <IconButton ref={closeBtnRef} className="cgpv-panel-close" aria-label={t('close')} onClick={closePanel}>
-                            <CloseIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <>
+                        {actionButtons}
+                        <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
+                            <IconButton ref={closeBtnRef} className="cgpv-panel-close" aria-label={t('close')} onClick={closePanel}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
                 }
             />
             <Divider />
-            <CardContent>
+            <CardContent className={classes.cardContainer}>
                 {typeof panel.content === 'string' ? (
                     <HtmlToReact htmlContent={panel.content} />
                 ) : typeof panel.content === 'object' ? (

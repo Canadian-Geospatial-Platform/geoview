@@ -22,6 +22,11 @@ export const EVENT_NAMES = {
     EVENT_MAP_IN_KEYFOCUS: 'map/inkeyfocus',
 
     /**
+     * Event triggered to enable / disable crosshair
+     */
+    EVENT_MAP_CROSSHAIR_ENABLE_DISABLE: 'map/crosshair_enable_disable',
+
+    /**
      * Event triggered when the overview map is toggled
      */
     EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',
@@ -62,6 +67,22 @@ export const EVENT_NAMES = {
      * Event triggered when a request is made to close a panel
      */
     EVENT_PANEL_CLOSE: 'panel/close',
+    /**
+     * Event triggered when a request is made to add an action button
+     */
+    EVENT_PANEL_ADD_ACTION: 'panel/add_action',
+    /**
+     * Event triggered when a request is made to remove an action button
+     */
+    EVENT_PANEL_REMOVE_ACTION: 'panel/remove_action',
+    /**
+     * Event triggered when a request is made to change panel header title
+     */
+    EVENT_PANEL_CHANGE_TITLE: 'panel/change_title',
+    /**
+     * Event triggered when a request is made to change panel content
+     */
+    EVENT_PANEL_CHANGE_CONTENT: 'panel/change_content',
 
     /**
      * Event triggered when adding a new layer
@@ -98,6 +119,11 @@ export const EVENT_NAMES = {
      * Event is triggered when a snackbar notification opens
      */
     EVENT_SNACKBAR_OPEN: 'snackbar/open',
+
+    /**
+     * Event is triggered when a user press enter on a crosshair to open details panel
+     */
+    EVENT_DETAILS_PANEL_CROSSHAIR_ENTER: 'details_panel/crosshair_enter',
 };
 
 /**

@@ -103,8 +103,8 @@ export class ButtonPanel {
         groupName: string | null | undefined
     ): ButtonPanelType | null => {
         if (buttonProps && panelProps) {
-            // generate an id
-            buttonProps.id = generateId(null);
+            // generate an id if not provided
+            buttonProps.id = generateId(buttonProps.id);
 
             // if group was not specified then add button panels to the default group
             if (!groupName) {
@@ -155,8 +155,8 @@ export class ButtonPanel {
         groupName: string
     ): ButtonPanelType | null | undefined => {
         if (buttonProps) {
-            // generate an id
-            buttonProps.id = generateId(null);
+            // generate an id if not provided
+            buttonProps.id = generateId(buttonProps.id);
 
             // if group was not specified then add button panels to the default group
             if (!groupName) {

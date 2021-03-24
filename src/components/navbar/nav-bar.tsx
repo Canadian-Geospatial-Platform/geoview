@@ -155,7 +155,12 @@ export function NavBar(): JSX.Element {
                             const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
 
                             return buttonPanel.panel ? (
-                                <PanelApp key={buttonPanel.button.id} panel={buttonPanel.panel} panelOpen={isOpen} />
+                                <PanelApp
+                                    key={buttonPanel.button.id}
+                                    button={buttonPanel.button}
+                                    panel={buttonPanel.panel}
+                                    panelOpen={isOpen}
+                                />
                             ) : null;
                         })}
                     </div>
@@ -169,26 +174,29 @@ export function NavBar(): JSX.Element {
                         <ButtonGroup key={groupName} orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained">
                             {Object.keys(buttons).map((buttonId) => {
                                 const buttonPanel: ButtonPanelType = buttons[buttonId];
-                                return !buttonPanel.panel ? (
-                                    <ButtonMapNav
-                                        key={buttonPanel.button.id}
-                                        tooltip={buttonPanel.button.tooltip}
-                                        icon={buttonPanel.button.icon}
-                                        onClickFunction={() => {
-                                            if (buttonPanel.button.callback) buttonPanel.button.callback();
-                                        }}
-                                    />
-                                ) : (
-                                    <ButtonMapNav
-                                        key={buttonPanel.button.id}
-                                        tooltip={buttonPanel.button.tooltip}
-                                        icon={buttonPanel.button.icon}
-                                        onClickFunction={() => {
-                                            setButtonPanelId(buttonPanel.button.id);
-                                            openClosePanel(true);
-                                        }}
-                                    />
-                                );
+                                // eslint-disable-next-line no-nested-ternary
+                                return buttonPanel.button.visible ? (
+                                    !buttonPanel.panel ? (
+                                        <ButtonMapNav
+                                            key={buttonPanel.button.id}
+                                            tooltip={buttonPanel.button.tooltip}
+                                            icon={buttonPanel.button.icon}
+                                            onClickFunction={() => {
+                                                if (buttonPanel.button.callback) buttonPanel.button.callback();
+                                            }}
+                                        />
+                                    ) : (
+                                        <ButtonMapNav
+                                            key={buttonPanel.button.id}
+                                            tooltip={buttonPanel.button.tooltip}
+                                            icon={buttonPanel.button.icon}
+                                            onClickFunction={() => {
+                                                setButtonPanelId(buttonPanel.button.id);
+                                                openClosePanel(true);
+                                            }}
+                                        />
+                                    )
+                                ) : null;
                             })}
                         </ButtonGroup>
                     );

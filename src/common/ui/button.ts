@@ -10,6 +10,8 @@ export interface ButtonProps {
     icon: React.ReactNode | Element;
     // optional callback function to run on button click
     callback?: () => void;
+    // should the button be displayed in the appbar/navbar?
+    visible?: boolean;
 }
 
 /**
@@ -31,6 +33,9 @@ export class Button {
     // optional callback function to run on button click
     callback?: () => void;
 
+    // optional value used to check if the button will be visible on the appbar/navbar (default true)
+    visible?: boolean = true;
+
     /**
      * Initialize a new button
      *
@@ -41,5 +46,7 @@ export class Button {
         this.icon = button.icon;
         this.tooltip = button.tooltip;
         this.callback = button.callback;
+
+        this.visible = button.visible !== undefined ? button.visible : true;
     }
 }

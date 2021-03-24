@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable react/no-danger */
+import { useCallback, useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +11,7 @@ import { useMap } from 'react-leaflet';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 import { CrosshairIcon } from '../../assests/style/crosshair';
+import { MapInterface } from '../../common/map-viewer';
 
 const useStyles = makeStyles((theme) => ({
     crosshairContainer: {
@@ -62,56 +64,69 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
     const { t } = useTranslation();
 
     const map = useMap();
+
+    const mapId = (api.mapInstance(map) as MapInterface).id;
+
     const mapContainer = map.getContainer();
 
     // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
     const [isCrosshairsActive, setCrosshairsActive] = useState(false);
+    const [panelButtonId, setPanelButtonId] = useState<string>();
 
     /**
      * Siimulate map mouse click to trigger details panel
      * @param {KeyboardEvent} evt the keyboard event
      */
-    function simulateClick(evt: KeyboardEvent): void {
-        // TODO: look at his plugin to do the details find from user press enter on map: https://github.com/mapbox/leaflet-pip
-        if (evt.key === 'Enter') {
-            const latlngPoint = map.getCenter();
+    const simulateClick = useCallback(
+        (evt: KeyboardEvent): void => {
+            if (evt.key === 'Enter') {
+                const latlngPoint = map.getCenter();
 
-            // TODO: set click event for triggering details instead of this dummy demo
-            map.fireEvent('dblclick', {
-                latlng: latlngPoint,
-                layerPoint: map.latLngToLayerPoint(latlngPoint),
-                containerPoint: map.latLngToContainerPoint(latlngPoint),
-                originalEvent: { shiftKey: false },
-            });
-        }
-    }
+                if (isCrosshairsActive) {
+                    const { panel } = api.map(mapId).appBarPanels.default[panelButtonId];
+
+                    if (panel) {
+                        // emit an event with the latlng point
+                        api.event.emit(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
+                            latlng: latlngPoint,
+                        });
+                    }
+                }
+            }
+        },
+        [isCrosshairsActive, map, mapId, panelButtonId]
+    );
 
     /**
      * Remove the crosshair for keyboard navigation on map mouse move or blur
      */
-    function removeCrosshair(): void {
+    const removeCrosshair = useCallback((): void => {
         // remove simulate click event listener
         mapContainer.removeEventListener('keydown', simulateClick);
         setCrosshairsActive(false);
-    }
-
-    // when mouse moves over the map or map blur, check if we need to remove the crosshair
-    mapContainer.addEventListener('mousemove', removeCrosshair);
-    mapContainer.addEventListener('blur', removeCrosshair);
+    }, [mapContainer, simulateClick]);
 
     useEffect(() => {
+        mapContainer.addEventListener('keydown', simulateClick);
+
         // on map keyboard focus, add crosshair
         api.event.on(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, (payload) => {
             if (payload && payload.handlerName.includes(id)) {
                 setCrosshairsActive(true);
-                mapContainer.addEventListener('keydown', simulateClick);
+
+                setPanelButtonId('detailsPanel');
             }
         });
 
+        // when mouse moves over the map or map blur, check if we need to remove the crosshair
+        mapContainer.addEventListener('mousemove', removeCrosshair);
+        mapContainer.addEventListener('blur', removeCrosshair);
+
         return () => {
             api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
+            mapContainer.removeEventListener('keydown', simulateClick);
         };
-    }, []);
+    }, [setPanelButtonId, isCrosshairsActive, simulateClick, mapContainer, id, removeCrosshair]);
 
     return (
         <div

@@ -1,8 +1,9 @@
 import { Map } from 'leaflet';
 
-import { featureLayer } from 'esri-leaflet';
+import { featureLayer, mapService } from 'esri-leaflet';
 
 import { LayerData, LayerConfig } from './layer';
+import { getMapServerUrl } from '../utilities';
 
 /**
  * a class to add esri feature layer
@@ -29,7 +30,13 @@ export class EsriFeature {
         layers.push({
             id: layerID,
             type: layer.type,
-            layer: feat,
+            layer: Object.defineProperties(feat, {
+                mapService: {
+                    value: mapService({
+                        url: getMapServerUrl(layer.url),
+                    }),
+                },
+            }),
         });
     }
 }

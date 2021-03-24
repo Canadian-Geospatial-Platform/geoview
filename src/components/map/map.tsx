@@ -100,6 +100,7 @@ export function Map(props: MapConfigProps): JSX.Element {
             minZoom={mapOptions.minZoom}
             maxZoom={mapOptions.maxZooom}
             maxBounds={mapOptions.maxBounds}
+            keyboardPanDelta={20}
             whenCreated={(cgpMap) => {
                 // add map instance to api
                 api.maps.push(viewer);
