@@ -37,50 +37,52 @@ export class Plugin {
      * @param {Object} props the plugin properties
      */
     addPlugin = async (id: string, constructor?: any, props?: Record<string, unknown>): void => {
-        let plugin: any;
+        if (!(id in this.plugins)) {
+            let plugin: any;
 
-        if (constructor) {
-            // create new instance of the plugin
-            plugin = new constructor();
-        } else {
-            const InstanceConstructor = (await import(`../plugins/${id}/index.tsx`)).default;
+            if (constructor) {
+                // create new instance of the plugin
+                plugin = new constructor();
+            } else {
+                const InstanceConstructor = (await import(`../plugins/${id}/index.tsx`)).default;
 
-            if (InstanceConstructor) plugin = new InstanceConstructor();
-        }
+                if (InstanceConstructor) plugin = new InstanceConstructor();
+            }
 
-        if (plugin) {
-            // add translations if provided
-            if (typeof plugin.translations === 'object') {
-                const { translations } = plugin;
+            if (plugin) {
+                // add translations if provided
+                if (typeof plugin.translations === 'object') {
+                    const { translations } = plugin;
 
-                Object.keys(translations).forEach((languageKey: string) => {
-                    const translation = translations[languageKey];
+                    Object.keys(translations).forEach((languageKey: string) => {
+                        const translation = translations[languageKey];
 
-                    i18next.addResourceBundle(languageKey, 'translation', translation, true, false);
+                        i18next.addResourceBundle(languageKey, 'translation', translation, true, false);
+                    });
+                }
+
+                // assign the plugin default values to be accessible from the plugin
+                Object.defineProperties(plugin, {
+                    id: { value: id },
+                    api: { value: api },
+                    createElement: { value: React.createElement },
+                    react: { value: React },
+                    props: { value: props !== undefined && props !== null ? props : {} },
+                    translate: { value: translate },
+                    makeStyles: { value: makeStyles },
                 });
-            }
 
-            // assign the plugin default values to be accessible from the plugin
-            Object.defineProperties(plugin, {
-                id: { value: id },
-                api: { value: api },
-                createElement: { value: React.createElement },
-                react: { value: React },
-                props: { value: props !== undefined && props !== null ? props : {} },
-                translate: { value: translate },
-                makeStyles: { value: makeStyles },
-            });
+                if (!this.plugins[id]) {
+                    this.plugins[id] = {
+                        id,
+                        plugin,
+                    };
+                }
 
-            if (!this.plugins[id]) {
-                this.plugins[id] = {
-                    id,
-                    plugin,
-                };
-            }
-
-            // call plugin added method if available
-            if (typeof plugin.added === 'function') {
-                plugin.added();
+                // call plugin added method if available
+                if (typeof plugin.added === 'function') {
+                    plugin.added();
+                }
             }
         }
     };
