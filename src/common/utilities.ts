@@ -61,6 +61,56 @@ export function isJsonString(str: string): boolean {
 }
 
 /**
+ * Convert an XML document object into a json object
+ *
+ * @param {any} xml the XML document object
+ * @returns the converted json object
+ */
+export function xmlToJson(xml: any): any {
+    // Create the return object
+    let obj: Record<string, any> = {};
+
+    // check for node type if it's an element, attribute, text, comment...
+    if (xml.nodeType === 1) {
+        // if it's an element, check the element's attributes to convert to json
+        if (xml.attributes) {
+            if (xml.attributes.length > 0) {
+                obj['@attributes'] = {};
+                // eslint-disable-next-line no-plusplus
+                for (let j = 0; j < xml.attributes.length; j++) {
+                    const attribute = xml.attributes.item(j);
+                    obj['@attributes'][attribute.nodeName] = attribute.nodeValue;
+                }
+            }
+        }
+    } else if (xml.nodeType === 3) {
+        // text
+        obj = xml.nodeValue;
+    }
+
+    // do children
+    if (xml.hasChildNodes()) {
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < xml.childNodes.length; i++) {
+            const item = xml.childNodes.item(i);
+            const { nodeName } = item;
+            if (typeof obj[nodeName] === 'undefined') {
+                obj[nodeName] = xmlToJson(item);
+            } else {
+                if (typeof obj[nodeName].push === 'undefined') {
+                    const old = obj[nodeName];
+                    obj[nodeName] = [];
+                    obj[nodeName].push(old);
+                }
+                obj[nodeName].push(xmlToJson(item));
+            }
+        }
+    }
+
+    return obj;
+}
+
+/**
  * Return the map server url from a layer service
  *
  * @param {string} url the service url for a wms / dynamic or feature layers
@@ -75,4 +125,33 @@ export function getMapServerUrl(url: string, rest = false): string {
     }
 
     return mapServerUrl;
+}
+
+/**
+ * Execute a XMLHttpRequest
+ * @param {string} url the url to request
+ * @returns {Promise<string>} the return value, return is '{}' if request failed
+ */
+export function getXMLHttpRequest(url: string): Promise<string> {
+    const request = new Promise<string>((resolve) => {
+        try {
+            const jsonObj = new XMLHttpRequest();
+            jsonObj.open('GET', url, true);
+            jsonObj.onreadystatechange = () => {
+                if (jsonObj.readyState === 4 && jsonObj.status === 200) {
+                    resolve(jsonObj.responseText);
+                } else if (jsonObj.readyState === 4 && jsonObj.status >= 400) {
+                    resolve('{}');
+                }
+            };
+            jsonObj.onerror = () => {
+                resolve('{}');
+            };
+            jsonObj.send(null);
+        } catch (error) {
+            resolve('{}');
+        }
+    });
+
+    return request;
 }

@@ -80,7 +80,7 @@ export class MapViewer {
         this.vector = new Vector(mapInstance.map);
 
         // initialize layers and load the layers passed in from map config if any
-        this.layer = new Layer(mapInstance.map, this.mapProps.layers);
+        this.layer = new Layer(this.id, mapInstance.map, this.mapProps.layers);
 
         this.buttonPanel = new ButtonPanel(mapInstance.map);
 

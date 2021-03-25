@@ -54,9 +54,9 @@
             <div
                 id="LYR1"
                 class="llwp-map"
-                data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true } ,
+                data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true },
             'layers': [
-            { 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' }
+                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' }
             ] } "
             ></div>
             <p>This map has a wms layer added from configuration.</p>
@@ -70,9 +70,9 @@
             <div
                 id="LYR2"
                 class="llwp-map"
-                data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true } ,
+                data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true },
             'layers': [
-            { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 28, 29, 37' }
+                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 28, 29, 37' }
             ] } "
             ></div>
             <p>This map has a Esri dynamic layer added from configuration.</p>
@@ -85,8 +85,10 @@
             <div
                 id="LYR3"
                 class="llwp-map"
-                data-leaflet="{ 'name': 'LCC_SHADED', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA','basemapOptions': { 'id': 'shaded', 'shaded': false, 'labeled': false } ,
-                              'layers': [ { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' }] }"
+                data-leaflet="{ 'name': 'LCC_SHADED', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA','basemapOptions': { 'id': 'shaded', 'shaded': false, 'labeled': false },
+            'layers': [
+                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' }]
+            }"
             ></div>
             <p>This map has a Esri feature layer added from configuration.</p>
             <p><strong>Configuration Snippet:</strong></p>
@@ -98,8 +100,8 @@
             <div
                 id="LYR4"
                 class="llwp-map"
-                data-leaflet="{ 'name': 'LCC_SHADED', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA','basemapOptions': { 'id': 'shaded', 'shaded': false, 'labeled': false } ,
-                              'layers': [ { 'url': './geojson/polygons.json', 'type': 'geoJSON' }] }"
+                data-leaflet="{ 'name': 'LCC_SHADED', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA','basemapOptions': { 'id': 'shaded', 'shaded': false, 'labeled': false },
+                              'layers': [ { 'name': 'GeoJSON', 'url': './geojson/polygons.json', 'type': 'geoJSON' }] }"
             ></div>
             <p>
                 This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clikcing the
@@ -129,7 +131,7 @@
             // add an event listener when a button is clicked
             addGeoJSONButton.addEventListener('click', function (e) {
                 // adding a geojson layer requires a type of geojson and url
-                const layerID = cgpv.api.map('LYR4').createGeoJSONLayer({
+                const layerID = cgpv.api.map('LYR4').addLayer({
                     type: 'geoJSON',
                     url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
                 });
@@ -142,7 +144,7 @@
             // add an event listener when a button is clicked
             removeGeoJSONButton.addEventListener('click', function (e) {
                 // removing a geojson layer using the ID
-                cgpv.api.map('LYR4').remove(document.getElementById('new-layer-id').innerText);
+                cgpv.api.map('LYR4').removeLayer(document.getElementById('new-layer-id').innerText);
                 document.getElementById('new-layer-id').innerText = '';
             });
         </script>

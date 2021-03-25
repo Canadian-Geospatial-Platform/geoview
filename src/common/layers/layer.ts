@@ -1,4 +1,5 @@
-import L, { Map } from 'leaflet';
+import L, { Map, Layer as leafletLayer } from 'leaflet';
+
 import { generateId } from '../constant';
 import { EsriDynamic } from './esri-dynamic';
 import { EsriFeature } from './esri-feature';
@@ -26,6 +27,8 @@ export const LayerTypes = {
  * interface used when adding a new layer
  */
 export interface LayerConfig {
+    id?: string;
+    name: string;
     url: string;
     type: string;
     entries?: string;
@@ -63,6 +66,11 @@ export class Layer {
     esriDynamic: EsriDynamic;
 
     /**
+     * used toreference event
+     */
+    private mapId: string;
+
+    /**
      * used to reference the map
      */
     private map: Map;
@@ -73,7 +81,8 @@ export class Layer {
      * @param {Map} map a reference to the map
      * @param {LayerConfig[]} layers an optional array containing layers passed within the map config
      */
-    constructor(map: Map, layers?: LayerConfig[] | undefined | null) {
+    constructor(mapId: string, map: Map, layers?: LayerConfig[] | undefined | null) {
+        this.mapId = mapId;
         this.map = map;
 
         this.geoJSON = new GeoJSON();
@@ -83,51 +92,88 @@ export class Layer {
 
         // listen to outside events to add layers
         api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
-            if (payload.type === LayerTypes.GEOJSON) {
-                this.geoJSON.add(this.map, payload, generateId(''), this.layers);
-            } else if (payload.type === LayerTypes.WMS) {
-                this.wms.add(this.map, payload, generateId(''), this.layers);
-            } else if (payload.type === LayerTypes.ESRI_DYNAMIC) {
-                this.esriDynamic.add(this.map, payload, generateId(''), this.layers);
-            } else if (payload.type === LayerTypes.ESRI_FEATURE) {
-                this.esriFeature.add(this.map, payload, generateId(''), this.layers);
+            if (payload && payload.handlerName.includes(this.mapId)) {
+                const layerConf = payload.layer;
+                layerConf.id = generateId(layerConf.id);
+                if (layerConf.type === LayerTypes.GEOJSON) {
+                    this.geoJSON.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                } else if (layerConf.type === LayerTypes.WMS) {
+                    this.wms.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                } else if (layerConf.type === LayerTypes.ESRI_DYNAMIC) {
+                    this.esriDynamic.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                } else if (layerConf.type === LayerTypes.ESRI_FEATURE) {
+                    this.esriFeature.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                }
             }
         });
 
         // listen to outside events to remove layers
         api.event.on(EVENT_NAMES.EVENT_REMOVE_LAYER, (payload) => {
             // remove layer from outside
-            this.remove(payload.id);
+            this.removeLayer(payload.id);
         });
 
-        if (layers && layers.length > 0) this.loadDefaultLayers(layers);
+        // Load layers that was passed in with the map config
+        if (layers && layers.length > 0) {
+            layers?.forEach((layer: LayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.mapId, { layer }));
+        }
     }
 
     /**
-     * Load layers that was passed in with the map config
-     *
-     * @param {LayerConfig[]} layers an array containing passed in layers from map config
+     * Check if the layer is loading. We do validation prior to this so it should almost alwasy load
+     * @param {string} name layer name
+     * @param {leafletLayer} layer to aply the load event on to see it it loads
      */
-    private loadDefaultLayers = (layers: LayerConfig[]): void => {
-        layers?.forEach((item) => {
-            if (item.type === LayerTypes.GEOJSON) {
-                this.createGeoJSONLayer(item);
-            } else if (item.type === LayerTypes.WMS) {
-                this.createWmsLayer(item);
-            } else if (item.type === LayerTypes.ESRI_FEATURE) {
-                this.createFeatureLayer(item);
-            } else if (item.type === LayerTypes.ESRI_DYNAMIC) {
-                this.createDynamicLayer(item);
-            }
+    layerIsLoaded(name: string, layer: leafletLayer): void {
+        let isLoaded = false;
+        // we trap most of the erros prior tp this. When this load, layer shoud ne ok
+        // ! load is not fired for GeoJSON layer
+        layer.once('load', () => {
+            isLoaded = true;
         });
-    };
+
+        setTimeout(() => {
+            if (!isLoaded) {
+                api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.mapId, {
+                    message: `Layer ${name} failed to load on map ${this.mapId}`,
+                });
+
+                this.removeLayer(layer.id);
+            }
+        }, 5000);
+    }
+
+    /**
+     * Add the layer to the map if valid. If not (is a string) emit an error
+     * @param {LayerConfig} payload the layer config
+     * @param {leafletLayer | string} layer incoming as layer or string if not valid
+     */
+    addToMap(payload: LayerConfig, layer: leafletLayer | string): void {
+        // if the return layer object is a string, it is because path or entries are bad
+        // do not add to the map
+        if (typeof layer === 'string') {
+            api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.mapId, {
+                message: `Layer ${payload.name} failed to load on map ${this.mapId}`,
+            });
+        } else {
+            if (payload.type !== 'geoJSON') this.layerIsLoaded(payload.name, layer);
+            layer.addTo(this.map);
+
+            const id = payload.id || generateId('');
+            this.layers.push({
+                id,
+                type: payload.type,
+                layer: Object.defineProperties(layer, { id: { value: id } }),
+            });
+        }
+    }
 
     /**
      * Remove a layer from the map
      *
      * @param {string} id the id of the layer to be removed
      */
-    remove = (id: string): void => {
+    removeLayer = (id: string): void => {
         // return items not matching the id
         this.layers = this.layers.filter((item: LayerData) => {
             if (item.id === id) item.layer.removeFrom(this.map);
@@ -136,65 +182,16 @@ export class Layer {
     };
 
     /**
-     * Create a new GeoJSON layer on the map
+     * Add a layer to the map
      *
-     * @param layerConfig the layer configuration
-     * @returns {string} for the layerID
+     * @param {LayerConfig} layer the layer configuration to add
      */
-    createGeoJSONLayer = (layerConfig: LayerConfig): string => {
-        const layerID = generateId('');
-        this.geoJSON.add(this.map, layerConfig, layerID, this.layers);
+    addLayer = (layer: LayerConfig): string => {
+        // eslint-disable-next-line no-param-reassign
+        layer.id = generateId(layer.id);
+        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.mapId, { layer });
 
-        return layerID;
-    };
-
-    /**
-     * Create a new WMS layer on the map
-     *
-     * @param layerConfig the layer configuration
-     * @returns {string} for the layerID
-     */
-    createWmsLayer = (layerConfig: LayerConfig): string => {
-        const layerID = generateId('');
-        this.wms.add(this.map, layerConfig, layerID, this.layers);
-
-        return layerID;
-    };
-
-    /**
-     * Create a new feature layer on the map
-     *
-     * @param layerConfig the layer configuration
-     * @returns {string} for the layerID
-     */
-    createFeatureLayer = (layerConfig: LayerConfig): string => {
-        const layerID = generateId('');
-        this.esriFeature.add(this.map, layerConfig, layerID, this.layers);
-
-        return layerID;
-    };
-
-    /**
-     * Create a new dynamic layer on the map
-     *
-     * @param layerConfig the layer configuration
-     * @returns {string} for the layerID
-     */
-    createDynamicLayer = (layerConfig: LayerConfig): string => {
-        const layerID = generateId('');
-        this.esriDynamic.add(this.map, layerConfig, layerID, this.layers);
-
-        return layerID;
-    };
-
-    /**
-     * Search for a layer using it's id and return the layer data
-     *
-     * @param {string} id the layer id to look for
-     * @returns the found layer data object
-     */
-    getLayerById = (id: string): LayerData | null => {
-        return this.layers.filter((layer: LayerData) => layer.id === id)[0];
+        return layer.id;
     };
 
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS

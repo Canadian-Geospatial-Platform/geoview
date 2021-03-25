@@ -116,8 +116,8 @@ export class Config {
         const language = this.validateLanguage(tmpConfig.language);
         const plugins = this.validatePlugins(tmpConfig.plugins);
 
-        // TODO link the validation function from layers in here when done
-        const layers: LayerConfig[] = tmpConfig.layers;
+        // validatio is done in layer class
+        const { layers } = tmpConfig;
 
         // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
         const validConfig: MapConfigProps = { id, projection, zoom, center, language, basemapOptions, layers, plugins };
