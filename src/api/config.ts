@@ -17,7 +17,7 @@ export interface MapConfigProps {
     language: string;
     basemapOptions: BasemapOptions;
     layers?: LayerConfig[];
-    plugins?: string[];
+    plugins: string[];
 }
 
 /**
@@ -114,12 +114,13 @@ export class Config {
         const center = this.validateCenter(projection, tmpConfig.center);
         const zoom = this.validateZoom(Number(tmpConfig.zoom));
         const language = this.validateLanguage(tmpConfig.language);
+        const plugins = this.validatePlugins(tmpConfig.plugins);
 
         // TODO link the validation function from layers in here when done
         const layers: LayerConfig[] = tmpConfig.layers;
 
         // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
-        const validConfig: MapConfigProps = { id, projection, zoom, center, language, basemapOptions, layers };
+        const validConfig: MapConfigProps = { id, projection, zoom, center, language, basemapOptions, layers, plugins };
         this.logModifs(tmpConfig, validConfig);
 
         return validConfig;
@@ -147,6 +148,14 @@ export class Config {
             console.log(
                 `- map: ${validConfig.id} - Invalid basemap options ${JSON.stringify(inConfig.basemapOptions)} replaced by ${JSON.stringify(
                     validConfig.basemapOptions
+                )} -`
+            );
+        }
+        const pluginsDiff = inConfig.plugins.filter((plugin) => !validConfig.plugins.includes(plugin));
+        if (pluginsDiff.length > 0) {
+            console.log(
+                `- map: ${validConfig.id} - Invalid plugin options ${JSON.stringify(inConfig.plugins)} replaced by ${JSON.stringify(
+                    validConfig.plugins
                 )} -`
             );
         }
@@ -217,5 +226,26 @@ export class Config {
      */
     private validateLanguage(language: string): string {
         return this._languages.includes(language) ? language : this._languages[0];
+    }
+
+    /**
+     * Validate the plugins array
+     * @param {string[]} plugins the plugins array
+     * @returns {string[]} valid plugins
+     */
+    private validatePlugins(plugins: string[]): string[] {
+        const validPlugins: string[] = [];
+
+        if (Array.isArray(plugins)) {
+            // loop through the array and check each element if its valid string
+            // eslint-disable-next-line no-plusplus
+            for (let i = 0; i < plugins.length; i++) {
+                if (typeof plugins[i] === 'string' && plugins[i].length > 0) validPlugins.push(plugins[i]);
+            }
+
+            return validPlugins;
+        }
+
+        return this._config.plugins;
     }
 }

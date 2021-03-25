@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 import { DomEvent } from 'leaflet';
 
@@ -63,6 +63,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
     const { panel, button, panelOpen } = props;
 
     const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
+    const [, updatePanelContent] = useState(0);
 
     const classes = useStyles(props);
     const { t } = useTranslation();
@@ -72,6 +73,13 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     const panelRef = useRef();
     const closeBtnRef = useRef();
+
+    /**
+     * function that causes rerender when changing panel content
+     */
+    const updateComponent = useCallback(() => {
+        updatePanelContent((count) => count + 1);
+    }, []);
 
     /**
      * Close the panel
@@ -167,10 +175,18 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             }
         });
 
+        // listen to change panel content and rerender
+        api.event.on(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, (args) => {
+            if (args.buttonId === panel.buttonId) {
+                updateComponent();
+            }
+        });
+
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
             api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION);
             api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION);
+            api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT);
         };
     }, []);
 
