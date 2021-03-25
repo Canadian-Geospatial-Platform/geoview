@@ -28,6 +28,7 @@ import { EVENT_NAMES } from '../../api/event';
 import { MapViewer } from '../../common/map-viewer';
 import { generateId } from '../../common/constant';
 import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
+import { ClickMarker } from '../mapctrl/click-marker';
 
 const useStyles = makeStyles((theme) => ({
     snackBar: {
@@ -162,6 +163,7 @@ export function Map(props: MapConfigProps): JSX.Element {
                     <NorthArrow projection={crs} />
                     <NorthPoleFlag projection={crs} />
                     <Crosshair id={id} />
+                    <ClickMarker />
                     <NavBar />
                     <SnackbarProvider
                         maxSnack={3}

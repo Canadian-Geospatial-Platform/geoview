@@ -222,6 +222,56 @@ export class ButtonPanel {
     };
 
     /**
+     * Get a button panel from the appbar by using it's id
+     *
+     * @param {string} id the id of the button panel to get
+     * @returns {ButtonPanelType} the returned button panel
+     */
+    getAppBarButtonPanelById = (id: string): ButtonPanelType | null => {
+        // loop through groups of appbar button panels
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < Object.keys(this.appBarPanels).length; i++) {
+            const group = this.appBarPanels[Object.keys(this.appBarPanels)[i]];
+
+            // eslint-disable-next-line no-plusplus
+            for (let j = 0; j < Object.keys(group).length; j++) {
+                const buttonPanel: ButtonPanelType = group[Object.keys(group)[j]];
+
+                if (buttonPanel.id === id) {
+                    return buttonPanel;
+                }
+            }
+        }
+
+        return null;
+    };
+
+    /**
+     * Get a button panel from the navbar by using it's id
+     *
+     * @param {string} id the id of the button panel to get
+     * @returns {ButtonPanelType} the returned button panel
+     */
+    getNavBarButtonPanelById = (id: string): ButtonPanelType | null => {
+        // loop through groups of appbar button panels
+        // eslint-disable-next-line no-plusplus
+        for (let i = 0; i < Object.keys(this.navBarButtons).length; i++) {
+            const group = this.navBarButtons[Object.keys(this.navBarButtons)[i]];
+
+            // eslint-disable-next-line no-plusplus
+            for (let j = 0; j < Object.keys(group).length; j++) {
+                const buttonPanel: ButtonPanelType = group[Object.keys(group)[j]];
+
+                if (buttonPanel.id === id) {
+                    return buttonPanel;
+                }
+            }
+        }
+
+        return null;
+    };
+
+    /**
      * Remove an appbar panel using an id
      *
      * @param {string} id the id of the panel to remove
