@@ -135,7 +135,11 @@ export class Layer {
         setTimeout(() => {
             if (!isLoaded) {
                 api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.mapId, {
-                    message: `Layer ${name} failed to load on map ${this.mapId}`,
+                    message: {
+                        type: 'key',
+                        value: 'validation.layer.loadfailed',
+                        params: [name, this.mapId],
+                    },
                 });
 
                 // TODO: some layer take time to load e.g. geomet so try to find a wayd to ping the layer
@@ -154,7 +158,11 @@ export class Layer {
         // do not add to the map
         if (typeof layer === 'string') {
             api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.mapId, {
-                message: `Layer ${payload.name} failed to load on map ${this.mapId}`,
+                message: {
+                    type: 'key',
+                    value: 'validation.layer.loadfailed',
+                    params: [payload.name, this.mapId],
+                },
             });
         } else {
             if (payload.type !== 'geoJSON') this.layerIsLoaded(payload.name, layer);

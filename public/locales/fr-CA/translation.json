@@ -35,5 +35,10 @@
             "toactivate": "Presser <strong>ENTER</strong> pour activer ou sauter avec <strong>TAB</strong>",
             "main": "Nous allons garder le focus verrouillé sur le visualiseur - sortir à l'aide de <strong>CTRL + ESCAPE</strong>"
         }
+    },
+    "validation": {
+        "layer": {
+            "loadfailed": "La couche __param__ n'est pas chargée sur la carte __param__"
+        }
     }
 }
