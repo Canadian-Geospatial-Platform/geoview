@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@material-ui/core';
 
 import { useSnackbar } from 'notistack';
@@ -41,7 +43,25 @@ function SnackButton(props: SnackButtonProps): JSX.Element {
 export function Snackbar(props: SnackBarProps): null {
     const { id } = props;
 
+    const { t } = useTranslation();
+
     const { enqueueSnackbar } = useSnackbar();
+
+    /**
+     * Take string and replace parameters from array of values
+     * @param {string[]} params array of parameters to replace
+     * @param {string} message original message
+     * @returns {string} message with values replaced
+     */
+    function replaceParams(params: string[], message: string) {
+        let tmpMess = message;
+        params.forEach((item: string) => {
+            tmpMess = tmpMess.replace('__param__', item);
+        });
+
+        return tmpMess;
+    }
+
     useEffect(() => {
         // listen to API event when app wants to show message
         api.event.on(EVENT_NAMES.EVENT_SNACKBAR_OPEN, (payload) => {
@@ -50,8 +70,12 @@ export function Snackbar(props: SnackBarProps): null {
             // apply function if provided
             opts.action = payload.button ? SnackButton({ label: payload.button.label, action: payload.button.action }) : null;
 
+            // get message
+            const message =
+                payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params, t(payload.message.value));
+
             // show the notification
-            if (payload && id === payload.handlerName) enqueueSnackbar(payload.message, opts);
+            if (payload && id === payload.handlerName) enqueueSnackbar(message, opts);
         });
 
         // remove the listener when the component unmounts

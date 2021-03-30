@@ -35,5 +35,10 @@
             "toactivate": "Press <strong>ENTER</strong> to activate or skip with <strong>TAB</strong>",
             "main": "We'll keep focus locked on the viewer - exit with <strong>CTRL + ESCAPE</strong>"
         }
+    },
+    "validation": {
+        "layer": {
+            "loadfailed": "Layer __param__ failed to load on map __param__"
+        }
     }
 }
