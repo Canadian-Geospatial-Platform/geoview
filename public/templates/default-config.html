@@ -34,6 +34,7 @@
                             <a href="#HLCONF1">1. Load from no config object</a><br />
                             <a href="#HLCONF2">2. Load with wrong JSON object</a><br />
                             <a href="#HLCONF3">3. Load with bad config values</a><br />
+                            <a href="#HLCONF4">4. Load layers with bad config values</a><br />
                         </td>
                     </tr>
                 </tbody>
@@ -84,9 +85,10 @@
                 class="llwp-map"
                 data-leaflet="{'name': 'LCCFR', 'projection': 3857, 'zoom': '40', 'center': ['Last',-1000], 'language': { 'test': 'sp-CA' }, 'basemapOptions': { 'id': 'notdefine', 'shaded': true, 'labeledWhat': true },
             'layers':[
-                { 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
-                { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 37' },
-                { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' }
+                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
+                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 37' },
+                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' },
+                { 'name': 'GeoJSON', 'url': './geojson/polygons.json', 'type': 'geoJSON' }
             ]}"
             ></div>
             <p>This map will load with bad configuration replaced with default.</p>
@@ -95,6 +97,28 @@
             <br />
             </div>
         </div>
+        <div>
+            <h3 id="HLCONF4">4. Load layers with bad config values</h3>
+            <h3><a href="#top">Top of the page</a></h3>
+            <div
+                id="CONF4"
+                class="llwp-map"
+                data-leaflet="{'name': 'LCCFR', 'projection': 3857, 'zoom': '40', 'center': ['Last',-1000], 'language': { 'test': 'sp-CA' }, 'basemapOptions': { 'id': 'notdefine', 'shaded': true, 'labeledWhat': true },
+            'layers':[
+                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': 'BADENTRIES' },
+                { 'name': 'Energy Dyna Bad End', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServerBAADEND', 'type': 'esriDynamic', 'entries': '38' },
+                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': 'BADENTRIES-4, 37' },
+                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_enNOT/MapServer/1TOOMUCH', 'type': 'esriFeature' },
+                { 'name': 'GeoJSON', 'url': './geojson/polygonsBAD.json', 'type': 'geoJSON' }
+            ]}"
+            ></div>
+            <p>This map will not load layers with bad configuration and inform the user.</p>
+            <p><strong>Configuration Snippet:</strong></p>
+            <div id="CONF4CS" class="panel"></div>
+            <br />
+            </div>
+        </div>
+
         <script src="codedoc.js"></script>
         <script>
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

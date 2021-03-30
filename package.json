@@ -59,7 +59,8 @@
         "react-dom": "^17.0.1",
         "react-i18next": "11.8.0",
         "react-leaflet": "3.0.2",
-        "screenfull": "~5.0.2"
+        "screenfull": "~5.0.2",
+        "wms-capabilities": "0.4.1"
     },
     "devDependencies": {
         "@babel/cli": "^7.12.8",

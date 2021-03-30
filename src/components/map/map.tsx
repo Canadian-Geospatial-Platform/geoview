@@ -164,7 +164,7 @@ export function Map(props: MapConfigProps): JSX.Element {
                     <Crosshair id={id} />
                     <NavBar />
                     <SnackbarProvider
-                        maxSnack={1}
+                        maxSnack={3}
                         dense
                         autoHideDuration={4000}
                         anchorOrigin={{

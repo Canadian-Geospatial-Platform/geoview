@@ -1,9 +1,9 @@
-import { Map } from 'leaflet';
+import { Layer } from 'leaflet';
 
 import { featureLayer, mapService } from 'esri-leaflet';
 
-import { LayerData, LayerConfig } from './layer';
-import { getMapServerUrl } from '../utilities';
+import { LayerConfig } from './layer';
+import { getXMLHttpRequest, getMapServerUrl } from '../utilities';
 
 /**
  * a class to add esri feature layer
@@ -15,28 +15,38 @@ export class EsriFeature {
     /**
      * Add a ESRI feature layer to the map.
      *
-     * @param {Map} map the Leaflet map
      * @param {LayerConfig} layer the layer configuration
-     * @param {string} layerID the layer id
-     * @param {Array<LayerData>} layers a reference to the layers array
+     * @return {Promise<Layer | string>} layers to add to the map
      */
-    add(map: Map, layer: LayerConfig, layerID: string, layers: Array<LayerData>): void {
-        const feat = featureLayer({
-            url: layer.url,
+    add(layer: LayerConfig): Promise<Layer | string> {
+        const data = getXMLHttpRequest(`${layer.url}?f=json`);
+
+        const geo = new Promise<Layer | string>((resolve) => {
+            data.then((value: string) => {
+                const { type } = JSON.parse(value);
+
+                // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
+                // if the path is bad, return will be {}
+                if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
+                    const feat = featureLayer({
+                        url: layer.url,
+                    });
+
+                    Object.defineProperties(feat, {
+                        mapService: {
+                            value: mapService({
+                                url: getMapServerUrl(layer.url),
+                            }),
+                        },
+                    });
+
+                    resolve(feat);
+                } else {
+                    resolve('{}');
+                }
+            });
         });
 
-        // add layer to map
-        feat.addTo(map);
-        layers.push({
-            id: layerID,
-            type: layer.type,
-            layer: Object.defineProperties(feat, {
-                mapService: {
-                    value: mapService({
-                        url: getMapServerUrl(layer.url),
-                    }),
-                },
-            }),
-        });
+        return new Promise((resolve) => resolve(geo));
     }
 }
