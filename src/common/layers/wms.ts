@@ -35,8 +35,10 @@ export class WMS {
         let { url } = layer;
 
         // if url has a '?' do not append to avoid errors, user must add this manually
+        // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
+        // TODO: in the legend regroup these layers
         if (layer.url.indexOf('?') === -1) {
-            url += '?service=WMS&version=1.3&request=GetCapabilities';
+            url += `?service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
         }
 
         const data = getXMLHttpRequest(url);
@@ -52,7 +54,7 @@ export class WMS {
 
                     // validate the entries
                     json.Capability.Layer.Layer.forEach((item) => {
-                        if (layer.entries?.match(item.Name)) isValid = true;
+                        isValid = this.validateEntries(item, layer.entries);
                     });
 
                     if (isValid) {
@@ -148,5 +150,24 @@ export class WMS {
         });
 
         return new Promise((resolve) => resolve(geo));
+    }
+
+    /**
+     * Check if the entries we try to create a layer exist in the getCapabilities layer object
+     * @param {object} layer layer WMS object to crawl
+     * @param {string} name name to check
+     * @returns {boolean} entry is valid
+     */
+    private validateEntries(layer: any, name: string): boolean {
+        let isValid = false;
+        // eslint-disable-next-line no-prototype-builtins
+        if (typeof layer === 'object' && layer.hasOwnProperty('Layer')) {
+            isValid = this.validateEntries(layer.Layer[0], name);
+        } else if (name === layer.Name) {
+            // TODO: modify for multiple entries
+            isValid = true;
+        }
+
+        return isValid;
     }
 }

@@ -116,7 +116,7 @@ export class Config {
         const language = this.validateLanguage(tmpConfig.language);
         const plugins = this.validatePlugins(tmpConfig.plugins);
 
-        // validatio is done in layer class
+        // validation is done in layer class
         const { layers } = tmpConfig;
 
         // recreate the prop object to remove unwanted items and check if same as original. Log the modifications

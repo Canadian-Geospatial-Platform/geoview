@@ -124,7 +124,7 @@ export class Layer {
      * @param {string} name layer name
      * @param {leafletLayer} layer to aply the load event on to see it it loads
      */
-    layerIsLoaded(name: string, layer: leafletLayer): void {
+    private layerIsLoaded(name: string, layer: leafletLayer): void {
         let isLoaded = false;
         // we trap most of the erros prior tp this. When this load, layer shoud ne ok
         // ! load is not fired for GeoJSON layer
@@ -138,9 +138,10 @@ export class Layer {
                     message: `Layer ${name} failed to load on map ${this.mapId}`,
                 });
 
-                this.removeLayer(layer.id);
+                // TODO: some layer take time to load e.g. geomet so try to find a wayd to ping the layer
+                // this.removeLayer(layer.id);
             }
-        }, 5000);
+        }, 10000);
     }
 
     /**
@@ -148,7 +149,7 @@ export class Layer {
      * @param {LayerConfig} payload the layer config
      * @param {leafletLayer | string} layer incoming as layer or string if not valid
      */
-    addToMap(payload: LayerConfig, layer: leafletLayer | string): void {
+    private addToMap(payload: LayerConfig, layer: leafletLayer | string): void {
         // if the return layer object is a string, it is because path or entries are bad
         // do not add to the map
         if (typeof layer === 'string') {
@@ -192,6 +193,16 @@ export class Layer {
         api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.mapId, { layer });
 
         return layer.id;
+    };
+
+    /**
+     * Search for a layer using it's id and return the layer data
+     *
+     * @param {string} id the layer id to look for
+     * @returns the found layer data object
+     */
+    getLayerById = (id: string): LayerData | null => {
+        return this.layers.filter((layer: LayerData) => layer.id === id)[0];
     };
 
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS
