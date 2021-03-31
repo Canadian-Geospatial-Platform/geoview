@@ -31,9 +31,13 @@
         "start": "Skip after map element",
         "end": "Skip before map element",
         "focusdialog": {
+            "title": "Keyboard Navigation",
             "ariadesc": "Focus trap dialog box",
-            "toactivate": "Press <strong>ENTER</strong> to activate or skip with <strong>TAB</strong>",
-            "main": "We'll keep focus locked on the viewer - exit with <strong>CTRL + ESCAPE</strong>"
+            "main": "We'll keep focus locked on the viewer <br > exit with <strong>SHIFT + ESCAPE</strong>",
+            "button": {
+                "enable": "Enable",
+                "skip": "Skip"
+            }
         }
     },
     "validation": {

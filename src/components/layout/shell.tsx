@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
         width: 1,
         textAlign: 'left',
         overflow: 'hidden',
+        backgroundColor: '#FFFFFF',
 
         '&:active, &:focus, &:hover': {
             left: theme.spacing(0),
@@ -72,7 +73,7 @@ export function Shell(props: ShellProps): JSX.Element {
     return (
         <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
             <div className={classes.shell}>
-                <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip}>
+                <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: '0px' }}>
                     {t('keyboardnav.start')}
                 </a>
                 <Map
@@ -86,7 +87,7 @@ export function Shell(props: ShellProps): JSX.Element {
                     plugins={config.plugins}
                 />
                 <FocusTrapDialog id={id} callback={handleCallback} />
-                <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip}>
+                <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: '0px' }}>
                     {t('keyboardnav.end')}
                 </a>
             </div>
