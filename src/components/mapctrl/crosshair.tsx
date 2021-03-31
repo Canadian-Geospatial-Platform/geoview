@@ -126,7 +126,7 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
             api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
             mapContainer.removeEventListener('keydown', simulateClick);
         };
-    }, [setPanelButtonId, isCrosshairsActive, simulateClick, mapContainer, id, removeCrosshair]);
+    }, []);
 
     return (
         <div
