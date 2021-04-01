@@ -93,9 +93,15 @@ export class MapViewer {
         // load plugins if provided in the config
         if (this.mapProps.plugins && this.mapProps.plugins.length > 0) {
             this.mapProps.plugins.forEach((plugin) => {
-                api.plugin.addPlugin(plugin, null, {
-                    mapId: this.id,
-                });
+                if (window.plugins && window.plugins[plugin]) {
+                    api.plugin.addPlugin(plugin, window.plugins[plugin], {
+                        mapId: this.id,
+                    });
+                } else {
+                    api.plugin.addPlugin(plugin, null, {
+                        mapId: this.id,
+                    });
+                }
             });
         }
     };

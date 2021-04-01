@@ -124,6 +124,15 @@ export const EVENT_NAMES = {
      * Event is triggered when a user press enter on a crosshair to open details panel
      */
     EVENT_DETAILS_PANEL_CROSSHAIR_ENTER: 'details_panel/crosshair_enter',
+
+    /**
+     * Event is triggered when a call is made to show a marker on map click in details panel
+     */
+    EVENT_MARKER_ICON_SHOW: 'marker_icon/show',
+    /**
+     * Event is triggered when a call is made to hide the marker
+     */
+    EVENT_MARKER_ICON_HIDE: 'marker_icon/hide',
 };
 
 /**

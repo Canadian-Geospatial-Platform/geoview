@@ -127,8 +127,10 @@
                  * @param {Object} basemapProps basemap properties
                  */
                 const createBasemap = (id, basemapProps) => {
+                    const { basemaps } = api.map(mapId);
+
                     // check if basemap with provided ID exists
-                    const exists = basemapList.filter((basemap) => basemap.id === id);
+                    const exists = basemaps.filter((basemap) => basemap.id === id);
 
                     // if basemap does not exist then create a new one
                     if (exists.length === 0) {

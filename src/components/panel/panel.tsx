@@ -97,6 +97,9 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             status: false,
         });
 
+        // emit an event to hide the marker when using the details panel
+        api.event.emit('marker_icon/hide', mapId, {});
+
         const buttonElement = document.getElementById(panel.buttonId);
 
         if (buttonElement) {

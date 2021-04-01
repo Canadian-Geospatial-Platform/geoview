@@ -57,7 +57,7 @@ As mentioned this class will automatically get access to few objects
 
 `react` is the an object to use React functions and hooks such as useState, useEffect etc... [see](https://reactjs.org/docs/hooks-intro.html) for more information.
 
-`props` is an object containing the plugin properties passed when loading the plugin [see](#loading-a-plugin) for more information.
+`props` is an object containing the plugin properties passed when loading the plugin [see](#loading-external-plugins) for more information.
 
 `translate` is an object to access `react-i18next` functions including `useTranslation` which will allow for accessing the viewer translations [see](https://react.i18next.com/latest/usetranslation-hook) for more information.
 
@@ -155,15 +155,19 @@ window.plugins = window.plugins || {};
 window.plugins.counter = Counter;
 ```
 
-## Loading a plugin
+## Loading external plugins
 
-You can load a plugin by first import it in a script tag in the `<head>` element of the page
+There are two ways to load plugins
+
+### Loading a plugin by calling the addPlugin function
+
+You can load a plugin by first importing it in a script tag in the `<head>` element of the page
 
 ` <script src="./counter.js"></script>`
 
-Then after the core viewer API is ready you can add the plugin to the viewer init callback using the `add` API function. This function takes 3 arguments, the first is the plugin name (should be unique name), the second is the exported plugin class, the third is the plugin properties.
+Then after the core viewer API is ready you can add the plugin to the viewer init callback using the `add` API function. This function takes 3 arguments, the first is the plugin name (should be unique name), the second is the exported plugin class, the third is the plugin properties. Plugin properties can be accessed using `this.props` inside the plugin `added` or `removed` functions.
 
-`cgpv.api.plugin.add(name, pluginClass, props)`
+`cgpv.api.addPlugin(name, pluginClass, props)`
 
 ```js
 cgpv.init(function () {
@@ -172,3 +176,40 @@ cgpv.init(function () {
     });
 });
 ```
+
+### Loading a plugin by passing it's ID in the map config
+
+You can load a plugin by first importing it in a script tag in the `<head>` element of the page.
+
+` <script src="./counter.js"></script>`
+
+After that you can load the plugin by passing the plugin name in the map config.
+
+```html
+<div
+    id="mapWM"
+    class="llwp-map"
+    data-leaflet="{'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false },
+            'layers':[], 'plugins': ['basemapSwitcher']}"
+></div>
+```
+
+**Note:** If you decide to load the plugin this way then you can't pass custom properties. `mapId` will be provided by default so you can access it from the `added` and `removed` functions inside the plugin using `this.props`
+
+## Loading bundled plugins
+
+You can call the `cgpv.api.addPlugin` to load plugins bundled by the viewer. Currently there are only one plugin available `details-panel`
+
+To load the details panel plugin either use
+
+```js
+cgpv.api.addPlugin('details-panel', null, {
+    mapId: 'mapLCC',
+});
+```
+
+**Note:** You must provide the `mapId` you want to load the plugin to
+
+`OR`
+
+You can provide the `details-panel` entry in the `plugins` array in the map config. Please [see](#loading-a-plugin-by-passing-its-id-in-the-map-config)

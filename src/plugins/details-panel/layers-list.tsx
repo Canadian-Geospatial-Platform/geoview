@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { makeStyles } from '@material-ui/core/styles';
 
+import { api } from '../../api/api';
+
 // use material ui theming
 const useStyles = makeStyles((theme) => ({
     layersContainer: {
@@ -64,6 +66,8 @@ interface LayersListProps {
     selectLayer: any;
     selectFeature: any;
     getSymbol: any;
+    clickPos: any;
+    mapId: any;
 }
 
 /**
@@ -73,7 +77,7 @@ interface LayersListProps {
  * @returns a React JSX Element containing map server layers
  */
 const LayersList = (props: LayersListProps): JSX.Element => {
-    const { layersData, selectFeature, selectLayer, getSymbol } = props;
+    const { layersData, selectFeature, selectLayer, getSymbol, clickPos, mapId } = props;
 
     const classes = useStyles();
 
@@ -145,6 +149,14 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                                                                 ? () => {
                                                                       // if a layer is clicked
                                                                       goToFeatureList(data, layerObj);
+
+                                                                      api.event.emit('marker_icon/show', mapId, {
+                                                                          latlng: clickPos,
+                                                                          symbology: getSymbol(
+                                                                              data.layers[layerObj].renderer,
+                                                                              layerData[0].attributes
+                                                                          ),
+                                                                      });
                                                                   }
                                                                 : undefined
                                                         }

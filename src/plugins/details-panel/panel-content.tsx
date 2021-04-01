@@ -46,6 +46,8 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     const [featureList, setFeatureList] = useState(false);
     const [featureInfo, setFeatureInfo] = useState(false);
 
+    const [clickPos, setClickPos] = useState();
+
     const classes = useStyles();
 
     // get the map instance
@@ -236,13 +238,11 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
 
     /**
      * Handle opening the details panel with correct panel content
+     * Identify the layers that matches the selected point from a mouse click / crosshair events
+     *
+     * @param {Object} latlng a LatLng object containing the latitude and longitude values from the event
      */
     const handleOpenDetailsPanel = useCallback(
-        /**
-         * Identify the layers that matches the selected point from a mouse click / crosshair events
-         *
-         * @param {Object} latlng a LatLng object containing the latitude and longitude values from the event
-         */
         async (latlng: any) => {
             // variable will be used later on as a counter to check which panel content should be selected
             const layersFound = [];
@@ -320,10 +320,14 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
                 }
             }
 
+            let symbology = null;
+
             // if the found layers is only one check if we need to go directly to the entry / feature info
             if (layersFound.length === 1) {
                 // set the entry data
                 selectLayer(layersFound[0].layer);
+
+                if (layersFound[0]) symbology = getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes);
 
                 // if there are only one entry found in this layer then go directly to the entry / feature info
                 if (layersFound[0].entries.length === 1) {
@@ -336,22 +340,41 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
                     });
                 }
             } else {
+                // if multiple layers contains entries then use the symbology of first layer
+                if (layersFound.length > 0) {
+                    symbology = getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes);
+                }
+
                 // if there are multiple layers with entries then display the layer list panel content
                 selectLayersList();
             }
+
+            // emit an event to display a marker on the click position
+            // if there is only one layer with entries the symbology will be of that layer
+            // if there is multiple layers with entries then symbology will be of the first layer
+            // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
+            // if no layers contains any entry then the default symbology with crosshair will show
+            api.event.emit('marker_icon/show', mapId, {
+                latlng,
+                symbology,
+            });
+
+            // save click position
+            setClickPos(latlng);
 
             // open the details panel
             buttonPanel.panel.open();
 
             const panelContainer = document.querySelectorAll(`[data-id=${buttonPanel.id}]`)[0];
 
+            // set focus to the close button of the panel
             if (panelContainer) {
                 const closeBtn = panelContainer.querySelectorAll('.cgpv-panel-close')[0];
 
                 closeBtn.focus();
             }
         },
-        [buttonPanel.panel, buttonPanel.id, layersData, clearResults, selectLayer, selectFeature, getSymbol, selectLayersList]
+        [mapId, buttonPanel.panel, buttonPanel.id, layersData, clearResults, selectLayer, getSymbol, selectFeature, selectLayersList]
     );
 
     useEffect(() => {
@@ -480,7 +503,14 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     return (
         <div className={classes.mainContainer}>
             {layersList && (
-                <LayersList layersData={layersData} selectFeature={selectFeature} selectLayer={selectLayer} getSymbol={getSymbol} />
+                <LayersList
+                    clickPos={clickPos}
+                    layersData={layersData}
+                    selectFeature={selectFeature}
+                    selectLayer={selectLayer}
+                    getSymbol={getSymbol}
+                    mapId={mapId}
+                />
             )}
             {featureList && (
                 <FeaturesList
