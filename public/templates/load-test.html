@@ -54,6 +54,18 @@
                 border: 1px solid #ccc;
                 border-top: none;
             }
+
+            .load-test-params {
+                display: inline;
+            }
+
+            input, label, button {
+                margin: 5px;
+            }
+
+            #url {
+                width: 500px;
+            }
         </style>
     </head>
     <body>
@@ -83,39 +95,41 @@
                 </tbody>
             </table>
         </div>
-        <label>Layer Type </label
-        ><select name="layerType" id="layerType">
-            <option value="ogcWMS">WMS Layer</option>
-            <option value="esriFeature">Esri Feature Layer</option>
-            <option value="esriDynamic">Esri Dynamic Layer</option>
-            <option value="geoJSONPoint">GeoJson Point Layer</option>
-            <option value="geoJSONLine">GeoJson Line Layer</option>
-            <option value="geoJSONPolygon">GeoJson Polygon Layer</option>
-            <option value="jsonFeatures">GeoJson Features</option>
-        </select>
-        <div id="sourcedLayers">
-            <input type="checkbox" id="useExample" /> load example <label id="URLlbl"> URL </label> <input id="url" /><label
-                id="entrieslbl"
-            >
-                entries
-            </label>
+        <br />
+        <span>Add Layers</span><br />
+        <div id="sourcedLayers" class="load-test-params">
+            <label>Layer Type</label>
+            <select name="layerType" id="layerType">
+                <option value="ogcWMS">WMS Layer</option>
+                <option value="esriFeature">Esri Feature Layer</option>
+                <option value="esriDynamic">Esri Dynamic Layer</option>
+                <option value="geoJSONPoint">GeoJson Point Layer</option>
+                <option value="geoJSONLine">GeoJson Line Layer</option>
+                <option value="geoJSONPolygon">GeoJson Polygon Layer</option>
+            </select>
+            <label id="URLlbl"> URL </label><input id="url" />
+            <label id="entrieslbl">entries</label>
             <input id="entries" />
-            <label> No of layers to load </label><input id="layerCount" /> <br />
-            <button id="load-btn">Load Data</button><br />
+            <label> No of layers to load </label><input id="layerCount" />
+            <button id="load-btn">Load Data</button>
         </div>
-        <div id="jsonFeatures" style="display: none">
-            <label id="featuretype"> Generate Random Geometries</label>
+        <br />
+        <br />
+        <span>Add GeoJSON Features</span><br />
+        <div id="jsonFeatures" class="load-test-params">
+            <label id="featuretype">Geometry</label>
             <select name="jsonfeaturetype" id="jsonfeaturetype">
                 <option value="jsonPoint">Point</option>
                 <option value="jsonLine">Lines</option>
                 <option value="jsonPolygon">Polygon</option>
             </select>
-            <label id="featureCntlbl">Feature Count</label>
+            <label id="featureCntlbl">Count</label>
             <input id="featureCnt" />
             <button id="load-features-btn">Load Data</button><br />
         </div>
-        <label id="timerlbl">time to render: </label><label id="timer"> </label><br />
-        <label id="zoomtimelbl">time to zoom : </label><label id="zoomtime"> </label><br />
+        <br >
+        <span>Time to render: </span><span id="timer"></span><br />
+        <span>Time to zoom : </span><span id="zoomtime"></span><br />
         <div
             id="mapWM"
             class="llwp-map"
@@ -534,6 +548,7 @@
         <script src="codedoc.js"></script>
         <script>
             let tzoom0 = 0;
+
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
@@ -556,206 +571,159 @@
             // find the button element by ID
             var addwmsButton = document.getElementById('load-wms-btn');
 
-            var useExample = document.getElementById('useExample');
-            useExample.addEventListener('click', function (e) {
-                updateURL();
-            });
-
             function updateURL() {
-                if (document.getElementById('useExample').checked === true) {
-                    switch (document.getElementById('layerType').value) {
-                        case 'esriFeature':
-                            document.getElementById('url').value =
-                                'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1';
-                            document.getElementById('entries').value = 0;
-                            break;
-                        case 'esriDynamic':
-                            document.getElementById('url').value =
-                                'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer';
-                            document.getElementById('entries').value = '0, 2, 4, 5';
-                            break;
-                        case 'ogcWMS':
-                            document.getElementById('url').value =
-                                'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer';
-                            document.getElementById('entries').value = 0;
-                            break;
-                        case 'geoJSONPoint':
-                            document.getElementById('url').value = './geojson/points.json';
-                            document.getElementById('entries').value = '';
-                            break;
-                        case 'geoJSONLine':
-                            document.getElementById('url').value = './geojson/lines.json';
-                            document.getElementById('entries').value = '';
-                            break;
-                        case 'geoJSONPolygon':
-                            document.getElementById('url').value = './geojson/polygons.json';
-                            document.getElementById('entries').value = '';
-                            break;
-                    }
+                switch (document.getElementById('layerType').value) {
+                    case 'esriFeature':
+                        document.getElementById('url').value =
+                            'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1';
+                        document.getElementById('entries').value = '---';
+                        break;
+                    case 'esriDynamic':
+                        document.getElementById('url').value =
+                            'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer';
+                        document.getElementById('entries').value = '0, 2, 4, 5';
+                        break;
+                    case 'ogcWMS':
+                        document.getElementById('url').value =
+                            'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer';
+                        document.getElementById('entries').value = '0';
+                        break;
+                    case 'geoJSONPoint':
+                        document.getElementById('url').value = './geojson/points.json';
+                        document.getElementById('entries').value = '---';
+                        break;
+                    case 'geoJSONLine':
+                        document.getElementById('url').value = './geojson/lines.json';
+                        document.getElementById('entries').value = '---';
+                        break;
+                    case 'geoJSONPolygon':
+                        document.getElementById('url').value = './geojson/polygons.json';
+                        document.getElementById('entries').value = '---';
+                        break;
                 }
             }
 
             var layerTypeCbo = document.getElementById('layerType');
             layerTypeCbo.addEventListener('change', function (e) {
-                updateEntriesVisibility();
                 updateURL();
             });
+            setTimeout(() => updateURL(), 1000);
+
             var addFeatureButton = document.getElementById('load-btn');
             addFeatureButton.addEventListener('click', function (e) {
-                var t0 = performance.now();
                 if (typeof parseInt(document.getElementById('layerCount').value) === 'number') {
-                    let i = 1;
+                    let type = document.getElementById('layerType').value;
+                    type = type.indexOf('geoJSON') === -1 ? type : 'geoJSON';
 
                     for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
-                        if (['ogcWMS'].indexOf(document.getElementById('layerType').value) > -1) {
-                            const layerID = cgpv.api.map('mapWM').createWmsLayer({
-                                type: document.getElementById('layerType').value,
-                                entries: document.getElementById('entries').value,
-                                url: document.getElementById('url').value,
-                            });
-                        }
-                        if (['esriFeature'].indexOf(document.getElementById('layerType').value) > -1) {
-                            const layerID = cgpv.api.map('mapWM').createFeatureLayer({
-                                type: document.getElementById('layerType').value,
-                                entries: document.getElementById('entries').value,
-                                url: document.getElementById('url').value,
-                            });
-                        }
-                        if (['esriDynamic'].indexOf(document.getElementById('layerType').value) > -1) {
-                            const layerID = cgpv.api.map('mapWM').createDynamicLayer({
-                                type: document.getElementById('layerType').value,
-                                entries: document.getElementById('entries').value,
-                                url: document.getElementById('url').value,
-                            });
-                        }
-                        if (['geoJSONPoint', 'geoJSONPolygon', 'geoJSONLine'].indexOf(document.getElementById('layerType').value) > -1) {
-                            const layerID = cgpv.api.map('mapWM').createGeoJSONLayer({
-                                type: document.getElementById('layerType').value,
-                                entries: document.getElementById('entries').value,
-                                url: document.getElementById('url').value,
-                            });
-                        }
-                        // add an event listener when a button is clicked
-                        // adding a geojson layer requires a type of geojson and url
-
-                        i++;
+                        cgpv.api.map('mapWM').addLayer({
+                            type: type,
+                            entries: document.getElementById('entries').value,
+                            url: document.getElementById('url').value,
+                        });
                     }
                 }
-                cgpv.api.map('mapWM').layers[cgpv.api.map('mapWM').layers.length - 1].layer.on('load', function () {
-                    if (!document.getElementById('timer').innerText) {
-                        var t1 = performance.now();
-                        document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
-                    }
-                });
             });
 
+            // ADD GEOJSON FEATURE SECTION
             var addFeatureButton = document.getElementById('load-features-btn');
             addFeatureButton.addEventListener('click', function (e) {
-                if (['jsonFeatures'].indexOf(document.getElementById('layerType').value) > -1) {
-                    var t0 = performance.now();
-                    switch (document.getElementById('jsonfeaturetype').value) {
-                        case 'jsonPoint':
-                            addJSONPoint();
-                            break;
-
-                        case 'jsonLine':
-                            addJSONLine();
-                            break;
-                        default:
-                            addJSONPolygon();
-                    }
+                var t0 = performance.now();
+                switch (document.getElementById('jsonfeaturetype').value) {
+                    case 'jsonPoint':
+                        addJSONPoint();
+                        break;
+                    case 'jsonLine':
+                        addJSONLine();
+                        break;
+                    default:
+                        addJSONPolygon();
                 }
+
                 var t1 = performance.now();
                 document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
             });
 
-            function addJSONPolyline() {
-                let i = 1;
+            function addJSONPoint() {
                 for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
-                    addPolyline(cgpv.api.map('mapWM'));
+                    const coord = generateRandomCoord();
+
+                    // call an api function to draw a polygon
+                    const circleMarker = cgpv.api
+                        .map('mapWM')
+                        .addCircleMarker(coord[0], coord[1], 3, {
+                            color: 'red',
+                            fillColor: '#f03',
+                            fillOpacity: 0.5,
+                            radius: 3.0,
+                        });
+                    cgpv.api.map('mapWM').addToGeometryGroup(circleMarker);
                 }
             }
 
-            function addJSONPoint() {
+            function addJSONLine() {
                 for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
-                    addCircleMarker(cgpv.api.map('mapWM'), Math.floor(Math.random()));
+                    const ptStart = generateRandomCoord();
+                    const ptEnd = generateRandomCoord();
+                    const line = [];
+
+                    // add 10 vertices
+                    for (k = 0; k < 10; k++) {
+                        line.push(generateRandomCoord(
+                            ptStart[0] < ptEnd[0] ? ptStart[0] : ptEnd[0],
+                            Math.abs(ptStart[1] < ptEnd[1] ? ptStart[1] : ptEnd[1]),
+                            ptEnd[0] > ptStart[0] ? ptEnd[0] : ptStart[0],
+                            Math.abs(ptEnd[1] > ptStart[1] ? ptEnd[1] : ptStart[1])))
+                    }
+                    line.push(ptEnd);
+                    line.unshift(ptStart);
+
+                    const polyline = cgpv.api.map('mapWM').addPolyline(
+                        line,
+                        {
+                            stroke: true,
+                            color: '#000',
+                            weight: 1,
+                            opacity: '0.8',
+                        }
+                    );
+
+                    cgpv.api.map('mapWM').addToGeometryGroup(polyline);
                 }
             }
 
             function addJSONPolygon() {
                 for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
-                    addPolygon(cgpv.api.map('mapWM'), Math.floor(Math.random() * 2));
+                    const center = generateRandomCoord();
+                    const factor = ((Math.random() * 100) + 1) / 10;
+
+                    // call an api function to draw a polygon
+                    const polygon = cgpv.api.map('mapWM').addPolygon(
+                        [
+                            [center[0] + factor/2, center[1] + factor],
+                            [center[0] + factor/2, center[1] - factor],
+                            [center[0] - factor/2, center[1] - factor],
+                            [center[0] - factor/2, center[1] + factor],
+                        ],
+                        {
+                            stroke: true,
+                            color: '#000',
+                            weight: 1,
+                            opacity: '0.8',
+                        }
+                    );
+                    cgpv.api.map('mapWM').addToGeometryGroup(polygon);
                 }
             }
 
-            function addCircleMarker(map) {
-                // call an api function to draw a polygon
-                const circleMarker = cgpv.api
-                    .map(map)
-                    .addCircleMarker(generateRandomCoord()[0], -generateRandomCoord()[1], Math.floor(Math.random() * 20), {
-                        color: 'red',
-                        fillColor: '#f03',
-                        fillOpacity: 0.5,
-                        radius: 50.0,
-                    });
-                cgpv.api.map(map).addToGeometryGroup(circleMarker);
-            }
-            function updateEntriesVisibility() {
-                if (
-                    ['ogcWMS', 'esriFeature', , 'esriDynamic', 'geoJSONPoint', 'geoJSONLine', 'geoJSONPolygon'].indexOf(
-                        document.getElementById('layerType').value
-                    ) > -1
-                ) {
-                    document.getElementById('sourcedLayers').style.display = 'block';
-                    document.getElementById('jsonFeatures').style.display = 'none';
-                }
-                if (['jsonFeatures'].indexOf(document.getElementById('layerType').value) > -1) {
-                    document.getElementById('jsonFeatures').style.display = 'block';
-                    document.getElementById('sourcedLayers').style.display = 'none';
-                }
-            }
-            function addPolygon(map, factor) {
-                const center = generateRandomCoord();
-                // call an api function to draw a polygon
-                const polygon = cgpv.api.map(map).addPolygon(
-                    [
-                        [center[0] + factor, -center[1] + factor],
-                        [center[0] + factor, -center[1] - factor],
-                        [center[0] - factor, -center[1] - factor],
-                        [center[0] - factor, -center[1] + factor],
-                    ],
-                    {
-                        stroke: true,
-                        color: '#000',
-                        weight: 5,
-                        opacity: '0.8',
-                    }
-                );
-                cgpv.api.map(map).addToGeometryGroup(polygon);
+            function generateRandomCoord(minY = 40, minX = 45, maxY = 85, maxX = 140) {
+                const lat = parseFloat((((Math.random() * ((maxY * 100) - (minY * 100) + 1)) + (minY * 100)) / 100).toFixed(3));
+                const long = parseFloat((((Math.random() * ((maxX * 100) - (minX * 100) + 1)) + (minX * 100)) / 100).toFixed(3));
+
+                return [lat, -long];
             }
 
-            function addPolyline(map) {
-                // call an api function to draw a polyline
-                const polyline = cgpv.api.map(map).addPolyline(
-                    [
-                        [generateRandomCoord()[0], -generateRandomCoord()[1]],
-                        [generateRandomCoord()[0], -generateRandomCoord()[1]],
-                    ],
-                    {
-                        stroke: true,
-                        color: '#000',
-                        weight: 5,
-                        opacity: '0.8',
-                    }
-                );
-
-                cgpv.api.map(map).addToGeometryGroup(polyline);
-            }
-
-            function generateRandomCoord() {
-                return [Math.floor(Math.random() * (72 - 40)) + 40, Math.floor(Math.random() * (129 - 62)) + 62];
-            }
-
+            // RESULT TAB SECTION
             var tabs = document.getElementsByClassName('tablinks');
             for (i = 0; i < tabs.length; i++) {
                 tabs[i].addEventListener('click', function (e) {
