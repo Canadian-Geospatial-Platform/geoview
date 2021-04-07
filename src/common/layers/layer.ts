@@ -7,7 +7,6 @@ import { WMS } from './wms';
 import { GeoJSON } from './geojson';
 
 import { api } from '../../api/api';
-
 import { EVENT_NAMES } from '../../api/event';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler

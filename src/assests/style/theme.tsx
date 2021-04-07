@@ -90,6 +90,7 @@ const themeOptions = {
             enteringScreen: 225,
             // recommended when something is leaving screen
             leavingScreen: 195,
+            splash: 1500,
         },
         easing: {
             // This is the most common easing curve.
