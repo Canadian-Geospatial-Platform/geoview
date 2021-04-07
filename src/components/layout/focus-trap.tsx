@@ -67,7 +67,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
         callback(false);
         mapElement?.classList.remove('map-focus-trap');
-        mapElement?.querySelectorAll('a[class^="makeStyles-skip"]').forEach((elem) => elem.setAttribute('tabindex', '0'));
+        mapElement?.querySelectorAll(`a[id*="link-${id}"]`).forEach((elem) => elem.setAttribute('tabindex', '0'));
         document.getElementById(`toplink-${id}`)?.focus();
     }
 
@@ -81,7 +81,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         mapElement?.classList.add('map-focus-trap');
 
         // remove the top and bottom link from focus cycle and start the FocusTrap
-        mapElement?.querySelectorAll('a[class^="makeStyles-skip"]').forEach((elem) => elem.setAttribute('tabindex', '-1'));
+        mapElement?.querySelectorAll(`a[id*="link-${id}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
         callback(true);
 
         // manage the exit of FocusTrap, remove the trap and focus the top link
