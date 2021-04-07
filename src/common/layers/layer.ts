@@ -97,12 +97,14 @@ export class Layer {
                 layerConf.id = generateId(layerConf.id);
                 if (layerConf.type === LayerTypes.GEOJSON) {
                     this.geoJSON.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                    this.removeTabindex();
                 } else if (layerConf.type === LayerTypes.WMS) {
                     this.wms.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                 } else if (layerConf.type === LayerTypes.ESRI_DYNAMIC) {
                     this.esriDynamic.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                 } else if (layerConf.type === LayerTypes.ESRI_FEATURE) {
                     this.esriFeature.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                    this.removeTabindex();
                 }
             }
         });
@@ -175,6 +177,21 @@ export class Layer {
                 layer: Object.defineProperties(layer, { id: { value: id } }),
             });
         }
+    }
+
+    /**
+     * Remove feature from ESRI Feature and GeoJSON layer from tabindex
+     */
+    removeTabindex(): void {
+        // Because there is no way to know GeoJSON is loaded (load event never trigger), we use a timeout
+        // TODO: timeout is never a good idea, may have to find a workaround...
+        setTimeout(() => {
+            const featElems = document.getElementsByClassName('leaflet-map-mapWM')[0].getElementsByClassName('leaflet-marker-pane')[0]
+                .children;
+            [...featElems].forEach((element) => {
+                element.setAttribute('tabindex', '-1');
+            });
+        }, 3000);
     }
 
     /**
