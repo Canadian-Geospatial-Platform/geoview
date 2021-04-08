@@ -26,13 +26,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface ButtonMapNavProps {
+    id: string;
     tooltip: string;
     icon: React.ReactNode;
     onClickFunction: () => void;
 }
 
 export function ButtonMapNav(props: ButtonMapNavProps): JSX.Element {
-    const { tooltip, icon, onClickFunction } = props;
+    const { id, tooltip, icon, onClickFunction } = props;
     const classes = useStyles();
     const { t } = useTranslation();
 
@@ -46,7 +47,7 @@ export function ButtonMapNav(props: ButtonMapNavProps): JSX.Element {
 
     return (
         <Tooltip title={t(tooltip)} placement="left" TransitionComponent={Fade} ref={newButton}>
-            <Button className={`${classes.buttonClass} ${classes.color}`} onClick={onClickFunction}>
+            <Button id={id} className={`${classes.buttonClass} ${classes.color}`} onClick={onClickFunction}>
                 {typeof icon === 'string' ? (
                     <HtmlToReact style={styles.buttonIcon} htmlContent={icon} />
                 ) : (

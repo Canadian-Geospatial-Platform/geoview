@@ -116,7 +116,7 @@ export function NavBar(): JSX.Element {
 
                     if (buttonPanel) {
                         setButtonPanelId(buttonPanel.button.id);
-                        openClosePanel(true);
+                        openClosePanel(!panelOpen);
                     }
                 }
             },
@@ -178,6 +178,7 @@ export function NavBar(): JSX.Element {
                                 return buttonPanel.button.visible ? (
                                     !buttonPanel.panel ? (
                                         <ButtonMapNav
+                                            id={buttonPanel.button.id}
                                             key={buttonPanel.button.id}
                                             tooltip={buttonPanel.button.tooltip}
                                             icon={buttonPanel.button.icon}
@@ -187,12 +188,13 @@ export function NavBar(): JSX.Element {
                                         />
                                     ) : (
                                         <ButtonMapNav
+                                            id={buttonPanel.button.id}
                                             key={buttonPanel.button.id}
                                             tooltip={buttonPanel.button.tooltip}
                                             icon={buttonPanel.button.icon}
                                             onClickFunction={() => {
                                                 setButtonPanelId(buttonPanel.button.id);
-                                                openClosePanel(true);
+                                                openClosePanel(!panelOpen);
                                             }}
                                         />
                                     )
