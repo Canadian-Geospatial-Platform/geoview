@@ -20,6 +20,7 @@ const themeOptions = {
             dark: '#ba000d',
             contrastText: '#000',
         },
+        backdrop: '#3F3F3F50',
     },
     typography: {
         fontSize: 16,

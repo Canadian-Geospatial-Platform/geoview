@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
     },
     backdrop: {
         position: 'absolute',
+        background: theme.palette.backdrop,
     },
     content: {
         padding: theme.spacing(5),
