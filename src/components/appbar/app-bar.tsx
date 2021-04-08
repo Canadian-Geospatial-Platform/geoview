@@ -156,7 +156,7 @@ export function Appbar(): JSX.Element {
 
                     if (buttonPanel) {
                         setButtonPanelId(buttonPanel.button.id);
-                        openClosePanel(true);
+                        openClosePanel(!panelOpen);
                     }
                 }
             },
@@ -182,6 +182,7 @@ export function Appbar(): JSX.Element {
                     <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
                         <IconButton
                             onClick={() => {
+                                setButtonPanelId(buttonPanel.button.id);
                                 openCloseDrawer(!open);
                             }}
                         >
