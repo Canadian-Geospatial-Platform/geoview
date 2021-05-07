@@ -1,9 +1,12 @@
 {
-    "close": "Fermer",
+    "general": {
+        "close": "Fermer",
+        "open": "Ouvrir"
+    },
     "mapnav": {
         "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
         "fullscreen": "Plein Écran",
-        "home": "Maison",
+        "home": "Retour à la vue initiale",
         "zoomIn": "Zoom avant",
         "zoomOut": "Zoom arrière"
     },
@@ -32,8 +35,7 @@
         "end": "Aller avant l'élément carte",
         "focusdialog": {
             "title": "Navigation clavier",
-            "ariadesc": "Boîte de dialogue pour verrouiller le focus",
-            "main": "Nous allons garder le focus verrouillé sur le visualiseur <br > sortir à l'aide de <strong>SHIFT + ESCAPE</strong>",
+            "main": "Si activé, le focus sera verrouillé sur le visualiseur. Pour sortir, appuyez sur <strong>CTRL + Q</strong>.",
             "button": {
                 "enable": "Activer",
                 "skip": "Sauter"

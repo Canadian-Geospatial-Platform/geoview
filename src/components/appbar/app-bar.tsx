@@ -179,10 +179,9 @@ export function Appbar(): JSX.Element {
                 classes={{ paper: open ? classes.drawerOpen : classes.drawerClose }}
             >
                 <div className={classes.toolbar}>
-                    <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
+                    <Tooltip title={open ? t('general.close') : t('general.open')} placement="right" TransitionComponent={Fade}>
                         <IconButton
                             onClick={() => {
-                                setButtonPanelId(buttonPanel.button.id);
                                 openCloseDrawer(!open);
                             }}
                         >

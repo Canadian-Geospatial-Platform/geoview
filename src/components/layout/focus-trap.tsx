@@ -87,7 +87,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
         // manage the exit of FocusTrap, remove the trap and focus the top link
         const manageExit = (evt2: KeyboardEvent) => {
-            if (evt2.code === 'Escape' && evt2.shiftKey) {
+            if (evt2.code === 'KeyQ' && evt2.ctrlKey) {
                 exitFocus();
                 mapElement?.removeEventListener('keydown', manageExit);
             }
@@ -160,10 +160,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     return (
         <Dialog
             style={{ position: 'absolute' }}
-            disablePortal
             container={document.getElementsByClassName('llwp-map')[0]}
-            aria-labelledby="dialog-keyboardfocus-title"
             open={open}
+            aria-labelledby="wcag-dialog-title"
+            aria-describedby="wcag-dialog-description"
             fullScreen={fullScreen}
             className={classes.trap}
             classes={{
@@ -173,11 +173,13 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
                 classes: { root: classes.backdrop },
             }}
         >
-            <DialogTitle id="dialog-keyboardfocus-title" aria-label={t('keyboardnav.focusdialog.ariadesc')}>
-                {t('keyboardnav.focusdialog.title')}
-            </DialogTitle>
-            <DialogContent dividers>
-                <DialogContentText className={classes.content} dangerouslySetInnerHTML={{ __html: t('keyboardnav.focusdialog.main') }} />
+            <DialogTitle id="wcag-dialog-title">{t('keyboardnav.focusdialog.title')}</DialogTitle>
+            <DialogContent>
+                <DialogContentText
+                    id="wcag-dialog-description"
+                    className={classes.content}
+                    dangerouslySetInnerHTML={{ __html: t('keyboardnav.focusdialog.main') }}
+                />
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={handleEnable}>
