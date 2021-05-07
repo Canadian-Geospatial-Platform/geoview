@@ -117,7 +117,9 @@ const FeatureInfo = (props: FeatureInfoProps): JSX.Element => {
                         return (
                             attributeValue.length > 0 &&
                             attributeAlias !== 'OBJECTID' &&
-                            attributeAlias !== 'SHAPE' && (
+                            attributeAlias !== 'SHAPE' &&
+                            attributeAlias !== 'SHAPE_Length' &&
+                            attributeAlias !== 'SHAPE_Area' && (
                                 <div className={classes.featureInfoItem} key={attrKey} tabIndex={0}>
                                     <span className={classes.featureInfoItemKey}>{attributeAlias}</span>
                                     <span className={classes.featureInfoItemValue}>{attributeValue}</span>

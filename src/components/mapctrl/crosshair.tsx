@@ -1,5 +1,5 @@
 /* eslint-disable react/no-danger */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -71,60 +71,62 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
 
     // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
     const [isCrosshairsActive, setCrosshairsActive] = useState(false);
-    const [panelButtonId, setPanelButtonId] = useState<string>();
+
+    // do not use useState for item used inside function only without rendering... use useRef
+    const isCrosshairsActiveValue = useRef(false);
+    const panelButtonId = useRef('');
 
     /**
      * Siimulate map mouse click to trigger details panel
+     * @function simulateClick
      * @param {KeyboardEvent} evt the keyboard event
      */
-    const simulateClick = useCallback(
-        (evt: KeyboardEvent): void => {
-            if (evt.key === 'Enter') {
-                const latlngPoint = map.getCenter();
+    function simulateClick(evt: KeyboardEvent): void {
+        if (evt.key === 'Enter') {
+            const latlngPoint = map.getCenter();
 
-                if (isCrosshairsActive) {
-                    const { panel } = api.map(mapId).appBarPanels.default[panelButtonId];
+            if (isCrosshairsActiveValue.current) {
+                const { panel } = api.map(mapId).appBarPanels.default[panelButtonId.current];
 
-                    if (panel) {
-                        // emit an event with the latlng point
-                        api.event.emit(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
-                            latlng: latlngPoint,
-                        });
-                    }
+                if (panel) {
+                    // emit an event with the latlng point
+                    api.event.emit(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
+                        latlng: latlngPoint,
+                    });
                 }
             }
-        },
-        [isCrosshairsActive, map, mapId, panelButtonId]
-    );
+        }
+    }
 
     /**
      * Remove the crosshair for keyboard navigation on map mouse move or blur
+     * @function removeCrosshair
      */
-    const removeCrosshair = useCallback((): void => {
+    function removeCrosshair(): void {
         // remove simulate click event listener
         mapContainer.removeEventListener('keydown', simulateClick);
         setCrosshairsActive(false);
-    }, [mapContainer, simulateClick]);
+        isCrosshairsActiveValue.current = false;
+    }
 
     useEffect(() => {
-        mapContainer.addEventListener('keydown', simulateClick);
-
         // on map keyboard focus, add crosshair
         api.event.on(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, (payload) => {
             if (payload && payload.handlerName.includes(id)) {
                 setCrosshairsActive(true);
-
-                setPanelButtonId('detailsPanel');
+                isCrosshairsActiveValue.current = true;
+                mapContainer.addEventListener('keydown', simulateClick);
+                panelButtonId.current = 'detailsPanel';
             }
         });
 
-        // when mouse moves over the map or map blur, check if we need to remove the crosshair
-        mapContainer.addEventListener('mousemove', removeCrosshair);
+        // when map blur, remove the crosshair and click event
         mapContainer.addEventListener('blur', removeCrosshair);
 
         return () => {
             api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
             mapContainer.removeEventListener('keydown', simulateClick);
+            mapContainer.removeEventListener('keydown', removeCrosshair);
         };
     }, []);
 

@@ -137,6 +137,7 @@ const FeaturesList = (props: FeaturesListProps): JSX.Element => {
                             tabIndex={0}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
+                                    e.preventDefault();
                                     goToFeatureInfo(attributes, symbolImage);
                                 }
                             }}
