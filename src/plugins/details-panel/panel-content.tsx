@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 import LayersList from './layers-list';
 import FeaturesList from './features-list';
@@ -108,8 +109,11 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
             setLayersList(showLayersList);
             setFeatureList(showFeaturesList);
             setFeatureInfo(showFeaturesInfo);
+
+            // emit content change event so the panel can focus on close button
+            api.event.emit(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId, {});
         },
-        [buttonPanel.panel]
+        [buttonPanel.panel, mapId]
     );
 
     /**
@@ -354,7 +358,7 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
             // if there is multiple layers with entries then symbology will be of the first layer
             // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
             // if no layers contains any entry then the default symbology with crosshair will show
-            api.event.emit('marker_icon/show', mapId, {
+            api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
                 latlng,
                 symbology,
             });
@@ -370,7 +374,6 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
             // set focus to the close button of the panel
             if (panelContainer) {
                 const closeBtn = panelContainer.querySelectorAll('.cgpv-panel-close')[0];
-
                 closeBtn.focus();
             }
         },
@@ -482,7 +485,7 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
 
         // handle crosshair enter
         api.event.on(
-            'details_panel/crosshair_enter',
+            EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER,
             function (args: any) {
                 if (args.handlerName === mapId) {
                     handleOpenDetailsPanel(args.latlng);
@@ -493,7 +496,7 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
 
         return () => {
             mapInstance.off('click');
-            api.event.off('details_panel/crosshair_enter');
+            api.event.off(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER);
         };
     }, [handleOpenDetailsPanel, mapId, mapInstance]);
 

@@ -3,6 +3,7 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 // use material ui theming
 const useStyles = makeStyles((theme) => ({
@@ -127,6 +128,7 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
                                                     if (!groupLayer) {
+                                                        e.preventDefault();
                                                         goToFeatureList(data, layerObj);
                                                     }
                                                 }
@@ -142,6 +144,7 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                                                 ) : (
                                                     <button
                                                         type="button"
+                                                        tabIndex={-1}
                                                         className={classes.layerItem}
                                                         disabled={layerData.length === 0}
                                                         onClick={
@@ -150,7 +153,7 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                                                                       // if a layer is clicked
                                                                       goToFeatureList(data, layerObj);
 
-                                                                      api.event.emit('marker_icon/show', mapId, {
+                                                                      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
                                                                           latlng: clickPos,
                                                                           symbology: getSymbol(
                                                                               data.layers[layerObj].renderer,

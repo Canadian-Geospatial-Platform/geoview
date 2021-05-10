@@ -11,6 +11,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardHeader, CardContent, Divider, IconButton, Tooltip, Fade } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
+import FocusTrap from 'focus-trap-react';
+
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
@@ -62,6 +64,9 @@ interface PanelAppProps {
 export default function PanelApp(props: PanelAppProps): JSX.Element {
     const { panel, button, panelOpen } = props;
 
+    // set the active trap value for FocusTrap
+    const [activeTrap, setActivetrap] = useState(false);
+
     const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
     const [, updatePanelContent] = useState(0);
 
@@ -85,6 +90,8 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
      * Close the panel
      */
     function closePanel(): void {
+        setActivetrap(false);
+
         // set panel status to false
         panel.status = false;
 
@@ -98,7 +105,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
         });
 
         // emit an event to hide the marker when using the details panel
-        api.event.emit('marker_icon/hide', mapId, {});
+        api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
 
         const buttonElement = document.getElementById(panel.buttonId);
 
@@ -106,7 +113,14 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
             // put back focus on calling button
             document.getElementById(panel.buttonId)?.focus();
         } else {
-            map.getContainer().focus();
+            const mapCont = map.getContainer();
+            mapCont.focus();
+
+            // if in focus trap mode, trigger the event
+            if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
+                mapCont.classList.add('keyboard-focus');
+                api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`, {});
+            }
         }
     }
 
@@ -180,72 +194,92 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
         // listen to change panel content and rerender
         api.event.on(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, (args) => {
+            // set focus on close button on panel content change
+            setTimeout(() => ((closeBtnRef.current as unknown) as HTMLElement).focus(), 100);
+
             if (args.buttonId === panel.buttonId) {
                 updateComponent();
             }
         });
+
+        // listen to open panel to activate focus trap and focus on close
+        api.event.on(
+            EVENT_NAMES.EVENT_PANEL_OPEN,
+            (args) => {
+                if (args.buttonId === panel.buttonId) {
+                    setActivetrap(true);
+
+                    // set focus on close button on panel open
+                    setTimeout(() => ((closeBtnRef.current as unknown) as HTMLElement).focus(), 0);
+                }
+            },
+            mapId
+        );
 
         return () => {
             api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
             api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION);
             api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION);
             api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT);
+            api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
         };
     }, []);
 
     useEffect(() => {
         // set focus on close button on panel open
         if (button.visible) ((closeBtnRef.current as unknown) as HTMLElement).focus();
-    });
+    }, [button, closeBtnRef]);
 
     return (
-        <Card
-            ref={panelRef}
-            className={`leaflet-control ${classes.root}`}
-            style={{
-                width: panel.width,
-                display: panelOpen ? 'block' : 'none',
-            }}
-            onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                    closePanel();
-                }
-            }}
-            {...{ 'data-id': panel.buttonId }}
-        >
-            <CardHeader
-                className={classes.avatar}
-                avatar={
-                    typeof panel.icon === 'string' ? (
-                        <HtmlToReact style={styles.buttonIcon} htmlContent={panel.icon} />
-                    ) : typeof panel.icon === 'object' ? (
-                        <panel.icon />
+        <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
+            <Card
+                ref={panelRef}
+                className={`leaflet-control ${classes.root}`}
+                style={{
+                    width: panel.width,
+                    display: panelOpen ? 'block' : 'none',
+                }}
+                onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                        closePanel();
+                    }
+                }}
+                {...{ 'data-id': panel.buttonId }}
+            >
+                <CardHeader
+                    className={classes.avatar}
+                    avatar={
+                        typeof panel.icon === 'string' ? (
+                            <HtmlToReact style={styles.buttonIcon} htmlContent={panel.icon} />
+                        ) : typeof panel.icon === 'object' ? (
+                            <panel.icon />
+                        ) : (
+                            <panel.icon />
+                        )
+                    }
+                    title={t(panel.title)}
+                    action={
+                        <>
+                            {actionButtons}
+                            <Tooltip title={t('general.close')} placement="right" TransitionComponent={Fade}>
+                                <IconButton ref={closeBtnRef} className="cgpv-panel-close" aria-label={t('general.close')} onClick={closePanel}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    }
+                />
+                <Divider />
+                <CardContent className={classes.cardContainer}>
+                    {typeof panel.content === 'string' ? (
+                        <HtmlToReact htmlContent={panel.content} />
+                    ) : typeof panel.content === 'object' ? (
+                        panel.content
                     ) : (
-                        <panel.icon />
-                    )
-                }
-                title={t(panel.title)}
-                action={
-                    <>
-                        {actionButtons}
-                        <Tooltip title={t('close')} placement="right" TransitionComponent={Fade}>
-                            <IconButton ref={closeBtnRef} className="cgpv-panel-close" aria-label={t('close')} onClick={closePanel}>
-                                <CloseIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </>
-                }
-            />
-            <Divider />
-            <CardContent className={classes.cardContainer}>
-                {typeof panel.content === 'string' ? (
-                    <HtmlToReact htmlContent={panel.content} />
-                ) : typeof panel.content === 'object' ? (
-                    panel.content
-                ) : (
-                    <panel.content />
-                )}
-            </CardContent>
-        </Card>
+                        <panel.content />
+                    )}
+                </CardContent>
+            </Card>
+        </FocusTrap>
     );
 }

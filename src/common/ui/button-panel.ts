@@ -67,6 +67,7 @@ export class ButtonPanel {
         // create default group for navbar buttons
         this.navBarButtons.default = {};
 
+        // TODO: do not keep, just proof of concept
         this.createAppbarPanel(LayersPanel.button, LayersPanel.panel, 'default');
     };
 

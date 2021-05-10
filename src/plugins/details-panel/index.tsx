@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from '../../api/api';
+
 import PanelContent from './panel-content';
 
 /**
