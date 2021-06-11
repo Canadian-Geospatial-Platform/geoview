@@ -203,7 +203,7 @@ export class Config {
                 ? xVal
                 : this._config.center[1];
         const y =
-            Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && xVal < this._center[projection].lat[1]
+            !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
                 ? yVal
                 : this._config.center[0];
 
