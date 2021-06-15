@@ -48,16 +48,16 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Crosshair properties interface
  */
-interface CrosshairBProps {
+interface CrosshairProps {
     id: string;
 }
 
 /**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
- * @param {CrosshairBProps} props the snackbar properties
+ * @param {CrosshairProps} props the crosshair properties
  * @return {JSX.Element} the north arrow component
  */
-export function Crosshair(props: CrosshairBProps): JSX.Element {
+export function Crosshair(props: CrosshairProps): JSX.Element {
     const { id } = props;
 
     const classes = useStyles();
@@ -107,6 +107,7 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
         mapContainer.removeEventListener('keydown', simulateClick);
         setCrosshairsActive(false);
         isCrosshairsActiveValue.current = false;
+        api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, { active: false });
     }
 
     useEffect(() => {
@@ -115,6 +116,8 @@ export function Crosshair(props: CrosshairBProps): JSX.Element {
             if (payload && payload.handlerName.includes(id)) {
                 setCrosshairsActive(true);
                 isCrosshairsActiveValue.current = true;
+                api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, { active: true });
+
                 mapContainer.addEventListener('keydown', simulateClick);
                 panelButtonId.current = 'detailsPanel';
             }
