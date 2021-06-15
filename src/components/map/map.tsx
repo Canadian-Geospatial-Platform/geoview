@@ -147,7 +147,7 @@ export function Map(props: MapConfigProps): JSX.Element {
                             />
                         );
                     })}
-                    {deviceSizeMedUp && <MousePosition />}
+                    {deviceSizeMedUp && <MousePosition id={id} />}
                     <ScaleControl position="bottomright" imperial={false} />
                     {deviceSizeMedUp && <Attribution attribution={attribution} />}
                     <div
