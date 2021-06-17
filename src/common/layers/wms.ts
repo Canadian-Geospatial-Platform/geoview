@@ -24,6 +24,7 @@ import { getMapServerUrl, getXMLHttpRequest, xmlToJson } from '../utilities';
  */
 export class WMS {
     // TODO: try to avoid getCapabilities for WMS. Use Web Presence metadata return info to store, legend image link, layer name, and other needed properties.
+    // ! This will maybe not happen because geoCore may not everything we need. We may have to use getCap
     // * We may have to do getCapabilites if we want to add layers not in the catalog
     /**
      * Add a WMS layer to the map.

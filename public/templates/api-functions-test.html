@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title><%= htmlWebpackPlugin.options.title %></title>
+        <link rel="shortcut icon" href="./favicon.ico" />
+        <meta name="msapplication-TileColor" content="#da532c" />
+        <meta name="msapplication-config" content="./img/browserconfig.xml" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="msapplication-TileColor" content="#da532c" />
+        <meta name="theme-color" content="#ffffff" />
+        <link
+            href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <div calss="header-table">
+            <table>
+                <tbody>
+                    <tr>
+                        <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+                        <td class="header-title">
+                            <h1><strong>API Functions Test</strong></h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="./index.html">Main</a><br />
+                            <a href="#HLNG1">1. Test get service metadata</a><br />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>This page is used to showcase how we can get service metadata from an API call.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h3 id="HLNG1">1. Test get service metadata</h3>
+            <h3><a href="#top">Top of the page</a></h3>
+            <div
+                id="LNG1"
+                class="llwp-map"
+                data-leaflet="{ 'name': 'LCCEN', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true }, 'layers': [] }"
+            ></div>
+            <p>These text areas show the metadata value for a ESRI and a WMS layer.</p>
+            <textarea id="esriMetadata" name="esriMetadata" rows="4" cols="500"></textarea>
+            <textarea id="wmsMetadata" name="wmsMetadata" rows="4" cols="500"></textarea>
+        </div>
+        <div id="codeSnippet" class="panel"></div>
+        <script src="codedoc.js"></script>
+        <script>
+            // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+            cgpv.init(() => {
+                console.log('api is ready');
+
+                // create snippets
+                createCodeSnippet();
+
+                const urls = ['https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/2', 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/3']
+
+
+                urls.forEach(async (url) => {
+                    const esriMeta = await cgpv.api.utilities.getESRIServiceMetadata(url);
+                    console.log(esriMeta);
+                });
+
+                cgpv.api.utilities.getESRIServiceMetadata(urls[0]).then((data) => {
+                    console.log(data);
+                    document.getElementById('esriMetadata').value = JSON.stringify(data);
+                });
+
+                cgpv.api.utilities.getWMSServiceMetadata('https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', '0').then((data) => {
+                    console.log(data);
+                    document.getElementById('wmsMetadata').value = JSON.stringify(data);
+                });
+            });
+        </script>
+    </body>
+</html>

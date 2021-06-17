@@ -10,6 +10,7 @@ import { LayerTypes } from '../common/layers/layer';
 import { MapViewer } from '../common/map-viewer';
 
 import { Plugin } from './plugin';
+import { Utilities } from './utilities';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -48,6 +49,9 @@ export class API {
     // load plugins API
     plugin: Plugin;
 
+    // utilities object
+    utilities: Utilities;
+
     /**
      * Initiate the event and projection objects
      */
@@ -55,6 +59,7 @@ export class API {
         this.event = new Event();
         this.projection = new Projection();
         this.plugin = new Plugin();
+        this.utilities = new Utilities();
     }
 
     /**

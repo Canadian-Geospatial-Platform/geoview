@@ -84,7 +84,7 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
      * @param {string} url the url of the map server
      * @returns a json containing the result of the query
      */
-    const queryServer = async (url: string) => {
+    const queryServer = async (url: string): string => {
         // fetch the map server returning a json object
         const response = await fetch(`${url}?f=json`);
 
