@@ -95,11 +95,11 @@ export function Shell(props: ShellProps): JSX.Element {
         setActivetrap(dialogTrap);
     }
 
-    // show a splash screen before map is loaded
+    // Show a splash screen before map is loaded
     const [isLoaded, setIsLoaded] = useState(false);
     api.event.on(EVENT_NAMES.EVENT_MAP_LOADED, (payload) => {
         if (payload && payload.handlerName.includes(id)) {
-            // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
+            // Even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
             setIsLoaded(true);
         }
     });
