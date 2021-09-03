@@ -1,9 +1,10 @@
-import { api } from './../api/api';
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Map } from 'leaflet';
 
 import queryString from 'query-string';
+
+import { api } from '../api/api';
 
 import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';

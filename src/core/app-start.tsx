@@ -16,14 +16,14 @@ import { Shell } from '../components/layout/shell';
 import { theme } from '../assests/style/theme';
 
 /**
- * interface used when passing html elements from the html pages
+ * Interface used when passing html elements from the html pages
  */
 interface AppStartProps {
     html: string;
 }
 
 /**
- * Inialize the app with maps from inline html configs, url params
+ * Initialize the app with maps from inline html configs, url params
  */
 const AppStart = (props: AppStartProps): JSX.Element => {
     const { html } = props;
@@ -35,9 +35,9 @@ const AppStart = (props: AppStartProps): JSX.Element => {
         return parse(html, {
             trim: true,
             replace: (domNode) => {
-                // parse map config and create maps
+                // Parse map config and create maps
                 if (domNode.attribs && domNode.attribs.class && domNode.attribs.class === 'llwp-map') {
-                    // validate configuration and appply default if problem occurs then setup language
+                    // Validate configuration and apply default if problem occurs then setup language
                     const configObj = new Config(domNode.attribs.id || '', (domNode.attribs['data-leaflet'] || '')?.replace(/'/g, '"'));
                     const i18nInstance = i18n.cloneInstance({
                         lng: configObj.language,
