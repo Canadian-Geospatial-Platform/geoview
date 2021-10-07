@@ -9,10 +9,8 @@ import { useTheme, makeStyles } from '@material-ui/core/styles';
 
 import { SnackbarProvider } from 'notistack';
 
-import { MapOptions, getMapOptions } from '../../common/map';
-import { BasemapLayer } from '../../common/basemap';
+import { getMapOptions } from '../../common/map';
 import { Projection } from '../../common/projection';
-import { MapConfigProps } from '../../api/config';
 
 import { Crosshair } from '../mapctrl/crosshair';
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -29,7 +27,7 @@ import { MapViewer } from '../../common/map-viewer';
 import { generateId } from '../../common/constant';
 import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 import { ClickMarker } from '../mapctrl/click-marker';
-import { TypeMapRef, TypeMap, TypeMapContainerProps } from '../../types/cgpv-types';
+import { TypeMapOptions, TypeMapRef, TypeMap, TypeMapContainerProps, TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     snackBar: {
@@ -41,7 +39,7 @@ const CGPVMapContainer = ({ children, className, id, placeholder, style, whenCre
     return MapContainer({ children, className, id, placeholder, style, whenCreated, ...options });
 };
 
-export function Map(props: MapConfigProps): JSX.Element {
+export function Map(props: TypeMapConfigProps): JSX.Element {
     // make sure the id is not undefined
     let { id } = props;
     id = generateId(id);
@@ -68,7 +66,7 @@ export function Map(props: MapConfigProps): JSX.Element {
     let attribution = '';
 
     // get map option from slected basemap projection
-    const mapOptions: MapOptions = getMapOptions(projection);
+    const mapOptions: TypeMapOptions = getMapOptions(projection);
 
     /**
      * Get the center position of the map when move / drag has ended
@@ -148,7 +146,7 @@ export function Map(props: MapConfigProps): JSX.Element {
         >
             {isLoaded && (
                 <>
-                    {basemapLayers.map((basemapLayer: BasemapLayer) => {
+                    {basemapLayers.map((basemapLayer: TypeBasemapLayer) => {
                         return (
                             <TileLayer
                                 key={basemapLayer.id}

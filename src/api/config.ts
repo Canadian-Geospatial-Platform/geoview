@@ -4,33 +4,7 @@ import { LatLngTuple } from 'leaflet';
 
 import { generateId } from '../common/constant';
 import { isJsonString } from '../common/utilities';
-import { TypeLayerConfig } from '../types/cgpv-types';
-
-/**
- * Interface used when creating a map to validate configuration object
- */
-export interface MapConfigProps {
-    id?: string;
-    center: LatLngTuple;
-    zoom: number;
-    projection: number;
-    language: string;
-    selectBox: boolean;
-    boxZoom: boolean;
-    basemapOptions: BasemapOptions;
-    layers?: TypeLayerConfig[];
-    plugins: string[];
-}
-
-/**
- * interface for basemap options
- */
-export interface BasemapOptions {
-    id: string;
-    shaded: boolean;
-    labeled: boolean;
-}
-
+import { TypeMapConfigProps, TypeBasemapOptions } from '../types/cgpv-types';
 /**
  * Class to handle configuration validation. Will validate every item for structure and valid values. If error found, will replace by default values
  * and sent a message in the console for developers to know something went wrong
@@ -40,7 +14,7 @@ export interface BasemapOptions {
  */
 export class Config {
     // default config if provided configuration is missing or wrong
-    private _config: MapConfigProps = {
+    private _config: TypeMapConfigProps = {
         id: generateId(null),
         center: [60, -100] as LatLngTuple,
         zoom: 4,
@@ -72,7 +46,7 @@ export class Config {
     /**
      * Get map configuration object
      */
-    get configuration(): MapConfigProps {
+    get configuration(): TypeMapConfigProps {
         return this._config;
     }
 
@@ -108,11 +82,11 @@ export class Config {
      * Validate the configuration file
      * @param {string} id map id
      * @param {JSON} config JSON configuration object
-     * @returns {MapConfigProps} valid JSON configuration object
+     * @returns {TypeMapConfigProps} valid JSON configuration object
      */
-    private validate(id: string, config: string): MapConfigProps {
+    private validate(id: string, config: string): TypeMapConfigProps {
         // merge default and provided configuration
-        const tmpConfig: MapConfigProps = { ...this._config, ...JSON.parse(config) };
+        const tmpConfig: TypeMapConfigProps = { ...this._config, ...JSON.parse(config) };
 
         // do validation for every pieces
         // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
@@ -129,7 +103,18 @@ export class Config {
         const { layers } = tmpConfig;
 
         // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
-        const validConfig: MapConfigProps = { id, projection, zoom, center, language, basemapOptions, selectBox, boxZoom, layers, plugins };
+        const validConfig: TypeMapConfigProps = {
+            id,
+            projection,
+            zoom,
+            center,
+            language,
+            basemapOptions,
+            selectBox,
+            boxZoom,
+            layers,
+            plugins,
+        };
         this.logModifs(tmpConfig, validConfig);
 
         return validConfig;
@@ -137,10 +122,10 @@ export class Config {
 
     /**
      * Log modifications made to configuration by the validator
-     * @param {MapConfigProps} inConfig input config
-     * @param {MapConfigProps} validConfig valid config
+     * @param {TypeMapConfigProps} inConfig input config
+     * @param {TypeMapConfigProps} validConfig valid config
      */
-    private logModifs(inConfig: MapConfigProps, validConfig: MapConfigProps): void {
+    private logModifs(inConfig: TypeMapConfigProps, validConfig: TypeMapConfigProps): void {
         // eslint-disable-next-line array-callback-return
         Object.keys(inConfig).map((key) => {
             if (!(key in validConfig)) {
@@ -188,10 +173,10 @@ export class Config {
     /**
      * Validate basemap options
      * @param {number} projection valid projection
-     * @param {BasemapOptions} basemapOptions basemap options
-     * @returns {BasemapOptions} valid basemap options
+     * @param {TypeBasemapOptions} basemapOptions basemap options
+     * @returns {TypeBasemapOptions} valid basemap options
      */
-    private validateBasemap(projection: number, basemapOptions: BasemapOptions): BasemapOptions {
+    private validateBasemap(projection: number, basemapOptions: TypeBasemapOptions): TypeBasemapOptions {
         const id: string = this._basemapId[projection].includes(basemapOptions.id) ? basemapOptions.id : this._basemapId[projection][0];
         const shaded = this._basemapShaded[projection].includes(basemapOptions.shaded)
             ? basemapOptions.shaded

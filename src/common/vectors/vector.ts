@@ -9,7 +9,7 @@ import { MarkerCGP } from './marker';
 import { generateId } from '../constant';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { TypeMapRef, VectorType, TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
+import { TypeMapRef, TypeVector, TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
@@ -33,7 +33,7 @@ export class Vector {
     marker: MarkerCGP;
 
     // used to store geometry groups
-    geometryGroups: VectorType[] = [];
+    geometryGroups: TypeVector[] = [];
 
     // contains all the added geometries
     geometries: TypeGeometry[] = [];
@@ -267,9 +267,9 @@ export class Vector {
      * @param {string} GeometryGroupid the id of the group to use when managing this group
      * @param {boolean} addGroupToMap a flag indicating that the geometry group must be added to the map
      */
-    createGeometryGroup = (GeometryGroupid: string, addGroupToMap?: boolean): void => {
+    createGeometryGroup = (GeometryGroupid: string, addGroupToMap = true): void => {
         if (!this.getGeometryGroup(GeometryGroupid)) {
-            const featureGroup = L.featureGroup() as VectorType;
+            const featureGroup = L.featureGroup() as TypeVector;
             featureGroup.id = GeometryGroupid;
             if (addGroupToMap) {
                 featureGroup.addTo(this.vectorMapRef.map);
@@ -302,7 +302,7 @@ export class Vector {
      *
      * @returns the geomtry group
      */
-    getGeometryGroup = (id: string): VectorType => {
+    getGeometryGroup = (id: string): TypeVector => {
         return this.geometryGroups.filter((geometryGroup) => geometryGroup.id === id)[0];
     };
 

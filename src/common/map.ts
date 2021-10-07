@@ -1,16 +1,17 @@
 import { LatLngBounds } from 'leaflet';
 import screenfull from 'screenfull';
+import { TypeMapOptions } from '../types/cgpv-types';
 
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
-const lccMapOptionsParam: MapOptions = {
+const lccMapOptionsParam: TypeMapOptions = {
     zoomFactor: 7,
     minZoom: 3,
     maxZooom: 19,
 };
 
 // Web Mercator map options
-const wmMapOptionsParam: MapOptions = {
+const wmMapOptionsParam: TypeMapOptions = {
     zoomFactor: 5,
     minZoom: 2,
     maxZooom: 19,
@@ -18,16 +19,8 @@ const wmMapOptionsParam: MapOptions = {
     maxBoundsViscosity: 0.0,
 };
 
-export function getMapOptions(epsgCode: number): MapOptions {
+export function getMapOptions(epsgCode: number): TypeMapOptions {
     return epsgCode === 3978 ? lccMapOptionsParam : wmMapOptionsParam;
-}
-
-export interface MapOptions {
-    zoomFactor: number;
-    minZoom: number;
-    maxZooom: number;
-    maxBounds?: LatLngBounds;
-    maxBoundsViscosity?: number;
 }
 
 /**

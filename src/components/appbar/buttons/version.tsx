@@ -3,9 +3,10 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 
 import ButtonApp from '../button';
 
-import { AppVersion, GITUHUB_REPO } from '../../../common/constant';
+import { GITUHUB_REPO } from '../../../common/constant';
+import { TypeAppVersion } from '../../../types/cgpv-types';
 // eslint-disable-next-line no-underscore-dangle
-declare const __VERSION__: AppVersion;
+declare const __VERSION__: TypeAppVersion;
 
 const useStyles = makeStyles((theme) => ({
     github: {

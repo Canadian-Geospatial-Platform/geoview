@@ -7,7 +7,7 @@ import { CircularProgress } from '@material-ui/core';
 
 import FocusTrap from 'focus-trap-react';
 
-import { MapConfigProps } from '../../api/config';
+import { TypeMapConfigProps } from '../../types/cgpv-types';
 import { Map } from '../map/map';
 import { FocusTrapDialog } from './focus-trap';
 
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => {
  */
 interface ShellProps {
     id: string;
-    config: MapConfigProps;
+    config: TypeMapConfigProps;
 }
 
 /**

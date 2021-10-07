@@ -1,18 +1,4 @@
-/**
- * Interface for the button properties used when creating a new button
- */
-export interface ButtonProps {
-    // generated button id
-    id: string;
-    // button tooltip
-    tooltip: string;
-    // button icon
-    icon: React.ReactNode | Element;
-    // optional callback function to run on button click
-    callback?: () => void;
-    // should the button be displayed in the appbar/navbar?
-    visible?: boolean;
-}
+import { TypeButtonProps } from '../../types/cgpv-types';
 
 /**
  * Class used to handle creating a new button
@@ -41,7 +27,7 @@ export class Button {
      *
      * @param button the passed in button properties when button is created
      */
-    constructor(button: ButtonProps) {
+    constructor(button: TypeButtonProps) {
         this.id = button.id;
         this.icon = button.icon;
         this.tooltip = button.tooltip;

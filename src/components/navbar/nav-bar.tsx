@@ -20,9 +20,8 @@ import { api } from '../../api/api';
 import { ButtonPanel } from '../../common/ui/button-panel';
 import { ButtonMapNav } from './button';
 import { EVENT_NAMES } from '../../api/event';
-import { PANEL_TYPES } from '../../common/ui/panel';
 import PanelApp from '../panel/panel';
-import { TypeButtonPanel } from '../../types/cgpv-types';
+import { TypeButtonPanel, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     navBar: {
@@ -82,7 +81,7 @@ export function NavBar(): JSX.Element {
      */
     const openClosePanel = (status: boolean): void => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
-            panelType: PANEL_TYPES.NAVBAR,
+            panelType: CONST_PANEL_TYPES.NAVBAR,
             handlerId: mapId,
             status,
         });
@@ -101,7 +100,7 @@ export function NavBar(): JSX.Element {
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
             (payload) => {
-                if (payload && payload.handlerId === mapId && payload.panelType === PANEL_TYPES.NAVBAR) setPanelOpen(payload.status);
+                if (payload && payload.handlerId === mapId && payload.panelType === CONST_PANEL_TYPES.NAVBAR) setPanelOpen(payload.status);
             },
             mapId
         );

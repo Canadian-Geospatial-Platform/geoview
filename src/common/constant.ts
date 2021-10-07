@@ -10,20 +10,6 @@ export const LEAFLET_POSITION_CLASSES = {
 };
 
 /**
- * An object containing version information.
- *
- * @export
- * @interface AppVersion
- */
-export interface AppVersion {
-    hash: string;
-    major: number;
-    minor: number;
-    patch: number;
-    timestamp: string;
-}
-
-/**
  * Generate a unique id if an id was not provided
  *
  * @param {string} id an id to return if it was already passed
