@@ -17,6 +17,11 @@ export const EVENT_NAMES = {
     EVENT_MAP_MOVE_END: 'map/moveend',
 
     /**
+     * Event triggered when a user end a select box
+     */
+    EVENT_BOX_SELECT_END: 'box/zoom_or_select_end',
+
+    /**
      * Event triggered when a user focus the map with keyboard (WCAG)
      */
     EVENT_MAP_IN_KEYFOCUS: 'map/inkeyfocus',
@@ -109,6 +114,27 @@ export const EVENT_NAMES = {
      * Event is triggered when a vector has been added
      */
     EVENT_VECTOR_ADDED: 'vector/added',
+    /**
+     * Event is triggered when you want to turn off all visible vectors
+     */
+    EVENT_VECTOR_OFF: 'vector/off',
+    /**
+     * Event is triggered when you want to turn on all visible vectors
+     */
+    EVENT_VECTOR_ON: 'vector/on',
+
+    /**
+     * Event triggered when a request is made to add a cluster
+     */
+    EVENT_CLUSTER_ADD: 'cluster/add',
+    /**
+     * Event triggered when a request is made to remove a cluster
+     */
+    EVENT_CLUSTER_REMOVE: 'cluster/remove',
+    /**
+     * Event is triggered when a cluster has been added
+     */
+    EVENT_CLUSTER_ADDED: 'cluster/added',
 
     /**
      * Event is triggered when updating the basemap layers

@@ -4,7 +4,7 @@ import { api } from '../api/api';
 import { BasemapOptions } from '../api/config';
 import { generateId } from './constant';
 import { EVENT_NAMES } from '../api/event';
-import { MapInterface } from './map-viewer';
+import { TypeMapViewer } from '../types/cgpv-types';
 
 /**
  * interface for basemap basic properties
@@ -72,11 +72,11 @@ export class Basemap {
     // used to hold all created basemaps for a map
     basemaps: BasemapProps[] = [];
 
+    // the language to use
+    language: string;
+
     // the basemap options passed from the map config
     private basemapOptions: BasemapOptions | null | undefined;
-
-    // the language to use
-    private language: string;
 
     // the projection number
     private projection: number;
@@ -110,7 +110,7 @@ export class Basemap {
     init = (mapId: string): void => {
         this.mapId = mapId;
 
-        const { map } = api.map(this.mapId) as MapInterface;
+        const { map } = api.map(this.mapId) as TypeMapViewer;
 
         // create new pane to host basemap layers
         this.basemapsPaneName = 'basemapsPane';

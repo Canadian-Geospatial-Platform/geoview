@@ -3,8 +3,8 @@
 import { LatLngTuple } from 'leaflet';
 
 import { generateId } from '../common/constant';
-import { LayerConfig } from '../common/layers/layer';
 import { isJsonString } from '../common/utilities';
+import { TypeLayerConfig } from '../types/cgpv-types';
 
 /**
  * Interface used when creating a map to validate configuration object
@@ -15,8 +15,10 @@ export interface MapConfigProps {
     zoom: number;
     projection: number;
     language: string;
+    selectBox: boolean;
+    boxZoom: boolean;
     basemapOptions: BasemapOptions;
-    layers?: LayerConfig[];
+    layers?: TypeLayerConfig[];
     plugins: string[];
 }
 
@@ -44,6 +46,8 @@ export class Config {
         zoom: 4,
         projection: 3978,
         language: 'en-CA',
+        selectBox: true,
+        boxZoom: true,
         basemapOptions: { id: 'transport', shaded: true, labeled: true },
         layers: [],
         plugins: [],
@@ -52,13 +56,16 @@ export class Config {
     // validations values
     private _projections: number[] = [3857, 3978];
 
-    private _basemapId = { 3857: ['transport'], 3978: ['transport', 'simple', 'shaded'] };
+    private _basemapId: Record<number, string[]> = { 3857: ['transport'], 3978: ['transport', 'simple', 'shaded'] };
 
-    private _basemapShaded = { 3857: [false], 3978: [true, false] };
+    private _basemapShaded: Record<number, boolean[]> = { 3857: [false], 3978: [true, false] };
 
-    private _basemaplabeled = { 3857: [true, false], 3978: [true, false] };
+    private _basemaplabeled: Record<number, boolean[]> = { 3857: [true, false], 3978: [true, false] };
 
-    private _center = { 3857: { lat: [-90, 90], long: [-180, 180] }, 3978: { lat: [40, 90], long: [-140, 40] } };
+    private _center: Record<number, Record<string, number[]>> = {
+        3857: { lat: [-90, 90], long: [-180, 180] },
+        3978: { lat: [40, 90], long: [-140, 40] },
+    };
 
     private _languages = ['en-CA', 'fr-CA'];
 
@@ -114,13 +121,15 @@ export class Config {
         const center = this.validateCenter(projection, tmpConfig.center);
         const zoom = this.validateZoom(Number(tmpConfig.zoom));
         const language = this.validateLanguage(tmpConfig.language);
+        const { selectBox } = tmpConfig;
+        const { boxZoom } = tmpConfig;
         const plugins = this.validatePlugins(tmpConfig.plugins);
 
         // validation is done in layer class
         const { layers } = tmpConfig;
 
         // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
-        const validConfig: MapConfigProps = { id, projection, zoom, center, language, basemapOptions, layers, plugins };
+        const validConfig: MapConfigProps = { id, projection, zoom, center, language, basemapOptions, selectBox, boxZoom, layers, plugins };
         this.logModifs(tmpConfig, validConfig);
 
         return validConfig;
@@ -132,6 +141,12 @@ export class Config {
      * @param {MapConfigProps} validConfig valid config
      */
     private logModifs(inConfig: MapConfigProps, validConfig: MapConfigProps): void {
+        // eslint-disable-next-line array-callback-return
+        Object.keys(inConfig).map((key) => {
+            if (!(key in validConfig)) {
+                console.log(`- map: ${validConfig.id} - Key '${key}' is invalid -`);
+            }
+        });
         if (inConfig.projection !== validConfig.projection) {
             console.log(`- map: ${validConfig.id} - Invalid projection ${inConfig.projection} replaced by ${validConfig.projection} -`);
         }

@@ -1,12 +1,14 @@
 import { CSSProperties } from 'react';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createMuiTheme, ThemeOptions } from '@material-ui/core/styles';
+// eslint-disable-next-line no-restricted-imports
+import { Variant, TypographyStyleOptions } from '@material-ui/core/styles/createTypography';
 
 const headingStyles = {
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
     fontWeight: 700,
 };
 
-const themeOptions = {
+const themeOptions: ThemeOptions = {
     palette: {
         primary: {
             light: '#ffffff',
@@ -113,16 +115,13 @@ const themeOptions = {
     },
     overrides: {
         button: {
-            width: 32,
-            height: 32,
+            size: { width: '32px', height: '32px' },
         },
         northArrow: {
-            width: 42,
-            height: 42,
+            size: { width: 42, height: 42 },
         },
-        crosshair: {
-            width: 275,
-            height: 275,
+        crosshairIcon: {
+            size: { width: 275, height: 275 },
         },
         MuiFab: {
             extended: {
@@ -138,12 +137,13 @@ const themeOptions = {
     },
 };
 
+type TypeTypography = Partial<Record<Variant, TypographyStyleOptions>>;
 export const styles: Record<string, CSSProperties> = {
     buttonIcon: {
         width: '1em',
         height: '1em',
         display: 'inherit',
-        fontSize: themeOptions.typography.button.fontSize,
+        fontSize: (themeOptions.typography as TypeTypography).button?.fontSize,
         alignItems: 'inherit',
         justifyContent: 'inherit',
         transition: 'fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',

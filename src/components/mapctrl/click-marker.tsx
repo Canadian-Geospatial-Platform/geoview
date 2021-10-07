@@ -1,18 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 
 import L, { divIcon, LatLng } from 'leaflet';
 
 import { Marker, useMap } from 'react-leaflet';
 
-import { useEventHandlers } from '@react-leaflet/core';
+import { useEventHandlers, LeafletElement } from '@react-leaflet/core';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { MapInterface } from '../../common/map-viewer';
 import { getTranslateValues } from '../../common/utilities';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     markerIcon: {
         display: 'flex',
         justifyContent: 'center',
@@ -44,7 +44,7 @@ export const ClickMarker = (): JSX.Element => {
     const classes = useStyles();
 
     const map = useMap();
-    const mapId = (api.mapInstance(map) as MapInterface).id;
+    const mapId = api.mapInstance(map).id;
     const overlay = document.createElement('div');
 
     /**
@@ -57,7 +57,8 @@ export const ClickMarker = (): JSX.Element => {
 
     // attach zoom and movestart events to the map instance
     const handlers = useMemo(() => ({ zoom: removeIcon, movestart: removeIcon }), [removeIcon]);
-    useEventHandlers({ instance: map }, handlers);
+    const leafletElement: LeafletElement<L.Map> = { instance: map, context: { __version: 1, map } };
+    useEventHandlers(leafletElement, handlers);
 
     /**
      * Create an icon using an svg canvas image
@@ -71,10 +72,11 @@ export const ClickMarker = (): JSX.Element => {
      * Hide features from markerPane (set zIndex to -1) because they are always on top of overlay
      */
     function hideMarker(): void {
-        const featElems = document.getElementsByClassName(`leaflet-map-${mapId}`)[0].getElementsByClassName('leaflet-marker-pane')[0].children;
-        [...featElems].forEach((element) => {
+        const featElems = document.getElementsByClassName(`leaflet-map-${mapId}`)[0].getElementsByClassName('leaflet-marker-pane')[0]
+            .children;
+        [...featElems].forEach((element: Element) => {
             // eslint-disable-next-line no-param-reassign
-            if (element.classList.contains('leaflet-marker-icon')) element.style.zIndex = '-1';
+            if (element.classList.contains('leaflet-marker-icon')) (element as HTMLElement).style.zIndex = '-1';
         });
     }
 
@@ -93,7 +95,7 @@ export const ClickMarker = (): JSX.Element => {
                     setShowMarker(true);
 
                     // set the overlay... get map size and apply mapPane transform to the overlay
-                    const test = getTranslateValues(map.getPane('mapPane'));
+                    const test = getTranslateValues(map.getPane('mapPane') as HTMLElement);
                     const size = map.getSize();
                     overlay.style.height = `${size.y}px`;
                     overlay.style.width = `${size.x}px`;

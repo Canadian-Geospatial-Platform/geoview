@@ -1,16 +1,17 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { makeStyles } from '@material-ui/core/styles';
+import { TypeJSONObject, TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps } from '../../types/cgpv-types';
 
 // use material ui theming
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     featuresContainer: {
         overflow: 'hidden',
         overflowY: 'auto',
@@ -57,31 +58,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Interface used for the Features List properties
- */
-interface FeaturesListProps {
-    selectLayer: any;
-    selectedLayer: any;
-    selectFeature: any;
-    buttonPanel: any;
-    getSymbol: any;
-    setPanel: any;
-}
-
-/**
  * A react component to display layer entries
  *
- * @param {FeaturesListProps} props properties of the component
+ * @param {TypeFeaturesListProps} props properties of the component
  * @returns A react JSX Element containing the entry list of a layer
  */
-const FeaturesList = (props: FeaturesListProps): JSX.Element => {
+const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
     const { selectedLayer, selectLayer, selectFeature, setPanel, getSymbol, buttonPanel } = props;
 
-    const { displayField, fieldAliases, layerData, renderer } = selectedLayer;
+    const { displayField, fieldAliases, layerData, renderer } = selectedLayer as TypeLayersEntry;
 
     const classes = useStyles();
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     /**
      * Switch to the feature / entry info panel content
@@ -89,9 +78,9 @@ const FeaturesList = (props: FeaturesListProps): JSX.Element => {
      * @param {Object} attributes attributes object for the layer attributes
      * @param {Object} symbolImage symbology image data
      */
-    const goToFeatureInfo = (attributes: any, symbolImage: any) => {
+    const goToFeatureInfo = (attributes: TypeJSONObject, symbolImage: TypeJSONObject) => {
         // add a back action button on the entry information panel to go back to the entry list
-        buttonPanel.panel.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
+        buttonPanel.panel?.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
             if (layerData.length === 1) {
                 setPanel(true, false, false);
             } else {
@@ -112,7 +101,7 @@ const FeaturesList = (props: FeaturesListProps): JSX.Element => {
 
     useEffect(() => {
         // add new action button that goes back to the layers list
-        buttonPanel.panel.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
+        buttonPanel.panel?.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
             // set the panel content back to the map server layer list
             setPanel(true, false, false);
         });
@@ -122,14 +111,15 @@ const FeaturesList = (props: FeaturesListProps): JSX.Element => {
         <div className={classes.featuresContainer}>
             {
                 // loop through each entry
-                layerData.map((feature: any, i: any) => {
-                    const { attributes } = feature;
+                layerData.map((feature: TypeJSONValue, i: number) => {
+                    const attributes = (feature as TypeJSONObject)?.attributes as TypeJSONObject;
 
                     // get symbol
                     const symbolImage = getSymbol(renderer, attributes);
 
                     // get the title from the attributes, if no title was defined in the layer then set it to the objectId
-                    const title = attributes[displayField].length > 0 ? `${attributes[displayField]}` : `${attributes.OBJECTID}`;
+                    const attributesDisplayField = attributes[displayField] as string;
+                    const title = attributesDisplayField.length > 0 ? `${attributesDisplayField}` : `${attributes.OBJECTID}`;
 
                     return (
                         <div

@@ -1,6 +1,6 @@
 import L from 'leaflet';
 
-import { GeometryType, VectorTypes } from './vector';
+import { TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
 
 /**
  * Class used to create and manage circles and circle markers
@@ -12,7 +12,7 @@ export class Circle {
     /**
      * Create a new circle and add it to the layer group
      *
-     * @param {string} id the id of this geometry
+     * @param {string} circleId the id of this geometry
      * @param {number} latitude the latitude position of the circle
      * @param {number} longitude the longitude position of the circle
      * @param {number} radius the radius (in kilometers)
@@ -20,24 +20,28 @@ export class Circle {
      *
      * @returns a geometry with the id and the created circle layer
      */
-    createCircle = (id: string, latitude: number, longitude: number, radius: number, options: Record<string, unknown>): GeometryType => {
+    createCircle = (
+        circleId: string,
+        latitude: number,
+        longitude: number,
+        radius: number,
+        options: Record<string, unknown>
+    ): TypeGeometry => {
         // radius is in meters, multiply by 1000 to convert it to km
-        const circle = L.circle([latitude, longitude], {
+        const circle: TypeGeometry = (L.circle([latitude, longitude], {
             ...options,
             radius: radius * 1000,
-        });
+        }) as unknown) as TypeGeometry;
+        circle.id = circleId;
+        circle.type = ConstVectorTypes.CIRCLE;
 
-        return {
-            id,
-            layer: circle,
-            type: VectorTypes.CIRCLE,
-        };
+        return circle;
     };
 
     /**
      * Create a new circle marker and add it to the layer group
      *
-     * @param {string} id the id of this geometry
+     * @param {string} circleMarkerId the id of this geometry
      * @param {number} latitude the latitude position of the circle marker
      * @param {number} longitude the longitude position of the circle marker
      * @param {number} radius the radius (in meters)
@@ -46,21 +50,19 @@ export class Circle {
      * @returns a geometry with the id and the created circle marker layer
      */
     createCircleMarker = (
-        id: string,
+        circleMarkerId: string,
         latitude: number,
         longitude: number,
         radius: number,
         options: Record<string, unknown>
-    ): GeometryType => {
-        const circleMarker = L.circleMarker([latitude, longitude], {
+    ): TypeGeometry => {
+        const circleMarker: TypeGeometry = (L.circleMarker([latitude, longitude], {
             ...options,
             radius,
-        });
+        }) as unknown) as TypeGeometry;
+        circleMarker.id = circleMarkerId;
+        circleMarker.type = ConstVectorTypes.CIRCLE_MARKER;
 
-        return {
-            id,
-            layer: circleMarker,
-            type: VectorTypes.CIRCLE_MARKER,
-        };
+        return circleMarker;
     };
 }

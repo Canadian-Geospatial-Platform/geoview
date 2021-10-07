@@ -1,6 +1,6 @@
 import { api } from '../api/api';
 import { EVENT_NAMES } from '../api/event';
-
+import { Cast, TypeCSSStyleDeclaration, TypeJSONObject, TypeJSONValue } from '../types/cgpv-types';
 /**
  * Apply outline to elements when keyboard is use to navigate
  * Issue in Leaflet... not implemented in the current release: Leaflet/Leaflet#7259
@@ -63,29 +63,30 @@ export function isJsonString(str: string): boolean {
 /**
  * Convert an XML document object into a json object
  *
- * @param {any} xml the XML document object
+ * @param {Document | Node | Element} xml the XML document object
  * @returns the converted json object
  */
-export function xmlToJson(xml: any): any {
+export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | TypeJSONValue {
     // Create the return object
-    let obj: Record<string, any> = {};
+    let obj: TypeJSONObject | TypeJSONValue = {};
 
     // check for node type if it's an element, attribute, text, comment...
     if (xml.nodeType === 1) {
         // if it's an element, check the element's attributes to convert to json
-        if (xml.attributes) {
-            if (xml.attributes.length > 0) {
+        const element = Cast<Element>(xml);
+        if (element.attributes) {
+            if (element.attributes.length > 0) {
                 obj['@attributes'] = {};
                 // eslint-disable-next-line no-plusplus
-                for (let j = 0; j < xml.attributes.length; j++) {
-                    const attribute = xml.attributes.item(j);
-                    obj['@attributes'][attribute.nodeName] = attribute.nodeValue;
+                for (let j = 0; j < element.attributes.length; j++) {
+                    const attribute = element.attributes.item(j) as Node;
+                    (obj['@attributes'] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
                 }
             }
         }
     } else if (xml.nodeType === 3) {
         // text
-        obj = xml.nodeValue;
+        obj = xml.nodeValue as string;
     }
 
     // do children
@@ -94,15 +95,14 @@ export function xmlToJson(xml: any): any {
         for (let i = 0; i < xml.childNodes.length; i++) {
             const item = xml.childNodes.item(i);
             const { nodeName } = item;
-            if (typeof obj[nodeName] === 'undefined') {
-                obj[nodeName] = xmlToJson(item);
+            const jsonObject = obj as TypeJSONObject;
+            if (typeof jsonObject[nodeName] === 'undefined') {
+                jsonObject[nodeName] = xmlToJson(item);
             } else {
-                if (typeof obj[nodeName].push === 'undefined') {
-                    const old = obj[nodeName];
-                    obj[nodeName] = [];
-                    obj[nodeName].push(old);
+                if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === 'undefined') {
+                    jsonObject[nodeName] = [jsonObject[nodeName]];
                 }
-                obj[nodeName].push(xmlToJson(item));
+                (jsonObject[nodeName] as TypeJSONValue[]).push(xmlToJson(item));
             }
         }
     }
@@ -163,7 +163,7 @@ export function getXMLHttpRequest(url: string): Promise<string> {
  * @returns {Object} the x, y and z translation values
  */
 export function getTranslateValues(element: HTMLElement): { x: number; y: number; z: number } {
-    const style = window.getComputedStyle(element);
+    const style = Cast<TypeCSSStyleDeclaration>(window.getComputedStyle(element));
     const matrix = style.transform || style.webkitTransform || style.mozTransform;
     const values = { x: 0, y: 0, z: 0 };
 
@@ -172,15 +172,16 @@ export function getTranslateValues(element: HTMLElement): { x: number; y: number
 
     // Can either be 2d or 3d transform
     const matrixType = matrix.includes('3d') ? '3d' : '2d';
-    const matrixValues = matrix.match(/matrix.*\((.+)\)/)[1].split(', ');
+    const matrixMatch = matrix.match(/matrix.*\((.+)\)/);
+    const matrixValues = matrixMatch && matrixMatch[1].split(', ');
 
     // 2d matrices have 6 values
     // Last 2 values are X and Y.
     // 2d matrices does not have Z value.
     if (matrixType === '2d') {
         return {
-            x: Number(matrixValues[4]),
-            y: Number(matrixValues[5]),
+            x: Number(matrixValues && matrixValues[4]),
+            y: Number(matrixValues && matrixValues[5]),
             z: 0,
         };
     }
@@ -189,9 +190,9 @@ export function getTranslateValues(element: HTMLElement): { x: number; y: number
     // The 13th, 14th, and 15th values are X, Y, and Z
     if (matrixType === '3d') {
         return {
-            x: Number(matrixValues[12]),
-            y: Number(matrixValues[13]),
-            z: Number(matrixValues[14]),
+            x: Number(matrixValues && matrixValues[12]),
+            y: Number(matrixValues && matrixValues[13]),
+            z: Number(matrixValues && matrixValues[14]),
         };
     }
 

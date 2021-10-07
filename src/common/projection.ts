@@ -33,29 +33,7 @@ export class Projection {
         // tile layer extent, expressed in local projection (xmin-left, ymin-bottom, xmax-right, ymax-top)
         const bbox = [-6211271, -5367092, 5972815, 4761177];
 
-        // tile layer scale and resolution
-        const scale = [
-            145000000,
-            85000000,
-            50000000,
-            30000000,
-            17500000,
-            10000000,
-            6000000,
-            3500000,
-            2000000,
-            1200000,
-            700000,
-            420000,
-            250000,
-            145000,
-            85000,
-            50000,
-            30000,
-            17500,
-            10000,
-            6000,
-        ];
+        // tile layer scales[i] = 1 / resolutions[i]
         const resolutions = [
             38364.660062653464,
             22489.62831258996,
@@ -81,16 +59,14 @@ export class Projection {
 
         // transformation matrix
         // TODO: check if the transformation matrix is required
-        const transformation = () => {
-            const scaleIn = 0.5 / (Math.PI * 6378137);
-            return new L.Transformation(scaleIn, 0.5, -scaleIn, 0.5);
-        };
+        const scaleIn = 0.5 / (Math.PI * 6378137);
+        const transformation = new L.Transformation(scaleIn, 0.5, -scaleIn, 0.5);
 
         const p1 = L.point(bbox[1], bbox[0]); // minx, miny
         const p2 = L.point(bbox[3], bbox[2]); // maxx, maxy
 
         // LCC projection
-        const projection = new (L as unknown).Proj.CRS(
+        const projection = new L.Proj.CRS(
             'EPSG:3978',
             '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
             {
@@ -98,7 +74,6 @@ export class Projection {
                 origin: [-3.46558e7, 3.931e7],
                 bounds: L.bounds(p1, p2),
                 transformation,
-                scale,
             }
         );
 

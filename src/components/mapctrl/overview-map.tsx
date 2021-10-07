@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { useCallback, useMemo, useState, useEffect, useRef, CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,8 +8,10 @@ import ChevronLeft from '@material-ui/icons/ChevronLeft';
 
 import { Map, CRS, DomEvent } from 'leaflet';
 import { MapContainer, TileLayer, useMap, useMapEvent } from 'react-leaflet';
-import { useEventHandlers } from '@react-leaflet/core';
+import { useEventHandlers, LeafletElement } from '@react-leaflet/core';
 
+// eslint-disable-next-line import/no-unresolved
+import { LeafletContextInterface } from '@react-leaflet/core/types/context';
 import { Basemap } from '../../common/basemap';
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
 
@@ -93,9 +95,9 @@ interface MinimapToggleProps {
 function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     const { parentId } = props;
 
-    const divRef = useRef(null);
+    const divRef = useRef<HTMLDivElement>(null);
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const [status, setStatus] = useState<boolean>(true);
 
@@ -109,13 +111,14 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
      * Toggle overview map to show or hide it
      * @param e the event being triggered on click
      */
-    function toggleMinimap(e): void {
+    function toggleMinimap(): void {
         setStatus(!status);
 
         if (status) {
+            const buttonSize = theme.overrides?.button?.size as CSSProperties;
             // decrease size of overview map to the size of the toggle btn
-            minimap.getContainer().style.width = `${theme.overrides.button.width}px`;
-            minimap.getContainer().style.height = `${theme.overrides.button.height}px`;
+            minimap.getContainer().style.width = buttonSize.width as string;
+            minimap.getContainer().style.height = buttonSize.height as string;
         } else {
             // restore the size of the overview map
             minimap.getContainer().style.width = MINIMAP_SIZE.width;
@@ -129,7 +132,7 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     }
 
     useEffect(() => {
-        DomEvent.disableClickPropagation(divRef.current);
+        DomEvent.disableClickPropagation((divRef.current as unknown) as HTMLElement);
     }, []);
 
     return (
@@ -200,15 +203,19 @@ function MinimapBounds(props: MiniboundProps) {
         return () => {
             api.event.off(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onChange = useCallback(() => {
         updateMap();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [minimap, parentMap, zoomFactor]);
 
     // Listen to events on the parent map
     const handlers = useMemo(() => ({ moveend: onChange, zoomend: onChange }), [onChange]);
-    useEventHandlers({ instance: parentMap }, handlers);
+    const context: LeafletContextInterface = { __version: 1, map: parentMap };
+    const leafletElement: LeafletElement<L.Map> = { instance: parentMap, context };
+    useEventHandlers(leafletElement, handlers);
 
     return !toggle ? (
         <div
@@ -269,10 +276,11 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
                 attributionControl={false}
                 zoomControl={false}
                 whenCreated={(cgpMap) => {
-                    DomEvent.disableClickPropagation(cgpMap.getContainer());
-                    DomEvent.disableScrollPropagation(cgpMap.getContainer());
-
-                    cgpMap.getContainer().parentElement.style.margin = `${theme.spacing(3)}px`;
+                    const cgpMapContainer = cgpMap.getContainer();
+                    DomEvent.disableClickPropagation(cgpMapContainer);
+                    DomEvent.disableScrollPropagation(cgpMapContainer);
+                    const cgpMapContainerParentElement = cgpMapContainer.parentElement as HTMLElement;
+                    cgpMapContainerParentElement.style.margin = `${theme.spacing(3)}px`;
                 }}
             >
                 {basemaps.getBasemapLayers().map((base: { id: string | number | null | undefined; url: string }) => (
@@ -282,6 +290,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
                 <MinimapToggle parentId={id} />
             </MapContainer>
         ),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [parentMap, crs, mapZoom, basemaps, zoomFactor]
     );
 

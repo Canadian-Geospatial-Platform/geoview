@@ -29,9 +29,9 @@ const useStyles = makeStyles((theme) => ({
 export default function ButtonApp(props: ButtonAppProps): JSX.Element {
     const { id, tooltip, icon, onClickFunction, content } = props;
     const classes = useStyles();
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
-    const Icon = icon.type;
+    const Icon = (icon as React.ReactElement).type;
 
     return (
         <Tooltip title={t(tooltip)} placement="right" TransitionComponent={Fade}>

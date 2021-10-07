@@ -2,6 +2,7 @@ import { createElement } from 'react';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
+import { CheckboxListAPI } from '../../components/appbar/checkbox-list';
 
 /**
  * constant that defines the panel types
@@ -26,7 +27,7 @@ export interface PanelProps {
     // panel header title
     title: string;
     // panel body content
-    content: React.ReactNode | Element;
+    content?: React.ReactNode | Element;
 }
 
 /**
@@ -57,6 +58,8 @@ export class Panel {
     // the linked button id that will open/close the panel
     buttonId: string;
 
+    checkboxListAPI?: CheckboxListAPI;
+
     /**
      * Initialize a new panel
      *
@@ -77,8 +80,8 @@ export class Panel {
      * Trigger an event to open the panel
      */
     open = (): void => {
-        api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, api.selectedMapInstance.id, {
-            handlerId: api.selectedMapInstance.id,
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, api.selectedMapViewer.id, {
+            handlerId: api.selectedMapViewer.id,
             buttonId: this.buttonId,
         });
 
@@ -89,8 +92,8 @@ export class Panel {
      * Trigger an event to close the panel
      */
     close = (): void => {
-        api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, api.selectedMapInstance.id, {
-            handlerId: api.selectedMapInstance.id,
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, api.selectedMapViewer.id, {
+            handlerId: api.selectedMapViewer.id,
             buttonId: this.buttonId,
         });
 
@@ -106,9 +109,9 @@ export class Panel {
      * @param {Function} action a function that will be triggered when clicking this action
      * @returns {Panel} the panel
      */
-    addActionButton = (id: string, title: string, icon: string & React.ReactElement & Element, action: () => void): Panel => {
-        api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, api.selectedMapInstance.id, {
-            handlerId: api.selectedMapInstance.id,
+    addActionButton = (id: string, title: string, icon: string | React.ReactElement | Element, action: () => void): Panel => {
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, api.selectedMapViewer.id, {
+            handlerId: api.selectedMapViewer.id,
             buttonId: this.buttonId,
             actionButton: {
                 id: `${this.buttonId}_${id}`,
@@ -122,6 +125,19 @@ export class Panel {
     };
 
     /**
+     * Create a check list that can be used as a content
+     *
+     * @param {String[]} elements of the check list the content to update to
+     *
+     * @returns {CheckboxList} the check list
+     */
+    attachCheckBoxList = (listItems: string[], multiselectFlag?: boolean, checkedItems?: number[]): void => {
+        if (this.checkboxListAPI) delete this.checkboxListAPI;
+        this.checkboxListAPI = new CheckboxListAPI(listItems, multiselectFlag, checkedItems);
+        this.changeContent(this.checkboxListAPI.CheckboxList);
+    };
+
+    /**
      * Change the content of the panel
      *
      * @param {React Element} content the content to update to
@@ -131,8 +147,8 @@ export class Panel {
     changeContent = (content: React.ReactNode | Element): Panel => {
         this.content = content;
 
-        api.event.emit(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, api.selectedMapInstance.id, {
-            handlerId: api.selectedMapInstance.id,
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, api.selectedMapViewer.id, {
+            handlerId: api.selectedMapViewer.id,
             buttonId: this.buttonId,
             content,
         });
@@ -147,8 +163,8 @@ export class Panel {
      * @returns {Panel} this panel
      */
     removeActionButton = (id: string): Panel => {
-        api.event.emit(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, api.selectedMapInstance.id, {
-            handlerId: api.selectedMapInstance.id,
+        api.event.emit(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, api.selectedMapViewer.id, {
+            handlerId: api.selectedMapViewer.id,
             buttonId: this.buttonId,
             actionButtonId: `${this.buttonId}_${id}`,
         });

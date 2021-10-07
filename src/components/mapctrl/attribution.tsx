@@ -1,6 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-
-import L from 'leaflet';
+import React from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 

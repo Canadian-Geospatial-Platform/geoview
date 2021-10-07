@@ -1,12 +1,12 @@
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { makeStyles } from '@material-ui/core/styles';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
+import { TypeJSONObject, TypeLayersListProps, TypeLayerData } from '../../types/cgpv-types';
 
 // use material ui theming
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     layersContainer: {
         overflow: 'hidden',
         overflowY: 'auto',
@@ -60,24 +60,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * interface for the layers list properties
- */
-interface LayersListProps {
-    layersData: any;
-    selectLayer: any;
-    selectFeature: any;
-    getSymbol: any;
-    clickPos: any;
-    mapId: any;
-}
-
-/**
  * A react component that will list the map server layers defined in the map config
  *
- * @param {LayersListProps} props properties passed to the component
+ * @param {TypeLayersListProps} props properties passed to the component
  * @returns a React JSX Element containing map server layers
  */
-const LayersList = (props: LayersListProps): JSX.Element => {
+const LayersList = (props: TypeLayersListProps): JSX.Element => {
     const { layersData, selectFeature, selectLayer, getSymbol, clickPos, mapId } = props;
 
     const classes = useStyles();
@@ -86,22 +74,23 @@ const LayersList = (props: LayersListProps): JSX.Element => {
      * Switch to the feature list / entries panel content
      *
      * @param {Object} data data object of all layers
-     * @param {Object} layerObj the layer object to list it's entries
+     * @param {string} layerKey the layer object to list it's entries
      */
-    const goToFeatureList = (data: any, layerObj: any) => {
-        const { layerData, displayField, fieldAliases, renderer } = data.layers[layerObj];
+    const goToFeatureList = (data: TypeLayerData, layerKey: string) => {
+        const { layerData, displayField, fieldAliases, renderer } = data.layers[layerKey];
 
         // set the layer entry data
-        selectLayer(data.layers[layerObj]);
+        selectLayer(data.layers[layerKey]);
 
         // check if the layer has only one entry
         if (layerData.length === 1) {
             // go to the entry information skipping entry list
+            const attributes = (layerData[0] as TypeJSONObject)?.attributes as TypeJSONObject;
             selectFeature({
-                attributes: layerData[0].attributes,
+                attributes,
                 displayField,
                 fieldAliases,
-                symbol: getSymbol(renderer, layerData[0].attributes),
+                symbol: getSymbol(renderer, attributes),
                 numOfEntries: 1,
             });
         }
@@ -118,8 +107,8 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                         <div key={data.id}>
                             {
                                 // loop through each layer in the map server
-                                Object.keys(data.layers).map((layerObj, index) => {
-                                    const { layer, layerData, groupLayer } = data.layers[layerObj];
+                                Object.keys(data.layers).map((layerKey: string, index: number) => {
+                                    const { layer, layerData, groupLayer } = data.layers[layerKey];
 
                                     return (
                                         <div
@@ -129,7 +118,7 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                                                 if (e.key === 'Enter') {
                                                     if (!groupLayer) {
                                                         e.preventDefault();
-                                                        goToFeatureList(data, layerObj);
+                                                        goToFeatureList(data, layerKey);
                                                     }
                                                 }
                                             }}
@@ -151,13 +140,13 @@ const LayersList = (props: LayersListProps): JSX.Element => {
                                                             layerData.length > 0
                                                                 ? () => {
                                                                       // if a layer is clicked
-                                                                      goToFeatureList(data, layerObj);
+                                                                      goToFeatureList(data, layerKey);
 
                                                                       api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
                                                                           latlng: clickPos,
                                                                           symbology: getSymbol(
-                                                                              data.layers[layerObj].renderer,
-                                                                              layerData[0].attributes
+                                                                              data.layers[layerKey].renderer,
+                                                                              (layerData[0] as TypeJSONObject).attributes as TypeJSONObject
                                                                           ),
                                                                       });
                                                                   }
