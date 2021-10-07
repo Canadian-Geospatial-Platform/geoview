@@ -90,6 +90,12 @@
         {
           "patterns": ["@material-ui/*/*/*", "!@material-ui/core/test-utils/*"]
         }
-    ]
+    ],
+    "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto",
+        }
+      ]
   }
 }

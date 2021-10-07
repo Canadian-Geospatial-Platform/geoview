@@ -15,12 +15,9 @@ import Version from './buttons/version';
 import ButtonApp from './button';
 import PanelApp from '../panel/panel';
 
-import { MapInterface } from '../../common/map-viewer';
-
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { ButtonPanel } from '../../common/ui/button-panel';
 import { PANEL_TYPES } from '../../common/ui/panel';
 
 const drawerWidth = 200;
@@ -75,15 +72,15 @@ export function Appbar(): JSX.Element {
     const [panelOpen, setPanelOpen] = useState(false);
     const [, setPanelCount] = useState(0);
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const classes = useStyles();
 
     const map = useMap();
 
-    const appBar = useRef();
+    const appBar = useRef<HTMLDivElement>(null);
 
-    const mapId = (api.mapInstance(map) as MapInterface).id;
+    const mapId = api.mapInstance(map).id;
 
     /**
      * function that causes rerender when adding a new panel
@@ -120,9 +117,10 @@ export function Appbar(): JSX.Element {
     };
 
     useEffect(() => {
+        const appBarChildren = appBar.current?.children[0] as HTMLElement;
         // disable events on container
-        DomEvent.disableClickPropagation(appBar.current.children[0] as HTMLElement);
-        DomEvent.disableScrollPropagation(appBar.current.children[0] as HTMLElement);
+        DomEvent.disableClickPropagation(appBarChildren);
+        DomEvent.disableScrollPropagation(appBarChildren);
 
         // listen to panel open/close events
         api.event.on(
@@ -148,8 +146,8 @@ export function Appbar(): JSX.Element {
             EVENT_NAMES.EVENT_PANEL_OPEN,
             (args) => {
                 if (args.handlerId === mapId) {
-                    const buttonPanel = Object.keys((api.map(mapId) as ButtonPanel).appBarPanels).map((groupName: string) => {
-                        const buttonPanels = (api.map(mapId) as ButtonPanel).appBarPanels[groupName];
+                    const buttonPanel = Object.keys(api.map(mapId).appBarPanels).map((groupName: string) => {
+                        const buttonPanels = api.map(mapId).appBarPanels[groupName];
 
                         return buttonPanels[args.buttonId];
                     })[0];
@@ -169,6 +167,7 @@ export function Appbar(): JSX.Element {
             api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
             api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -191,9 +190,9 @@ export function Appbar(): JSX.Element {
                 </div>
                 <Divider />
                 <List>
-                    {Object.keys((api.mapInstance(map) as ButtonPanel).appBarPanels).map((groupName: string) => {
+                    {Object.keys(api.mapInstance(map).appBarPanels).map((groupName: string) => {
                         // get button panels from group
-                        const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarPanels[groupName];
+                        const buttonPanels = api.mapInstance(map).appBarPanels[groupName];
 
                         // display the button panels in the list
                         return (
@@ -227,9 +226,9 @@ export function Appbar(): JSX.Element {
                     <Version />
                 </List>
             </Drawer>
-            {Object.keys((api.mapInstance(map) as ButtonPanel).appBarPanels).map((groupName: string) => {
+            {Object.keys(api.mapInstance(map).appBarPanels).map((groupName: string) => {
                 // get button panels from group
-                const buttonPanels = (api.mapInstance(map) as ButtonPanel).appBarPanels[groupName];
+                const buttonPanels = api.mapInstance(map).appBarPanels[groupName];
 
                 // display the panels in the list
                 return (

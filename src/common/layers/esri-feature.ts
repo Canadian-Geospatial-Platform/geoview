@@ -2,8 +2,8 @@ import { Layer } from 'leaflet';
 
 import { featureLayer, mapService } from 'esri-leaflet';
 
-import { LayerConfig } from './layer';
 import { getXMLHttpRequest, getMapServerUrl } from '../utilities';
+import { TypeLayerConfig } from '../../types/cgpv-types';
 
 /**
  * a class to add esri feature layer
@@ -15,10 +15,10 @@ export class EsriFeature {
     /**
      * Add a ESRI feature layer to the map.
      *
-     * @param {LayerConfig} layer the layer configuration
+     * @param {TypeLayerConfig} layer the layer configuration
      * @return {Promise<Layer | string>} layers to add to the map
      */
-    add(layer: LayerConfig): Promise<Layer | string> {
+    add(layer: TypeLayerConfig): Promise<Layer | string> {
         const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
         const geo = new Promise<Layer | string>((resolve) => {

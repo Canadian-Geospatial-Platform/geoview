@@ -1,13 +1,14 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { useTranslation } from 'react-i18next';
+import { TypeJSONObject, TypeFeatureInfoProps } from '../../types/cgpv-types';
 
 // use material ui theming
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     featureInfoContainer: {
         width: '100%',
     },
@@ -51,32 +52,23 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Feature info properties
- */
-interface FeatureInfoProps {
-    buttonPanel: any;
-    selectedFeature: any;
-    setPanel: any;
-}
-
-/**
  * A react component that will return entry / feature information
  *
  * @param {Object} props properties for the component
  * @returns A react JSX Element with the entry / feature information
  */
-const FeatureInfo = (props: FeatureInfoProps): JSX.Element => {
+const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
     const { buttonPanel, selectedFeature, setPanel } = props;
 
     const { displayField, fieldAliases, attributes, symbol, numOfEntries } = selectedFeature;
 
     const classes = useStyles();
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     useEffect(() => {
         // add new action button that goes back to the entry / features list or layers list
-        buttonPanel.panel.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
+        buttonPanel.panel?.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
             if (numOfEntries === 1) {
                 // set panel back to layers list
                 setPanel(true, false, false);
@@ -98,21 +90,23 @@ const FeatureInfo = (props: FeatureInfoProps): JSX.Element => {
                             alt=""
                         />
                     ) : symbol.legendImageUrl ? (
-                        <img className={classes.featureInfoHeaderIcon} src={symbol.legendImageUrl} alt="" />
+                        <img className={classes.featureInfoHeaderIcon} src={symbol.legendImageUrl as string} alt="" />
                     ) : (
                         <div className={classes.featureInfoHeaderIcon} />
                     )}
                 </div>
                 <span className={classes.featureInfoHeaderText}>
-                    {attributes[displayField].length > 0 ? `${attributes[displayField]}` : `${attributes.OBJECTID}`}
+                    {(attributes[displayField as string] as TypeJSONObject[]).length > 0
+                        ? `${attributes[displayField as string]}`
+                        : `${attributes.OBJECTID}`}
                 </span>
             </div>
             <div className={classes.featureInfoItemsContainer}>
                 {
                     // loop through each attribute in the selected entry / feature
                     Object.keys(attributes).map((attrKey) => {
-                        const attributeAlias = fieldAliases[attrKey];
-                        const attributeValue = attributes[attrKey];
+                        const attributeAlias = fieldAliases[attrKey] as string;
+                        const attributeValue = attributes[attrKey] as string;
 
                         return (
                             attributeValue.length > 0 &&

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -43,7 +44,7 @@ function SnackButton(props: SnackButtonProps): JSX.Element {
 export function Snackbar(props: SnackBarProps): null {
     const { id } = props;
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const { enqueueSnackbar } = useSnackbar();
 

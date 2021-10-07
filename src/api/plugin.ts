@@ -9,16 +9,7 @@ import * as translate from 'react-i18next';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { api } from './api';
-
-/**
- * interface used when creating a new plugin
- */
-interface PluginType {
-    // id of the plugin
-    id: string;
-    // plugin class object
-    plugin: any;
-}
+import { TypePlugin } from '../types/cgpv-types';
 
 /**
  * Class to manage plugins
@@ -27,7 +18,7 @@ interface PluginType {
  * @class
  */
 export class Plugin {
-    plugins: Record<string, PluginType> = {};
+    plugins: Record<string, TypePlugin> = {};
 
     /**
      * Add new plugin
@@ -36,17 +27,17 @@ export class Plugin {
      * @param {Class} constructor the plugin class (React Component)
      * @param {Object} props the plugin properties
      */
-    addPlugin = async (id: string, constructor?: any, props?: Record<string, unknown>): void => {
+    addPlugin = async (id: string, constructor?: any, props?: Record<string, unknown>): Promise<void> => {
         if (!(id in this.plugins)) {
             let plugin: any;
 
             if (constructor) {
                 // create new instance of the plugin
-                plugin = new constructor();
+                plugin = new constructor(id, props);
             } else {
                 const InstanceConstructor = (await import(`../plugins/${id}/index.tsx`)).default;
 
-                if (InstanceConstructor) plugin = new InstanceConstructor();
+                if (InstanceConstructor) plugin = new InstanceConstructor(id, props);
             }
 
             if (plugin) {

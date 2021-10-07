@@ -26,28 +26,27 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface ButtonMapNavProps {
-    id: string;
     tooltip: string;
     icon: React.ReactNode;
     onClickFunction: () => void;
 }
 
 export function ButtonMapNav(props: ButtonMapNavProps): JSX.Element {
-    const { id, tooltip, icon, onClickFunction } = props;
+    const { tooltip, icon, onClickFunction } = props;
     const classes = useStyles();
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
-    const newButton = useRef();
+    const newButton = useRef<{ children: HTMLElement[] }>({ children: [] as HTMLElement[] });
 
     useEffect(() => {
         // disable events on container
-        DomEvent.disableClickPropagation(newButton.current.children[0] as HTMLElement);
-        DomEvent.disableScrollPropagation(newButton.current.children[0] as HTMLElement);
+        DomEvent.disableClickPropagation(newButton.current.children[0]);
+        DomEvent.disableScrollPropagation(newButton.current.children[0]);
     }, []);
 
     return (
         <Tooltip title={t(tooltip)} placement="left" TransitionComponent={Fade} ref={newButton}>
-            <Button id={id} className={`${classes.buttonClass} ${classes.color}`} onClick={onClickFunction}>
+            <Button className={`${classes.buttonClass} ${classes.color}`} onClick={onClickFunction}>
                 {typeof icon === 'string' ? (
                     <HtmlToReact style={styles.buttonIcon} htmlContent={icon} />
                 ) : (

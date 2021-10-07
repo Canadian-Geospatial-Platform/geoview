@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useState, useEffect, useRef } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -60,7 +61,7 @@ interface MousePositionProps {
 export function MousePosition(props: MousePositionProps): JSX.Element {
     const { id } = props;
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const classes = useStyles();
 

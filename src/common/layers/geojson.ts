@@ -1,7 +1,7 @@
 import L, { Layer } from 'leaflet';
 
-import { LayerConfig } from './layer';
 import { getXMLHttpRequest } from '../utilities';
+import { TypeLayerConfig } from '../../types/cgpv-types';
 
 /**
  * Class used to add geojson layer to the map
@@ -13,10 +13,10 @@ export class GeoJSON {
     /**
      * Add a GeoJSON layer to the map.
      *
-     * @param {LayerConfig} layer the layer configuration
+     * @param {TypeLayerConfig} layer the layer configuration
      * @return {Promise<Layer | string>} layers to add to the map
      */
-    add(layer: LayerConfig): Promise<Layer | string> {
+    add(layer: TypeLayerConfig): Promise<Layer | string> {
         const data = getXMLHttpRequest(layer.url);
 
         const geo = new Promise<Layer | string>((resolve) => {

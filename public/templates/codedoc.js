@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-plusplus */
 function createCodeSnippet() {
     const scripts = document.getElementsByTagName('script')[document.getElementsByTagName('script').length - 1];
     document.getElementById('codeSnippet').innerHTML = `<pre>${scripts.textContent

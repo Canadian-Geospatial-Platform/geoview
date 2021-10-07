@@ -71,7 +71,7 @@
             // get used language
             const { language } = api.map(mapId);
 
-            const useStyles = makeStyles((theme) => ({
+            const useStyles = makeStyles(() => ({
                 listContainer: {
                     overflowY: 'scroll',
                     height: '600px',
@@ -277,6 +277,7 @@
                             max: 0,
                         },
                     });
+                    // eslint-disable-next-line react-hooks/exhaustive-deps
                 }, []);
 
                 // h is a reference to this.createElement

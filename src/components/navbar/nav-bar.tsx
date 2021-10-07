@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { DomEvent } from 'leaflet';
@@ -16,12 +17,12 @@ import Home from './buttons/home';
 
 import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
 import { api } from '../../api/api';
-import { ButtonPanel, ButtonPanelType } from '../../common/ui/button-panel';
+import { ButtonPanel } from '../../common/ui/button-panel';
 import { ButtonMapNav } from './button';
 import { EVENT_NAMES } from '../../api/event';
 import { PANEL_TYPES } from '../../common/ui/panel';
 import PanelApp from '../panel/panel';
-import { MapInterface } from '../../common/map-viewer';
+import { TypeButtonPanel } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     navBar: {
@@ -58,13 +59,14 @@ export function NavBar(): JSX.Element {
     const [, setButtonCount] = useState(0);
 
     const classes = useStyles();
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
-    const navBar = useRef();
+    const navBar = useRef<HTMLDivElement>(null);
 
     const map = useMap();
 
-    const mapId = (api.mapInstance(map) as MapInterface).id;
+    const mapId = api.mapInstance(map).id;
+    const buttonPanelApi = (api.map(mapId) as unknown) as ButtonPanel;
 
     /**
      * function that causes rerender when adding a new button, button panel
@@ -91,8 +93,9 @@ export function NavBar(): JSX.Element {
      */
     useEffect(() => {
         // disable events on container
-        DomEvent.disableClickPropagation(navBar.current.children[0] as HTMLElement);
-        DomEvent.disableScrollPropagation(navBar.current.children[0] as HTMLElement);
+        const navBarCurrent = navBar.current as HTMLDivElement;
+        DomEvent.disableClickPropagation(navBarCurrent.children[0] as HTMLElement);
+        DomEvent.disableScrollPropagation(navBarCurrent.children[0] as HTMLElement);
 
         // listen to panel open/close events
         api.event.on(
@@ -108,8 +111,8 @@ export function NavBar(): JSX.Element {
             EVENT_NAMES.EVENT_PANEL_OPEN,
             (args) => {
                 if (args.handlerId === mapId) {
-                    const buttonPanel = Object.keys((api.map(mapId) as ButtonPanel).navBarButtons).map((groupName: string) => {
-                        const buttonPanels = (api.map(mapId) as ButtonPanel).navBarButtons[groupName];
+                    const buttonPanel = Object.keys(buttonPanelApi.navBarButtons).map((groupName: string) => {
+                        const buttonPanels = buttonPanelApi.navBarButtons[groupName];
 
                         return buttonPanels[args.buttonId];
                     })[0];
@@ -143,8 +146,8 @@ export function NavBar(): JSX.Element {
 
     return (
         <div ref={navBar} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBar}`}>
-            {Object.keys((api.mapInstance(map) as ButtonPanel).navBarButtons).map((groupName) => {
-                const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
+            {Object.keys(buttonPanelApi.navBarButtons).map((groupName) => {
+                const buttons = buttonPanelApi.navBarButtons[groupName];
 
                 // display the panels in the list
                 return (
@@ -167,18 +170,17 @@ export function NavBar(): JSX.Element {
                 );
             })}
             <div className={classes.root}>
-                {Object.keys((api.mapInstance(map) as ButtonPanel).navBarButtons).map((groupName) => {
-                    const buttons = (api.mapInstance(map) as ButtonPanel).navBarButtons[groupName];
+                {Object.keys(buttonPanelApi.navBarButtons).map((groupName) => {
+                    const buttons = buttonPanelApi.navBarButtons[groupName];
 
                     return (
                         <ButtonGroup key={groupName} orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained">
                             {Object.keys(buttons).map((buttonId) => {
-                                const buttonPanel: ButtonPanelType = buttons[buttonId];
+                                const buttonPanel: TypeButtonPanel = buttons[buttonId];
                                 // eslint-disable-next-line no-nested-ternary
                                 return buttonPanel.button.visible ? (
                                     !buttonPanel.panel ? (
                                         <ButtonMapNav
-                                            id={buttonPanel.button.id}
                                             key={buttonPanel.button.id}
                                             tooltip={buttonPanel.button.tooltip}
                                             icon={buttonPanel.button.icon}
@@ -188,7 +190,6 @@ export function NavBar(): JSX.Element {
                                         />
                                     ) : (
                                         <ButtonMapNav
-                                            id={buttonPanel.button.id}
                                             key={buttonPanel.button.id}
                                             tooltip={buttonPanel.button.tooltip}
                                             icon={buttonPanel.button.icon}

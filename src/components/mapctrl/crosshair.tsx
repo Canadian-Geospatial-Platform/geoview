@@ -1,5 +1,5 @@
 /* eslint-disable react/no-danger */
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,6 @@ import { useMap } from 'react-leaflet';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 import { CrosshairIcon } from '../../assests/style/crosshair';
-import { MapInterface } from '../../common/map-viewer';
 
 const useStyles = makeStyles((theme) => ({
     crosshairContainer: {
@@ -40,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     crosshairIcon: {
-        width: theme.overrides?.crosshair.width,
-        height: theme.overrides?.crosshair.width,
+        width: (theme.overrides?.crosshairIcon?.size as CSSProperties).width,
+        height: (theme.overrides?.crosshairIcon?.size as CSSProperties).height,
     },
 }));
 
@@ -61,11 +60,11 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     const { id } = props;
 
     const classes = useStyles();
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const map = useMap();
 
-    const mapId = (api.mapInstance(map) as MapInterface).id;
+    const mapId = api.mapInstance(map).id;
 
     const mapContainer = map.getContainer();
 
@@ -131,6 +130,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
             mapContainer.removeEventListener('keydown', simulateClick);
             mapContainer.removeEventListener('keydown', removeCrosshair);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

@@ -29,6 +29,7 @@ import { MapViewer } from '../../common/map-viewer';
 import { generateId } from '../../common/constant';
 import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 import { ClickMarker } from '../mapctrl/click-marker';
+import { TypeMapRef, TypeMap, TypeMapContainerProps } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     snackBar: {
@@ -36,8 +37,16 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const CGPVMapContainer = ({ children, className, id, placeholder, style, whenCreated, ...options }: TypeMapContainerProps): JSX.Element => {
+    return MapContainer({ children, className, id, placeholder, style, whenCreated, ...options });
+};
+
 export function Map(props: MapConfigProps): JSX.Element {
-    const { id, center, zoom, projection, language } = props;
+    // make sure the id is not undefined
+    let { id } = props;
+    id = generateId(id);
+
+    const { center, zoom, projection, language, selectBox, boxZoom } = props;
 
     const [basemapLayers, setBasemapLayers] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -46,7 +55,7 @@ export function Map(props: MapConfigProps): JSX.Element {
     const classes = useStyles();
 
     // create a new map viewer instance
-    const viewer = new MapViewer(props);
+    let viewer: MapViewer;
 
     // if screen size is medium and up
     const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
@@ -55,8 +64,8 @@ export function Map(props: MapConfigProps): JSX.Element {
     // the projection will work with CBMT basemap. If another basemap would be use, update...
     const crs = projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
 
-    // get attribution
-    const attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
+    // attribution used by the map
+    let attribution = '';
 
     // get map option from slected basemap projection
     const mapOptions: MapOptions = getMapOptions(projection);
@@ -66,7 +75,7 @@ export function Map(props: MapConfigProps): JSX.Element {
      * then emit it as an api event
      * @param event Move end event container a reference to the map
      */
-    function mapMoveEnd(event: Record<string, LeafletMap>): void {
+    function mapMoveEnd(event: L.LeafletEvent): void {
         // get a map reference from the moveend event
         const map: LeafletMap = event.target;
 
@@ -89,23 +98,23 @@ export function Map(props: MapConfigProps): JSX.Element {
         return () => {
             api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-        <MapContainer
+        <CGPVMapContainer
             center={center}
             zoom={zoom}
             crs={crs}
             zoomControl={false}
+            selectBox={selectBox}
+            boxZoom={boxZoom}
             attributionControl={false}
             minZoom={mapOptions.minZoom}
             maxZoom={mapOptions.maxZooom}
             maxBounds={mapOptions.maxBounds}
             keyboardPanDelta={20}
-            whenCreated={(cgpMap) => {
-                // add map instance to api
-                api.maps.push(viewer);
-
+            whenCreated={(cgpMap: LeafletMap) => {
                 // add a class to map container to easely find the container
                 cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
 
@@ -121,10 +130,13 @@ export function Map(props: MapConfigProps): JSX.Element {
                 cgpMap.on('moveend', mapMoveEnd);
 
                 // initialize the map viewer and load plugins
-                viewer.init({
-                    map: cgpMap,
+                viewer = new MapViewer(props, {
+                    map: cgpMap as TypeMap,
                     id: id || generateId(id),
-                });
+                } as TypeMapRef);
+
+                // get attribution
+                attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
 
                 // call the ready function since rendering of this map instance is done
                 api.ready();
@@ -179,6 +191,6 @@ export function Map(props: MapConfigProps): JSX.Element {
                     </SnackbarProvider>
                 </>
             )}
-        </MapContainer>
+        </CGPVMapContainer>
     );
 }
