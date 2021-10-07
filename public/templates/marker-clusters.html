@@ -77,47 +77,47 @@
                 }, 'marker-1');
                 marker.setIcon(api.markerDefinitions.greenIcon)
 
-                marker = api.addClusterMarker(58,-98.5, {
+                marker = api.markerCluster.addClusterMarker(58,-98.5, {
                     selected: true,
                     title: 'Test-marker-2.1'
                 }, 'marker-2.1');
 
-                marker = api.addClusterMarker(58.2,-99.3, {
+                marker = api.markerCluster.addClusterMarker(58.2,-99.3, {
                     title: 'Test-marker-2.2'
                 }, 'marker-2.2');
 
-                marker = api.addClusterMarker(58,-99.4, {
+                marker = api.markerCluster.addClusterMarker(58,-99.4, {
                     title: 'Test-marker-2.3'
                 }, 'marker-2.3');
 
-                marker = api.addClusterMarker(57.9,-98.6, {
+                marker = api.markerCluster.addClusterMarker(57.9,-98.6, {
                     selected: true,
                     title: 'Test-marker-2.4'
                 }, 'marker-2.4');
 
-                marker = api.addClusterMarker(57.7,-99, {
+                marker = api.markerCluster.addClusterMarker(57.7,-99, {
                     selected: true,
                     title: 'Test-marker-2.5'
                 }, 'marker-2.5');
 
-                marker = api.addClusterMarker(57.7005,-99, {
+                marker = api.markerCluster.addClusterMarker(57.7005,-99, {
                     title: 'Test-marker-2.6'
                 }, 'marker-2.6');
 
-                marker = api.addClusterMarker(57.7005,-99.0005, {
+                marker = api.markerCluster.addClusterMarker(57.7005,-99.0005, {
                     title: 'Test-marker-2.7'
                 }, 'marker-2.7');
 
-                api.setClusterGroupAsInvisible();
-                api.setClusterGroupAsVisible();
+                api.markerCluster.setClusterGroupAsInvisible();
+                api.markerCluster.setClusterGroupAsVisible();
 
                 api.createGeometryGroup('myGroup');
                 api.setActiveGeometryGroup('myGroup');
                 cgpv.api.event.emit(cgpv.api.eventNames.EVENT_VECTOR_ADD, null, {type: 'marker', latitude: 57, longitude:-98, options: {title: 'Test-marker-3'}, id: 'Marker-3'})
-                // api.showGeometryGroup('myGroup');
+                // api.setGeometryGroupAsVisible('myGroup');
                 //api.setGeometryGroupAsInvisible('defaultGeomGroup');
-                api.addToGeometryGroup(marker, 'MarkerGroup');
-                // api.showGeometryGroup('MarkerGroup');
+                api.markerCluster.addToGeometryGroup(marker, 'MarkerGroup');
+                // api.setGeometryGroupAsVisible('MarkerGroup');
             }
 
             function addModelsToAppbarPane(api) {
@@ -142,8 +142,6 @@
             // initialize s and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
-                // cgpv.api.maps[0].map.options.boxZoom = false;
-                // cgpv.api.maps[0].map.options.selectBox = false;
                 const api = cgpv.api.map('LNG1');
                 api.map.on('boxzoomend', (e) => {
                     console.log('boxzoomend');
@@ -157,18 +155,6 @@
                 layerPanel.attachCheckBoxList(['layer 1', 'layer 2', 'layer 3', 'layer 4', ], false);
                 addModelsToAppbarPane(api);
                 addMarker('LNG1');
-
-                cgpv.api.addPlugin('basemapSwitcher', window.plugins['basemapSwitcher'], {
-                    mapId: 'LNG1',
-                });
-                /*
-                cgpv.api.addPlugin('counter', window.plugins['counter'], {
-                    mapId: 'LNG1',
-                });
-                */
-                cgpv.api.addPlugin('details-panel', null, {
-                    mapId: 'LNG1',
-                });
             });
         </script>
     </body>

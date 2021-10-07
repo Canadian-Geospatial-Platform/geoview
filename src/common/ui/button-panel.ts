@@ -5,9 +5,9 @@ import { EVENT_NAMES } from '../../api/event';
 import { LayersPanel } from '../../components/panel/default-panels';
 
 import { generateId } from '../constant';
-import { Button, ButtonProps } from './button';
-import { Panel, PanelProps, PANEL_TYPES } from './panel';
-import { TypeMapRef, TypeButtonPanel } from '../../types/cgpv-types';
+import { Button } from './button';
+import { Panel } from './panel';
+import { TypeMapRef, TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 // TODO: look at code duplication
 
@@ -73,15 +73,15 @@ export class ButtonPanel {
     /**
      * Create a button on the appbar that will open a panel
      *
-     * @param {ButtonProps} buttonProps button properties (icon, tooltip)
-     * @param {PanelProps} panelProps panel properties (icon, title, content)
+     * @param {TypeButtonProps} buttonProps button properties (icon, tooltip)
+     * @param {TypePanelProps} panelProps panel properties (icon, title, content)
      * @param {string} groupName optional value to set this button in a group
      *
      * @returns the created panel
      */
     createAppbarPanel = (
-        buttonProps: ButtonProps,
-        panelProps: PanelProps,
+        buttonProps: TypeButtonProps,
+        panelProps: TypePanelProps,
         groupName?: string | null | undefined
     ): TypeButtonPanel | null => {
         if (buttonProps && panelProps) {
@@ -99,7 +99,7 @@ export class ButtonPanel {
             }
 
             // set panel type
-            panelProps.type = PANEL_TYPES.APPBAR;
+            panelProps.type = CONST_PANEL_TYPES.APPBAR;
 
             const buttonPanel: TypeButtonPanel = {
                 id: buttonProps.id,
@@ -125,15 +125,15 @@ export class ButtonPanel {
     /**
      * Create either a button or a button panel on the navbar
      *
-     * @param {ButtonProps} buttonProps button properties
-     * @param {PanelProps} panelProps panel properties
+     * @param {TypeButtonProps} buttonProps button properties
+     * @param {TypePanelProps} panelProps panel properties
      * @param {string} groupName the group to place the button / panel in
      *
      * @returns the create button / button panel
      */
     private createButtonPanel = (
-        buttonProps: ButtonProps,
-        panelProps: PanelProps | null | undefined,
+        buttonProps: TypeButtonProps,
+        panelProps: TypePanelProps | null | undefined,
         groupName: string
     ): TypeButtonPanel | null => {
         if (buttonProps) {
@@ -159,7 +159,7 @@ export class ButtonPanel {
             // if adding a panel
             if (panelProps) {
                 // set panel type
-                if (panelProps) panelProps.type = PANEL_TYPES.NAVBAR;
+                if (panelProps) panelProps.type = CONST_PANEL_TYPES.NAVBAR;
 
                 buttonPanel.panel = new Panel(panelProps, buttonProps.id);
             }
@@ -181,25 +181,25 @@ export class ButtonPanel {
     /**
      * Create a navbar button panel
      *
-     * @param {ButtonProps} buttonProps button properties
-     * @param {PanelProps} panelProps panel properties
+     * @param {TypeButtonProps} buttonProps button properties
+     * @param {TypePanelProps} panelProps panel properties
      * @param {string} groupName group name to add the button panel to
      *
      * @returns the created button panel
      */
-    createNavbarButtonPanel = (buttonProps: ButtonProps, panelProps: PanelProps, groupName: string): TypeButtonPanel | null => {
+    createNavbarButtonPanel = (buttonProps: TypeButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
         return this.createButtonPanel(buttonProps, panelProps, groupName);
     };
 
     /**
      * Create a new navbar button that will trigger a callback when clicked
      *
-     * @param {ButtonProps} buttonProps button properties
+     * @param {TypeButtonProps} buttonProps button properties
      * @param {string} groupName group name to add button to
      *
      * @returns the create button
      */
-    createNavbarButton = (buttonProps: ButtonProps, groupName: string): TypeButtonPanel | null => {
+    createNavbarButton = (buttonProps: TypeButtonProps, groupName: string): TypeButtonPanel | null => {
         return this.createButtonPanel(buttonProps, null, groupName);
     };
 

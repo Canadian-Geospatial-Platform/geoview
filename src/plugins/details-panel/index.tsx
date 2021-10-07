@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import PanelContent from './panel-content';
 import { api } from '../../api/api';
-import { PanelProps } from '../../common/ui/panel';
-import { ButtonProps } from '../../common/ui/button';
-import { TypeButtonPanel, TypeProps } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps } from '../../types/cgpv-types';
 
 /**
  * Create a class for the plugin instance
@@ -48,7 +46,7 @@ class DetailsPlugin {
         const { language } = api.map(mapId);
 
         // button props
-        const button: ButtonProps = {
+        const button: TypeButtonProps = {
             // set ID to detailsPanel so that it can be accessed from the core viewer
             id: 'detailsPanelButton',
             tooltip: this.translations[language].detailsPanel,
@@ -57,7 +55,7 @@ class DetailsPlugin {
         };
 
         // panel props
-        const panel: PanelProps = {
+        const panel: TypePanelProps = {
             title: this.translations[language].detailsPanel,
             icon: '<i class="material-icons">details</i>',
             width: 300,

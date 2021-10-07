@@ -3,32 +3,7 @@ import { createElement } from 'react';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 import { CheckboxListAPI } from '../../components/appbar/checkbox-list';
-
-/**
- * constant that defines the panel types
- */
-export const PANEL_TYPES = {
-    APPBAR: 'appbar',
-    NAVBAR: 'navbar',
-};
-
-/**
- * Interface for the panel properties used when creating a new panel
- */
-export interface PanelProps {
-    // panel type (appbar, navbar)
-    type?: string;
-    // panel open status (open/closed)
-    status?: boolean;
-    // width of the panel
-    width: string | number;
-    // panel header icon
-    icon: React.ReactNode | Element;
-    // panel header title
-    title: string;
-    // panel body content
-    content?: React.ReactNode | Element;
-}
+import { TypePanelProps } from '../../types/cgpv-types';
 
 /**
  * Class used to handle creating a new panel
@@ -66,7 +41,7 @@ export class Panel {
      * @param panel the passed in panel properties when panel is created
      * @param buttonId the button id of the button that will manage the panel
      */
-    constructor(panel: PanelProps, buttonId: string) {
+    constructor(panel: TypePanelProps, buttonId: string) {
         this.buttonId = buttonId;
         this.type = panel.type;
         this.title = panel.title;

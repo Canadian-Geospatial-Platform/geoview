@@ -9,7 +9,7 @@ import { GeoJSON } from './geojson';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { ConstLayerTypes, TypeMapRef, TypeLayerData, TypeLayerConfig } from '../../types/cgpv-types';
+import { CONST_LAYER_TYPES, TypeMapRef, TypeLayerData, TypeLayerConfig } from '../../types/cgpv-types';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 import 'esri-leaflet-renderers';
@@ -64,16 +64,16 @@ export class Layer {
             if (payload && payload.handlerName.includes(this.layerMapRef.id)) {
                 const layerConf = payload.layer;
                 layerConf.id = generateId(layerConf.id);
-                if (layerConf.type === ConstLayerTypes.GEOJSON) {
+                if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
                     this.geoJSON.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                     this.removeTabindex();
-                } else if (layerConf.type === ConstLayerTypes.WMS) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
                     this.wms.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
-                } else if (layerConf.type === ConstLayerTypes.XYZ_TILES) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
                     this.xyzTiles.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
-                } else if (layerConf.type === ConstLayerTypes.ESRI_DYNAMIC) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
                     this.esriDynamic.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
-                } else if (layerConf.type === ConstLayerTypes.ESRI_FEATURE) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
                     this.esriFeature.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                     this.removeTabindex();
                 }

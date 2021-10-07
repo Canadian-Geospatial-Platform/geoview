@@ -4,7 +4,6 @@ import queryString from 'query-string';
 
 import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';
-import { MapConfigProps } from '../api/config';
 import { Basemap } from './basemap';
 import { Layer } from './layers/layer';
 import { MarkerClusters } from './vectors/marker-clusters';
@@ -13,7 +12,7 @@ import '../types/cgp-leaflet-config';
 
 import { api } from '../api/api';
 import { EVENT_NAMES } from '../api/event';
-import { Cast, TypeWindow, TypeMap, TypeMapRef } from '../types/cgpv-types';
+import { Cast, TypeWindow, TypeMap, TypeMapRef, TypeMapConfigProps } from '../types/cgpv-types';
 
 /**
  * Class used to manage created maps
@@ -23,7 +22,7 @@ import { Cast, TypeWindow, TypeMap, TypeMapRef } from '../types/cgpv-types';
  */
 export class MapViewer {
     // map config properties
-    mapProps: MapConfigProps;
+    mapProps: TypeMapConfigProps;
 
     // the id of the map
     id!: string;
@@ -58,9 +57,9 @@ export class MapViewer {
     /**
      * Initialize map props and basemaps
      *
-     * @param {MapConfigProps} mapProps map properties
+     * @param {TypeMapConfigProps} mapProps map properties
      */
-    constructor(mapProps: MapConfigProps, cgpMapRef: TypeMapRef) {
+    constructor(mapProps: TypeMapConfigProps, cgpMapRef: TypeMapRef) {
         // add map viewer instance to api
         api.maps.push(this);
 

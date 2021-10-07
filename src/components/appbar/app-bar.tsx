@@ -18,7 +18,7 @@ import PanelApp from '../panel/panel';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { PANEL_TYPES } from '../../common/ui/panel';
+import { CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 const drawerWidth = 200;
 
@@ -95,7 +95,7 @@ export function Appbar(): JSX.Element {
      */
     const openClosePanel = (status: boolean): void => {
         api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
-            panelType: PANEL_TYPES.APPBAR,
+            panelType: CONST_PANEL_TYPES.APPBAR,
             handlerId: mapId,
             status,
         });
@@ -126,7 +126,7 @@ export function Appbar(): JSX.Element {
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
             (payload) => {
-                if (payload && payload.handlerId === mapId && payload.panelType === PANEL_TYPES.APPBAR) setPanelOpen(payload.status);
+                if (payload && payload.handlerId === mapId && payload.panelType === CONST_PANEL_TYPES.APPBAR) setPanelOpen(payload.status);
             },
             mapId
         );

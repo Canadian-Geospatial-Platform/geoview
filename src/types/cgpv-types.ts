@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import L, { Map, LeafletEventHandlerFn, MapOptions } from 'leaflet';
+import L from 'leaflet';
 import { MapContainerProps } from 'react-leaflet';
 import { Projection } from '../api/projection';
 import { Plugin } from '../api/plugin';
@@ -9,8 +9,8 @@ import { MarkerClusters } from '../common/vectors/marker-clusters';
 import { ButtonPanel } from '../common/ui/button-panel';
 import { Basemap } from '../common/basemap';
 import { Layer } from '../common/layers/layer';
-import { Button, ButtonProps } from '../common/ui/button';
-import { Panel, PanelProps } from '../common/ui/panel';
+import { Button } from '../common/ui/button';
+import { Panel } from '../common/ui/panel';
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
     return p as TargetType;
@@ -67,7 +67,7 @@ export type TypeIconCreationFunction = () => L.DivIcon;
  */
 export interface TypeMarkerClusterOptions extends L.MarkerOptions {
     selected?: boolean;
-    on?: Record<string, LeafletEventHandlerFn>;
+    on?: Record<string, L.LeafletEventHandlerFn>;
 }
 
 /**
@@ -84,7 +84,7 @@ export interface TypeMarkerCluster<OptionsType extends L.MarkerOptions = TypeMar
  */
 export interface TypeClusterGroupOptions extends L.MarkerClusterGroupOptions {
     visible?: boolean;
-    on?: Record<string, LeafletEventHandlerFn>;
+    on?: Record<string, L.LeafletEventHandlerFn>;
 }
 
 /**
@@ -99,7 +99,7 @@ export interface TypeClusterGroup<OptionsType extends L.MarkerClusterGroupOption
 /**
  * interface used to store and access created maps
  */
-export interface TypeMapViewer extends Map, Vector, MarkerClusters, ButtonPanel, Basemap, Layer {
+export interface TypeMapViewer extends L.Map, Vector, MarkerClusters, ButtonPanel, Basemap, Layer {
     id: string;
     map: TypeMap;
 }
@@ -107,15 +107,20 @@ export interface TypeMapViewer extends Map, Vector, MarkerClusters, ButtonPanel,
 /**
  * interface used to describe cgp map options
  */
-export interface TypeMapOptions extends MapOptions {
-    boxZoom: boolean;
-    selectBox: boolean;
+export interface TypeMapOptions extends L.MapOptions {
+    zoomFactor: number;
+    minZoom: number;
+    maxZooom: number;
+    maxBounds?: L.LatLngBounds;
+    maxBoundsViscosity?: number;
+    boxZoom?: boolean;
+    selectBox?: boolean;
 }
 
 /**
  * interface used to describe cgp maps
  */
-export interface TypeMap<OptionsType extends MapOptions = TypeMapOptions> extends Map {
+export interface TypeMap<OptionsType extends L.MapOptions = TypeMapOptions> extends L.Map {
     boxZoom: L.Handler;
     selectBox: L.Handler;
     options: OptionsType;
@@ -132,7 +137,7 @@ export type TypeMapRef = {
 /**
  * constant contains layer types
  */
-export const ConstLayerTypes = {
+export const CONST_LAYER_TYPES = {
     WMS: 'ogcWMS',
     GEOJSON: 'geoJSON',
     ESRI_DYNAMIC: 'esriDynamic',
@@ -236,8 +241,8 @@ export type TypeRendererSymbol = {
  * Interface used to initialize a button panel
  */
 export type TypeButtonPanelProps = {
-    panel: PanelProps;
-    button: ButtonProps;
+    panel: TypePanelProps;
+    button: TypeButtonProps;
 };
 
 /**
@@ -282,7 +287,7 @@ export interface TypeGeometry extends L.Layer {
 /**
  * Used to store geometries in a group
  */
-export interface VectorType extends L.FeatureGroup {
+export interface TypeVector extends L.FeatureGroup {
     id: string;
     visible: boolean;
 }
@@ -339,4 +344,139 @@ export type TypeLayersListProps = {
 export type TypePanelContentProps = {
     buttonPanel: TypeButtonPanel;
     mapId: string;
+};
+
+/**
+ * Interface used when creating a map to validate configuration object
+ */
+export type TypeMapConfigProps = {
+    id?: string;
+    center: L.LatLngTuple;
+    zoom: number;
+    projection: number;
+    language: string;
+    selectBox: boolean;
+    boxZoom: boolean;
+    basemapOptions: TypeBasemapOptions;
+    layers?: TypeLayerConfig[];
+    plugins: string[];
+};
+
+/**
+ * interface for basemap options
+ */
+export type TypeBasemapOptions = {
+    id: string;
+    shaded: boolean;
+    labeled: boolean;
+};
+
+/**
+ * interface for basemap basic properties
+ */
+export type TypeBasemapLayerOptions = {
+    tms: boolean;
+    tileSize: number;
+    attribution: boolean;
+    noWrap: boolean;
+};
+
+/**
+ * interface used to define a new basemap layer
+ */
+export type TypeBasemapLayer = {
+    id: string;
+    url: string;
+    type: string;
+    options: TypeBasemapLayerOptions;
+    opacity: number;
+    basemapPaneName: string;
+};
+
+/**
+ * interface used to define zoom levels for a basemap
+ */
+export type TypeZoomLevels = {
+    min: number;
+    max: number;
+};
+
+/**
+ * interface for attribution value
+ */
+export type TypeAttribution = {
+    'en-CA': string;
+    'fr-CA': string;
+};
+
+/**
+ * interface used to define a new basemap
+ */
+export type TypeBasemapProps = {
+    id: string;
+    name: string;
+    type: string;
+    description: string;
+    descSummary: string;
+    altText: string;
+    thumbnailUrl: string | Array<string>;
+    layers: TypeBasemapLayer[];
+    attribution: TypeAttribution;
+    zoomLevels: TypeZoomLevels;
+};
+
+/**
+ * An object containing version information.
+ *
+ * @export
+ * @interface TypeAppVersion
+ */
+export type TypeAppVersion = {
+    hash: string;
+    major: number;
+    minor: number;
+    patch: number;
+    timestamp: string;
+};
+
+/**
+ * Interface for the button properties used when creating a new button
+ */
+export type TypeButtonProps = {
+    // generated button id
+    id: string;
+    // button tooltip
+    tooltip: string;
+    // button icon
+    icon: React.ReactNode | Element;
+    // optional callback function to run on button click
+    callback?: () => void;
+    // should the button be displayed in the appbar/navbar?
+    visible?: boolean;
+};
+
+/**
+ * constant that defines the panel types
+ */
+export const CONST_PANEL_TYPES = {
+    APPBAR: 'appbar',
+    NAVBAR: 'navbar',
+};
+
+/**
+ * Interface for the panel properties used when creating a new panel
+ */
+export type TypePanelProps = {
+    // panel type (appbar, navbar)
+    type?: string;
+    // panel open status (open/closed)
+    status?: boolean;
+    // width of the panel
+    width: string | number;
+    // panel header icon
+    icon: React.ReactNode | Element;
+    // panel header title
+    title: string;
+    // panel body content
+    content?: React.ReactNode | Element;
 };

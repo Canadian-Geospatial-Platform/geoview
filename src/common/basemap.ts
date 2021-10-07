@@ -1,65 +1,16 @@
 /* eslint-disable no-multi-assign */
 /* eslint-disable lines-between-class-members */
 import { api } from '../api/api';
-import { BasemapOptions } from '../api/config';
 import { generateId } from './constant';
 import { EVENT_NAMES } from '../api/event';
-import { TypeMapViewer } from '../types/cgpv-types';
-
-/**
- * interface for basemap basic properties
- */
-interface BasemapLayerOptions {
-    tms: boolean;
-    tileSize: number;
-    attribution: boolean;
-    noWrap: boolean;
-}
-
-/**
- * interface used to define a new basemap layer
- */
-export interface BasemapLayer {
-    id: string;
-    url: string;
-    type: string;
-    options: BasemapLayerOptions;
-    opacity: number;
-    basemapPaneName: string;
-}
-
-/**
- * interface used to define zoom levels for a basemap
- */
-interface ZoomLevels {
-    min: number;
-    max: number;
-}
-
-/**
- * interface for attribution value
- */
-export interface Attribution {
-    'en-CA': string;
-    'fr-CA': string;
-}
-
-/**
- * interface used to define a new basemap
- */
-interface BasemapProps {
-    id: string;
-    name: string;
-    type: string;
-    description: string;
-    descSummary: string;
-    altText: string;
-    thumbnailUrl: string | Array<string>;
-    layers: BasemapLayer[];
-    attribution: Attribution;
-    zoomLevels: ZoomLevels;
-}
-
+import {
+    TypeBasemapProps,
+    TypeBasemapLayerOptions,
+    TypeBasemapLayer,
+    TypeMapViewer,
+    TypeBasemapOptions,
+    TypeAttribution,
+} from '../types/cgpv-types';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,
@@ -70,13 +21,13 @@ interface BasemapProps {
  */
 export class Basemap {
     // used to hold all created basemaps for a map
-    basemaps: BasemapProps[] = [];
+    basemaps: TypeBasemapProps[] = [];
 
     // the language to use
     language: string;
 
     // the basemap options passed from the map config
-    private basemapOptions: BasemapOptions | null | undefined;
+    private basemapOptions: TypeBasemapOptions | null | undefined;
 
     // the projection number
     private projection: number;
@@ -90,11 +41,11 @@ export class Basemap {
     /**
      * initialize basemap
      *
-     * @param {BasemapOptions} basemapOptions optional basemap option properties, passed in from map config
+     * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
      * @param {string} language language to be used either en-CA or fr-CA
      * @param {number} projection projection number
      */
-    constructor(basemapOptions: BasemapOptions | null | undefined, language: string, projection: number) {
+    constructor(basemapOptions: TypeBasemapOptions | null | undefined, language: string, projection: number) {
         this.basemapOptions = basemapOptions;
 
         this.language = language;
@@ -146,7 +97,7 @@ export class Basemap {
     /**
      * basemap layer configuration
      */
-    private basemapLayerOptions: BasemapLayerOptions = {
+    private basemapLayerOptions: TypeBasemapLayerOptions = {
         tms: false,
         tileSize: 256,
         attribution: false,
@@ -156,7 +107,7 @@ export class Basemap {
     /**
      * attribution to add the the map
      */
-    private attributionVal: Attribution = {
+    private attributionVal: TypeAttribution = {
         'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
         'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
     };
@@ -164,10 +115,10 @@ export class Basemap {
     /**
      * Build basemap array using projection and language...
      *
-     * @return {BasemapLayer[]} basemapLayers the array of basemap layer
+     * @return {TypeBasemapLayer[]} basemapLayers the array of basemap layer
      */
-    getBasemapLayers(): BasemapLayer[] {
-        const basemapLayers: BasemapLayer[] = [];
+    getBasemapLayers(): TypeBasemapLayer[] {
+        const basemapLayers: TypeBasemapLayer[] = [];
         let mainBasemapOpacity = 1;
 
         if (this.basemapOptions) {
@@ -223,9 +174,9 @@ export class Basemap {
     /**
      * Create a new basemap
      *
-     * @param {BasemapProps} basemapProps basemap properties
+     * @param {TypeBasemapProps} basemapProps basemap properties
      */
-    createBasemap = (basemapProps: BasemapProps): void => {
+    createBasemap = (basemapProps: TypeBasemapProps): void => {
         // generate an id if none provided
         // eslint-disable-next-line no-param-reassign
         if (!basemapProps.id) basemapProps.id = generateId(basemapProps.id);
@@ -286,7 +237,7 @@ export class Basemap {
      */
     setBasemap = (id: string): void => {
         // get basemap by id
-        const basemap = this.basemaps.filter((basemapType: BasemapProps) => basemapType.id === id)[0];
+        const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.id === id)[0];
 
         // emit an event to update the basemap layers on the map
         api.event.emit(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, {
@@ -299,7 +250,7 @@ export class Basemap {
      *
      * @returns returns the attribution value
      */
-    get attribution(): Attribution {
+    get attribution(): TypeAttribution {
         return this.attributionVal;
     }
 }
