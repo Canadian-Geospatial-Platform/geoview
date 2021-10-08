@@ -168,7 +168,6 @@ export class WMS {
             // TODO: modify for multiple entries
             isValid = true;
         }
-
         return isValid;
     }
 }

@@ -4,6 +4,7 @@ import { generateId } from '../constant';
 import { EsriDynamic } from './esri-dynamic';
 import { EsriFeature } from './esri-feature';
 import { WMS } from './wms';
+import { XYZTiles } from './xyz-tiles';
 import { GeoJSON } from './geojson';
 
 import { api } from '../../api/api';
@@ -20,6 +21,7 @@ export const LayerTypes = {
     GEOJSON: 'geoJSON',
     ESRI_DYNAMIC: 'esriDynamic',
     ESRI_FEATURE: 'esriFeature',
+    XYZ_TILES: 'xyzTiles'
 };
 
 /**
@@ -64,6 +66,9 @@ export class Layer {
     // variable used to handle esriDynamic functions
     esriDynamic: EsriDynamic;
 
+     // variable used to handle xyzTiles functions
+    xyzTiles: XYZTiles;
+
     /**
      * used toreference event
      */
@@ -88,6 +93,7 @@ export class Layer {
         this.esriFeature = new EsriFeature();
         this.esriDynamic = new EsriDynamic();
         this.wms = new WMS();
+        this.xyzTiles = new XYZTiles();
 
         // listen to outside events to add layers
         api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
@@ -99,6 +105,8 @@ export class Layer {
                     this.removeTabindex();
                 } else if (layerConf.type === LayerTypes.WMS) {
                     this.wms.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
+                } else if (layerConf.type === LayerTypes.XYZ_TILES) {
+                    this.xyzTiles.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                 } else if (layerConf.type === LayerTypes.ESRI_DYNAMIC) {
                     this.esriDynamic.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                 } else if (layerConf.type === LayerTypes.ESRI_FEATURE) {
