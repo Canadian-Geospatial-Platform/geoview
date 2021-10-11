@@ -1,7 +1,5 @@
 import L from 'leaflet';
 
-import { TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
-
 /**
  * Class used to create and manage circles and circle markers
  *
@@ -16,24 +14,17 @@ export class Circle {
      * @param {number} latitude the latitude position of the circle
      * @param {number} longitude the longitude position of the circle
      * @param {number} radius the radius (in kilometers)
-     * @param {Record<string, unknown>} options circle options including styling
+     * @param {L.CircleMarkerOptions} options circle options including styling
      *
      * @returns a geometry with the id and the created circle layer
      */
-    createCircle = (
-        circleId: string,
-        latitude: number,
-        longitude: number,
-        radius: number,
-        options: Record<string, unknown>
-    ): TypeGeometry => {
+    createCircle = (circleId: string, latitude: number, longitude: number, radius: number, options: L.CircleMarkerOptions): L.Circle => {
         // radius is in meters, multiply by 1000 to convert it to km
-        const circle: TypeGeometry = (L.circle([latitude, longitude], {
+        const circle = L.circle([latitude, longitude], {
             ...options,
             radius: radius * 1000,
-        }) as unknown) as TypeGeometry;
-        circle.id = circleId;
-        circle.type = ConstVectorTypes.CIRCLE;
+            id: circleId,
+        });
 
         return circle;
     };
@@ -45,7 +36,7 @@ export class Circle {
      * @param {number} latitude the latitude position of the circle marker
      * @param {number} longitude the longitude position of the circle marker
      * @param {number} radius the radius (in meters)
-     * @param {Record<string, unknown>} options circle marker options including styling
+     * @param {L.CircleMarkerOptions} options circle marker options including styling
      *
      * @returns a geometry with the id and the created circle marker layer
      */
@@ -54,14 +45,13 @@ export class Circle {
         latitude: number,
         longitude: number,
         radius: number,
-        options: Record<string, unknown>
-    ): TypeGeometry => {
-        const circleMarker: TypeGeometry = (L.circleMarker([latitude, longitude], {
+        options: L.CircleMarkerOptions
+    ): L.CircleMarker => {
+        const circleMarker = L.circleMarker([latitude, longitude], {
             ...options,
             radius,
-        }) as unknown) as TypeGeometry;
-        circleMarker.id = circleMarkerId;
-        circleMarker.type = ConstVectorTypes.CIRCLE_MARKER;
+            id: circleMarkerId,
+        });
 
         return circleMarker;
     };

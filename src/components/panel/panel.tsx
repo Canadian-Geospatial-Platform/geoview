@@ -19,7 +19,7 @@ import { EVENT_NAMES } from '../../api/event';
 
 import { HtmlToReact } from '../../common/containers/html-to-react';
 import { styles } from '../../assests/style/theme';
-import { TypeMapViewer, TypePanelAppProps } from '../../types/cgpv-types';
+import { Cast, TypeMapViewer, TypePanelAppProps } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -183,7 +183,7 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
         // listen to change panel content and rerender
         api.event.on(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, (args) => {
             // set focus on close button on panel content change
-            setTimeout(() => ((closeBtnRef.current as unknown) as HTMLElement).focus(), 100);
+            setTimeout(() => Cast<HTMLElement>(closeBtnRef.current).focus(), 100);
 
             if (args.buttonId === panel.buttonId) {
                 updateComponent();
@@ -198,7 +198,7 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
                     setActivetrap(true);
 
                     // set focus on close button on panel open
-                    setTimeout(() => ((closeBtnRef.current as unknown) as HTMLElement).focus(), 0);
+                    setTimeout(() => Cast<HTMLElement>(closeBtnRef.current).focus(), 0);
                 }
             },
             mapId

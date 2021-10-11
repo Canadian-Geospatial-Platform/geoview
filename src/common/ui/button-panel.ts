@@ -7,7 +7,7 @@ import { LayersPanel } from '../../components/panel/default-panels';
 import { generateId } from '../constant';
 import { Button } from './button';
 import { Panel } from './panel';
-import { TypeMapRef, TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 // TODO: look at code duplication
 
@@ -25,15 +25,15 @@ export class ButtonPanel {
     navBarButtons: Record<string, Record<string, TypeButtonPanel>> = {};
 
     // reference to the leaflet map
-    private buttonPanelMapRef: TypeMapRef;
+    private buttonPanelMap: L.Map;
 
     /**
      * Create default buttons, button panels
      *
      * @param {Map} map the leaflet map
      */
-    constructor(mapRef: TypeMapRef) {
-        this.buttonPanelMapRef = mapRef;
+    constructor(map: L.Map) {
+        this.buttonPanelMap = map;
 
         this.createDefaultButtonPanels();
     }

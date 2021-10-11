@@ -45,32 +45,27 @@ export class Basemap {
      * @param {string} language language to be used either en-CA or fr-CA
      * @param {number} projection projection number
      */
-    constructor(basemapOptions: TypeBasemapOptions | null | undefined, language: string, projection: number) {
+    constructor(basemapOptions: TypeBasemapOptions | null | undefined, language: string, projection: number, mapId?: string) {
         this.basemapOptions = basemapOptions;
 
         this.language = language;
 
         this.projection = projection;
-    }
 
-    /**
-     * init the basemap and load default basemap layers if provided in map configs
-     *
-     * @param {string} mapId the map id
-     */
-    init = (mapId: string): void => {
-        this.mapId = mapId;
+        if (mapId) {
+            this.mapId = mapId;
 
-        const { map } = api.map(this.mapId) as TypeMapViewer;
+            const { map } = api.map(this.mapId) as TypeMapViewer;
 
-        // create new pane to host basemap layers
-        this.basemapsPaneName = 'basemapsPane';
-        map.createPane(this.basemapsPaneName).style.zIndex = '10';
+            // create new pane to host basemap layers
+            this.basemapsPaneName = 'basemapsPane';
+            map.createPane(this.basemapsPaneName).style.zIndex = '10';
 
-        if (this.basemapOptions) {
-            this.loadDefaultBasemaps();
+            if (this.basemapOptions) {
+                this.loadDefaultBasemaps();
+            }
         }
-    };
+    }
 
     /**
      * basemap list

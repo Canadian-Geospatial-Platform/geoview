@@ -2,20 +2,12 @@
 /* eslint-disable no-plusplus */
 import L, { LeafletMouseEvent, LeafletEventHandlerFn, LeafletEvent } from 'leaflet';
 import 'leaflet.markercluster/src';
-import {
-    Cast,
-    TypeMarkerCluster,
-    TypeClusterGroupOptions,
-    TypeClusterGroup,
-    TypeStampedIconCreationFunction,
-    TypeIconCreationFunction,
-    TypeMarkerClusterOptions,
-    TypeMapRef,
-} from '../../types/cgpv-types';
 
 import { EVENT_NAMES } from '../../api/event';
 import { api } from '../../api/api';
 import { generateId } from '../constant';
+import { Cast, TypeStampedIconCreationFunction, TypeIconCreationFunction } from '../../types/cgpv-types';
+
 import * as MarkerDefinitions from '../../../public/markers/marker-definitions';
 
 let {
@@ -36,7 +28,7 @@ let {
 const createMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
     let icon: L.DivIcon;
     let numberOfSelectedIcons = 0;
-    const markers = cluster.getAllChildMarkers() as TypeMarkerCluster[];
+    const markers = cluster.getAllChildMarkers();
     for (let i = 0; i < markers.length; i++) {
         if (markers[i].options.selected) numberOfSelectedIcons++;
     }
@@ -52,7 +44,7 @@ const createMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
 };
 
 // default options used by cluster groups
-export const defaultClusterGroupOptions: TypeClusterGroupOptions = {
+export const defaultClusterGroupOptions: L.MarkerClusterGroupOptions = {
     maxClusterRadius: 50,
     iconCreateFunction: createMarkerIcon,
     animate: false,
@@ -78,7 +70,7 @@ const createZoomedMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
 };
 
 // default options used by zoomed cluster groups
-export const defaultZoomedClusterGroupOptions: TypeClusterGroupOptions = {
+export const defaultZoomedClusterGroupOptions: L.MarkerClusterGroupOptions = {
     maxClusterRadius: 100,
     iconCreateFunction: createZoomedMarkerIcon,
     animate: false,
@@ -99,13 +91,13 @@ let zoomedClusterGroupOptions = defaultZoomedClusterGroupOptions;
  */
 export class MarkerClusters {
     // reference to the map object
-    private markerClusterMapRef: TypeMapRef;
+    private markerClusterMap: L.Map;
 
     // used to store marker cluster groups
-    clusterGroups: TypeClusterGroup[] = [];
+    clusterGroups: L.MarkerClusterGroup[] = [];
 
     // used to store a marker cluster when zooming to it
-    zoomedMarkerGroup: TypeClusterGroup;
+    zoomedMarkerGroup: L.MarkerClusterGroup;
 
     // index of the active marker cluster group used to add new marker cluster in the map
     activeClusterGroup = 0;
@@ -118,8 +110,8 @@ export class MarkerClusters {
      *
      * @param {Map} map leaflet map object
      */
-    constructor(mapRef: TypeMapRef) {
-        this.markerClusterMapRef = mapRef;
+    constructor(map: L.Map) {
+        this.markerClusterMap = map;
 
         // create default cluster group and set it as visible
         this.createClusterGroup(this.defaultClusterGroupID, {
@@ -153,10 +145,10 @@ export class MarkerClusters {
 
         // listen to outside events to turn select by bounding polygone
         api.event.on(EVENT_NAMES.EVENT_BOX_SELECT_END, (payload) => {
-            const bbox = payload.boxZoomBounds;
+            const bbox: L.LatLngBounds = payload.selectBoxBounds;
             for (let i = 0; i < this.clusterGroups.length; i++) {
                 if (this.clusterGroups[i].options.visible) {
-                    const markerClusters = Cast<TypeMarkerCluster[]>(this.clusterGroups[i].getLayers());
+                    const markerClusters = Cast<L.MarkerCluster[]>(this.clusterGroups[i].getLayers());
                     for (let j = 0; j < markerClusters.length; j++) {
                         if (bbox.contains(markerClusters[j].getLatLng())) {
                             markerClusters[j].options.selected = !markerClusters[j].options.selected;
@@ -226,18 +218,18 @@ export class MarkerClusters {
     /**
      * set the default cluster group options
      *
-     * @param {TypeClusterGroupOptions} options marker options including styling
+     * @param {MarkerClusterGroupOptions} options marker options including styling
      */
-    setClusterGroupOptions = (options: TypeClusterGroupOptions): void => {
+    setClusterGroupOptions = (options: L.MarkerClusterGroupOptions): void => {
         clusterGroupOptions = options;
     };
 
     /**
      * set the zoomed default cluster group options
      *
-     * @param {TypeClusterGroupOptions} options marker options including styling
+     * @param {MarkerClusterGroupOptions} options marker options including styling
      */
-    setZoomedClusterGroupOptions = (options: TypeClusterGroupOptions): void => {
+    setZoomedClusterGroupOptions = (options: L.MarkerClusterGroupOptions): void => {
         zoomedClusterGroupOptions = options;
     };
 
@@ -251,16 +243,19 @@ export class MarkerClusters {
      *
      * @returns a marker cluster element with the id, the selected flag and the created marker layer
      */
-    createMarker = (markerId: string, latitude: number, longitude: number, options: TypeMarkerClusterOptions): TypeMarkerCluster => {
+    createMarker = (markerId: string, latitude: number, longitude: number, options: L.MarkerOptions): L.MarkerCluster => {
         let iconToUse: L.DivIcon;
         if (options.selected) {
             iconToUse = selectedMarkerIconCreator();
         } else {
             iconToUse = unselectedMarkerIconCreator();
         }
-        const marker = L.marker([latitude, longitude], { ...options, icon: iconToUse }) as TypeMarkerCluster;
-        marker.id = markerId;
-        marker.options.selected = !!options.selected;
+
+        const marker = L.marker([latitude, longitude], {
+            ...options,
+            icon: iconToUse,
+            id: markerId,
+        }) as L.MarkerCluster;
         marker.on('click', this.markerOnClick);
 
         if (options.on) {
@@ -283,15 +278,15 @@ export class MarkerClusters {
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addClusterMarker = (latitude: number, longitude: number, options: TypeMarkerClusterOptions, id?: string): TypeMarkerCluster => {
+    addClusterMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.MarkerCluster => {
         const MarkerClusterID = generateId(id);
 
         const marker = this.createMarker(MarkerClusterID, latitude, longitude, options);
 
-        marker.addTo(this.clusterGroups[this.activeClusterGroup]);
+        marker.addTo(this.clusterGroups[this.activeClusterGroup] as L.LayerGroup);
 
         // emit an event that a marker vector has been added
-        api.event.emit(EVENT_NAMES.EVENT_CLUSTER_ADDED, this.markerClusterMapRef.id, { ...marker });
+        api.event.emit(EVENT_NAMES.EVENT_CLUSTER_ADDED, this.markerClusterMap.id, { ...marker });
 
         return marker;
     };
@@ -303,11 +298,11 @@ export class MarkerClusters {
      *
      * @returns a marker cluster with the specified id
      */
-    getMarkerCluster = (id: string): TypeMarkerCluster | null => {
-        let returnValue: TypeMarkerCluster | null = null;
+    getMarkerCluster = (id: string): L.MarkerCluster | null => {
+        let returnValue: L.MarkerCluster | null = null;
         this.clusterGroups.forEach((clusterGroup) => {
             clusterGroup.eachLayer((marker) => {
-                const markerCluster = marker as TypeMarkerCluster;
+                const markerCluster = marker as L.MarkerCluster;
                 if (markerCluster.id === id) returnValue = markerCluster;
             });
         });
@@ -319,14 +314,14 @@ export class MarkerClusters {
      *
      * @param {string} id the id of the marker cluster
      *
-     * @returns {TypeClusterGroup} the group that contains the marker cluster
+     * @returns {MarkerClusterGroup} the group that contains the marker cluster
      */
-    getClusterGroupByMarkerId = (id: string): TypeClusterGroup | null => {
-        let returnValue: TypeClusterGroup | null = null;
+    getClusterGroupByMarkerId = (id: string): L.MarkerClusterGroup | null => {
+        let returnValue: L.MarkerClusterGroup | null = null;
         for (let i = 0; i < this.clusterGroups.length; i++) {
             const markerClusters = this.clusterGroups[i].getLayers();
             for (let j = 0; j < markerClusters.length; j++) {
-                const markerCluster = markerClusters[j] as TypeMarkerCluster;
+                const markerCluster = markerClusters[j] as L.MarkerCluster;
                 if (markerCluster.id === id) returnValue = this.clusterGroups[i];
             }
         }
@@ -337,12 +332,12 @@ export class MarkerClusters {
      * Create a new marker cluster group instance
      *
      * @param {string} clusterGroupid the id of the marker cluster group
-     * @param {TypeClusterGroupOptions} options marker cluster group options
+     * @param {MarkerClusterGroupOptions} options marker cluster group options
      */
-    newClusterGroupInstance = (clusterGroupid: string, options: TypeClusterGroupOptions): TypeClusterGroup => {
-        const clusterGroup = Cast<TypeClusterGroup>(L.markerClusterGroup(options));
+    newClusterGroupInstance = (clusterGroupid: string, options: L.MarkerClusterGroupOptions): L.MarkerClusterGroup => {
+        const clusterGroup = L.markerClusterGroup({ ...options, id: clusterGroupid });
 
-        clusterGroup.id = clusterGroupid;
+        // clusterGroup.id = clusterGroupid;
 
         if (options.on) {
             const onHandlerDefinitions = Object.entries(options.on);
@@ -351,9 +346,8 @@ export class MarkerClusters {
             });
         }
 
-        clusterGroup.options.visible = !!options.visible;
         if (clusterGroup.options.visible) {
-            clusterGroup.addTo(this.markerClusterMapRef.map);
+            clusterGroup.addTo(this.markerClusterMap);
         }
 
         return clusterGroup;
@@ -363,9 +357,9 @@ export class MarkerClusters {
      * Create a new marker cluster group in the clusterGroups attribute to manage multiple marker at once
      *
      * @param {string} clusterGroupid the id of the marker cluster group to use when managing this group
-     * @param {TypeClusterGroupOptions>} options marker cluster group options
+     * @param {MarkerClusterGroupOptions>} options marker cluster group options
      */
-    createClusterGroup = (clusterGroupid: string, options: TypeClusterGroupOptions): void => {
+    createClusterGroup = (clusterGroupid: string, options: L.MarkerClusterGroupOptions): void => {
         if (!this.getClusterGroupById(clusterGroupid)) {
             this.clusterGroups.push(this.newClusterGroupInstance(clusterGroupid, options));
         }
@@ -396,7 +390,7 @@ export class MarkerClusters {
         // if group name not give, add to default group
         const groupName = clusterGroupid || this.defaultClusterGroupID;
         const clusterGroup = this.getClusterGroupById(groupName);
-        clusterGroup.addTo(this.markerClusterMapRef.map);
+        clusterGroup.addTo(this.markerClusterMap);
         clusterGroup.options.visible = true;
     };
 
@@ -409,7 +403,7 @@ export class MarkerClusters {
         // if group name not give, add to default group
         const groupName = clusterGroupid || this.defaultClusterGroupID;
         const clusterGroup = this.getClusterGroupById(groupName);
-        clusterGroup.removeFrom(this.markerClusterMapRef.map);
+        clusterGroup.removeFrom(this.markerClusterMap);
         clusterGroup.options.visible = false;
     };
 
@@ -420,7 +414,7 @@ export class MarkerClusters {
      *
      * @returns the geomtry group
      */
-    getClusterGroupById = (clusterGroupid: string): TypeClusterGroup => {
+    getClusterGroupById = (clusterGroupid: string): L.MarkerClusterGroup => {
         return this.clusterGroups.filter((clusterGroup) => clusterGroup.id === clusterGroupid)[0];
     };
 
@@ -509,7 +503,7 @@ export class MarkerClusters {
         } else if (!e.originalEvent.shiftKey && !e.originalEvent.ctrlKey && !e.originalEvent.altKey) {
             // turn off all visible cluster groups
             this.clusterGroups.forEach((clusterGroup) => {
-                if (clusterGroup.options.visible) clusterGroup.removeFrom(this.markerClusterMapRef.map);
+                if (clusterGroup.options.visible) clusterGroup.removeFrom(this.markerClusterMap);
             });
             // turn off all visible geometry groups
             api.event.emit(api.eventNames.EVENT_VECTOR_OFF, null, {});
@@ -517,13 +511,13 @@ export class MarkerClusters {
             // and keep a reference to the last child marker
             const childMarkers = e.layer.getAllChildMarkers();
             let sourceMarker = childMarkers[0];
-            let lastChildMarker: TypeMarkerCluster = this.createMarker(
+            let lastChildMarker: L.MarkerCluster = this.createMarker(
                 sourceMarker.id,
                 sourceMarker.getLatLng().lat,
                 sourceMarker.getLatLng().lng,
                 sourceMarker.options
             );
-            lastChildMarker.addTo(this.zoomedMarkerGroup);
+            lastChildMarker.addTo(this.zoomedMarkerGroup as L.LayerGroup);
             for (let i = 1; i < childMarkers.length; i++) {
                 sourceMarker = childMarkers[i];
                 lastChildMarker = this.createMarker(
@@ -532,10 +526,10 @@ export class MarkerClusters {
                     sourceMarker.getLatLng().lng,
                     sourceMarker.options
                 );
-                lastChildMarker.addTo(this.zoomedMarkerGroup);
+                lastChildMarker.addTo(this.zoomedMarkerGroup as L.LayerGroup);
             }
             // Find the cluster marker and spiderfy it.
-            const zoomedMarkerCluster = this.zoomedMarkerGroup.getVisibleParent(lastChildMarker);
+            const zoomedMarkerCluster = this.zoomedMarkerGroup.getVisibleParent(lastChildMarker) as L.MarkerCluster;
             zoomedMarkerCluster.spiderfy();
         }
     };
@@ -554,7 +548,7 @@ export class MarkerClusters {
         api.event.emit(api.eventNames.EVENT_VECTOR_ON, null, {});
         // turn on all visible cluster group
         this.clusterGroups.forEach((clusterGroup) => {
-            if (clusterGroup.options.visible) clusterGroup.addTo(this.markerClusterMapRef.map);
+            if (clusterGroup.options.visible) clusterGroup.addTo(this.markerClusterMap);
         });
     };
 
@@ -570,7 +564,7 @@ export class MarkerClusters {
             // refresh the visible parent
             this.zoomedMarkerGroup.refreshClusters();
 
-            const originalMarker = Cast<TypeMarkerCluster>(this.getMarkerCluster(e.target.id));
+            const originalMarker = this.getMarkerCluster(e.target.id) as L.MarkerCluster;
             originalMarker.options.selected = !originalMarker.options.selected;
             if (originalMarker.options.selected) {
                 originalMarker.setIcon(selectedMarkerIconCreator());

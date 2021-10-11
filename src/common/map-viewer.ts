@@ -1,5 +1,6 @@
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
+// import L from 'leaflet';
 import queryString from 'query-string';
 
 import { ButtonPanel } from './ui/button-panel';
@@ -11,8 +12,7 @@ import * as MarkerDefinitions from '../../public/markers/marker-definitions';
 import '../types/cgp-leaflet-config';
 
 import { api } from '../api/api';
-import { EVENT_NAMES } from '../api/event';
-import { Cast, TypeWindow, TypeMap, TypeMapRef, TypeMapConfigProps } from '../types/cgpv-types';
+import { Cast, TypeWindow, TypeMapConfigProps } from '../types/cgpv-types';
 
 /**
  * Class used to manage created maps
@@ -28,7 +28,7 @@ export class MapViewer {
     id!: string;
 
     // the leaflet map
-    map!: TypeMap;
+    map!: L.Map;
 
     // used to access vector API to create and manage geometries
     vector!: Vector;
@@ -59,7 +59,7 @@ export class MapViewer {
      *
      * @param {TypeMapConfigProps} mapProps map properties
      */
-    constructor(mapProps: TypeMapConfigProps, cgpMapRef: TypeMapRef) {
+    constructor(mapProps: TypeMapConfigProps, cgpMap: L.Map) {
         // add map viewer instance to api
         api.maps.push(this);
 
@@ -68,35 +68,23 @@ export class MapViewer {
         this.language = mapProps.language;
         this.projection = mapProps.projection;
 
-        this.basemap = new Basemap(mapProps.basemapOptions, mapProps.language, mapProps.projection);
+        this.id = cgpMap.id as string;
+        this.map = cgpMap;
 
-        this.id = cgpMapRef.id;
-        this.map = cgpMapRef.map;
+        this.markerClusters = new MarkerClusters(cgpMap);
 
-        if (this.map.options.selectBox) {
-            this.map.on('boxselectend', (e) => {
-                const event = (e as unknown) as Record<string, unknown>;
-                api.event.emit(EVENT_NAMES.EVENT_BOX_SELECT_END, api.mapInstance(this.map).id, {
-                    selectFlag: event.selectFlag,
-                    boxZoomBounds: event.boxZoomBounds,
-                });
-            });
-        }
-
-        this.markerClusters = new MarkerClusters(cgpMapRef);
-
-        this.vector = new Vector(cgpMapRef);
+        this.vector = new Vector(cgpMap);
 
         // initialize layers and load the layers passed in from map config if any
-        this.layer = new Layer(cgpMapRef, this.mapProps.layers);
+        this.layer = new Layer(cgpMap, this.mapProps.layers);
 
-        this.buttonPanel = new ButtonPanel(cgpMapRef);
+        this.buttonPanel = new ButtonPanel(cgpMap);
 
         // check if geometries are provided from url
         this.loadGeometries();
 
-        // init basemap and pass in the map id to be able to access the map instance
-        this.basemap.init(this.id);
+        // create basemap and pass in the map id to be able to access the map instance
+        this.basemap = new Basemap(mapProps.basemapOptions, mapProps.language, mapProps.projection, this.id);
 
         // load plugins if provided in the config
         if (this.mapProps.plugins && this.mapProps.plugins.length > 0) {

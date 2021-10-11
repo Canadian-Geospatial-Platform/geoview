@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { useEffect, useState } from 'react';
 
-import { Map as LeafletMap, CRS } from 'leaflet';
+import { CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
@@ -27,17 +27,13 @@ import { MapViewer } from '../../common/map-viewer';
 import { generateId } from '../../common/constant';
 import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 import { ClickMarker } from '../mapctrl/click-marker';
-import { TypeMapOptions, TypeMapRef, TypeMap, TypeMapContainerProps, TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
+import { TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     snackBar: {
         '& .MuiButton-text': { color: theme.palette.primary.light },
     },
 }));
-
-const CGPVMapContainer = ({ children, className, id, placeholder, style, whenCreated, ...options }: TypeMapContainerProps): JSX.Element => {
-    return MapContainer({ children, className, id, placeholder, style, whenCreated, ...options });
-};
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
     // make sure the id is not undefined
@@ -66,7 +62,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     let attribution = '';
 
     // get map option from slected basemap projection
-    const mapOptions: TypeMapOptions = getMapOptions(projection);
+    const mapOptions: L.MapOptions = getMapOptions(projection);
 
     /**
      * Get the center position of the map when move / drag has ended
@@ -75,7 +71,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
      */
     function mapMoveEnd(event: L.LeafletEvent): void {
         // get a map reference from the moveend event
-        const map: LeafletMap = event.target;
+        const map: L.Map = event.target;
 
         // emit the moveend event to the api
         api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
@@ -100,7 +96,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     }, []);
 
     return (
-        <CGPVMapContainer
+        <MapContainer
             center={center}
             zoom={zoom}
             crs={crs}
@@ -109,10 +105,13 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             boxZoom={boxZoom}
             attributionControl={false}
             minZoom={mapOptions.minZoom}
-            maxZoom={mapOptions.maxZooom}
+            maxZoom={mapOptions.maxZoom}
             maxBounds={mapOptions.maxBounds}
             keyboardPanDelta={20}
-            whenCreated={(cgpMap: LeafletMap) => {
+            whenCreated={(cgpMap: L.Map) => {
+                // eslint-disable-next-line no-param-reassign
+                cgpMap.id = id;
+
                 // add a class to map container to easely find the container
                 cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
 
@@ -128,10 +127,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
                 cgpMap.on('moveend', mapMoveEnd);
 
                 // initialize the map viewer and load plugins
-                viewer = new MapViewer(props, {
-                    map: cgpMap as TypeMap,
-                    id: id || generateId(id),
-                } as TypeMapRef);
+                viewer = new MapViewer(props, cgpMap);
 
                 // get attribution
                 attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
@@ -169,7 +165,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
                     >
                         <Appbar />
                     </div>
-                    {deviceSizeMedUp && <OverviewMap id={id} crs={crs} language={language} zoomFactor={mapOptions.zoomFactor} />}
+                    {deviceSizeMedUp && <OverviewMap id={id} crs={crs} language={language} zoomFactor={mapOptions.zoomFactor as number} />}
                     <NorthArrow projection={crs} />
                     <NorthPoleFlag projection={crs} />
                     <Crosshair id={id} />
@@ -189,6 +185,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
                     </SnackbarProvider>
                 </>
             )}
-        </CGPVMapContainer>
+        </MapContainer>
     );
 }

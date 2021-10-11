@@ -8,7 +8,7 @@ import { GeoJSON } from './geojson';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { CONST_LAYER_TYPES, TypeMapRef, TypeLayerData, TypeLayerConfig } from '../../types/cgpv-types';
+import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from '../../types/cgpv-types';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 import 'esri-leaflet-renderers';
@@ -38,7 +38,7 @@ export class Layer {
     /**
      * used to reference the map and its event
      */
-    private layerMapRef: TypeMapRef;
+    private layerMap: L.Map;
 
     /**
      * Initialize layer types and listen to add/remove layer events from outside
@@ -46,8 +46,8 @@ export class Layer {
      * @param {Map} map a reference to the map
      * @param {TypeLayerConfig[]} layers an optional array containing layers passed within the map config
      */
-    constructor(mapRef: TypeMapRef, layers?: TypeLayerConfig[] | undefined | null) {
-        this.layerMapRef = mapRef;
+    constructor(map: L.Map, layers?: TypeLayerConfig[] | undefined | null) {
+        this.layerMap = map;
 
         this.geoJSON = new GeoJSON();
         this.esriFeature = new EsriFeature();
@@ -56,7 +56,7 @@ export class Layer {
 
         // listen to outside events to add layers
         api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
-            if (payload && payload.handlerName.includes(this.layerMapRef.id)) {
+            if (payload && payload.handlerName.includes(this.layerMap.id)) {
                 const layerConf = payload.layer;
                 layerConf.id = generateId(layerConf.id);
                 if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
@@ -81,7 +81,7 @@ export class Layer {
 
         // Load layers that was passed in with the map config
         if (layers && layers.length > 0) {
-            layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.layerMapRef.id, { layer }));
+            layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.layerMap.id, { layer }));
         }
     }
 
@@ -100,11 +100,11 @@ export class Layer {
 
         setTimeout(() => {
             if (!isLoaded) {
-                api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.layerMapRef.id, {
+                api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.layerMap.id, {
                     message: {
                         type: 'key',
                         value: 'validation.layer.loadfailed',
-                        params: [name, this.layerMapRef.id],
+                        params: [name, this.layerMap.id],
                     },
                 });
 
@@ -123,16 +123,16 @@ export class Layer {
         // if the return layer object is a string, it is because path or entries are bad
         // do not add to the map
         if (typeof layer === 'string') {
-            api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.layerMapRef.id, {
+            api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.layerMap.id, {
                 message: {
                     type: 'key',
                     value: 'validation.layer.loadfailed',
-                    params: [payload.name, this.layerMapRef.id],
+                    params: [payload.name, this.layerMap.id],
                 },
             });
         } else {
             if (payload.type !== 'geoJSON') this.layerIsLoaded(payload.name, layer);
-            layer.addTo(this.layerMapRef.map);
+            layer.addTo(this.layerMap);
 
             const id = payload.id || generateId('');
             this.layers.push({
@@ -151,7 +151,7 @@ export class Layer {
         // TODO: timeout is never a good idea, may have to find a workaround...
         setTimeout(() => {
             const featElems = document
-                .getElementsByClassName(`leaflet-map-${this.layerMapRef.id}`)[0]
+                .getElementsByClassName(`leaflet-map-${this.layerMap.id}`)[0]
                 .getElementsByClassName('leaflet-marker-pane')[0].children;
             [...featElems].forEach((element) => {
                 element.setAttribute('tabindex', '-1');
@@ -167,7 +167,7 @@ export class Layer {
     removeLayerById = (id: string): void => {
         // return items not matching the id
         this.layers = this.layers.filter((item: TypeLayerData) => {
-            if (item.id === id) item.layer.removeFrom(this.layerMapRef.map);
+            if (item.id === id) item.layer.removeFrom(this.layerMap);
             return item.id !== id;
         });
     };
@@ -180,7 +180,7 @@ export class Layer {
     addThisLayer = (layer: TypeLayerConfig): string => {
         // eslint-disable-next-line no-param-reassign
         layer.id = generateId(layer.id);
-        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.layerMapRef.id, { layer });
+        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.layerMap.id, { layer });
 
         return layer.id;
     };

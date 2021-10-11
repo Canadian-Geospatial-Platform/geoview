@@ -1,6 +1,4 @@
-import L, { LatLngExpression } from 'leaflet';
-
-import { TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
+import L from 'leaflet';
 
 /**
  * Class used to create and manage polygons
@@ -14,18 +12,16 @@ export class Polygon {
      *
      * @param {string} polygonId the id of this geometry
      * @param {LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][]} points an array of points to create the polygon
-     * @param {Record<string, unknown>} options polygon options including styling
+     * @param {L.PolylineOptions} options polygon options including styling
      *
      * @returns a geometry with the id and the created polygon layer
      */
     createPolygon = (
         polygonId: string,
-        points: LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][],
-        options: Record<string, unknown>
-    ): TypeGeometry => {
-        const polygon: TypeGeometry = (L.polygon(points, options) as unknown) as TypeGeometry;
-        polygon.id = polygonId;
-        polygon.type = ConstVectorTypes.POLYGON;
+        points: L.LatLngExpression[] | L.LatLngExpression[][] | L.LatLngExpression[][][],
+        options: L.PolylineOptions
+    ): L.Polygon => {
+        const polygon = L.polygon(points, { ...options, id: polygonId });
 
         return polygon;
     };
