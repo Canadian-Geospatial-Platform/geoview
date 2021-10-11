@@ -21,10 +21,10 @@ import { ButtonPanel } from '../../common/ui/button-panel';
 import { ButtonMapNav } from './button';
 import { EVENT_NAMES } from '../../api/event';
 import PanelApp from '../panel/panel';
-import { TypeButtonPanel, CONST_PANEL_TYPES } from '../../types/cgpv-types';
+import { Cast, TypeButtonPanel, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
-    navBar: {
+    navBarRef: {
         display: 'flex',
         flexDirection: 'row',
         marginBottom: theme.spacing(14),
@@ -60,7 +60,7 @@ export function NavBar(): JSX.Element {
     const classes = useStyles();
     const { t } = useTranslation<string>();
 
-    const navBar = useRef<HTMLDivElement>(null);
+    const navBarRef = useRef<HTMLDivElement>(null);
 
     const map = useMap();
 
@@ -92,9 +92,9 @@ export function NavBar(): JSX.Element {
      */
     useEffect(() => {
         // disable events on container
-        const navBarCurrent = navBar.current as HTMLDivElement;
-        DomEvent.disableClickPropagation(navBarCurrent.children[0] as HTMLElement);
-        DomEvent.disableScrollPropagation(navBarCurrent.children[0] as HTMLElement);
+        const navBarChildrenHTMLElements = Cast<HTMLElement[]>(navBarRef.current?.children);
+        DomEvent.disableClickPropagation(navBarChildrenHTMLElements[0]);
+        DomEvent.disableScrollPropagation(navBarChildrenHTMLElements[0]);
 
         // listen to panel open/close events
         api.event.on(
@@ -144,7 +144,7 @@ export function NavBar(): JSX.Element {
     }, []);
 
     return (
-        <div ref={navBar} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBar}`}>
+        <div ref={navBarRef} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}>
             {Object.keys(buttonPanelApi.navBarButtons).map((groupName) => {
                 const buttons = buttonPanelApi.navBarButtons[groupName];
 

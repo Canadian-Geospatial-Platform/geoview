@@ -17,7 +17,6 @@
         />
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
         <script src="./plugins/basemap/basemap-switcher.js"></script>
-        <script src="./plugins/counter/counter.js"></script>
         <link rel="stylesheet" href="css/style.css" />
         <link rel="stylesheet" href="css/cluster-marker-style.css" />
     </head>
@@ -71,40 +70,40 @@
                 api.addCircleMarker(56,-97, 1, null, 'CircleMarker-1');
                 api.addCircle(58,-99, 10, null, 'Circle-1');
 
-                marker = api.addMarker(56,-97, {
+                marker1 = api.addMarker(56,-97, {
                     icon: api.markerDefinitions.yellowIcon,
                     title: 'Test-marker-1'
                 }, 'marker-1');
-                marker.setIcon(api.markerDefinitions.greenIcon)
+                marker1.setIcon(api.markerDefinitions.greenIcon)
 
-                marker = api.markerCluster.addClusterMarker(58,-98.5, {
+                marker2 = api.markerCluster.addClusterMarker(58,-98.5, {
                     selected: true,
                     title: 'Test-marker-2.1'
                 }, 'marker-2.1');
 
-                marker = api.markerCluster.addClusterMarker(58.2,-99.3, {
+                marker2 = api.markerCluster.addClusterMarker(58.2,-99.3, {
                     title: 'Test-marker-2.2'
                 }, 'marker-2.2');
 
-                marker = api.markerCluster.addClusterMarker(58,-99.4, {
+                marker2 = api.markerCluster.addClusterMarker(58,-99.4, {
                     title: 'Test-marker-2.3'
                 }, 'marker-2.3');
 
-                marker = api.markerCluster.addClusterMarker(57.9,-98.6, {
+                marker2 = api.markerCluster.addClusterMarker(57.9,-98.6, {
                     selected: true,
                     title: 'Test-marker-2.4'
                 }, 'marker-2.4');
 
-                marker = api.markerCluster.addClusterMarker(57.7,-99, {
+                marker2 = api.markerCluster.addClusterMarker(57.7,-99, {
                     selected: true,
                     title: 'Test-marker-2.5'
                 }, 'marker-2.5');
 
-                marker = api.markerCluster.addClusterMarker(57.7005,-99, {
+                marker2 = api.markerCluster.addClusterMarker(57.7005,-99, {
                     title: 'Test-marker-2.6'
                 }, 'marker-2.6');
 
-                marker = api.markerCluster.addClusterMarker(57.7005,-99.0005, {
+                marker2 = api.markerCluster.addClusterMarker(57.7005,-99.0005, {
                     title: 'Test-marker-2.7'
                 }, 'marker-2.7');
 
@@ -114,10 +113,10 @@
                 api.createGeometryGroup('myGroup');
                 api.setActiveGeometryGroup('myGroup');
                 cgpv.api.event.emit(cgpv.api.eventNames.EVENT_VECTOR_ADD, null, {type: 'marker', latitude: 57, longitude:-98, options: {title: 'Test-marker-3'}, id: 'Marker-3'})
-                // api.setGeometryGroupAsVisible('myGroup');
-                //api.setGeometryGroupAsInvisible('defaultGeomGroup');
-                api.markerCluster.addToGeometryGroup(marker, 'MarkerGroup');
-                // api.setGeometryGroupAsVisible('MarkerGroup');
+                api.setGeometryGroupAsVisible('myGroup');
+                api.setGeometryGroupAsInvisible('defaultGeomGroup');
+                api.addToGeometryGroup(marker1, 'MarkerGroup');
+                api.setGeometryGroupAsVisible('MarkerGroup');
             }
 
             function addModelsToAppbarPane(api) {

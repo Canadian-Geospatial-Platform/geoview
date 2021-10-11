@@ -9,7 +9,7 @@ import { MarkerCGP } from './marker';
 import { generateId } from '../constant';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { TypeMapRef, TypeVector, TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
+import { CONST_VECTOR_TYPES } from '../../types/cgpv-types';
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
@@ -18,7 +18,7 @@ import { TypeMapRef, TypeVector, TypeGeometry, ConstVectorTypes } from '../../ty
  */
 export class Vector {
     // reference to the map object
-    private vectorMapRef: TypeMapRef;
+    private vectorMap: L.Map;
 
     // used to handle creating a polyline
     polyline: Polyline;
@@ -33,10 +33,10 @@ export class Vector {
     marker: MarkerCGP;
 
     // used to store geometry groups
-    geometryGroups: TypeVector[] = [];
+    geometryGroups: L.FeatureGroup[] = [];
 
     // contains all the added geometries
-    geometries: TypeGeometry[] = [];
+    geometries: L.Layer[] = [];
 
     // default geometry group name
     defaultGeometryGroupID = 'defaultGeomGroup';
@@ -49,8 +49,8 @@ export class Vector {
      *
      * @param {Map} map leaflet map object
      */
-    constructor(mapRef: TypeMapRef) {
-        this.vectorMapRef = mapRef;
+    constructor(map: L.Map) {
+        this.vectorMap = map;
 
         // initialize vector types
         this.polyline = new Polyline();
@@ -64,15 +64,15 @@ export class Vector {
         // listen to add vector events
         api.event.on(EVENT_NAMES.EVENT_VECTOR_ADD, (payload) => {
             const id = payload.id ? payload.id : null;
-            if (payload.type === ConstVectorTypes.CIRCLE) {
+            if (payload.type === CONST_VECTOR_TYPES.CIRCLE) {
                 this.addCircle(payload.latitude, payload.longitude, payload.radius, payload.options, id);
-            } else if (payload.type === ConstVectorTypes.POLYGON) {
+            } else if (payload.type === CONST_VECTOR_TYPES.POLYGON) {
                 this.addPolygon(payload.points, payload.options, id);
-            } else if (payload.type === ConstVectorTypes.POLYLINE) {
+            } else if (payload.type === CONST_VECTOR_TYPES.POLYLINE) {
                 this.addPolyline(payload.points, payload.options, id);
-            } else if (payload.type === ConstVectorTypes.MARKER) {
+            } else if (payload.type === CONST_VECTOR_TYPES.MARKER) {
                 this.addMarker(payload.latitude, payload.longitude, payload.options, id);
-            } else if (payload.type === ConstVectorTypes.CIRCLE_MARKER) {
+            } else if (payload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
                 this.addCircleMarker(payload.latitude, payload.longitude, payload.radius, payload.options, id);
             }
         });
@@ -103,7 +103,7 @@ export class Vector {
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: Record<string, unknown>, id?: string): TypeGeometry => {
+    addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: L.PolylineOptions, id?: string): L.Polyline => {
         const lId = generateId(id);
 
         const polyline = this.polyline.createPolyline(lId, points, options);
@@ -113,7 +113,7 @@ export class Vector {
         this.geometries.push(polyline);
 
         // emit an event that a polyline vector has been added
-        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMapRef.map).id, { ...polyline });
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMap).id, { ...polyline });
 
         return polyline;
     };
@@ -129,9 +129,9 @@ export class Vector {
      */
     addPolygon = (
         points: LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][],
-        options: Record<string, unknown>,
+        options: L.PolylineOptions,
         id?: string
-    ): TypeGeometry => {
+    ): L.Polygon => {
         const lId = generateId(id);
 
         const polygon = this.polygon.createPolygon(lId, points, options);
@@ -141,7 +141,7 @@ export class Vector {
         this.geometries.push(polygon);
 
         // emit an event that a polygon vector has been added
-        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMapRef.map).id, { ...polygon });
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMap).id, { ...polygon });
 
         return polygon;
     };
@@ -152,12 +152,12 @@ export class Vector {
      * @param {number} latitude the latitude position of the circle
      * @param {number} longitude the longitude position of the circle
      * @param {number} radius the radius of the circle (in kilometers)
-     * @param {Record<string, unknown>} options circle options including styling
+     * @param {L.CircleMarkerOptions} options circle options including styling
      * @param {string} id an optional id to be used to manage this geometry
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addCircle = (latitude: number, longitude: number, radius: number, options: Record<string, unknown>, id?: string): TypeGeometry => {
+    addCircle = (latitude: number, longitude: number, radius: number, options: L.CircleMarkerOptions, id?: string): L.Circle => {
         const lId = generateId(id);
 
         const circle = this.circle.createCircle(lId, latitude, longitude, radius, options);
@@ -167,7 +167,7 @@ export class Vector {
         circle.addTo(this.geometryGroups[this.activeGeometryGroup]);
 
         // emit an event that a circle vector has been added
-        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMapRef.map).id, { ...circle });
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMap).id, { ...circle });
 
         return circle;
     };
@@ -178,7 +178,7 @@ export class Vector {
      * @param {number} latitude the latitude position of the circle marker
      * @param {number} longitude the longitude position of the circle marker
      * @param {number} radius the radius of the circle marker (in meters)
-     * @param {Record<string, unknown>} options circle marker options including styling
+     * @param {L.CircleMarkerOptions} options circle marker options including styling
      * @param {string} id an optional id to be used to manage this geometry
      *
      * @returns a geometry containing the id and the created geometry
@@ -187,9 +187,9 @@ export class Vector {
         latitude: number,
         longitude: number,
         radius: number,
-        options: Record<string, unknown>,
+        options: L.CircleMarkerOptions,
         id?: string
-    ): TypeGeometry => {
+    ): L.CircleMarker => {
         const lId = generateId(id);
 
         const circleMarker = this.circle.createCircleMarker(lId, latitude, longitude, radius, options);
@@ -199,7 +199,7 @@ export class Vector {
         circleMarker.addTo(this.geometryGroups[this.activeGeometryGroup]);
 
         // emit an event that a circleMarker vector has been added
-        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMapRef.map).id, {
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMap).id, {
             ...circleMarker,
         });
 
@@ -211,22 +211,22 @@ export class Vector {
      *
      * @param {number} latitude the latitude position of the marker
      * @param {number} longitude the longitude position of the marker
-     * @param {Record<string, unknown>} options marker options including styling
+     * @param {L.Marker} options marker options including styling
      * @param {string} id an optional id to be used to manage this geometry
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addMarker = (latitude: number, longitude: number, options: Record<string, unknown>, id?: string): TypeGeometry => {
-        const lId = generateId(id);
+    addMarker = (latitude: number, longitude: number, options: Record<string, unknown>, id?: string): L.Marker => {
+        const idMarker = generateId(id);
 
-        const marker = this.marker.createMarker(lId, latitude, longitude, options);
+        const marker = this.marker.createMarker(idMarker, latitude, longitude, options);
 
         this.geometries.push(marker);
 
         marker.addTo(this.geometryGroups[this.activeGeometryGroup]);
 
         // emit an event that a marker vector has been added
-        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMapRef.map).id, { ...marker });
+        api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, api.mapInstance(this.vectorMap).id, { ...marker });
 
         return marker;
     };
@@ -238,7 +238,7 @@ export class Vector {
      *
      * @returns a geometry with a geometry and id
      */
-    getGeometry = (id: string): TypeGeometry => {
+    getGeometry = (id: string): L.Layer => {
         return this.geometries.filter((layer) => layer.id === id)[0];
     };
 
@@ -269,10 +269,10 @@ export class Vector {
      */
     createGeometryGroup = (GeometryGroupid: string, addGroupToMap = true): void => {
         if (!this.getGeometryGroup(GeometryGroupid)) {
-            const featureGroup = L.featureGroup() as TypeVector;
+            const featureGroup = L.featureGroup() as L.FeatureGroup;
             featureGroup.id = GeometryGroupid;
             if (addGroupToMap) {
-                featureGroup.addTo(this.vectorMapRef.map);
+                featureGroup.addTo(this.vectorMap);
                 featureGroup.visible = true;
             }
             this.geometryGroups.push(featureGroup);
@@ -302,7 +302,7 @@ export class Vector {
      *
      * @returns the geomtry group
      */
-    getGeometryGroup = (id: string): TypeVector => {
+    getGeometryGroup = (id: string): L.FeatureGroup => {
         return this.geometryGroups.filter((geometryGroup) => geometryGroup.id === id)[0];
     };
 
@@ -314,7 +314,7 @@ export class Vector {
     setGeometryGroupAsVisible = (id?: string): void => {
         const groupName = id || this.defaultGeometryGroupID;
         const geometryGroup = this.getGeometryGroup(groupName);
-        geometryGroup.addTo(this.vectorMapRef.map);
+        geometryGroup.addTo(this.vectorMap);
         geometryGroup.visible = true;
     };
 
@@ -326,7 +326,7 @@ export class Vector {
     setGeometryGroupAsInvisible = (id?: string): void => {
         const groupName = id || this.defaultGeometryGroupID;
         const geometryGroup = this.getGeometryGroup(groupName);
-        geometryGroup.removeFrom(this.vectorMapRef.map);
+        geometryGroup.removeFrom(this.vectorMap);
         geometryGroup.visible = false;
     };
 
@@ -335,7 +335,7 @@ export class Vector {
      */
     turnOnGeometryGroups = (): void => {
         for (let i = 0; i < this.geometryGroups.length; i++) {
-            if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(this.vectorMapRef.map);
+            if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(this.vectorMap);
         }
     };
 
@@ -344,7 +344,7 @@ export class Vector {
      */
     turnOffGeometryGroups = (): void => {
         for (let i = 0; i < this.geometryGroups.length; i++) {
-            if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(this.vectorMapRef.map);
+            if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(this.vectorMap);
         }
     };
 
@@ -354,7 +354,7 @@ export class Vector {
      * @param {TypeGeometry} geometry the geometry to be added to the group
      * @param {string} id optional id of the group to add the geometry to
      */
-    addToGeometryGroup = (geometry: TypeGeometry, id?: string): void => {
+    addToGeometryGroup = (geometry: L.Layer, id?: string): void => {
         // if group name not given, add to default group
         const groupName = id || this.defaultGeometryGroupID;
 

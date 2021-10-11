@@ -1,7 +1,5 @@
 import L from 'leaflet';
 
-import { TypeGeometry, ConstVectorTypes } from '../../types/cgpv-types';
-
 /**
  * Class used to create and manage markers
  *
@@ -19,12 +17,11 @@ export class MarkerCGP {
      *
      * @returns a geometry with the id and the created marker layer
      */
-    createMarker = (markerId: string, latitude: number, longitude: number, options: Record<string, unknown>): TypeGeometry => {
-        const marker: TypeGeometry = (L.marker([latitude, longitude], {
+    createMarker = (markerId: string, latitude: number, longitude: number, options: Record<string, unknown>): L.Marker => {
+        const marker = L.marker([latitude, longitude], {
             ...options,
-        }) as unknown) as TypeGeometry;
-        marker.id = markerId;
-        marker.type = ConstVectorTypes.MARKER;
+            id: markerId,
+        });
 
         return marker;
     };

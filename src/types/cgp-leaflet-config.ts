@@ -1,8 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-underscore-dangle */
 import L, { Util, LatLngBounds } from 'leaflet';
+import 'leaflet.markercluster/src';
+import 'react-leaflet';
+
 import * as DomUtil from 'leaflet/src/dom/DomUtil';
 import * as DomEvent from 'leaflet/src/dom/DomEvent';
+import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
+
+import { api } from '../api/api';
+import { EVENT_NAMES } from '../api/event';
+
+/*-----------------------------------------------------------------------------
+ *
+ * BoxZoom and SelectBox configuration
+ *
+ *---------------------------------------------------------------------------*/
 
 (L.Map as any).BoxZoom.include({
     _onMouseDown: function _onMouseDown(e: MouseEvent): void {
@@ -86,9 +99,197 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
 
         const bounds = new LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
 
-        this._map.fire('boxselectend', { boxZoomBounds: bounds });
+        this._map.fire('boxselectend', { selectBoxBounds: bounds });
     },
 });
 
-// L.Map.addInitHook('addHandler', 'boxZoom', BoxZoom);
 L.Map.addInitHook('addHandler', 'selectBox', SelectBox);
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Layer configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface LayerOptions {
+        id?: string;
+        visible?: boolean;
+    }
+
+    interface Layer {
+        id: string;
+        options: LayerOptions;
+    }
+}
+
+L.Layer.addInitHook(function fn(this: L.Layer) {
+    if (this.options && this.options.id) this.id = this.options.id;
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Circle configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface Circle {
+        type: string;
+    }
+
+    interface CircleMarker {
+        type: string;
+    }
+}
+
+L.Circle.addInitHook(function fn(this: L.Circle) {
+    this.type = CONST_VECTOR_TYPES.CIRCLE;
+});
+
+L.CircleMarker.addInitHook(function fn(this: L.CircleMarker) {
+    this.type = CONST_VECTOR_TYPES.CIRCLE_MARKER;
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Polygon configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface Polygon {
+        type: string;
+    }
+}
+
+L.Polygon.addInitHook(function fn(this: L.Polygon) {
+    this.type = CONST_VECTOR_TYPES.POLYGON;
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Polyline configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface Polyline {
+        type: string;
+    }
+}
+
+L.Polyline.addInitHook(function fn(this: L.Polyline) {
+    this.type = CONST_VECTOR_TYPES.POLYLINE;
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Marker and L.MarkerCluster configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface MarkerOptions {
+        selected?: boolean;
+        on?: Record<string, L.LeafletEventHandlerFn>;
+    }
+
+    interface Marker {
+        type: string;
+    }
+
+    interface MarkerCluster {
+        type: string;
+        selected: boolean;
+        spiderfy: () => void;
+    }
+}
+
+L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
+    if ('getAllChildMarkers' in this) {
+        this.type = `${CONST_VECTOR_TYPES.MARKER}_cluster`;
+        this.selected = !!this.options.selected;
+    } else {
+        this.type = CONST_VECTOR_TYPES.MARKER;
+    }
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.FeatureGroup and L.MarkerClusterGroup configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface MarkerClusterGroupOptions {
+        id?: string;
+        visible?: boolean;
+        on?: Record<string, L.LeafletEventHandlerFn>;
+    }
+
+    interface FeatureGroup {
+        visible: boolean;
+        type: string;
+    }
+
+    interface MarkerClusterGroup {
+        visible: boolean;
+        type: string;
+    }
+}
+
+L.FeatureGroup.addInitHook(function fn(this: L.FeatureGroup | L.MarkerClusterGroup) {
+    this.visible = !!(this.options as L.MarkerClusterGroupOptions).visible;
+    if ('getVisibleParent' in this) {
+        this.type = 'MarkerClusterGroup';
+    } else {
+        this.type = 'FeatureGroup';
+    }
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Map configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface MapOptions {
+        id?: string;
+        zoomFactor?: number;
+        selectBox?: boolean;
+    }
+
+    interface Map {
+        id: string | undefined;
+        selectBox: L.Handler;
+        zoomFactor: number;
+    }
+}
+
+L.Map.addInitHook(function fn(this: L.Map) {
+    if (this.options && this.options.id) this.id = this.options.id;
+    if (this.options.selectBox) {
+        this.on('boxselectend', (e: L.LeafletEvent) => {
+            const bounds = Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
+            api.event.emit(EVENT_NAMES.EVENT_BOX_SELECT_END, e.target.id, {
+                selectBoxBounds: bounds,
+            });
+        });
+    }
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.MapContainerProps configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'react-leaflet' {
+    interface MapContainerProps {
+        id?: string;
+        boxZoom?: boolean;
+        selectBox?: boolean;
+    }
+}

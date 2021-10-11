@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { HtmlToReact } from '../../common/containers/html-to-react';
 
 import { styles } from '../../assests/style/theme';
+import { Cast } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     buttonClass: {
@@ -36,16 +37,17 @@ export function ButtonMapNav(props: ButtonMapNavProps): JSX.Element {
     const classes = useStyles();
     const { t } = useTranslation<string>();
 
-    const newButton = useRef<{ children: HTMLElement[] }>({ children: [] as HTMLElement[] });
+    const newButtonRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         // disable events on container
-        DomEvent.disableClickPropagation(newButton.current.children[0]);
-        DomEvent.disableScrollPropagation(newButton.current.children[0]);
+        const newButtonChildrenHTMLElements = Cast<HTMLElement[]>(newButtonRef.current?.children);
+        DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
+        DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
     }, []);
 
     return (
-        <Tooltip title={t(tooltip)} placement="left" TransitionComponent={Fade} ref={newButton}>
+        <Tooltip title={t(tooltip)} placement="left" TransitionComponent={Fade} ref={newButtonRef}>
             <Button className={`${classes.buttonClass} ${classes.color}`} onClick={onClickFunction}>
                 {typeof icon === 'string' ? (
                     <HtmlToReact style={styles.buttonIcon} htmlContent={icon} />

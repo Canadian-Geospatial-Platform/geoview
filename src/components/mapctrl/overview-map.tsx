@@ -17,6 +17,7 @@ import { LEAFLET_POSITION_CLASSES } from '../../common/constant';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
+import { Cast } from '../../types/cgpv-types';
 
 const MINIMAP_SIZE = {
     width: '150px',
@@ -132,7 +133,7 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     }
 
     useEffect(() => {
-        DomEvent.disableClickPropagation((divRef.current as unknown) as HTMLElement);
+        DomEvent.disableClickPropagation(Cast<HTMLElement>(divRef.current));
     }, []);
 
     return (
@@ -254,12 +255,12 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
     const overviewRef = useRef(null);
     useEffect(() => {
         // disable events on container
-        const overviewElement = (overviewRef.current as unknown) as HTMLElement;
-        DomEvent.disableClickPropagation(overviewElement);
-        DomEvent.disableScrollPropagation(overviewElement);
+        const overviewHTMLElement = Cast<HTMLElement>(overviewRef.current);
+        DomEvent.disableClickPropagation(overviewHTMLElement);
+        DomEvent.disableScrollPropagation(overviewHTMLElement);
 
         // remove ability to tab to the overview map
-        overviewElement.children[0].setAttribute('tabIndex', '-1');
+        overviewHTMLElement.children[0].setAttribute('tabIndex', '-1');
     }, []);
 
     // Memorize the minimap so it's not affected by position changes

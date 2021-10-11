@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from 'leaflet';
-import { MapContainerProps } from 'react-leaflet';
 import { Projection } from '../api/projection';
 import { Plugin } from '../api/plugin';
 import { API } from '../api/api';
 import { Vector } from '../common/vectors/vector';
-import { MarkerClusters } from '../common/vectors/marker-clusters';
 import { ButtonPanel } from '../common/ui/button-panel';
 import { Basemap } from '../common/basemap';
 import { Layer } from '../common/layers/layer';
@@ -63,76 +61,12 @@ export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
 export type TypeIconCreationFunction = () => L.DivIcon;
 
 /**
- * Used when creating marker cluster group options
- */
-export interface TypeMarkerClusterOptions extends L.MarkerOptions {
-    selected?: boolean;
-    on?: Record<string, L.LeafletEventHandlerFn>;
-}
-
-/**
- * Used when creating a cluster marker
- */
-export interface TypeMarkerCluster<OptionsType extends L.MarkerOptions = TypeMarkerClusterOptions> extends L.MarkerCluster {
-    id: string;
-    options: OptionsType;
-    spiderfy: () => void;
-}
-
-/**
- * Used when creating marker cluster group options
- */
-export interface TypeClusterGroupOptions extends L.MarkerClusterGroupOptions {
-    visible?: boolean;
-    on?: Record<string, L.LeafletEventHandlerFn>;
-}
-
-/**
- * Used when creating marker cluster group
- */
-export interface TypeClusterGroup<OptionsType extends L.MarkerClusterGroupOptions = TypeClusterGroupOptions> extends L.MarkerClusterGroup {
-    id: string;
-    options: OptionsType;
-    getVisibleParent: (marker: TypeMarkerCluster) => TypeMarkerCluster;
-}
-
-/**
  * interface used to store and access created maps
  */
-export interface TypeMapViewer extends L.Map, Vector, MarkerClusters, ButtonPanel, Basemap, Layer {
+export interface TypeMapViewer extends Vector, ButtonPanel, Basemap, Layer {
     id: string;
-    map: TypeMap;
+    map: L.Map;
 }
-
-/**
- * interface used to describe cgp map options
- */
-export interface TypeMapOptions extends L.MapOptions {
-    zoomFactor: number;
-    minZoom: number;
-    maxZooom: number;
-    maxBounds?: L.LatLngBounds;
-    maxBoundsViscosity?: number;
-    boxZoom?: boolean;
-    selectBox?: boolean;
-}
-
-/**
- * interface used to describe cgp maps
- */
-export interface TypeMap<OptionsType extends L.MapOptions = TypeMapOptions> extends L.Map {
-    boxZoom: L.Handler;
-    selectBox: L.Handler;
-    options: OptionsType;
-}
-
-/**
- * interface used to store and access created maps
- */
-export type TypeMapRef = {
-    id: string;
-    map: TypeMap;
-};
 
 /**
  * constant contains layer types
@@ -268,35 +202,13 @@ export type TypePlugin = {
 /**
  * constant used to specify available vectors to draw
  */
-export const ConstVectorTypes = {
+export const CONST_VECTOR_TYPES = {
     POLYLINE: 'polyline',
     POLYGON: 'polygon',
     CIRCLE: 'circle',
     CIRCLE_MARKER: 'circle_marker',
     MARKER: 'marker',
 };
-
-/**
- * Used when creating a geometry
- */
-export interface TypeGeometry extends L.Layer {
-    id: string;
-    type: string;
-}
-
-/**
- * Used to store geometries in a group
- */
-export interface TypeVector extends L.FeatureGroup {
-    id: string;
-    visible: boolean;
-}
-
-export interface TypeMapContainerProps extends MapContainerProps {
-    id?: string;
-    boxZoom?: boolean;
-    selectBox?: boolean;
-}
 
 /**
  * Interface for panel properties
