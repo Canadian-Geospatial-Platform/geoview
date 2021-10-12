@@ -215,7 +215,7 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
 
     useEffect(() => {
         // set focus on close button on panel open
-        if (button.visible) ((closeBtnRef.current as unknown) as HTMLElement).focus();
+        if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
     }, [button, closeBtnRef]);
 
     return (
