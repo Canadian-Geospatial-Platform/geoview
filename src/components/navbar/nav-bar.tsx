@@ -65,7 +65,7 @@ export function NavBar(): JSX.Element {
     const map = useMap();
 
     const mapId = api.mapInstance(map).id;
-    const buttonPanelApi = (api.map(mapId) as unknown) as ButtonPanel;
+    const buttonPanelApi = Cast<ButtonPanel>(api.map(mapId));
 
     /**
      * function that causes rerender when adding a new button, button panel

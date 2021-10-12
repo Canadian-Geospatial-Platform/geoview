@@ -4,7 +4,7 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 import ButtonApp from '../button';
 
 import { GITUHUB_REPO } from '../../../common/constant';
-import { TypeAppVersion } from '../../../types/cgpv-types';
+import { Cast, TypeAppVersion } from '../../../types/cgpv-types';
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
 
@@ -52,17 +52,15 @@ export default function Version(): JSX.Element {
             tooltip="appbar.version"
             icon={<GitHubIcon />}
             onClickFunction={getRepo}
-            content={
-                ((
-                    <div className={classes.github}>
-                        <span className="cgp-version">
-                            {getVersion()}
-                            <span className="cgp-hash">{`  ${getHash()}`}</span>
-                        </span>
-                        <span className="cgp-timestamp">{getTimestamp()}</span>
-                    </div>
-                ) as unknown) as Element
-            }
+            content={Cast<Element>(
+                <div className={classes.github}>
+                    <span className="cgp-version">
+                        {getVersion()}
+                        <span className="cgp-hash">{`  ${getHash()}`}</span>
+                    </span>
+                    <span className="cgp-timestamp">{getTimestamp()}</span>
+                </div>
+            )}
         />
     );
 }

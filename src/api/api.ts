@@ -9,7 +9,7 @@ import { MapViewer } from '../common/map-viewer';
 
 import { Plugin } from './plugin';
 import { Utilities } from './utilities';
-import { TypeMapViewer, CONST_LAYER_TYPES } from '../types/cgpv-types';
+import { Cast, TypeMapViewer, CONST_LAYER_TYPES } from '../types/cgpv-types';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -94,14 +94,14 @@ export class API {
             }
         }
 
-        return ({
+        return Cast<TypeMapViewer>({
             ...this.selectedMapViewer,
             ...this.selectedMapViewer.vector,
             markerCluster: { ...this.selectedMapViewer.markerClusters },
             ...this.selectedMapViewer.buttonPanel,
             ...this.selectedMapViewer.basemap,
             ...this.selectedMapViewer.layer,
-        } as unknown) as TypeMapViewer;
+        });
     };
 
     /**
@@ -120,14 +120,14 @@ export class API {
             }
         }
 
-        return ({
+        return Cast<TypeMapViewer>({
             ...this.selectedMapViewer,
             ...this.selectedMapViewer.vector,
             ...this.selectedMapViewer.markerClusters,
             ...this.selectedMapViewer.buttonPanel,
             ...this.selectedMapViewer.basemap,
             ...this.selectedMapViewer.layer,
-        } as unknown) as TypeMapViewer;
+        });
     };
 }
 
