@@ -76,39 +76,39 @@
                 }, 'marker-1');
                 marker1.setIcon(api.markerDefinitions.greenIcon)
 
-                marker2 = api.markerCluster.addClusterMarker(58,-98.5, {
+                marker2 = api.markerClusters.addClusterMarker(58,-98.5, {
                     selected: true,
                     title: 'Test-marker-2.1'
                 }, 'marker-2.1');
 
-                marker2 = api.markerCluster.addClusterMarker(58.2,-99.3, {
+                marker2 = api.markerClusters.addClusterMarker(58.2,-99.3, {
                     title: 'Test-marker-2.2'
                 }, 'marker-2.2');
 
-                marker2 = api.markerCluster.addClusterMarker(58,-99.4, {
+                marker2 = api.markerClusters.addClusterMarker(58,-99.4, {
                     title: 'Test-marker-2.3'
                 }, 'marker-2.3');
 
-                marker2 = api.markerCluster.addClusterMarker(57.9,-98.6, {
+                marker2 = api.markerClusters.addClusterMarker(57.9,-98.6, {
                     selected: true,
                     title: 'Test-marker-2.4'
                 }, 'marker-2.4');
 
-                marker2 = api.markerCluster.addClusterMarker(57.7,-99, {
+                marker2 = api.markerClusters.addClusterMarker(57.7,-99, {
                     selected: true,
                     title: 'Test-marker-2.5'
                 }, 'marker-2.5');
 
-                marker2 = api.markerCluster.addClusterMarker(57.7005,-99, {
+                marker2 = api.markerClusters.addClusterMarker(57.7005,-99, {
                     title: 'Test-marker-2.6'
                 }, 'marker-2.6');
 
-                marker2 = api.markerCluster.addClusterMarker(57.7005,-99.0005, {
+                marker2 = api.markerClusters.addClusterMarker(57.7005,-99.0005, {
                     title: 'Test-marker-2.7'
                 }, 'marker-2.7');
 
-                api.markerCluster.setClusterGroupAsInvisible();
-                api.markerCluster.setClusterGroupAsVisible();
+                api.markerClusters.setClusterGroupAsInvisible();
+                api.markerClusters.setClusterGroupAsVisible();
 
                 api.createGeometryGroup('myGroup');
                 api.setActiveGeometryGroup('myGroup');
