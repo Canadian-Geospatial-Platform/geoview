@@ -97,7 +97,6 @@ export class API {
         return Cast<TypeMapViewer>({
             ...this.selectedMapViewer,
             ...this.selectedMapViewer.vector,
-            markerCluster: { ...this.selectedMapViewer.markerClusters },
             ...this.selectedMapViewer.buttonPanel,
             ...this.selectedMapViewer.basemap,
             ...this.selectedMapViewer.layer,
@@ -123,7 +122,6 @@ export class API {
         return Cast<TypeMapViewer>({
             ...this.selectedMapViewer,
             ...this.selectedMapViewer.vector,
-            ...this.selectedMapViewer.markerClusters,
             ...this.selectedMapViewer.buttonPanel,
             ...this.selectedMapViewer.basemap,
             ...this.selectedMapViewer.layer,
