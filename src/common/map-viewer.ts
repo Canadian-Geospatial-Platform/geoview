@@ -7,7 +7,7 @@ import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './vectors/vector';
 import { Basemap } from './basemap';
 import { Layer } from './layers/layer';
-import { MarkerClusters } from './vectors/marker-clusters';
+import { MarkerClusters } from './marker-clusters/marker-clusters';
 import * as MarkerDefinitions from '../../public/markers/marker-definitions';
 import '../types/cgp-leaflet-config';
 

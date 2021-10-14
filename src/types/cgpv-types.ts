@@ -392,3 +392,9 @@ export type TypePanelProps = {
     // panel body content
     content?: React.ReactNode | Element;
 };
+
+export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
+    selected?: boolean;
+    blinking?: boolean;
+    on?: Record<string, L.LeafletEventHandlerFn>;
+}

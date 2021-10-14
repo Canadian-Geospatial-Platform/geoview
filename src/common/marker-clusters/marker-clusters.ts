@@ -6,17 +6,17 @@ import 'leaflet.markercluster/src';
 import { EVENT_NAMES } from '../../api/event';
 import { api } from '../../api/api';
 import { generateId } from '../constant';
-import { Cast, TypeStampedIconCreationFunction, TypeIconCreationFunction } from '../../types/cgpv-types';
+import { Cast, TypeStampedIconCreationFunction } from '../../types/cgpv-types';
 
+import {
+    setSelectedMarkerIconCreator,
+    setUnselectedMarkerIconCreator,
+    getSelectedMarkerIcon,
+    getUnselectedMarkerIcon,
+} from './marker-cluster-element';
 import * as MarkerDefinitions from '../../../public/markers/marker-definitions';
 
-let {
-    getClusterIconFull,
-    getClusterIconPart,
-    getClusterIconEmpty,
-    unselectedMarkerIconCreator,
-    selectedMarkerIconCreator,
-} = MarkerDefinitions;
+let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } = MarkerDefinitions;
 
 /**
  * function used for creating a marker cluster icon
@@ -106,6 +106,22 @@ export class MarkerClusters {
     defaultClusterGroupID = 'defaultClusterGroup';
 
     /**
+     * set the selectedMarkerIconCreator function to be used when creating a normal
+     * selected marker that is part of cluster groups
+     *
+     * @param {TypeIconCreationFunction} options marker options including styling
+     */
+    setSelectedMarkerIconCreator = setSelectedMarkerIconCreator;
+
+    /**
+     * set the unselectedMarkerIconCreator function to be used when creating a normal
+     * unselected marker that is part of cluster groups
+     *
+     * @param {TypeIconCreationFunction} options marker options including styling
+     */
+    setUnselectedMarkerIconCreator = setUnselectedMarkerIconCreator;
+
+    /**
      * Initialize map, MarkerClusters, and listen to add marker cluster events
      *
      * @param {Map} map leaflet map object
@@ -140,24 +156,24 @@ export class MarkerClusters {
         // listen to outside events to remove marker cluster
         api.event.on(EVENT_NAMES.EVENT_CLUSTER_REMOVE, (payload) => {
             // remove marker cluster from outside
-            this.deleteMarkerClusterFromGroups(payload.id);
+            this.deleteMarkerClusterElementFromGroups(payload.id);
         });
 
-        // listen to outside events to turn select by bounding polygone
+        // listen to outside events to process select by bounding polygone
         api.event.on(EVENT_NAMES.EVENT_BOX_SELECT_END, (payload) => {
             const bbox: L.LatLngBounds = payload.selectBoxBounds;
             for (let i = 0; i < this.clusterGroups.length; i++) {
                 if (this.clusterGroups[i].options.visible) {
-                    const markerClusters = Cast<L.MarkerCluster[]>(this.clusterGroups[i].getLayers());
-                    for (let j = 0; j < markerClusters.length; j++) {
-                        if (bbox.contains(markerClusters[j].getLatLng())) {
-                            markerClusters[j].options.selected = !markerClusters[j].options.selected;
-                            if (markerClusters[j].options.selected) {
-                                markerClusters[j].setIcon(selectedMarkerIconCreator());
+                    const markerClusterElements = Cast<L.MarkerClusterElement[]>(this.clusterGroups[i].getLayers());
+                    for (let j = 0; j < markerClusterElements.length; j++) {
+                        if (bbox.contains(markerClusterElements[j].getLatLng())) {
+                            markerClusterElements[j].options.selected = !markerClusterElements[j].options.selected;
+                            if (markerClusterElements[j].options.selected) {
+                                markerClusterElements[j].setIcon(getSelectedMarkerIcon());
                             } else {
-                                markerClusters[j].setIcon(unselectedMarkerIconCreator());
+                                markerClusterElements[j].setIcon(getUnselectedMarkerIcon());
                             }
-                            this.getClusterGroupByMarkerId(markerClusters[j].id)?.refreshClusters();
+                            this.getClusterGroupByMarkerId(markerClusterElements[j].id)?.refreshClusters();
                         }
                     }
                 }
@@ -196,26 +212,6 @@ export class MarkerClusters {
     };
 
     /**
-     * set the unselectedMarkerIconCreator function to be used when creating a normal
-     * unselected marker that is part of cluster groups
-     *
-     * @param {TypeIconCreationFunction} options marker options including styling
-     */
-    setUnselectedMarkerIconCreator = (f: TypeIconCreationFunction): void => {
-        unselectedMarkerIconCreator = f;
-    };
-
-    /**
-     * set the selectedMarkerIconCreator function to be used when creating a normal
-     * selected marker that is part of cluster groups
-     *
-     * @param {TypeIconCreationFunction} options marker options including styling
-     */
-    setSelectedMarkerIconCreator = (f: TypeIconCreationFunction): void => {
-        selectedMarkerIconCreator = f;
-    };
-
-    /**
      * set the default cluster group options
      *
      * @param {MarkerClusterGroupOptions} options marker options including styling
@@ -243,27 +239,17 @@ export class MarkerClusters {
      *
      * @returns a marker cluster element with the id, the selected flag and the created marker layer
      */
-    createMarker = (markerId: string, latitude: number, longitude: number, options: L.MarkerOptions): L.MarkerCluster => {
-        let iconToUse: L.DivIcon;
-        if (options.selected) {
-            iconToUse = selectedMarkerIconCreator();
-        } else {
-            iconToUse = unselectedMarkerIconCreator();
-        }
-
-        const marker = L.marker([latitude, longitude], {
+    createMarker = (
+        markerId: string,
+        latitude: number,
+        longitude: number,
+        options: L.MarkerClusterElementOptions
+    ): L.MarkerClusterElement => {
+        const marker = L.markerClusterElement([latitude, longitude], {
             ...options,
-            icon: iconToUse,
             id: markerId,
-        }) as L.MarkerCluster;
+        });
         marker.on('click', this.markerOnClick);
-
-        if (options.on) {
-            const onHandlerDefinitions = Object.entries(options.on);
-            onHandlerDefinitions.forEach((handlerDefinition: [string, LeafletEventHandlerFn]) => {
-                marker.on(handlerDefinition[0], handlerDefinition[1]);
-            });
-        }
 
         return marker;
     };
@@ -278,7 +264,7 @@ export class MarkerClusters {
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addClusterMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.MarkerCluster => {
+    addClusterMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.MarkerClusterElement => {
         const MarkerClusterID = generateId(id);
 
         const marker = this.createMarker(MarkerClusterID, latitude, longitude, options);
@@ -298,12 +284,11 @@ export class MarkerClusters {
      *
      * @returns a marker cluster with the specified id
      */
-    getMarkerCluster = (id: string): L.MarkerCluster | null => {
-        let returnValue: L.MarkerCluster | null = null;
+    getMarkerClusterElement = (id: string): L.MarkerClusterElement | null => {
+        let returnValue: L.MarkerClusterElement | null = null;
         this.clusterGroups.forEach((clusterGroup) => {
             clusterGroup.eachLayer((marker) => {
-                const markerCluster = marker as L.MarkerCluster;
-                if (markerCluster.id === id) returnValue = markerCluster;
+                if ((marker as L.MarkerClusterElement).id === id) returnValue = marker as L.MarkerClusterElement;
             });
         });
         return returnValue;
@@ -423,8 +408,8 @@ export class MarkerClusters {
      *
      * @param {string} markerClusterId the marker cluster id
      */
-    deleteMarkerClusterFromGroups = (markerClusterId: string): void => {
-        const markerCluster = this.getMarkerCluster(markerClusterId);
+    deleteMarkerClusterElementFromGroups = (markerClusterElementId: string): void => {
+        const markerCluster = this.getMarkerClusterElement(markerClusterElementId);
         for (let i = 0; i < this.clusterGroups.length; i++) {
             this.clusterGroups[i].getLayers().forEach((layer) => {
                 if (markerCluster === layer) {
@@ -441,7 +426,7 @@ export class MarkerClusters {
      * @param {string} groupId optional group id
      */
     deleteMarkerClusterFromGroup = (markerClusterId: string, groupId?: string): void => {
-        const markerCluster = this.getMarkerCluster(markerClusterId);
+        const markerCluster = this.getMarkerClusterElement(markerClusterId);
         // if group name not given, use the default group
         const groupName = groupId || this.defaultClusterGroupID;
         for (let i = 0; i < this.clusterGroups.length; i++) {
@@ -492,9 +477,9 @@ export class MarkerClusters {
             for (let i = 0; i < layers.length; i++) {
                 layers[i].options.selected = !layers[i].options.selected;
                 if (layers[i].options.selected) {
-                    layers[i].setIcon(selectedMarkerIconCreator());
+                    layers[i].setIcon(getSelectedMarkerIcon());
                 } else {
-                    layers[i].setIcon(unselectedMarkerIconCreator());
+                    layers[i].setIcon(getUnselectedMarkerIcon());
                 }
             }
             e.target.refreshClusters();
@@ -511,7 +496,7 @@ export class MarkerClusters {
             // and keep a reference to the last child marker
             const childMarkers = e.layer.getAllChildMarkers();
             let sourceMarker = childMarkers[0];
-            let lastChildMarker: L.MarkerCluster = this.createMarker(
+            let lastChildMarker = this.createMarker(
                 sourceMarker.id,
                 sourceMarker.getLatLng().lat,
                 sourceMarker.getLatLng().lng,
@@ -557,19 +542,19 @@ export class MarkerClusters {
             const zoomedMarker = e.target;
             zoomedMarker.options.selected = !zoomedMarker.options.selected;
             if (zoomedMarker.options.selected) {
-                zoomedMarker.setIcon(selectedMarkerIconCreator());
+                zoomedMarker.setIcon(getSelectedMarkerIcon());
             } else {
-                zoomedMarker.setIcon(unselectedMarkerIconCreator());
+                zoomedMarker.setIcon(getUnselectedMarkerIcon());
             }
             // refresh the visible parent
             this.zoomedMarkerGroup.refreshClusters();
 
-            const originalMarker = this.getMarkerCluster(e.target.id) as L.MarkerCluster;
+            const originalMarker = this.getMarkerClusterElement(e.target.id) as L.MarkerClusterElement;
             originalMarker.options.selected = !originalMarker.options.selected;
             if (originalMarker.options.selected) {
-                originalMarker.setIcon(selectedMarkerIconCreator());
+                originalMarker.setIcon(getSelectedMarkerIcon());
             } else {
-                originalMarker.setIcon(unselectedMarkerIconCreator());
+                originalMarker.setIcon(getUnselectedMarkerIcon());
             }
             this.getClusterGroupByMarkerId(originalMarker.id)?.refreshClusters();
         }
