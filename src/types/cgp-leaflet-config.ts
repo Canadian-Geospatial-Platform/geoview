@@ -44,7 +44,10 @@ import { EVENT_NAMES } from '../api/event';
     },
 
     _onMouseUp: function _onMouseUp(e: MouseEvent): void {
-        if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
+        if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) {
+            this._finish();
+            return;
+        }
 
         this._finish();
 
@@ -87,7 +90,10 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
     },
 
     _onMouseUp: function _onMouseUp(e: MouseEvent): void {
-        if (!e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
+        if (!e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) {
+            this._finish();
+            return;
+        }
 
         this._finish();
 
@@ -120,6 +126,7 @@ declare module 'leaflet' {
     interface Layer {
         id: string;
         options: LayerOptions;
+        type: string;
     }
 }
 
@@ -129,42 +136,16 @@ L.Layer.addInitHook(function fn(this: L.Layer) {
 
 /*-----------------------------------------------------------------------------
  *
- * L.Circle configuration
+ * L.CircleMarker and L.Circle configuration
  *
  *---------------------------------------------------------------------------*/
-
-declare module 'leaflet' {
-    interface Circle {
-        type: string;
-    }
-
-    interface CircleMarker {
-        type: string;
-    }
-}
-
-L.Circle.addInitHook(function fn(this: L.Circle) {
-    this.type = CONST_VECTOR_TYPES.CIRCLE;
-});
 
 L.CircleMarker.addInitHook(function fn(this: L.CircleMarker) {
     this.type = CONST_VECTOR_TYPES.CIRCLE_MARKER;
 });
 
-/*-----------------------------------------------------------------------------
- *
- * L.Polygon configuration
- *
- *---------------------------------------------------------------------------*/
-
-declare module 'leaflet' {
-    interface Polygon {
-        type: string;
-    }
-}
-
-L.Polygon.addInitHook(function fn(this: L.Polygon) {
-    this.type = CONST_VECTOR_TYPES.POLYGON;
+L.Circle.addInitHook(function fn(this: L.Circle) {
+    this.type = CONST_VECTOR_TYPES.CIRCLE;
 });
 
 /*-----------------------------------------------------------------------------
@@ -173,14 +154,18 @@ L.Polygon.addInitHook(function fn(this: L.Polygon) {
  *
  *---------------------------------------------------------------------------*/
 
-declare module 'leaflet' {
-    interface Polyline {
-        type: string;
-    }
-}
-
 L.Polyline.addInitHook(function fn(this: L.Polyline) {
     this.type = CONST_VECTOR_TYPES.POLYLINE;
+});
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.Polygon configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+L.Polygon.addInitHook(function fn(this: L.Polygon) {
+    this.type = CONST_VECTOR_TYPES.POLYGON;
 });
 
 /*-----------------------------------------------------------------------------
@@ -188,28 +173,16 @@ L.Polyline.addInitHook(function fn(this: L.Polyline) {
  * L.Marker and L.MarkerCluster configuration
  *
  *---------------------------------------------------------------------------*/
-
 declare module 'leaflet' {
-    interface MarkerOptions {
-        selected?: boolean;
-        on?: Record<string, L.LeafletEventHandlerFn>;
-    }
-
-    interface Marker {
-        type: string;
-    }
-
     interface MarkerCluster {
-        type: string;
-        selected: boolean;
         spiderfy: () => void;
+        getAllChildMarkers(): L.MarkerClusterElement[];
     }
 }
 
 L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
     if ('getAllChildMarkers' in this) {
-        this.type = `${CONST_VECTOR_TYPES.MARKER}_cluster`;
-        this.selected = !!this.options.selected;
+        this.type = 'marker_cluster';
     } else {
         this.type = CONST_VECTOR_TYPES.MARKER;
     }
@@ -230,7 +203,6 @@ declare module 'leaflet' {
 
     interface FeatureGroup {
         visible: boolean;
-        type: string;
     }
 
     interface MarkerClusterGroup {
