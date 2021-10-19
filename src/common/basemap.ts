@@ -3,14 +3,7 @@
 import { api } from '../api/api';
 import { generateId } from './constant';
 import { EVENT_NAMES } from '../api/event';
-import {
-    TypeBasemapProps,
-    TypeBasemapLayerOptions,
-    TypeBasemapLayer,
-    TypeMapViewer,
-    TypeBasemapOptions,
-    TypeAttribution,
-} from '../types/cgpv-types';
+import { TypeBasemapProps, TypeBasemapLayerOptions, TypeBasemapLayer, TypeBasemapOptions, TypeAttribution } from '../types/cgpv-types';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,
@@ -55,7 +48,7 @@ export class Basemap {
         if (mapId) {
             this.mapId = mapId;
 
-            const { map } = api.map(this.mapId) as TypeMapViewer;
+            const { map } = api.map(this.mapId);
 
             // create new pane to host basemap layers
             this.basemapsPaneName = 'basemapsPane';

@@ -19,7 +19,7 @@ import { EVENT_NAMES } from '../../api/event';
 
 import { HtmlToReact } from '../../common/containers/html-to-react';
 import { styles } from '../../assests/style/theme';
-import { Cast, TypeMapViewer, TypePanelAppProps } from '../../types/cgpv-types';
+import { Cast, TypePanelAppProps } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -63,7 +63,7 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
     const { t } = useTranslation<string>();
 
     const map = useMap();
-    const mapId = (api.mapInstance(map) as TypeMapViewer).id;
+    const mapId = api.mapInstance(map).id;
 
     const panelRef = useRef<HTMLElement>(null);
     const closeBtnRef = useRef<HTMLButtonElement>(null);

@@ -62,7 +62,7 @@ class DetailsPlugin {
         };
 
         // create a new button panel on the appbar
-        this.buttonPanel = api.map(mapId).createAppbarPanel(button, panel, null);
+        this.buttonPanel = api.map(mapId).buttonPanel.createAppbarPanel(button, panel, null);
 
         // set panel content
         this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
@@ -75,7 +75,7 @@ class DetailsPlugin {
         const { mapId } = this.DetailsPluginProps;
 
         if (this.buttonPanel) {
-            api.map(mapId).removeAppbarPanel(this.buttonPanel.id);
+            api.map(mapId).buttonPanel.removeAppbarPanel(this.buttonPanel.id);
         }
     }
 }

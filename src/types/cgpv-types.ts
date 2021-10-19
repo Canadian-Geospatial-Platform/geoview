@@ -3,10 +3,6 @@ import L from 'leaflet';
 import { Projection } from '../api/projection';
 import { Plugin } from '../api/plugin';
 import { API } from '../api/api';
-import { Vector } from '../common/vectors/vector';
-import { ButtonPanel } from '../common/ui/button-panel';
-import { Basemap } from '../common/basemap';
-import { Layer } from '../common/layers/layer';
 import { Button } from '../common/ui/button';
 import { Panel } from '../common/ui/panel';
 
@@ -61,14 +57,6 @@ export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
 export type TypeIconCreationFunction = () => L.DivIcon;
 
 /**
- * interface used to store and access created maps
- */
-export interface TypeMapViewer extends Vector, ButtonPanel, Basemap, Layer {
-    id: string;
-    map: L.Map;
-}
-
-/**
  * constant contains layer types
  */
 export const CONST_LAYER_TYPES = {
@@ -76,6 +64,7 @@ export const CONST_LAYER_TYPES = {
     GEOJSON: 'geoJSON',
     ESRI_DYNAMIC: 'esriDynamic',
     ESRI_FEATURE: 'esriFeature',
+    XYZ_TILES: 'xyzTiles',
 };
 
 /**

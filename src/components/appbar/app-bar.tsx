@@ -146,8 +146,8 @@ export function Appbar(): JSX.Element {
             EVENT_NAMES.EVENT_PANEL_OPEN,
             (args) => {
                 if (args.handlerId === mapId) {
-                    const buttonPanel = Object.keys(api.map(mapId).appBarPanels).map((groupName: string) => {
-                        const buttonPanels = api.map(mapId).appBarPanels[groupName];
+                    const buttonPanel = Object.keys(api.map(mapId).buttonPanel.appBarPanels).map((groupName: string) => {
+                        const buttonPanels = api.map(mapId).buttonPanel.appBarPanels[groupName];
 
                         return buttonPanels[args.buttonId];
                     })[0];
@@ -190,9 +190,9 @@ export function Appbar(): JSX.Element {
                 </div>
                 <Divider />
                 <List>
-                    {Object.keys(api.mapInstance(map).appBarPanels).map((groupName: string) => {
+                    {Object.keys(api.mapInstance(map).buttonPanel.appBarPanels).map((groupName: string) => {
                         // get button panels from group
-                        const buttonPanels = api.mapInstance(map).appBarPanels[groupName];
+                        const buttonPanels = api.mapInstance(map).buttonPanel.appBarPanels[groupName];
 
                         // display the button panels in the list
                         return (
@@ -226,9 +226,9 @@ export function Appbar(): JSX.Element {
                     <Version />
                 </List>
             </Drawer>
-            {Object.keys(api.mapInstance(map).appBarPanels).map((groupName: string) => {
+            {Object.keys(api.mapInstance(map).buttonPanel.appBarPanels).map((groupName: string) => {
                 // get button panels from group
-                const buttonPanels = api.mapInstance(map).appBarPanels[groupName];
+                const buttonPanels = api.mapInstance(map).buttonPanel.appBarPanels[groupName];
 
                 // display the panels in the list
                 return (
