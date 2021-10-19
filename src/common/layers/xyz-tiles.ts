@@ -6,7 +6,11 @@
  */
 
 import L, { Layer } from 'leaflet';
+<<<<<<< HEAD
 import { LayerConfig } from './layer';
+=======
+import { TypeLayerConfig } from '../../types/cgpv-types';
+>>>>>>> d8aaf72 (Correction du map viewer)
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -20,12 +24,19 @@ export class XYZTiles {
     /**
      * Add a XYZ Tiles layer to the map.
      *
+<<<<<<< HEAD
      * @param {LayerConfig} layer the layer configuration
      * @return {Promise<Layer | string>} layers to add to the map
      */
     add(layer: LayerConfig): Promise<Layer | string> {
         const { url } = layer;
 
+=======
+     * @param {TypeLayerConfig} layer the layer configuration
+     * @return {Promise<Layer | string>} layers to add to the map
+     */
+    add(layer: TypeLayerConfig): Promise<Layer | string> {
+>>>>>>> d8aaf72 (Correction du map viewer)
         const geo = new Promise<Layer | string>((resolve) => {
             const xyzTiles = L.tileLayer(layer.url);
             resolve(xyzTiles);

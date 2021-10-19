@@ -127,7 +127,7 @@
                  * @param {Object} basemapProps basemap properties
                  */
                 const createBasemap = (id, basemapProps) => {
-                    const { basemaps } = api.map(mapId);
+                    const { basemaps } = api.map(mapId).basemap;
 
                     // check if basemap with provided ID exists
                     const exists = basemaps.filter((basemap) => basemap.id === id);
@@ -137,7 +137,7 @@
                         const basemap = { ...basemapProps, id };
 
                         // create the basemap
-                        api.map(mapId).createBasemap(basemap);
+                        api.map(mapId).basemap.createBasemap(basemap);
                     }
                 };
 
@@ -147,7 +147,7 @@
                  * @param {string} id update the basemap on the map
                  */
                 const setBasemap = (id) => {
-                    api.map(mapId).setBasemap(id);
+                    api.map(mapId).basemap.setBasemap(id);
                 };
 
                 /**
@@ -155,7 +155,7 @@
                  */
                 useEffect(() => {
                     // get existing basemaps
-                    const { basemaps } = api.map(mapId);
+                    const { basemaps } = api.map(mapId).basemap;
 
                     // set the basemaps in the list
                     setBasemapList(basemaps);
@@ -326,14 +326,14 @@
             };
 
             // create a new button panel on the appbar
-            this.panel = api.map(mapId).createAppbarPanel(button, panel, null);
+            this.panel = api.map(mapId).buttonPanel.createAppbarPanel(button, panel, null);
         };
 
         // hook is called once the plugin has been unmounted, remove any added components
         removed = () => {
             const { mapId } = this.props;
 
-            this.api.map(mapId).removeAppbarPanel(this.panel.id);
+            this.api.map(mapId).buttonPanel.removeAppbarPanel(this.panel.id);
         };
     }
 

@@ -9,7 +9,7 @@ import { MapViewer } from '../common/map-viewer';
 
 import { Plugin } from './plugin';
 import { Utilities } from './utilities';
-import { Cast, TypeMapViewer, CONST_LAYER_TYPES } from '../types/cgpv-types';
+import { CONST_LAYER_TYPES } from '../types/cgpv-types';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -85,7 +85,7 @@ export class API {
      *
      * @returns map api functions
      */
-    map = (id: string): TypeMapViewer => {
+    map = (id: string): MapViewer => {
         for (let i = 0; i < this.maps.length; i++) {
             if (this.maps[i].id === id) {
                 this.selectedMapViewer = this.maps[i];
@@ -94,13 +94,7 @@ export class API {
             }
         }
 
-        return Cast<TypeMapViewer>({
-            ...this.selectedMapViewer,
-            ...this.selectedMapViewer.vector,
-            ...this.selectedMapViewer.buttonPanel,
-            ...this.selectedMapViewer.basemap,
-            ...this.selectedMapViewer.layer,
-        });
+        return this.selectedMapViewer;
     };
 
     /**
@@ -110,7 +104,7 @@ export class API {
      *
      * @returns map api functions
      */
-    mapInstance = (map: Map): TypeMapViewer => {
+    mapInstance = (map: Map): MapViewer => {
         for (let i = 0; i < this.maps.length; i++) {
             if (this.maps[i].map === map) {
                 this.selectedMapViewer = this.maps[i];
@@ -119,13 +113,7 @@ export class API {
             }
         }
 
-        return Cast<TypeMapViewer>({
-            ...this.selectedMapViewer,
-            ...this.selectedMapViewer.vector,
-            ...this.selectedMapViewer.buttonPanel,
-            ...this.selectedMapViewer.basemap,
-            ...this.selectedMapViewer.layer,
-        });
+        return this.selectedMapViewer;
     };
 }
 

@@ -67,10 +67,10 @@
              function addMarker(map) {
                 // call an api function to draw markers
                 const api = cgpv.api.map(map);
-                api.addCircleMarker(56,-97, 1, null, 'CircleMarker-1');
-                api.addCircle(58,-99, 10, null, 'Circle-1');
+                api.vector.addCircleMarker(56,-97, 1, null, 'CircleMarker-1');
+                api.vector.addCircle(58,-99, 10, null, 'Circle-1');
 
-                marker1 = api.addMarker(56,-97, {
+                marker1 = api.vector.addMarker(56,-97, {
                     icon: api.markerDefinitions.yellowIcon,
                     title: 'Test-marker-1'
                 }, 'marker-1');
@@ -111,13 +111,13 @@
                 api.markerClusters.setClusterGroupAsInvisible();
                 api.markerClusters.setClusterGroupAsVisible();
 
-                api.createGeometryGroup('myGroup');
-                api.setActiveGeometryGroup('myGroup');
+                api.vector.createGeometryGroup('myGroup');
+                api.vector.setActiveGeometryGroup('myGroup');
                 cgpv.api.event.emit(cgpv.api.eventNames.EVENT_VECTOR_ADD, null, {type: 'marker', latitude: 57, longitude:-98, options: {title: 'Test-marker-3'}, id: 'Marker-3'})
-                api.setGeometryGroupAsVisible('myGroup');
-                api.setGeometryGroupAsInvisible('defaultGeomGroup');
-                api.addToGeometryGroup(marker1, 'MarkerGroup');
-                api.setGeometryGroupAsVisible('MarkerGroup');
+                api.vector.setGeometryGroupAsVisible('myGroup');
+                api.vector.setGeometryGroupAsInvisible('defaultGeomGroup');
+                api.vector.addToGeometryGroup(marker1, 'MarkerGroup');
+                api.vector.setGeometryGroupAsVisible('MarkerGroup');
             }
 
             function addModelsToAppbarPane(api) {
@@ -134,7 +134,7 @@
                 };
 
                 // call an api function to add a panel with a button in the default group
-                const modelPanel = api.createAppbarPanel(button, panel, 'model-selector').panel;
+                const modelPanel = api.buttonPanel.createAppbarPanel(button, panel, 'model-selector').panel;
                 modelPanel.attachCheckBoxList(['model 1', 'model 2', 'model 3', 'model 4', ], false);
 
             }
