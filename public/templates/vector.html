@@ -176,7 +176,7 @@
                 //  add event handler to the delete geometry group button
                 deleteGeomtryGroup.addEventListener('click', function (e) {
                     // call an api function to  delete the geometry group
-                    cgpv.api.map('mapWM').deleteGeometryGroup(document.getElementById('groupname').value);
+                    cgpv.api.map('mapWM').vector.deleteGeometryGroup(document.getElementById('groupname').value);
                 });
 
                 // get deleteGeomtryFromGroup button element for WM map
@@ -185,7 +185,7 @@
                 //  add event handler to the delete geometry group button
                 createGeomtryFromGroup.addEventListener('click', function (e) {
                     // call an api function to  delete the geometry group
-                    cgpv.api.map('mapWM').createGeometryGroup(document.getElementById('groupname').value);
+                    cgpv.api.map('mapWM').vector.createGeometryGroup(document.getElementById('groupname').value);
                     alert('Geometry Group Created');
                 });
             });

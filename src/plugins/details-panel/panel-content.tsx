@@ -25,6 +25,7 @@ import {
     TypeLayerData,
     TypeLayerInfo,
     TypeFieldNameAlias,
+    TypeFoundLayers,
     TypeLayersEntry,
     TypeEntry,
     TypePanelContentProps,
@@ -65,9 +66,9 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     /**
      * Get the symbology from the layer
      *
-     * @param {Object} renderer the display renderer containing the symbol
-     * @param {Object} attributes the attributes of the selected layer features
-     * @returns the symbology containing the imageData
+     * @param {TypeRendererSymbol} renderer the display renderer containing the symbol
+     * @param {TypeJSONObject} attributes the attributes of the selected layer features
+     * @returns {TypeJSONObject} the symbology containing the imageData
      */
     const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJSONObject): TypeJSONObject => {
         let symbolImage: TypeJSONObject | null = null;
@@ -90,7 +91,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
      * Fetch the json response from the map server
      *
      * @param {string} url the url of the map server
-     * @returns a json containing the result of the query
+     * @returns {Promise<TypeLayerInfo>} a json containing the result of the query
      */
     const queryServer = async (url: string): Promise<TypeLayerInfo> => {
         // fetch the map server returning a json object
@@ -138,7 +139,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         /**
          * Set the entry / feature list object
          *
-         * @param {TypeJSONObject} layerData an object containing the entry / feature list
+         * @param {TypeLayersEntry} layerData an object containing the entry / feature list
          */
         (layerData?: TypeLayersEntry) => {
             // set the entry / feature list data
@@ -153,7 +154,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     /**
      * Set the entry / feature info object
      *
-     * @param {Object} featureData an object containing the entry / feature data
+     * @param {TypeJSONObject} featureData an object containing the entry / feature data
      */
     const selectFeature = useCallback(
         (featureData: TypeJSONObject) => {
@@ -169,11 +170,11 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     /**
      * Get all aliases from the defined layer list, will be used when displaying entry / feature info
      *
-     * @param {Object} fields a list of the fields defined in the layer
-     * @returns an object containing field name and it's alias
+     * @param {TypeFieldNameAlias[]} fields a list of the fields defined in the layer
+     * @returns {TypeJSONObject} an object containing field name and it's alias
      */
     const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
-        const fieldAliases: Record<string, string> = {};
+        const fieldAliases: TypeJSONObject = {};
 
         if (fields) {
             fields.forEach((field: { name: string; alias: string }) => {
@@ -189,16 +190,11 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     /**
      * Add a layer to the panel layer list
      *
-     * @param {Object} mapLayer the main object that contains added layers from the api
-     * @param {Object} data the data object that contains all layers
-     * @param {Object} layerInfo the layer information
+     * @param {TypeLayerData} mapLayer the main object that contains added layers from the api
+     * @param {Record<string, TypeLayerData>} data the data object that contains all layers
+     * @param {TypeLayerInfo} layerInfo the layer information
      * @param {boolean} isGroupLayer a boolean value to check if this layer is a group layer
      */
-    interface TypeFoundLayers {
-        layer: TypeLayersEntry;
-        entries: TypeEntry[];
-    }
-
     const addLayer = (mapLayer: TypeLayerData, data: Record<string, TypeLayerData>, layerInfo: TypeLayerInfo, isGroupLayer: boolean) => {
         // get the layers object from the map, it begins with an empty object then adds each layer
         const { layers } = data[mapLayer.id];
@@ -257,7 +253,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
      * Handle opening the details panel with correct panel content
      * Identify the layers that matches the selected point from a mouse click / crosshair events
      *
-     * @param {Object} latlng a LatLng object containing the latitude and longitude values from the event
+     * @param {L.LatLng} latlng a LatLng object containing the latitude and longitude values from the event
      */
     const handleOpenDetailsPanel = useCallback(
         async (latlng: L.LatLng) => {

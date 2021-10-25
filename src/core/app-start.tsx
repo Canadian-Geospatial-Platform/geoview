@@ -23,7 +23,7 @@ interface AppStartProps {
 }
 
 /**
- * Inialize the app with maps from inline html configs, url params
+ * Initialize the app with maps from inline html configs, url params
  */
 const AppStart = (props: AppStartProps): JSX.Element => {
     const { html } = props;
