@@ -2,10 +2,11 @@
 /* eslint-disable no-underscore-dangle */
 import L, { LeafletEventHandlerFn } from 'leaflet';
 import 'leaflet.markercluster/src';
-import './marker-cluster-element.d';
+import './marker-cluster-element';
+import '../../../types/cgp-leaflet-config';
 
-import { TypeIconCreationFunction } from '../../types/cgpv-types';
-import * as MarkerDefinitions from '../../../public/markers/marker-definitions';
+import { TypeIconCreationFunction } from '../../../types/cgpv-types';
+import * as MarkerDefinitions from '../../../../public/markers/marker-definitions';
 
 let { unselectedMarkerIconCreator, selectedMarkerIconCreator } = MarkerDefinitions;
 
@@ -13,7 +14,7 @@ let { unselectedMarkerIconCreator, selectedMarkerIconCreator } = MarkerDefinitio
  * set the selectedMarkerIconCreator function to be used when creating a normal
  * selected marker that is part of cluster groups
  *
- * @param {TypeIconCreationFunction} options marker options including styling
+ * @param {TypeIconCreationFunction} function returning a L.DivIcon
  */
 export const setSelectedMarkerIconCreator = (f: TypeIconCreationFunction): void => {
     selectedMarkerIconCreator = f;
@@ -23,7 +24,7 @@ export const setSelectedMarkerIconCreator = (f: TypeIconCreationFunction): void 
  * set the unselectedMarkerIconCreator function to be used when creating a normal
  * unselected marker that is part of cluster groups
  *
- * @param {TypeIconCreationFunction} options marker options including styling
+ * @param {TypeIconCreationFunction} function returning a L.DivIcon
  */
 export const setUnselectedMarkerIconCreator = (f: TypeIconCreationFunction): void => {
     unselectedMarkerIconCreator = f;
@@ -33,7 +34,7 @@ export const setUnselectedMarkerIconCreator = (f: TypeIconCreationFunction): voi
  * get the selectedMarkerIcon to be used when creating a normal
  * selected marker that is part of cluster groups
  *
- * @param {TypeIconCreationFunction} options marker options including styling
+ * @returns {L.DivIcon} the selected marker icon
  */
 export const getSelectedMarkerIcon = (): L.DivIcon => {
     return selectedMarkerIconCreator();
@@ -43,15 +44,20 @@ export const getSelectedMarkerIcon = (): L.DivIcon => {
  * get the unselectedMarkerIcon to be used when creating a normal
  * unselected marker that is part of cluster groups
  *
- * @param {TypeIconCreationFunction} options marker options including styling
+ * @returns {L.DivIcon} the unselected marker icon
  */
 export const getUnselectedMarkerIcon = (): L.DivIcon => {
     return unselectedMarkerIconCreator();
 };
 
+/*
+ * MarkerClusterElement is a child of the leaflet Marker class. It has
+ * some extra attributes and methodes.
+ */
 export const MarkerClusterElement = L.Marker.extend({
     initialize(latLng: L.LatLng, options: L.MarkerClusterElementOptions) {
-        (L.Marker.prototype as any).initialize.call(this, latLng, {
+        // call the L.Marker leaflet initialize methode (constructor)
+        L.Marker.prototype.initialize.call(this, latLng, {
             ...options,
         });
 
@@ -90,11 +96,21 @@ export const MarkerClusterElement = L.Marker.extend({
     },
 });
 
+/*
+ * this methode is called right after the constructor chain has been called
+ * it sets the type attribute of the marker cluster element
+ */
 MarkerClusterElement.addInitHook(function fn(this: L.MarkerClusterElement) {
     this.type = 'marker_cluster_element';
 });
+
+// any is used here because attribute MarkerClusterElement doesn't exist on L
 (L as any).MarkerClusterElement = MarkerClusterElement;
 
+/* Define a factory function. Most Leaflet classes have a corresponding
+ * factory function. A factory function has the same name as the class,
+ * but in lowerCamelCase instead of UpperCamelCase
+ */
 L.markerClusterElement = function markerClusterElement(latLng, options) {
     return new (L as any).MarkerClusterElement(latLng, options);
 };

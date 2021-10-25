@@ -3,10 +3,10 @@
 import L, { LeafletMouseEvent, LeafletEventHandlerFn, LeafletEvent } from 'leaflet';
 import 'leaflet.markercluster/src';
 
-import { EVENT_NAMES } from '../../api/event';
-import { api } from '../../api/api';
-import { generateId } from '../constant';
-import { Cast, TypeStampedIconCreationFunction } from '../../types/cgpv-types';
+import { EVENT_NAMES } from '../../../api/event';
+import { api } from '../../../api/api';
+import { generateId } from '../../constant';
+import { Cast, TypeStampedIconCreationFunction } from '../../../types/cgpv-types';
 
 import {
     setSelectedMarkerIconCreator,
@@ -14,7 +14,7 @@ import {
     getSelectedMarkerIcon,
     getUnselectedMarkerIcon,
 } from './marker-cluster-element';
-import * as MarkerDefinitions from '../../../public/markers/marker-definitions';
+import * as MarkerDefinitions from '../../../../public/markers/marker-definitions';
 
 let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } = MarkerDefinitions;
 
@@ -32,6 +32,7 @@ const createMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
     for (let i = 0; i < markers.length; i++) {
         if (markers[i].options.selected) numberOfSelectedIcons++;
     }
+
     const Stamp = `${numberOfSelectedIcons}/${markers.length}`;
     if (numberOfSelectedIcons === 0) {
         icon = getClusterIconEmpty(Stamp);
@@ -40,6 +41,7 @@ const createMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
     } else {
         icon = getClusterIconPart(Stamp);
     }
+
     return icon;
 };
 
@@ -66,6 +68,7 @@ let clusterGroupOptions = defaultClusterGroupOptions;
 const createZoomedMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
     const icon = createMarkerIcon(cluster);
     icon.options.className = 'leaflet-marker-icon cluster-div-icon zoomed-marker';
+
     return icon;
 };
 
@@ -239,7 +242,7 @@ export class MarkerClusters {
      *
      * @returns a marker cluster element with the id, the selected flag and the created marker layer
      */
-    createMarker = (
+    createMarkerElement = (
         markerId: string,
         latitude: number,
         longitude: number,
@@ -267,7 +270,7 @@ export class MarkerClusters {
     addClusterMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.MarkerClusterElement => {
         const MarkerClusterID = generateId(id);
 
-        const marker = this.createMarker(MarkerClusterID, latitude, longitude, options);
+        const marker = this.createMarkerElement(MarkerClusterID, latitude, longitude, options);
 
         marker.addTo(this.clusterGroups[this.activeClusterGroup] as L.LayerGroup);
 
@@ -291,6 +294,7 @@ export class MarkerClusters {
                 if ((marker as L.MarkerClusterElement).id === id) returnValue = marker as L.MarkerClusterElement;
             });
         });
+
         return returnValue;
     };
 
@@ -310,6 +314,7 @@ export class MarkerClusters {
                 if (markerCluster.id === id) returnValue = this.clusterGroups[i];
             }
         }
+
         return returnValue;
     };
 
@@ -318,11 +323,11 @@ export class MarkerClusters {
      *
      * @param {string} clusterGroupid the id of the marker cluster group
      * @param {MarkerClusterGroupOptions} options marker cluster group options
+     *
+     * @returns {L.MarkerClusterGroup} the new marker cluster group instance
      */
     newClusterGroupInstance = (clusterGroupid: string, options: L.MarkerClusterGroupOptions): L.MarkerClusterGroup => {
         const clusterGroup = L.markerClusterGroup({ ...options, id: clusterGroupid });
-
-        // clusterGroup.id = clusterGroupid;
 
         if (options.on) {
             const onHandlerDefinitions = Object.entries(options.on);
@@ -455,6 +460,7 @@ export class MarkerClusters {
                 break;
             }
         }
+
         return i;
     };
 
@@ -496,7 +502,7 @@ export class MarkerClusters {
             // and keep a reference to the last child marker
             const childMarkers = e.layer.getAllChildMarkers();
             let sourceMarker = childMarkers[0];
-            let lastChildMarker = this.createMarker(
+            let lastChildMarker = this.createMarkerElement(
                 sourceMarker.id,
                 sourceMarker.getLatLng().lat,
                 sourceMarker.getLatLng().lng,
@@ -505,7 +511,7 @@ export class MarkerClusters {
             lastChildMarker.addTo(this.zoomedMarkerGroup as L.LayerGroup);
             for (let i = 1; i < childMarkers.length; i++) {
                 sourceMarker = childMarkers[i];
-                lastChildMarker = this.createMarker(
+                lastChildMarker = this.createMarkerElement(
                     sourceMarker.id,
                     sourceMarker.getLatLng().lat,
                     sourceMarker.getLatLng().lng,

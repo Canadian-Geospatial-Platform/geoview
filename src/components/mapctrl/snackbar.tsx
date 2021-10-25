@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -83,6 +82,7 @@ export function Snackbar(props: SnackBarProps): null {
         return () => {
             api.event.off(EVENT_NAMES.EVENT_SNACKBAR_OPEN);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return null;

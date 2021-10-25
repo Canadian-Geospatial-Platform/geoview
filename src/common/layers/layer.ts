@@ -36,11 +36,7 @@ export class Layer {
     // variable used to handle esriDynamic functions
     esriDynamic: EsriDynamic;
 
-<<<<<<< HEAD
-     // variable used to handle xyzTiles functions
-=======
     // variable used to handle xyzTiles functions
->>>>>>> d8aaf72 (Correction du map viewer)
     xyzTiles: XYZTiles;
 
     /**
