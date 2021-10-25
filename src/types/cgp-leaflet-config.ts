@@ -140,29 +140,54 @@ L.Layer.addInitHook(function fn(this: L.Layer) {
  *
  *---------------------------------------------------------------------------*/
 
+declare module 'leaflet' {
+    interface CircleMarkerOptions {
+        id: string;
+    }
+
+    interface CircleMarker {
+        options: CircleMarkerOptions;
+    }
+
+    interface Circle {
+        options: CircleMarkerOptions;
+        _mRadius: number;
+    }
+}
+
 L.CircleMarker.addInitHook(function fn(this: L.CircleMarker) {
     this.type = CONST_VECTOR_TYPES.CIRCLE_MARKER;
 });
 
 L.Circle.addInitHook(function fn(this: L.Circle) {
     this.type = CONST_VECTOR_TYPES.CIRCLE;
+    // Radius of the circle is in meters, we convert it to km
+    this._mRadius = (this.options.radius as number) * 1000;
 });
 
 /*-----------------------------------------------------------------------------
  *
- * L.Polyline configuration
+ * L.Polyline and Polygon configuration
  *
  *---------------------------------------------------------------------------*/
+
+declare module 'leaflet' {
+    interface PolylineOptions {
+        id: string;
+    }
+
+    interface Polyline {
+        options: PolylineOptions;
+    }
+
+    interface Polygon {
+        options: PolylineOptions;
+    }
+}
 
 L.Polyline.addInitHook(function fn(this: L.Polyline) {
     this.type = CONST_VECTOR_TYPES.POLYLINE;
 });
-
-/*-----------------------------------------------------------------------------
- *
- * L.Polygon configuration
- *
- *---------------------------------------------------------------------------*/
 
 L.Polygon.addInitHook(function fn(this: L.Polygon) {
     this.type = CONST_VECTOR_TYPES.POLYGON;
@@ -174,6 +199,14 @@ L.Polygon.addInitHook(function fn(this: L.Polygon) {
  *
  *---------------------------------------------------------------------------*/
 declare module 'leaflet' {
+    interface MarkerOptions {
+        id: string;
+    }
+
+    interface Marker {
+        initialize: (latLng: L.LatLng, options: L.MarkerOptions) => void;
+    }
+
     interface MarkerCluster {
         spiderfy: () => void;
         getAllChildMarkers(): L.MarkerClusterElement[];

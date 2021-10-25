@@ -110,7 +110,7 @@ export type TypeLayersEntry = {
     layerData: TypeJSONValue[];
     groupLayer: boolean;
     displayField: string;
-    fieldAliases: Record<string, string>;
+    fieldAliases: TypeJSONObject;
     layer: TypeLayerInfo;
     entries?: TypeEntry[];
     renderer: TypeRendererSymbol;
@@ -134,6 +134,11 @@ export type TypeLayerInfo = {
 export type TypeFieldNameAlias = {
     name: string;
     alias: string;
+};
+
+export type TypeFoundLayers = {
+    layer: TypeLayersEntry;
+    entries: TypeEntry[];
 };
 
 /**
