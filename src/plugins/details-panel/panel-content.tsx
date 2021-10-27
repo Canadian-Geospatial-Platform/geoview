@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable func-names */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable func-names */
+/* eslint-disable object-shorthand */
 import { useCallback, useEffect, useState } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -13,9 +16,23 @@ import { EVENT_NAMES } from '../../api/event';
 import LayersList from './layers-list';
 import FeaturesList from './features-list';
 import FeatureInfo from './feature-info';
+import {
+    Cast,
+    TypeJSONObject,
+    TypeJSONValue,
+    TypeRendererSymbol,
+    TypeSelectedFeature,
+    TypeLayerData,
+    TypeLayerInfo,
+    TypeFieldNameAlias,
+    TypeFoundLayers,
+    TypeLayersEntry,
+    TypeEntry,
+    TypePanelContentProps,
+} from '../../types/cgpv-types';
 
 // use material ui theming
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
     mainContainer: {
         display: 'flex',
         flexDirection: 'row',
@@ -23,31 +40,23 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Interface used for the panel content
- */
-interface PanelContentProps {
-    buttonPanel: any;
-    mapId: string;
-}
-
-/**
  * A react component that displays the details panel content
  *
- * @param {PanelContentProps} props the properties of the pane content
+ * @param {TypePanelContentProps} props the properties of the pane content
  * @returns A React JSX Element with the details panel
  */
-const PanelContent = (props: PanelContentProps): JSX.Element => {
+const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     const { buttonPanel, mapId } = props;
 
-    const [layersData, setLayersData] = useState({});
-    const [selectedLayer, setSelectedLayer] = useState({});
-    const [selectedFeature, setSelectedFeature] = useState({});
+    const [layersData, setLayersData] = useState<Record<string, TypeLayerData>>({});
+    const [selectedLayer, setSelectedLayer] = useState<TypeLayersEntry | {}>({});
+    const [selectedFeature, setSelectedFeature] = useState<TypeSelectedFeature | {}>({});
 
     const [layersList, setLayersList] = useState(false);
     const [featureList, setFeatureList] = useState(false);
     const [featureInfo, setFeatureInfo] = useState(false);
 
-    const [clickPos, setClickPos] = useState();
+    const [clickPos, setClickPos] = useState<L.LatLng>();
 
     const classes = useStyles();
 
@@ -57,12 +66,12 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     /**
      * Get the symbology from the layer
      *
-     * @param {Object} renderer the display renderer containing the symbol
-     * @param {Object} attributes the attributes of the selected layer features
-     * @returns the symbology containing the imageData
+     * @param {TypeRendererSymbol} renderer the display renderer containing the symbol
+     * @param {TypeJSONObject} attributes the attributes of the selected layer features
+     * @returns {TypeJSONObject} the symbology containing the imageData
      */
-    const getSymbol = useCallback((renderer: any, attributes: any): any => {
-        let symbolImage = null;
+    const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJSONObject): TypeJSONObject => {
+        let symbolImage: TypeJSONObject | null = null;
 
         // check if a symbol object exists in the renderer
         if (renderer && renderer.symbol) {
@@ -72,19 +81,19 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
             symbolImage = renderer.uniqueValueInfos.filter((info) => {
                 // return the correct symbology matching the layer using the layer defined fields
                 return info.value === (attributes[renderer.field1] || attributes[renderer.field2] || attributes[renderer.field3]);
-            })[0].symbol;
+            })[0].symbol as TypeJSONObject;
         }
 
-        return symbolImage;
+        return symbolImage as TypeJSONObject;
     }, []);
 
     /**
      * Fetch the json response from the map server
      *
      * @param {string} url the url of the map server
-     * @returns a json containing the result of the query
+     * @returns {Promise<TypeLayerInfo>} a json containing the result of the query
      */
-    const queryServer = async (url: string): string => {
+    const queryServer = async (url: string): Promise<TypeLayerInfo> => {
         // fetch the map server returning a json object
         const response = await fetch(`${url}?f=json`);
 
@@ -103,7 +112,7 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     const setPanel = useCallback(
         (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => {
             // remove the back button if it exists
-            buttonPanel.panel.removeActionButton('back');
+            buttonPanel.panel?.removeActionButton('back');
 
             // show the correct panel content
             setLayersList(showLayersList);
@@ -130,11 +139,11 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
         /**
          * Set the entry / feature list object
          *
-         * @param {Object} layerData an object containing the entry / feature list
+         * @param {TypeLayersEntry} layerData an object containing the entry / feature list
          */
-        (layerData: any) => {
+        (layerData?: TypeLayersEntry) => {
             // set the entry / feature list data
-            setSelectedLayer(layerData);
+            setSelectedLayer(layerData || {});
 
             // set the panel to show the entry / feature list content
             setPanel(false, true, false);
@@ -145,10 +154,10 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     /**
      * Set the entry / feature info object
      *
-     * @param {Object} featureData an object containing the entry / feature data
+     * @param {TypeJSONObject} featureData an object containing the entry / feature data
      */
     const selectFeature = useCallback(
-        (featureData: any) => {
+        (featureData: TypeJSONObject) => {
             // set the entry / feature data
             setSelectedFeature(featureData);
 
@@ -161,14 +170,14 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     /**
      * Get all aliases from the defined layer list, will be used when displaying entry / feature info
      *
-     * @param {Object} fields a list of the fields defined in the layer
-     * @returns an object containing field name and it's alias
+     * @param {TypeFieldNameAlias[]} fields a list of the fields defined in the layer
+     * @returns {TypeJSONObject} an object containing field name and it's alias
      */
-    const getFieldAliases = (fields: any) => {
-        const fieldAliases = {};
+    const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
+        const fieldAliases: TypeJSONObject = {};
 
         if (fields) {
-            fields.forEach((field: any) => {
+            fields.forEach((field: { name: string; alias: string }) => {
                 const { name, alias } = field;
 
                 fieldAliases[name] = alias;
@@ -181,12 +190,12 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
     /**
      * Add a layer to the panel layer list
      *
-     * @param {Object} mapLayer the main object that contains added layers from the api
-     * @param {Object} data the data object that contains all layers
-     * @param {Object} layerInfo the layer information
+     * @param {TypeLayerData} mapLayer the main object that contains added layers from the api
+     * @param {Record<string, TypeLayerData>} data the data object that contains all layers
+     * @param {TypeLayerInfo} layerInfo the layer information
      * @param {boolean} isGroupLayer a boolean value to check if this layer is a group layer
      */
-    const addLayer = (mapLayer: any, data: any, layerInfo: any, isGroupLayer: boolean) => {
+    const addLayer = (mapLayer: TypeLayerData, data: Record<string, TypeLayerData>, layerInfo: TypeLayerInfo, isGroupLayer: boolean) => {
         // get the layers object from the map, it begins with an empty object then adds each layer
         const { layers } = data[mapLayer.id];
 
@@ -197,7 +206,7 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
             // is it a group layer or not
             groupLayer: isGroupLayer,
             // the layer entry / feature data, will be filled / reset when a click / crosshair event is triggered on an element
-            layerData: [],
+            layerData: [] as TypeJSONValue[],
             // the default display field or field name defined in the layer
             displayField: layerInfo.displayField || layerInfo.displayFieldName || '',
             // the defined field aliases by the layer
@@ -244,12 +253,12 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
      * Handle opening the details panel with correct panel content
      * Identify the layers that matches the selected point from a mouse click / crosshair events
      *
-     * @param {Object} latlng a LatLng object containing the latitude and longitude values from the event
+     * @param {L.LatLng} latlng a LatLng object containing the latitude and longitude values from the event
      */
     const handleOpenDetailsPanel = useCallback(
-        async (latlng: any) => {
+        async (latlng: L.LatLng) => {
             // variable will be used later on as a counter to check which panel content should be selected
-            const layersFound = [];
+            const layersFound: TypeFoundLayers[] = [];
 
             // loop through all the map server layers
             for (let i = 0; i < Object.keys(layersData).length; i++) {
@@ -267,11 +276,12 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
                         // clear previous entry data for this layer
                         clearResults(dataKey, l);
 
+                        const layerMap = Cast<{ _map: L.Map }>(layer)._map;
                         // get map size
-                        const size = layer._map.getSize();
+                        const size = layerMap.getSize();
 
                         // get extent
-                        const bounds = layer._map.getBounds();
+                        const bounds = layerMap.getBounds();
 
                         const extent = {
                             xmin: bounds.getSouthWest().lng,
@@ -300,16 +310,16 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
 
                         // fetch the result from the map server
                         const response = await fetch(identifyUrl);
-                        const res = await response.json();
+                        const res = (await response.json()) as { results: TypeEntry[] };
 
                         if (res && res.results && res.results.length > 0) {
                             layersFound.push({
                                 layer: layers[l],
                                 entries: res.results,
-                            });
+                            } as TypeFoundLayers);
 
                             // add the found entries to the array
-                            layers[l].layerData.push(...res.results);
+                            layers[l].layerData?.push(...res.results);
 
                             // save the data
                             setLayersData((prevState) => ({
@@ -367,14 +377,14 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
             setClickPos(latlng);
 
             // open the details panel
-            buttonPanel.panel.open();
+            buttonPanel.panel?.open();
 
             const panelContainer = document.querySelectorAll(`[data-id=${buttonPanel.id}]`)[0];
 
             // set focus to the close button of the panel
             if (panelContainer) {
                 const closeBtn = panelContainer.querySelectorAll('.cgpv-panel-close')[0];
-                closeBtn.focus();
+                (closeBtn as HTMLElement).focus();
             }
         },
         [mapId, buttonPanel.panel, buttonPanel.id, layersData, clearResults, selectLayer, getSymbol, selectFeature, selectLayersList]
@@ -382,13 +392,13 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
 
     useEffect(() => {
         // get the map service layers from the API
-        const mapLayers = api.map(mapId).layers;
+        const mapLayers = api.map(mapId).layer.layers;
 
         // will be used to store the added map server layers, layers in the map server etc...
-        const data = {};
+        const data: Record<string, TypeLayerData> = {};
 
         // loop through each map server layer loaded from the map config and created using the API
-        mapLayers.forEach(async (mapLayer: any) => {
+        mapLayers.forEach(async (mapLayer: TypeLayerData) => {
             data[mapLayer.id] = {
                 // the map server layer id
                 id: mapLayer.id,
@@ -434,15 +444,16 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
                 // get active layers
                 const entries = mapLayer.layer.getLayers();
 
-                const activeLayers = {};
+                const activeLayers: Record<number, number> = {};
 
                 // change active layers to keys so it can be compared with id in all layers
-                entries.forEach((entry: any) => {
+                entries.forEach((entry: number) => {
                     activeLayers[entry] = entry;
                 });
 
                 // get the metadata of the dynamic layer
-                mapLayer.layer.metadata(async (error: any, res: any) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                mapLayer.layer.metadata(async (error: any, res: { layers: { id: string; subLayerIds: string[] }[] }) => {
                     if (error) return;
 
                     if (res.layers) {
@@ -475,18 +486,21 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
         });
 
         setLayersData(data);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         // handle map click
-        mapInstance.on('click', async (e) => {
-            handleOpenDetailsPanel(e.latlng);
+        mapInstance.on('click', async (e: L.LeafletMouseEvent) => {
+            if (!e.originalEvent.shiftKey) {
+                handleOpenDetailsPanel(e.latlng);
+            }
         });
 
         // handle crosshair enter
         api.event.on(
             EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER,
-            function (args: any) {
+            function (args: { handlerName: string; latlng: L.LatLng }) {
                 if (args.handlerName === mapId) {
                     handleOpenDetailsPanel(args.latlng);
                 }
@@ -525,7 +539,9 @@ const PanelContent = (props: PanelContentProps): JSX.Element => {
                     setPanel={setPanel}
                 />
             )}
-            {featureInfo && <FeatureInfo buttonPanel={buttonPanel} selectedFeature={selectedFeature} setPanel={setPanel} />}
+            {featureInfo && (
+                <FeatureInfo buttonPanel={buttonPanel} selectedFeature={selectedFeature as TypeSelectedFeature} setPanel={setPanel} />
+            )}
         </div>
     );
 };

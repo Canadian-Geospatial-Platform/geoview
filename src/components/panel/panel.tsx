@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-nested-ternary */
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 
@@ -16,12 +17,9 @@ import FocusTrap from 'focus-trap-react';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { MapInterface } from '../../common/map-viewer';
-
 import { HtmlToReact } from '../../common/containers/html-to-react';
-import { Panel } from '../../common/ui/panel';
 import { styles } from '../../assests/style/theme';
-import { Button } from '../../common/ui/button';
+import { Cast, TypePanelAppProps } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -39,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
         height: '100%',
         overflow: 'hidden',
         overflowY: 'auto',
-        paddingBottom: '60px !important',
+        paddingBottom: '10px !important',
         boxSizing: 'border-box',
     },
     avatar: {
@@ -49,19 +47,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Interface for panel properties
- */
-interface PanelAppProps {
-    panel: Panel;
-    panelOpen: boolean;
-    button: Button;
-}
-
-/**
  * Create a panel with a header title, icon and content
- * @param {PanelAppProps} props panel properties
+ * @param {TypePanelAppProps} props panel properties
  */
-export default function PanelApp(props: PanelAppProps): JSX.Element {
+export default function PanelApp(props: TypePanelAppProps): JSX.Element {
     const { panel, button, panelOpen } = props;
 
     // set the active trap value for FocusTrap
@@ -71,13 +60,13 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
     const [, updatePanelContent] = useState(0);
 
     const classes = useStyles(props);
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const map = useMap();
-    const mapId = (api.mapInstance(map) as MapInterface).id;
+    const mapId = api.mapInstance(map).id;
 
-    const panelRef = useRef();
-    const closeBtnRef = useRef();
+    const panelRef = useRef<HTMLElement>(null);
+    const closeBtnRef = useRef<HTMLButtonElement>(null);
 
     /**
      * function that causes rerender when changing panel content
@@ -126,9 +115,8 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     useEffect(() => {
         // disable events on container
-        const panelElement = (panelRef.current as unknown) as HTMLElement;
-        DomEvent.disableClickPropagation(panelElement);
-        DomEvent.disableScrollPropagation(panelElement);
+        DomEvent.disableClickPropagation(panelRef.current as HTMLElement);
+        DomEvent.disableScrollPropagation(panelRef.current as HTMLElement);
 
         api.event.on(
             EVENT_NAMES.EVENT_PANEL_CLOSE,
@@ -195,7 +183,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
         // listen to change panel content and rerender
         api.event.on(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, (args) => {
             // set focus on close button on panel content change
-            setTimeout(() => ((closeBtnRef.current as unknown) as HTMLElement).focus(), 100);
+            setTimeout(() => Cast<HTMLElement>(closeBtnRef.current).focus(), 100);
 
             if (args.buttonId === panel.buttonId) {
                 updateComponent();
@@ -210,7 +198,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                     setActivetrap(true);
 
                     // set focus on close button on panel open
-                    setTimeout(() => ((closeBtnRef.current as unknown) as HTMLElement).focus(), 0);
+                    setTimeout(() => Cast<HTMLElement>(closeBtnRef.current).focus(), 0);
                 }
             },
             mapId
@@ -227,7 +215,7 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
 
     useEffect(() => {
         // set focus on close button on panel open
-        if (button.visible) ((closeBtnRef.current as unknown) as HTMLElement).focus();
+        if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
     }, [button, closeBtnRef]);
 
     return (
@@ -262,7 +250,12 @@ export default function PanelApp(props: PanelAppProps): JSX.Element {
                         <>
                             {actionButtons}
                             <Tooltip title={t('general.close')} placement="right" TransitionComponent={Fade}>
-                                <IconButton ref={closeBtnRef} className="cgpv-panel-close" aria-label={t('general.close')} onClick={closePanel}>
+                                <IconButton
+                                    ref={closeBtnRef}
+                                    className="cgpv-panel-close"
+                                    aria-label={t('general.close')}
+                                    onClick={closePanel}
+                                >
                                     <CloseIcon />
                                 </IconButton>
                             </Tooltip>

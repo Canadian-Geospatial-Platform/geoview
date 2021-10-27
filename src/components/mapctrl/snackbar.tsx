@@ -43,7 +43,7 @@ function SnackButton(props: SnackButtonProps): JSX.Element {
 export function Snackbar(props: SnackBarProps): null {
     const { id } = props;
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -82,6 +82,7 @@ export function Snackbar(props: SnackBarProps): null {
         return () => {
             api.event.off(EVENT_NAMES.EVENT_SNACKBAR_OPEN);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return null;

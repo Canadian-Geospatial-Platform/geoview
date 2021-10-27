@@ -14,11 +14,13 @@ import './assests/style/vendor.css';
 
 import AppStart from './core/app-start';
 import { manageKeyboardFocus } from './common/utilities';
+import { TypeCGPV, TypeWindow, TypeApi, Cast } from './types/cgpv-types';
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
 const DefaultIcon = new Icon({
     iconUrl: icon,
+    iconAnchor: [13, 40],
     shadowUrl: iconShadow,
 });
 Marker.prototype.options.icon = DefaultIcon;
@@ -47,18 +49,18 @@ function init(callback: () => void) {
 }
 
 // cgpv object to be exported with the api for outside use
-const cgpv = {
+const cgpv: TypeCGPV = {
     init,
-    api: {
+    api: Cast<TypeApi>({
         ...api,
         ...api.event,
         ...api.projection,
         ...api.plugin,
-    },
+    }),
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
 
 // export the cgpv globally
-window.cgpv = cgpv;
+Cast<TypeWindow>(window).cgpv = cgpv;

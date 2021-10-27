@@ -1,11 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-param-reassign */
-/* eslint-disable func-names */
 /* eslint-disable object-shorthand */
-(function () {
+(function autoExecute() {
     /**
      * DetailsPanel plugin that will create a react component to show details when a feature or a layer is clicked on the map
      */
@@ -43,7 +43,7 @@
             const { language } = api.map(mapId);
 
             // use material ui theming
-            const useStyles = makeStyles((theme) => ({
+            const useStyles = makeStyles(() => ({
                 mainContainer: {
                     display: 'flex',
                     flexDirection: 'row',
@@ -284,7 +284,7 @@
                                                   // if a layer is clicked
                                                   onClick:
                                                       layerData.length > 0
-                                                          ? (e) => {
+                                                          ? () => {
                                                                 goToFeatureList(data, layerObj);
                                                             }
                                                           : null,
@@ -395,7 +395,7 @@
                                       'div',
                                       {
                                           className: classes.featureItem,
-                                          onClick: (e) => {
+                                          onClick: () => {
                                               goToFeatureInfo(attributes, symbolImage);
                                           },
                                       },
@@ -551,8 +551,6 @@
 
                 const classes = useStyles();
 
-                const { t } = useTranslation();
-
                 // get the map instance
                 const mapInstance = api.map(mapId).map;
 
@@ -602,7 +600,7 @@
                     /**
                      * Set the entry / feature list object
                      *
-                     * @param {Object} layerData an object containing the entry / feature list
+                     * @param {TypeJSONObject} layerData an object containing the entry / feature list
                      */
                     (layerData) => {
                         // set the entry / feature list data
@@ -946,7 +944,7 @@
                     // handle crosshair enter
                     api.event.on(
                         'details_panel/crosshair_enter',
-                        function (props) {
+                        function onDetails(props) {
                             if (props.handlerName === mapId) {
                                 handleOpenDetailsPanel(props.latlng);
                             }

@@ -60,7 +60,7 @@ interface MousePositionProps {
 export function MousePosition(props: MousePositionProps): JSX.Element {
     const { id } = props;
 
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const classes = useStyles();
 
@@ -79,6 +79,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
         setPosition({ lat, lng });
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onMouseMove = useCallback(
         debounce((e) => {
             formatCoord(e.latlng);
@@ -87,6 +88,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     );
     useMapEvent('mousemove', onMouseMove);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onMoveEnd = useCallback(
         debounce((e) => {
             if (isCrosshairsActive.current) {
@@ -108,6 +110,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
         return () => {
             api.event.off(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

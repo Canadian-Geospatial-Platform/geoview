@@ -1,5 +1,3 @@
-import { Map } from 'leaflet';
-
 /* eslint-disable no-param-reassign */
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
@@ -7,26 +5,9 @@ import { EVENT_NAMES } from '../../api/event';
 import { LayersPanel } from '../../components/panel/default-panels';
 
 import { generateId } from '../constant';
-import { Button, ButtonProps } from './button';
-import { Panel, PanelProps, PANEL_TYPES } from './panel';
-
-/**
- * Interface used to initialize a button panel
- */
-export interface ButtonPanelProps {
-    panel: PanelProps;
-    button: ButtonProps;
-}
-
-/**
- * Interface used when creating a new button panel
- */
-export interface ButtonPanelType {
-    id: string;
-    panel?: Panel;
-    button: Button;
-    groupName?: string | null | undefined;
-}
+import { Button } from './button';
+import { Panel } from './panel';
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 // TODO: look at code duplication
 
@@ -38,21 +19,21 @@ export interface ButtonPanelType {
  */
 export class ButtonPanel {
     // groups of array of button panels to hold all buttons created on the appbar
-    appBarPanels: Record<string, Record<string, ButtonPanelType>> = {};
+    appBarPanels: Record<string, Record<string, TypeButtonPanel>> = {};
 
     // group of array to hold all buttons, button panels created on the navbar
-    navBarButtons: Record<string, Record<string, ButtonPanelType>> = {};
+    navBarButtons: Record<string, Record<string, TypeButtonPanel>> = {};
 
     // reference to the leaflet map
-    map: Map;
+    private buttonPanelMap: L.Map;
 
     /**
      * Create default buttons, button panels
      *
      * @param {Map} map the leaflet map
      */
-    constructor(map: Map) {
-        this.map = map;
+    constructor(map: L.Map) {
+        this.buttonPanelMap = map;
 
         this.createDefaultButtonPanels();
     }
@@ -92,17 +73,17 @@ export class ButtonPanel {
     /**
      * Create a button on the appbar that will open a panel
      *
-     * @param {ButtonProps} buttonProps button properties (icon, tooltip)
-     * @param {PanelProps} panelProps panel properties (icon, title, content)
+     * @param {TypeButtonProps} buttonProps button properties (icon, tooltip)
+     * @param {TypePanelProps} panelProps panel properties (icon, title, content)
      * @param {string} groupName optional value to set this button in a group
      *
      * @returns the created panel
      */
     createAppbarPanel = (
-        buttonProps: ButtonProps,
-        panelProps: PanelProps,
-        groupName: string | null | undefined
-    ): ButtonPanelType | null => {
+        buttonProps: TypeButtonProps,
+        panelProps: TypePanelProps,
+        groupName?: string | null | undefined
+    ): TypeButtonPanel | null => {
         if (buttonProps && panelProps) {
             // generate an id if not provided
             buttonProps.id = generateId(buttonProps.id);
@@ -118,9 +99,9 @@ export class ButtonPanel {
             }
 
             // set panel type
-            panelProps.type = PANEL_TYPES.APPBAR;
+            panelProps.type = CONST_PANEL_TYPES.APPBAR;
 
-            const buttonPanel: ButtonPanelType = {
+            const buttonPanel: TypeButtonPanel = {
                 id: buttonProps.id,
                 panel: new Panel(panelProps, buttonProps.id),
                 button: new Button(buttonProps),
@@ -144,17 +125,17 @@ export class ButtonPanel {
     /**
      * Create either a button or a button panel on the navbar
      *
-     * @param {ButtonProps} buttonProps button properties
-     * @param {PanelProps} panelProps panel properties
+     * @param {TypeButtonProps} buttonProps button properties
+     * @param {TypePanelProps} panelProps panel properties
      * @param {string} groupName the group to place the button / panel in
      *
      * @returns the create button / button panel
      */
     private createButtonPanel = (
-        buttonProps: ButtonProps,
-        panelProps: PanelProps | null | undefined,
+        buttonProps: TypeButtonProps,
+        panelProps: TypePanelProps | null | undefined,
         groupName: string
-    ): ButtonPanelType | null | undefined => {
+    ): TypeButtonPanel | null => {
         if (buttonProps) {
             // generate an id if not provided
             buttonProps.id = generateId(buttonProps.id);
@@ -169,7 +150,7 @@ export class ButtonPanel {
                 this.navBarButtons[groupName] = {};
             }
 
-            const buttonPanel: ButtonPanelType = {
+            const buttonPanel: TypeButtonPanel = {
                 id: buttonProps.id,
                 button: new Button(buttonProps),
                 groupName,
@@ -178,7 +159,7 @@ export class ButtonPanel {
             // if adding a panel
             if (panelProps) {
                 // set panel type
-                if (panelProps) panelProps.type = PANEL_TYPES.NAVBAR;
+                if (panelProps) panelProps.type = CONST_PANEL_TYPES.NAVBAR;
 
                 buttonPanel.panel = new Panel(panelProps, buttonProps.id);
             }
@@ -200,25 +181,25 @@ export class ButtonPanel {
     /**
      * Create a navbar button panel
      *
-     * @param {ButtonProps} buttonProps button properties
-     * @param {PanelProps} panelProps panel properties
+     * @param {TypeButtonProps} buttonProps button properties
+     * @param {TypePanelProps} panelProps panel properties
      * @param {string} groupName group name to add the button panel to
      *
      * @returns the created button panel
      */
-    createNavbarButtonPanel = (buttonProps: ButtonProps, panelProps: PanelProps, groupName: string): ButtonPanelType | null | undefined => {
+    createNavbarButtonPanel = (buttonProps: TypeButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
         return this.createButtonPanel(buttonProps, panelProps, groupName);
     };
 
     /**
      * Create a new navbar button that will trigger a callback when clicked
      *
-     * @param {ButtonProps} buttonProps button properties
+     * @param {TypeButtonProps} buttonProps button properties
      * @param {string} groupName group name to add button to
      *
      * @returns the create button
      */
-    createNavbarButton = (buttonProps: ButtonProps, groupName: string): ButtonPanelType | null | undefined => {
+    createNavbarButton = (buttonProps: TypeButtonProps, groupName: string): TypeButtonPanel | null => {
         return this.createButtonPanel(buttonProps, null, groupName);
     };
 
@@ -226,9 +207,9 @@ export class ButtonPanel {
      * Get a button panel from the appbar by using it's id
      *
      * @param {string} id the id of the button panel to get
-     * @returns {ButtonPanelType} the returned button panel
+     * @returns {TypeButtonPanel} the returned button panel
      */
-    getAppBarButtonPanelById = (id: string): ButtonPanelType | null => {
+    getAppBarButtonPanelById = (id: string): TypeButtonPanel | null => {
         // loop through groups of appbar button panels
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < Object.keys(this.appBarPanels).length; i++) {
@@ -236,7 +217,7 @@ export class ButtonPanel {
 
             // eslint-disable-next-line no-plusplus
             for (let j = 0; j < Object.keys(group).length; j++) {
-                const buttonPanel: ButtonPanelType = group[Object.keys(group)[j]];
+                const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 
                 if (buttonPanel.id === id) {
                     return buttonPanel;
@@ -251,9 +232,9 @@ export class ButtonPanel {
      * Get a button panel from the navbar by using it's id
      *
      * @param {string} id the id of the button panel to get
-     * @returns {ButtonPanelType} the returned button panel
+     * @returns {TypeButtonPanel} the returned button panel
      */
-    getNavBarButtonPanelById = (id: string): ButtonPanelType | null => {
+    getNavBarButtonPanelById = (id: string): TypeButtonPanel | null => {
         // loop through groups of appbar button panels
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < Object.keys(this.navBarButtons).length; i++) {
@@ -261,7 +242,7 @@ export class ButtonPanel {
 
             // eslint-disable-next-line no-plusplus
             for (let j = 0; j < Object.keys(group).length; j++) {
-                const buttonPanel: ButtonPanelType = group[Object.keys(group)[j]];
+                const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 
                 if (buttonPanel.id === id) {
                     return buttonPanel;

@@ -616,7 +616,7 @@
                     type = type.indexOf('geoJSON') === -1 ? type : 'geoJSON';
 
                     for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
-                        cgpv.api.map('mapWM').addLayer({
+                        cgpv.api.map('mapWM').layer.addLayer({
                             type: type,
                             entries: document.getElementById('entries').value,
                             url: document.getElementById('url').value,
@@ -651,13 +651,13 @@
                     // call an api function to draw a polygon
                     const circleMarker = cgpv.api
                         .map('mapWM')
-                        .addCircleMarker(coord[0], coord[1], 3, {
+                        .vector.addCircleMarker(coord[0], coord[1], 3, {
                             color: 'red',
                             fillColor: '#f03',
                             fillOpacity: 0.5,
                             radius: 3.0,
                         });
-                    cgpv.api.map('mapWM').addToGeometryGroup(circleMarker);
+                    cgpv.api.map('mapWM').vector.addToGeometryGroup(circleMarker);
                 }
             }
 
@@ -678,7 +678,7 @@
                     line.push(ptEnd);
                     line.unshift(ptStart);
 
-                    const polyline = cgpv.api.map('mapWM').addPolyline(
+                    const polyline = cgpv.api.map('mapWM').vector.addPolyline(
                         line,
                         {
                             stroke: true,
@@ -688,7 +688,7 @@
                         }
                     );
 
-                    cgpv.api.map('mapWM').addToGeometryGroup(polyline);
+                    cgpv.api.map('mapWM').vector.addToGeometryGroup(polyline);
                 }
             }
 
@@ -698,7 +698,7 @@
                     const factor = ((Math.random() * 100) + 1) / 10;
 
                     // call an api function to draw a polygon
-                    const polygon = cgpv.api.map('mapWM').addPolygon(
+                    const polygon = cgpv.api.map('mapWM').vector.addPolygon(
                         [
                             [center[0] + factor/2, center[1] + factor],
                             [center[0] + factor/2, center[1] - factor],
@@ -712,7 +712,7 @@
                             opacity: '0.8',
                         }
                     );
-                    cgpv.api.map('mapWM').addToGeometryGroup(polygon);
+                    cgpv.api.map('mapWM').vector.addToGeometryGroup(polygon);
                 }
             }
 

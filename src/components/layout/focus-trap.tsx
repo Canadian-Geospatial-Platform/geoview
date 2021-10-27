@@ -53,7 +53,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     const defaultTheme = useTheme();
     const classes = useStyles();
-    const { t } = useTranslation();
+    const { t } = useTranslation<string>();
 
     const fullScreen = useMediaQuery(defaultTheme.breakpoints.down('sm'));
 
@@ -155,6 +155,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
             document.removeEventListener('keydown', manageBottomLink);
             api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

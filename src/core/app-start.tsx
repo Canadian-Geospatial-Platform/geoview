@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { Suspense } from 'react';
 
 import '../assests/i18n/i18n';
@@ -11,12 +10,13 @@ import parse, { attributesToProps } from 'html-react-parser';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
+import { Element } from 'domhandler';
 import { Config } from '../api/config';
 import { Shell } from '../components/layout/shell';
 import { theme } from '../assests/style/theme';
 
 /**
- * Interface used when passing html elements from the html pages
+ * interface used when passing html elements from the html pages
  */
 interface AppStartProps {
     html: string;
@@ -35,10 +35,14 @@ const AppStart = (props: AppStartProps): JSX.Element => {
         return parse(html, {
             trim: true,
             replace: (domNode) => {
-                // Parse map config and create maps
-                if (domNode.attribs && domNode.attribs.class && domNode.attribs.class === 'llwp-map') {
-                    // Validate configuration and apply default if problem occurs then setup language
-                    const configObj = new Config(domNode.attribs.id || '', (domNode.attribs['data-leaflet'] || '')?.replace(/'/g, '"'));
+                const domNodeElement = domNode as Element;
+                // parse map config and create maps
+                if (domNodeElement.attribs && domNodeElement.attribs.class && domNodeElement.attribs.class === 'llwp-map') {
+                    // validate configuration and appply default if problem occurs then setup language
+                    const configObj = new Config(
+                        domNodeElement.attribs.id || '',
+                        (domNodeElement.attribs['data-leaflet'] || '')?.replace(/'/g, '"')
+                    );
                     const i18nInstance = i18n.cloneInstance({
                         lng: configObj.language,
                         fallbackLng: configObj.language,
@@ -46,7 +50,7 @@ const AppStart = (props: AppStartProps): JSX.Element => {
 
                     return (
                         // eslint-disable-next-line react/jsx-props-no-spreading
-                        <div {...attributesToProps(domNode.attribs)}>
+                        <div {...attributesToProps(domNodeElement.attribs)}>
                             <I18nextProvider i18n={i18nInstance}>
                                 <Shell id={configObj.id} config={configObj.configuration} />
                             </I18nextProvider>

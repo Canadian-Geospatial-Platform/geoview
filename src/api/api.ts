@@ -5,13 +5,11 @@ import { Event, EVENT_NAMES } from './event';
 
 import { Projection, PROJECTION_NAMES } from './projection';
 
-import { LayerTypes } from '../common/layers/layer';
-
 import { MapViewer } from '../common/map-viewer';
 
 import { Plugin } from './plugin';
 import { Utilities } from './utilities';
-
+import { CONST_LAYER_TYPES } from '../types/cgpv-types';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -32,13 +30,13 @@ export class API {
     projectNames = PROJECTION_NAMES;
 
     // available layer types
-    layerTypes = LayerTypes;
+    layerTypes = CONST_LAYER_TYPES;
 
     // list of available maps
     maps: MapViewer[] = [];
 
     // set selected map instance / app
-    selectedMapInstance!: MapViewer;
+    selectedMapViewer!: MapViewer;
 
     // timeout number used to check if everything is ready to make API calls
     isReady = 0;
@@ -87,22 +85,16 @@ export class API {
      *
      * @returns map api functions
      */
-    map = (id: string): unknown => {
+    map = (id: string): MapViewer => {
         for (let i = 0; i < this.maps.length; i++) {
             if (this.maps[i].id === id) {
-                this.selectedMapInstance = this.maps[i];
+                this.selectedMapViewer = this.maps[i];
 
                 break;
             }
         }
 
-        return {
-            ...this.selectedMapInstance,
-            ...this.selectedMapInstance.vector,
-            ...this.selectedMapInstance.buttonPanel,
-            ...this.selectedMapInstance.basemap,
-            ...this.selectedMapInstance.layer,
-        };
+        return this.selectedMapViewer;
     };
 
     /**
@@ -112,22 +104,16 @@ export class API {
      *
      * @returns map api functions
      */
-    mapInstance = (map: Map): unknown => {
+    mapInstance = (map: Map): MapViewer => {
         for (let i = 0; i < this.maps.length; i++) {
             if (this.maps[i].map === map) {
-                this.selectedMapInstance = this.maps[i];
+                this.selectedMapViewer = this.maps[i];
 
                 break;
             }
         }
 
-        return {
-            ...this.selectedMapInstance,
-            ...this.selectedMapInstance.vector,
-            ...this.selectedMapInstance.buttonPanel,
-            ...this.selectedMapInstance.basemap,
-            ...this.selectedMapInstance.layer,
-        };
+        return this.selectedMapViewer;
     };
 }
 

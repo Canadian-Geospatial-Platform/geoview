@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 
@@ -18,8 +18,8 @@ const useStyles = makeStyles((theme) => ({
         left: theme.shape.center,
     },
     northArrow: {
-        width: theme.overrides?.northArrow.width,
-        height: theme.overrides?.northArrow.height,
+        width: (theme.overrides?.northArrow?.size as CSSProperties).width,
+        height: (theme.overrides?.northArrow?.size as CSSProperties).height,
     },
 }));
 
@@ -41,7 +41,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
     const classes = useStyles();
 
-    const northArrowRef = useRef();
+    const northArrowRef = useRef<HTMLDivElement>(null);
 
     const [rotationAngle, setRotationAngle] = useState({ angle: 0 });
     const [isNorthVisible, setIsNorthVisible] = useState(false);
@@ -172,6 +172,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     /**
      * Map moveend event callback
      */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onMapMoveEnd = useCallback(
         debounce((e) => {
             const map = e.target as Map;
@@ -189,6 +190,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     const map = useMap();
     useEffect(() => {
         manageArrow(map);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return projection.code === PROJECTION_NAMES.LCC ? (

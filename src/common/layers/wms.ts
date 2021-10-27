@@ -1,18 +1,15 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable object-shorthand */
-/* eslint-disable func-names */
+/* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L, { LeafletMouseEvent, Layer } from 'leaflet';
 
 import { mapService } from 'esri-leaflet';
 
 import WMSCapabilities from 'wms-capabilities';
 
-import { LayerConfig } from './layer';
 import { getMapServerUrl, getXMLHttpRequest, xmlToJson } from '../utilities';
+import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../types/cgpv-types';
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -29,10 +26,10 @@ export class WMS {
     /**
      * Add a WMS layer to the map.
      *
-     * @param {LayerConfig} layer the layer configuration
+     * @param {TypeLayerConfig} layer the layer configuration
      * @return {Promise<Layer | string>} layers to add to the map
      */
-    add(layer: LayerConfig): Promise<Layer | string> {
+    add(layer: TypeLayerConfig): Promise<Layer | string> {
         let { url } = layer;
 
         // if url has a '?' do not append to avoid errors, user must add this manually
@@ -51,11 +48,10 @@ export class WMS {
                     let isValid = false;
 
                     // parse the xml string and convert to json
-                    const json = new WMSCapabilities(value).toJSON();
-
+                    const json = new WMSCapabilities(value).toJSON() as TypeJSONObjectLoop;
                     // validate the entries
-                    json.Capability.Layer.Layer.forEach((item) => {
-                        isValid = this.validateEntries(item, layer.entries);
+                    Cast<TypeJSONObjectLoop[]>(json.Capability.Layer.Layer).forEach((item: TypeJSONObjectLoop) => {
+                        isValid = this.validateEntries(item, layer.entries as string);
                     });
 
                     if (isValid) {
@@ -83,21 +79,15 @@ export class WMS {
                                 /**
                                  * Get feature info from a WMS Layer
                                  *
-                                 * @param {Event} evt Event received on any interaction with the map
-                                 * @param {Function} callback a callback function that will return the result json object
-                                 * @returns a promise that returns the feature info in a json format
+                                 * @param {LeafletMouseEvent} evt Event received on any interaction with the map
+                                 * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
                                  */
-                                value: async function (evt: any): Promise<any> {
+                                value: async function _getFeatureInfo(evt: LeafletMouseEvent): Promise<TypeJSONObject | null> {
                                     const res = await axios.get(this.getFeatureInfoUrl(evt.latlng));
-
-                                    const featureInfo = xmlToJson(res.request.responseXML);
-
-                                    if (
-                                        featureInfo.FeatureInfoResponse &&
-                                        featureInfo.FeatureInfoResponse.FIELDS &&
-                                        featureInfo.FeatureInfoResponse.FIELDS['@attributes']
-                                    ) {
-                                        return featureInfo.FeatureInfoResponse.FIELDS['@attributes'];
+                                    const featureInfoResponse = (xmlToJson(res.request.responseXML) as TypeJSONObjectLoop)
+                                        .FeatureInfoResponse;
+                                    if (featureInfoResponse && featureInfoResponse.FIELDS && featureInfoResponse.FIELDS['@attributes']) {
+                                        return featureInfoResponse.FIELDS['@attributes'] as TypeJSONObject;
                                     }
 
                                     return null;
@@ -110,7 +100,7 @@ export class WMS {
                                  * @param {LatLng} latlng a latlng point to generate the feature url from
                                  * @returns the map service url including the feature query
                                  */
-                                value: function (latlng: L.LatLng): string {
+                                value: function _getFeatureInfoUrl(latlng: L.LatLng): string {
                                     // Construct a GetFeatureInfo request URL given a point
                                     const point = this._map.latLngToContainerPoint(latlng);
 
@@ -159,12 +149,12 @@ export class WMS {
      * @param {string} name name to check
      * @returns {boolean} entry is valid
      */
-    private validateEntries(layer: any, name: string): boolean {
+    private validateEntries(layer: TypeJSONObjectLoop, name: string): boolean {
         let isValid = false;
         // eslint-disable-next-line no-prototype-builtins
         if (typeof layer === 'object' && layer.hasOwnProperty('Layer')) {
             isValid = this.validateEntries(layer.Layer[0], name);
-        } else if (name === layer.Name) {
+        } else if (name === Cast<string>(layer.Name)) {
             // TODO: modify for multiple entries
             isValid = true;
         }

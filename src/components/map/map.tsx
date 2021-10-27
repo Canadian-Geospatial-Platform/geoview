@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { useEffect, useState } from 'react';
 
-import { Map as LeafletMap, CRS } from 'leaflet';
+import { CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
 import { useMediaQuery } from '@material-ui/core';
@@ -9,10 +9,8 @@ import { useTheme, makeStyles } from '@material-ui/core/styles';
 
 import { SnackbarProvider } from 'notistack';
 
-import { MapOptions, getMapOptions } from '../../common/map';
-import { BasemapLayer } from '../../common/basemap';
+import { getMapOptions } from '../../common/map';
 import { Projection } from '../../common/projection';
-import { MapConfigProps } from '../../api/config';
 
 import { Crosshair } from '../mapctrl/crosshair';
 import { MousePosition } from '../mapctrl/mouse-position';
@@ -29,6 +27,7 @@ import { MapViewer } from '../../common/map-viewer';
 import { generateId } from '../../common/constant';
 import { NorthArrow, NorthPoleFlag } from '../mapctrl/north-arrow';
 import { ClickMarker } from '../mapctrl/click-marker';
+import { TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
     snackBar: {
@@ -36,8 +35,12 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export function Map(props: MapConfigProps): JSX.Element {
-    const { id, center, zoom, projection, language } = props;
+export function Map(props: TypeMapConfigProps): JSX.Element {
+    // make sure the id is not undefined
+    let { id } = props;
+    id = generateId(id);
+
+    const { center, zoom, projection, language, selectBox, boxZoom } = props;
 
     const [basemapLayers, setBasemapLayers] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -46,7 +49,7 @@ export function Map(props: MapConfigProps): JSX.Element {
     const classes = useStyles();
 
     // create a new map viewer instance
-    const viewer = new MapViewer(props);
+    let viewer: MapViewer;
 
     // if screen size is medium and up
     const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
@@ -55,20 +58,20 @@ export function Map(props: MapConfigProps): JSX.Element {
     // the projection will work with CBMT basemap. If another basemap would be use, update...
     const crs = projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
 
-    // get attribution
-    const attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
+    // attribution used by the map
+    let attribution = '';
 
     // get map option from slected basemap projection
-    const mapOptions: MapOptions = getMapOptions(projection);
+    const mapOptions: L.MapOptions = getMapOptions(projection);
 
     /**
      * Get the center position of the map when move / drag has ended
      * then emit it as an api event
      * @param event Move end event container a reference to the map
      */
-    function mapMoveEnd(event: Record<string, LeafletMap>): void {
+    function mapMoveEnd(event: L.LeafletEvent): void {
         // get a map reference from the moveend event
-        const map: LeafletMap = event.target;
+        const map: L.Map = event.target;
 
         // emit the moveend event to the api
         api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
@@ -89,6 +92,7 @@ export function Map(props: MapConfigProps): JSX.Element {
         return () => {
             api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -97,14 +101,16 @@ export function Map(props: MapConfigProps): JSX.Element {
             zoom={zoom}
             crs={crs}
             zoomControl={false}
+            selectBox={selectBox}
+            boxZoom={boxZoom}
             attributionControl={false}
             minZoom={mapOptions.minZoom}
-            maxZoom={mapOptions.maxZooom}
+            maxZoom={mapOptions.maxZoom}
             maxBounds={mapOptions.maxBounds}
             keyboardPanDelta={20}
-            whenCreated={(cgpMap) => {
-                // add map instance to api
-                api.maps.push(viewer);
+            whenCreated={(cgpMap: L.Map) => {
+                // eslint-disable-next-line no-param-reassign
+                cgpMap.id = id;
 
                 // add a class to map container to easely find the container
                 cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
@@ -121,10 +127,10 @@ export function Map(props: MapConfigProps): JSX.Element {
                 cgpMap.on('moveend', mapMoveEnd);
 
                 // initialize the map viewer and load plugins
-                viewer.init({
-                    map: cgpMap,
-                    id: id || generateId(id),
-                });
+                viewer = new MapViewer(props, cgpMap);
+
+                // get attribution
+                attribution = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
 
                 // call the ready function since rendering of this map instance is done
                 api.ready();
@@ -136,7 +142,7 @@ export function Map(props: MapConfigProps): JSX.Element {
         >
             {isLoaded && (
                 <>
-                    {basemapLayers.map((basemapLayer: BasemapLayer) => {
+                    {basemapLayers.map((basemapLayer: TypeBasemapLayer) => {
                         return (
                             <TileLayer
                                 key={basemapLayer.id}
@@ -159,7 +165,7 @@ export function Map(props: MapConfigProps): JSX.Element {
                     >
                         <Appbar />
                     </div>
-                    {deviceSizeMedUp && <OverviewMap id={id} crs={crs} language={language} zoomFactor={mapOptions.zoomFactor} />}
+                    {deviceSizeMedUp && <OverviewMap id={id} crs={crs} language={language} zoomFactor={mapOptions.zoomFactor as number} />}
                     <NorthArrow projection={crs} />
                     <NorthPoleFlag projection={crs} />
                     <Crosshair id={id} />

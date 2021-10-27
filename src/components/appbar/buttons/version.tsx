@@ -3,9 +3,10 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 
 import ButtonApp from '../button';
 
-import { AppVersion, GITUHUB_REPO } from '../../../common/constant';
+import { GITUHUB_REPO } from '../../../common/constant';
+import { Cast, TypeAppVersion } from '../../../types/cgpv-types';
 // eslint-disable-next-line no-underscore-dangle
-declare const __VERSION__: AppVersion;
+declare const __VERSION__: TypeAppVersion;
 
 const useStyles = makeStyles((theme) => ({
     github: {
@@ -47,20 +48,19 @@ export default function Version(): JSX.Element {
 
     return (
         <ButtonApp
+            id="version-button"
             tooltip="appbar.version"
             icon={<GitHubIcon />}
             onClickFunction={getRepo}
-            content={
-                ((
-                    <div className={classes.github}>
-                        <span className="cgp-version">
-                            {getVersion()}
-                            <span className="cgp-hash">{`  ${getHash()}`}</span>
-                        </span>
-                        <span className="cgp-timestamp">{getTimestamp()}</span>
-                    </div>
-                ) as unknown) as Element
-            }
+            content={Cast<Element>(
+                <div className={classes.github}>
+                    <span className="cgp-version">
+                        {getVersion()}
+                        <span className="cgp-hash">{`  ${getHash()}`}</span>
+                    </span>
+                    <span className="cgp-timestamp">{getTimestamp()}</span>
+                </div>
+            )}
         />
     );
 }

@@ -2,8 +2,8 @@ import { Layer } from 'leaflet';
 
 import { dynamicMapLayer, mapService } from 'esri-leaflet';
 
-import { LayerConfig } from './layer';
 import { getXMLHttpRequest, getMapServerUrl } from '../utilities';
+import { TypeLayerConfig } from '../../types/cgpv-types';
 
 /**
  * a class to add esri dynamic layer
@@ -15,10 +15,10 @@ export class EsriDynamic {
     /**
      * Add a ESRI dynamic layer to the map.
      *
-     * @param {LayerConfig} layer the layer configuration
+     * @param {TypeLayerConfig} layer the layer configuration
      * @return {Promise<Layer | string>} layers to add to the map
      */
-    add(layer: LayerConfig): Promise<Layer | string> {
+    add(layer: TypeLayerConfig): Promise<Layer | string> {
         const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
         const geo = new Promise<Layer | string>((resolve) => {
@@ -31,7 +31,7 @@ export class EsriDynamic {
                 entries = entries?.filter((item) => !Number.isNaN(item));
 
                 // check if the entries are part of the service
-                if (value !== '{}' && layers && layers.find((item) => entries?.includes(item.id))) {
+                if (value !== '{}' && layers && layers.find((item: Record<string, number>) => entries?.includes(item.id))) {
                     const feat = dynamicMapLayer({
                         url: layer.url,
                         layers: entries,

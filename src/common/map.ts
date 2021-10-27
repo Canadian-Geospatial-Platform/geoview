@@ -3,31 +3,23 @@ import screenfull from 'screenfull';
 
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
-const lccMapOptionsParam: MapOptions = {
+const lccMapOptionsParam: L.MapOptions = {
     zoomFactor: 7,
     minZoom: 3,
-    maxZooom: 19,
+    maxZoom: 19,
 };
 
 // Web Mercator map options
-const wmMapOptionsParam: MapOptions = {
+const wmMapOptionsParam: L.MapOptions = {
     zoomFactor: 5,
     minZoom: 2,
-    maxZooom: 19,
+    maxZoom: 19,
     maxBounds: new LatLngBounds({ lat: -89.999, lng: -180 }, { lat: 89.999, lng: 180 }),
     maxBoundsViscosity: 0.0,
 };
 
-export function getMapOptions(epsgCode: number): MapOptions {
+export function getMapOptions(epsgCode: number): L.MapOptions {
     return epsgCode === 3978 ? lccMapOptionsParam : wmMapOptionsParam;
-}
-
-export interface MapOptions {
-    zoomFactor: number;
-    minZoom: number;
-    maxZooom: number;
-    maxBounds?: LatLngBounds;
-    maxBoundsViscosity?: number;
 }
 
 /**

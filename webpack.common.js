@@ -84,6 +84,7 @@ const config = {
                 { from: './public/img', to: 'img' },
                 { from: './public/locales', to: 'locales' },
                 { from: './public/css', to: 'css' },
+                { from: './public/markers', to: 'markers' },
                 { from: './public/geojson', to: 'geojson' },
                 { from: './public/plugins', to: 'plugins' },
                 { from: './public/favicon.ico' },

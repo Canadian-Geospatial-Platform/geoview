@@ -1,24 +1,18 @@
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { Map } from 'leaflet';
-
+// import L from 'leaflet';
 import queryString from 'query-string';
 
-import { api } from '../api/api';
-
 import { ButtonPanel } from './ui/button-panel';
-import { Vector } from './vectors/vector';
-import { MapConfigProps } from '../api/config';
+import { Vector } from './layers/vector';
 import { Basemap } from './basemap';
 import { Layer } from './layers/layer';
+import { MarkerClusters } from './layers/marker-clusters/marker-clusters';
+import * as MarkerDefinitions from '../../public/markers/marker-definitions';
+import '../types/cgp-leaflet-config';
 
-/**
- * interface used to store created maps
- */
-export interface MapInterface {
-    id: string;
-    map: Map;
-}
+import { api } from '../api/api';
+import { Cast, TypeWindow, TypeMapConfigProps } from '../types/cgpv-types';
 
 /**
  * Class used to manage created maps
@@ -28,16 +22,22 @@ export interface MapInterface {
  */
 export class MapViewer {
     // map config properties
-    mapProps: MapConfigProps;
+    mapProps: TypeMapConfigProps;
 
     // the id of the map
     id!: string;
 
     // the leaflet map
-    map!: Map;
+    map!: L.Map;
 
     // used to access vector API to create and manage geometries
     vector!: Vector;
+
+    // used to access marker cluster API to create and manage marker cluster groups
+    markerClusters!: MarkerClusters;
+
+    // used to access marker definitions
+    markerDefinitions = MarkerDefinitions;
 
     // used to access button panel API to create buttons and button panels
     buttonPanel!: ButtonPanel;
@@ -46,7 +46,7 @@ export class MapViewer {
     basemap: Basemap;
 
     // used to access layers functions
-    layer: Layer;
+    layer!: Layer;
 
     // get used language
     language: string;
@@ -57,45 +57,41 @@ export class MapViewer {
     /**
      * Initialize map props and basemaps
      *
-     * @param {MapConfigProps} mapProps map properties
+     * @param {TypeMapConfigProps} mapProps map properties
      */
-    constructor(mapProps: MapConfigProps) {
+    constructor(mapProps: TypeMapConfigProps, cgpMap: L.Map) {
+        // add map viewer instance to api
+        api.maps.push(this);
+
         this.mapProps = mapProps;
 
         this.language = mapProps.language;
         this.projection = mapProps.projection;
 
-        this.basemap = new Basemap(mapProps.basemapOptions, mapProps.language, mapProps.projection);
-    }
+        this.id = cgpMap.id as string;
+        this.map = cgpMap;
 
-    /**
-     * initialize the map interface, map apis and load plugins
-     *
-     * @param {MapInterface} mapInstance map instance containing ID and Leaflet map instance
-     */
-    init = (mapInstance: MapInterface): void => {
-        this.id = mapInstance.id;
+        this.markerClusters = new MarkerClusters(cgpMap);
 
-        this.map = mapInstance.map;
-
-        this.vector = new Vector(mapInstance.map);
+        this.vector = new Vector(cgpMap);
 
         // initialize layers and load the layers passed in from map config if any
-        this.layer = new Layer(this.id, mapInstance.map, this.mapProps.layers);
+        this.layer = new Layer(cgpMap, this.mapProps.layers);
 
-        this.buttonPanel = new ButtonPanel(mapInstance.map);
+        this.buttonPanel = new ButtonPanel(cgpMap);
 
         // check if geometries are provided from url
         this.loadGeometries();
 
-        // init basemap and pass in the map id to be able to access the map instance
-        this.basemap.init(this.id);
+        // create basemap and pass in the map id to be able to access the map instance
+        this.basemap = new Basemap(mapProps.basemapOptions, mapProps.language, mapProps.projection, this.id);
 
         // load plugins if provided in the config
         if (this.mapProps.plugins && this.mapProps.plugins.length > 0) {
             this.mapProps.plugins.forEach((plugin) => {
-                if (window.plugins && window.plugins[plugin]) {
-                    api.plugin.addPlugin(plugin, window.plugins[plugin], {
+                const { plugins } = Cast<TypeWindow>(window);
+                if (plugins && plugins[plugin]) {
+                    api.plugin.addPlugin(plugin, plugins[plugin], {
                         mapId: this.id,
                     });
                 } else {
@@ -105,7 +101,7 @@ export class MapViewer {
                 }
             });
         }
-    };
+    }
 
     /**
      * Check if geometries needs to be loaded from a URL geoms parameter

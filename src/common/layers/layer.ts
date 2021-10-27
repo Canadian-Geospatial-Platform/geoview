@@ -1,4 +1,4 @@
-import L, { Map, Layer as leafletLayer } from 'leaflet';
+import { Layer as leafletLayer } from 'leaflet';
 
 import { generateId } from '../constant';
 import { EsriDynamic } from './esri-dynamic';
@@ -9,40 +9,10 @@ import { GeoJSON } from './geojson';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
+import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from '../../types/cgpv-types';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 import 'esri-leaflet-renderers';
-
-/**
- * constant contains layer types
- */
-export const LayerTypes = {
-    WMS: 'ogcWMS',
-    GEOJSON: 'geoJSON',
-    ESRI_DYNAMIC: 'esriDynamic',
-    ESRI_FEATURE: 'esriFeature',
-    XYZ_TILES: 'xyzTiles'
-};
-
-/**
- * interface used when adding a new layer
- */
-export interface LayerConfig {
-    id?: string;
-    name: string;
-    url: string;
-    type: string;
-    entries?: string;
-}
-
-/**
- * interface used when adding a new layer
- */
-export interface LayerData {
-    id: string;
-    type: string;
-    layer: L.Layer;
-}
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -52,7 +22,7 @@ export interface LayerData {
  */
 export class Layer {
     // variable used to store all added layers
-    layers: Array<LayerData> = [];
+    layers: Array<TypeLayerData> = [];
 
     // variable used to handle geojson functions
     geoJSON: GeoJSON;
@@ -66,27 +36,21 @@ export class Layer {
     // variable used to handle esriDynamic functions
     esriDynamic: EsriDynamic;
 
-     // variable used to handle xyzTiles functions
+    // variable used to handle xyzTiles functions
     xyzTiles: XYZTiles;
 
     /**
-     * used toreference event
+     * used to reference the map and its event
      */
-    private mapId: string;
-
-    /**
-     * used to reference the map
-     */
-    private map: Map;
+    private map: L.Map;
 
     /**
      * Initialize layer types and listen to add/remove layer events from outside
      *
      * @param {Map} map a reference to the map
-     * @param {LayerConfig[]} layers an optional array containing layers passed within the map config
+     * @param {TypeLayerConfig[]} layers an optional array containing layers passed within the map config
      */
-    constructor(mapId: string, map: Map, layers?: LayerConfig[] | undefined | null) {
-        this.mapId = mapId;
+    constructor(map: L.Map, layers?: TypeLayerConfig[] | undefined | null) {
         this.map = map;
 
         this.geoJSON = new GeoJSON();
@@ -97,19 +61,19 @@ export class Layer {
 
         // listen to outside events to add layers
         api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
-            if (payload && payload.handlerName.includes(this.mapId)) {
+            if (payload && payload.handlerName.includes(this.map.id)) {
                 const layerConf = payload.layer;
                 layerConf.id = generateId(layerConf.id);
-                if (layerConf.type === LayerTypes.GEOJSON) {
+                if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
                     this.geoJSON.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                     this.removeTabindex();
-                } else if (layerConf.type === LayerTypes.WMS) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
                     this.wms.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
-                } else if (layerConf.type === LayerTypes.XYZ_TILES) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
                     this.xyzTiles.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
-                } else if (layerConf.type === LayerTypes.ESRI_DYNAMIC) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
                     this.esriDynamic.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
-                } else if (layerConf.type === LayerTypes.ESRI_FEATURE) {
+                } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
                     this.esriFeature.add(layerConf).then((layer: leafletLayer | string) => this.addToMap(layerConf, layer));
                     this.removeTabindex();
                 }
@@ -119,12 +83,12 @@ export class Layer {
         // listen to outside events to remove layers
         api.event.on(EVENT_NAMES.EVENT_REMOVE_LAYER, (payload) => {
             // remove layer from outside
-            this.removeLayer(payload.id);
+            this.removeLayerById(payload.id);
         });
 
         // Load layers that was passed in with the map config
         if (layers && layers.length > 0) {
-            layers?.forEach((layer: LayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.mapId, { layer }));
+            layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.map.id, { layer }));
         }
     }
 
@@ -143,11 +107,11 @@ export class Layer {
 
         setTimeout(() => {
             if (!isLoaded) {
-                api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.mapId, {
+                api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.map.id, {
                     message: {
                         type: 'key',
                         value: 'validation.layer.loadfailed',
-                        params: [name, this.mapId],
+                        params: [name, this.map.id],
                     },
                 });
 
@@ -159,18 +123,18 @@ export class Layer {
 
     /**
      * Add the layer to the map if valid. If not (is a string) emit an error
-     * @param {LayerConfig} payload the layer config
+     * @param {TypeLayerConfig} payload the layer config
      * @param {leafletLayer | string} layer incoming as layer or string if not valid
      */
-    private addToMap(payload: LayerConfig, layer: leafletLayer | string): void {
+    private addToMap(payload: TypeLayerConfig, layer: leafletLayer | string): void {
         // if the return layer object is a string, it is because path or entries are bad
         // do not add to the map
         if (typeof layer === 'string') {
-            api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.mapId, {
+            api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.map.id, {
                 message: {
                     type: 'key',
                     value: 'validation.layer.loadfailed',
-                    params: [payload.name, this.mapId],
+                    params: [payload.name, this.map.id],
                 },
             });
         } else {
@@ -182,7 +146,7 @@ export class Layer {
                 id,
                 type: payload.type,
                 layer: Object.defineProperties(layer, { id: { value: id } }),
-            });
+            } as TypeLayerData);
         }
     }
 
@@ -194,7 +158,7 @@ export class Layer {
         // TODO: timeout is never a good idea, may have to find a workaround...
         setTimeout(() => {
             const featElems = document
-                .getElementsByClassName(`leaflet-map-${this.mapId}`)[0]
+                .getElementsByClassName(`leaflet-map-${this.map.id}`)[0]
                 .getElementsByClassName('leaflet-marker-pane')[0].children;
             [...featElems].forEach((element) => {
                 element.setAttribute('tabindex', '-1');
@@ -207,9 +171,9 @@ export class Layer {
      *
      * @param {string} id the id of the layer to be removed
      */
-    removeLayer = (id: string): void => {
+    removeLayerById = (id: string): void => {
         // return items not matching the id
-        this.layers = this.layers.filter((item: LayerData) => {
+        this.layers = this.layers.filter((item: TypeLayerData) => {
             if (item.id === id) item.layer.removeFrom(this.map);
             return item.id !== id;
         });
@@ -218,12 +182,12 @@ export class Layer {
     /**
      * Add a layer to the map
      *
-     * @param {LayerConfig} layer the layer configuration to add
+     * @param {TypeLayerConfig} layer the layer configuration to add
      */
-    addLayer = (layer: LayerConfig): string => {
+    addLayer = (layer: TypeLayerConfig): string => {
         // eslint-disable-next-line no-param-reassign
         layer.id = generateId(layer.id);
-        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.mapId, { layer });
+        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.map.id, { layer });
 
         return layer.id;
     };
@@ -234,8 +198,8 @@ export class Layer {
      * @param {string} id the layer id to look for
      * @returns the found layer data object
      */
-    getLayerById = (id: string): LayerData | null => {
-        return this.layers.filter((layer: LayerData) => layer.id === id)[0];
+    getLayerById = (id: string): TypeLayerData | null => {
+        return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
     };
 
     // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS
