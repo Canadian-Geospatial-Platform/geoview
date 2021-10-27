@@ -11,6 +11,7 @@ import { useEventHandlers, LeafletElement } from '@react-leaflet/core';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 import { getTranslateValues } from '../../common/utilities';
+import { generateId } from '../../common/constant';
 
 const useStyles = makeStyles((theme: Theme) => ({
     markerIcon: {
@@ -146,5 +147,9 @@ export const ClickMarker = (): JSX.Element => {
         };
     }, []);
 
-    return showMarker ? <Marker zIndexOffset={2000} position={[markerPos?.lat || 0, markerPos?.lng || 0]} icon={markerIcon} /> : <></>;
+    return showMarker ? (
+        <Marker id={generateId('')} zIndexOffset={2000} position={[markerPos?.lat || 0, markerPos?.lng || 0]} icon={markerIcon} />
+    ) : (
+        <></>
+    );
 };

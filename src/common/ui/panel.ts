@@ -2,7 +2,7 @@ import { createElement } from 'react';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { CheckboxListAPI } from '../../components/appbar/checkbox-list';
+import { CheckboxListAPI } from './checkbox-list';
 import { TypePanelProps } from '../../types/cgpv-types';
 
 /**

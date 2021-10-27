@@ -169,7 +169,7 @@ export const getClusterIconFull = (ratio: string): L.DivIcon => {
             "<div class='marker-cluster-full hole'></div>" +
             '</div>' +
             "<div class='cluster-div-icon-text'>" +
-            `<b>${ratio}</b>` +
+            `<b class='cluster-text'>${ratio}</b>` +
             '</div>',
         iconSize: [-8, 36],
         iconAnchor: [-4, 36],
@@ -186,7 +186,7 @@ export const getClusterIconPart = (ratio: string): L.DivIcon => {
             "<div class='marker-cluster-part hole'></div>" +
             '</div>' +
             "<div class='cluster-div-icon-text'>" +
-            `<b>${ratio}</b>` +
+            `<b class='cluster-text'>${ratio}</b>` +
             '</div>',
         iconSize: [-8, 36],
         iconAnchor: [-4, 36],
@@ -203,7 +203,7 @@ export const getClusterIconEmpty = (ratio: string): L.DivIcon => {
             "<div class='marker-cluster-empty hole'></div>" +
             '</div>' +
             "<div class='cluster-div-icon-text'>" +
-            `<b>${ratio}</b>` +
+            `<b class='cluster-text'>${ratio}</b>` +
             '</div>',
         iconSize: [-8, 36],
         iconAnchor: [-4, 36],

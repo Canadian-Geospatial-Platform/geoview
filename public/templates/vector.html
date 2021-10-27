@@ -19,7 +19,7 @@
         <link rel="stylesheet" href="css/style.css" />
     </head>
     <body>
-        <div calss="header-table">
+        <div class="header-table">
             <table>
                 <tbody>
                     <tr>
@@ -185,7 +185,7 @@
                 //  add event handler to the delete geometry group button
                 createGeomtryFromGroup.addEventListener('click', function (e) {
                     // call an api function to  delete the geometry group
-                    cgpv.api.map('mapWM').vector.createGeometryGroup(document.getElementById('groupname').value);
+                    cgpv.api.map('mapWM').vector.createGeometryGroup({ id: document.getElementById('groupname').value });
                     alert('Geometry Group Created');
                 });
             });

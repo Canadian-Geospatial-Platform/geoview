@@ -44,12 +44,8 @@ import { EVENT_NAMES } from '../api/event';
     },
 
     _onMouseUp: function _onMouseUp(e: MouseEvent): void {
-        if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) {
-            this._finish();
-            return;
-        }
-
         this._finish();
+        if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
         if (!this._moved) return;
         // Postpone to next JS tick so internal click event handling
@@ -64,13 +60,35 @@ import { EVENT_NAMES } from '../api/event';
 });
 
 export const SelectBox = (L.Map as any).BoxZoom.extend({
+    _onMouseMove: function _onMouseMove(e: MouseEvent): void {
+        if (!this._moved) {
+            this._moved = true;
+
+            this._box = DomUtil.create('div', 'leaflet-zoom-box', this._container);
+            DomUtil.addClass(this._container, 'leaflet-crosshair');
+
+            this._map.fire('boxzoomstart');
+        }
+
+        this._point = this._map.mouseEventToContainerPoint(e);
+
+        const bounds = new L.Bounds(this._point, this._startPoint);
+        const size = bounds.getSize();
+
+        DomUtil.setPosition(this._box, bounds.min);
+
+        this._box.style.width = `${size.x}px`;
+        this._box.style.height = `${size.y}px`;
+    },
+
     _onMouseDown: function _onMouseDown(e: MouseEvent): void {
-        if (!e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
+        if (e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
         // Clear the deferred resetState if it hasn't executed yet, otherwise it
         // will interrupt the interaction and orphan a box element in the container.
         this._clearDeferredResetState();
         this._resetState();
+        this._map.dragging.disable();
 
         DomUtil.disableTextSelection();
         DomUtil.disableImageDrag();
@@ -90,12 +108,9 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
     },
 
     _onMouseUp: function _onMouseUp(e: MouseEvent): void {
-        if (!e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) {
-            this._finish();
-            return;
-        }
-
         this._finish();
+        this._map.dragging.enable();
+        if (e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
         if (!this._moved) return;
         // Postpone to next JS tick so internal click event handling
@@ -209,7 +224,9 @@ declare module 'leaflet' {
 
     interface MarkerCluster {
         spiderfy: () => void;
+        unspiderfy: () => void;
         getAllChildMarkers(): L.MarkerClusterElement[];
+        zoomToBounds(options: { padding: [number, number] }): void;
     }
 }
 
@@ -228,24 +245,63 @@ L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
  *---------------------------------------------------------------------------*/
 
 declare module 'leaflet' {
-    interface MarkerClusterGroupOptions {
-        id?: string;
+    interface FeatureGroupOptions extends LayerOptions {
+        id: string;
         visible?: boolean;
-        on?: Record<string, L.LeafletEventHandlerFn>;
     }
 
     interface FeatureGroup {
         visible: boolean;
     }
 
-    interface MarkerClusterGroup {
+    export function featureGroup(layers?: Layer[], options?: FeatureGroupOptions): FeatureGroup;
+
+    export interface MarkerClusterMouseEvent extends LeafletMouseEvent {
+        latlng: LatLng;
+        layerPoint: Point;
+        containerPoint: Point;
+        originalEvent: MouseEvent;
+        propagatedFrom: MarkerCluster;
+        target: MarkerClusterGroup;
+        type: string;
+    }
+
+    export type MarkerClusterMouseEventHandlerFn = (event: MarkerClusterMouseEvent) => void;
+
+    interface MarkerClusterGroupOnOptions {
+        clusterclick?: MarkerClusterMouseEventHandlerFn;
+        unspiderfied?: MarkerClusterMouseEventHandlerFn;
+        spiderfied?: MarkerClusterMouseEventHandlerFn;
+    }
+
+    interface MarkerClusterGroupOptions {
+        id?: string;
+        visible?: boolean;
+        on?: MarkerClusterGroupOnOptions;
+    }
+
+    interface MarkerClusterGroup extends FeatureGroup {
         visible: boolean;
         type: string;
+        addLayer(marker: MarkerClusterElement): this;
+        removeLayer(marker: MarkerClusterElement): this;
+        eachLayer(fn: (layer: L.MarkerClusterElement) => void, context?: any): this;
+        getLayers(): MarkerClusterElement[];
+        getVisibleParent(marker: MarkerClusterElement): MarkerCluster;
+        unspiderfy(): void;
+        on(type: 'clusterclick' | 'unspiderfied' | 'spiderfied', fn: MarkerClusterMouseEventHandlerFn): void;
+        off(type: 'clusterclick' | 'unspiderfied' | 'spiderfied', fn: MarkerClusterMouseEventHandlerFn): void;
+        fire(type: 'click', event: MarkerClusterMouseEvent, propagate: boolean): void;
     }
 }
 
 L.FeatureGroup.addInitHook(function fn(this: L.FeatureGroup | L.MarkerClusterGroup) {
-    this.visible = !!(this.options as L.MarkerClusterGroupOptions).visible;
+    if ('visible' in this.options) {
+        this.visible = this.options.visible as boolean;
+    } else {
+        this.visible = true;
+        this.options.visible = true;
+    }
     if ('getVisibleParent' in this) {
         this.type = 'MarkerClusterGroup';
     } else {
@@ -267,7 +323,7 @@ declare module 'leaflet' {
     }
 
     interface Map {
-        id: string | undefined;
+        id: string;
         selectBox: L.Handler;
         zoomFactor: number;
     }

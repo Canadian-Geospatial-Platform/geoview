@@ -10,6 +10,8 @@ import { MapViewer } from '../common/map-viewer';
 import { Plugin } from './plugin';
 import { Utilities } from './utilities';
 import { CONST_LAYER_TYPES } from '../types/cgpv-types';
+import * as MarkerDefinitions from '../../public/markers/marker-definitions';
+
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -49,6 +51,9 @@ export class API {
 
     // utilities object
     utilities: Utilities;
+
+    // used to access marker definitions
+    markerDefinitions = MarkerDefinitions;
 
     /**
      * Initiate the event and projection objects

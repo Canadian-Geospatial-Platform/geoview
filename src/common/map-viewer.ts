@@ -7,12 +7,12 @@ import { ButtonPanel } from './ui/button-panel';
 import { Vector } from './layers/vector';
 import { Basemap } from './basemap';
 import { Layer } from './layers/layer';
-import { MarkerClusters } from './layers/marker-clusters/marker-clusters';
-import * as MarkerDefinitions from '../../public/markers/marker-definitions';
+import { MarkerCluster } from './layers/marker-cluster';
 import '../types/cgp-leaflet-config';
 
 import { api } from '../api/api';
 import { Cast, TypeWindow, TypeMapConfigProps } from '../types/cgpv-types';
+import { generateId } from './constant';
 
 /**
  * Class used to manage created maps
@@ -34,10 +34,7 @@ export class MapViewer {
     vector!: Vector;
 
     // used to access marker cluster API to create and manage marker cluster groups
-    markerClusters!: MarkerClusters;
-
-    // used to access marker definitions
-    markerDefinitions = MarkerDefinitions;
+    markerCluster!: MarkerCluster;
 
     // used to access button panel API to create buttons and button panels
     buttonPanel!: ButtonPanel;
@@ -71,7 +68,7 @@ export class MapViewer {
         this.id = cgpMap.id as string;
         this.map = cgpMap;
 
-        this.markerClusters = new MarkerClusters(cgpMap);
+        this.markerCluster = new MarkerCluster(cgpMap);
 
         this.vector = new Vector(cgpMap);
 
@@ -130,7 +127,7 @@ export class MapViewer {
 
                                 // add the geometry
                                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                                this.vector.addPolygon(data.geometry.coordinates, {});
+                                this.vector.addPolygon(data.geometry.coordinates, { id: generateId('') });
                             }
                         });
                     }
