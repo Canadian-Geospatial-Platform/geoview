@@ -37,8 +37,8 @@ const useStyles = makeStyles((theme) => ({
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
     // make sure the id is not undefined
-    let { id } = props;
-    id = generateId(id);
+    // eslint-disable-next-line react/destructuring-assignment
+    const id = props.id ? props.id : generateId('');
 
     const { center, zoom, projection, language, selectBox, boxZoom } = props;
 
