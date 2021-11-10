@@ -22,7 +22,7 @@
     </head>
     <body>
     <body>
-        <div calss="header-table">
+        <div class="header-table">
             <table>
                 <tbody>
                     <tr>
@@ -39,13 +39,81 @@
             <table>
                 <tbody>
                     <tr>
-                        <td>This page is used to showcase how marker clusters can be used.</td>
+                        <td>
+                            </p>This page is used to showcase how marker clusters are different from traditional markers and how they can be used.</p>
+                            <h2><strong>Introduction</strong></h2>
+                            <p>
+                                When you look at the map below, you can see many traditional markers sharing relatively close positions. The downside
+                                of these markers is that it becomes difficult to distinguish or count them, especially if their coordinates are
+                                nearly identical. Now, if you hold down the c-key and click anywhere on the map while the pointer is an arrow, these
+                                markers will be replaced by cluster type markers. These markers allow you to group all the markers within a
+                                certain resolution into a single marker. Whenever you want to compare the two representations, use a t-click to see
+                                the traditional markers and a c-click for the cluster markers.
+                            </p>
+                            <h2><strong>Definitions:</strong></h2>
+                            <p>
+                                A <b><i>marker cluster element</i></b> is a single marker that will be merged with other marker cluster elements when
+                                they are in the configurable resolution.
+                            </p>
+                            <p>
+                                <b><i>Marker clusters</i></b> are single markers that group together multiple marker cluster elements.
+                            </p>
+                            <p>
+                                <b><i>Marker cluster groups</i></b>, sometimes named <b><i>cluster groups</i></b>, are layers used to group marker
+                                cluster elements and their cluster representation so that their display characteristics can be managed as a whole.
+                            </p>
+                            <h2><strong>Visual Representation</strong></h2>
+                            <p>
+                                Marker cluster elements are small markers. Their representation is affected by two attributes: selected and blinking.
+                                Selected elements are green while unselected elements are blue. The blinking feature allows to identify only one
+                                element per map, the one that has the focus. The affected element contains a circle in its center that alternates
+                                between white and black. This makes it easy to locate the element you are working on.
+                            </p>
+                            <p>
+                                Marker clusters appear larger than marker cluster elements and are stamped with a fraction where the numerator
+                                indicates the number of selected elements and the denominator indicates the total number of elements contained
+                                in the marker cluster. Their colors depend on what they contain. They have a blue border and a white center
+                                when they contain no selected items. If only a part of their content is selected, they have a blue border and a
+                                pale green center. When all the items they contain are selected, they have a dark green border and a pale green
+                                center. When zooming out or at creation time, if the blinking element of the map ends up in a cluster marker,
+                                then its stamp will blink.
+                            </p>
+                            <h2><strong>Marker Behaviour</strong></h2>
+                            <p>
+                                A marker cluster can be exploded in the form of a spider simply by clicking on it. In this mode,
+                                all the elements of the vector and markerCluster class are temporarily hidden so that only the cluster we have
+                                exploded is displayed. This allow us to focus on the marker content without being distracted by unrelated elements.
+                                To cancel the display of the spiderfied marker, click anywhere on the map or on the dimmed marker group.
+                            </p>
+                            <p>
+                                The shift key is used for zoom actions. When you hold down the Shift key and click on a marker cluster element
+                                or a marker cluster, a zoom effect will be triggered to center the targeted marker as closely as possible. You
+                                can also zoom to an area by shift-clicking somewhere on the map without releasing the mouse button to draw a
+                                bounding box that will be used to calculate the center and zoom level when you release the mouse.
+                            </p>
+                            <p>
+                                The alt key is used to modify the selection of markers. To change the selection indicator of a marker cluster
+                                element, click on it with the alt key. This will toggle the value of its selection indicator and change the
+                                marker color to green to indicate that it is now selected or to blue when it is not. This behavior is the
+                                same whether you are in normal mode or in spider mode. In addition, if you alt-click on a cluster marker,
+                                all the elements it contains will have their selection indicator value swapped. It is also possible to swap
+                                the selection indicator of several marker elements and clusters in a single operation by drawing a selection
+                                box around them with the mouse, using an alt-click.
+                            <p>
+                                Concerning the focus (flashing function), it can only be activated on the elements of the marker cluster. This means
+                                that if your element is in a marker cluster, you will have to zoom in or spiderfy the marker in order to gain access
+                                to the targeted element. At this point, all that is left to do is to make a ctrl-click on the desired candidate.
+                                The blinking behaves like a toggle. However, only one element can blink at a time. This means that if you ctrl-click
+                                an element that is blinking, then it will stop blinking. If you ctrl-click a different element, the old one will
+                                stop blinking and the new one on will start.
+                            </p>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div>
-            <h3 id="HLNG1">Marker Clusters</h3>
+            <h3 id="HLNG1">Marker Clusters map</h3>
             <div
                 id="LNG1"
                 class="llwp-map"
@@ -63,64 +131,120 @@
                 }"
             ></div>
         </div>
+        <p><strong>Configuration Snippet:</strong></p>
+        <div id="LNG1CS" class="panel"></div>
+        <p><strong>Code Snippet:</strong></p>
+        <div id="codeSnippet" class="panel"></div>
+        <br />
+        <script src="codedoc.js"></script>
         <script>
-             function addMarker(map) {
-                // call an api function to draw markers
-                const api = cgpv.api.map(map);
-                api.vector.addCircleMarker(56,-97, 1, null, 'CircleMarker-1');
-                api.vector.addCircle(58,-99, 10, null, 'Circle-1');
+            let clickCounter = 0;
 
-                marker1 = api.vector.addMarker(56,-97, {
-                    icon: api.markerDefinitions.yellowIcon,
-                    title: 'Test-marker-1'
-                }, 'marker-1');
-                marker1.setIcon(api.markerDefinitions.greenIcon)
+            var pressedKeys = {};
+            window.onkeyup = function(e) { pressedKeys[e.keyCode] = false; }
+            window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
-                marker2 = api.markerClusters.addClusterMarker(58,-98.5, {
-                    selected: true,
-                    title: 'Test-marker-2.1'
-                }, 'marker-2.1');
-                marker2.startBlinking();
+            function addVectorMarkers(mapViewer) {
+                mapViewer.vector.addCircleMarker(56, -97, 1, null, 'CircleMarker-1');
+                mapViewer.vector.addCircle(57.7, -99, 10, null, 'Circle-1');
 
-                marker2 = api.markerClusters.addClusterMarker(58.2,-99.3, {
-                    title: 'Test-marker-2.2'
-                }, 'marker-2.2');
+                mapViewer.vector.createGeometryGroup('myGroup', { visible: true });
+                mapViewer.vector.setActiveGeometryGroup('myGroup');
 
-                marker2 = api.markerClusters.addClusterMarker(58,-99.4, {
-                    title: 'Test-marker-2.3'
-                }, 'marker-2.3');
+                marker = mapViewer.vector.addMarker(57, -98, {
+                    title: 'Marker-1'
+                }, 'Marker-1');
+                marker.setIcon(cgpv.api.markerDefinitions.greenIcon);
 
-                marker2 = api.markerClusters.addClusterMarker(57.9,-98.6, {
-                    selected: true,
-                    title: 'Test-marker-2.4'
-                }, 'marker-2.4');
+                mapViewer.vector.addMarker(58, -98.5, {
+                    icon: cgpv.api.markerDefinitions.yellowIcon,
+                    title: 'Marker-2'
+                }, 'Marker-2');
 
-                marker2 = api.markerClusters.addClusterMarker(57.7,-99, {
-                    selected: true,
-                    title: 'Test-marker-2.5'
-                }, 'marker-2.5');
+                mapViewer.vector.addMarker(58.2, -99.3, {
+                    title: 'Marker-3'
+                }, 'Marker-3');
 
-                marker2 = api.markerClusters.addClusterMarker(57.7005,-99, {
-                    title: 'Test-marker-2.6'
-                }, 'marker-2.6');
+                mapViewer.vector.addMarker(58, -99.4, {
+                    title: 'Marker-4'
+                }, 'Marker-4');
 
-                marker2 = api.markerClusters.addClusterMarker(57.7005,-99.0005, {
-                    title: 'Test-marker-2.7'
-                }, 'marker-2.7');
+                mapViewer.vector.addMarker(57.9, -98.6, {
+                    title: 'Marker-5'
+                }, 'Marker-5');
 
-                api.markerClusters.setClusterGroupAsInvisible();
-                api.markerClusters.setClusterGroupAsVisible();
+                mapViewer.vector.addMarker(57.7, -99, {
+                    title: 'Marker-6'
+                }, 'Marker-6');
 
-                api.vector.createGeometryGroup('myGroup');
-                api.vector.setActiveGeometryGroup('myGroup');
-                cgpv.api.event.emit(cgpv.api.eventNames.EVENT_VECTOR_ADD, null, {type: 'marker', latitude: 57, longitude:-98, options: {title: 'Test-marker-3'}, id: 'Marker-3'})
-                api.vector.setGeometryGroupAsVisible('myGroup');
-                api.vector.setGeometryGroupAsInvisible('defaultGeomGroup');
-                api.vector.addToGeometryGroup(marker1, 'MarkerGroup');
-                api.vector.setGeometryGroupAsVisible('MarkerGroup');
+                mapViewer.vector.addMarker(57.7005, -99, {
+                    title: 'Marker-7'
+                }, 'Marker-7');
+
+                mapViewer.vector.addMarker(57.7, -99.0005, {
+                    title: 'Marker-8'
+                }, 'Marker-8');
+
+                cgpv.api.event.emit(cgpv.api.eventNames.EVENT_VECTOR_ADD,
+                    null, {
+                        type: 'marker',
+                        latitude: 56,
+                        longitude: -97,
+                        options: {title: 'Marker-9'},
+                        id: 'Marker-9'
+                });
             }
 
-            function addModelsToAppbarPane(api) {
+            function addMarkerCluster(mapViewer) {
+                mapViewer.markerCluster.createClusterGroup('myGroup', { ...mapViewer.markerCluster.clusterGroupOptions, visible: false });
+                mapViewer.markerCluster.setActiveClusterGroup('myGroup');
+
+                marker = mapViewer.markerCluster.addMarkerElement(57, -98, {
+                    selected: true,
+                    blinking: true,
+                    title: 'MarkerClusterElement-1'
+                }, 'MarkerClusterElement-1');
+
+                mapViewer.markerCluster.addMarkerElement(58, -98.5, {
+                    title: 'MarkerClusterElement-2'
+                }, 'MarkerClusterElement-2');
+
+                mapViewer.markerCluster.addMarkerElement(58.2, -99.3, {
+                    title: 'MarkerClusterElement-3'
+                }, 'MarkerClusterElement-3');
+
+                mapViewer.markerCluster.addMarkerElement(58, -99.4, {
+                    selected: true,
+                    title: 'MarkerClusterElement-4'
+                }, 'MarkerClusterElement-4');
+
+                mapViewer.markerCluster.addMarkerElement(57.9, -98.6, {
+                    selected: true,
+                    title: 'MarkerClusterElement-5'
+                }, 'MarkerClusterElement-5');
+
+                mapViewer.markerCluster.addMarkerElement(57.7, -99, {
+                    title: 'MarkerClusterElement-6'
+                }, 'MarkerClusterElement-6');
+
+                mapViewer.markerCluster.addMarkerElement(57.7005, -99, {
+                    title: 'MarkerClusterElement-7'
+                }, 'MarkerClusterElement-7');
+
+                mapViewer.markerCluster.addMarkerElement(57.7, -99.0005, {
+                    title: 'MarkerClusterElement-8'
+                }, 'MarkerClusterElement-8');
+
+                cgpv.api.event.emit(cgpv.api.eventNames.EVENT_CLUSTER_ELEMENT_ADD,
+                    null, {
+                        latitude: 56,
+                        longitude:-97,
+                        options: {title: 'MarkerClusterElement-9'},
+                        id: 'MarkerClusterElement-9'
+                    });
+            }
+
+            function addModelsToAppbarPane(mapViewer) {
                 const button = {
                     tooltip: 'Models',
                     icon: '<i class="material-icons">apps</i>',
@@ -133,28 +257,40 @@
                     width: 200,
                 };
 
-                // call an api function to add a panel with a button in the default group
-                const modelPanel = api.buttonPanel.createAppbarPanel(button, panel, 'model-selector').panel;
+                // call an mapViewer function to add a panel with a button in the default group
+                const modelPanel = mapViewer.buttonPanel.createAppbarPanel(button, panel, 'model-selector').panel;
                 modelPanel.attachCheckBoxList(['model 1', 'model 2', 'model 3', 'model 4', ], false);
 
             }
 
-            // initialize s and api events, a callback is optional, used if calling api's after the rendering is ready
+            // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
                 console.log('api is ready');
-                const api = cgpv.api.map('LNG1');
-                api.map.on('boxzoomend', (e) => {
-                    console.log('boxzoomend');
-                    console.log(e);
+                //create snippets
+                createCodeSnippet();
+                createConfigSnippet();
+
+                const mapViewer = cgpv.api.map('LNG1');
+                mapViewer.map.on('click', (e) => {
+                    const markerClusterApi = window.cgpv.api.map(e.target.id).markerCluster;
+                    const vectorsApi = window.cgpv.api.map(e.target.id).vector;
+                    if (pressedKeys['C'.charCodeAt(0)]) {
+                        markerClusterApi.setClusterGroupAsVisible();
+                        vectorsApi.setGeometryGroupAsInvisible();
+                    }
+                    if (pressedKeys['T'.charCodeAt(0)]) {
+                        vectorsApi.setGeometryGroupAsVisible();
+                        markerClusterApi.setClusterGroupAsInvisible();
+                    }
+                    if (pressedKeys['C'.charCodeAt(0)] || pressedKeys['T'.charCodeAt(0)] ) clickCounter = ++clickCounter & 1;
                 });
-                api.map.on('boxselectend', (e) => {
-                    console.log('boxselectend');
-                    console.log(e);
-                });
-                const layerPanel = api.buttonPanel.getAppBarButtonPanelById('layer-panel').panel;
-                layerPanel.attachCheckBoxList(['layer 1', 'layer 2', 'layer 3', 'layer 4', ], false);
-                addModelsToAppbarPane(api);
-                addMarker('LNG1');
+
+                const layerPanel = mapViewer.buttonPanel.getAppBarButtonPanelById('layer-panel').panel;
+                layerPanel.attachCheckBoxList(['layer 1', 'layer 2', 'layer 3', 'layer 4', ], true);
+
+                addModelsToAppbarPane(mapViewer);
+                addVectorMarkers(mapViewer);
+                addMarkerCluster(mapViewer);
             });
         </script>
     </body>

@@ -1,4 +1,4 @@
-/* 
+/*
  * This section is use to hold styles relative to marker cluster
  */
 .marker-cluster-full.hole {
@@ -50,8 +50,8 @@
     width: 40px;
     height: 40px;
     margin: -20px 0 0 -20px;
-    background: rgb(202,32,38);
-    border: 1px solid rgb(104,52,32);
+    background: rgb(46,113,203);
+    border: 1px solid rgb(25,25,110);
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     transform: skewY(-25deg);
@@ -79,8 +79,8 @@
     width: 40px;
     height: 40px;
     margin: -20px 0 0 -20px;
-    background: rgb(202,32,38);
-    border: 1px solid rgb(104,52,32);
+    background: rgb(46,113,203);
+    border: 1px solid rgb(25,25,110);
     border-radius: 50% 50% 50% 0;
     transform: rotate(-45deg);
     transform: skewY(-25deg);
@@ -179,7 +179,22 @@
      }
 }
 
-.cluster-div-icon.zoomed-marker {
+.cluster-div-icon.blinking-icon-enabled b.cluster-text {
+    animation:blinking-text 1s ease-in infinite;
+}
+@keyframes blinking-text{
+  0% {
+     color: rgb(0,0,0);
+     }
+ 50% {
+     color: rgb(255,255,255);
+     }
+100% {
+     color: rgb(0,0,0);
+     }
+}
+
+.cluster-div-icon.spiderfied-marker {
     z-index: 0 !important;
 }
 

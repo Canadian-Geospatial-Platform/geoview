@@ -124,17 +124,29 @@ export const EVENT_NAMES = {
     EVENT_VECTOR_ON: 'vector/on',
 
     /**
-     * Event triggered when a request is made to add a cluster
+     * Event triggered when a request is made to add a cluster element
      */
-    EVENT_CLUSTER_ADD: 'cluster/add',
+    EVENT_CLUSTER_ELEMENT_ADD: 'cluster_element/add',
     /**
-     * Event triggered when a request is made to remove a cluster
+     * Event triggered when a request is made to remove a cluster element
      */
-    EVENT_CLUSTER_REMOVE: 'cluster/remove',
+    EVENT_CLUSTER_ELEMENT_REMOVE: 'cluster_element/remove',
     /**
-     * Event is triggered when a cluster has been added
+     * Event is triggered when a cluster element has been added
      */
-    EVENT_CLUSTER_ADDED: 'cluster/added',
+    EVENT_CLUSTER_ELEMENT_ADDED: 'cluster_element/added',
+    /**
+     * Event is triggered when a cluster element start blinking
+     */
+    EVENT_CLUSTER_ELEMENT_START_BLINKING: 'cluster_element/start_blinking',
+    /**
+     * Event is triggered when a cluster element stop blinking
+     */
+    EVENT_CLUSTER_ELEMENT_STOP_BLINKING: 'cluster_element/stop_blinking',
+    /**
+     * Event is triggered when a cluster element selection indicator changes
+     */
+    EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED: 'cluster_element/selection_has_changed',
 
     /**
      * Event is triggered when updating the basemap layers
