@@ -145,8 +145,8 @@
             window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
             function addVectorMarkers(mapViewer) {
-                mapViewer.vector.addCircleMarker(56, -97, 1, null, 'CircleMarker-1');
-                mapViewer.vector.addCircle(57.7, -99, 10, null, 'Circle-1');
+                mapViewer.vector.addCircleMarker(56, -97, { radius: 1 }, 'CircleMarker-1');
+                mapViewer.vector.addCircle(57.7, -99, { radius: 10 }, 'Circle-1');
 
                 mapViewer.vector.createGeometryGroup('myGroup', { visible: true });
                 mapViewer.vector.setActiveGeometryGroup('myGroup');

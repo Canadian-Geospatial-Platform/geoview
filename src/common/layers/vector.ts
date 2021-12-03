@@ -42,7 +42,7 @@ export class Vector {
         api.event.on(EVENT_NAMES.EVENT_VECTOR_ADD, (payload) => {
             const id = payload.id ? payload.id : null;
             if (payload.type === CONST_VECTOR_TYPES.CIRCLE) {
-                this.addCircle(payload.latitude, payload.longitude, payload.radius, payload.options, id);
+                this.addCircle(payload.latitude, payload.longitude, payload.options, id);
             } else if (payload.type === CONST_VECTOR_TYPES.POLYGON) {
                 this.addPolygon(payload.points, payload.options, id);
             } else if (payload.type === CONST_VECTOR_TYPES.POLYLINE) {
@@ -50,7 +50,7 @@ export class Vector {
             } else if (payload.type === CONST_VECTOR_TYPES.MARKER) {
                 this.addMarker(payload.latitude, payload.longitude, payload.options, id);
             } else if (payload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
-                this.addCircleMarker(payload.latitude, payload.longitude, payload.radius, payload.options, id);
+                this.addCircleMarker(payload.latitude, payload.longitude, payload.options, id);
             }
         });
 
@@ -128,16 +128,15 @@ export class Vector {
      *
      * @param {number} latitude the latitude position of the circle
      * @param {number} longitude the longitude position of the circle
-     * @param {number} radius the radius of the circle (in kilometers)
      * @param {L.CircleMarkerOptions} options circle options including styling
      * @param {string} id an optional id to be used to manage this geometry
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addCircle = (latitude: number, longitude: number, radius: number, options: L.CircleMarkerOptions, id?: string): L.Circle => {
-        const lId = generateId(id);
+    addCircle = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.Circle => {
+        const lId = options.id || generateId(id);
 
-        const circle = L.circle([latitude, longitude], { ...options, radius, id: lId });
+        const circle = L.circle([latitude, longitude], { ...options, id: lId });
 
         this.geometries.push(circle);
 
@@ -154,22 +153,16 @@ export class Vector {
      *
      * @param {number} latitude the latitude position of the circle marker
      * @param {number} longitude the longitude position of the circle marker
-     * @param {number} radius the radius of the circle marker (in meters)
      * @param {L.CircleMarkerOptions} options circle marker options including styling
      * @param {string} id an optional id to be used to manage this geometry
+     *                 The value from options.id has precedence on the id parameter.
      *
      * @returns a geometry containing the id and the created geometry
      */
-    addCircleMarker = (
-        latitude: number,
-        longitude: number,
-        radius: number,
-        options: L.CircleMarkerOptions,
-        id?: string
-    ): L.CircleMarker => {
-        const lId = generateId(id);
+    addCircleMarker = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.CircleMarker => {
+        const lId = options.id || generateId(id);
 
-        const circleMarker = L.circleMarker([latitude, longitude], { ...options, radius, id: lId });
+        const circleMarker = L.circleMarker([latitude, longitude], { ...options, id: lId });
 
         this.geometries.push(circleMarker);
 
@@ -242,12 +235,11 @@ export class Vector {
      * Create a new geometry group to manage multiple geometries at once
      *
      * @param {string} geometryGroupid the id of the group to use when managing this group
-     * @param {boolean} addGroupToMap a flag indicating that the geometry group must be added to the map
      */
     createGeometryGroup = (geometryGroupid: string, options?: L.FeatureGroupOptions): L.FeatureGroup => {
         let featureGroup = this.getGeometryGroup(geometryGroupid);
         if (!featureGroup) {
-            const featureGroupOptions = { ...options, id: geometryGroupid } || { id: geometryGroupid };
+            const featureGroupOptions = { ...options, id: geometryGroupid };
             featureGroup = L.featureGroup([], featureGroupOptions);
             if (featureGroup.visible) {
                 featureGroup.addTo(this.map);
@@ -259,7 +251,8 @@ export class Vector {
     };
 
     /**
-     * set the active geometry group (the geometry group used when adding geometries)
+     * set the active geometry group (the geometry group used when adding geometries).
+     * If id is not specified, use the default geometry group.
      *
      * @param {string} id optional the id of the group to set as active
      */
@@ -379,7 +372,7 @@ export class Vector {
      * @param {L.Layer} geometry the geometry to be added to the group
      * @param {string} geometryGroupId optional id of the group to add the geometry to
      */
-    addGeometryToGeometryGroup = (geometry: L.Layer, geometryGroupId?: string): void => {
+    addToGeometryGroup = (geometry: L.Layer, geometryGroupId?: string): void => {
         let geometryGroup: L.FeatureGroup;
         if (geometryGroupId) {
             // create geometry group if it does not exist
