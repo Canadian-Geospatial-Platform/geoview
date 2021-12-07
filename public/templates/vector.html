@@ -109,7 +109,7 @@
 
             function addCircle(map) {
                 // call an api function to draw a polygon
-                const circle = cgpv.api.map(map).vector.addCircle(50, -109, 200, {
+                const circle = cgpv.api.map(map).vector.addCircle(50, -109, {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
@@ -121,7 +121,7 @@
 
             function addCircleMarker(map) {
                 // call an api function to draw a polygon
-                const circleMarker = cgpv.api.map(map).vector.addCircleMarker(70, -109, 5, {
+                const circleMarker = cgpv.api.map(map).vector.addCircleMarker(70, -109, {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
