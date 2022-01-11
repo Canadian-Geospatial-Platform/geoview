@@ -30,7 +30,7 @@ Marker.prototype.options.icon = DefaultIcon;
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
-function init(callback: () => void) {
+function init(callback) {
     // apply focus to element when keyboard navigation is use
     manageKeyboardFocus();
 
@@ -64,3 +64,7 @@ Object.freeze(cgpv);
 
 // export the cgpv globally
 Cast<TypeWindow>(window).cgpv = cgpv;
+
+export const test = (): void => {
+    console.log('Test');
+};

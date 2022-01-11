@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "Lightweight viewer based on Leaflet and React for the Canadian Geospatial Platform",
     "private": true,
-    "main": "app.tsx",
+    "main": "src/app.tsx",
     "scripts": {
         "serve": "webpack serve --progress --color --config webpack.dev.js",
         "build": "webpack --progress --color --config webpack.prod.js",
