@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react';
-import { createMuiTheme, ThemeOptions } from '@material-ui/core/styles';
+import { createTheme, ThemeOptions } from '@material-ui/core/styles';
 // eslint-disable-next-line no-restricted-imports
 import { Variant, TypographyStyleOptions } from '@material-ui/core/styles/createTypography';
 
@@ -152,4 +152,4 @@ export const styles: Record<string, CSSProperties> = {
     },
 };
 
-export const theme = createMuiTheme(themeOptions);
+export const theme = createTheme(themeOptions);

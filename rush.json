@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
+  "rushVersion": "5.58.0",
+  "pnpmVersion": "6.7.1",
+  "pnpmOptions": {
+    "strictPeerDependencies": true,
+    "useWorkspaces": true
+  },
+  "ensureConsistentVersions": true,
+  "eventHooks": {
+    "preRushInstall": [],
+    "postRushInstall": [],
+    "preRushBuild": [],
+    "postRushBuild": []
+  },
+  "telemetryEnabled": false,
+  "projects": [
+    {
+      "packageName": "geoview-core",
+      "projectFolder": "apps/geoview-core"
+    },
+    {
+      "packageName": "geoview-details-panel",
+      "projectFolder": "packages/geoview-details-panel"
+    }
+  ]
+}
