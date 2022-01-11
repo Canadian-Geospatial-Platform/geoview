@@ -3,6 +3,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+**/log
+**/logs
 
 # Runtime data
 *.pid
@@ -13,8 +15,8 @@ yarn-error.log*
 lib-cov
 
 # Coverage directory used by tools like istanbul
-/coverage
-/analysis
+**/coverage
+**/analysis
 
 # nyc test coverage
 .nyc_output
@@ -30,13 +32,13 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
-/build
-/dist
+**/build
+**/dist
 
 # Dependency directories
 **/node_modules
-jspm_packages/
-/.pnp
+**/jspm_packages
+**/.pnp
 .pnp.js
 
 # Optional npm cache directory
@@ -68,11 +70,10 @@ jspm_packages/
 .DS_Store
 
 # Rush temporary files
-common/deploy/**/
-**/temp
+**/common/deploy
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
 
 # Common toolchain intermediate files
-lib
-temp
+**/lib
+**/temp
