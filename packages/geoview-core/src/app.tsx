@@ -49,7 +49,7 @@ function init(callback) {
 }
 
 // cgpv object to be exported with the api for outside use
-const cgpv: TypeCGPV = {
+export const cgpv: TypeCGPV = {
     init,
     api: Cast<TypeApi>({
         ...api,
@@ -64,7 +64,3 @@ Object.freeze(cgpv);
 
 // export the cgpv globally
 Cast<TypeWindow>(window).cgpv = cgpv;
-
-export const test = (): void => {
-    console.log('Test');
-};
