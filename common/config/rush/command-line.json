@@ -2,11 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
   "commands": [
     {
-      "commandKind": "bulk",
+      "commandKind": "global",
       "name": "serve",
       "summary": "Serves the page locally with hot-reload.",
-      "enableParallelism": true,
-      "ignoreDependencyOrder": true
+      "shellCommand": "npm run --prefix packages/geoview-core serve"
     }
   ],
   "parameters": []
