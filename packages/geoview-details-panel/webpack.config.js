@@ -1,18 +1,14 @@
 const path = require("path");
 const LodashWebpackPlugin = require("lodash-webpack-plugin");
 
-const package = require("./package.json");
-
-const packageName = package.name;
-
 module.exports = {
-  entry: {
-    [packageName]: "./src/index.tsx",
-    "gcpv-main": "../geoview-core/src/app.tsx",
-  },
+  entry: "./src/index.tsx",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].js",
+    filename: "geoview-details-panel.js",
+  },
+  externals: {
+    core: "geoview-core",
   },
   resolve: {
     extensions: [".js", ".jsx", ".json", ".ts", ".tsx"],
@@ -56,11 +52,9 @@ module.exports = {
     ],
   },
   plugins: [new LodashWebpackPlugin()],
-  optimization: {
-    splitChunks: {
-      chunks(chunk) {
-        return chunk.name === packageName;
-      },
-    },
-  },
+  //   optimization: {
+  //     splitChunks: {
+  //       chunks: "all",
+  //     },
+  //   },
 };
