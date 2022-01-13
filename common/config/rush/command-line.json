@@ -5,7 +5,7 @@
       "commandKind": "global",
       "name": "serve",
       "summary": "Serves the page locally with hot-reload.",
-      "shellCommand": "npm run --prefix packages/geoview-core serve"
+      "shellCommand": "npm run --prefix packages/geoview-loader serve"
     }
   ],
   "parameters": []

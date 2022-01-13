@@ -10,8 +10,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { api } from "geoview-core/src/api/api";
-import { EVENT_NAMES } from "geoview-core/src/api/event";
+import { EVENT_NAMES } from "../../geoview-core/src/api/event";
 import {
   Cast,
   TypeJSONObject,
@@ -25,11 +24,14 @@ import {
   TypeLayersEntry,
   TypeEntry,
   TypePanelContentProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "../../geoview-core/src/types/cgpv-types";
 
 import LayersList from "./layers-list";
 import FeaturesList from "./features-list";
 import FeatureInfo from "./feature-info";
+
+// get the window object
+const w = window as any;
 
 // use material ui theming
 const useStyles = makeStyles(() => ({
@@ -61,6 +63,12 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const [featureInfo, setFeatureInfo] = useState(false);
 
   const [clickPos, setClickPos] = useState<L.LatLng>();
+
+  // access the cgpv object from the window object
+  const cgpv = w["cgpv"];
+
+  // access the api calls
+  const { api } = cgpv;
 
   const classes = useStyles();
 

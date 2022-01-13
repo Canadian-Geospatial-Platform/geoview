@@ -1,17 +1,16 @@
 {
     "presets": [
-        ["@babel/preset-react", {
-            "runtime": "automatic"
-        }],
         [
-        "@babel/preset-env",
-        {
-            "targets": [
-            "last 2 Chrome versions",
-            "last 2 Safari versions",
-            "last 2 Firefox versions"
-            ]
-        }
+            "@babel/preset-react",
+            {
+                "runtime": "automatic"
+            }
+        ],
+        [
+            "@babel/preset-env",
+            {
+                "targets": ["last 2 Chrome versions", "last 2 Safari versions", "last 2 Firefox versions"]
+            }
         ],
         "@babel/preset-typescript"
     ],
@@ -30,10 +29,10 @@
         [
             "babel-plugin-import",
             {
-            "libraryName": "@material-ui/icons",
-            // Use "'libraryDirectory': ''," if your bundler does not support ES modules
-            "libraryDirectory": "esm",
-            "camel2DashComponentName": false
+                "libraryName": "@material-ui/icons",
+                // Use "'libraryDirectory': ''," if your bundler does not support ES modules
+                "libraryDirectory": "esm",
+                "camel2DashComponentName": false
             },
             "icons"
         ],

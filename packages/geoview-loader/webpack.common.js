@@ -23,17 +23,19 @@ const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) =>
         title: 'Canadian Geospatial Platform Viewer',
         inject: 'head',
         scriptLoading: 'blocking',
-        chunks: ['app'],
+        chunks: ['gcpv-main'],
     });
 });
 
 const config = {
     entry: {
-        app: path.resolve(__dirname, 'src/app.tsx'),
+        'gcpv-main': 'geoview-core',
+        'geoview-details-panel': 'geoview-details-panel',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'gcpv-main.js',
+        filename: '[name].js',
+        chunkFilename: '[name].js',
     },
     resolve: {
         extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx'],
@@ -64,13 +66,18 @@ const config = {
                     {
                         loader: 'babel-loader',
                         options: {
-                            plugins: ['lodash'],
+                            plugins: ['lodash', '@babel/transform-runtime'],
                             presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
                         },
                     },
                 ],
             },
         ],
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        },
     },
     plugins: [
         new LodashWebpackPlugin(),

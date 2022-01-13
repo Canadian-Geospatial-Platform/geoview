@@ -13,7 +13,7 @@ import {
   TypeJSONValue,
   TypeLayersEntry,
   TypeFeaturesListProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "../../geoview-core/src/types/cgpv-types";
 
 // use material ui theming
 const useStyles = makeStyles(() => ({

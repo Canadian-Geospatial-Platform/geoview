@@ -3,7 +3,8 @@
   "rushVersion": "5.58.0",
   "pnpmVersion": "6.7.1",
   "pnpmOptions": {
-    "strictPeerDependencies": true
+    "strictPeerDependencies": true,
+    "useWorkspaces": true
   },
   "ensureConsistentVersions": true,
   "eventHooks": {
@@ -14,6 +15,10 @@
   },
   "telemetryEnabled": false,
   "projects": [
+    {
+      "packageName": "geoview-loader",
+      "projectFolder": "packages/geoview-loader"
+    },
     {
       "packageName": "geoview-core",
       "projectFolder": "packages/geoview-core"

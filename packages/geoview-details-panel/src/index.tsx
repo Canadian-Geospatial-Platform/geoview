@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import PanelContent from "./panel-content";
 
-import { api } from "geoview-core/src/api/api";
 import {
   TypeButtonPanel,
   TypeProps,
   TypeButtonProps,
   TypePanelProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "../../geoview-core/src/types/cgpv-types";
+
+const w = window as any;
 
 /**
  * Create a class for the plugin instance
@@ -49,6 +50,13 @@ class DetailsPlugin {
    */
   added = (): void => {
     const { mapId } = this.DetailsPluginProps;
+
+    // access the cgpv object from the window object
+    const cgpv = w["cgpv"];
+
+    // access the api calls
+    const { api } = cgpv;
+
     const { language } = api.map(mapId);
 
     // button props
@@ -57,7 +65,7 @@ class DetailsPlugin {
       id: "detailsPanelButton",
       tooltip: this.translations[language].detailsPanel,
       icon: '<i class="material-icons">details</i>',
-      visible: false,
+      visible: true,
     };
 
     // panel props
@@ -84,6 +92,12 @@ class DetailsPlugin {
   removed(): void {
     const { mapId } = this.DetailsPluginProps;
 
+    // access the cgpv object from the window object
+    const cgpv = w["cgpv"];
+
+    // access the api calls
+    const { api } = cgpv;
+
     if (this.buttonPanel) {
       api.map(mapId).buttonPanel.removeAppbarPanel(this.buttonPanel.id);
     }
@@ -91,3 +105,6 @@ class DetailsPlugin {
 }
 
 export default DetailsPlugin;
+
+w["plugins"] = w["plugins"] || {};
+w["plugins"]["detailsPanel"] = DetailsPlugin;

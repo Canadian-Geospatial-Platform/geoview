@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import {
   TypeJSONObject,
   TypeFeatureInfoProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "../../geoview-core/src/types/cgpv-types";
 
 // use material ui theming
 const useStyles = makeStyles(() => ({

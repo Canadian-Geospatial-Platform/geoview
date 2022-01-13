@@ -1,13 +1,15 @@
 /* eslint-disable react/no-array-index-key */
 import { makeStyles } from "@material-ui/core/styles";
 
-import { api } from "geoview-core/src/api/api";
-import { EVENT_NAMES } from "geoview-core/src/api/event";
+import { EVENT_NAMES } from "../../geoview-core/src/api/event";
 import {
   TypeJSONObject,
   TypeLayersListProps,
   TypeLayerData,
-} from "geoview-core/src/types/cgpv-types";
+} from "../../geoview-core/src/types/cgpv-types";
+
+// get the window object
+const w = window as any;
 
 // use material ui theming
 const useStyles = makeStyles(() => ({
@@ -73,6 +75,12 @@ const useStyles = makeStyles(() => ({
 const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { layersData, selectFeature, selectLayer, getSymbol, clickPos, mapId } =
     props;
+
+  // access the cgpv object from the window object
+  const cgpv = w["cgpv"];
+
+  // access the api calls
+  const { api } = cgpv;
 
   const classes = useStyles();
 
