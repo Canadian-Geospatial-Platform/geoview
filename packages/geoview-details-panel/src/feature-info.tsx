@@ -1,59 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import { useEffect } from "react";
-
-import { makeStyles } from "@material-ui/core/styles";
-import { useTranslation } from "react-i18next";
 import {
   TypeJSONObject,
   TypeFeatureInfoProps,
 } from "../../geoview-core/src/types/cgpv-types";
 
-// use material ui theming
-const useStyles = makeStyles(() => ({
-  featureInfoContainer: {
-    width: "100%",
-  },
-  featureInfoHeader: {
-    display: "flex",
-    alignItems: "center",
-  },
-  featureInfoHeaderIconContainer: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "32px",
-    minWidth: "32px",
-    height: "32px",
-    boxShadow:
-      "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
-  },
-  featureInfoHeaderIcon: {},
-  featureInfoHeaderText: {
-    marginLeft: "10px",
-    width: "100%",
-    fontSize: 18,
-  },
-  featureInfoItemsContainer: {
-    display: "flex",
-    flexDirection: "column",
-    marginTop: 20,
-  },
-  featureInfoItem: {
-    display: "flex",
-    flexDirection: "column",
-    margin: "5px 0",
-  },
-  featureInfoItemKey: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  featureInfoItemValue: {
-    fontSize: 16,
-    backgroundColor: "#ddd",
-  },
-}));
+const w = window as any;
 
 /**
  * A react component that will return entry / feature information
@@ -64,8 +17,61 @@ const useStyles = makeStyles(() => ({
 const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
   const { buttonPanel, selectedFeature, setPanel } = props;
 
+  // access the cgpv object from the window object
+  const cgpv = w["cgpv"];
+
+  // access the api calls
+  const { react, makeStyles, useTranslation } = cgpv;
+
+  const { useEffect } = react;
+
   const { displayField, fieldAliases, attributes, symbol, numOfEntries } =
     selectedFeature;
+
+  // use material ui theming
+  const useStyles = makeStyles(() => ({
+    featureInfoContainer: {
+      width: "100%",
+    },
+    featureInfoHeader: {
+      display: "flex",
+      alignItems: "center",
+    },
+    featureInfoHeaderIconContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "32px",
+      minWidth: "32px",
+      height: "32px",
+      boxShadow:
+        "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
+    },
+    featureInfoHeaderIcon: {},
+    featureInfoHeaderText: {
+      marginLeft: "10px",
+      width: "100%",
+      fontSize: 18,
+    },
+    featureInfoItemsContainer: {
+      display: "flex",
+      flexDirection: "column",
+      marginTop: 20,
+    },
+    featureInfoItem: {
+      display: "flex",
+      flexDirection: "column",
+      margin: "5px 0",
+    },
+    featureInfoItemKey: {
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    featureInfoItemValue: {
+      fontSize: 16,
+      backgroundColor: "#ddd",
+    },
+  }));
 
   const classes = useStyles();
 

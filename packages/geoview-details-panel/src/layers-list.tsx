@@ -1,6 +1,4 @@
 /* eslint-disable react/no-array-index-key */
-import { makeStyles } from "@material-ui/core/styles";
-
 import { EVENT_NAMES } from "../../geoview-core/src/api/event";
 import {
   TypeJSONObject,
@@ -10,61 +8,6 @@ import {
 
 // get the window object
 const w = window as any;
-
-// use material ui theming
-const useStyles = makeStyles(() => ({
-  layersContainer: {
-    overflow: "hidden",
-    overflowY: "auto",
-    width: "100%",
-  },
-  layerItem: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    margin: "5px 0",
-    padding: "10px 5px",
-    boxSizing: "content-box",
-    "&:hover": {
-      cursor: "pointer",
-      backgroundColor: "#c9c9c9",
-    },
-    zIndex: 1000,
-    border: "none",
-    width: "100%",
-  },
-  layerParentText: {
-    fontSize: "16px",
-    fontWeight: "bold",
-  },
-  layerCountTextContainer: {
-    display: "flex",
-    // justifyContent: 'space-around',
-    alignItems: "center",
-    width: "100%",
-  },
-  layerFeatureCount: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "32px",
-    minWidth: "32px",
-    height: "32px",
-    boxShadow:
-      "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
-    marginRight: "10px",
-    color: "black",
-    fontSize: "16px",
-    fontWeight: "bold",
-  },
-  layerItemText: {
-    fontSize: "14px",
-    // fontWeight: 'bold',
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-  },
-}));
 
 /**
  * A react component that will list the map server layers defined in the map config
@@ -80,7 +23,62 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { api } = cgpv;
+  const { api, makeStyles } = cgpv;
+
+  // use material ui theming
+  const useStyles = makeStyles(() => ({
+    layersContainer: {
+      overflow: "hidden",
+      overflowY: "auto",
+      width: "100%",
+    },
+    layerItem: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      margin: "5px 0",
+      padding: "10px 5px",
+      boxSizing: "content-box",
+      "&:hover": {
+        cursor: "pointer",
+        backgroundColor: "#c9c9c9",
+      },
+      zIndex: 1000,
+      border: "none",
+      width: "100%",
+    },
+    layerParentText: {
+      fontSize: "16px",
+      fontWeight: "bold",
+    },
+    layerCountTextContainer: {
+      display: "flex",
+      // justifyContent: 'space-around',
+      alignItems: "center",
+      width: "100%",
+    },
+    layerFeatureCount: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "32px",
+      minWidth: "32px",
+      height: "32px",
+      boxShadow:
+        "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
+      marginRight: "10px",
+      color: "black",
+      fontSize: "16px",
+      fontWeight: "bold",
+    },
+    layerItemText: {
+      fontSize: "14px",
+      // fontWeight: 'bold',
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+    },
+  }));
 
   const classes = useStyles();
 

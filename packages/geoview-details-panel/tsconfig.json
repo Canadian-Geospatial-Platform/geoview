@@ -10,7 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "strictPropertyInitialization": true,
     "sourceMap": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "allowJs": true,
     "noEmit": true,
     "isolatedModules": true,

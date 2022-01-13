@@ -204,8 +204,6 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
       if (args.buttonId === panel.buttonId) {
         updateComponent();
       }
-
-      console.log(panel.content);
     });
 
     // listen to open panel to activate focus trap and focus on close

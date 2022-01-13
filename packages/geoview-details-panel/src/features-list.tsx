@@ -3,11 +3,7 @@
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
-import { useEffect } from "react";
 
-import { useTranslation } from "react-i18next";
-
-import { makeStyles } from "@material-ui/core/styles";
 import {
   TypeJSONObject,
   TypeJSONValue,
@@ -15,53 +11,7 @@ import {
   TypeFeaturesListProps,
 } from "../../geoview-core/src/types/cgpv-types";
 
-// use material ui theming
-const useStyles = makeStyles(() => ({
-  featuresContainer: {
-    overflow: "hidden",
-    overflowY: "auto",
-    width: "100%",
-  },
-  featureItem: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    margin: "5px 0",
-    padding: "10px 5px",
-    boxSizing: "content-box",
-    "&:hover": {
-      cursor: "pointer",
-      backgroundColor: "#c9c9c9",
-    },
-    zIndex: 1000,
-  },
-  featureIconTextContainer: {
-    display: "flex",
-    alignItems: "center",
-    width: "100%",
-  },
-  featureItemIconContainer: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "32px",
-    minWidth: "32px",
-    height: "32px",
-    boxShadow:
-      "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
-  },
-  featureItemIcon: {},
-  featureItemText: {
-    display: "inline-block",
-    width: "100%",
-    fontWeight: 400,
-    marginLeft: "10px",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    fontSize: "16px",
-  },
-}));
+const w = window as any;
 
 /**
  * A react component to display layer entries
@@ -79,8 +29,64 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
     buttonPanel,
   } = props;
 
+  // access the cgpv object from the window object
+  const cgpv = w["cgpv"];
+
+  // access the api calls
+  const { react, makeStyles, useTranslation } = cgpv;
+
+  const { useEffect } = react;
+
   const { displayField, fieldAliases, layerData, renderer } =
     selectedLayer as TypeLayersEntry;
+
+  // use material ui theming
+  const useStyles = makeStyles(() => ({
+    featuresContainer: {
+      overflow: "hidden",
+      overflowY: "auto",
+      width: "100%",
+    },
+    featureItem: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      margin: "5px 0",
+      padding: "10px 5px",
+      boxSizing: "content-box",
+      "&:hover": {
+        cursor: "pointer",
+        backgroundColor: "#c9c9c9",
+      },
+      zIndex: 1000,
+    },
+    featureIconTextContainer: {
+      display: "flex",
+      alignItems: "center",
+      width: "100%",
+    },
+    featureItemIconContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "32px",
+      minWidth: "32px",
+      height: "32px",
+      boxShadow:
+        "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
+    },
+    featureItemIcon: {},
+    featureItemText: {
+      display: "inline-block",
+      width: "100%",
+      fontWeight: 400,
+      marginLeft: "10px",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      fontSize: "16px",
+    },
+  }));
 
   const classes = useStyles();
 

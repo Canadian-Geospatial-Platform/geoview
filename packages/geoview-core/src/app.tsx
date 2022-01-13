@@ -3,6 +3,11 @@ import ReactDOM from "react-dom";
 
 // Leaflet icons import to solve issues 4968
 import { Icon, Marker } from "leaflet";
+
+import { useTranslation } from "react-i18next";
+
+import { makeStyles } from "@material-ui/core/styles";
+
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
@@ -30,7 +35,7 @@ Marker.prototype.options.icon = DefaultIcon;
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
-function init(callback) {
+function init(callback: () => void) {
   // apply focus to element when keyboard navigation is use
   manageKeyboardFocus();
 
@@ -48,6 +53,8 @@ function init(callback) {
   ReactDOM.render(<AppStart html={html} />, document.getElementById("root"));
 }
 
+console.log(typeof React);
+
 // cgpv object to be exported with the api for outside use
 export const cgpv: TypeCGPV = {
   init,
@@ -57,6 +64,9 @@ export const cgpv: TypeCGPV = {
     ...api.projection,
     ...api.plugin,
   }),
+  react: React,
+  makeStyles: makeStyles,
+  useTranslation: useTranslation,
 };
 
 // freeze variable name so a variable with same name can't be defined from outside

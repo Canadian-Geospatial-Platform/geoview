@@ -30,11 +30,8 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.12.9",
-    "@types/create-react-class": "^15.6.3",
     "@types/flux": "^3.1.9",
     "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "@types/react-router-dom": "^5.1.6",
-    "react-test-renderer": "^17.0.1"
+    "@types/react-dom": "^17.0.0"
   }
 }

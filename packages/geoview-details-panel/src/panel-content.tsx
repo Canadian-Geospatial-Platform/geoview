@@ -7,9 +7,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
 /* eslint-disable object-shorthand */
-import { useCallback, useEffect, useState } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
 import { EVENT_NAMES } from "../../geoview-core/src/api/event";
 import {
   Cast,
@@ -33,14 +31,6 @@ import FeatureInfo from "./feature-info";
 // get the window object
 const w = window as any;
 
-// use material ui theming
-const useStyles = makeStyles(() => ({
-  mainContainer: {
-    display: "flex",
-    flexDirection: "row",
-  },
-}));
-
 /**
  * A react component that displays the details panel content
  *
@@ -49,6 +39,14 @@ const useStyles = makeStyles(() => ({
  */
 const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { buttonPanel, mapId } = props;
+
+  // access the cgpv object from the window object
+  const cgpv = w["cgpv"];
+
+  // access the api calls
+  const { api, react, makeStyles } = cgpv;
+
+  const { useState, useCallback, useEffect } = react;
 
   const [layersData, setLayersData] = useState<Record<string, TypeLayerData>>(
     {}
@@ -64,11 +62,13 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
   const [clickPos, setClickPos] = useState<L.LatLng>();
 
-  // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
-
-  // access the api calls
-  const { api } = cgpv;
+  // use material ui theming
+  const useStyles = makeStyles(() => ({
+    mainContainer: {
+      display: "flex",
+      flexDirection: "row",
+    },
+  }));
 
   const classes = useStyles();
 
