@@ -20,7 +20,10 @@ export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
   react: Object;
-  makeStyles: Object;
+  leaflet: Object;
+  reactLeaflet: Object;
+  reactLeafletCore: Object;
+  ui: Object;
   useTranslation: Object;
 };
 

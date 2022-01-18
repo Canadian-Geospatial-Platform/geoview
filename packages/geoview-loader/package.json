@@ -53,7 +53,8 @@
         "screenfull": "~5.0.2",
         "leaflet": "1.7.1",
         "geoview-core": "workspace:~0.1.0",
-        "geoview-details-panel": "workspace:~1.0.0"
+        "geoview-details-panel": "workspace:~1.0.0",
+        "geoview-overview-map": "workspace:*"
     },
     "devDependencies": {
         "@babel/cli": "^7.12.8",

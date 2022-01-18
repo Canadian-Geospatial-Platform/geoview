@@ -26,6 +26,10 @@
     {
       "packageName": "geoview-details-panel",
       "projectFolder": "packages/geoview-details-panel"
+    },
+    {
+      "packageName": "geoview-overview-map",
+      "projectFolder": "packages/geoview-overview-map"
     }
   ]
 }

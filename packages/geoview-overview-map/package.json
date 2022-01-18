@@ -1,11 +1,11 @@
 {
-  "name": "geoview-details-panel",
+  "name": "geoview-overview-map",
   "version": "1.0.0",
-  "description": "Details panel plugin for the geo viewer project",
+  "description": "Overview map for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
     "react",
-    "details panel"
+    "overview map"
   ],
   "author": "Saleh Yassin",
   "license": "MIT",

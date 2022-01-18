@@ -6,7 +6,7 @@ import {
   TypeProps,
   TypeButtonProps,
   TypePanelProps,
-} from "../../geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/types/cgpv-types";
 
 const w = window as any;
 
@@ -65,7 +65,7 @@ class DetailsPlugin {
       id: "detailsPanelButton",
       tooltip: this.translations[language].detailsPanel,
       icon: '<i class="material-icons">details</i>',
-      visible: false,
+      visible: true,
     };
 
     // panel props

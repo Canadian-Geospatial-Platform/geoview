@@ -7,6 +7,7 @@ import { ButtonPanel } from "./ui/button-panel";
 import { Vector } from "./layers/vector";
 import { Basemap } from "./basemap";
 import { Layer } from "./layers/layer";
+import { Projection } from "./projection";
 import { MarkerCluster } from "./layers/marker-cluster";
 import "../types/cgp-leaflet-config";
 
@@ -49,7 +50,10 @@ export class MapViewer {
   language: string;
 
   // get used projection
-  projection: number;
+  currentProjection: number;
+
+  // access projection functions for this map instance
+  projection: Projection;
 
   /**
    * Initialize map props and basemaps
@@ -63,7 +67,7 @@ export class MapViewer {
     this.mapProps = mapProps;
 
     this.language = mapProps.language;
-    this.projection = mapProps.projection;
+    this.currentProjection = mapProps.projection;
 
     this.id = cgpMap.id as string;
     this.map = cgpMap;
@@ -74,6 +78,9 @@ export class MapViewer {
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(cgpMap, this.mapProps.layers);
+
+    // initialize the projection
+    this.projection = new Projection(mapProps.projection);
 
     this.buttonPanel = new ButtonPanel(cgpMap);
 

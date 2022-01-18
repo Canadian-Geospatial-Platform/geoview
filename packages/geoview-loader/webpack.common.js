@@ -31,6 +31,7 @@ const config = {
     entry: {
         'gcpv-main': 'geoview-core',
         'geoview-details-panel': 'geoview-details-panel',
+        'geoview-overview-map': 'geoview-overview-map',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -74,11 +75,11 @@ const config = {
             },
         ],
     },
-    optimization: {
-        splitChunks: {
-            chunks: 'all',
-        },
-    },
+    // optimization: {
+    //     splitChunks: {
+    //         chunks: 'all',
+    //     },
+    // },
     plugins: [
         new LodashWebpackPlugin(),
         new HtmlWebpackPlugin({

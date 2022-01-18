@@ -6,6 +6,13 @@
       "name": "serve",
       "summary": "Serves the page locally with hot-reload.",
       "shellCommand": "npm run --prefix packages/geoview-loader serve"
+    },
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Build the packages and move them to the dist directory",
+      "enableParallelism": false,
+      "ignoreMissingScript": true
     }
   ],
   "parameters": []

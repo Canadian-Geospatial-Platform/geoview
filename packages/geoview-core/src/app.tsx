@@ -2,11 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 // Leaflet icons import to solve issues 4968
-import { Icon, Marker } from "leaflet";
+import L, { Icon, Marker } from "leaflet";
+import * as ReactLeaflet from "react-leaflet";
+import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { useMediaQuery } from "@material-ui/core";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -53,8 +56,6 @@ function init(callback: () => void) {
   ReactDOM.render(<AppStart html={html} />, document.getElementById("root"));
 }
 
-console.log(typeof React);
-
 // cgpv object to be exported with the api for outside use
 export const cgpv: TypeCGPV = {
   init,
@@ -65,7 +66,14 @@ export const cgpv: TypeCGPV = {
     ...api.plugin,
   }),
   react: React,
-  makeStyles: makeStyles,
+  leaflet: L,
+  reactLeaflet: ReactLeaflet,
+  reactLeafletCore: ReactLeafletCore,
+  ui: {
+    useTheme: useTheme,
+    useMediaQuery: useMediaQuery,
+    makeStyles: makeStyles,
+  },
   useTranslation: useTranslation,
 };
 

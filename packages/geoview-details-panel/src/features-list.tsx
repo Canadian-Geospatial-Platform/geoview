@@ -9,7 +9,7 @@ import {
   TypeJSONValue,
   TypeLayersEntry,
   TypeFeaturesListProps,
-} from "../../geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/types/cgpv-types";
 
 const w = window as any;
 
@@ -33,7 +33,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { react, makeStyles, useTranslation } = cgpv;
+  const { react, ui, useTranslation } = cgpv;
 
   const { useEffect } = react;
 
@@ -41,7 +41,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
     selectedLayer as TypeLayersEntry;
 
   // use material ui theming
-  const useStyles = makeStyles(() => ({
+  const useStyles = ui.makeStyles(() => ({
     featuresContainer: {
       overflow: "hidden",
       overflowY: "auto",
@@ -90,7 +90,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
 
   const classes = useStyles();
 
-  const { t } = useTranslation<string>();
+  const { t } = useTranslation();
 
   /**
    * Switch to the feature / entry info panel content

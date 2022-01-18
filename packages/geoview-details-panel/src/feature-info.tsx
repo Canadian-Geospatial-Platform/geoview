@@ -4,7 +4,7 @@
 import {
   TypeJSONObject,
   TypeFeatureInfoProps,
-} from "../../geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/types/cgpv-types";
 
 const w = window as any;
 
@@ -21,7 +21,7 @@ const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { react, makeStyles, useTranslation } = cgpv;
+  const { react, ui, useTranslation } = cgpv;
 
   const { useEffect } = react;
 
@@ -29,7 +29,7 @@ const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
     selectedFeature;
 
   // use material ui theming
-  const useStyles = makeStyles(() => ({
+  const useStyles = ui.makeStyles(() => ({
     featureInfoContainer: {
       width: "100%",
     },

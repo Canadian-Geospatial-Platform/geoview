@@ -1,10 +1,9 @@
 /* eslint-disable react/no-array-index-key */
-import { EVENT_NAMES } from "../../geoview-core/src/api/event";
 import {
   TypeJSONObject,
   TypeLayersListProps,
   TypeLayerData,
-} from "../../geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/types/cgpv-types";
 
 // get the window object
 const w = window as any;
@@ -23,10 +22,13 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { api, makeStyles } = cgpv;
+  const { api, ui } = cgpv;
+
+  // get event names
+  const EVENT_NAMES = api.eventNames;
 
   // use material ui theming
-  const useStyles = makeStyles(() => ({
+  const useStyles = ui.makeStyles(() => ({
     layersContainer: {
       overflow: "hidden",
       overflowY: "auto",

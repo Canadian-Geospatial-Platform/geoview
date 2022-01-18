@@ -8,7 +8,6 @@
 /* eslint-disable func-names */
 /* eslint-disable object-shorthand */
 
-import { EVENT_NAMES } from "../../geoview-core/src/api/event";
 import {
   Cast,
   TypeJSONObject,
@@ -22,7 +21,7 @@ import {
   TypeLayersEntry,
   TypeEntry,
   TypePanelContentProps,
-} from "../../geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/types/cgpv-types";
 
 import LayersList from "./layers-list";
 import FeaturesList from "./features-list";
@@ -44,7 +43,10 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { api, react, makeStyles } = cgpv;
+  const { api, react, ui } = cgpv;
+
+  // get event names
+  const EVENT_NAMES = api.eventNames;
 
   const { useState, useCallback, useEffect } = react;
 
@@ -63,7 +65,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const [clickPos, setClickPos] = useState<L.LatLng>();
 
   // use material ui theming
-  const useStyles = makeStyles(() => ({
+  const useStyles = ui.makeStyles(() => ({
     mainContainer: {
       display: "flex",
       flexDirection: "row",
