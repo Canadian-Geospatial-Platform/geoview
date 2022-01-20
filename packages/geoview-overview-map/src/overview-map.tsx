@@ -1,11 +1,8 @@
-import { IconButton } from "@material-ui/core";
-import ChevronLeft from "@material-ui/icons/ChevronLeft";
-
 // eslint-disable-next-line import/no-unresolved
-import { Basemap } from "geoview-core/src/common/basemap";
-import { LEAFLET_POSITION_CLASSES } from "geoview-core/src/common/constant";
+import { Basemap } from "geoview-core/src/geo/layer/basemap/basemap";
+import { LEAFLET_POSITION_CLASSES } from "geoview-core/src/geo/utils/constant";
 
-import { Cast } from "geoview-core/src/types/cgpv-types";
+import { Cast } from "geoview-core/src/core/types/cgpv-types";
 
 // get the window object
 const w = window as any;
@@ -71,6 +68,12 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   const [status, setStatus] = useState(true);
 
   const minimap = useMap();
+
+  // get available elements
+  const { IconButton } = ui.elements;
+
+  // get available icons
+  const { ChevronLeft } = ui.icons;
 
   const useStyles = ui.makeStyles((theme) => ({
     toggleBtn: {

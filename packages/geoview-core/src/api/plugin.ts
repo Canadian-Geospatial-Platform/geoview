@@ -9,7 +9,7 @@ import * as translate from "react-i18next";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { api } from "./api";
-import { TypePlugin } from "../types/cgpv-types";
+import { TypePlugin } from "../core/types/cgpv-types";
 
 /**
  * Class to manage plugins

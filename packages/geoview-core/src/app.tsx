@@ -8,8 +8,9 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { useMediaQuery } from "@material-ui/core";
+import { useMediaQuery, IconButton } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { ChevronLeft } from "@material-ui/icons";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -17,12 +18,12 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import { api } from "./api/api";
 
 import "../node_modules/leaflet/dist/leaflet.css";
-import "./assests/style/style.css";
-import "./assests/style/vendor.css";
+import "./ui/style/style.css";
+import "./ui/style/vendor.css";
 
 import AppStart from "./core/app-start";
-import { manageKeyboardFocus } from "./common/utilities";
-import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./types/cgpv-types";
+import { manageKeyboardFocus } from "./geo/utils/utilities";
+import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./core/types/cgpv-types";
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
@@ -73,6 +74,12 @@ export const cgpv: TypeCGPV = {
     useTheme: useTheme,
     useMediaQuery: useMediaQuery,
     makeStyles: makeStyles,
+    icons: {
+      ChevronLeft: ChevronLeft,
+    },
+    elements: {
+      IconButton: IconButton,
+    },
   },
   useTranslation: useTranslation,
 };

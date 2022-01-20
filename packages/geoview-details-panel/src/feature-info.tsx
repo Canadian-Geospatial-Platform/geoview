@@ -4,7 +4,7 @@
 import {
   TypeJSONObject,
   TypeFeatureInfoProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/core/types/cgpv-types";
 
 const w = window as any;
 

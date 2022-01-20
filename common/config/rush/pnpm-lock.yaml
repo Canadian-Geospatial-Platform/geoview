@@ -17,6 +17,7 @@ importers:
       '@types/jest': ^26.0.16
       '@types/leaflet': 1.5.19
       '@types/leaflet-markercluster': ^1.0.3
+      '@types/lodash': 4.14.168
       '@types/proj4': ^2.5.0
       '@types/proj4leaflet': ^1.0.6
       '@types/react': ^17.0.0
@@ -53,6 +54,7 @@ importers:
       '@material-ui/icons': 4.11.2_d7c58ad036f460dedca755aa3bc1bb8f
       '@react-leaflet/core': 1.0.2_91fa1427a3331e02931dfea77720a290
       '@types/leaflet-markercluster': 1.0.3
+      '@types/lodash': 4.14.168
       '@types/proj4leaflet': 1.0.6
       axios: 0.21.4
       domhandler: 4.3.0
@@ -2394,7 +2396,6 @@ packages:
 
   /@types/lodash/4.14.168:
     resolution: {integrity: sha512-oVfRvqHV/V6D1yifJbVRU3TMp8OT6o6BG+U9MkwuJ3U8/CsDHvalRpsxBqivn71ztOFZBTfJMvETbqHiaNSj7Q==}
-    dev: true
 
   /@types/minimatch/3.0.5:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}

@@ -3,7 +3,7 @@ import {
   TypeJSONObject,
   TypeLayersListProps,
   TypeLayerData,
-} from "geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/core/types/cgpv-types";
 
 // get the window object
 const w = window as any;

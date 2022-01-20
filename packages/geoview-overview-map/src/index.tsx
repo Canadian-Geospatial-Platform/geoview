@@ -5,7 +5,8 @@ import {
   TypeProps,
   TypeButtonProps,
   TypePanelProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/core/types/cgpv-types";
+import { OverviewMap } from "./overview-map";
 
 const w = window as any;
 
@@ -44,7 +45,22 @@ class OverviewMapPlugin {
     // access the api calls
     const { api } = cgpv;
 
-    const { language } = api.map(mapId);
+    const { language, projection, getMapOptions, currentProjection } =
+      api.map(mapId);
+
+    console.log(language, projection, getMapOptions, currentProjection);
+
+    api
+      .map(mapId)
+      .addComponent(
+        "overviewMap",
+        <OverviewMap
+          id={mapId}
+          language={language}
+          crs={projection.getCRS()}
+          zoomFactor={getMapOptions(currentProjection)}
+        />
+      );
   };
 
   /**
@@ -58,6 +74,8 @@ class OverviewMapPlugin {
 
     // access the api calls
     const { api } = cgpv;
+
+    api.map(mapId).removeComponent("overviewMap");
   }
 }
 

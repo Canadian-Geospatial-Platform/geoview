@@ -21,7 +21,7 @@ import {
   TypeLayersEntry,
   TypeEntry,
   TypePanelContentProps,
-} from "geoview-core/src/types/cgpv-types";
+} from "geoview-core/src/core/types/cgpv-types";
 
 import LayersList from "./layers-list";
 import FeaturesList from "./features-list";

@@ -5,11 +5,11 @@ import { Event, EVENT_NAMES } from "./event";
 
 import { Projection, PROJECTION_NAMES } from "./projection";
 
-import { MapViewer } from "../common/map-viewer";
+import { MapViewer } from "../geo/map/map";
 
 import { Plugin } from "./plugin";
 import { Utilities } from "./utilities";
-import { CONST_LAYER_TYPES } from "../types/cgpv-types";
+import { CONST_LAYER_TYPES } from "../core/types/cgpv-types";
 import * as MarkerDefinitions from "../../../geoview-loader/public/markers/marker-definitions";
 
 /**

@@ -65,6 +65,8 @@
         </style>
 
         <script src="geoview-details-panel.js"></script>
+
+        <script src="geoview-overview-map.js"></script>
     </head>
     <body>
         <div class="header-table">
@@ -92,6 +94,9 @@
         <div class="toolbar">
             <button id="load-details-panel-btn">Load Details Panel</button>
             <button id="unload-details-panel-btn">Unload Details Panel</button>
+
+            <button id="load-overview-map-btn">Load Overview Map</button>
+            <button id="unload-overview-map-btn">Unload Overview Map</button>
         </div>
         <div>
             <div
@@ -130,6 +135,24 @@
                 // add event handler to the unload details panel button
                 unloadDetailsPanelBtn.addEventListener('click', function (e) {
                     cgpv.api.removePlugin('detailsPanel');
+                });
+
+                // get load overview map button element
+                var loadOverviewMapBtn = document.getElementById('load-overview-map-btn');
+
+                // add event handler to the load overview map button
+                loadOverviewMapBtn.addEventListener('click', function (e) {
+                    cgpv.api.addPlugin('overviewMap', window.plugins['overviewMap'], {
+                        mapId: 'mapWM',
+                    });
+                });
+
+                // get unload overview map button element
+                var unloadOverviewMapBtn = document.getElementById('unload-overview-map-btn');
+
+                // add event handler to the unload overview map button
+                unloadOverviewMapBtn.addEventListener('click', function (e) {
+                    cgpv.api.removePlugin('overviewMap');
                 });
 
                 createCodeSnippet();
