@@ -11,7 +11,7 @@ import { ButtonPanel } from "../../ui/button-panel/button-panel";
 import { Vector } from "../layer/vector/vector";
 import { Basemap } from "../layer/basemap/basemap";
 import { Layer } from "../layer/layer";
-import { Projection } from "../projection/projection";
+import { MapProjection } from "../projection/map-projection";
 import { MarkerCluster } from "../layer/vector/marker-cluster";
 import "../../core/types/cgp-leaflet-config";
 
@@ -82,7 +82,7 @@ export class MapViewer {
   currentProjection: number;
 
   // access projection functions for this map instance
-  projection!: Projection;
+  projection!: MapProjection;
 
   /**
    * Add the map instance to the maps array in the api
@@ -116,7 +116,7 @@ export class MapViewer {
     this.layer = new Layer(cgpMap, this.mapProps.layers);
 
     // initialize the projection
-    this.projection = new Projection(this.mapProps.projection);
+    this.projection = new MapProjection(this.mapProps.projection);
 
     this.buttonPanel = new ButtonPanel(cgpMap);
 

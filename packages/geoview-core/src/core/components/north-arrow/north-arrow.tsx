@@ -7,7 +7,7 @@ import { useMapEvent, Marker, useMap } from "react-leaflet";
 
 import { debounce } from "lodash";
 
-import { PROJECTION_NAMES } from "../../../api/projection";
+import { PROJECTION_NAMES } from "../../../geo/projection/projection";
 
 import { northPolePosition } from "../../../geo/utils/constant";
 

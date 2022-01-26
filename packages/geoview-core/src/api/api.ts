@@ -3,7 +3,7 @@ import { Map } from "leaflet";
 /* eslint-disable no-plusplus */
 import { Event, EVENT_NAMES } from "./event";
 
-import { Projection, PROJECTION_NAMES } from "./projection";
+import { Projection, PROJECTION_NAMES } from "../geo/projection/projection";
 
 import { MapViewer } from "../geo/map/map";
 

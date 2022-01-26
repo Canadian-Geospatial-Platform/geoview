@@ -19,6 +19,7 @@ export class Config {
   // default config if provided configuration is missing or wrong
   private _config: TypeMapConfigProps = {
     id: generateId(null),
+    name: generateId(null),
     center: [60, -100] as LatLngTuple,
     zoom: 4,
     projection: 3978,
@@ -110,6 +111,7 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
+    const name = this.validateName(tmpConfig.name);
     const projection = this.validateProjection(Number(tmpConfig.projection));
     const basemapOptions = this.validateBasemap(
       projection,
@@ -128,6 +130,7 @@ export class Config {
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapConfigProps = {
       id,
+      name,
       projection,
       zoom,
       center,
@@ -302,5 +305,14 @@ export class Config {
     }
 
     return this._config.plugins;
+  }
+
+  /**
+   * Validate map name
+   * @param {string} name provided map name
+   * @returns {string} valid name
+   */
+  private validateName(name: string): string {
+    return name.length > 2 ? name : generateId("");
   }
 }

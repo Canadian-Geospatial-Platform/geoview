@@ -1,7 +1,7 @@
 import React, { ElementType, ReactType } from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import L from "leaflet";
-import { Projection } from "../../api/projection";
+import { Projection } from "../../geo/projection/projection";
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
 import { Button } from "../../ui/button/button";
@@ -300,6 +300,7 @@ export type TypePanelContentProps = {
  */
 export type TypeMapConfigProps = {
   id?: string;
+  name: string;
   center: L.LatLngTuple;
   zoom: number;
   projection: number;
