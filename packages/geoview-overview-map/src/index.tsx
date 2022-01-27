@@ -1,11 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
-import {
-  TypeButtonPanel,
-  TypeProps,
-  TypeButtonProps,
-  TypePanelProps,
-} from "geoview-core/src/core/types/cgpv-types";
+import { TypeProps } from "geoview-core";
 import { OverviewMap } from "./overview-map";
 
 const w = window as any;

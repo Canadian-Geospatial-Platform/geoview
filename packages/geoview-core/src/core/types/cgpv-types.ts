@@ -300,7 +300,6 @@ export type TypePanelContentProps = {
  */
 export type TypeMapConfigProps = {
   id?: string;
-  name: string;
   center: L.LatLngTuple;
   zoom: number;
   projection: number;

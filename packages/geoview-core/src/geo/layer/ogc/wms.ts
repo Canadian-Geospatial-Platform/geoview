@@ -8,11 +8,10 @@ import { mapService } from "esri-leaflet";
 
 import WMSCapabilities from "wms-capabilities";
 
-import {
-  getMapServerUrl,
-  getXMLHttpRequest,
-  xmlToJson,
-} from "../../utils/utilities";
+import { getMapServerUrl } from "../../utils/utilities";
+
+import { getXMLHttpRequest, xmlToJson } from "../../../core/utils/utilities";
+
 import {
   Cast,
   TypeJSONObject,

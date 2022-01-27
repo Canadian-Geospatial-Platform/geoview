@@ -2,7 +2,9 @@ import { Layer } from "leaflet";
 
 import { featureLayer, mapService } from "esri-leaflet";
 
-import { getXMLHttpRequest, getMapServerUrl } from "../../utils/utilities";
+import { getMapServerUrl } from "../../utils/utilities";
+
+import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 
 /**

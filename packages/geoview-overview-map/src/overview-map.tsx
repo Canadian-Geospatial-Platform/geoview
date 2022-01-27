@@ -286,16 +286,13 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { api, react, leaflet, reactLeaflet, ui, useTranslation } = cgpv;
+  const { react, leaflet, reactLeaflet, ui } = cgpv;
 
   const { DomEvent } = leaflet;
 
   const { MapContainer, TileLayer, useMap } = reactLeaflet;
 
-  // get event names
-  const EVENT_NAMES = api.eventNames;
-
-  const { useState, useEffect, useRef, useMemo } = react;
+  const { useEffect, useRef, useMemo } = react;
 
   const useStyles = ui.makeStyles((theme) => ({
     minimap: {

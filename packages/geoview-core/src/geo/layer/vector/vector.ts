@@ -1,10 +1,11 @@
 /* eslint-disable no-plusplus */
 import L, { LatLngExpression } from "leaflet";
 
-import { generateId } from "../../utils/constant";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 import { CONST_VECTOR_TYPES } from "../../../core/types/cgpv-types";
+import { generateId } from "../../../core/utils/utilities";
+
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *

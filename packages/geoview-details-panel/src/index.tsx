@@ -6,7 +6,7 @@ import {
   TypeProps,
   TypeButtonProps,
   TypePanelProps,
-} from "geoview-core/src/core/types/cgpv-types";
+} from "geoview-core";
 
 const w = window as any;
 

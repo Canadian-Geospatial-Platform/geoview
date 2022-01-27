@@ -9,9 +9,8 @@ import { debounce } from "lodash";
 
 import { PROJECTION_NAMES } from "../../../geo/projection/projection";
 
-import { northPolePosition } from "../../../geo/utils/constant";
-
 import { NorthArrowIcon, NorthPoleIcon } from "./north-arrow-icon";
+import { generateId } from "../../utils/utilities";
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
@@ -22,6 +21,9 @@ const useStyles = makeStyles((theme) => ({
     height: (theme.overrides?.northArrow?.size as CSSProperties).height,
   },
 }));
+
+// The north pole position use for north arrow marker and get north arrow rotation angle
+const northPolePosition: number[] = [90, -95];
 
 /**
  * north arrow passed in properties
@@ -258,6 +260,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
 
   return projection.code === PROJECTION_NAMES.LCC ? (
     <Marker
+      id={generateId("")}
       position={northPolePosition as LatLngExpression}
       icon={northPoleIcon}
       keyboard={false}

@@ -9,7 +9,7 @@ import {
   TypeJSONValue,
   TypeLayersEntry,
   TypeFeaturesListProps,
-} from "geoview-core/src/core/types/cgpv-types";
+} from "geoview-core";
 
 const w = window as any;
 

@@ -21,13 +21,12 @@ import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
 import { MapViewer } from "../../../geo/map/map";
-import { generateId } from "../../../geo/utils/constant";
+import { generateId } from "../../utils/utilities";
 import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
 import { ClickMarker } from "../click-marker/click-marker";
 import {
   TypeMapConfigProps,
   TypeBasemapLayer,
-  TypeMapComponent,
   TypeJSONObjectMapComponent,
 } from "../../types/cgpv-types";
 

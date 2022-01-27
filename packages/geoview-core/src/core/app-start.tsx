@@ -11,7 +11,7 @@ import { ThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
 import { Element } from "domhandler";
-import { Config } from "../api/config";
+import { Config } from "./utils/config";
 import { Shell } from "./containers/shell";
 import { theme } from "../ui/style/theme";
 

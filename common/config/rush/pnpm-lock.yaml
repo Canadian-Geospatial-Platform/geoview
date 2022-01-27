@@ -53,9 +53,6 @@ importers:
       '@material-ui/core': 4.12.3_b3482aaf5744fc7c2aeb7941b0e0a78f
       '@material-ui/icons': 4.11.2_d7c58ad036f460dedca755aa3bc1bb8f
       '@react-leaflet/core': 1.0.2_91fa1427a3331e02931dfea77720a290
-      '@types/leaflet-markercluster': 1.0.3
-      '@types/lodash': 4.14.168
-      '@types/proj4leaflet': 1.0.6
       axios: 0.21.4
       domhandler: 4.3.0
       esri-leaflet: 2.5.1_leaflet@1.7.1
@@ -87,7 +84,10 @@ importers:
       '@types/flux': 3.1.11
       '@types/jest': 26.0.24
       '@types/leaflet': 1.5.19
+      '@types/leaflet-markercluster': 1.0.3
+      '@types/lodash': 4.14.168
       '@types/proj4': 2.5.2
+      '@types/proj4leaflet': 1.0.6
       '@types/react': 17.0.38
       '@types/react-dom': 17.0.11
       '@types/react-leaflet': 2.5.2
@@ -97,49 +97,17 @@ importers:
   ../../packages/geoview-details-panel:
     specifiers:
       '@babel/runtime': ^7.12.9
-      '@material-ui/core': ^4.11.1
-      '@material-ui/icons': ^4.9.1
-      '@types/flux': ^3.1.9
       '@types/react': ^17.0.0
       '@types/react-dom': ^17.0.0
-      domhandler: ^4.2.0
-      eventemitter3: ^4.0.7
-      focus-trap-react: 8.4.2
       geoview-core: workspace:~0.1.0
-      html-react-parser: ^1.2.4
-      i18next: 19.8.4
-      i18next-http-backend: 1.0.21
-      immutable: ^4.0.0-rc.12
-      lodash: 4.17.21
-      notistack: 1.0.4
-      prop-types: ^15.8.1
-      query-string: 6.14.1
       react: ^17.0.1
       react-dom: ^17.0.1
-      react-i18next: 11.8.0
-      screenfull: ~5.0.2
     dependencies:
-      '@material-ui/core': 4.12.3_b3482aaf5744fc7c2aeb7941b0e0a78f
-      '@material-ui/icons': 4.11.2_d7c58ad036f460dedca755aa3bc1bb8f
-      domhandler: 4.3.0
-      eventemitter3: 4.0.7
-      focus-trap-react: 8.4.2_75cb922c19ee1b7939faae9b4d1f4cf7
       geoview-core: link:../geoview-core
-      html-react-parser: 1.4.5_react@17.0.2
-      i18next: 19.8.4
-      i18next-http-backend: 1.0.21
-      immutable: 4.0.0
-      lodash: 4.17.21
-      notistack: 1.0.4_fced322086cd04afb0b6feec9e866920
-      prop-types: 15.8.1
-      query-string: 6.14.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      react-i18next: 11.8.0_i18next@19.8.4+react@17.0.2
-      screenfull: 5.0.2
     devDependencies:
       '@babel/runtime': 7.16.7
-      '@types/flux': 3.1.11
       '@types/react': 17.0.38
       '@types/react-dom': 17.0.11
 
@@ -315,49 +283,17 @@ importers:
   ../../packages/geoview-overview-map:
     specifiers:
       '@babel/runtime': ^7.12.9
-      '@material-ui/core': ^4.11.1
-      '@material-ui/icons': ^4.9.1
-      '@types/flux': ^3.1.9
       '@types/react': ^17.0.0
       '@types/react-dom': ^17.0.0
-      domhandler: ^4.2.0
-      eventemitter3: ^4.0.7
-      focus-trap-react: 8.4.2
       geoview-core: workspace:~0.1.0
-      html-react-parser: ^1.2.4
-      i18next: 19.8.4
-      i18next-http-backend: 1.0.21
-      immutable: ^4.0.0-rc.12
-      lodash: 4.17.21
-      notistack: 1.0.4
-      prop-types: ^15.8.1
-      query-string: 6.14.1
       react: ^17.0.1
       react-dom: ^17.0.1
-      react-i18next: 11.8.0
-      screenfull: ~5.0.2
     dependencies:
-      '@material-ui/core': 4.12.3_b3482aaf5744fc7c2aeb7941b0e0a78f
-      '@material-ui/icons': 4.11.2_d7c58ad036f460dedca755aa3bc1bb8f
-      domhandler: 4.3.0
-      eventemitter3: 4.0.7
-      focus-trap-react: 8.4.2_75cb922c19ee1b7939faae9b4d1f4cf7
       geoview-core: link:../geoview-core
-      html-react-parser: 1.4.5_react@17.0.2
-      i18next: 19.8.4
-      i18next-http-backend: 1.0.21
-      immutable: 4.0.0
-      lodash: 4.17.21
-      notistack: 1.0.4_fced322086cd04afb0b6feec9e866920
-      prop-types: 15.8.1
-      query-string: 6.14.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      react-i18next: 11.8.0_i18next@19.8.4+react@17.0.2
-      screenfull: 5.0.2
     devDependencies:
       '@babel/runtime': 7.16.7
-      '@types/flux': 3.1.11
       '@types/react': 17.0.38
       '@types/react-dom': 17.0.11
 
@@ -2318,6 +2254,7 @@ packages:
 
   /@types/geojson/7946.0.8:
     resolution: {integrity: sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==}
+    dev: true
 
   /@types/glob/7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
@@ -2376,12 +2313,13 @@ packages:
     deprecated: '''@types/leaflet-markercluster'' is now ''@types/leaflet.markercluster''.'
     dependencies:
       '@types/leaflet': 1.5.19
-    dev: false
+    dev: true
 
   /@types/leaflet/1.5.19:
     resolution: {integrity: sha512-ZAKqfvdU/+KFoCpf8aUba09F8mfSc8R2esq++Cha3E2DgwS5K/I/4eJ+0JylrVHZivgY7PSAeXFv/izP+81/MQ==}
     dependencies:
       '@types/geojson': 7946.0.8
+    dev: true
 
   /@types/lodash-webpack-plugin/0.11.4_webpack-cli@4.9.1:
     resolution: {integrity: sha512-5+ZPzDgkYunyOWKmjnshTDz5WSxqZM0e5/Az3/Vld2MW5fGOQtqfaNuvBiu5VUcEg65eBO/Ivm/2krb+G8nQmQ==}
@@ -2396,6 +2334,7 @@ packages:
 
   /@types/lodash/4.14.168:
     resolution: {integrity: sha512-oVfRvqHV/V6D1yifJbVRU3TMp8OT6o6BG+U9MkwuJ3U8/CsDHvalRpsxBqivn71ztOFZBTfJMvETbqHiaNSj7Q==}
+    dev: true
 
   /@types/minimatch/3.0.5:
     resolution: {integrity: sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ==}
@@ -2415,6 +2354,7 @@ packages:
 
   /@types/proj4/2.5.2:
     resolution: {integrity: sha512-/Nmfn9p08yaYw6xo5f2b0L+2oHk2kZeOkp5v+4VCeNfq+ETlLQbmHmC97/pjDIEZy8jxwz7pdPpwNzDHM5cuJw==}
+    dev: true
 
   /@types/proj4leaflet/1.0.6:
     resolution: {integrity: sha512-5Js2Yl+wpvOpYNVpQG5PjBSqUQUDOh7TqdDMyWQIGJKXub7AMi4B6VbHL9Sk/23JjlKy2EGsZWM2/tV7vOcn/g==}
@@ -2422,7 +2362,7 @@ packages:
       '@types/geojson': 7946.0.8
       '@types/leaflet': 1.5.19
       '@types/proj4': 2.5.2
-    dev: false
+    dev: true
 
   /@types/prop-types/15.7.4:
     resolution: {integrity: sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==}

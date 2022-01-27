@@ -6,8 +6,9 @@ import "leaflet.markercluster/src";
 
 import { EVENT_NAMES } from "../../../api/event";
 import { api } from "../../../api/api";
-import { generateId } from "../../utils/constant";
 import { TypeStampedIconCreationFunction } from "../../../core/types/cgpv-types";
+import { generateId } from "../../../core/utils/utilities";
+
 import "./marker-cluster-element";
 
 import * as MarkerDefinitions from "../../../../../geoview-loader/public/markers/marker-definitions";

@@ -21,7 +21,9 @@ import {
   TypeWindow,
   TypeMapConfigProps,
 } from "../../core/types/cgpv-types";
-import { generateId } from "../utils/constant";
+
+import { generateId } from "../../core/utils/utilities";
+
 import { EVENT_NAMES } from "../../api/event";
 
 // LCC map options

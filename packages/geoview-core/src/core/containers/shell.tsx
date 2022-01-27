@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -99,12 +99,15 @@ export function Shell(props: ShellProps): JSX.Element {
 
   // show a splash screen before map is loaded
   const [isLoaded, setIsLoaded] = useState(false);
-  api.event.on(EVENT_NAMES.EVENT_MAP_LOADED, (payload) => {
-    if (payload && payload.handlerName.includes(id)) {
-      // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
-      setIsLoaded(true);
-    }
-  });
+
+  useEffect(() => {
+    api.event.on(EVENT_NAMES.EVENT_MAP_LOADED, (payload) => {
+      if (payload && payload.handlerName.includes(id)) {
+        // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
+        setIsLoaded(true);
+      }
+    });
+  }, []);
 
   return (
     <FocusTrap

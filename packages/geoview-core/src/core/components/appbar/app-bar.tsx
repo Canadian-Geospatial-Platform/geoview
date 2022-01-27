@@ -25,7 +25,7 @@ import PanelApp from "../../../ui/panel/panel-app";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
-import { CONST_PANEL_TYPES } from "../../../core/types/cgpv-types";
+import { CONST_PANEL_TYPES } from "../../types/cgpv-types";
 
 const drawerWidth = 200;
 

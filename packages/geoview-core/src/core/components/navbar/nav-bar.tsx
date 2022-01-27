@@ -17,7 +17,6 @@ import Home from "./buttons/home";
 
 import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
 import { api } from "../../../api/api";
-import { ButtonPanel } from "../../../ui/button-panel/button-panel";
 import { ButtonMapNav } from "./button";
 import { EVENT_NAMES } from "../../../api/event";
 import PanelApp from "../../../ui/panel/panel-app";

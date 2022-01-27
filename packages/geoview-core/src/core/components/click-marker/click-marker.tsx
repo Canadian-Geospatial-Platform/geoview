@@ -11,7 +11,7 @@ import { useEventHandlers, LeafletElement } from "@react-leaflet/core";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 import { getTranslateValues } from "../../../geo/utils/utilities";
-import { generateId } from "../../../geo/utils/constant";
+import { generateId } from "../../utils/utilities";
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {

@@ -3,8 +3,9 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 
 import ButtonApp from "../button";
 
-import { GITUHUB_REPO } from "../../../../geo/utils/constant";
-import { Cast, TypeAppVersion } from "../../../../core/types/cgpv-types";
+import { GITUHUB_REPO } from "../../../utils/constant";
+import { Cast, TypeAppVersion } from "../../../types/cgpv-types";
+
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
 

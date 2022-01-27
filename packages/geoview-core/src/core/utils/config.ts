@@ -2,12 +2,8 @@
 /* eslint-disable no-underscore-dangle */
 import { LatLngTuple } from "leaflet";
 
-import { generateId } from "../geo/utils/constant";
-import { isJsonString } from "../geo/utils/utilities";
-import {
-  TypeMapConfigProps,
-  TypeBasemapOptions,
-} from "../core/types/cgpv-types";
+import { isJsonString, generateId } from "./utilities";
+import { TypeMapConfigProps, TypeBasemapOptions } from "../types/cgpv-types";
 /**
  * Class to handle configuration validation. Will validate every item for structure and valid values. If error found, will replace by default values
  * and sent a message in the console for developers to know something went wrong
@@ -19,7 +15,6 @@ export class Config {
   // default config if provided configuration is missing or wrong
   private _config: TypeMapConfigProps = {
     id: generateId(null),
-    name: generateId(null),
     center: [60, -100] as LatLngTuple,
     zoom: 4,
     projection: 3978,
@@ -111,7 +106,6 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
-    const name = this.validateName(tmpConfig.name);
     const projection = this.validateProjection(Number(tmpConfig.projection));
     const basemapOptions = this.validateBasemap(
       projection,
@@ -130,7 +124,6 @@ export class Config {
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapConfigProps = {
       id,
-      name,
       projection,
       zoom,
       center,
@@ -305,14 +298,5 @@ export class Config {
     }
 
     return this._config.plugins;
-  }
-
-  /**
-   * Validate map name
-   * @param {string} name provided map name
-   * @returns {string} valid name
-   */
-  private validateName(name: string): string {
-    return name.length > 2 ? name : generateId("");
   }
 }

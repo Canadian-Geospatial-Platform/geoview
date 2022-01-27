@@ -4,15 +4,17 @@ import { EVENT_NAMES } from "../../api/event";
 
 import { LayersPanel } from "../panel/default-panels";
 
-import { generateId } from "../../geo/utils/constant";
 import { Button } from "../button/button";
 import { Panel } from "../panel/panel";
+
 import {
   TypeButtonPanel,
   TypeButtonProps,
   TypePanelProps,
   CONST_PANEL_TYPES,
 } from "../../core/types/cgpv-types";
+
+import { generateId } from "../../core/utils/utilities";
 
 // TODO: look at code duplication
 

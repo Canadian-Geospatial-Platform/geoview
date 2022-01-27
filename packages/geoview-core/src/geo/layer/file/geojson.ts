@@ -1,6 +1,6 @@
 import L, { Layer } from "leaflet";
 
-import { getXMLHttpRequest } from "../../utils/utilities";
+import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 
 /**

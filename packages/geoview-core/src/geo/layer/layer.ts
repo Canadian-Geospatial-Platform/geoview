@@ -1,6 +1,5 @@
 import { Layer as leafletLayer } from "leaflet";
 
-import { generateId } from "../utils/constant";
 import { EsriDynamic } from "./esri/esri-dynamic";
 import { EsriFeature } from "./esri/esri-feature";
 import { WMS } from "./ogc/wms";
@@ -9,6 +8,9 @@ import { GeoJSON } from "./file/geojson";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
+
+import { generateId } from "../../core/utils/utilities";
+
 import {
   CONST_LAYER_TYPES,
   TypeLayerData,

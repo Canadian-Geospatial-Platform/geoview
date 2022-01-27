@@ -24,6 +24,7 @@ import "./ui/style/vendor.css";
 import AppStart from "./core/app-start";
 import { manageKeyboardFocus } from "./geo/utils/utilities";
 import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./core/types/cgpv-types";
+export * from "./core/types/cgpv-types";
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else

@@ -1,6 +1,6 @@
 import WMSCapabilities from "wms-capabilities";
 
-import { getXMLHttpRequest } from "../geo/utils/utilities";
+import { getXMLHttpRequest } from "../core/utils/utilities";
 
 export class Utilities {
   /**

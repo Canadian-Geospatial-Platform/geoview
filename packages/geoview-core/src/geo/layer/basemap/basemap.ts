@@ -1,8 +1,9 @@
 /* eslint-disable no-multi-assign */
 /* eslint-disable lines-between-class-members */
 import { api } from "../../../api/api";
-import { generateId } from "../../utils/constant";
+
 import { EVENT_NAMES } from "../../../api/event";
+
 import {
   TypeBasemapProps,
   TypeBasemapLayerOptions,
@@ -10,6 +11,9 @@ import {
   TypeBasemapOptions,
   TypeAttribution,
 } from "../../../core/types/cgpv-types";
+
+import { generateId } from "../../../core/utils/utilities";
+
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,

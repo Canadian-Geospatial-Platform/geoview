@@ -1,10 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import {
-  TypeJSONObject,
-  TypeFeatureInfoProps,
-} from "geoview-core/src/core/types/cgpv-types";
+import { TypeJSONObject, TypeFeatureInfoProps } from "geoview-core";
 
 const w = window as any;
 
