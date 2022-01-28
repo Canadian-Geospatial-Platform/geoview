@@ -29,7 +29,7 @@ importers:
       esri-leaflet: 2.5.1
       esri-leaflet-renderers: 2.0.6
       eventemitter3: ^4.0.7
-      focus-trap-react: 8.4.2
+      focus-trap-react: 8.9.1
       html-react-parser: ^1.2.4
       i18next: 19.8.4
       i18next-http-backend: 1.0.21
@@ -58,7 +58,7 @@ importers:
       esri-leaflet: 2.5.1_leaflet@1.7.1
       esri-leaflet-renderers: 2.0.6
       eventemitter3: 4.0.7
-      focus-trap-react: 8.4.2_75cb922c19ee1b7939faae9b4d1f4cf7
+      focus-trap-react: 8.9.1_75cb922c19ee1b7939faae9b4d1f4cf7
       html-react-parser: 1.4.5_react@17.0.2
       i18next: 19.8.4
       i18next-http-backend: 1.0.21
@@ -4801,10 +4801,10 @@ packages:
     resolution: {integrity: sha512-8/sOawo8tJ4QOBX8YlQBMxL8+RLZfxMQOif9o0KUKTNTjMYElWPE0r/m5VNFxTRd0NSw8qSy8dajrwX4RYI1Hw==}
     dev: true
 
-  /focus-trap-react/8.4.2_75cb922c19ee1b7939faae9b4d1f4cf7:
-    resolution: {integrity: sha512-yuItOIwgriOBMrbHDqbWMpQjGVs9SbtugYrT0vs0yPjHiPKja3NZ9dBMxDQrV1JhyojGK5d6j7ayqBS7Kcm9xQ==}
+  /focus-trap-react/8.9.1_75cb922c19ee1b7939faae9b4d1f4cf7:
+    resolution: {integrity: sha512-QGVw4ch1ZfT2IcCL1ehBgrwnFuPA0nP7hXcrZzC8SThbktt/jiXCWQSKhA2WL0nVbxTiZ7YpIu/foTekp+dcqA==}
     peerDependencies:
-      prop-types: ^15.7.2
+      prop-types: ^15.8.1
       react: '>=16.0.0'
       react-dom: '>=16.0.0'
     dependencies:

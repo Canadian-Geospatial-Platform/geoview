@@ -199,7 +199,10 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
     // listen to change panel content and rerender
     api.event.on(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, (args) => {
       // set focus on close button on panel content change
-      setTimeout(() => Cast<HTMLElement>(closeBtnRef.current).focus(), 100);
+      setTimeout(() => {
+        if (closeBtnRef && closeBtnRef.current)
+          Cast<HTMLElement>(closeBtnRef.current).focus();
+      }, 100);
 
       if (args.buttonId === panel.buttonId) {
         updateComponent();
@@ -211,10 +214,15 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
         if (args.buttonId === panel.buttonId) {
-          setActivetrap(true);
-
           // set focus on close button on panel open
-          setTimeout(() => Cast<HTMLElement>(closeBtnRef.current).focus(), 0);
+          setTimeout(() => {
+            if (closeBtnRef && closeBtnRef.current) {
+              console.log(panelRef.current);
+              setActivetrap(true);
+
+              Cast<HTMLElement>(closeBtnRef.current).focus();
+            }
+          }, 100);
         }
       },
       mapId
@@ -278,6 +286,7 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
                   className="cgpv-panel-close"
                   aria-label={t("general.close")}
                   onClick={closePanel}
+                  tabIndex={0}
                 >
                   <CloseIcon />
                 </IconButton>

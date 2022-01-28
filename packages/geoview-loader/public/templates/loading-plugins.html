@@ -65,6 +65,7 @@
         </style>
 
         <script src="./plugins/basemap/basemap-switcher.js"></script>
+        <script src="geoview-details-panel.js"></script>
     </head>
     <body>
         <div class="header-table">
@@ -121,7 +122,7 @@
 
                 // add event handler to the load details panel button
                 loadDetailsPanelBtn.addEventListener('click', function (e) {
-                    cgpv.api.addPlugin('details-panel', null, {
+                    cgpv.api.addPlugin('detailsPanel', window.plugins['detailsPanel'], {
                         mapId: 'UC1',
                     });
                 });
@@ -131,7 +132,7 @@
 
                 // add event handler to the unload details panel button
                 unloadDetailsPanelBtn.addEventListener('click', function (e) {
-                    cgpv.api.removePlugin('details-panel');
+                    cgpv.api.removePlugin('detailsPanel');
                 });
 
                 // get load basemap switcher button element

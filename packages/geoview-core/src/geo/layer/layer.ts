@@ -50,6 +50,9 @@ export class Layer {
    */
   private map: L.Map;
 
+  // this is supposed to be private and not accessible same as map above
+  #test: string = "Hello";
+
   /**
    * Initialize layer types and listen to add/remove layer events from outside
    *
@@ -118,6 +121,8 @@ export class Layer {
         api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.map.id, { layer })
       );
     }
+
+    this._test = "Test";
   }
 
   /**
