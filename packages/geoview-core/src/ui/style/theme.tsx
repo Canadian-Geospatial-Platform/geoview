@@ -41,9 +41,11 @@ const themeOptions: ThemeOptions = {
     },
     subtitle1: {
       fontSize: "0.8rem",
+      lineHeight: 1.25,
     },
     subtitle2: {
       fontSize: "0.7rem",
+      lineHeight: 1.25,
     },
     body1: {},
     body2: {},

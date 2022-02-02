@@ -74,6 +74,10 @@
                     const button = {
                         tooltip: 'Test',
                         icon: '<i class="material-icons">apps</i>',
+                        variant: 'text',
+                        tooltipPlacement: 'right',
+                        type: 'textWithIcon',
+                        children: 'Test',
                     };
 
                     const panel = {
@@ -84,7 +88,7 @@
                     };
 
                     // call an api function to add a panel with a button in the default group
-                    cgpv.api.map('mapWM').buttonPanel.createAppbarPanel(button, panel, null);
+                    cgpv.api.map('mapWM').appBarButtons.createAppbarPanel(button, panel, null);
                 });
 
                 // get add navbar panel button element for WM map

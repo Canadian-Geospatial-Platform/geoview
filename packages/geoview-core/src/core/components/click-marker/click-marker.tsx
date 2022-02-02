@@ -1,13 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import L, { divIcon, LatLng } from "leaflet";
+import { Marker, useMap } from "react-leaflet";
+import { useEventHandlers, LeafletElement } from "@react-leaflet/core";
+
 import { makeStyles, Theme } from "@material-ui/core/styles";
 
-import L, { divIcon, LatLng } from "leaflet";
-
-import { Marker, useMap } from "react-leaflet";
-
-import { useEventHandlers, LeafletElement } from "@react-leaflet/core";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 import { getTranslateValues } from "../../../geo/utils/utilities";

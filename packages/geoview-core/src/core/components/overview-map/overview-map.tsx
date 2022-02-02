@@ -10,7 +10,6 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { IconButton } from "@material-ui/core";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 
 import { Map, CRS, DomEvent } from "leaflet";
@@ -25,6 +24,8 @@ import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 import { Cast } from "../../types/cgpv-types";
+
+import { IconButton } from "../../../ui";
 
 const MINIMAP_SIZE = {
   width: "150px",
@@ -160,6 +161,8 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
         style={{
           margin: theme.spacing(3) * -1,
           padding: 0,
+          height: "initial",
+          minWidth: "initial",
         }}
         aria-label={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}

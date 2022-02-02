@@ -1,11 +1,15 @@
-import React, { ElementType, ReactType } from "react";
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { CSSProperties } from "react";
+
 import L from "leaflet";
+
+import { TooltipProps } from "@material-ui/core";
+
 import { Projection } from "../../geo/projection/projection";
+
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
-import { Button } from "../../ui/button/button";
-import { Panel } from "../../ui/panel/panel";
+
+import { PanelApi, ButtonApi } from "../../ui";
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
@@ -29,11 +33,27 @@ export type TypeCGPV = {
 
 export type TypeCallback = (callback: () => void) => void;
 
+export type TypeFunction = () => void;
+
 export interface TypeApi extends API, Event, Projection, Plugin {}
 
 export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
+
+export type TypeChild = React.ReactElement<any, any> | undefined;
+
+export type TypeChildren =
+  | number
+  | boolean
+  | {}
+  | JSX.Element
+  | Element
+  | React.ReactElement<any, any | string | React.JSXElementConstructor<any>>
+  | Iterable<React.ReactNode>
+  | React.ReactPortal
+  | (JSX.Element | null)[]
+  | null;
 
 /**
  * Map types
@@ -214,8 +234,8 @@ export type TypeButtonPanelProps = {
  */
 export type TypeButtonPanel = {
   id: string;
-  panel?: Panel;
-  button: Button;
+  panel?: PanelApi;
+  button: ButtonApi;
   groupName?: string | null;
 };
 
@@ -244,9 +264,9 @@ export const CONST_VECTOR_TYPES = {
  * Interface for panel properties
  */
 export type TypePanelAppProps = {
-  panel: Panel;
+  panel: PanelApi;
   panelOpen: boolean;
-  button: Button;
+  button: ButtonApi;
 };
 
 /**
@@ -396,12 +416,30 @@ export type TypeButtonProps = {
   id: string;
   // button tooltip
   tooltip: string;
+  // location for tooltip
+  tooltipPlacement: TooltipProps["placement"];
   // button icon
-  icon: React.ReactNode | Element;
+  icon?: TypeChildren;
   // optional callback function to run on button click
-  callback?: () => void;
+  callback?: TypeFunction;
+  // on click function
+  onClick?: TypeFunction;
   // should the button be displayed in the appbar/navbar?
   visible?: boolean;
+  // optional class names
+  className?: string | undefined;
+  // optional style properties
+  style?: CSSProperties | undefined;
+  // button type
+  type: "text" | "textWithIcon" | "icon";
+  // button state
+  state?: "expanded" | "collapsed";
+  // button style variant
+  variant?: "text" | "contained" | "outlined";
+  // button children
+  children?: TypeChildren;
+  // focus used for accessibility to enable focus
+  autoFocus?: boolean;
 };
 
 /**

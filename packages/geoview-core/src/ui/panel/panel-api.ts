@@ -9,9 +9,9 @@ import { TypePanelProps } from "../../core/types/cgpv-types";
  * Class used to handle creating a new panel
  *
  * @export
- * @class Panel
+ * @class PanelApi
  */
-export class Panel {
+export class PanelApi {
   // panel type (appbar, navbar)
   type: string | undefined;
 
@@ -95,7 +95,7 @@ export class Panel {
     title: string,
     icon: string | React.ReactElement | Element,
     action: () => void
-  ): Panel => {
+  ): PanelApi => {
     api.event.emit(
       EVENT_NAMES.EVENT_PANEL_ADD_ACTION,
       api.selectedMapViewer.id,
@@ -142,7 +142,7 @@ export class Panel {
    *
    * @returns {Panel} this panel
    */
-  changeContent = (content: React.ReactNode | Element): Panel => {
+  changeContent = (content: React.ReactNode | Element): PanelApi => {
     this.content = content;
 
     api.event.emit(
@@ -164,7 +164,7 @@ export class Panel {
    * @param {string} id the id of the action button to be removed
    * @returns {Panel} this panel
    */
-  removeActionButton = (id: string): Panel => {
+  removeActionButton = (id: string): PanelApi => {
     api.event.emit(
       EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION,
       api.selectedMapViewer.id,

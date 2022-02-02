@@ -1,6 +1,8 @@
 /* eslint-disable react/require-default-props */
 import { useEffect, useState } from "react";
 
+import { useTranslation } from "react-i18next";
+
 import { CRS } from "leaflet";
 import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
 
@@ -24,6 +26,7 @@ import { MapViewer } from "../../../geo/map/map";
 import { generateId } from "../../utils/utilities";
 import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
 import { ClickMarker } from "../click-marker/click-marker";
+
 import {
   TypeMapConfigProps,
   TypeBasemapLayer,
@@ -48,11 +51,20 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const [crs, setCRS] = useState<CRS>();
   const [components, setComponents] = useState<TypeJSONObjectMapComponent>({});
 
+  const { i18n } = useTranslation();
+
   const defaultTheme = useTheme();
   const classes = useStyles();
 
   // create a new map viewer instance
-  let viewer: MapViewer = new MapViewer(props);
+  let viewer: MapViewer;
+
+  // check if instance already created
+  if (!api.map(id)) {
+    viewer = new MapViewer(props, i18n);
+  } else {
+    viewer = api.map(id);
+  }
 
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up("md"));

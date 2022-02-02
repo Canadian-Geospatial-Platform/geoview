@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
  * Create a panel with a header title, icon and content
  * @param {TypePanelAppProps} props panel properties
  */
-export default function PanelApp(props: TypePanelAppProps): JSX.Element {
+export const Panel = (props: TypePanelAppProps): JSX.Element => {
   const { panel, button, panelOpen } = props;
 
   // set the active trap value for FocusTrap
@@ -307,4 +307,4 @@ export default function PanelApp(props: TypePanelAppProps): JSX.Element {
       </Card>
     </FocusTrap>
   );
-}
+};

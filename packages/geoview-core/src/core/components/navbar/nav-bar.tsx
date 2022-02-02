@@ -7,7 +7,6 @@ import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
 
-import { ButtonGroup } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import ZoomIn from "./buttons/zoom-in";
@@ -17,9 +16,10 @@ import Home from "./buttons/home";
 
 import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
 import { api } from "../../../api/api";
-import { ButtonMapNav } from "./button";
 import { EVENT_NAMES } from "../../../api/event";
-import PanelApp from "../../../ui/panel/panel-app";
+
+import { Panel, ButtonGroup, Button } from "../../../ui";
+
 import {
   Cast,
   TypeButtonPanel,
@@ -32,6 +32,18 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "row",
     marginBottom: theme.spacing(14),
     zIndex: theme.zIndex.appBar,
+  },
+  navBarButton: {
+    height: "initial",
+    paddingLeft: "initial",
+    paddingRight: "initial",
+    margin: theme.spacing(2, 0),
+    backgroundColor: "rgba(255,255,255,1)",
+    color: theme.palette.primary.contrastText,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.dark,
+    },
   },
   root: {
     display: "flex",
@@ -173,7 +185,7 @@ export function NavBar(): JSX.Element {
                 buttonPanelId === buttonPanel.button.id && panelOpen;
 
               return buttonPanel.panel ? (
-                <PanelApp
+                <Panel
                   key={buttonPanel.button.id}
                   button={buttonPanel.button}
                   panel={buttonPanel.panel}
@@ -200,21 +212,29 @@ export function NavBar(): JSX.Element {
                 // eslint-disable-next-line no-nested-ternary
                 return buttonPanel.button.visible ? (
                   !buttonPanel.panel ? (
-                    <ButtonMapNav
+                    <Button
                       key={buttonPanel.button.id}
+                      id={buttonPanel.button.id}
+                      type="icon"
                       tooltip={buttonPanel.button.tooltip}
+                      tooltipPlacement="left"
                       icon={buttonPanel.button.icon}
-                      onClickFunction={() => {
+                      className={classes.navBarButton}
+                      onClick={() => {
                         if (buttonPanel.button.callback)
                           buttonPanel.button.callback();
                       }}
                     />
                   ) : (
-                    <ButtonMapNav
+                    <Button
                       key={buttonPanel.button.id}
+                      id={buttonPanel.button.id}
+                      type="icon"
                       tooltip={buttonPanel.button.tooltip}
+                      tooltipPlacement="left"
                       icon={buttonPanel.button.icon}
-                      onClickFunction={() => {
+                      className={classes.navBarButton}
+                      onClick={() => {
                         setButtonPanelId(buttonPanel.button.id);
                         openClosePanel(!panelOpen);
                       }}

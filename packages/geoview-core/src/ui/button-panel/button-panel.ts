@@ -4,8 +4,8 @@ import { EVENT_NAMES } from "../../api/event";
 
 import { LayersPanel } from "../panel/default-panels";
 
-import { Button } from "../button/button";
-import { Panel } from "../panel/panel";
+import { ButtonApi } from "../button/button-api";
+import { PanelApi } from "../panel/panel-api";
 
 import {
   TypeButtonPanel,
@@ -25,9 +25,6 @@ import { generateId } from "../../core/utils/utilities";
  * @class ButtonPanel
  */
 export class ButtonPanel {
-  // groups of array of button panels to hold all buttons created on the appbar
-  appBarPanels: Record<string, Record<string, TypeButtonPanel>> = {};
-
   // group of array to hold all buttons, button panels created on the navbar
   navBarButtons: Record<string, Record<string, TypeButtonPanel>> = {};
 
@@ -49,23 +46,8 @@ export class ButtonPanel {
    * Function used to create default buttons, button panels
    */
   private createDefaultButtonPanels = () => {
-    // create default group for appbar button panels
-    this.appBarPanels.default = {};
-
     // create default group for navbar buttons
     this.navBarButtons.default = {};
-
-    // TODO: do not keep, just proof of concept
-    this.createAppbarPanel(LayersPanel.button, LayersPanel.panel, "default");
-  };
-
-  /**
-   * Create a group for the appbar buttons
-   *
-   * @param {string} groupName a group name to be used to manage the group of appbar buttons
-   */
-  createAppbarButtonGroup = (groupName: string): void => {
-    this.appBarPanels[groupName] = {};
   };
 
   /**
@@ -75,58 +57,6 @@ export class ButtonPanel {
    */
   createNavbarButtonGroup = (groupName: string): void => {
     this.navBarButtons[groupName] = {};
-  };
-
-  /**
-   * Create a button on the appbar that will open a panel
-   *
-   * @param {TypeButtonProps} buttonProps button properties (icon, tooltip)
-   * @param {TypePanelProps} panelProps panel properties (icon, title, content)
-   * @param {string} groupName optional value to set this button in a group
-   *
-   * @returns the created panel
-   */
-  createAppbarPanel = (
-    buttonProps: TypeButtonProps,
-    panelProps: TypePanelProps,
-    groupName?: string | null | undefined
-  ): TypeButtonPanel | null => {
-    if (buttonProps && panelProps) {
-      // generate an id if not provided
-      buttonProps.id = generateId(buttonProps.id);
-
-      // if group was not specified then add button panels to the default group
-      if (!groupName) {
-        groupName = "default";
-      }
-
-      // if group does not exist then create it
-      if (!this.appBarPanels[groupName]) {
-        this.appBarPanels[groupName] = {};
-      }
-
-      // set panel type
-      panelProps.type = CONST_PANEL_TYPES.APPBAR;
-
-      const buttonPanel: TypeButtonPanel = {
-        id: buttonProps.id,
-        panel: new Panel(panelProps, buttonProps.id),
-        button: new Button(buttonProps),
-        groupName,
-      };
-
-      // add the new button panel to the correct group
-      this.appBarPanels[groupName][buttonProps.id] = buttonPanel;
-
-      // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, null, {
-        buttonPanel,
-      });
-
-      return buttonPanel;
-    }
-
-    return null;
   };
 
   /**
@@ -159,7 +89,7 @@ export class ButtonPanel {
 
       const buttonPanel: TypeButtonPanel = {
         id: buttonProps.id,
-        button: new Button(buttonProps),
+        button: new ButtonApi(buttonProps),
         groupName,
       };
 
@@ -168,7 +98,7 @@ export class ButtonPanel {
         // set panel type
         if (panelProps) panelProps.type = CONST_PANEL_TYPES.NAVBAR;
 
-        buttonPanel.panel = new Panel(panelProps, buttonProps.id);
+        buttonPanel.panel = new PanelApi(panelProps, buttonProps.id);
       }
 
       // add the new button panel to the correct group
@@ -218,31 +148,6 @@ export class ButtonPanel {
   };
 
   /**
-   * Get a button panel from the appbar by using it's id
-   *
-   * @param {string} id the id of the button panel to get
-   * @returns {TypeButtonPanel} the returned button panel
-   */
-  getAppBarButtonPanelById = (id: string): TypeButtonPanel | null => {
-    // loop through groups of appbar button panels
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < Object.keys(this.appBarPanels).length; i++) {
-      const group = this.appBarPanels[Object.keys(this.appBarPanels)[i]];
-
-      // eslint-disable-next-line no-plusplus
-      for (let j = 0; j < Object.keys(group).length; j++) {
-        const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
-
-        if (buttonPanel.id === id) {
-          return buttonPanel;
-        }
-      }
-    }
-
-    return null;
-  };
-
-  /**
    * Get a button panel from the navbar by using it's id
    *
    * @param {string} id the id of the button panel to get
@@ -265,24 +170,6 @@ export class ButtonPanel {
     }
 
     return null;
-  };
-
-  /**
-   * Remove an appbar panel using an id
-   *
-   * @param {string} id the id of the panel to remove
-   */
-  removeAppbarPanel = (id: string): void => {
-    // loop through groups of appbar button panels
-    Object.keys(this.appBarPanels).forEach((groupName) => {
-      const group = this.appBarPanels[groupName];
-
-      // delete the panel from the group
-      delete group[id];
-
-      // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, null, {});
-    });
   };
 
   /**

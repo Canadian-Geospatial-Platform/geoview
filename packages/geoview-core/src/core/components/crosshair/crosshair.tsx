@@ -3,7 +3,6 @@ import { useEffect, useState, useRef, CSSProperties } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import { Fade } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { useMap } from "react-leaflet";
@@ -11,6 +10,8 @@ import { useMap } from "react-leaflet";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 import { CrosshairIcon } from "./crosshair-icon";
+
+import { Fade } from "../../../ui";
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
@@ -86,7 +87,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
       if (isCrosshairsActiveValue.current) {
         const { panel } =
-          api.map(mapId).appBarPanels.default[panelButtonId.current];
+          api.map(mapId).appBarButtons.buttons.default[panelButtonId.current];
 
         if (panel) {
           // emit an event with the latlng point
@@ -149,7 +150,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
         visibility: isCrosshairsActive ? "visible" : "hidden",
       }}
     >
-      <Fade in={isCrosshairsActive}>
+      <Fade fadeIn={isCrosshairsActive}>
         <div className={classes.crosshairIcon}>
           <CrosshairIcon />
         </div>

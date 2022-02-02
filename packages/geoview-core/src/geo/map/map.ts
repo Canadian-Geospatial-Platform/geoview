@@ -1,3 +1,4 @@
+import { i18n } from "i18next";
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import L from 'leaflet';
@@ -20,11 +21,13 @@ import {
   Cast,
   TypeWindow,
   TypeMapConfigProps,
+  TypeJSONObject,
 } from "../../core/types/cgpv-types";
 
 import { generateId } from "../../core/utils/utilities";
 
 import { EVENT_NAMES } from "../../api/event";
+import { AppbarButtons } from "../../core/components/appbar/app-bar-buttons";
 
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
@@ -69,7 +72,9 @@ export class MapViewer {
   markerCluster!: MarkerCluster;
 
   // used to access button panel API to create buttons and button panels
+  // TODO replace with navbarButtons and appBarButtons
   buttonPanel!: ButtonPanel;
+  appBarButtons!: AppbarButtons;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -86,12 +91,15 @@ export class MapViewer {
   // access projection functions for this map instance
   projection!: MapProjection;
 
+  // i18n instance
+  i18nInstance!: i18n;
+
   /**
    * Add the map instance to the maps array in the api
    *
    * @param {TypeMapConfigProps} mapProps map properties
    */
-  constructor(mapProps: TypeMapConfigProps) {
+  constructor(mapProps: TypeMapConfigProps, i18n: i18n) {
     // add map viewer instance to api
     api.maps.push(this);
 
@@ -99,6 +107,7 @@ export class MapViewer {
 
     this.language = mapProps.language;
     this.currentProjection = mapProps.projection;
+    this.i18nInstance = i18n;
   }
 
   /**
@@ -121,6 +130,7 @@ export class MapViewer {
     this.projection = new MapProjection(this.mapProps.projection);
 
     this.buttonPanel = new ButtonPanel(cgpMap);
+    this.appBarButtons = new AppbarButtons(this.id);
 
     // check if geometries are provided from url
     this.loadGeometries();

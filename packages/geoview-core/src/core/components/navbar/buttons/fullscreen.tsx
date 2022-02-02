@@ -5,9 +5,9 @@ import FullscreenExitIcon from "@material-ui/icons/FullscreenExit";
 
 import { useMap } from "react-leaflet";
 
-import { ButtonMapNav } from "../button";
-
 import { api } from "../../../../api/api";
+
+import { Button } from "../../../../ui";
 
 export default function Fullscreen(): JSX.Element {
   const map = useMap();
@@ -20,10 +20,13 @@ export default function Fullscreen(): JSX.Element {
   }
 
   return (
-    <ButtonMapNav
+    <Button
+      id="fullscreen"
+      type="icon"
       tooltip="mapnav.fullscreen"
+      tooltipPlacement="left"
       icon={!fs ? <FullscreenIcon /> : <FullscreenExitIcon />}
-      onClickFunction={setFullscreen}
+      onClick={setFullscreen}
     />
   );
 }

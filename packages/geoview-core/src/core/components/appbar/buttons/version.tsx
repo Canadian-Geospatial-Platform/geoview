@@ -1,36 +1,39 @@
 import { makeStyles } from "@material-ui/core/styles";
 import GitHubIcon from "@material-ui/icons/GitHub";
 
-import ButtonApp from "../button";
-
 import { GITUHUB_REPO } from "../../../utils/constant";
 import { Cast, TypeAppVersion } from "../../../types/cgpv-types";
+
+import { Button } from "../../../../ui";
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
 
-const useStyles = makeStyles((theme) => ({
-  github: {
-    textAlign: "center",
-    margin: theme.spacing(3),
-    "& .cgp-version": {
-      fontWeight: "bold",
-      display: "block",
-      fontSize: theme.typography.subtitle1,
-      "& .cgp-hash": {
-        display: "inline",
+const useStyles = makeStyles((theme) => {
+  return {
+    github: {
+      textAlign: "center",
+      lineHeight: theme.typography.subtitle1.lineHeight,
+      "& .cgp-version": {
+        fontWeight: "bold",
+        display: "block",
+        fontSize: theme.typography.subtitle1.fontSize,
+      },
+      "& .cgp-timestamp": {
         fontWeight: "normal",
-        fontSize: theme.typography.subtitle2,
+        fontSize: theme.typography.subtitle2.fontSize,
       },
     },
-    "& .cgp-timestamp": {
-      fontWeight: "normal",
-      fontSize: theme.typography.subtitle2,
-    },
-  },
-}));
+  };
+});
 
-export default function Version(): JSX.Element {
+interface VersionProps {
+  drawerStatus: boolean;
+}
+
+export default function Version(props: VersionProps): JSX.Element {
+  const { drawerStatus } = props;
+
   const classes = useStyles();
 
   function getRepo(): void {
@@ -48,20 +51,22 @@ export default function Version(): JSX.Element {
   }
 
   return (
-    <ButtonApp
+    <Button
       id="version-button"
+      variant="text"
       tooltip="appbar.version"
+      tooltipPlacement="right"
+      type="textWithIcon"
+      onClick={getRepo}
       icon={<GitHubIcon />}
-      onClickFunction={getRepo}
-      content={Cast<Element>(
+      className=""
+      children={Cast<Element>(
         <div className={classes.github}>
-          <span className="cgp-version">
-            {getVersion()}
-            <span className="cgp-hash">{`  ${getHash()}`}</span>
-          </span>
+          <span className="cgp-version">{getVersion()}</span>
           <span className="cgp-timestamp">{getTimestamp()}</span>
         </div>
       )}
+      state={drawerStatus ? "expanded" : "collapsed"}
     />
   );
 }

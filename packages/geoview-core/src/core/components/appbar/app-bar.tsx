@@ -1,35 +1,20 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 
-import { useTranslation } from "react-i18next";
-
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  Drawer,
-  List,
-  Divider,
-  IconButton,
-  Tooltip,
-  Fade,
-} from "@material-ui/core";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-
 import { DomEvent } from "leaflet";
 import { useMap } from "react-leaflet";
 
+import { makeStyles } from "@material-ui/core/styles";
+
 import Version from "./buttons/version";
 
-import ButtonApp from "./button";
-import PanelApp from "../../../ui/panel/panel-app";
+import { Divider, Drawer, List, ListItem, Panel, Button } from "../../../ui";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
 import { CONST_PANEL_TYPES } from "../../types/cgpv-types";
 
-const drawerWidth = 200;
-
-const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme) => ({
   appBar: {
     display: "flex",
     flexDirection: "row",
@@ -38,48 +23,16 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(2, 2),
     border: "2px solid rgba(0, 0, 0, 0.2)",
   },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: "nowrap",
-  },
-  drawerOpen: {
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawerClose: {
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    overflowX: "hidden",
-    width: "61px",
-  },
-  toolbar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    padding: theme.spacing(0, 1),
-  },
-  spacer: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.primary.main,
-  },
 }));
 
 /**
  * Create an appbar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  const [open, setOpen] = useState(false);
   const [buttonPanelId, setButtonPanelId] = useState<string>();
   const [panelOpen, setPanelOpen] = useState(false);
   const [, setPanelCount] = useState(0);
-
-  const { t } = useTranslation<string>();
+  const [drawerStatus, setDrawerStatus] = useState<boolean>(false);
 
   const classes = useStyles();
 
@@ -108,18 +61,8 @@ export function Appbar(): JSX.Element {
     });
 
     // if appbar is open then close it
-    if (open) setOpen(false);
-  };
-
-  const openCloseDrawer = (status: boolean): void => {
-    setOpen(status);
-
-    // if panel is open then close it
-    if (panelOpen) openClosePanel(false);
-
-    // emit an api event when drawer opens/closes
     api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
-      status: open,
+      status: false,
     });
   };
 
@@ -128,6 +71,17 @@ export function Appbar(): JSX.Element {
     // disable events on container
     DomEvent.disableClickPropagation(appBarChildren);
     DomEvent.disableScrollPropagation(appBarChildren);
+
+    // listen to drawer open/close events
+    api.event.on(
+      EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE,
+      (payload) => {
+        if (payload && payload.handlerName === mapId) {
+          setDrawerStatus(payload.status);
+        }
+      },
+      mapId
+    );
 
     // listen to panel open/close events
     api.event.on(
@@ -159,10 +113,10 @@ export function Appbar(): JSX.Element {
       (args) => {
         if (args.handlerId === mapId) {
           const buttonPanel = Object.keys(
-            api.map(mapId).buttonPanel.appBarPanels
+            api.map(mapId).appBarButtons.buttons
           ).map((groupName: string) => {
             const buttonPanels =
-              api.map(mapId).buttonPanel.appBarPanels[groupName];
+              api.map(mapId).appBarButtons.buttons[groupName];
 
             return buttonPanels[args.buttonId];
           })[0];
@@ -181,39 +135,20 @@ export function Appbar(): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE);
+      api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className={classes.appBar} ref={appBar}>
-      <Drawer
-        variant="permanent"
-        className={open ? classes.drawerOpen : classes.drawerClose}
-        classes={{ paper: open ? classes.drawerOpen : classes.drawerClose }}
-      >
-        <div className={classes.toolbar}>
-          <Tooltip
-            title={open ? t("general.close") : t("general.open")}
-            placement="right"
-            TransitionComponent={Fade}
-          >
-            <IconButton
-              onClick={() => {
-                openCloseDrawer(!open);
-              }}
-            >
-              {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </Tooltip>
-        </div>
+      <Drawer>
         <Divider />
-        <List>
-          {Object.keys(api.mapInstance(map).buttonPanel.appBarPanels).map(
+        <div>
+          {Object.keys(api.map(mapId).appBarButtons.buttons).map(
             (groupName: string) => {
               // get button panels from group
               const buttonPanels =
-                api.mapInstance(map).buttonPanel.appBarPanels[groupName];
+                api.map(mapId).appBarButtons.buttons[groupName];
 
               // display the button panels in the list
               return (
@@ -223,16 +158,25 @@ export function Appbar(): JSX.Element {
 
                     return buttonPanel.button.visible ? (
                       <div key={buttonPanel.button.id}>
-                        <ButtonApp
-                          tooltip={buttonPanel.button.tooltip}
-                          icon={buttonPanel.button.icon}
-                          id={buttonPanel.button.id}
-                          onClickFunction={() => {
-                            setButtonPanelId(buttonPanel.button.id);
-                            openClosePanel(!panelOpen);
-                          }}
-                        />
-                        <Divider className={classes.spacer} />
+                        <List>
+                          <ListItem>
+                            <Button
+                              id={buttonPanel.button.id}
+                              variant="text"
+                              tooltip={buttonPanel.button.tooltip}
+                              tooltipPlacement="right"
+                              type="textWithIcon"
+                              onClick={() => {
+                                setButtonPanelId(buttonPanel.button.id);
+                                openClosePanel(!panelOpen);
+                              }}
+                              icon={buttonPanel.button.icon}
+                              children={buttonPanel.button.tooltip}
+                              state={drawerStatus ? "expanded" : "collapsed"}
+                            />
+                          </ListItem>
+                        </List>
+                        <Divider grow={true} />
                         <Divider />
                       </div>
                     ) : null;
@@ -241,18 +185,16 @@ export function Appbar(): JSX.Element {
               );
             }
           )}
-        </List>
-        <Divider className={classes.spacer} />
+        </div>
+        <Divider grow={true} />
         <Divider />
-        <List>
-          <Version />
-        </List>
+        <Version drawerStatus={drawerStatus} />
       </Drawer>
-      {Object.keys(api.mapInstance(map).buttonPanel.appBarPanels).map(
+      {Object.keys(api.mapInstance(map).appBarButtons.buttons).map(
         (groupName: string) => {
           // get button panels from group
           const buttonPanels =
-            api.mapInstance(map).buttonPanel.appBarPanels[groupName];
+            api.mapInstance(map).appBarButtons.buttons[groupName];
 
           // display the panels in the list
           return (
@@ -264,7 +206,7 @@ export function Appbar(): JSX.Element {
                   buttonPanelId === buttonPanel.button.id && panelOpen;
 
                 return buttonPanel.panel ? (
-                  <PanelApp
+                  <Panel
                     key={buttonPanel.button.id}
                     panel={buttonPanel.panel}
                     button={buttonPanel.button}

@@ -64,7 +64,7 @@ class DetailsPlugin {
       // set ID to detailsPanel so that it can be accessed from the core viewer
       id: "detailsPanelButton",
       tooltip: this.translations[language].detailsPanel,
-      icon: '<i class="material-icons">details</i>',
+      icon: '<i class="material-icons">details</i><div>Test</div>',
       visible: false,
     };
 
@@ -78,7 +78,7 @@ class DetailsPlugin {
     // create a new button panel on the appbar
     this.buttonPanel = api
       .map(mapId)
-      .buttonPanel.createAppbarPanel(button, panel, null);
+      .appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
     this.buttonPanel?.panel?.changeContent(
@@ -99,7 +99,7 @@ class DetailsPlugin {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId).buttonPanel.removeAppbarPanel(this.buttonPanel.id);
+      api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
     }
   }
 }
