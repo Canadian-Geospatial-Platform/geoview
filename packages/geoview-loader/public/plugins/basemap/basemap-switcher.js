@@ -326,14 +326,14 @@
             };
 
             // create a new button panel on the appbar
-            this.panel = api.map(mapId).buttonPanel.createAppbarPanel(button, panel, null);
+            this.panel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
         };
 
         // hook is called once the plugin has been unmounted, remove any added components
         removed = () => {
             const { mapId } = this.props;
 
-            this.api.map(mapId).buttonPanel.removeAppbarPanel(this.panel.id);
+            this.api.map(mapId).appBarButtons.removeAppbarPanel(this.panel.id);
         };
     }
 

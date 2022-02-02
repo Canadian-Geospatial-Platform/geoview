@@ -8,7 +8,6 @@ import { LatLngBounds } from "leaflet";
 import queryString from "query-string";
 import screenfull from "screenfull";
 
-import { ButtonPanel } from "../../ui/button-panel/button-panel";
 import { Vector } from "../layer/vector/vector";
 import { Basemap } from "../layer/basemap/basemap";
 import { Layer } from "../layer/layer";
@@ -21,13 +20,13 @@ import {
   Cast,
   TypeWindow,
   TypeMapConfigProps,
-  TypeJSONObject,
 } from "../../core/types/cgpv-types";
 
 import { generateId } from "../../core/utils/utilities";
 
 import { EVENT_NAMES } from "../../api/event";
 import { AppbarButtons } from "../../core/components/appbar/app-bar-buttons";
+import { NavbarButtons } from "../../core/components/navbar/nav-bar-buttons";
 
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
@@ -71,10 +70,11 @@ export class MapViewer {
   // used to access marker cluster API to create and manage marker cluster groups
   markerCluster!: MarkerCluster;
 
-  // used to access button panel API to create buttons and button panels
-  // TODO replace with navbarButtons and appBarButtons
-  buttonPanel!: ButtonPanel;
+  // used to access button panel API to create buttons and button panels on the appbar
   appBarButtons!: AppbarButtons;
+
+  // used to access button panel API to create buttons and button panels on the navbar
+  navBarButtons!: NavbarButtons;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -129,8 +129,8 @@ export class MapViewer {
     // initialize the projection
     this.projection = new MapProjection(this.mapProps.projection);
 
-    this.buttonPanel = new ButtonPanel(cgpMap);
     this.appBarButtons = new AppbarButtons(this.id);
+    this.navBarButtons = new NavbarButtons(this.id);
 
     // check if geometries are provided from url
     this.loadGeometries();

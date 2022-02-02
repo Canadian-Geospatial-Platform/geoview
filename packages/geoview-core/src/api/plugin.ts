@@ -32,8 +32,6 @@ export class Plugin {
     constructor?: any,
     props?: Record<string, unknown>
   ): Promise<void> => {
-    console.log(this.plugins);
-
     if (!(id in this.plugins)) {
       let plugin: any;
 

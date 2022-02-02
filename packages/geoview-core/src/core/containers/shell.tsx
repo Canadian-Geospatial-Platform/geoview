@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { CircularProgress } from "@material-ui/core";
 
 import FocusTrap from "focus-trap-react";
 
@@ -13,6 +12,8 @@ import { FocusTrapDialog } from "./focus-trap";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
+
+import { CircularProgress } from "../../ui";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -25,27 +26,6 @@ const useStyles = makeStyles((theme) => {
       zIndex: -1,
       height: "100%",
       pointerEvents: "none",
-    },
-    loading: {
-      position: "absolute",
-      top: "0px",
-      bottom: "0px",
-      left: "0px",
-      right: "0px",
-      zIndex: 10000,
-      backgroundColor: "#000000",
-      textAlign: "center",
-      transition: theme.transitions.create(["visibility", "opacity"], {
-        delay: theme.transitions.duration.shortest,
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.splash,
-      }),
-    },
-    progress: {
-      width: "100px !important",
-      height: "100px !important",
-      top: "50%",
-      position: "absolute",
     },
     skip: {
       position: "absolute",
@@ -115,15 +95,7 @@ export function Shell(props: ShellProps): JSX.Element {
       focusTrapOptions={{ escapeDeactivates: false }}
     >
       <div className={classes.shell}>
-        <div
-          className={classes.loading}
-          style={{
-            opacity: isLoaded ? "0" : "1",
-            visibility: isLoaded ? "hidden" : "visible",
-          }}
-        >
-          <CircularProgress className={classes.progress} />
-        </div>
+        <CircularProgress isLoaded={isLoaded} />
         <a
           id={`toplink-${id}`}
           href={`#bottomlink-${id}`}

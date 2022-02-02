@@ -1,43 +1,37 @@
-/* eslint-disable no-param-reassign */
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from "../../../api/api";
 
-import { LayersPanel } from "../panel/default-panels";
+import { EVENT_NAMES } from "../../../api/event";
 
-import { ButtonApi } from "../button/button-api";
-import { PanelApi } from "../panel/panel-api";
+import { ButtonApi, PanelApi } from "../../../ui";
 
 import {
   TypeButtonPanel,
   TypeButtonProps,
   TypePanelProps,
   CONST_PANEL_TYPES,
-} from "../../core/types/cgpv-types";
+} from "../../types/cgpv-types";
 
-import { generateId } from "../../core/utils/utilities";
-
-// TODO: look at code duplication
+import { generateId } from "../../utils/utilities";
 
 /**
- * Class used to manage creating buttons and button panels
+ * Class to manage buttons on the navbar
  *
- * @export
- * @class ButtonPanel
+ * @exports
+ * @class
  */
-export class ButtonPanel {
-  // group of array to hold all buttons, button panels created on the navbar
-  navBarButtons: Record<string, Record<string, TypeButtonPanel>> = {};
+export class NavbarButtons {
+  mapId!: string;
 
-  // reference to the leaflet map
-  private buttonPanelMap: L.Map;
+  // group of array to hold all buttons, button panels created on the navbar
+  buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
   /**
    * Create default buttons, button panels
    *
-   * @param {Map} map the leaflet map
+   * @param {string} mapId the current map
    */
-  constructor(map: L.Map) {
-    this.buttonPanelMap = map;
+  constructor(mapId: string) {
+    this.mapId = mapId;
 
     this.createDefaultButtonPanels();
   }
@@ -47,7 +41,7 @@ export class ButtonPanel {
    */
   private createDefaultButtonPanels = () => {
     // create default group for navbar buttons
-    this.navBarButtons.default = {};
+    this.buttons.default = {};
   };
 
   /**
@@ -56,7 +50,7 @@ export class ButtonPanel {
    * @param {string} groupName a group name to be used to manage the group of navbar buttons
    */
   createNavbarButtonGroup = (groupName: string): void => {
-    this.navBarButtons[groupName] = {};
+    this.buttons[groupName] = {};
   };
 
   /**
@@ -83,8 +77,8 @@ export class ButtonPanel {
       }
 
       // if group does not exist then create it
-      if (!this.navBarButtons[groupName]) {
-        this.navBarButtons[groupName] = {};
+      if (!this.buttons[groupName]) {
+        this.buttons[groupName] = {};
       }
 
       const buttonPanel: TypeButtonPanel = {
@@ -102,7 +96,7 @@ export class ButtonPanel {
       }
 
       // add the new button panel to the correct group
-      this.navBarButtons[groupName][buttonProps.id] = buttonPanel;
+      this.buttons[groupName][buttonProps.id] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
       api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, null, {
@@ -156,8 +150,8 @@ export class ButtonPanel {
   getNavBarButtonPanelById = (id: string): TypeButtonPanel | null => {
     // loop through groups of appbar button panels
     // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < Object.keys(this.navBarButtons).length; i++) {
-      const group = this.navBarButtons[Object.keys(this.navBarButtons)[i]];
+    for (let i = 0; i < Object.keys(this.buttons).length; i++) {
+      const group = this.buttons[Object.keys(this.buttons)[i]];
 
       // eslint-disable-next-line no-plusplus
       for (let j = 0; j < Object.keys(group).length; j++) {
@@ -179,8 +173,8 @@ export class ButtonPanel {
    */
   removeNavbarButtonPanel = (id: string): void => {
     // loop through groups
-    Object.keys(this.navBarButtons).forEach((groupName) => {
-      const group = this.navBarButtons[groupName];
+    Object.keys(this.buttons).forEach((groupName) => {
+      const group = this.buttons[groupName];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
       api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, null, {});

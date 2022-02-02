@@ -80,7 +80,7 @@ export function NavBar(): JSX.Element {
   const map = useMap();
 
   const mapId = api.mapInstance(map).id;
-  const buttonPanelApi = api.map(mapId).buttonPanel;
+  const navBarButtons = api.map(mapId).navBarButtons;
 
   /**
    * function that causes rerender when adding a new button, button panel
@@ -132,9 +132,9 @@ export function NavBar(): JSX.Element {
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
         if (args.handlerId === mapId) {
-          const buttonPanel = Object.keys(buttonPanelApi.navBarButtons).map(
+          const buttonPanel = Object.keys(navBarButtons.buttons).map(
             (groupName: string) => {
-              const buttonPanels = buttonPanelApi.navBarButtons[groupName];
+              const buttonPanels = navBarButtons.buttons[groupName];
 
               return buttonPanels[args.buttonId];
             }
@@ -172,8 +172,8 @@ export function NavBar(): JSX.Element {
       ref={navBarRef}
       className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}
     >
-      {Object.keys(buttonPanelApi.navBarButtons).map((groupName) => {
-        const buttons = buttonPanelApi.navBarButtons[groupName];
+      {Object.keys(navBarButtons.buttons).map((groupName) => {
+        const buttons = navBarButtons.buttons[groupName];
 
         // display the panels in the list
         return (
@@ -197,8 +197,8 @@ export function NavBar(): JSX.Element {
         );
       })}
       <div className={classes.root}>
-        {Object.keys(buttonPanelApi.navBarButtons).map((groupName) => {
-          const buttons = buttonPanelApi.navBarButtons[groupName];
+        {Object.keys(navBarButtons.buttons).map((groupName) => {
+          const buttons = navBarButtons.buttons[groupName];
 
           return (
             <ButtonGroup

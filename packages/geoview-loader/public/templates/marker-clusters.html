@@ -258,7 +258,7 @@
                 };
 
                 // call an mapViewer function to add a panel with a button in the default group
-                const modelPanel = mapViewer.buttonPanel.createAppbarPanel(button, panel, 'model-selector').panel;
+                const modelPanel = mapViewer.appBarButtons.createAppbarPanel(button, panel, 'model-selector').panel;
                 modelPanel.attachCheckBoxList(['model 1', 'model 2', 'model 3', 'model 4', ], false);
 
             }
@@ -285,7 +285,7 @@
                     if (pressedKeys['C'.charCodeAt(0)] || pressedKeys['T'.charCodeAt(0)] ) clickCounter = ++clickCounter & 1;
                 });
 
-                const layerPanel = mapViewer.buttonPanel.getAppBarButtonPanelById('layer-panel').panel;
+                const layerPanel = mapViewer.appBarButtons.getAppBarButtonPanelById('layer-panel').panel;
                 layerPanel.attachCheckBoxList(['layer 1', 'layer 2', 'layer 3', 'layer 4', ], true);
 
                 addModelsToAppbarPane(mapViewer);
