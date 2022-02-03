@@ -1,0 +1,22 @@
+{
+  "name": "geoview-overview-map",
+  "version": "1.0.0",
+  "description": "Overview map for the geoview project",
+  "main": "src/index.tsx",
+  "keywords": [
+    "react",
+    "overview map"
+  ],
+  "author": "Saleh Yassin",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "geoview-core": "workspace:~0.1.0"
+  },
+  "devDependencies": {
+    "@babel/runtime": "^7.12.9",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0"
+  }
+}

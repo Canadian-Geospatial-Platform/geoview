@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+  "commands": [
+    {
+      "commandKind": "global",
+      "name": "serve",
+      "summary": "Serves the page locally with hot-reload.",
+      "shellCommand": "npm run --prefix packages/geoview-loader serve"
+    },
+    {
+      "commandKind": "global",
+      "name": "host",
+      "summary": "Deploys the geoview project to github pages.",
+      "shellCommand": "npm run --prefix packages/geoview-loader deploy"
+    },
+    {
+      "commandKind": "bulk",
+      "name": "build",
+      "summary": "Build the packages and move them to the dist directory",
+      "enableParallelism": false,
+      "ignoreMissingScript": true
+    }
+  ],
+  "parameters": []
+}
