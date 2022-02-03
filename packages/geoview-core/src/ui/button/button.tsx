@@ -55,6 +55,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Create a customized Material UI button
+ *
+ * @param {TypeButtonProps} props the properties of the Button UI element
+ * @returns {JSX.Element} the new UI element
+ */
 export const Button = (props: TypeButtonProps): JSX.Element => {
   const [content, setContent] = useState<TypeChildren>();
 
@@ -82,9 +88,30 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     return typeof children === "undefined" ? (
       <div></div>
     ) : typeof children === "string" ? (
-      <HtmlToReact className={classes.text} htmlContent={children} />
+      <HtmlToReact
+        className={classes.text}
+        style={
+          type === "text"
+            ? {
+                marginLeft: "initial",
+              }
+            : {}
+        }
+        htmlContent={children}
+      />
     ) : (
-      <div className={classes.text}>{children}</div>
+      <div
+        className={classes.text}
+        style={
+          type === "text"
+            ? {
+                marginLeft: "initial",
+              }
+            : {}
+        }
+      >
+        {children}
+      </div>
     );
   };
 
@@ -136,7 +163,7 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
 
   return (
     <Tooltip
-      title={t(tooltip)}
+      title={t(tooltip ? tooltip : "")}
       placement={tooltipPlacement}
       TransitionComponent={Fade}
       ref={buttonRef}

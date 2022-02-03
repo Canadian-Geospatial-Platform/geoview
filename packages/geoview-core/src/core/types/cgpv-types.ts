@@ -413,11 +413,11 @@ export type TypeAppVersion = {
  */
 export type TypeButtonProps = {
   // generated button id
-  id: string;
+  id?: string;
   // button tooltip
-  tooltip: string;
+  tooltip?: string;
   // location for tooltip
-  tooltipPlacement: TooltipProps["placement"];
+  tooltipPlacement?: TooltipProps["placement"];
   // button icon
   icon?: TypeChildren;
   // optional callback function to run on button click

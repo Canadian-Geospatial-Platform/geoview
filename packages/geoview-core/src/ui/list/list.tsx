@@ -7,10 +7,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Properties for the List UI
+ */
 interface ListProps {
   children?: JSX.Element | (JSX.Element | null)[] | JSX.Element[];
 }
 
+/**
+ * Create a customized Material UI List
+ *
+ * @param {ListProps} props the properties passed to the List element
+ * @returns {JSX.Element} the created List element
+ */
 export const List = (props: ListProps) => {
   const { children } = props;
 

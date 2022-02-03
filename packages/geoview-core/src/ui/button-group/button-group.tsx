@@ -3,7 +3,10 @@ import { ButtonGroup as MaterialButtonGroup } from "@material-ui/core";
 
 import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
 
-interface IconButtonProps {
+/**
+ * Button Group properties
+ */
+interface ButtonGroupProps {
   children?: TypeChildren;
   className?: string | undefined;
   style?: CSSProperties | undefined;
@@ -12,7 +15,13 @@ interface IconButtonProps {
   variant?: "text" | "outlined" | "contained";
 }
 
-export const ButtonGroup = (props: IconButtonProps): JSX.Element => {
+/**
+ * Create a customized Material UI button group
+ *
+ * @param {ButtonGroupProps} props the properties passed to the button group element
+ * @returns {JSX.Element} the created Button Group element
+ */
+export const ButtonGroup = (props: ButtonGroupProps): JSX.Element => {
   const { className, style, children, ariaLabel, variant, orientation } = props;
 
   return (

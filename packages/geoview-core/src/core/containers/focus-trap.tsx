@@ -5,17 +5,11 @@ import { useTranslation } from "react-i18next";
 import { useTheme, makeStyles } from "@material-ui/core/styles";
 
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-} from "@material-ui/core";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
+
+import { Dialog, Button } from "../../ui";
 
 const useStyles = makeStyles((theme) => ({
   trap: {
@@ -29,16 +23,6 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     zIndex: theme.zIndex.focusDialog,
     overflow: "hidden",
-  },
-  root: {
-    position: "absolute",
-  },
-  backdrop: {
-    position: "absolute",
-    background: theme.palette.backdrop,
-  },
-  content: {
-    padding: theme.spacing(5),
   },
 }));
 
@@ -177,40 +161,51 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   return (
     <Dialog
-      style={{ position: "absolute" }}
       container={document.getElementsByClassName("llwp-map")[0]}
       open={open}
       aria-labelledby="wcag-dialog-title"
       aria-describedby="wcag-dialog-description"
       fullScreen={fullScreen}
       className={classes.trap}
-      classes={{
-        root: classes.root,
-      }}
-      BackdropProps={{
-        classes: { root: classes.backdrop },
-      }}
-    >
-      <DialogTitle id="wcag-dialog-title">
-        {t("keyboardnav.focusdialog.title")}
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText
-          id="wcag-dialog-description"
-          className={classes.content}
+      titleId="wcag-dialog-title"
+      title={t("keyboardnav.focusdialog.title")}
+      contentTextId="wcag-dialog-description"
+      content={
+        <div
           dangerouslySetInnerHTML={{
             __html: t("keyboardnav.focusdialog.main"),
           }}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button autoFocus onClick={handleEnable}>
-          {t("keyboardnav.focusdialog.button.enable")}
-        </Button>
-        <Button onClick={handleSkip}>
-          {t("keyboardnav.focusdialog.button.skip")}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        ></div>
+      }
+      actions={
+        <>
+          <Button
+            id="enable-focus"
+            tooltip={t("keyboardnav.focusdialog.button.enable")}
+            tooltipPlacement="top-end"
+            autoFocus
+            onClick={handleEnable}
+            type="text"
+            style={{
+              width: "initial",
+            }}
+          >
+            {t("keyboardnav.focusdialog.button.enable")}
+          </Button>
+          <Button
+            id="skip-focus"
+            tooltip={t("keyboardnav.focusdialog.button.skip")}
+            tooltipPlacement="top-end"
+            onClick={handleSkip}
+            type="text"
+            style={{
+              width: "initial",
+            }}
+          >
+            {t("keyboardnav.focusdialog.button.skip")}
+          </Button>
+        </>
+      }
+    />
   );
 }

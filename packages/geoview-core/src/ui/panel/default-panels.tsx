@@ -10,7 +10,9 @@ export const LayersPanel: TypeButtonPanelProps = {
   button: {
     id: "layer-panel",
     tooltip: "appbar.layers",
+    tooltipPlacement: "right",
     icon: <LayersIcon />,
+    type: "textWithIcon",
   },
   panel: {
     title: "appbar.layers",

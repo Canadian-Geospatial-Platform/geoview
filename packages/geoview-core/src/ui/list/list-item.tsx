@@ -17,12 +17,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * List item properties
+ */
 interface ListItemProps {
   className?: string | undefined;
   style?: CSSProperties | undefined;
   children?: TypeChildren;
 }
 
+/**
+ * Create a customized Material UI List Item
+ *
+ * @param {ListItemProps} props the properties passed to the List Item element
+ * @returns {JSX.Element} the created List Item element
+ */
 export const ListItem = (props: ListItemProps) => {
   const { children, className, style } = props;
 

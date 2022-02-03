@@ -56,6 +56,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Drawer Properties
+ */
 interface DrawerProps {
   variant?: "permanent" | "persistent" | "temporary" | undefined;
   className?: string | undefined;
@@ -64,6 +67,12 @@ interface DrawerProps {
   children?: JSX.Element | JSX.Element[];
 }
 
+/**
+ * Create a customized Material UI Drawer
+ *
+ * @param {DrawerProps} props the properties passed to the Drawer element
+ * @returns {JSX.Element} the created Drawer element
+ */
 export const Drawer = (props: DrawerProps): JSX.Element => {
   const { variant, status, className, style, children } = props;
 

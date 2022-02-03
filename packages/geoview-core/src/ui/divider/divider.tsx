@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Properties for the Divider
+ */
 interface DividerProps {
   className?: string;
   style?: CSSProperties;
@@ -25,6 +28,12 @@ interface DividerProps {
   grow?: boolean;
 }
 
+/**
+ * Create a customized Material UI Divider
+ *
+ * @param {DividerProps} props the properties passed to the Divider element
+ * @returns {JSX.Element} the created Divider element
+ */
 export const Divider = (props: DividerProps): JSX.Element => {
   const { className, style, grow, orientation } = props;
 

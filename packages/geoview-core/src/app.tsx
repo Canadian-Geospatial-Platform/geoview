@@ -17,6 +17,8 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
 import { api } from "./api/api";
 
+import * as UI from "./ui";
+
 import "../node_modules/leaflet/dist/leaflet.css";
 import "./ui/style/style.css";
 import "./ui/style/vendor.css";
@@ -78,9 +80,7 @@ export const cgpv: TypeCGPV = {
     icons: {
       ChevronLeft: ChevronLeft,
     },
-    elements: {
-      IconButton: IconButton,
-    },
+    elements: UI,
   },
   useTranslation: useTranslation,
 };

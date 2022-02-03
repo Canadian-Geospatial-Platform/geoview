@@ -57,6 +57,8 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Create a panel with a header title, icon and content
  * @param {TypePanelAppProps} props panel properties
+ *
+ * @returns {JSX.Element} the created Panel element
  */
 export const Panel = (props: TypePanelAppProps): JSX.Element => {
   const { panel, button, panelOpen } = props;
