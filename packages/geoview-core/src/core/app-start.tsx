@@ -40,7 +40,7 @@ const AppStart = (props: AppStartProps): JSX.Element => {
         if (
           domNodeElement.attribs &&
           domNodeElement.attribs.class &&
-          domNodeElement.attribs.class === "llwp-map"
+          domNodeElement.attribs.class.indexOf("llwp-map") >= 0
         ) {
           // validate configuration and appply default if problem occurs then setup language
           const configObj = new Config(
