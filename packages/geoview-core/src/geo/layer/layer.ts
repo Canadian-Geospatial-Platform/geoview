@@ -18,7 +18,6 @@ import {
 } from "../../core/types/cgpv-types";
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
-import "esri-leaflet-renderers";
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
