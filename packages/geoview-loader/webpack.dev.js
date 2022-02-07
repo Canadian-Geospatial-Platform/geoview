@@ -8,8 +8,11 @@ const config = {
     mode: 'development',
     devtool: 'source-map',
     devServer: {
-        contentBase: path.resolve(__dirname, 'public'),
         historyApiFallback: true,
+        static: {
+            directory: path.join(__dirname, 'public'),
+            publicPath: '/',
+        },
         compress: true,
         open: true,
     },
