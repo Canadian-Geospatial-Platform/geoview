@@ -1,4 +1,4 @@
-import HomeIcon from "@material-ui/icons/Home";
+import { HomeIcon } from "../../../../ui";
 
 import { useMap } from "react-leaflet";
 

@@ -33,6 +33,11 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(14),
     zIndex: theme.zIndex.appBar,
   },
+  navBtnGroup: {
+    "& > button:not(:last-child)": {
+      marginBottom: theme.spacing(4),
+    },
+  },
   navBarButton: {
     height: "initial",
     paddingLeft: "initial",
@@ -176,87 +181,94 @@ export function NavBar(): JSX.Element {
         const buttons = navBarButtons.buttons[groupName];
 
         // display the panels in the list
-        return (
-          <div key={groupName}>
-            {Object.keys(buttons).map((buttonId) => {
-              const buttonPanel = buttons[buttonId];
+        const panels = Object.keys(buttons).map((buttonId) => {
+            const buttonPanel = buttons[buttonId];
+            const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
 
-              const isOpen =
-                buttonPanelId === buttonPanel.button.id && panelOpen;
+            return buttonPanel.panel ? (
+              <Panel
+                key={buttonPanel.button.id}
+                button={buttonPanel.button}
+                panel={buttonPanel.panel}
+                panelOpen={isOpen}
+              />
+            ) : null;
+          });
 
-              return buttonPanel.panel ? (
-                <Panel
-                  key={buttonPanel.button.id}
-                  button={buttonPanel.button}
-                  panel={buttonPanel.panel}
-                  panelOpen={isOpen}
-                />
-              ) : null;
-            })}
-          </div>
-        );
+          if (panels.length > 0) {
+            return (
+                <div key={groupName}>
+                    {panels}
+                </div> 
+            );
+          }
       })}
       <div className={classes.root}>
         {Object.keys(navBarButtons.buttons).map((groupName) => {
-          const buttons = navBarButtons.buttons[groupName];
+            const buttons = navBarButtons.buttons[groupName];
 
-          return (
-            <ButtonGroup
-              key={groupName}
-              orientation="vertical"
-              aria-label={t("mapnav.arianavbar")}
-              variant="contained"
-            >
-              {Object.keys(buttons).map((buttonId) => {
-                const buttonPanel: TypeButtonPanel = buttons[buttonId];
-                // eslint-disable-next-line no-nested-ternary
-                return buttonPanel.button.visible ? (
-                  !buttonPanel.panel ? (
-                    <Button
-                      key={buttonPanel.button.id}
-                      id={buttonPanel.button.id}
-                      type="icon"
-                      tooltip={buttonPanel.button.tooltip}
-                      tooltipPlacement="left"
-                      icon={buttonPanel.button.icon}
-                      className={classes.navBarButton}
-                      onClick={() => {
-                        if (buttonPanel.button.callback)
-                          buttonPanel.button.callback();
-                      }}
-                    />
-                  ) : (
-                    <Button
-                      key={buttonPanel.button.id}
-                      id={buttonPanel.button.id}
-                      type="icon"
-                      tooltip={buttonPanel.button.tooltip}
-                      tooltipPlacement="left"
-                      icon={buttonPanel.button.icon}
-                      className={classes.navBarButton}
-                      onClick={() => {
-                        setButtonPanelId(buttonPanel.button.id);
-                        openClosePanel(!panelOpen);
-                      }}
-                    />
-                  )
-                ) : null;
-              })}
-            </ButtonGroup>
-          );
-        })}
+            // if not an empty object, only then render any HTML
+            if (Object.keys(buttons).length !== 0) {
+                return (
+                    <ButtonGroup
+                      key={groupName}
+                      orientation="vertical"
+                      ariaLabel={t("mapnav.arianavbar")}
+                      variant="contained"
+                    >
+                      {Object.keys(buttons).map((buttonId) => {
+                        const buttonPanel: TypeButtonPanel = buttons[buttonId];
+                        // eslint-disable-next-line no-nested-ternary
+                        return buttonPanel.button.visible ? (
+                          !buttonPanel.panel ? (
+                            <Button
+                              key={buttonPanel.button.id}
+                              id={buttonPanel.button.id}
+                              type="icon"
+                              tooltip={buttonPanel.button.tooltip}
+                              tooltipPlacement="left"
+                              icon={buttonPanel.button.icon}
+                              className={classes.navBarButton}
+                              onClick={() => {
+                                if (buttonPanel.button.callback)
+                                  buttonPanel.button.callback();
+                              }}
+                            />
+                          ) : (
+                            <Button
+                              key={buttonPanel.button.id}
+                              id={buttonPanel.button.id}
+                              type="icon"
+                              tooltip={buttonPanel.button.tooltip}
+                              tooltipPlacement="left"
+                              icon={buttonPanel.button.icon}
+                              className={classes.navBarButton}
+                              onClick={() => {
+                                setButtonPanelId(buttonPanel.button.id);
+                                openClosePanel(!panelOpen);
+                              }}
+                            />
+                          )
+                        ) : null;
+                      })}
+                    </ButtonGroup>
+                );
+            }
+          })}
         <ButtonGroup
           orientation="vertical"
-          aria-label={t("mapnav.arianavbar")}
+          ariaLabel={t("mapnav.arianavbar")}
           variant="contained"
+          className={classes.navBtnGroup}
         >
           <ZoomIn />
           <ZoomOut />
         </ButtonGroup>
         <ButtonGroup
           orientation="vertical"
-          aria-label={t("mapnav.arianavbar", "")}
+          ariaLabel={t("mapnav.arianavbar", "")}
           variant="contained"
+          className={classes.navBtnGroup}
         >
           <Fullscreen />
           <Home />

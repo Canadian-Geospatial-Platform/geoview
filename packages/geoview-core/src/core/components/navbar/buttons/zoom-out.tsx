@@ -1,4 +1,4 @@
-import ZoomOutIcon from "@material-ui/icons/Remove";
+import { ZoomOutIcon } from "../../../../ui";
 
 import { useMap } from "react-leaflet";
 

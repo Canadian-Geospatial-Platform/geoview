@@ -1,6 +1,5 @@
 import { Typography } from "@material-ui/core";
-import LayersIcon from "@material-ui/icons/Layers";
-
+import LayersIcon from "../icons/icons";
 import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
 
 /**

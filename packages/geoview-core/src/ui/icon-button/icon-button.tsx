@@ -1,5 +1,11 @@
-import { CSSProperties } from "react";
-import { IconButton as MaterialIconButton } from "@material-ui/core";
+import React, { CSSProperties } from "react";
+import {
+  IconButton as MaterialIconButton,
+  Tooltip,
+  TooltipProps,
+  Fade,
+} from "@material-ui/core";
+import { useTranslation } from "react-i18next";
 
 import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
 
@@ -12,6 +18,10 @@ interface IconButtonProps {
   style?: CSSProperties | undefined;
   ariaLabel?: string;
   onClick?: TypeFunction;
+  tooltip?: string;
+  tooltipPlacement?: TooltipProps["placement"];
+  id?: string | undefined;
+  tabIndex?: string | number | undefined;
 }
 
 /**
@@ -20,17 +30,41 @@ interface IconButtonProps {
  * @param {IconButtonProps} props the properties passed to the Icon Button element
  * @returns {JSX.Element} the created Icon Button element
  */
-export const IconButton = (props: IconButtonProps): JSX.Element => {
-  const { className, style, children, onClick, ariaLabel } = props;
 
-  return (
-    <MaterialIconButton
-      aria-label={ariaLabel ? ariaLabel : undefined}
-      style={style ? style : undefined}
-      className={className ? className : undefined}
-      onClick={onClick ? onClick : undefined}
-    >
-      {children && children}
-    </MaterialIconButton>
-  );
-};
+// USE forwardRef() because IconButton comp in panel.tsx uses useRef to build a connection with IconButton comp ???
+export const IconButton = React.forwardRef(
+    (props: IconButtonProps, ref): JSX.Element => {
+    const {
+      className,
+      style,
+      children,
+      onClick,
+      ariaLabel,
+      tooltip,
+      tooltipPlacement,
+      id,
+      tabIndex,
+    } = props;
+
+    const { t } = useTranslation<string>();
+
+    return (
+        <Tooltip
+            title={t(tooltip ? tooltip : "")}
+            placement={tooltipPlacement ? tooltipPlacement : undefined}
+            TransitionComponent={Fade}
+            ref={ref ? ref : undefined}
+        >
+            <MaterialIconButton
+                id={id ? id : undefined}
+                aria-label={ariaLabel ? ariaLabel : undefined}
+                style={style ? style : undefined}
+                className={className ? className : undefined}
+                onClick={onClick ? onClick : undefined}
+                tabIndex={tabIndex ? tabIndex : undefined}
+            >
+                {children && children}
+        </MaterialIconButton>
+      </Tooltip>
+    );
+})

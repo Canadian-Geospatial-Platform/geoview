@@ -15,10 +15,10 @@ import {
  */
 export class ButtonApi {
   // generated button id
-  id: string;
+  id?: string;
 
   // button tooltip
-  tooltip: string;
+  tooltip?: string;
 
   // location of the tooltip (left, right,...)
   tooltipPlacement: TooltipProps["placement"];

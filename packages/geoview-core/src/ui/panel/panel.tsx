@@ -14,11 +14,8 @@ import {
   CardHeader,
   CardContent,
   Divider,
-  IconButton,
-  Tooltip,
-  Fade,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { IconButton, CloseIcon } from "..";
 
 import FocusTrap from "focus-trap-react";
 
@@ -28,6 +25,7 @@ import { EVENT_NAMES } from "../../api/event";
 import { HtmlToReact } from "../../core/containers/html-to-react";
 import { styles } from "../style/theme";
 import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
+import { ContactlessOutlined } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -153,33 +151,27 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
           setActionButtons((prev) => [
             ...prev,
-            <Tooltip
+            <IconButton
+              tooltip={actionButton.title}
+              tooltipPlacement="right"
               id={actionButton.id}
-              key={actionButton.id}
-              title={actionButton.title}
-              placement="right"
-              TransitionComponent={Fade}
+              className="cgpv-panel-close"
+              ariaLabel={actionButton.title}
+              onClick={actionButton.action}
             >
-              <IconButton
-                id={actionButton.id}
-                className="cgpv-panel-close"
-                aria-label={actionButton.title}
-                onClick={actionButton.action}
-              >
-                {typeof actionButton.icon === "string" ? (
-                  <HtmlToReact
-                    style={{
-                      display: "flex",
-                    }}
-                    htmlContent={actionButton.icon}
-                  />
-                ) : typeof actionButton.icon === "object" ? (
-                  actionButton.icon
-                ) : (
-                  <actionButton.icon />
-                )}
-              </IconButton>
-            </Tooltip>,
+              {typeof actionButton.icon === "string" ? (
+                <HtmlToReact
+                  style={{
+                    display: "flex",
+                  }}
+                  htmlContent={actionButton.icon}
+                />
+              ) : typeof actionButton.icon === "object" ? (
+                actionButton.icon
+              ) : (
+                <actionButton.icon />
+              )}
+            </IconButton>,
           ]);
         }
       },
@@ -278,21 +270,17 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
           action={
             <>
               {actionButtons}
-              <Tooltip
-                title={t("general.close")}
-                placement="right"
-                TransitionComponent={Fade}
+              <IconButton
+                tooltip={t("general.close")}
+                tooltipPlacement="right"
+                ref={closeBtnRef}
+                className="cgpv-panel-close"
+                ariaLabel={t("general.close")}
+                onClick={closePanel}
+                tabIndex={0}
               >
-                <IconButton
-                  ref={closeBtnRef}
-                  className="cgpv-panel-close"
-                  aria-label={t("general.close")}
-                  onClick={closePanel}
-                  tabIndex={0}
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
+                <CloseIcon />
+              </IconButton>
             </>
           }
         />

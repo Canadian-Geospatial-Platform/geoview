@@ -164,7 +164,7 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
           height: "initial",
           minWidth: "initial",
         }}
-        aria-label={t("mapctrl.overviewmap.toggle")}
+        ariaLabel={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}
       >
         <ChevronLeft />

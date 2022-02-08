@@ -1,4 +1,4 @@
-import ZoomInIcon from "@material-ui/icons/Add";
+import { ZoomInIcon } from "../../../../ui";
 
 import { useMap } from "react-leaflet";
 

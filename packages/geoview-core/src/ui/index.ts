@@ -8,3 +8,4 @@ export * from "./fade/fade";
 export * from "./icon-button/icon-button";
 export * from "./list";
 export * from "./panel";
+export * from "./icons/icons";
