@@ -64,9 +64,6 @@ export class MapViewer {
   // the leaflet map
   map!: L.Map;
 
-  
-  
-
   // used to access button panel API to create buttons and button panels on the appbar
   appBarButtons!: AppbarButtons;
 
@@ -116,7 +113,6 @@ export class MapViewer {
     this.id = cgpMap.id as string;
     this.map = cgpMap;
 
-    
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(cgpMap, this.mapProps.layers);
 
@@ -127,7 +123,7 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.id);
 
     // check if geometries are provided from url
-    //this.loadGeometries();  //commented out for refactoring layer
+    this.loadGeometries();
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(
@@ -185,9 +181,9 @@ export class MapViewer {
 
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                //this.vector.addPolygon(data.geometry.coordinates, {
-                //  id: generateId(""),
-                //});
+                this.layer.vector.addPolygon(data.geometry.coordinates, {
+                  id: generateId(""),
+                });
               }
             });
           }

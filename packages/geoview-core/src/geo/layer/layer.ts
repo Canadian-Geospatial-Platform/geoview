@@ -6,16 +6,17 @@ import { WMS } from "./ogc/wms";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
 import { Vector } from "./vector/vector";
+import { MarkerCluster } from "./vector/marker-cluster";
+
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
-import { MarkerCluster } from "./vector/marker-cluster";
-import { generateId } from "../../core/utils/utilities";
 
 import {
   CONST_LAYER_TYPES,
   TypeLayerData,
   TypeLayerConfig,
 } from "../../core/types/cgpv-types";
+import { generateId } from "../../core/utils/utilities";
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 //import "esri-leaflet-renderers";

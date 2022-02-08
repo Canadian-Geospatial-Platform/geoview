@@ -5,7 +5,7 @@ import { dynamicMapLayer, mapService } from "esri-leaflet";
 import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 
-import {api} from "../../../api/api";
+import { api } from "../../../api/api";
 
 /**
  * a class to add esri dynamic layer
