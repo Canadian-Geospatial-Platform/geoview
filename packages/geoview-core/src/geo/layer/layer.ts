@@ -5,10 +5,10 @@ import { EsriFeature } from "./esri/esri-feature";
 import { WMS } from "./ogc/wms";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
-
+import { Vector } from "./vector/vector";
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
-
+import { MarkerCluster } from "./vector/marker-cluster";
 import { generateId } from "../../core/utils/utilities";
 
 import {
@@ -18,7 +18,7 @@ import {
 } from "../../core/types/cgpv-types";
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
-import "esri-leaflet-renderers";
+//import "esri-leaflet-renderers";
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -45,6 +45,12 @@ export class Layer {
   // variable used to handle xyzTiles functions
   xyzTiles: XYZTiles;
 
+  // used to access vector API to create and manage geometries
+  vector: Vector;
+
+  // used to access marker cluster API to create and manage marker cluster groups
+  markerCluster: MarkerCluster;
+
   /**
    * used to reference the map and its event
    */
@@ -67,7 +73,9 @@ export class Layer {
     this.esriDynamic = new EsriDynamic();
     this.wms = new WMS();
     this.xyzTiles = new XYZTiles();
-
+    this.vector=new Vector(map);
+    this.markerCluster = new MarkerCluster(map);
+    
     // listen to outside events to add layers
     api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
       if (payload && payload.handlerName.includes(this.map.id)) {
@@ -122,7 +130,7 @@ export class Layer {
       );
     }
 
-    this._test = "Test";
+    //this._test = "Test";
   }
 
   /**

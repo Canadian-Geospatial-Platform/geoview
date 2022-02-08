@@ -145,43 +145,43 @@
             window.onkeydown = function(e) { pressedKeys[e.keyCode] = true; }
 
             function addVectorMarkers(mapViewer) {
-                mapViewer.vector.addCircleMarker(56, -97, { radius: 1 }, 'CircleMarker-1');
-                mapViewer.vector.addCircle(57.7, -99, { radius: 10 }, 'Circle-1');
+                mapViewer.layer.vector.addCircleMarker(56, -97, { radius: 1 }, 'CircleMarker-1');
+                mapViewer.layer.vector.addCircle(57.7, -99, { radius: 10 }, 'Circle-1');
 
-                mapViewer.vector.createGeometryGroup('myGroup', { visible: true });
-                mapViewer.vector.setActiveGeometryGroup('myGroup');
+                mapViewer.layer.vector.createGeometryGroup('myGroup', { visible: true });
+                mapViewer.layer.vector.setActiveGeometryGroup('myGroup');
 
-                marker = mapViewer.vector.addMarker(57, -98, {
+                marker = mapViewer.layer.vector.addMarker(57, -98, {
                     title: 'Marker-1'
                 }, 'Marker-1');
                 marker.setIcon(cgpv.api.markerDefinitions.greenIcon);
 
-                mapViewer.vector.addMarker(58, -98.5, {
+                mapViewer.layer.vector.addMarker(58, -98.5, {
                     icon: cgpv.api.markerDefinitions.yellowIcon,
                     title: 'Marker-2'
                 }, 'Marker-2');
 
-                mapViewer.vector.addMarker(58.2, -99.3, {
+                mapViewer.layer.vector.addMarker(58.2, -99.3, {
                     title: 'Marker-3'
                 }, 'Marker-3');
 
-                mapViewer.vector.addMarker(58, -99.4, {
+                mapViewer.layer.vector.addMarker(58, -99.4, {
                     title: 'Marker-4'
                 }, 'Marker-4');
 
-                mapViewer.vector.addMarker(57.9, -98.6, {
+                mapViewer.layer.vector.addMarker(57.9, -98.6, {
                     title: 'Marker-5'
                 }, 'Marker-5');
 
-                mapViewer.vector.addMarker(57.7, -99, {
+                mapViewer.layer.vector.addMarker(57.7, -99, {
                     title: 'Marker-6'
                 }, 'Marker-6');
 
-                mapViewer.vector.addMarker(57.7005, -99, {
+                mapViewer.layer.vector.addMarker(57.7005, -99, {
                     title: 'Marker-7'
                 }, 'Marker-7');
 
-                mapViewer.vector.addMarker(57.7, -99.0005, {
+                mapViewer.layer.vector.addMarker(57.7, -99.0005, {
                     title: 'Marker-8'
                 }, 'Marker-8');
 
@@ -196,42 +196,42 @@
             }
 
             function addMarkerCluster(mapViewer) {
-                mapViewer.markerCluster.createClusterGroup('myGroup', { ...mapViewer.markerCluster.clusterGroupOptions, visible: false });
-                mapViewer.markerCluster.setActiveClusterGroup('myGroup');
+                mapViewer.layer.markerCluster.createClusterGroup('myGroup', { ...mapViewer.layer.markerCluster.clusterGroupOptions, visible: false });
+                mapViewer.layer.markerCluster.setActiveClusterGroup('myGroup');
 
-                marker = mapViewer.markerCluster.addMarkerElement(57, -98, {
+                marker = mapViewer.layer.markerCluster.addMarkerElement(57, -98, {
                     selected: true,
                     blinking: true,
                     title: 'MarkerClusterElement-1'
                 }, 'MarkerClusterElement-1');
 
-                mapViewer.markerCluster.addMarkerElement(58, -98.5, {
+                mapViewer.layer.markerCluster.addMarkerElement(58, -98.5, {
                     title: 'MarkerClusterElement-2'
                 }, 'MarkerClusterElement-2');
 
-                mapViewer.markerCluster.addMarkerElement(58.2, -99.3, {
+                mapViewer.layer.markerCluster.addMarkerElement(58.2, -99.3, {
                     title: 'MarkerClusterElement-3'
                 }, 'MarkerClusterElement-3');
 
-                mapViewer.markerCluster.addMarkerElement(58, -99.4, {
+                mapViewer.layer.markerCluster.addMarkerElement(58, -99.4, {
                     selected: true,
                     title: 'MarkerClusterElement-4'
                 }, 'MarkerClusterElement-4');
 
-                mapViewer.markerCluster.addMarkerElement(57.9, -98.6, {
+                mapViewer.layer.markerCluster.addMarkerElement(57.9, -98.6, {
                     selected: true,
                     title: 'MarkerClusterElement-5'
                 }, 'MarkerClusterElement-5');
 
-                mapViewer.markerCluster.addMarkerElement(57.7, -99, {
+                mapViewer.layer.markerCluster.addMarkerElement(57.7, -99, {
                     title: 'MarkerClusterElement-6'
                 }, 'MarkerClusterElement-6');
 
-                mapViewer.markerCluster.addMarkerElement(57.7005, -99, {
+                mapViewer.layer.markerCluster.addMarkerElement(57.7005, -99, {
                     title: 'MarkerClusterElement-7'
                 }, 'MarkerClusterElement-7');
 
-                mapViewer.markerCluster.addMarkerElement(57.7, -99.0005, {
+                mapViewer.layer.markerCluster.addMarkerElement(57.7, -99.0005, {
                     title: 'MarkerClusterElement-8'
                 }, 'MarkerClusterElement-8');
 
@@ -272,8 +272,8 @@
 
                 const mapViewer = cgpv.api.map('LNG1');
                 mapViewer.map.on('click', (e) => {
-                    const markerClusterApi = window.cgpv.api.map(e.target.id).markerCluster;
-                    const vectorsApi = window.cgpv.api.map(e.target.id).vector;
+                    const markerClusterApi = window.cgpv.api.map(e.target.id).layer.markerCluster;
+                    const vectorsApi = window.cgpv.api.map(e.target.id).layer.vector;
                     if (pressedKeys['C'.charCodeAt(0)]) {
                         markerClusterApi.setClusterGroupAsVisible();
                         vectorsApi.setGeometryGroupAsInvisible();
