@@ -8,7 +8,7 @@ import { Projection, PROJECTION_NAMES } from "../geo/projection/projection";
 import { MapViewer } from "../geo/map/map";
 
 import { Plugin } from "./plugin";
-import { Utilities } from "./utilities";
+import { GeoUtilities } from "../geo/utils/utilities";
 import { CONST_LAYER_TYPES } from "../core/types/cgpv-types";
 import * as MarkerDefinitions from "../../../geoview-loader/public/markers/marker-definitions";
 
@@ -50,7 +50,7 @@ export class API {
   plugin: Plugin;
 
   // utilities object
-  utilities: Utilities;
+  geoUtilities: GeoUtilities;
 
   // used to access marker definitions
   markerDefinitions = MarkerDefinitions;
@@ -62,7 +62,7 @@ export class API {
     this.event = new Event();
     this.projection = new Projection();
     this.plugin = new Plugin();
-    this.utilities = new Utilities();
+    this.geoUtilities = new GeoUtilities();
   }
 
   /**

@@ -8,8 +8,6 @@ import { mapService } from "esri-leaflet";
 
 import WMSCapabilities from "wms-capabilities";
 
-import { getMapServerUrl } from "../../utils/utilities";
-
 import { getXMLHttpRequest, xmlToJson } from "../../../core/utils/utilities";
 
 import {
@@ -18,6 +16,8 @@ import {
   TypeJSONObjectLoop,
   TypeLayerConfig,
 } from "../../../core/types/cgpv-types";
+
+import { api } from "../../../api/api";
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -83,7 +83,7 @@ export class WMS {
               },
               mapService: {
                 value: mapService({
-                  url: getMapServerUrl(layer.url, true),
+                  url: api.geoUtilities.getMapServerUrl(layer.url, true),
                 }),
               },
               // add support for a getFeatureInfo to WMS Layer
