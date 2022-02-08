@@ -73,9 +73,9 @@ export class Layer {
     this.esriDynamic = new EsriDynamic();
     this.wms = new WMS();
     this.xyzTiles = new XYZTiles();
-    this.vector=new Vector(map);
+    this.vector = new Vector(map);
     this.markerCluster = new MarkerCluster(map);
-    
+
     // listen to outside events to add layers
     api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
       if (payload && payload.handlerName.includes(this.map.id)) {

@@ -44,11 +44,6 @@ const config = {
     module: {
         rules: [
             {
-                test: /.(ts|tsx|js|jsx)$/,
-                exclude: [path.resolve(__dirname, 'node_modules')],
-                loader: 'babel-loader',
-            },
-            {
                 test: /\.s?[ac]ss$/,
                 use: ['style-loader', 'css-loader', 'sass-loader'],
             },
