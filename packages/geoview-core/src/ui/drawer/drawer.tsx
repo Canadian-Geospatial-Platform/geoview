@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useMap } from "react-leaflet";
 
 import { makeStyles } from "@material-ui/core/styles";
-
 import { Drawer as MaterialDrawer } from "@material-ui/core";
-import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
+
+import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
@@ -117,13 +117,13 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
     <MaterialDrawer
       variant={variant ? variant : "permanent"}
       className={open ? classes.drawerOpen : classes.drawerClose}
-    //   classes={{
-    //     paper: className
-    //       ? className
-    //       : open
-    //       ? classes.drawerOpen
-    //       : classes.drawerClose,
-    //   }}
+      classes={{
+        paper: className
+          ? className
+          : open
+          ? classes.drawerOpen
+          : classes.drawerClose,
+      }}
       style={style ? style : undefined}
     >
       <div className={classes.toolbar}>

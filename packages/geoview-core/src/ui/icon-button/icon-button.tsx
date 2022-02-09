@@ -1,11 +1,11 @@
 import React, { CSSProperties } from "react";
+
 import {
   IconButton as MaterialIconButton,
   Tooltip,
   TooltipProps,
   Fade,
 } from "@material-ui/core";
-import { useTranslation } from "react-i18next";
 
 import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
 
@@ -31,9 +31,7 @@ interface IconButtonProps {
  * @returns {JSX.Element} the created Icon Button element
  */
 
-// USE forwardRef() because IconButton comp in panel.tsx uses useRef to build a connection with IconButton comp ???
-export const IconButton = React.forwardRef(
-    (props: IconButtonProps, ref): JSX.Element => {
+export const IconButton = (props: IconButtonProps): JSX.Element => {
     const {
       className,
       style,
@@ -46,14 +44,11 @@ export const IconButton = React.forwardRef(
       tabIndex,
     } = props;
 
-    const { t } = useTranslation<string>();
-
     return (
         <Tooltip
-            title={t(tooltip ? tooltip : "")}
+            title={tooltip ? tooltip : ""}
             placement={tooltipPlacement ? tooltipPlacement : undefined}
             TransitionComponent={Fade}
-            ref={ref ? ref : undefined}
         >
             <MaterialIconButton
                 id={id ? id : undefined}
@@ -67,4 +62,4 @@ export const IconButton = React.forwardRef(
         </MaterialIconButton>
       </Tooltip>
     );
-})
+}

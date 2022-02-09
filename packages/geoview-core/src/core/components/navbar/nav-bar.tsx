@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DomEvent } from "leaflet";
-
 import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
@@ -30,41 +29,44 @@ const useStyles = makeStyles((theme) => ({
   navBarRef: {
     display: "flex",
     flexDirection: "row",
-    marginBottom: theme.spacing(14),
+    margin: theme.spacing(0, 3, 14, 0),
     zIndex: theme.zIndex.appBar,
   },
+  root: {
+    display: "flex",
+    overflow: "auto",
+    position: "relative",
+    flexDirection: "column",
+    pointerEvents: "auto",
+    overflowX: "hidden",
+  },
   navBtnGroup: {
+    margin: theme.spacing(3, 0, 3, 3),
+    width: "32px",
+    "& > button": {
+      width: "32px",
+      maxWidth: "32px",
+      height: "initial",
+      //   borderRadius: theme.spacing(5),
+      borderRadius: theme.spacing(0),
+    },
     "& > button:not(:last-child)": {
-      marginBottom: theme.spacing(4),
+      margin: theme.spacing(2, 0),
+    },
+    "& > button:last-child": {
+      margin: theme.spacing(2, 0, 0, 0),
     },
   },
   navBarButton: {
     height: "initial",
     paddingLeft: "initial",
     paddingRight: "initial",
-    margin: theme.spacing(2, 0),
     backgroundColor: "rgba(255,255,255,1)",
     color: theme.palette.primary.contrastText,
     "&:hover": {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.dark,
     },
-  },
-  root: {
-    display: "flex",
-    overflow: "auto",
-    "& > *": {
-      margin: theme.spacing(3),
-    },
-    "& .MuiButtonGroup-vertical": {
-      width: "32px",
-      "& button": {
-        minWidth: "32px",
-      },
-    },
-    position: "relative",
-    flexDirection: "column",
-    pointerEvents: "auto",
   },
 }));
 
@@ -182,79 +184,76 @@ export function NavBar(): JSX.Element {
 
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
-            const buttonPanel = buttons[buttonId];
-            const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
+          const buttonPanel = buttons[buttonId];
+          const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
 
-            return buttonPanel.panel ? (
-              <Panel
-                key={buttonPanel.button.id}
-                button={buttonPanel.button}
-                panel={buttonPanel.panel}
-                panelOpen={isOpen}
-              />
-            ) : null;
-          });
+          return buttonPanel.panel ? (
+            <Panel
+              key={buttonPanel.button.id}
+              button={buttonPanel.button}
+              panel={buttonPanel.panel}
+              panelOpen={isOpen}
+            />
+          ) : null;
+        });
 
-          if (panels.length > 0) {
-            return (
-                <div key={groupName}>
-                    {panels}
-                </div> 
-            );
-          }
+        if (panels.length > 0) {
+          return <div key={groupName}>{panels}</div>;
+        }
       })}
       <div className={classes.root}>
         {Object.keys(navBarButtons.buttons).map((groupName) => {
-            const buttons = navBarButtons.buttons[groupName];
+          const buttons = navBarButtons.buttons[groupName];
 
-            // if not an empty object, only then render any HTML
-            if (Object.keys(buttons).length !== 0) {
-                return (
-                    <ButtonGroup
-                      key={groupName}
-                      orientation="vertical"
-                      ariaLabel={t("mapnav.arianavbar")}
-                      variant="contained"
-                    >
-                      {Object.keys(buttons).map((buttonId) => {
-                        const buttonPanel: TypeButtonPanel = buttons[buttonId];
-                        // eslint-disable-next-line no-nested-ternary
-                        return buttonPanel.button.visible ? (
-                          !buttonPanel.panel ? (
-                            <Button
-                              key={buttonPanel.button.id}
-                              id={buttonPanel.button.id}
-                              type="icon"
-                              tooltip={buttonPanel.button.tooltip}
-                              tooltipPlacement="left"
-                              icon={buttonPanel.button.icon}
-                              className={classes.navBarButton}
-                              onClick={() => {
-                                if (buttonPanel.button.callback)
-                                  buttonPanel.button.callback();
-                              }}
-                            />
-                          ) : (
-                            <Button
-                              key={buttonPanel.button.id}
-                              id={buttonPanel.button.id}
-                              type="icon"
-                              tooltip={buttonPanel.button.tooltip}
-                              tooltipPlacement="left"
-                              icon={buttonPanel.button.icon}
-                              className={classes.navBarButton}
-                              onClick={() => {
-                                setButtonPanelId(buttonPanel.button.id);
-                                openClosePanel(!panelOpen);
-                              }}
-                            />
-                          )
-                        ) : null;
-                      })}
-                    </ButtonGroup>
-                );
-            }
-          })}
+          // if not an empty object, only then render any HTML
+          if (Object.keys(buttons).length !== 0) {
+            return (
+              <ButtonGroup
+                key={groupName}
+                orientation="vertical"
+                ariaLabel={t("mapnav.arianavbar")}
+                variant="contained"
+                className={classes.navBtnGroup}
+              >
+                {Object.keys(buttons).map((buttonId) => {
+                  const buttonPanel: TypeButtonPanel = buttons[buttonId];
+                  // eslint-disable-next-line no-nested-ternary
+                  return buttonPanel.button.visible ? (
+                    !buttonPanel.panel ? (
+                      <Button
+                        key={buttonPanel.button.id}
+                        id={buttonPanel.button.id}
+                        type="icon"
+                        tooltip={buttonPanel.button.tooltip}
+                        tooltipPlacement="left"
+                        icon={buttonPanel.button.icon}
+                        className={classes.navBarButton}
+                        onClick={() => {
+                          if (buttonPanel.button.callback)
+                            buttonPanel.button.callback();
+                        }}
+                      />
+                    ) : (
+                      <Button
+                        key={buttonPanel.button.id}
+                        id={buttonPanel.button.id}
+                        type="icon"
+                        tooltip={buttonPanel.button.tooltip}
+                        tooltipPlacement="left"
+                        icon={buttonPanel.button.icon}
+                        className={classes.navBarButton}
+                        onClick={() => {
+                          setButtonPanelId(buttonPanel.button.id);
+                          openClosePanel(!panelOpen);
+                        }}
+                      />
+                    )
+                  ) : null;
+                })}
+              </ButtonGroup>
+            );
+          }
+        })}
         <ButtonGroup
           orientation="vertical"
           ariaLabel={t("mapnav.arianavbar")}

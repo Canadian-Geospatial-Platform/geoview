@@ -35,7 +35,7 @@ export class AppbarButtons {
   constructor(mapId: string) {
     this.mapId = mapId;
 
-    this.panel = new PanelApi(LayersPanel.panel, LayersPanel.button.id);
+    this.panel = new PanelApi(LayersPanel.panel, LayersPanel.button.id!);
 
     this.createDefaultButtonPanels();
   }
