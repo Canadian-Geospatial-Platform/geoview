@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(0, 0, 14, 0),
     zIndex: theme.zIndex.appBar,
   },
-  root: {
+  navBtnGroupContainer: {
     display: "flex",
     overflow: "auto",
     position: "relative",
@@ -212,7 +212,7 @@ export function NavBar(): JSX.Element {
           return <div key={groupName}>{panels}</div>;
         }
       })}
-      <div className={classes.root}>
+      <div className={classes.navBtnGroupContainer}>
         {Object.keys(navBarButtons.buttons).map((groupName) => {
           const buttons = navBarButtons.buttons[groupName];
 
