@@ -48,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
       width: navBtnWidth,
       maxWidth: navBtnWidth,
       minWidth: navBtnWidth,
+      padding: theme.spacing(5, 5, 5),
       height: "initial",
       borderRadius: theme.spacing(5),
       "&:first-child": {

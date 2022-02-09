@@ -39,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
   buttonClass: {
     display: "flex",
     fontSize: theme.typography.fontSize,
-    padding: theme.spacing(5, 5, 5),
+    paddingLeft: 18,
+    paddingRight: 20,
     justifyContent: "center",
     width: "100%",
     height: 50,
