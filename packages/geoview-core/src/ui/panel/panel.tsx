@@ -3,7 +3,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
 import { DomEvent } from "leaflet";
-
 import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
@@ -22,12 +21,12 @@ import CloseIcon from "@material-ui/icons/Close";
 
 import FocusTrap from "focus-trap-react";
 
+import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
+
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
-
 import { HtmlToReact } from "../../core/containers/html-to-react";
 import { styles } from "../style/theme";
-import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   root: {

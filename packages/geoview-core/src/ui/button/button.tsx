@@ -1,20 +1,19 @@
-import { useRef, useState, CSSProperties } from "react";
-
-import { DomEvent } from "leaflet";
+import { useRef, useState, useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
+import { DomEvent } from "leaflet";
+
 import { makeStyles } from "@material-ui/core/styles";
 import { Tooltip, Fade, Button as MaterialButton } from "@material-ui/core";
-
-import { HtmlToReact } from "../../core/containers/html-to-react";
-import { useEffect } from "react";
 
 import {
   Cast,
   TypeChildren,
   TypeButtonProps,
 } from "../../core/types/cgpv-types";
+
+import { HtmlToReact } from "../../core/containers/html-to-react";
 
 const useStyles = makeStyles((theme) => ({
   textIconContainer: {
@@ -43,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: 18,
     paddingRight: 20,
     justifyContent: "center",
-    // marginLeft: 20,
     width: "100%",
     height: 50,
     backgroundColor: "rgba(255,255,255,1)",
@@ -90,25 +88,13 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     ) : typeof children === "string" ? (
       <HtmlToReact
         className={classes.text}
-        style={
-          type === "text"
-            ? {
-                marginLeft: "initial",
-              }
-            : {}
-        }
+        style={type === "text" ? { marginLeft: "initial" } : {}}
         htmlContent={children}
       />
     ) : (
       <div
         className={classes.text}
-        style={
-          type === "text"
-            ? {
-                marginLeft: "initial",
-              }
-            : {}
-        }
+        style={type === "text" ? { marginLeft: "initial" } : {}}
       >
         {children}
       </div>
@@ -170,7 +156,7 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     >
       <MaterialButton
         variant={variant ? variant : "text"}
-        className={classes.buttonClass + " " + (className ? className : "")}
+        className={`${classes.buttonClass} ${className ? className : ""}`}
         style={style ? style : undefined}
         onClick={onClick}
         autoFocus={autoFocus !== undefined && autoFocus ? autoFocus : undefined}

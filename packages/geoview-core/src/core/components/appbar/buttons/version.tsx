@@ -1,10 +1,9 @@
 import { makeStyles } from "@material-ui/core/styles";
-import GitHubIcon from "@material-ui/icons/GitHub";
 
 import { GITUHUB_REPO } from "../../../utils/constant";
 import { Cast, TypeAppVersion } from "../../../types/cgpv-types";
 
-import { Button } from "../../../../ui";
+import { Button, GitHubIcon } from "../../../../ui";
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;

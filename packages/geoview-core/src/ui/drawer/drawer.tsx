@@ -5,22 +5,14 @@ import { useTranslation } from "react-i18next";
 import { useMap } from "react-leaflet";
 
 import { makeStyles } from "@material-ui/core/styles";
-
-import {
-  Drawer as MaterialDrawer,
-  Tooltip,
-  Fade,
-  IconButton,
-} from "@material-ui/core";
-
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import { Drawer as MaterialDrawer } from "@material-ui/core";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
 
-const drawerWidth = 200;
+import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
 
+const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: drawerWidth,
@@ -135,19 +127,15 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
       style={style ? style : undefined}
     >
       <div className={classes.toolbar}>
-        <Tooltip
-          title={open ? t("general.close") : t("general.open")}
-          placement="right"
-          TransitionComponent={Fade}
+        <IconButton
+          tooltip={open ? t("general.close") : t("general.open")}
+          tooltipPlacement="right"
+          onClick={() => {
+            openCloseDrawer(!open);
+          }}
         >
-          <IconButton
-            onClick={() => {
-              openCloseDrawer(!open);
-            }}
-          >
-            {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </Tooltip>
+          {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        </IconButton>
       </div>
       {children !== undefined && children}
     </MaterialDrawer>

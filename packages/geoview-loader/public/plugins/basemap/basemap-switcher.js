@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 /* eslint-disable object-shorthand */
-(function () {
+(function() {
     /**
      * BasemapSwitcher plugin that will create a react component to list basemaps and switch them
      */
@@ -134,7 +134,7 @@
 
                     // if basemap does not exist then create a new one
                     if (exists.length === 0) {
-                        const basemap = { ...basemapProps, id };
+                        const basemap = {...basemapProps, id };
 
                         // create the basemap
                         api.map(mapId).basemap.createBasemap(basemap);
@@ -164,17 +164,14 @@
                     createBasemap('transportWithLabels', {
                         name: t('basemap-transport-label.name'),
                         type: 'transport_label',
-                        description:
-                            'This Canadian basemap provides geographic context with bilingual labels and an emphasis on transportation networks. From Natural Resources Canada.',
+                        description: 'This Canadian basemap provides geographic context with bilingual labels and an emphasis on transportation networks. From Natural Resources Canada.',
                         descSummary: '',
                         altText: t('basemap-transport-label.name'),
                         thumbnailUrl: '',
-                        layers: [
-                            {
+                        layers: [{
                                 id: 'transport',
                                 type: 'transport',
-                                url:
-                                    'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+                                url: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
                                 opacity: 1,
                             },
                             {
@@ -198,20 +195,16 @@
                     createBasemap('transportWithNoLabels', {
                         name: t('basemap-transport.name'),
                         type: 'transport',
-                        description:
-                            'This Canadian basemap provides geographic context that emphasis on transportation networks. From Natural Resources Canada.',
+                        description: 'This Canadian basemap provides geographic context that emphasis on transportation networks. From Natural Resources Canada.',
                         descSummary: '',
                         altText: t('basemap-transport.name'),
                         thumbnailUrl: '',
-                        layers: [
-                            {
-                                id: 'transport',
-                                type: 'transport',
-                                url:
-                                    'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
-                                opacity: 1,
-                            },
-                        ],
+                        layers: [{
+                            id: 'transport',
+                            type: 'transport',
+                            url: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+                            opacity: 1,
+                        }, ],
                         attribution: 'test attribution',
                         zoomLevels: {
                             min: 0,
@@ -223,20 +216,16 @@
                     createBasemap('shadedRelief', {
                         name: t('basemap-shaded.name'),
                         type: 'shaded',
-                        description:
-                            '":"This Canadian base map provides geographic context using shaded relief. From Natural Resources Canada.',
+                        description: '":"This Canadian base map provides geographic context using shaded relief. From Natural Resources Canada.',
                         descSummary: '',
                         altText: t('basemap-shaded.name'),
                         thumbnailUrl: '',
-                        layers: [
-                            {
-                                id: 'shaded',
-                                type: 'shaded',
-                                url:
-                                    'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
-                                opacity: 1,
-                            },
-                        ],
+                        layers: [{
+                            id: 'shaded',
+                            type: 'shaded',
+                            url: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+                            opacity: 1,
+                        }, ],
                         attribution: 'test attribution',
                         zoomLevels: {
                             min: 0,
@@ -248,17 +237,14 @@
                     createBasemap('shadedLabel', {
                         name: t('basemap-shaded-label.name'),
                         type: 'shaded_label',
-                        description:
-                            '":"This Canadian base map provides geographic context using shaded relief with labels. From Natural Resources Canada.',
+                        description: '":"This Canadian base map provides geographic context using shaded relief with labels. From Natural Resources Canada.',
                         descSummary: '',
                         altText: t('basemap-shaded-label.name'),
                         thumbnailUrl: '',
-                        layers: [
-                            {
+                        layers: [{
                                 id: 'shaded',
                                 type: 'shaded',
-                                url:
-                                    'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+                                url: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
                                 opacity: 1,
                             },
                             {
@@ -284,14 +270,12 @@
                 // createElement is a React function to create React HTML elements
                 // It takes 3 arguments, the tag element name, the attributes of the element and the content of the element
                 return h(
-                    'div',
-                    {
+                    'div', {
                         className: classes.listContainer,
                     },
                     basemapList.map((basemap) => {
                         return h(
-                            'div',
-                            {
+                            'div', {
                                 role: 'button',
                                 tabIndex: '0',
                                 className: classes.card,
@@ -300,11 +284,11 @@
                                 key: basemap.id,
                             },
                             typeof basemap.thumbnailUrl === 'string' &&
-                                h('img', { src: basemap.thumbnailUrl, alt: basemap.altText, className: classes.thumbnail }),
+                            h('img', { src: basemap.thumbnailUrl, alt: basemap.altText, className: classes.thumbnail }),
                             Array.isArray(basemap.thumbnailUrl) &&
-                                basemap.thumbnailUrl.map((thumbnail, index) => {
-                                    return h('img', { key: index, src: thumbnail, alt: basemap.altText, className: classes.thumbnail });
-                                }),
+                            basemap.thumbnailUrl.map((thumbnail, index) => {
+                                return h('img', { key: index, src: thumbnail, alt: basemap.altText, className: classes.thumbnail });
+                            }),
                             h('div', { className: classes.container }, basemap.name)
                         );
                     })

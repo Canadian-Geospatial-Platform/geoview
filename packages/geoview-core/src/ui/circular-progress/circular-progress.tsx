@@ -46,12 +46,11 @@ interface CircularProgressProps {
  */
 export const CircularProgress = (props: CircularProgressProps): JSX.Element => {
   const { className, style, isLoaded } = props;
-
   const classes = useStyles();
 
   return (
     <div
-      className={classes.loading + " " + (className !== undefined && className)}
+      className={`${classes.loading} ${className !== undefined && className}`}
       style={{
         ...style,
         opacity: isLoaded ? "0" : "1",

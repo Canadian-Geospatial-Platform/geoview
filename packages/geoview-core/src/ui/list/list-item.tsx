@@ -38,7 +38,7 @@ export const ListItem = (props: ListItemProps) => {
   const classes = useStyles();
 
   return (
-    <MaterialListItem className={classes.listItem}>
+    <MaterialListItem className={`${classes.listItem} ${className ? className : ''}`} style={style ? style : undefined}>
       {children !== undefined && children}
     </MaterialListItem>
   );

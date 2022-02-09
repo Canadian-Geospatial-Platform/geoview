@@ -6,5 +6,6 @@ export * from "./divider/divider";
 export * from "./drawer/drawer";
 export * from "./fade/fade";
 export * from "./icon-button/icon-button";
+export * from "./icons";
 export * from "./list";
 export * from "./panel";
