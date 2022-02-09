@@ -1,8 +1,6 @@
-import { ZoomInIcon } from "../../../../ui";
-
 import { useMap } from "react-leaflet";
 
-import { Button } from "../../../../ui";
+import { Button, ZoomInIcon } from "../../../../ui";
 
 export default function ZoomIn(): JSX.Element {
   // get map to use in zoom function

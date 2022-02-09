@@ -1,12 +1,11 @@
 import { useState } from "react";
 
-import { FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
-
 import { useMap } from "react-leaflet";
 
 import { api } from "../../../../api/api";
 
-import { Button } from "../../../../ui";
+import { Button, FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
+
 
 export default function Fullscreen(): JSX.Element {
   const map = useMap();

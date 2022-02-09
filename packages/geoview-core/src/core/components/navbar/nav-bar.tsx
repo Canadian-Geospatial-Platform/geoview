@@ -25,11 +25,12 @@ import {
   CONST_PANEL_TYPES,
 } from "../../types/cgpv-types";
 
+const navBtnWidth = "38px";
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
     display: "flex",
     flexDirection: "row",
-    margin: theme.spacing(0, 3, 14, 0),
+    margin: theme.spacing(0, 0, 14, 0),
     zIndex: theme.zIndex.appBar,
   },
   root: {
@@ -41,20 +42,28 @@ const useStyles = makeStyles((theme) => ({
     overflowX: "hidden",
   },
   navBtnGroup: {
-    margin: theme.spacing(3, 0, 3, 3),
-    width: "32px",
+    margin: theme.spacing(3),
+    width: navBtnWidth,
     "& > button": {
-      width: "32px",
-      maxWidth: "32px",
+      width: navBtnWidth,
+      maxWidth: navBtnWidth,
+      minWidth: navBtnWidth,
       height: "initial",
-      //   borderRadius: theme.spacing(5),
-      borderRadius: theme.spacing(0),
+      borderRadius: theme.spacing(5),
+      "&:first-child": {
+        margin: theme.spacing(0, 0, 1, 0),
+      },
+      "&:last-child": {
+        margin: theme.spacing(1, 0, 0, 0),
+      },
     },
-    "& > button:not(:last-child)": {
-      margin: theme.spacing(2, 0),
+    "& > button.MuiButtonGroup-groupedVertical:not(:first-child)": {
+      borderTopLeftRadius: theme.spacing(5),
+      borderTopRightRadius: theme.spacing(5),
     },
-    "& > button:last-child": {
-      margin: theme.spacing(2, 0, 0, 0),
+    "& > button.MuiButtonGroup-groupedVertical:not(:last-child)": {
+      borderBottomLeftRadius: theme.spacing(5),
+      borderBottomRightRadius: theme.spacing(5),
     },
   },
   navBarButton: {
@@ -63,6 +72,7 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: "initial",
     backgroundColor: "rgba(255,255,255,1)",
     color: theme.palette.primary.contrastText,
+    borderRadius: theme.spacing(5),
     "&:hover": {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.dark,
