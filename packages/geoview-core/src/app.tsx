@@ -24,7 +24,6 @@ import "./ui/style/style.css";
 import "./ui/style/vendor.css";
 
 import AppStart from "./core/app-start";
-import { manageKeyboardFocus } from "./geo/utils/utilities";
 import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./core/types/cgpv-types";
 export * from "./core/types/cgpv-types";
 
@@ -44,7 +43,7 @@ Marker.prototype.options.icon = DefaultIcon;
  */
 function init(callback: () => void) {
   // apply focus to element when keyboard navigation is use
-  manageKeyboardFocus();
+  api.geoUtilities.manageKeyboardFocus();
 
   const html = document.body.innerHTML;
 
@@ -66,7 +65,7 @@ export const cgpv: TypeCGPV = {
   api: Cast<TypeApi>({
     ...api,
     ...api.event,
-    ...api.projection,
+    //...api.projection,
     ...api.plugin,
   }),
   react: React,

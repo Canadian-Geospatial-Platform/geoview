@@ -161,7 +161,8 @@
             // add an event listener when a button is clicked
             removeGeoJSONButton.addEventListener('click', function (e) {
                 // removing a geojson layer using the ID
-                cgpv.api.map('LYR5').layer..removeLayer(document.getElementById('new-layer-id').innerText);
+                //cgpv.api.map('LYR5').layer.removeLayer(document.getElementById('new-layer-id').innerText);
+                cgpv.api.map('LYR5').layer.removeLayerById(document.getElementById('new-layer-id').innerText);
                 document.getElementById('new-layer-id').innerText = '';
             });
         </script>

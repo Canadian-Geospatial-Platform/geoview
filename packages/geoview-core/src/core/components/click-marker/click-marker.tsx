@@ -9,7 +9,7 @@ import { makeStyles, Theme } from "@material-ui/core/styles";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
-import { getTranslateValues } from "../../../geo/utils/utilities";
+
 import { generateId } from "../../utils/utilities";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -103,7 +103,7 @@ export const ClickMarker = (): JSX.Element => {
           setShowMarker(true);
 
           // set the overlay... get map size and apply mapPane transform to the overlay
-          const test = getTranslateValues(
+          const test = api.geoUtilities.getTranslateValues(
             map.getPane("mapPane") as HTMLElement
           );
           const size = map.getSize();
