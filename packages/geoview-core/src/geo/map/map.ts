@@ -94,8 +94,10 @@ export class MapViewer {
    * @param {TypeMapConfigProps} mapProps map properties
    */
   constructor(mapProps: TypeMapConfigProps, i18n: i18n) {
+    this.id = mapProps.id!;
+
     // add map viewer instance to api
-    api.maps.push(this);
+    api.maps[this.id] = this;
 
     this.mapProps = mapProps;
 
@@ -132,22 +134,6 @@ export class MapViewer {
       this.mapProps.projection,
       this.id
     );
-
-    // load plugins if provided in the config
-    if (this.mapProps.plugins && this.mapProps.plugins.length > 0) {
-      this.mapProps.plugins.forEach((plugin) => {
-        const { plugins } = Cast<TypeWindow>(window);
-        if (plugins && plugins[plugin]) {
-          api.plugin.addPlugin(plugin, plugins[plugin], {
-            mapId: this.id,
-          });
-        } else {
-          api.plugin.addPlugin(plugin, null, {
-            mapId: this.id,
-          });
-        }
-      });
-    }
   }
 
   /**

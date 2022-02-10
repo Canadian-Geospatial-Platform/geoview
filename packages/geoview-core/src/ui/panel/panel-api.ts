@@ -33,6 +33,9 @@ export class PanelApi {
   // the linked button id that will open/close the panel
   buttonId: string;
 
+  // reference to the map id
+  mapId: string;
+
   checkboxListAPI?: CheckboxListAPI;
 
   /**
@@ -41,7 +44,8 @@ export class PanelApi {
    * @param panel the passed in panel properties when panel is created
    * @param buttonId the button id of the button that will manage the panel
    */
-  constructor(panel: TypePanelProps, buttonId: string) {
+  constructor(panel: TypePanelProps, buttonId: string, mapId: string) {
+    this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
     this.title = panel.title;
@@ -61,8 +65,8 @@ export class PanelApi {
    * Trigger an event to open the panel
    */
   open = (): void => {
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, api.selectedMapViewer.id, {
-      handlerId: api.selectedMapViewer.id,
+    api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, this.mapId, {
+      handlerId: this.mapId,
       buttonId: this.buttonId,
     });
 
@@ -73,8 +77,8 @@ export class PanelApi {
    * Trigger an event to close the panel
    */
   close = (): void => {
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, api.selectedMapViewer.id, {
-      handlerId: api.selectedMapViewer.id,
+    api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, this.mapId, {
+      handlerId: this.mapId,
       buttonId: this.buttonId,
     });
 
@@ -96,20 +100,16 @@ export class PanelApi {
     icon: string | React.ReactElement | Element,
     action: () => void
   ): PanelApi => {
-    api.event.emit(
-      EVENT_NAMES.EVENT_PANEL_ADD_ACTION,
-      api.selectedMapViewer.id,
-      {
-        handlerId: api.selectedMapViewer.id,
-        buttonId: this.buttonId,
-        actionButton: {
-          id: `${this.buttonId}_${id}`,
-          title,
-          icon,
-          action,
-        },
-      }
-    );
+    api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, this.mapId, {
+      handlerId: this.mapId,
+      buttonId: this.buttonId,
+      actionButton: {
+        id: `${this.buttonId}_${id}`,
+        title,
+        icon,
+        action,
+      },
+    });
 
     return this;
   };
@@ -145,15 +145,11 @@ export class PanelApi {
   changeContent = (content: React.ReactNode | Element): PanelApi => {
     this.content = content;
 
-    api.event.emit(
-      EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
-      api.selectedMapViewer.id,
-      {
-        handlerId: api.selectedMapViewer.id,
-        buttonId: this.buttonId,
-        content,
-      }
-    );
+    api.event.emit(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, this.mapId, {
+      handlerId: this.mapId,
+      buttonId: this.buttonId,
+      content,
+    });
 
     return this;
   };
@@ -165,15 +161,11 @@ export class PanelApi {
    * @returns {Panel} this panel
    */
   removeActionButton = (id: string): PanelApi => {
-    api.event.emit(
-      EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION,
-      api.selectedMapViewer.id,
-      {
-        handlerId: api.selectedMapViewer.id,
-        buttonId: this.buttonId,
-        actionButtonId: `${this.buttonId}_${id}`,
-      }
-    );
+    api.event.emit(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, this.mapId, {
+      handlerId: this.mapId,
+      buttonId: this.buttonId,
+      actionButtonId: `${this.buttonId}_${id}`,
+    });
 
     return this;
   };

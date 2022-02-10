@@ -9,7 +9,7 @@ import * as translate from "react-i18next";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { api } from "./api";
-import { TypePlugin } from "../core/types/cgpv-types";
+import { TypePlugin, Cast, TypeWindow } from "../core/types/cgpv-types";
 
 /**
  * Class to manage plugins
@@ -39,8 +39,9 @@ export class Plugin {
         // create new instance of the plugin
         plugin = new constructor(id, props);
       } else {
-        const InstanceConstructor = (await import(`../plugins/${id}/index.tsx`))
-          .default;
+        const InstanceConstructor = (
+          await import(`${"../plugins"}/${id}/index.tsx`)
+        ).default;
 
         if (InstanceConstructor) plugin = new InstanceConstructor(id, props);
       }
@@ -103,5 +104,29 @@ export class Plugin {
     }
 
     delete this.plugins[id];
+  };
+
+  /**
+   * Load plugins provided by map config
+   *
+   * @param mapId the map id to load the plugins to
+   * @param plugins the plugins to load
+   */
+  loadPlugins = (mapId: string, plugins: string[]): void => {
+    // load plugins if provided in the config
+    if (plugins && plugins.length > 0) {
+      plugins.forEach((plugin) => {
+        const { plugins } = Cast<TypeWindow>(window);
+        if (plugins && plugins[plugin]) {
+          this.addPlugin(plugin, plugins[plugin], {
+            mapId: mapId,
+          });
+        } else {
+          this.addPlugin(plugin, null, {
+            mapId: mapId,
+          });
+        }
+      });
+    }
   };
 }

@@ -92,7 +92,11 @@ export class NavbarButtons {
         // set panel type
         if (panelProps) panelProps.type = CONST_PANEL_TYPES.NAVBAR;
 
-        buttonPanel.panel = new PanelApi(panelProps, buttonProps.id);
+        buttonPanel.panel = new PanelApi(
+          panelProps,
+          buttonProps.id,
+          this.mapId
+        );
       }
 
       // add the new button panel to the correct group

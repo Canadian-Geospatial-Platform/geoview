@@ -14,6 +14,7 @@ import { Element } from "domhandler";
 import { Config } from "./utils/config";
 import { Shell } from "./containers/shell";
 import { theme } from "../ui/style/theme";
+import { MapViewer } from "../geo/map/map";
 
 /**
  * interface used when passing html elements from the html pages
@@ -44,13 +45,20 @@ const AppStart = (props: AppStartProps): JSX.Element => {
         ) {
           // validate configuration and appply default if problem occurs then setup language
           const configObj = new Config(
-            domNodeElement.attribs.id || "",
+            domNodeElement.attribs.id,
             (domNodeElement.attribs["data-leaflet"] || "")?.replace(/'/g, '"')
           );
+
           const i18nInstance = i18n.cloneInstance({
             lng: configObj.language,
             fallbackLng: configObj.language,
           });
+
+          // create a new map instance
+          const mapInstance = new MapViewer(
+            configObj.configuration,
+            i18nInstance
+          );
 
           return (
             // eslint-disable-next-line react/jsx-props-no-spreading
