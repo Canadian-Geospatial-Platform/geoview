@@ -36,7 +36,7 @@ export type TypeCallback = (callback: () => void) => void;
 export type TypeFunction = () => void;
 
 //export interface TypeApi extends API, Event, Projection, Plugin {} //#427
-export interface TypeApi extends API, Event,  Plugin {}
+export interface TypeApi extends API, Event, Plugin {}
 
 export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
@@ -321,6 +321,7 @@ export type TypePanelContentProps = {
  */
 export type TypeMapConfigProps = {
   id?: string;
+  name?: string;
   center: L.LatLngTuple;
   zoom: number;
   projection: number;
