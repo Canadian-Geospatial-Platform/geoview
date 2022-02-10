@@ -15,6 +15,7 @@ export class Config {
   // default config if provided configuration is missing or wrong
   private _config: TypeMapConfigProps = {
     id: generateId(null),
+    name: "",
     center: [60, -100] as LatLngTuple,
     zoom: 4,
     projection: 3978,
@@ -79,10 +80,11 @@ export class Config {
    */
   constructor(id: string, config: string) {
     // check if a config is provided and valid JSON object, if so validate, if not set to default
-    this._config.id = id !== "" ? id : this._config.id;
+    const mapId = id && id.length ? id : this._config.id;
+
     this._config =
       config !== "" && isJsonString(config)
-        ? this.validate(id, config)
+        ? this.validate(mapId!, config)
         : this._config;
 
     if (config === "" || !isJsonString(config))
@@ -106,6 +108,7 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
+    const name = this.validateName(tmpConfig.name || "");
     const projection = this.validateProjection(Number(tmpConfig.projection));
     const basemapOptions = this.validateBasemap(
       projection,
@@ -124,6 +127,7 @@ export class Config {
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapConfigProps = {
       id,
+      name,
       projection,
       zoom,
       center,
@@ -154,6 +158,12 @@ export class Config {
         console.log(`- map: ${validConfig.id} - Key '${key}' is invalid -`);
       }
     });
+    if (inConfig.name !== validConfig.name) {
+      console.log(
+        `- map: ${validConfig.id} - Invalid name ${inConfig.name} replaced by ${validConfig.name} -`
+      );
+    }
+
     if (inConfig.projection !== validConfig.projection) {
       console.log(
         `- map: ${validConfig.id} - Invalid projection ${inConfig.projection} replaced by ${validConfig.projection} -`
@@ -298,5 +308,14 @@ export class Config {
     }
 
     return this._config.plugins;
+  }
+
+  /**
+   * Validate map name
+   * @param {string} name provided name
+   * @returns {string} valid name
+   */
+  private validateName(name: string): string {
+    return name.length > 0 ? name : generateId("");
   }
 }
