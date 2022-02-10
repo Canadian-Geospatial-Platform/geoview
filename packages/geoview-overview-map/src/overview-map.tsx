@@ -139,7 +139,7 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
           !status ? classes.minimapOpen : classes.minimapClosed,
         ].join(" ")}
         style={{
-          margin: theme.spacing(3) * -1,
+          margin: `-${theme.spacing(3)}`,
           padding: 0,
         }}
         aria-label={t("mapctrl.overviewmap.toggle")}

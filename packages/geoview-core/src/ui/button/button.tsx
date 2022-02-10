@@ -4,8 +4,8 @@ import { DomEvent } from "leaflet";
 
 import { useTranslation } from "react-i18next";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { Tooltip, Fade, Button as MaterialButton } from "@material-ui/core";
+import makeStyles from '@mui/styles/makeStyles';
+import { Tooltip, Fade, Button as MaterialButton } from "@mui/material";
 
 import { HtmlToReact } from "../../core/containers/html-to-react";
 import { useEffect } from "react";
@@ -147,8 +147,10 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     const newButtonChildrenHTMLElements = Cast<HTMLElement[]>(
       buttonRef.current?.children
     );
-    DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
-    DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
+    if (newButtonChildrenHTMLElements.length > 0) {
+        DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
+        DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
+    }
 
     if (type) {
       if (type === "text") {

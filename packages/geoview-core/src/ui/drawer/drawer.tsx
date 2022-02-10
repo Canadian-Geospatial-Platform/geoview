@@ -4,17 +4,17 @@ import { useTranslation } from "react-i18next";
 
 import { useMap } from "react-leaflet";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import {
   Drawer as MaterialDrawer,
   Tooltip,
   Fade,
   IconButton,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
@@ -144,7 +144,7 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
             onClick={() => {
               openCloseDrawer(!open);
             }}
-          >
+            size="large">
             {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </Tooltip>

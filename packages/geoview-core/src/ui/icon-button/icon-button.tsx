@@ -1,11 +1,12 @@
 import { CSSProperties } from "react";
-import { IconButton as MaterialIconButton } from "@material-ui/core";
+import { IconButton as MaterialIconButton } from "@mui/material";
+import { IconButtonProps } from "@mui/material/IconButton/IconButton";
 
 import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
 
 /**
  * Properties for the icon button
- */
+ * /
 interface IconButtonProps {
   children?: TypeChildren;
   className?: string | undefined;
@@ -21,7 +22,8 @@ interface IconButtonProps {
  * @returns {JSX.Element} the created Icon Button element
  */
 export const IconButton = (props: IconButtonProps): JSX.Element => {
-  const { className, style, children, onClick, ariaLabel } = props;
+  const { className, style, children, onClick } = props;
+  const ariaLabel = props["aria-label"];
 
   return (
     <MaterialIconButton

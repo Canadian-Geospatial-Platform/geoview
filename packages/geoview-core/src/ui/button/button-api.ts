@@ -1,4 +1,4 @@
-import { TooltipProps } from "@material-ui/core";
+import { TooltipProps } from "@mui/material";
 import { CSSProperties } from "react";
 
 import {

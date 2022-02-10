@@ -5,7 +5,9 @@ import L, { divIcon, LatLng } from "leaflet";
 import { Marker, useMap } from "react-leaflet";
 import { useEventHandlers, LeafletElement } from "@react-leaflet/core";
 
-import { makeStyles, Theme } from "@material-ui/core/styles";
+import { Theme } from "@mui/material/styles";
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";

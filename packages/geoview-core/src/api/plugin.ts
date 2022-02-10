@@ -6,7 +6,7 @@ import React from "react";
 import i18next from "i18next";
 import * as translate from "react-i18next";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import { api } from "./api";
 import { TypePlugin } from "../core/types/cgpv-types";
@@ -39,7 +39,7 @@ export class Plugin {
         // create new instance of the plugin
         plugin = new constructor(id, props);
       } else {
-        const InstanceConstructor = (await import(`../plugins/${id}/index.tsx`))
+        const InstanceConstructor = (await import(`../${id}/index.tsx`))
           .default;
 
         if (InstanceConstructor) plugin = new InstanceConstructor(id, props);

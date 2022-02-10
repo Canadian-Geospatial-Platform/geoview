@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { DomEvent } from "leaflet";
 import { useMap } from "react-leaflet";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import Version from "./buttons/version";
 

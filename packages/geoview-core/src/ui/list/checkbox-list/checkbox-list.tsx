@@ -1,11 +1,12 @@
 /* eslint-disable no-plusplus */
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { useState } from "react";
-import { createStyles, makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Checkbox from "@material-ui/core/Checkbox";
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Checkbox from "@mui/material/Checkbox";
 
 const useStyles = makeStyles((theme) =>
   createStyles({

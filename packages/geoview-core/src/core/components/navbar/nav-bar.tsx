@@ -7,7 +7,7 @@ import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import ZoomIn from "./buttons/zoom-in";
 import ZoomOut from "./buttons/zoom-out";

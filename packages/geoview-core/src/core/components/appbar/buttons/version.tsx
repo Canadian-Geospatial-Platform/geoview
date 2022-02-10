@@ -1,5 +1,5 @@
-import { makeStyles } from "@material-ui/core/styles";
-import GitHubIcon from "@material-ui/icons/GitHub";
+import makeStyles from '@mui/styles/makeStyles';
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 import { GITUHUB_REPO } from "../../../utils/constant";
 import { Cast, TypeAppVersion } from "../../../types/cgpv-types";

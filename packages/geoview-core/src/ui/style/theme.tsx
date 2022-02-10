@@ -1,10 +1,7 @@
 import { CSSProperties } from "react";
-import { createTheme, ThemeOptions } from "@material-ui/core/styles";
-// eslint-disable-next-line no-restricted-imports
-import {
-  Variant,
-  TypographyStyleOptions,
-} from "@material-ui/core/styles/createTypography";
+import { createTheme, ThemeOptions } from "@mui/material/styles";
+import { TypographyOptions } from "@mui/material/styles/createTypography";
+//import { DeprecatedThemeOptions, adaptV4Theme, Variant, TypographyStyleOptions } from "@mui/material/styles/createTheme";
 
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
@@ -118,9 +115,26 @@ const themeOptions: ThemeOptions = {
     center: "50%",
     right: "100%",
   },
-  overrides: {
+  components: {
+    MuiFab: {
+      styleOverrides: {
+        extended: {
+          padding: "0 24px",
+        },
+/*        label: {
+          fontSize: "1rem",
+        },*/
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: { position: "relative" },
+      },
+    },
     button: {
-      size: { width: "32px", height: "32px" },
+      styleOverrides: {
+        size: { width: "32px", height: "32px" },
+      },
     },
     northArrow: {
       size: { width: 42, height: 42 },
@@ -128,27 +142,15 @@ const themeOptions: ThemeOptions = {
     crosshairIcon: {
       size: { width: 275, height: 275 },
     },
-    MuiFab: {
-      extended: {
-        padding: "0 24px",
-      },
-      label: {
-        fontSize: "1rem",
-      },
-    },
-    MuiDrawer: {
-      paper: { position: "relative" },
-    },
   },
 };
 
-type TypeTypography = Partial<Record<Variant, TypographyStyleOptions>>;
 export const styles: Record<string, CSSProperties> = {
   buttonIcon: {
     width: "1em",
     height: "1em",
     display: "inherit",
-    fontSize: (themeOptions.typography as TypeTypography).button?.fontSize,
+    fontSize: (themeOptions.typography as TypographyOptions).button?.fontSize,
     alignItems: "inherit",
     justifyContent: "inherit",
     transition: "fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",

@@ -7,3 +7,4 @@ declare module '*.png' {
 declare module 'wms-capabilities';
 declare module 'leaflet/src/dom/DomUtil';
 declare module 'leaflet/src/dom/DomEvent';
+// declare module '@mui/system/createTheme/shape';
