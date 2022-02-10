@@ -59,7 +59,9 @@
                 display: inline;
             }
 
-            input, label, button {
+            input,
+            label,
+            button {
                 margin: 5px;
             }
 
@@ -120,14 +122,14 @@
             <label id="featuretype">Geometry</label>
             <select name="jsonfeaturetype" id="jsonfeaturetype">
                 <option value="jsonPoint">Point</option>
-                <option value="jsonLine">Lines</option>
+                <option value="jsonLine">Line</option>
                 <option value="jsonPolygon">Polygon</option>
             </select>
             <label id="featureCntlbl">Count</label>
             <input id="featureCnt" />
             <button id="load-features-btn">Load Data</button><br />
         </div>
-        <br >
+        <br />
         <span>Time to render: </span><span id="timer"></span><br />
         <span>Time to zoom : </span><span id="zoomtime"></span><br />
         <div
@@ -548,6 +550,8 @@
         <script src="codedoc.js"></script>
         <script>
             let tzoom0 = 0;
+            const layerOptionValues = ['ogcWMS', 'esriFeature', 'esriDynamic', 'geoJSONPoint', 'geoJSONLine', 'geoJSONPolygon'];
+            const jsonFeatureOptionValues = ['jsonPoint', 'jsonLine', 'jsonPolygon'];
 
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
             cgpv.init(function () {
@@ -572,7 +576,7 @@
             var addwmsButton = document.getElementById('load-wms-btn');
 
             function updateURL() {
-                switch (document.getElementById('layerType').value) {
+                switch (layerOptionValues[document.getElementById('layerType').selectedIndex]) {
                     case 'esriFeature':
                         document.getElementById('url').value =
                             'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1';
@@ -612,8 +616,10 @@
             var addFeatureButton = document.getElementById('load-btn');
             addFeatureButton.addEventListener('click', function (e) {
                 if (typeof parseInt(document.getElementById('layerCount').value) === 'number') {
-                    let type = document.getElementById('layerType').value;
+                    let type = layerOptionValues[document.getElementById('layerType').selectedIndex];
                     type = type.indexOf('geoJSON') === -1 ? type : 'geoJSON';
+
+                    var t0 = performance.now();
 
                     for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
                         cgpv.api.map('mapWM').layer.addLayer({
@@ -622,6 +628,9 @@
                             url: document.getElementById('url').value,
                         });
                     }
+
+                    var t1 = performance.now();
+                    document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
                 }
             });
 
@@ -629,7 +638,8 @@
             var addFeatureButton = document.getElementById('load-features-btn');
             addFeatureButton.addEventListener('click', function (e) {
                 var t0 = performance.now();
-                switch (document.getElementById('jsonfeaturetype').value) {
+
+                switch (jsonFeatureOptionValues[document.getElementById('jsonfeaturetype').selectedIndex]) {
                     case 'jsonPoint':
                         addJSONPoint();
                         break;
@@ -649,15 +659,13 @@
                     const coord = generateRandomCoord();
 
                     // call an api function to draw a polygon
-                    const circleMarker = cgpv.api
-                        .map('mapWM')
-                        .vector.addCircleMarker(coord[0], coord[1], {
-                            color: 'red',
-                            fillColor: '#f03',
-                            fillOpacity: 0.5,
-                            radius: 3.0,
-                        });
-                    cgpv.api.map('mapWM').vector.addToGeometryGroup(circleMarker);
+                    const circleMarker = cgpv.api.map('mapWM').layer.vector.addCircleMarker(coord[0], coord[1], {
+                        color: 'red',
+                        fillColor: '#f03',
+                        fillOpacity: 0.5,
+                        radius: 3.0,
+                    });
+                    cgpv.api.map('mapWM').layer.vector.addToGeometryGroup(circleMarker);
                 }
             }
 
@@ -669,41 +677,41 @@
 
                     // add 10 vertices
                     for (k = 0; k < 10; k++) {
-                        line.push(generateRandomCoord(
-                            ptStart[0] < ptEnd[0] ? ptStart[0] : ptEnd[0],
-                            Math.abs(ptStart[1] < ptEnd[1] ? ptStart[1] : ptEnd[1]),
-                            ptEnd[0] > ptStart[0] ? ptEnd[0] : ptStart[0],
-                            Math.abs(ptEnd[1] > ptStart[1] ? ptEnd[1] : ptStart[1])))
+                        line.push(
+                            generateRandomCoord(
+                                ptStart[0] < ptEnd[0] ? ptStart[0] : ptEnd[0],
+                                Math.abs(ptStart[1] < ptEnd[1] ? ptStart[1] : ptEnd[1]),
+                                ptEnd[0] > ptStart[0] ? ptEnd[0] : ptStart[0],
+                                Math.abs(ptEnd[1] > ptStart[1] ? ptEnd[1] : ptStart[1])
+                            )
+                        );
                     }
                     line.push(ptEnd);
                     line.unshift(ptStart);
 
-                    const polyline = cgpv.api.map('mapWM').vector.addPolyline(
-                        line,
-                        {
-                            stroke: true,
-                            color: '#000',
-                            weight: 1,
-                            opacity: '0.8',
-                        }
-                    );
+                    const polyline = cgpv.api.map('mapWM').layer.vector.addPolyline(line, {
+                        stroke: true,
+                        color: '#000',
+                        weight: 1,
+                        opacity: '0.8',
+                    });
 
-                    cgpv.api.map('mapWM').vector.addToGeometryGroup(polyline);
+                    cgpv.api.map('mapWM').layer.vector.addToGeometryGroup(polyline);
                 }
             }
 
             function addJSONPolygon() {
                 for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
                     const center = generateRandomCoord();
-                    const factor = ((Math.random() * 100) + 1) / 10;
+                    const factor = (Math.random() * 100 + 1) / 10;
 
                     // call an api function to draw a polygon
-                    const polygon = cgpv.api.map('mapWM').vector.addPolygon(
+                    const polygon = cgpv.api.map('mapWM').layer.vector.addPolygon(
                         [
-                            [center[0] + factor/2, center[1] + factor],
-                            [center[0] + factor/2, center[1] - factor],
-                            [center[0] - factor/2, center[1] - factor],
-                            [center[0] - factor/2, center[1] + factor],
+                            [center[0] + factor / 2, center[1] + factor],
+                            [center[0] + factor / 2, center[1] - factor],
+                            [center[0] - factor / 2, center[1] - factor],
+                            [center[0] - factor / 2, center[1] + factor],
                         ],
                         {
                             stroke: true,
@@ -712,13 +720,13 @@
                             opacity: '0.8',
                         }
                     );
-                    cgpv.api.map('mapWM').vector.addToGeometryGroup(polygon);
+                    cgpv.api.map('mapWM').layer.vector.addToGeometryGroup(polygon);
                 }
             }
 
             function generateRandomCoord(minY = 40, minX = 45, maxY = 85, maxX = 140) {
-                const lat = parseFloat((((Math.random() * ((maxY * 100) - (minY * 100) + 1)) + (minY * 100)) / 100).toFixed(3));
-                const long = parseFloat((((Math.random() * ((maxX * 100) - (minX * 100) + 1)) + (minX * 100)) / 100).toFixed(3));
+                const lat = parseFloat(((Math.random() * (maxY * 100 - minY * 100 + 1) + minY * 100) / 100).toFixed(3));
+                const long = parseFloat(((Math.random() * (maxX * 100 - minX * 100 + 1) + minX * 100) / 100).toFixed(3));
 
                 return [lat, -long];
             }
