@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from "react";
 
-import makeStyles from '@mui/styles/makeStyles';
+import { makeStyles } from "@material-ui/core/styles";
 
 import { useTranslation } from "react-i18next";
 

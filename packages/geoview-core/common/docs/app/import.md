@@ -16,9 +16,9 @@ We add an empty line between each group of import from different category
 >
 >import { useTranslation } from 'react-i18next';
 >
->import { makeStyles, createStyles } from '@material--ui/core/styles';
->import { Card, CardHeader, CardContent, Divider, IconButton } from '@material--ui/core';
->import CloseIcon from '@material--ui/icons/Close';
+>import { makeStyles, createStyles } from '@material-ui/core/styles';
+>import { Card, CardHeader, CardContent, Divider, IconButton } from '@material-ui/core';
+>import CloseIcon from '@material-ui/icons/Close';
 >
 >import { DomEvent } from 'leaflet';
 >import { useMap } from 'react-leaflet';

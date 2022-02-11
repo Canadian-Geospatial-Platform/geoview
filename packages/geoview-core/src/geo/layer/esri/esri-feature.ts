@@ -2,10 +2,10 @@ import { Layer } from "leaflet";
 
 import { featureLayer, mapService } from "esri-leaflet";
 
-import { getMapServerUrl } from "../../utils/utilities";
-
 import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
+
+import { api } from "../../../api/api";
 
 /**
  * a class to add esri feature layer
@@ -41,7 +41,7 @@ export class EsriFeature {
           Object.defineProperties(feat, {
             mapService: {
               value: mapService({
-                url: getMapServerUrl(layer.url),
+                url: api.geoUtilities.getMapServerUrl(layer.url),
               }),
             },
           });

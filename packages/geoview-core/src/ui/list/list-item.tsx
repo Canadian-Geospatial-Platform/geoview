@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 
-import { ListItem as MaterialListItem } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import { ListItem as MaterialListItem } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
 import { TypeChildren } from "../../core/types/cgpv-types";
 
@@ -38,7 +38,7 @@ export const ListItem = (props: ListItemProps) => {
   const classes = useStyles();
 
   return (
-    <MaterialListItem className={classes.listItem}>
+    <MaterialListItem className={`${classes.listItem} ${className ? className : ''}`} style={style ? style : undefined}>
       {children !== undefined && children}
     </MaterialListItem>
   );

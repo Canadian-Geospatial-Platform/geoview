@@ -1,8 +1,6 @@
-import ZoomOutIcon from "@mui/icons-material/Remove";
-
 import { useMap } from "react-leaflet";
 
-import { Button } from "../../../../ui";
+import { Button, ZoomOutIcon } from "../../../../ui";
 
 export default function ZoomOut(): JSX.Element {
   // get map to use in zoom function

@@ -63,7 +63,7 @@
         "no-restricted-imports": [
             "error",
             {
-                "patterns": ["@mui/*/*/*", "!@mui/core/test-utils/*"]
+                "patterns": ["@material-ui/*/*/*", "!@material-ui/core/test-utils/*"]
             }
         ],
         "prettier/prettier": [

@@ -8,7 +8,7 @@ import { Projection, PROJECTION_NAMES } from "../geo/projection/projection";
 import { MapViewer } from "../geo/map/map";
 
 import { Plugin } from "./plugin";
-import { Utilities } from "./utilities";
+import { GeoUtilities } from "../geo/utils/utilities";
 import { CONST_LAYER_TYPES } from "../core/types/cgpv-types";
 import * as MarkerDefinitions from "../../../geoview-loader/public/markers/marker-definitions";
 
@@ -35,10 +35,7 @@ export class API {
   layerTypes = CONST_LAYER_TYPES;
 
   // list of available maps
-  maps: MapViewer[] = [];
-
-  // set selected map instance / app
-  selectedMapViewer!: MapViewer;
+  maps: Record<string, MapViewer> = {};
 
   // timeout number used to check if everything is ready to make API calls
   isReady = 0;
@@ -50,7 +47,7 @@ export class API {
   plugin: Plugin;
 
   // utilities object
-  utilities: Utilities;
+  geoUtilities: GeoUtilities;
 
   // used to access marker definitions
   markerDefinitions = MarkerDefinitions;
@@ -62,22 +59,27 @@ export class API {
     this.event = new Event();
     this.projection = new Projection();
     this.plugin = new Plugin();
-    this.utilities = new Utilities();
+    this.geoUtilities = new GeoUtilities();
   }
 
+  /**
+   */
   /**
    * Check if map rendering / drawing is ready then run the callback function
    * Timeout does not effect rendering speed, each map will cancel the previous timer after it renders
    * so timing of rendering will be based on device specs.
    *
+   * @param callback a callback to make once the map has rendered
    */
-  ready = (): void => {
+  ready = (callback: () => void): void => {
     // Clear our timeout throughout the event change
     window.clearTimeout(this.isReady);
 
     // Set a timeout to run after render ends
     // this will only be called after the last map renders so no delay in rendering and performance will happen
     this.isReady = window.setTimeout(() => {
+      if (callback) callback();
+
       // Run the callback
       if (this.readyCallback) this.readyCallback();
     }, 1000);
@@ -91,15 +93,7 @@ export class API {
    * @returns map api functions
    */
   map = (id: string): MapViewer => {
-    for (let i = 0; i < this.maps.length; i++) {
-      if (this.maps[i].id === id) {
-        this.selectedMapViewer = this.maps[i];
-
-        break;
-      }
-    }
-
-    return this.selectedMapViewer;
+    return this.maps[id];
   };
 
   /**
@@ -107,18 +101,17 @@ export class API {
    *
    * @param {Map} map the leaflet map instance
    *
-   * @returns map api functions
+   * @returns {MapViewer | undefined} the map instance
    */
-  mapInstance = (map: Map): MapViewer => {
-    for (let i = 0; i < this.maps.length; i++) {
-      if (this.maps[i].map === map) {
-        this.selectedMapViewer = this.maps[i];
+  mapInstance = (map: Map): MapViewer | undefined => {
+    for (let i = 0; i < Object.keys(this.maps).length; i++) {
+      var key = Object.keys(this.maps)[i];
+      var value = this.maps[key];
 
-        break;
+      if (value.map === map) {
+        return this.maps[key];
       }
     }
-
-    return this.selectedMapViewer;
   };
 }
 

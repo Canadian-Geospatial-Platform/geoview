@@ -1,15 +1,11 @@
 /* eslint-disable react/require-default-props */
 import { useEffect, useState } from "react";
 
-import { useTranslation } from "react-i18next";
-
 import { CRS } from "leaflet";
 import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
 
-import { useMediaQuery } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-
-import makeStyles from '@mui/styles/makeStyles';
+import { useMediaQuery } from "@material-ui/core";
+import { useTheme, makeStyles } from "@material-ui/core/styles";
 
 import { SnackbarProvider } from "notistack";
 
@@ -20,14 +16,15 @@ import { Attribution } from "../attribution/attribution";
 import { Snackbar } from "../../../ui/snackbar/snackbar";
 import { Appbar } from "../appbar/app-bar";
 import { NavBar } from "../navbar/nav-bar";
+import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
+import { ClickMarker } from "../click-marker/click-marker";
+
+import { generateId } from "../../utils/utilities";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
 import { MapViewer } from "../../../geo/map/map";
-import { generateId } from "../../utils/utilities";
-import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
-import { ClickMarker } from "../click-marker/click-marker";
 
 import {
   TypeMapConfigProps,
@@ -46,38 +43,29 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const id = props.id ? props.id : generateId("");
 
-  const { center, zoom, projection, language, selectBox, boxZoom } = props;
+  const { center, zoom, projection, language, selectBox, boxZoom, plugins } =
+    props;
 
   const [basemapLayers, setBasemapLayers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [crs, setCRS] = useState<CRS>();
-  const [components, setComponents] = useState<TypeJSONObjectMapComponent>({});
 
-  const { i18n } = useTranslation();
+  // projection crs
+  const [crs, setCRS] = useState<CRS>();
+
+  // attribution used by the map
+  const [attribution, setAttribution] = useState<string>("");
+
+  // render additional components if added by api
+  const [components, setComponents] = useState<TypeJSONObjectMapComponent>({});
 
   const defaultTheme = useTheme();
   const classes = useStyles();
 
   // create a new map viewer instance
-  let viewer: MapViewer;
-
-  // check if instance already created
-  if (!api.map(id)) {
-    viewer = new MapViewer(props, i18n);
-  } else {
-    viewer = api.map(id);
-  }
+  let viewer: MapViewer = api.map(id);
 
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up("md"));
-
-  // get the needed projection. Web Mercator is out of the box but we need to create LCC
-  // the projection will work with CBMT basemap. If another basemap would be use, update...
-  //   const crs =
-  //     projection === 3857 ? CRS.EPSG3857 : Projection.getProjection(projection);
-
-  // attribution used by the map
-  let attribution = "";
 
   // get map option from selected basemap projection
   const mapOptions: L.MapOptions = viewer.getMapOptions(projection);
@@ -181,13 +169,17 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setCRS(viewer.projection.getCRS());
 
         // get attribution
-        attribution =
+        setAttribution(
           language === "en-CA"
             ? viewer.basemap.attribution["en-CA"]
-            : viewer.basemap.attribution["fr-CA"];
+            : viewer.basemap.attribution["fr-CA"]
+        );
 
         // call the ready function since rendering of this map instance is done
-        api.ready();
+        api.ready(() => {
+          // load plugins once map has rendered
+          api.plugin.loadPlugins(id, plugins);
+        });
 
         // emit the map loaded event
         setIsLoaded(true);

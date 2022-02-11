@@ -1,9 +1,6 @@
 import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
-import { useTheme } from "@mui/material/styles";
-
-import makeStyles from '@mui/styles/makeStyles';
-import { DefaultTheme } from '@mui/styles/defaultTheme';
+import { makeStyles, useTheme } from "@material-ui/core/styles";
 
 import { Map, LatLng, LatLngExpression, CRS, Point, Icon } from "leaflet";
 import { useMapEvent, Marker, useMap } from "react-leaflet";
@@ -15,13 +12,13 @@ import { PROJECTION_NAMES } from "../../../geo/projection/projection";
 import { NorthArrowIcon, NorthPoleIcon } from "./north-arrow-icon";
 import { generateId } from "../../utils/utilities";
 
-const useStyles = makeStyles((theme: DefaultTheme) => ({
+const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
-    left: "50%", // theme.shape.center,
+    left: theme.shape.center,
   },
   northArrow: {
-    width: 42, //(theme.overrides?.northArrow?.size as CSSProperties).width,
-    height: 42, //(theme.overrides?.northArrow?.size as CSSProperties).height,
+    width: (theme.overrides?.northArrow?.size as CSSProperties).width,
+    height: (theme.overrides?.northArrow?.size as CSSProperties).height,
   },
 }));
 

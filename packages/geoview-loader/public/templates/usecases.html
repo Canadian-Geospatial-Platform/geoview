@@ -120,7 +120,7 @@
         <script>
             function addPolyline(map) {
                 // call an api function to draw a polyline
-                const polyline = cgpv.api.map(map).vector.addPolyline(
+                const polyline = cgpv.api.map(map).layer.vector.addPolyline(
                     [
                         [45, -100],
                         [50, -105],
@@ -132,12 +132,12 @@
                         opacity: '0.8',
                     }
                 );
-                cgpv.api.map(map).vector.addToGeometryGroup(polyline);
+                cgpv.api.map(map).layer.vector.addToGeometryGroup(polyline);
             }
 
             function addPolygon(map) {
                 // call an api function to draw a polygon
-                const polygon = cgpv.api.map(map).vector.addPolygon(
+                const polygon = cgpv.api.map(map).layer.vector.addPolygon(
                     [
                         [48, -109.05],
                         [54, -109.03],
@@ -151,29 +151,29 @@
                         opacity: '0.8',
                     }
                 );
-                cgpv.api.map(map).vector.addToGeometryGroup(polygon);
+                cgpv.api.map(map).layer.vector.addToGeometryGroup(polygon);
             }
 
             function addCircle(map) {
                 // call an api function to draw a polygon
-                const circle = cgpv.api.map(map).vector.addCircle(50, -109, {
+                const circle = cgpv.api.map(map).layer.vector.addCircle(50, -109, {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
-                cgpv.api.map(map).vector.addToGeometryGroup(circle);
+                cgpv.api.map(map).layer.vector.addToGeometryGroup(circle);
             }
 
             function addCircleMarker(map) {
                 // call an api function to draw a polygon
-                const circleMarker = cgpv.api.map(map).vector.addCircleMarker(70, -109, {
+                const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker(70, -109, {
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5,
                     radius: 50.0,
                 });
-                cgpv.api.map(map).vector.addToGeometryGroup(circleMarker);
+                cgpv.api.map(map).layer.vector.addToGeometryGroup(circleMarker);
             }
 
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

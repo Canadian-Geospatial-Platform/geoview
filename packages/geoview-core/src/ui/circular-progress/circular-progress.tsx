@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 
-import makeStyles from '@mui/styles/makeStyles';
-import { CircularProgress as MaterialCircularProgress } from "@mui/material";
+import { makeStyles } from "@material-ui/core/styles";
+import { CircularProgress as MaterialCircularProgress } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -46,12 +46,11 @@ interface CircularProgressProps {
  */
 export const CircularProgress = (props: CircularProgressProps): JSX.Element => {
   const { className, style, isLoaded } = props;
-
   const classes = useStyles();
 
   return (
     <div
-      className={classes.loading + " " + (className !== undefined && className)}
+      className={`${classes.loading} ${className !== undefined && className}`}
       style={{
         ...style,
         opacity: isLoaded ? "0" : "1",

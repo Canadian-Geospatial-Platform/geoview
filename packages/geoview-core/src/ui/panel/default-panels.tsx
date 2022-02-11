@@ -1,6 +1,7 @@
-import { Typography } from "@mui/material";
-import LayersIcon from "@mui/icons-material/Layers";
+import { Typography } from "@material-ui/core";
+import LayersIcon from "@material-ui/icons/Layers";
 
+// import { LayersIcon } from "../../ui";
 import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
 
 /**

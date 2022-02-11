@@ -12,7 +12,7 @@ import { Vector } from "../layer/vector/vector";
 import { Basemap } from "../layer/basemap/basemap";
 import { Layer } from "../layer/layer";
 import { MapProjection } from "../projection/map-projection";
-import { MarkerCluster } from "../layer/vector/marker-cluster";
+
 import "../../core/types/cgp-leaflet-config";
 
 import { api } from "../../api/api";
@@ -64,12 +64,6 @@ export class MapViewer {
   // the leaflet map
   map!: L.Map;
 
-  // used to access vector API to create and manage geometries
-  vector!: Vector;
-
-  // used to access marker cluster API to create and manage marker cluster groups
-  markerCluster!: MarkerCluster;
-
   // used to access button panel API to create buttons and button panels on the appbar
   appBarButtons!: AppbarButtons;
 
@@ -100,8 +94,10 @@ export class MapViewer {
    * @param {TypeMapConfigProps} mapProps map properties
    */
   constructor(mapProps: TypeMapConfigProps, i18n: i18n) {
+    this.id = mapProps.id!;
+
     // add map viewer instance to api
-    api.maps.push(this);
+    api.maps[this.id] = this;
 
     this.mapProps = mapProps;
 
@@ -118,10 +114,6 @@ export class MapViewer {
   initMap(cgpMap: L.Map): void {
     this.id = cgpMap.id as string;
     this.map = cgpMap;
-
-    this.markerCluster = new MarkerCluster(cgpMap);
-
-    this.vector = new Vector(cgpMap);
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(cgpMap, this.mapProps.layers);
@@ -142,22 +134,6 @@ export class MapViewer {
       this.mapProps.projection,
       this.id
     );
-
-    // load plugins if provided in the config
-    if (this.mapProps.plugins && this.mapProps.plugins.length > 0) {
-      this.mapProps.plugins.forEach((plugin) => {
-        const { plugins } = Cast<TypeWindow>(window);
-        if (plugins && plugins[plugin]) {
-          api.plugin.addPlugin(plugin, plugins[plugin], {
-            mapId: this.id,
-          });
-        } else {
-          api.plugin.addPlugin(plugin, null, {
-            mapId: this.id,
-          });
-        }
-      });
-    }
   }
 
   /**
@@ -191,7 +167,7 @@ export class MapViewer {
 
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                this.vector.addPolygon(data.geometry.coordinates, {
+                this.layer.vector.addPolygon(data.geometry.coordinates, {
                   id: generateId(""),
                 });
               }

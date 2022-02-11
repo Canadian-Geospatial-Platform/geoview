@@ -7,20 +7,14 @@ import { I18nextProvider } from "react-i18next";
 
 import parse, { attributesToProps } from "html-react-parser";
 
-import { ThemeProvider, Theme, StyledEngineProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@material-ui/core/styles";
+import CssBaseline from "@material-ui/core/CssBaseline";
 
 import { Element } from "domhandler";
 import { Config } from "./utils/config";
 import { Shell } from "./containers/shell";
 import { theme } from "../ui/style/theme";
-
-
-declare module '@mui/styles/defaultTheme' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DefaultTheme extends Theme {}
-}
-
+import { MapViewer } from "../geo/map/map";
 
 /**
  * interface used when passing html elements from the html pages
@@ -51,13 +45,20 @@ const AppStart = (props: AppStartProps): JSX.Element => {
         ) {
           // validate configuration and appply default if problem occurs then setup language
           const configObj = new Config(
-            domNodeElement.attribs.id || "",
+            domNodeElement.attribs.id,
             (domNodeElement.attribs["data-leaflet"] || "")?.replace(/'/g, '"')
           );
+
           const i18nInstance = i18n.cloneInstance({
             lng: configObj.language,
             fallbackLng: configObj.language,
           });
+
+          // create a new map instance
+          const mapInstance = new MapViewer(
+            configObj.configuration,
+            i18nInstance
+          );
 
           return (
             // eslint-disable-next-line react/jsx-props-no-spreading
@@ -75,14 +76,12 @@ const AppStart = (props: AppStartProps): JSX.Element => {
   }
 
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
-        <Suspense fallback="">
-          <CssBaseline />
-          {getInlineMaps()}
-        </Suspense>
-      </ThemeProvider>
-    </StyledEngineProvider>
+    <ThemeProvider theme={theme}>
+      <Suspense fallback="">
+        <CssBaseline />
+        {getInlineMaps()}
+      </Suspense>
+    </ThemeProvider>
   );
 };
 

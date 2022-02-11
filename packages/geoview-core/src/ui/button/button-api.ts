@@ -1,5 +1,6 @@
-import { TooltipProps } from "@mui/material";
 import { CSSProperties } from "react";
+
+import { TooltipProps } from "@material-ui/core";
 
 import {
   TypeChildren,
@@ -15,10 +16,10 @@ import {
  */
 export class ButtonApi {
   // generated button id
-  id: string;
+  id?: string;
 
   // button tooltip
-  tooltip: string;
+  tooltip?: string;
 
   // location of the tooltip (left, right,...)
   tooltipPlacement: TooltipProps["placement"];

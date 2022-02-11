@@ -3,12 +3,11 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 
 import { DomEvent } from "leaflet";
-
 import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from '@mui/styles/makeStyles';
+import { makeStyles } from "@material-ui/core/styles";
 import {
   Card,
   CardHeader,
@@ -17,17 +16,17 @@ import {
   IconButton,
   Tooltip,
   Fade,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+} from "@material-ui/core";
+import CloseIcon from "@material-ui/icons/Close";
 
 import FocusTrap from "focus-trap-react";
 
+import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
+
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
-
 import { HtmlToReact } from "../../core/containers/html-to-react";
 import { styles } from "../style/theme";
-import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     marginLeft: theme.spacing(2),
     borderRadius: 0,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down("xs")]: {
       width: "auto !important",
       minWidth: 100,
     },
@@ -165,7 +164,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
                 className="cgpv-panel-close"
                 aria-label={actionButton.title}
                 onClick={actionButton.action}
-                size="large">
+              >
                 {typeof actionButton.icon === "string" ? (
                   <HtmlToReact
                     style={{
@@ -289,7 +288,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
                   aria-label={t("general.close")}
                   onClick={closePanel}
                   tabIndex={0}
-                  size="large">
+                >
                   <CloseIcon />
                 </IconButton>
               </Tooltip>

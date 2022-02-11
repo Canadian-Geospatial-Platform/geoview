@@ -6,6 +6,8 @@
   "main": "src/app.tsx",
   "license": "MIT",
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "4.11.2",
     "@react-leaflet/core": "^1.1.1",
     "prop-types": "^15.8.1",
     "axios": "^0.25.0",
@@ -20,7 +22,7 @@
     "leaflet": "^1.7.1",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.21",
-    "notistack": "^2.0.3",
+    "notistack": "^1.0.4",
     "proj4": "^2.7.5",
     "proj4leaflet": "^1.0.2",
     "query-string": "^7.1.0",
@@ -29,13 +31,7 @@
     "react-i18next": "^11.8.0",
     "react-leaflet": "^3.2.5",
     "screenfull": "^6.0.1",
-    "wms-capabilities": "^0.5.1",
-    "@mui/material": "~5.4.1",
-    "@mui/styles": "~5.4.1",
-    "@mui/icons-material": "~5.4.1",
-    "@emotion/react": "~11.7.1",
-    "@emotion/styled": "~11.6.0",
-    "@babel/core": "^7.0.0"
+    "wms-capabilities": "^0.5.1"
   },
   "devDependencies": {
     "@babel/runtime": "^7.17.0",
@@ -49,7 +45,7 @@
     "@types/react-dom": "^17.0.11",
     "@types/react-leaflet": "^2.8.2",
     "@types/react-router-dom": "^5.3.3",
-    "@types/leaflet.markercluster": "^1.0.3",
+    "@types/leaflet-markercluster": "^1.0.3",
     "@types/proj4leaflet": "^1.0.6",
     "@types/lodash": "^4.14.178",
     "react-test-renderer": "^17.0.2"

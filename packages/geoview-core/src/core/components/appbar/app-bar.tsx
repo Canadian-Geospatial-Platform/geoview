@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 
 import { DomEvent } from "leaflet";
 import { useMap } from "react-leaflet";
 
-import makeStyles from '@mui/styles/makeStyles';
+import { makeStyles } from "@material-ui/core/styles";
 
 import Version from "./buttons/version";
 
@@ -152,13 +152,12 @@ export function Appbar(): JSX.Element {
 
               // display the button panels in the list
               return (
-                <div key={groupName}>
+                <List key={groupName}>
                   {Object.keys(buttonPanels).map((buttonId) => {
                     const buttonPanel = buttonPanels[buttonId];
 
                     return buttonPanel.button.visible ? (
-                      <div key={buttonPanel.button.id}>
-                        <List>
+                        <Fragment  key={buttonPanel.button.id}>
                           <ListItem>
                             <Button
                               id={buttonPanel.button.id}
@@ -175,13 +174,12 @@ export function Appbar(): JSX.Element {
                               state={drawerStatus ? "expanded" : "collapsed"}
                             />
                           </ListItem>
-                        </List>
                         <Divider grow={true} />
                         <Divider />
-                      </div>
+                        </Fragment>
                     ) : null;
                   })}
-                </div>
+                </List>
               );
             }
           )}

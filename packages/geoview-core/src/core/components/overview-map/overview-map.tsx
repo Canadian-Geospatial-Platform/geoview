@@ -9,9 +9,8 @@ import {
 
 import { useTranslation } from "react-i18next";
 
-import { useTheme } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import ChevronLeft from "@material-ui/icons/ChevronLeft";
 
 import { Map, CRS, DomEvent } from "leaflet";
 import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
@@ -160,14 +159,14 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
           !status ? classes.minimapOpen : classes.minimapClosed,
         ].join(" ")}
         style={{
-          margin: `-${theme.spacing(3)}`,
+          margin: theme.spacing(3) * -1,
           padding: 0,
           height: "initial",
           minWidth: "initial",
         }}
-        aria-label={t("mapctrl.overviewmap.toggle")}
+        ariaLabel={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}
-        size="large">
+      >
         <ChevronLeft />
       </IconButton>
     </div>
@@ -331,7 +330,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
           DomEvent.disableScrollPropagation(cgpMapContainer);
           const cgpMapContainerParentElement =
             cgpMapContainer.parentElement as HTMLElement;
-          cgpMapContainerParentElement.style.margin = theme.spacing(3);
+          cgpMapContainerParentElement.style.margin = `${theme.spacing(3)}px`;
         }}
       >
         {basemaps

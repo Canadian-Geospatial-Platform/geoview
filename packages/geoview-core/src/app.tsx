@@ -8,10 +8,9 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { useMediaQuery, IconButton } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
-import { ChevronLeft } from "@mui/icons-material";
+import { useMediaQuery, IconButton } from "@material-ui/core";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { ChevronLeft } from "@material-ui/icons";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -25,7 +24,6 @@ import "./ui/style/style.css";
 import "./ui/style/vendor.css";
 
 import AppStart from "./core/app-start";
-import { manageKeyboardFocus } from "./geo/utils/utilities";
 import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./core/types/cgpv-types";
 export * from "./core/types/cgpv-types";
 
@@ -45,7 +43,7 @@ Marker.prototype.options.icon = DefaultIcon;
  */
 function init(callback: () => void) {
   // apply focus to element when keyboard navigation is use
-  manageKeyboardFocus();
+  api.geoUtilities.manageKeyboardFocus();
 
   const html = document.body.innerHTML;
 
@@ -67,7 +65,7 @@ export const cgpv: TypeCGPV = {
   api: Cast<TypeApi>({
     ...api,
     ...api.event,
-    ...api.projection,
+    //...api.projection,
     ...api.plugin,
   }),
   react: React,

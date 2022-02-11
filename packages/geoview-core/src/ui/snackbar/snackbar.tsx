@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@mui/material";
+import { Button } from "@material-ui/core";
 
 import { useSnackbar } from "notistack";
 
