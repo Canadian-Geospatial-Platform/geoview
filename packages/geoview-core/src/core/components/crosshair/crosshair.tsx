@@ -86,19 +86,10 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
       const latlngPoint = map.getCenter();
 
       if (isCrosshairsActiveValue.current) {
-        const { panel } =
-          api.map(mapId).appBarButtons.buttons.default[panelButtonId.current];
-
-        if (panel) {
-          // emit an event with the latlng point
-          api.event.emit(
-            EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER,
-            mapId,
-            {
-              latlng: latlngPoint,
-            }
-          );
-        }
+        // emit an event with the latlng point
+        api.event.emit(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
+          latlng: latlngPoint,
+        });
       }
     }
   }
