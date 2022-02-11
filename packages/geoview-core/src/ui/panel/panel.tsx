@@ -218,12 +218,11 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
           // set focus on close button on panel open
           setTimeout(() => {
             if (closeBtnRef && closeBtnRef.current) {
-              console.log(panelRef.current);
               setActivetrap(true);
 
               Cast<HTMLElement>(closeBtnRef.current).focus();
             }
-          }, 100);
+          }, 0);
         }
       },
       mapId
@@ -246,14 +245,17 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
   return (
     <FocusTrap
       active={activeTrap}
-      focusTrapOptions={{ escapeDeactivates: false }}
+      focusTrapOptions={{
+        escapeDeactivates: false,
+        clickOutsideDeactivates: true,
+      }}
     >
       <Card
         ref={panelRef}
         className={`leaflet-control ${classes.root}`}
         style={{
           width: panel.width,
-          display: panelOpen ? "block" : "none",
+          display: activeTrap ? "block" : "none",
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {

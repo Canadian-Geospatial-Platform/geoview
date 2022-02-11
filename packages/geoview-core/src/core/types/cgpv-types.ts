@@ -29,6 +29,7 @@ export type TypeCGPV = {
   reactLeafletCore: Object;
   ui: Object;
   useTranslation: Object;
+  types: Object;
 };
 
 export type TypeCallback = (callback: () => void) => void;

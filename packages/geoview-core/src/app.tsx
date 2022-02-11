@@ -8,9 +8,8 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { useMediaQuery, IconButton } from "@material-ui/core";
+import { useMediaQuery } from "@material-ui/core";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { ChevronLeft } from "@material-ui/icons";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -24,7 +23,7 @@ import "./ui/style/style.css";
 import "./ui/style/vendor.css";
 
 import AppStart from "./core/app-start";
-import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./core/types/cgpv-types";
+import * as types from "./core/types/cgpv-types";
 export * from "./core/types/cgpv-types";
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
@@ -60,9 +59,9 @@ function init(callback: () => void) {
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: TypeCGPV = {
+export const cgpv: types.TypeCGPV = {
   init,
-  api: Cast<TypeApi>({
+  api: types.Cast<types.TypeApi>({
     ...api,
     ...api.event,
     //...api.projection,
@@ -76,16 +75,14 @@ export const cgpv: TypeCGPV = {
     useTheme: useTheme,
     useMediaQuery: useMediaQuery,
     makeStyles: makeStyles,
-    icons: {
-      ChevronLeft: ChevronLeft,
-    },
     elements: UI,
   },
   useTranslation: useTranslation,
+  types: types,
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
 
 // export the cgpv globally
-Cast<TypeWindow>(window).cgpv = cgpv;
+types.Cast<types.TypeWindow>(window).cgpv = cgpv;

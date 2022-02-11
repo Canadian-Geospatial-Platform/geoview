@@ -180,7 +180,6 @@ export class MapViewer {
 
   addComponent = (id: string, component: JSX.Element): void => {
     if (id && component) {
-      console.log(component);
       // emit an event to add the component
       api.event.emit(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, this.id, {
         id: id,
