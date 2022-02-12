@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, CSSProperties } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import { useMap } from "react-leaflet";
 
@@ -40,8 +40,8 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   crosshairIcon: {
-    width: (theme.overrides?.crosshairIcon?.size as CSSProperties).width,
-    height: (theme.overrides?.crosshairIcon?.size as CSSProperties).height,
+    width: 275, // (theme.overrides?.crosshairIcon?.size as CSSProperties).width,
+    height: 275, // (theme.overrides?.crosshairIcon?.size as CSSProperties).height,
   },
 }));
 

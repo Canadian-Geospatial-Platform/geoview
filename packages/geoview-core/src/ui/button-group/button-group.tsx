@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-import { ButtonGroup as MaterialButtonGroup } from "@material-ui/core";
+import { ButtonGroup as MaterialButtonGroup } from "@mui/material";
 
 import { TypeChildren } from "../../core/types/cgpv-types";
 

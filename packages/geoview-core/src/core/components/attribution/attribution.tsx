@@ -1,6 +1,6 @@
 import React from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
 

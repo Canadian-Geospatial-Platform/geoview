@@ -139,12 +139,12 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
           !status ? classes.minimapOpen : classes.minimapClosed,
         ].join(" ")}
         style={{
-          margin: theme.spacing(3) * -1,
+          margin: `-${theme.spacing(3)}`,
           padding: 0,
         }}
         aria-label={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}
-      >
+        size="large">
         <ChevronLeft />
       </IconButton>
     </div>
@@ -361,7 +361,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
           DomEvent.disableScrollPropagation(cgpMapContainer);
           const cgpMapContainerParentElement =
             cgpMapContainer.parentElement as HTMLElement;
-          cgpMapContainerParentElement.style.margin = `${theme.spacing(3)}px`;
+          cgpMapContainerParentElement.style.margin = theme.spacing(3);
         }}
       >
         {basemaps

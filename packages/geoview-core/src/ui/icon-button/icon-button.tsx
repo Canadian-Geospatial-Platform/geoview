@@ -5,7 +5,7 @@ import {
   Tooltip,
   TooltipProps,
   Fade,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
 
