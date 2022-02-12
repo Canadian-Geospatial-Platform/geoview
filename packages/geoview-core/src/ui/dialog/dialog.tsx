@@ -7,8 +7,8 @@ import {
   DialogContentText,
   DialogActions,
   DialogProps as MaterialDialogProps,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 
 import { TypeChildren } from "../../core/types/cgpv-types";
 

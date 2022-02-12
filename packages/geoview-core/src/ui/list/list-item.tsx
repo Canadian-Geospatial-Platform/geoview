@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 
-import { ListItem as MaterialListItem } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { ListItem as MaterialListItem } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 
 import { TypeChildren } from "../../core/types/cgpv-types";
 

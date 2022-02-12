@@ -2,7 +2,7 @@ import React, { CSSProperties } from "react";
 
 import L from "leaflet";
 
-import { TooltipProps } from "@material-ui/core";
+import { TooltipProps } from "@mui/material";
 
 import { Projection } from "../../geo/projection/projection";
 

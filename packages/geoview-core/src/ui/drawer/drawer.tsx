@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { useMap } from "react-leaflet";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { Drawer as MaterialDrawer } from "@material-ui/core";
+import makeStyles from '@mui/styles/makeStyles';
+import { Drawer as MaterialDrawer } from "@mui/material";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
@@ -133,7 +133,7 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
           onClick={() => {
             openCloseDrawer(!open);
           }}
-        >
+          size="large">
           {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
         </IconButton>
       </div>

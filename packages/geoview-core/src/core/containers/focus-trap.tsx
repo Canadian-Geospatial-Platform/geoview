@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import { useTheme, makeStyles } from "@material-ui/core/styles";
+import { useTheme } from "@mui/material/styles";
 
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import makeStyles from '@mui/styles/makeStyles';
+
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
@@ -46,7 +48,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down("sm"));
+  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down('md'));
 
   const [open, setOpen] = useState(false);
 
