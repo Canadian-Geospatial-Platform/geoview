@@ -11,7 +11,7 @@ import { generateId } from "../../../core/utils/utilities";
 
 import "./marker-cluster-element";
 
-import * as MarkerDefinitions from "../../../../../geoview-loader/public/markers/marker-definitions";
+import * as MarkerDefinitions from "../../../core/types/marker-definitions";
 
 let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } =
   MarkerDefinitions;

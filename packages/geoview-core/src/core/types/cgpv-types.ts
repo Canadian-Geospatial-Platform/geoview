@@ -267,7 +267,7 @@ export const CONST_VECTOR_TYPES = {
  */
 export type TypePanelAppProps = {
   panel: PanelApi;
-  panelOpen: boolean;
+  //   panelOpen: boolean;
   button: ButtonApi;
 };
 

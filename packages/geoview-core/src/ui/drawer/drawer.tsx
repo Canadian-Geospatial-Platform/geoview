@@ -76,7 +76,7 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
 
   const map = useMap();
 
-  const mapId = api.mapInstance(map).id;
+  const mapId = api.mapInstance(map)!.id;
 
   const openCloseDrawer = (status: boolean): void => {
     setOpen(status);

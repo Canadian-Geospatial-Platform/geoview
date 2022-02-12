@@ -85,10 +85,7 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function NavBar(): JSX.Element {
-  const [buttonPanelId, setButtonPanelId] = useState<string>();
-  const [panelOpen, setPanelOpen] = useState(false);
-
-  const [, setButtonCount] = useState(0);
+  const [buttonCount, setButtonCount] = useState(0);
 
   const classes = useStyles();
   const { t } = useTranslation<string>();
@@ -97,7 +94,7 @@ export function NavBar(): JSX.Element {
 
   const map = useMap();
 
-  const mapId = api.mapInstance(map).id;
+  const mapId = api.mapInstance(map)!.id;
   const navBarButtons = api.map(mapId).navBarButtons;
 
   /**
@@ -106,19 +103,6 @@ export function NavBar(): JSX.Element {
   const updatePanelCount = useCallback(() => {
     setButtonCount((count) => count + 1);
   }, []);
-
-  /**
-   * Open or close the panel
-   *
-   * @param {boolean} status the status of the panel
-   */
-  const openClosePanel = (status: boolean): void => {
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
-      panelType: CONST_PANEL_TYPES.NAVBAR,
-      handlerId: mapId,
-      status,
-    });
-  };
 
   /**
    * listen to events to open/close the panel and to create the buttons
@@ -131,42 +115,6 @@ export function NavBar(): JSX.Element {
     DomEvent.disableClickPropagation(navBarChildrenHTMLElements[0]);
     DomEvent.disableScrollPropagation(navBarChildrenHTMLElements[0]);
 
-    // listen to panel open/close events
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
-      (payload) => {
-        if (
-          payload &&
-          payload.handlerId === mapId &&
-          payload.panelType === CONST_PANEL_TYPES.NAVBAR
-        )
-          setPanelOpen(payload.status);
-      },
-      mapId
-    );
-
-    // listen to event when a request to open a panel
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
-      (args) => {
-        if (args.handlerId === mapId) {
-          const buttonPanel = Object.keys(navBarButtons.buttons).map(
-            (groupName: string) => {
-              const buttonPanels = navBarButtons.buttons[groupName];
-
-              return buttonPanels[args.buttonId];
-            }
-          )[0];
-
-          if (buttonPanel) {
-            setButtonPanelId(buttonPanel.button.id);
-            openClosePanel(!panelOpen);
-          }
-        }
-      },
-      mapId
-    );
-
     // listen to new navbar panel creation
     api.event.on(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, () => {
       updatePanelCount();
@@ -178,8 +126,6 @@ export function NavBar(): JSX.Element {
     });
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE);
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE);
     };
@@ -196,14 +142,12 @@ export function NavBar(): JSX.Element {
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
           const buttonPanel = buttons[buttonId];
-          const isOpen = buttonPanelId === buttonPanel.button.id && panelOpen;
 
           return buttonPanel.panel ? (
             <Panel
-              key={buttonPanel.button.id}
+              key={buttonPanel.button.id + "-" + buttonCount}
               button={buttonPanel.button}
               panel={buttonPanel.panel}
-              panelOpen={isOpen}
             />
           ) : null;
         });
@@ -254,8 +198,11 @@ export function NavBar(): JSX.Element {
                         icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
                         onClick={() => {
-                          setButtonPanelId(buttonPanel.button.id);
-                          openClosePanel(!panelOpen);
+                          if (buttonPanel.panel?.status) {
+                            buttonPanel.panel?.close();
+                          } else {
+                            buttonPanel.panel?.open();
+                          }
                         }}
                       />
                     )

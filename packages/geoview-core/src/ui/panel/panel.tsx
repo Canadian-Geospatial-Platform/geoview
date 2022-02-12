@@ -60,9 +60,10 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the created Panel element
  */
 export const Panel = (props: TypePanelAppProps): JSX.Element => {
-  const { panel, button, panelOpen } = props;
+  const { panel, button } = props;
 
   // set the active trap value for FocusTrap
+  const [panelStatus, setPanelStatus] = useState(false);
   const [activeTrap, setActivetrap] = useState(false);
 
   const [actionButtons, setActionButtons] = useState<
@@ -74,7 +75,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
   const { t } = useTranslation<string>();
 
   const map = useMap();
-  const mapId = api.mapInstance(map).id;
+  const mapId = api.mapInstance(map)!.id;
 
   const panelRef = useRef<HTMLElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -92,19 +93,20 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
    * Close the panel
    */
   function closePanel(): void {
-    setActivetrap(false);
+    setPanelStatus(false);
+    // setActivetrap(false);
 
     // set panel status to false
-    panel.status = false;
+    // panel.status = false;
 
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
-      // used to tell which panel type has been closed
-      panelType: panel.type,
-      // used when checking which panel was closed from which map
-      handlerId: mapId,
-      // status of panel (false = closed)
-      status: false,
-    });
+    // api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
+    //   // used to tell which panel type has been closed
+    //   panelType: panel.type,
+    //   // used when checking which panel was closed from which map
+    //   handlerId: mapId,
+    //   // status of panel (false = closed)
+    //   status: false,
+    // });
 
     // emit an event to hide the marker when using the details panel
     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
@@ -134,6 +136,11 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     // disable events on container
     DomEvent.disableClickPropagation(panelRef.current as HTMLElement);
     DomEvent.disableScrollPropagation(panelRef.current as HTMLElement);
+
+    // if the panel was still open on reload then close it
+    if (panel.status) {
+      panel.close();
+    }
 
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
@@ -218,7 +225,9 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
           // set focus on close button on panel open
           setTimeout(() => {
             if (closeBtnRef && closeBtnRef.current) {
-              setActivetrap(true);
+              //   setActivetrap(true);
+
+              setPanelStatus(true);
 
               Cast<HTMLElement>(closeBtnRef.current).focus();
             }
@@ -244,7 +253,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
   return (
     <FocusTrap
-      active={activeTrap}
+      active={panelStatus}
       focusTrapOptions={{
         escapeDeactivates: false,
         clickOutsideDeactivates: true,
@@ -255,7 +264,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         className={`leaflet-control ${classes.root}`}
         style={{
           width: panel.width,
-          display: activeTrap ? "block" : "none",
+          display: panelStatus ? "block" : "none",
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {

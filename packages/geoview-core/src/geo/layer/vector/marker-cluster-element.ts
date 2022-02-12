@@ -6,7 +6,7 @@ import "leaflet.markercluster/src";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 import { TypeIconCreationFunction } from "../../../core/types/cgpv-types";
-import * as MarkerDefinitions from "../../../../../geoview-loader/public/markers/marker-definitions";
+import * as MarkerDefinitions from "../../../core/types/marker-definitions";
 
 let { unselectedMarkerIconCreator, selectedMarkerIconCreator } =
   MarkerDefinitions;

@@ -29,9 +29,7 @@ export const useStyles = makeStyles((theme) => ({
  * Create an appbar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  const [buttonPanelId, setButtonPanelId] = useState<string>();
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [, setPanelCount] = useState(0);
+  const [panelCount, setPanelCount] = useState(0);
   const [drawerStatus, setDrawerStatus] = useState<boolean>(false);
 
   const classes = useStyles();
@@ -40,7 +38,7 @@ export function Appbar(): JSX.Element {
 
   const appBar = useRef<HTMLDivElement>(null);
 
-  const mapId = api.mapInstance(map).id;
+  const mapId = api.mapInstance(map)!.id;
 
   /**
    * function that causes rerender when adding a new panel
@@ -50,16 +48,9 @@ export function Appbar(): JSX.Element {
   }, []);
 
   /**
-   * Open / Close the panel
-   * @param {boolean} status status of the panel
+   * Open / Close drawer
    */
-  const openClosePanel = (status: boolean): void => {
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
-      panelType: CONST_PANEL_TYPES.APPBAR,
-      handlerId: mapId,
-      status,
-    });
-
+  const openClosePanel = (): void => {
     // if appbar is open then close it
     api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
       status: false,
@@ -83,20 +74,6 @@ export function Appbar(): JSX.Element {
       mapId
     );
 
-    // listen to panel open/close events
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE,
-      (payload) => {
-        if (
-          payload &&
-          payload.handlerId === mapId &&
-          payload.panelType === CONST_PANEL_TYPES.APPBAR
-        )
-          setPanelOpen(payload.status);
-      },
-      mapId
-    );
-
     // listen to new panel creation
     api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, () => {
       updatePanelCount();
@@ -107,32 +84,7 @@ export function Appbar(): JSX.Element {
       updatePanelCount();
     });
 
-    // listen to event when a request to open a panel
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
-      (args) => {
-        if (args.handlerId === mapId) {
-          const buttonPanel = Object.keys(
-            api.map(mapId).appBarButtons.buttons
-          ).map((groupName: string) => {
-            const buttonPanels =
-              api.map(mapId).appBarButtons.buttons[groupName];
-
-            return buttonPanels[args.buttonId];
-          })[0];
-
-          if (buttonPanel) {
-            setButtonPanelId(buttonPanel.button.id);
-            openClosePanel(!panelOpen);
-          }
-        }
-      },
-      mapId
-    );
-
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE);
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE);
       api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE);
@@ -157,26 +109,30 @@ export function Appbar(): JSX.Element {
                     const buttonPanel = buttonPanels[buttonId];
 
                     return buttonPanel.button.visible ? (
-                        <Fragment  key={buttonPanel.button.id}>
-                          <ListItem>
-                            <Button
-                              id={buttonPanel.button.id}
-                              variant="text"
-                              tooltip={buttonPanel.button.tooltip}
-                              tooltipPlacement="right"
-                              type="textWithIcon"
-                              onClick={() => {
-                                setButtonPanelId(buttonPanel.button.id);
-                                openClosePanel(!panelOpen);
-                              }}
-                              icon={buttonPanel.button.icon}
-                              children={buttonPanel.button.tooltip}
-                              state={drawerStatus ? "expanded" : "collapsed"}
-                            />
-                          </ListItem>
+                      <Fragment key={buttonPanel.button.id}>
+                        <ListItem>
+                          <Button
+                            id={buttonPanel.button.id}
+                            variant="text"
+                            tooltip={buttonPanel.button.tooltip}
+                            tooltipPlacement="right"
+                            type="textWithIcon"
+                            onClick={() => {
+                              if (buttonPanel.panel?.status) {
+                                buttonPanel.panel?.close();
+                              } else {
+                                buttonPanel.panel?.open();
+                              }
+                              openClosePanel();
+                            }}
+                            icon={buttonPanel.button.icon}
+                            children={buttonPanel.button.tooltip}
+                            state={drawerStatus ? "expanded" : "collapsed"}
+                          />
+                        </ListItem>
                         <Divider grow={true} />
                         <Divider />
-                        </Fragment>
+                      </Fragment>
                     ) : null;
                   })}
                 </List>
@@ -188,11 +144,10 @@ export function Appbar(): JSX.Element {
         <Divider />
         <Version drawerStatus={drawerStatus} />
       </Drawer>
-      {Object.keys(api.mapInstance(map).appBarButtons.buttons).map(
+      {Object.keys(api.map(mapId).appBarButtons.buttons).map(
         (groupName: string) => {
           // get button panels from group
-          const buttonPanels =
-            api.mapInstance(map).appBarButtons.buttons[groupName];
+          const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
 
           // display the panels in the list
           return (
@@ -200,15 +155,12 @@ export function Appbar(): JSX.Element {
               {Object.keys(buttonPanels).map((buttonId) => {
                 const buttonPanel = buttonPanels[buttonId];
 
-                const isOpen =
-                  buttonPanelId === buttonPanel.button.id && panelOpen;
-
                 return buttonPanel.panel ? (
                   <Panel
-                    key={buttonPanel.button.id}
+                    key={buttonPanel.button.id + "-" + panelCount}
                     panel={buttonPanel.panel}
                     button={buttonPanel.button}
-                    panelOpen={isOpen}
+                    // panelOpen={isOpen}
                   />
                 ) : null;
               })}
