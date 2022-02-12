@@ -94,19 +94,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
    */
   function closePanel(): void {
     setPanelStatus(false);
-    // setActivetrap(false);
-
-    // set panel status to false
-    // panel.status = false;
-
-    // api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN_CLOSE, mapId, {
-    //   // used to tell which panel type has been closed
-    //   panelType: panel.type,
-    //   // used when checking which panel was closed from which map
-    //   handlerId: mapId,
-    //   // status of panel (false = closed)
-    //   status: false,
-    // });
 
     // emit an event to hide the marker when using the details panel
     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
@@ -139,7 +126,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
     // if the panel was still open on reload then close it
     if (panel.status) {
-      panel.close();
+      setPanelStatus(true);
     }
 
     api.event.on(
