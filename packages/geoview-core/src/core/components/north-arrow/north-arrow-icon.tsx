@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-restricted-imports
-import { ClassNameMap } from "@material-ui/core/styles/withStyles";
+import { ClassNameMap } from '@mui/styles';
 
 /**
  * interface for north arrow icon properties
