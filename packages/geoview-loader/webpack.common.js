@@ -11,7 +11,6 @@ const package = require('./package.json');
 
 // get version numbers and the hash of the current commit
 const [major, minor, patch] = package.version.split('.');
-const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString().trim());
 // eslint-disable-next-line no-console
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch}`);
 
@@ -101,7 +100,6 @@ const config = {
                 minor,
                 patch,
                 timestamp: Date.now(),
-                hash,
             },
         }),
     ].concat(multipleHtmlPlugins),
