@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-import { TooltipProps } from "@material-ui/core";
+import { TooltipProps } from "@mui/material";
 
 import {
   TypeChildren,

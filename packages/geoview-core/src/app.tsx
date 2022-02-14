@@ -8,8 +8,9 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { useMediaQuery } from "@material-ui/core";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { useMediaQuery, IconButton } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";

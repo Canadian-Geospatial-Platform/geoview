@@ -6,7 +6,7 @@ import React from "react";
 import i18next from "i18next";
 import * as translate from "react-i18next";
 
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 import { api } from "./api";
 import { TypePlugin, Cast, TypeWindow } from "../core/types/cgpv-types";

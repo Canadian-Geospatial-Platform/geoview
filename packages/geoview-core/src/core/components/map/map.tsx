@@ -4,8 +4,10 @@ import { Fragment, useEffect, useState } from "react";
 import { CRS } from "leaflet";
 import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
 
-import { useMediaQuery } from "@material-ui/core";
-import { useTheme, makeStyles } from "@material-ui/core/styles";
+import { useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { SnackbarProvider } from "notistack";
 

@@ -1,18 +1,13 @@
 import { CSSProperties } from "react";
 
-import { createTheme, ThemeOptions } from "@material-ui/core/styles";
-// eslint-disable-next-line no-restricted-imports
-import {
-  Variant,
-  TypographyStyleOptions,
-} from "@material-ui/core/styles/createTypography";
+import { createTheme, DeprecatedThemeOptions, adaptV4Theme, Variant, TypographyStyleOptions } from "@mui/material/styles";
 
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
   fontWeight: 700,
 };
 
-const themeOptions: ThemeOptions = {
+const themeOptions: DeprecatedThemeOptions = {
   palette: {
     primary: {
       light: "#ffffff",
@@ -158,4 +153,4 @@ export const styles: Record<string, CSSProperties> = {
   },
 };
 
-export const theme = createTheme(themeOptions);
+export const theme = createTheme(adaptV4Theme(themeOptions));

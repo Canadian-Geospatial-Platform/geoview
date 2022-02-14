@@ -5,13 +5,22 @@ import "./translation/i18n";
 import i18n from "i18next";
 import { I18nextProvider } from "react-i18next";
 
-import { ThemeProvider } from "@material-ui/core/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
+import {
+  ThemeProvider,
+  Theme,
+  StyledEngineProvider,
+} from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import { Config } from "./utils/config";
 import { Shell } from "./containers/shell";
 import { theme } from "../ui/style/theme";
 import { MapViewer } from "../geo/map/map";
+
+declare module "@mui/styles/defaultTheme" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme {}
+}
 
 /**
  * interface used when passing configuration from the maps
@@ -46,12 +55,14 @@ const AppStart = (props: AppStartProps): JSX.Element => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <Suspense fallback="">
-        <CssBaseline />
-        {getInlineMaps()}
-      </Suspense>
-    </ThemeProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <Suspense fallback="">
+          <CssBaseline />
+          {getInlineMaps()}
+        </Suspense>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 };
 
