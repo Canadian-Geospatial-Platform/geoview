@@ -55,7 +55,7 @@ class DetailsPlugin {
     const cgpv = w["cgpv"];
 
     // access the api calls
-    const { api } = cgpv;
+    const { api, eventNames } = cgpv;
 
     const { language } = api.map(mapId);
 
@@ -100,6 +100,7 @@ class DetailsPlugin {
 
     if (this.buttonPanel) {
       api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      api.event.emit(api.eventNames.EVENT_MARKER_ICON_HIDE, mapId, {});
     }
   }
 }

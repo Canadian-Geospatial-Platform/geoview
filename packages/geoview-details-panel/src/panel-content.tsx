@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable func-names */
-/* eslint-disable no-plusplus */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-param-reassign */
-/* eslint-disable func-names */
-/* eslint-disable object-shorthand */
+import LayersList from "./layers-list";
+import FeaturesList from "./features-list";
+import FeatureInfo from "./feature-info";
+
+// get the window object
+const w = window as any;
 
 import {
   Cast,
@@ -22,13 +19,6 @@ import {
   TypeEntry,
   TypePanelContentProps,
 } from "geoview-core";
-
-import LayersList from "./layers-list";
-import FeaturesList from "./features-list";
-import FeatureInfo from "./feature-info";
-
-// get the window object
-const w = window as any;
 
 /**
  * A react component that displays the details panel content
@@ -50,19 +40,15 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
   const { useState, useCallback, useEffect } = react;
 
-  const [layersData, setLayersData] = useState<Record<string, TypeLayerData>>(
-    {}
-  );
-  const [selectedLayer, setSelectedLayer] = useState<TypeLayersEntry | {}>({});
-  const [selectedFeature, setSelectedFeature] = useState<
-    TypeSelectedFeature | {}
-  >({});
+  const [layersData, setLayersData] = useState({});
+  const [selectedLayer, setSelectedLayer] = useState({});
+  const [selectedFeature, setSelectedFeature] = useState({});
 
   const [layersList, setLayersList] = useState(false);
   const [featureList, setFeatureList] = useState(false);
   const [featureInfo, setFeatureInfo] = useState(false);
 
-  const [clickPos, setClickPos] = useState<L.LatLng>();
+  const [clickPos, setClickPos] = useState();
 
   // use material ui theming
   const useStyles = ui.makeStyles(() => ({
@@ -362,7 +348,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
               layers[l].layerData?.push(...res.results);
 
               // save the data
-              setLayersData((prevState) => ({
+              setLayersData((prevState: any) => ({
                 ...prevState,
                 [dataKey]: {
                   ...prevState[dataKey],

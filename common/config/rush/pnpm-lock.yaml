@@ -53,7 +53,6 @@ importers:
       screenfull: ^6.0.1
       wms-capabilities: ^0.5.1
     dependencies:
-      '@babel/core': 7.17.0
       '@emotion/react': 11.7.1_1f521ea4d22f56301c9243450fe7194f
       '@emotion/styled': 11.6.0_ba4ec3a77d3d9eb7e3d5afde2c760205
       '@mui/icons-material': 5.4.1_e1f48b56a62c2aead59c34c0828be441
@@ -84,6 +83,7 @@ importers:
       screenfull: 6.0.1
       wms-capabilities: 0.5.1
     devDependencies:
+      '@babel/core': 7.17.0
       '@babel/runtime': 7.17.0
       '@types/create-react-class': 15.6.3
       '@types/esri-leaflet': 2.1.9

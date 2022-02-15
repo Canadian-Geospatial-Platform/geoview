@@ -72,7 +72,7 @@ const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
 
   const classes = useStyles();
 
-  const { t } = useTranslation<string>();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // add new action button that goes back to the entry / features list or layers list

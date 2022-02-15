@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import { CRS } from "leaflet";
 import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
@@ -239,7 +239,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             <Snackbar id={id} />
           </SnackbarProvider>
           {Object.keys(components).map((key: string) => {
-            return <div key={key}>{components[key]}</div>;
+            return <Fragment key={key}>{components[key]}</Fragment>;
           })}
         </>
       )}

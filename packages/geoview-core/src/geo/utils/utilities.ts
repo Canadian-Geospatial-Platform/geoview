@@ -104,10 +104,13 @@ export class GeoUtilities {
     );
 
     if (rest) {
+      const urlRightSide = mapServerUrl.slice(
+        mapServerUrl.indexOf("/services/")
+      );
       mapServerUrl = `${mapServerUrl.slice(
         0,
         url.indexOf("services/")
-      )}rest${mapServerUrl.slice(url.indexOf("/services"))}`;
+      )}rest${urlRightSide}`;
     }
 
     return mapServerUrl;

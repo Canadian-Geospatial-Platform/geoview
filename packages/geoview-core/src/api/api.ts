@@ -10,7 +10,7 @@ import { MapViewer } from "../geo/map/map";
 import { Plugin } from "./plugin";
 import { GeoUtilities } from "../geo/utils/utilities";
 import { CONST_LAYER_TYPES } from "../core/types/cgpv-types";
-import * as MarkerDefinitions from "../../../geoview-loader/public/markers/marker-definitions";
+import * as MarkerDefinitions from "../core/types/marker-definitions";
 
 /**
  * Class used to handle api calls (events, functions etc...)

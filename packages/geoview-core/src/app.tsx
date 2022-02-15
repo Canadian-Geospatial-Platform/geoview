@@ -11,7 +11,6 @@ import { useTranslation } from "react-i18next";
 import { useMediaQuery, IconButton } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import makeStyles from '@mui/styles/makeStyles';
-import { ChevronLeft } from "@mui/icons-material";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -25,7 +24,10 @@ import "./ui/style/style.css";
 import "./ui/style/vendor.css";
 
 import AppStart from "./core/app-start";
-import { TypeCGPV, TypeWindow, TypeApi, Cast } from "./core/types/cgpv-types";
+
+import * as types from "./core/types/cgpv-types";
+import { Config } from "./core/utils/config";
+
 export * from "./core/types/cgpv-types";
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
@@ -46,24 +48,28 @@ function init(callback: () => void) {
   // apply focus to element when keyboard navigation is use
   api.geoUtilities.manageKeyboardFocus();
 
-  const html = document.body.innerHTML;
-
-  document.body.innerHTML = "";
-
-  const root = document.createElement("div");
-  root.setAttribute("id", "root");
-  document.body.appendChild(root);
-
   // set the API callback if a callback is provided
   if (callback) api.readyCallback = callback;
 
-  ReactDOM.render(<AppStart html={html} />, document.getElementById("root"));
+  const mapElements = document.getElementsByClassName("llwp-map");
+
+  for (var i = 0; i < mapElements.length; i++) {
+    const mapElement = mapElements[i] as Element;
+
+    // validate configuration and appply default if problem occurs then setup language
+    const configObj = new Config(
+      mapElement.getAttribute("id")!,
+      (mapElement.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
+    );
+
+    ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+  }
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: TypeCGPV = {
+export const cgpv: types.TypeCGPV = {
   init,
-  api: Cast<TypeApi>({
+  api: types.Cast<types.TypeApi>({
     ...api,
     ...api.event,
     //...api.projection,
@@ -77,16 +83,14 @@ export const cgpv: TypeCGPV = {
     useTheme: useTheme,
     useMediaQuery: useMediaQuery,
     makeStyles: makeStyles,
-    icons: {
-      ChevronLeft: ChevronLeft,
-    },
     elements: UI,
   },
   useTranslation: useTranslation,
+  types: types,
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
 Object.freeze(cgpv);
 
 // export the cgpv globally
-Cast<TypeWindow>(window).cgpv = cgpv;
+types.Cast<types.TypeWindow>(window).cgpv = cgpv;
