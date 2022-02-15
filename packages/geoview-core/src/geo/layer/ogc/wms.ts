@@ -59,12 +59,20 @@ export class WMS {
           const json = new WMSCapabilities(
             value
           ).toJSON() as TypeJSONObjectLoop;
+
           // validate the entries
-          Cast<TypeJSONObjectLoop[]>(json.Capability.Layer.Layer).forEach(
-            (item: TypeJSONObjectLoop) => {
-              isValid = this.validateEntries(item, layer.entries as string);
-            }
-          );
+          if (!json.Capability.Layer.Layer) {
+            isValid = this.validateEntries(
+              json.Capability.Layer,
+              layer.entries as string
+            );
+          } else {
+            Cast<TypeJSONObjectLoop[]>(json.Capability.Layer.Layer).forEach(
+              (item: TypeJSONObjectLoop) => {
+                isValid = this.validateEntries(item, layer.entries as string);
+              }
+            );
+          }
 
           if (isValid) {
             const wms = L.tileLayer.wms(layer.url, {
