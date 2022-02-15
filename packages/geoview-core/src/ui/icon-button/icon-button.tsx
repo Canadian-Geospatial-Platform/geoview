@@ -21,7 +21,9 @@ interface IconButtonProps {
   tooltip?: string;
   tooltipPlacement?: TooltipProps["placement"];
   id?: string | undefined;
-  tabIndex?: string | number | undefined;
+  tabIndex?: number | undefined;
+  iconRef?: React.RefObject<any> | null | undefined;
+  size?: "small" | "medium" | "large";
 }
 
 /**
@@ -32,34 +34,38 @@ interface IconButtonProps {
  */
 
 export const IconButton = (props: IconButtonProps): JSX.Element => {
-    const {
-      className,
-      style,
-      children,
-      onClick,
-      ariaLabel,
-      tooltip,
-      tooltipPlacement,
-      id,
-      tabIndex,
-    } = props;
+  const {
+    className,
+    style,
+    children,
+    onClick,
+    ariaLabel,
+    tooltip,
+    tooltipPlacement,
+    id,
+    tabIndex,
+    iconRef,
+    size,
+  } = props;
 
-    return (
-        <Tooltip
-            title={tooltip ? tooltip : ""}
-            placement={tooltipPlacement ? tooltipPlacement : undefined}
-            TransitionComponent={Fade}
-        >
-            <MaterialIconButton
-                id={id ? id : undefined}
-                aria-label={ariaLabel ? ariaLabel : undefined}
-                style={style ? style : undefined}
-                className={className ? className : undefined}
-                onClick={onClick ? onClick : undefined}
-                tabIndex={tabIndex ? tabIndex : undefined}
-            >
-                {children && children}
-        </MaterialIconButton>
-      </Tooltip>
-    );
-}
+  return (
+    <Tooltip
+      title={tooltip ? tooltip : ""}
+      placement={tooltipPlacement ? tooltipPlacement : undefined}
+      TransitionComponent={Fade}
+    >
+      <MaterialIconButton
+        id={id ? id : undefined}
+        aria-label={ariaLabel ? ariaLabel : undefined}
+        style={style ? style : undefined}
+        className={className ? className : undefined}
+        onClick={onClick ? onClick : undefined}
+        tabIndex={tabIndex ? tabIndex : undefined}
+        size={size ? size : undefined}
+        ref={iconRef ? iconRef : undefined}
+      >
+        {children && children}
+      </MaterialIconButton>
+    </Tooltip>
+  );
+};

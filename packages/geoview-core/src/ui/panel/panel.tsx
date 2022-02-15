@@ -9,17 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import makeStyles from "@mui/styles/makeStyles";
 
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Divider,
-  IconButton,
-  Tooltip,
-  Fade,
-} from "@mui/material";
-
-import CloseIcon from "@mui/icons-material/Close";
+import { Card, CardHeader, CardContent } from "@mui/material";
 
 import FocusTrap from "focus-trap-react";
 
@@ -28,6 +18,8 @@ import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
 import { HtmlToReact } from "../../core/containers/html-to-react";
+
+import { IconButton, CloseIcon, Divider, Fade } from "..";
 import { styles } from "../style/theme";
 
 const useStyles = makeStyles((theme) => ({
@@ -134,12 +126,12 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if (args.buttonId === panel.buttonId) {
+        if (args.buttonId === panel.buttonId && args.handlerId === mapId) {
           // set focus on close button on panel open
           setTimeout(() => {
-            if (closeBtnRef && closeBtnRef.current) {
-              setPanelStatus(true);
+            setPanelStatus(true);
 
+            if (closeBtnRef && closeBtnRef.current) {
               Cast<HTMLElement>(closeBtnRef.current).focus();
             }
           }, 0);
@@ -151,7 +143,8 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if (args.buttonId === panel.buttonId) closePanel();
+        if (args.buttonId === panel.buttonId && args.handlerId === mapId)
+          closePanel();
       },
       mapId
     );
@@ -165,34 +158,27 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
           setActionButtons((prev) => [
             ...prev,
-            <Tooltip
+            <IconButton
+              tooltip={actionButton.title}
+              tooltipPlacement="right"
               id={actionButton.id}
-              key={actionButton.id}
-              title={actionButton.title}
-              placement="right"
-              TransitionComponent={Fade}
+              ariaLabel={actionButton.title}
+              onClick={actionButton.action}
+              size="large"
             >
-              <IconButton
-                id={actionButton.id}
-                className="cgpv-panel-close"
-                aria-label={actionButton.title}
-                onClick={actionButton.action}
-                size="large"
-              >
-                {typeof actionButton.icon === "string" ? (
-                  <HtmlToReact
-                    style={{
-                      display: "flex",
-                    }}
-                    htmlContent={actionButton.icon}
-                  />
-                ) : typeof actionButton.icon === "object" ? (
-                  actionButton.icon
-                ) : (
-                  <actionButton.icon />
-                )}
-              </IconButton>
-            </Tooltip>,
+              {typeof actionButton.icon === "string" ? (
+                <HtmlToReact
+                  style={{
+                    display: "flex",
+                  }}
+                  htmlContent={actionButton.icon}
+                />
+              ) : typeof actionButton.icon === "object" ? (
+                actionButton.icon
+              ) : (
+                <actionButton.icon />
+              )}
+            </IconButton>,
           ]);
         }
       },
@@ -235,7 +221,8 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
   useEffect(() => {
     // set focus on close button on panel open
-    if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
+    if (closeBtnRef && closeBtnRef.current)
+      if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
   }, [button, closeBtnRef]);
 
   return (
@@ -275,22 +262,17 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
           action={
             <>
               {actionButtons}
-              <Tooltip
-                title={t("general.close")}
-                placement="right"
-                TransitionComponent={Fade}
+              <IconButton
+                tooltip={t("general.close")}
+                tooltipPlacement="right"
+                className="cgpv-panel-close"
+                ariaLabel={t("general.close")}
+                size="large"
+                onClick={closePanel}
+                iconRef={closeBtnRef}
               >
-                <IconButton
-                  ref={closeBtnRef}
-                  className="cgpv-panel-close"
-                  aria-label={t("general.close")}
-                  onClick={closePanel}
-                  tabIndex={0}
-                  size="large"
-                >
-                  <CloseIcon />
-                </IconButton>
-              </Tooltip>
+                <CloseIcon />
+              </IconButton>
             </>
           }
         />
