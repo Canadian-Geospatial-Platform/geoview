@@ -6,7 +6,7 @@ import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import ZoomIn from "./buttons/zoom-in";
 import ZoomOut from "./buttons/zoom-out";
@@ -19,11 +19,7 @@ import { EVENT_NAMES } from "../../../api/event";
 
 import { Panel, ButtonGroup, Button } from "../../../ui";
 
-import {
-  Cast,
-  TypeButtonPanel,
-  CONST_PANEL_TYPES,
-} from "../../types/cgpv-types";
+import { Cast, TypeButtonPanel } from "../../types/cgpv-types";
 
 const navBtnWidth = "38px";
 const useStyles = makeStyles((theme) => ({
@@ -131,6 +127,25 @@ export function NavBar(): JSX.Element {
     };
   }, []);
 
+  /**
+   * Close all open panels
+   */
+  const closeAllPanels = (): void => {
+    Object.keys(api.map(mapId).navBarButtons.buttons).map(
+      (groupName: string) => {
+        // get button panels from group
+        const buttonPanels = api.map(mapId).navBarButtons.buttons[groupName];
+
+        // get all button panels in each group
+        Object.keys(buttonPanels).map((buttonId) => {
+          const buttonPanel = buttonPanels[buttonId];
+
+          buttonPanel.panel?.close();
+        });
+      }
+    );
+  };
+
   return (
     <div
       ref={navBarRef}
@@ -145,7 +160,7 @@ export function NavBar(): JSX.Element {
 
           return buttonPanel.panel ? (
             <Panel
-              key={buttonPanel.button.id + "-" + buttonCount}
+              key={buttonPanel.button.id}
               button={buttonPanel.button}
               panel={buttonPanel.panel}
             />
@@ -201,6 +216,7 @@ export function NavBar(): JSX.Element {
                           if (buttonPanel.panel?.status) {
                             buttonPanel.panel?.close();
                           } else {
+                            closeAllPanels();
                             buttonPanel.panel?.open();
                           }
                         }}

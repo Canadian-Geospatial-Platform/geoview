@@ -3,6 +3,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-lock.yaml*
 **/log
 **/logs
 
@@ -72,6 +73,7 @@ build/Release
 # Rush temporary files
 **/common/deploy
 common/autoinstallers/*/.npmrc
+common/config/rush/pnpm-lock.yaml
 **/.rush/temp/
 
 # Common toolchain intermediate files

@@ -34,10 +34,10 @@
     "@mui/styles": "~5.4.1",
     "@mui/icons-material": "~5.4.1",
     "@emotion/react": "~11.7.1",
-    "@emotion/styled": "~11.6.0",
-    "@babel/core": "^7.17.0"
+    "@emotion/styled": "~11.6.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.0",
     "@babel/runtime": "^7.17.0",
     "@types/create-react-class": "^15.6.3",
     "@types/esri-leaflet": "^2.1.9",

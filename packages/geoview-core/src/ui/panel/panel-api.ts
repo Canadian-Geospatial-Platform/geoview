@@ -65,24 +65,24 @@ export class PanelApi {
    * Trigger an event to open the panel
    */
   open = (): void => {
+    this.status = true;
+
     api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
     });
-
-    this.status = true;
   };
 
   /**
    * Trigger an event to close the panel
    */
   close = (): void => {
+    this.status = false;
+
     api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
     });
-
-    this.status = false;
   };
 
   /**

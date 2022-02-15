@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { DomEvent } from "leaflet";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { Tooltip, Fade, Button as MaterialButton } from "@mui/material";
 
 import {
@@ -134,8 +134,8 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
       buttonRef.current?.children
     );
     if (newButtonChildrenHTMLElements.length > 0) {
-        DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
-        DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
+      DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
+      DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
     }
 
     if (type) {
@@ -151,7 +151,7 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
 
   return (
     <Tooltip
-    title={Cast<string>(t(tooltip|| ""))}
+      title={Cast<string>(t(tooltip || ""))}
       placement={tooltipPlacement}
       TransitionComponent={Fade}
       ref={buttonRef}

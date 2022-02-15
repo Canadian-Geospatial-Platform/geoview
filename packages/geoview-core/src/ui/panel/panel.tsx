@@ -7,7 +7,8 @@ import { useMap } from "react-leaflet";
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
+
 import {
   Card,
   CardHeader,
@@ -17,6 +18,7 @@ import {
   Tooltip,
   Fade,
 } from "@mui/material";
+
 import CloseIcon from "@mui/icons-material/Close";
 
 import FocusTrap from "focus-trap-react";
@@ -35,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     marginLeft: theme.spacing(2),
     borderRadius: 0,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down("sm")]: {
       width: "auto !important",
       minWidth: 100,
     },
@@ -64,7 +66,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
-  const [activeTrap, setActivetrap] = useState(false);
 
   const [actionButtons, setActionButtons] = useState<
     JSX.Element[] & React.ReactNode[]
@@ -77,7 +78,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
   const map = useMap();
   const mapId = api.mapInstance(map)!.id;
 
-  const panelRef = useRef<HTMLElement>(null);
+  const panelRef = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   const PanelContent = (panel.content as React.ReactElement).type;
@@ -93,8 +94,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
    * Close the panel
    */
   function closePanel(): void {
-    setPanelStatus(false);
-
     // emit an event to hide the marker when using the details panel
     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
 
@@ -117,6 +116,8 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         );
       }
     }
+
+    setPanelStatus(false);
   }
 
   useEffect(() => {
@@ -128,6 +129,24 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     if (panel.status) {
       setPanelStatus(true);
     }
+
+    // listen to open panel to activate focus trap and focus on close
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_OPEN,
+      (args) => {
+        if (args.buttonId === panel.buttonId) {
+          // set focus on close button on panel open
+          setTimeout(() => {
+            if (closeBtnRef && closeBtnRef.current) {
+              setPanelStatus(true);
+
+              Cast<HTMLElement>(closeBtnRef.current).focus();
+            }
+          }, 0);
+        }
+      },
+      mapId
+    );
 
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
@@ -158,7 +177,8 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
                 className="cgpv-panel-close"
                 aria-label={actionButton.title}
                 onClick={actionButton.action}
-                size="large">
+                size="large"
+              >
                 {typeof actionButton.icon === "string" ? (
                   <HtmlToReact
                     style={{
@@ -204,26 +224,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       }
     });
 
-    // listen to open panel to activate focus trap and focus on close
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
-      (args) => {
-        if (args.buttonId === panel.buttonId) {
-          // set focus on close button on panel open
-          setTimeout(() => {
-            if (closeBtnRef && closeBtnRef.current) {
-              //   setActivetrap(true);
-
-              setPanelStatus(true);
-
-              Cast<HTMLElement>(closeBtnRef.current).focus();
-            }
-          }, 0);
-        }
-      },
-      mapId
-    );
-
     return () => {
       api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
       api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION);
@@ -247,7 +247,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       }}
     >
       <Card
-        ref={panelRef}
+        ref={panelRef as React.MutableRefObject<null>}
         className={`leaflet-control ${classes.root}`}
         style={{
           width: panel.width,
@@ -286,7 +286,8 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
                   aria-label={t("general.close")}
                   onClick={closePanel}
                   tabIndex={0}
-                  size="large">
+                  size="large"
+                >
                   <CloseIcon />
                 </IconButton>
               </Tooltip>

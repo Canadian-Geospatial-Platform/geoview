@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback, Fragment } from "react";
 import { DomEvent } from "leaflet";
 import { useMap } from "react-leaflet";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import Version from "./buttons/version";
 
@@ -11,8 +11,6 @@ import { Divider, Drawer, List, ListItem, Panel, Button } from "../../../ui";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
-
-import { CONST_PANEL_TYPES } from "../../types/cgpv-types";
 
 export const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -55,6 +53,25 @@ export function Appbar(): JSX.Element {
     api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
       status: false,
     });
+  };
+
+  /**
+   * Close all open panels
+   */
+  const closeAllPanels = (): void => {
+    Object.keys(api.map(mapId).appBarButtons.buttons).map(
+      (groupName: string) => {
+        // get button panels from group
+        const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
+
+        // get all button panels in each group
+        Object.keys(buttonPanels).map((buttonId) => {
+          const buttonPanel = buttonPanels[buttonId];
+
+          buttonPanel.panel?.close();
+        });
+      }
+    );
   };
 
   useEffect(() => {
@@ -121,6 +138,8 @@ export function Appbar(): JSX.Element {
                               if (buttonPanel.panel?.status) {
                                 buttonPanel.panel?.close();
                               } else {
+                                closeAllPanels();
+
                                 buttonPanel.panel?.open();
                               }
                               openClosePanel();
@@ -157,10 +176,9 @@ export function Appbar(): JSX.Element {
 
                 return buttonPanel.panel ? (
                   <Panel
-                    key={buttonPanel.button.id + "-" + panelCount}
+                    key={buttonPanel.button.id}
                     panel={buttonPanel.panel}
                     button={buttonPanel.button}
-                    // panelOpen={isOpen}
                   />
                 ) : null;
               })}
