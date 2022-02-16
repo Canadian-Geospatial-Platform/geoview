@@ -1,3 +1,3 @@
-# geoview-overview-map
+# geoview-basemap-switcher
 
-A plugin that displays an overview map for geoview
+A plugin that adds a new panel that allows the user to switch basemaps
