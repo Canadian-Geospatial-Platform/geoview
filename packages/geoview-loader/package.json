@@ -54,7 +54,8 @@
         "leaflet": "^1.7.1",
         "geoview-core": "workspace:~0.1.0",
         "geoview-details-panel": "workspace:~1.0.0",
-        "geoview-overview-map": "workspace:*"
+        "geoview-overview-map": "workspace:*",
+        "geoview-basemap-switcher": "workspace:*"
     },
     "devDependencies": {
         "@babel/cli": "^7.17.0",

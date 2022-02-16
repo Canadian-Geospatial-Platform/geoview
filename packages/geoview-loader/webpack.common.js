@@ -31,6 +31,7 @@ const config = {
         'gcpv-main': 'geoview-core',
         'geoview-details-panel': 'geoview-details-panel',
         'geoview-overview-map': 'geoview-overview-map',
+        'geoview-basemap-switcher': 'geoview-basemap-switcher',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -85,11 +86,11 @@ const config = {
         new CopyWebpackPlugin({
             patterns: [
                 { from: './public/img', to: 'img' },
-                { from: './public/locales', to: 'locales' },
+                { from: './public/locales', to: 'locales', noErrorOnMissing: true },
                 { from: './public/css', to: 'css' },
                 { from: './public/markers', to: 'markers' },
                 { from: './public/geojson', to: 'geojson' },
-                { from: './public/plugins', to: 'plugins' },
+                { from: './public/plugins', to: 'plugins', noErrorOnMissing: true },
                 { from: './public/favicon.ico' },
                 { from: './public/templates/codedoc.js' },
             ],

@@ -30,6 +30,10 @@
     {
       "packageName": "geoview-overview-map",
       "projectFolder": "packages/geoview-overview-map"
+    },
+    {
+      "packageName": "geoview-basemap-switcher",
+      "projectFolder": "packages/geoview-basemap-switcher"
     }
   ]
 }
