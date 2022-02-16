@@ -7,7 +7,7 @@ import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
 import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import { SnackbarProvider } from "notistack";
 

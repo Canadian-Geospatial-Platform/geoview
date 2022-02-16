@@ -385,7 +385,7 @@ export type TypeAttribution = {
  * interface used to define a new basemap
  */
 export type TypeBasemapProps = {
-  id: string;
+  id?: string;
   name: string;
   type: string;
   description: string;
@@ -393,7 +393,7 @@ export type TypeBasemapProps = {
   altText: string;
   thumbnailUrl: string | Array<string>;
   layers: TypeBasemapLayer[];
-  attribution: TypeAttribution;
+  attribution: string;
   zoomLevels: TypeZoomLevels;
 };
 

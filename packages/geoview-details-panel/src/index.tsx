@@ -64,8 +64,10 @@ class DetailsPlugin {
       // set ID to detailsPanel so that it can be accessed from the core viewer
       id: "detailsPanelButton",
       tooltip: this.translations[language].detailsPanel,
+      tooltipPlacement: "right",
       icon: '<i class="material-icons">details</i><div>Test</div>',
       visible: false,
+      type: "textWithIcon",
     };
 
     // panel props
