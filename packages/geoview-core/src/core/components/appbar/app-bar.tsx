@@ -213,10 +213,6 @@ export function Appbar(): JSX.Element {
             {Object.keys(buttonPanels).map((buttonId) => {
               const buttonPanel = buttonPanels[buttonId];
 
-              if (mapId === "mapWM") {
-                console.log(buttonPanel?.panel);
-              }
-
               return buttonPanel?.panel ? (
                 <Panel
                   key={buttonPanel.button.id}

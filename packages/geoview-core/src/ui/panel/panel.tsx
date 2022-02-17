@@ -126,8 +126,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        console.log("open pleassse");
-
         if (args.buttonId === panel.buttonId && args.handlerId === mapId) {
           // set focus on close button on panel open
           setTimeout(() => {
