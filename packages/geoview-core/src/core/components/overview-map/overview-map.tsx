@@ -10,7 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 
 import { Map, CRS, DomEvent } from "leaflet";
@@ -167,7 +167,8 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
         }}
         ariaLabel={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}
-        size="large">
+        size="large"
+      >
         <ChevronLeft />
       </IconButton>
     </div>
@@ -231,16 +232,20 @@ function MinimapBounds(props: MiniboundProps) {
     updateMap();
 
     // listen to API event when the overview map is toggled
-    api.event.on(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, (payload) => {
-      if (payload && parentId === payload.handlerName) {
-        updateMap();
-        setToggle(payload.status);
-      }
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE,
+      (payload) => {
+        if (payload && parentId === payload.handlerName) {
+          updateMap();
+          setToggle(payload.status);
+        }
+      },
+      parentId
+    );
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE);
+      api.event.off(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, parentId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

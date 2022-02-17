@@ -126,6 +126,8 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
+        console.log("open pleassse");
+
         if (args.buttonId === panel.buttonId && args.handlerId === mapId) {
           // set focus on close button on panel open
           setTimeout(() => {
@@ -186,37 +188,37 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     );
 
     // listen to remove action button event
-    api.event.on(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, (args) => {
-      if (args.buttonId === panel.buttonId) {
-        const { actionButtonId } = args;
-        setActionButtons((list) =>
-          list.filter((item) => {
-            return item.props.id !== actionButtonId;
-          })
-        );
-      }
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION,
+      (args) => {
+        if (args.buttonId === panel.buttonId) {
+          const { actionButtonId } = args;
+          setActionButtons((list) =>
+            list.filter((item) => {
+              return item.props.id !== actionButtonId;
+            })
+          );
+        }
+      },
+      mapId
+    );
 
     // listen to change panel content and rerender
-    api.event.on(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, (args) => {
-      // set focus on close button on panel content change
-      setTimeout(() => {
-        if (closeBtnRef && closeBtnRef.current)
-          Cast<HTMLElement>(closeBtnRef.current).focus();
-      }, 100);
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
+      (args) => {
+        // set focus on close button on panel content change
+        setTimeout(() => {
+          if (closeBtnRef && closeBtnRef.current)
+            Cast<HTMLElement>(closeBtnRef.current).focus();
+        }, 100);
 
-      if (args.buttonId === panel.buttonId) {
-        updateComponent();
-      }
-    });
-
-    return () => {
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN);
-    };
+        if (args.buttonId === panel.buttonId) {
+          updateComponent();
+        }
+      },
+      mapId
+    );
   }, []);
 
   useEffect(() => {

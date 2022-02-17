@@ -121,9 +121,6 @@ export class MapViewer {
     // initialize the projection
     this.projection = new MapProjection(this.mapProps.projection);
 
-    this.appBarButtons = new AppbarButtons(this.id);
-    this.navBarButtons = new NavbarButtons(this.id);
-
     // check if geometries are provided from url
     this.loadGeometries();
 
@@ -214,5 +211,13 @@ export class MapViewer {
       // toogle fullscreen
       screenfull.toggle(element);
     }
+  };
+
+  /**
+   * Function called when the map has been rendered and ready to be customized
+   */
+  mapReady = (): void => {
+    this.appBarButtons = new AppbarButtons(this.id);
+    this.navBarButtons = new NavbarButtons(this.id);
   };
 }

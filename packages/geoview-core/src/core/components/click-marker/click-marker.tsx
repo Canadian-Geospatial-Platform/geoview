@@ -7,7 +7,7 @@ import { useEventHandlers, LeafletElement } from "@react-leaflet/core";
 
 import { Theme } from "@mui/material/styles";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
@@ -147,16 +147,20 @@ export const ClickMarker = (): JSX.Element => {
       mapId
     );
 
-    api.event.on(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, (payload) => {
-      if (payload && payload.handlerName.includes(mapId)) {
-        setShowMarker(false);
-        overlay.style.visibility = "hidden";
-      }
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_MARKER_ICON_HIDE,
+      (payload) => {
+        if (payload && payload.handlerName.includes(mapId)) {
+          setShowMarker(false);
+          overlay.style.visibility = "hidden";
+        }
+      },
+      mapId
+    );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_SHOW);
-      api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_HIDE);
+      api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId);
+      api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId);
     };
   }, []);
 
