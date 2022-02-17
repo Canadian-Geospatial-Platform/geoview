@@ -1,10 +1,10 @@
 import { useCallback, useState, useEffect, useRef } from "react";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import { useTranslation } from "react-i18next";
 
-import { useMapEvent } from "react-leaflet";
+import { useMapEvent, useMap } from "react-leaflet";
 import { LatLng } from "leaflet";
 
 import { debounce } from "lodash";
@@ -71,6 +71,10 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   // keep track of crosshair status to know when update coord from keyboard navigation
   const isCrosshairsActive = useRef(false);
 
+  const map = useMap();
+
+  const mapId = api.mapInstance(map)?.id;
+
   /**
    * Format the coordinates output
    * @param {LatLng} latlng the Lat and Lng value to format
@@ -113,14 +117,18 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   useEffect(() => {
     // on map crosshair enable\disable, set variable for WCAG mouse position
-    api.event.on(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, (payload) => {
-      if (payload && payload.handlerName.includes(id)) {
-        isCrosshairsActive.current = payload.active;
-      }
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
+      (payload) => {
+        if (payload && payload.handlerName.includes(id)) {
+          isCrosshairsActive.current = payload.active;
+        }
+      },
+      mapId
+    );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE);
+      api.event.off(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

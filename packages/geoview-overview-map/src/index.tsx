@@ -41,8 +41,6 @@ class OverviewMapPlugin {
     const { language, projection, getMapOptions, currentProjection } =
       api.map(mapId);
 
-    console.log(language, projection, getMapOptions, currentProjection);
-
     api
       .map(mapId)
       .addComponent(

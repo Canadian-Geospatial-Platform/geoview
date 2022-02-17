@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+import { useMap } from "react-leaflet";
+
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@mui/material";
@@ -47,6 +49,10 @@ export function Snackbar(props: SnackBarProps): null {
 
   const { enqueueSnackbar } = useSnackbar();
 
+  const map = useMap();
+
+  const mapId = api.mapInstance(map)?.id;
+
   /**
    * Take string and replace parameters from array of values
    * @param {string[]} params array of parameters to replace
@@ -64,30 +70,35 @@ export function Snackbar(props: SnackBarProps): null {
 
   useEffect(() => {
     // listen to API event when app wants to show message
-    api.event.on(EVENT_NAMES.EVENT_SNACKBAR_OPEN, (payload) => {
-      const opts = payload.options ? payload.options : {};
+    api.event.on(
+      EVENT_NAMES.EVENT_SNACKBAR_OPEN,
+      (payload) => {
+        const opts = payload.options ? payload.options : {};
 
-      // apply function if provided
-      opts.action = payload.button
-        ? SnackButton({
-            label: payload.button.label,
-            action: payload.button.action,
-          })
-        : null;
+        // apply function if provided
+        opts.action = payload.button
+          ? SnackButton({
+              label: payload.button.label,
+              action: payload.button.action,
+            })
+          : null;
 
-      // get message
-      const message =
-        payload.message.type === "string"
-          ? payload.message.value
-          : replaceParams(payload.message.params, t(payload.message.value));
+        // get message
+        const message =
+          payload.message.type === "string"
+            ? payload.message.value
+            : replaceParams(payload.message.params, t(payload.message.value));
 
-      // show the notification
-      if (payload && id === payload.handlerName) enqueueSnackbar(message, opts);
-    });
+        // show the notification
+        if (payload && id === payload.handlerName)
+          enqueueSnackbar(message, opts);
+      },
+      mapId
+    );
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_SNACKBAR_OPEN);
+      api.event.off(EVENT_NAMES.EVENT_SNACKBAR_OPEN, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

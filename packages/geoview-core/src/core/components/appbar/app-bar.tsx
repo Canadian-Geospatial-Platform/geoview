@@ -12,6 +12,9 @@ import { Divider, Drawer, List, ListItem, Panel, Button } from "../../../ui";
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
+import { TypeButtonPanel } from "../../types/cgpv-types";
+import { AppbarButtons } from "./app-bar-buttons";
+
 export const useStyles = makeStyles((theme) => ({
   appBar: {
     display: "flex",
@@ -27,8 +30,10 @@ export const useStyles = makeStyles((theme) => ({
  * Create an appbar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  const [panelCount, setPanelCount] = useState(0);
   const [drawerStatus, setDrawerStatus] = useState<boolean>(false);
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<
+    Record<string, Record<string, TypeButtonPanel>>
+  >({});
 
   const classes = useStyles();
 
@@ -38,12 +43,33 @@ export function Appbar(): JSX.Element {
 
   const mapId = api.mapInstance(map)!.id;
 
-  /**
-   * function that causes rerender when adding a new panel
-   */
-  const updatePanelCount = useCallback(() => {
-    setPanelCount((count) => count + 1);
-  }, []);
+  const addButtonPanel = useCallback(
+    (payload) => {
+      setButtonPanelGroups({
+        ...buttonPanelGroups,
+        [payload.groupName]: {
+          ...buttonPanelGroups[payload.groupName],
+          [payload.id]: payload.buttonPanel,
+        },
+      });
+    },
+    [setButtonPanelGroups, buttonPanelGroups]
+  );
+
+  const removeButtonPanel = useCallback(
+    (payload) => {
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+
+        const group = state[payload.groupName];
+
+        delete group[payload.id];
+
+        return state;
+      });
+    },
+    [setButtonPanelGroups, buttonPanelGroups]
+  );
 
   /**
    * Open / Close drawer
@@ -91,101 +117,113 @@ export function Appbar(): JSX.Element {
       mapId
     );
 
-    // listen to new panel creation
-    api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, () => {
-      updatePanelCount();
-    });
-
-    // listen on panel removal
-    api.event.on(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, () => {
-      updatePanelCount();
-    });
-
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE);
-      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE);
-      api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE);
+      api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId);
     };
   }, []);
+
+  useEffect(() => {
+    // listen to new panel creation
+    api.event.on(
+      EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE,
+      (payload) => {
+        if (payload && payload.handlerName && payload.handlerName === mapId) {
+          addButtonPanel(payload);
+        }
+      },
+      mapId
+    );
+
+    // listen on panel removal
+    api.event.on(
+      EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE,
+      (payload) => {
+        if (payload && payload.handlerName && payload.handlerName === mapId) {
+          removeButtonPanel(payload);
+        }
+      },
+      mapId
+    );
+
+    return () => {
+      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, mapId);
+    };
+  }, [addButtonPanel, removeButtonPanel]);
 
   return (
     <div className={classes.appBar} ref={appBar}>
       <Drawer>
         <Divider />
         <div>
-          {Object.keys(api.map(mapId).appBarButtons.buttons).map(
-            (groupName: string) => {
-              // get button panels from group
-              const buttonPanels =
-                api.map(mapId).appBarButtons.buttons[groupName];
+          {Object.keys(buttonPanelGroups).map((groupName: string) => {
+            // get button panels from group
+            const buttonPanels = buttonPanelGroups[groupName];
 
-              // display the button panels in the list
-              return (
-                <List key={groupName}>
-                  {Object.keys(buttonPanels).map((buttonId) => {
-                    const buttonPanel = buttonPanels[buttonId];
+            // display the button panels in the list
+            return (
+              <List key={groupName}>
+                {Object.keys(buttonPanels).map((buttonId) => {
+                  const buttonPanel = buttonPanels[buttonId];
 
-                    return buttonPanel.button.visible ? (
-                      <Fragment key={buttonPanel.button.id}>
-                        <ListItem>
-                          <Button
-                            id={buttonPanel.button.id}
-                            variant="text"
-                            tooltip={buttonPanel.button.tooltip}
-                            tooltipPlacement="right"
-                            type="textWithIcon"
-                            onClick={() => {
-                              if (buttonPanel.panel?.status) {
-                                buttonPanel.panel?.close();
-                              } else {
-                                closeAllPanels();
+                  return buttonPanel?.button.visible ? (
+                    <Fragment key={buttonPanel.button.id}>
+                      <ListItem>
+                        <Button
+                          id={buttonPanel.button.id}
+                          variant="text"
+                          tooltip={buttonPanel.button.tooltip}
+                          tooltipPlacement="right"
+                          type="textWithIcon"
+                          onClick={() => {
+                            if (buttonPanel.panel?.status) {
+                              buttonPanel.panel?.close();
+                            } else {
+                              closeAllPanels();
 
-                                buttonPanel.panel?.open();
-                              }
-                              openClosePanel();
-                            }}
-                            icon={buttonPanel.button.icon}
-                            children={buttonPanel.button.tooltip}
-                            state={drawerStatus ? "expanded" : "collapsed"}
-                          />
-                        </ListItem>
-                        <Divider grow={true} />
-                        <Divider />
-                      </Fragment>
-                    ) : null;
-                  })}
-                </List>
-              );
-            }
-          )}
+                              buttonPanel.panel?.open();
+                            }
+                            openClosePanel();
+                          }}
+                          icon={buttonPanel.button.icon}
+                          children={buttonPanel.button.tooltip}
+                          state={drawerStatus ? "expanded" : "collapsed"}
+                        />
+                      </ListItem>
+                      <Divider grow={true} />
+                      <Divider />
+                    </Fragment>
+                  ) : null;
+                })}
+              </List>
+            );
+          })}
         </div>
         <Divider grow={true} />
         <Divider />
         <Version drawerStatus={drawerStatus} />
       </Drawer>
-      {Object.keys(api.map(mapId).appBarButtons.buttons).map(
-        (groupName: string) => {
-          // get button panels from group
-          const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
+      {Object.keys(buttonPanelGroups).map((groupName: string) => {
+        // get button panels from group
+        const buttonPanels = buttonPanelGroups[groupName];
 
-          // display the panels in the list
-          return (
-            <div key={groupName}>
-              {Object.keys(buttonPanels).map((buttonId) => {
-                const buttonPanel = buttonPanels[buttonId];
+        // display the panels in the list
+        return (
+          <div key={groupName}>
+            {Object.keys(buttonPanels).map((buttonId) => {
+              const buttonPanel = buttonPanels[buttonId];
 
-                return buttonPanel.panel ? (
-                  <Panel
-                    key={buttonPanel.button.id}
-                    panel={buttonPanel.panel}
-                    button={buttonPanel.button}
-                  />
-                ) : null;
-              })}
-            </div>
-          );
-        }
-      )}
+              return buttonPanel?.panel ? (
+                <Panel
+                  key={buttonPanel.button.id}
+                  panel={buttonPanel.panel}
+                  button={buttonPanel.button}
+                />
+              ) : null;
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, CSSProperties } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import { useMap } from "react-leaflet";
 
@@ -110,24 +110,28 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
   useEffect(() => {
     // on map keyboard focus, add crosshair
-    api.event.on(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, (payload) => {
-      if (payload && payload.handlerName.includes(id)) {
-        setCrosshairsActive(true);
-        isCrosshairsActiveValue.current = true;
-        api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
-          active: true,
-        });
+    api.event.on(
+      EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
+      (payload) => {
+        if (payload && payload.handlerName.includes(id)) {
+          setCrosshairsActive(true);
+          isCrosshairsActiveValue.current = true;
+          api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
+            active: true,
+          });
 
-        mapContainer.addEventListener("keydown", simulateClick);
-        panelButtonId.current = "detailsPanel";
-      }
-    });
+          mapContainer.addEventListener("keydown", simulateClick);
+          panelButtonId.current = "detailsPanel";
+        }
+      },
+      mapId
+    );
 
     // when map blur, remove the crosshair and click event
     mapContainer.addEventListener("blur", removeCrosshair);
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
+      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId);
       mapContainer.removeEventListener("keydown", simulateClick);
       mapContainer.removeEventListener("keydown", removeCrosshair);
     };

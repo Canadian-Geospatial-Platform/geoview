@@ -78,51 +78,59 @@ export class Layer {
     this.markerCluster = new MarkerCluster(map);
 
     // listen to outside events to add layers
-    api.event.on(EVENT_NAMES.EVENT_LAYER_ADD, (payload) => {
-      if (payload && payload.handlerName.includes(this.map.id)) {
-        const layerConf = payload.layer;
-        layerConf.id = generateId(layerConf.id);
-        if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
-          this.geoJSON
-            .add(layerConf)
-            .then((layer: leafletLayer | string) =>
-              this.addToMap(layerConf, layer)
-            );
-          this.removeTabindex();
-        } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
-          this.wms
-            .add(layerConf)
-            .then((layer: leafletLayer | string) =>
-              this.addToMap(layerConf, layer)
-            );
-        } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
-          this.xyzTiles
-            .add(layerConf)
-            .then((layer: leafletLayer | string) =>
-              this.addToMap(layerConf, layer)
-            );
-        } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-          this.esriDynamic
-            .add(layerConf)
-            .then((layer: leafletLayer | string) =>
-              this.addToMap(layerConf, layer)
-            );
-        } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
-          this.esriFeature
-            .add(layerConf)
-            .then((layer: leafletLayer | string) =>
-              this.addToMap(layerConf, layer)
-            );
-          this.removeTabindex();
+    api.event.on(
+      EVENT_NAMES.EVENT_LAYER_ADD,
+      (payload) => {
+        if (payload && payload.handlerName.includes(this.map.id)) {
+          const layerConf = payload.layer;
+          layerConf.id = generateId(layerConf.id);
+          if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
+            this.geoJSON
+              .add(layerConf)
+              .then((layer: leafletLayer | string) =>
+                this.addToMap(layerConf, layer)
+              );
+            this.removeTabindex();
+          } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
+            this.wms
+              .add(layerConf)
+              .then((layer: leafletLayer | string) =>
+                this.addToMap(layerConf, layer)
+              );
+          } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
+            this.xyzTiles
+              .add(layerConf)
+              .then((layer: leafletLayer | string) =>
+                this.addToMap(layerConf, layer)
+              );
+          } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
+            this.esriDynamic
+              .add(layerConf)
+              .then((layer: leafletLayer | string) =>
+                this.addToMap(layerConf, layer)
+              );
+          } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            this.esriFeature
+              .add(layerConf)
+              .then((layer: leafletLayer | string) =>
+                this.addToMap(layerConf, layer)
+              );
+            this.removeTabindex();
+          }
         }
-      }
-    });
+      },
+      this.map.id
+    );
 
     // listen to outside events to remove layers
-    api.event.on(EVENT_NAMES.EVENT_REMOVE_LAYER, (payload) => {
-      // remove layer from outside
-      this.removeLayerById(payload.id);
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_REMOVE_LAYER,
+      (payload) => {
+        // remove layer from outside
+        this.removeLayerById(payload.id);
+      },
+      this.map.id
+    );
 
     // Load layers that was passed in with the map config
     if (layers && layers.length > 0) {

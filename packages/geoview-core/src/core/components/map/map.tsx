@@ -17,7 +17,9 @@ import { OverviewMap } from "../overview-map/overview-map";
 import { Attribution } from "../attribution/attribution";
 import { Snackbar } from "../../../ui/snackbar/snackbar";
 import { Appbar } from "../appbar/app-bar";
+import { AppbarButtons } from "../appbar/app-bar-buttons";
 import { NavBar } from "../navbar/nav-bar";
+import { NavbarButtons } from "../navbar/nav-bar-buttons";
 import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
 import { ClickMarker } from "../click-marker/click-marker";
 
@@ -128,7 +130,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE);
+      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -179,7 +181,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
-          // load plugins once map has rendered
+          // load plugins once all maps has rendered
           api.plugin.loadPlugins(id, plugins);
         });
 

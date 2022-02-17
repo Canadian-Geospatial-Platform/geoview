@@ -81,7 +81,9 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function NavBar(): JSX.Element {
-  const [buttonCount, setButtonCount] = useState(0);
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<
+    Record<string, Record<string, TypeButtonPanel>>
+  >({});
 
   const classes = useStyles();
   const { t } = useTranslation<string>();
@@ -91,14 +93,36 @@ export function NavBar(): JSX.Element {
   const map = useMap();
 
   const mapId = api.mapInstance(map)!.id;
-  const navBarButtons = api.map(mapId).navBarButtons;
 
-  /**
-   * function that causes rerender when adding a new button, button panel
-   */
-  const updatePanelCount = useCallback(() => {
-    setButtonCount((count) => count + 1);
-  }, []);
+  const addButtonPanel = useCallback(
+    (payload) => {
+      const group = buttonPanelGroups[payload.groupName];
+
+      setButtonPanelGroups({
+        ...buttonPanelGroups,
+        [payload.groupName]: {
+          ...group,
+          [payload.id]: payload.buttonPanel,
+        },
+      });
+    },
+    [setButtonPanelGroups, buttonPanelGroups]
+  );
+
+  const removeButtonPanel = useCallback(
+    (payload) => {
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+
+        const group = state[payload.groupName];
+
+        delete group[payload.id];
+
+        return state;
+      });
+    },
+    [setButtonPanelGroups, buttonPanelGroups]
+  );
 
   /**
    * listen to events to open/close the panel and to create the buttons
@@ -110,40 +134,52 @@ export function NavBar(): JSX.Element {
     );
     DomEvent.disableClickPropagation(navBarChildrenHTMLElements[0]);
     DomEvent.disableScrollPropagation(navBarChildrenHTMLElements[0]);
+  }, []);
 
+  useEffect(() => {
     // listen to new navbar panel creation
-    api.event.on(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, () => {
-      updatePanelCount();
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
+      (payload) => {
+        if (payload && payload.handlerName && payload.handlerName === mapId) {
+          addButtonPanel(payload);
+        }
+      },
+      mapId
+    );
 
     // listen to new navbar panel removal
-    api.event.on(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, () => {
-      updatePanelCount();
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
+      (payload) => {
+        if (payload && payload.handlerName && payload.handlerName === mapId) {
+          removeButtonPanel(payload);
+        }
+      },
+      mapId
+    );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE);
-      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE);
+      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
     };
-  }, []);
+  }, [addButtonPanel, removeButtonPanel]);
 
   /**
    * Close all open panels
    */
   const closeAllPanels = (): void => {
-    Object.keys(api.map(mapId).navBarButtons.buttons).map(
-      (groupName: string) => {
-        // get button panels from group
-        const buttonPanels = api.map(mapId).navBarButtons.buttons[groupName];
+    Object.keys(buttonPanelGroups).map((groupName: string) => {
+      // get button panels from group
+      const buttonPanels = buttonPanelGroups[groupName];
 
-        // get all button panels in each group
-        Object.keys(buttonPanels).map((buttonId) => {
-          const buttonPanel = buttonPanels[buttonId];
+      // get all button panels in each group
+      Object.keys(buttonPanels).map((buttonId) => {
+        const buttonPanel = buttonPanels[buttonId];
 
-          buttonPanel.panel?.close();
-        });
-      }
-    );
+        buttonPanel.panel?.close();
+      });
+    });
   };
 
   return (
@@ -151,8 +187,8 @@ export function NavBar(): JSX.Element {
       ref={navBarRef}
       className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}
     >
-      {Object.keys(navBarButtons.buttons).map((groupName) => {
-        const buttons = navBarButtons.buttons[groupName];
+      {Object.keys(buttonPanelGroups).map((groupName) => {
+        const buttons = buttonPanelGroups[groupName];
 
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
@@ -172,8 +208,8 @@ export function NavBar(): JSX.Element {
         }
       })}
       <div className={classes.navBtnGroupContainer}>
-        {Object.keys(navBarButtons.buttons).map((groupName) => {
-          const buttons = navBarButtons.buttons[groupName];
+        {Object.keys(buttonPanelGroups).map((groupName) => {
+          const buttons = buttonPanelGroups[groupName];
 
           // if not an empty object, only then render any HTML
           if (Object.keys(buttons).length !== 0) {

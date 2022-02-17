@@ -118,9 +118,9 @@
             <p>This map is in LCC projection with an English interface.</p>
             <p><strong>Configuraion Snippet:</strong></p>
             <div id="mapWMCS" class="panel"></div>
-            <p><strong>Code Snippet:</strong></p>
-            <div id="codeSnippet" class="panel"></div>
         </div>
+        <p><strong>Code Snippet:</strong></p>
+        <div id="codeSnippet" class="panel"></div>
         <script src="codedoc.js"></script>
         <script>
             // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
@@ -135,7 +135,7 @@
 
                 // add event handler to the load details panel button
                 loadDetailsPanelBtn.addEventListener('click', function (e) {
-                    cgpv.api.addPlugin('detailsPanel', window.plugins['detailsPanel'], {
+                    cgpv.api.addPlugin('detailsPanel', 'mapWM', window.plugins['detailsPanel'], {
                         mapId: 'mapWM',
                     });
                 });
@@ -153,7 +153,7 @@
 
                 // add event handler to the load overview map button
                 loadOverviewMapBtn.addEventListener('click', function (e) {
-                    cgpv.api.addPlugin('overviewMap', window.plugins['overviewMap'], {
+                    cgpv.api.addPlugin('overviewMap', 'mapWM', window.plugins['overviewMap'], {
                         mapId: 'mapWM',
                     });
                 });
@@ -171,7 +171,7 @@
 
                 // add event handler to the load basemap switcher button
                 loadBasemapSwitcherBtn.addEventListener('click', function (e) {
-                    cgpv.api.addPlugin('basemapSwitcher', window.plugins['basemapSwitcher'], {
+                    cgpv.api.addPlugin('basemapSwitcher', 'mapWM', window.plugins['basemapSwitcher'], {
                         mapId: 'mapWM',
                     });
                 });
@@ -181,7 +181,7 @@
 
                 // add event handler to the unload basemap switcher button
                 unloadBasemapSwitcherBtn.addEventListener('click', function (e) {
-                    cgpv.api.removePlugin('basemapSwitcher');
+                    cgpv.api.removePlugin('basemapSwitcher', 'mapWM');
                 });
             });
         </script>

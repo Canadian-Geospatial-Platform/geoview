@@ -103,8 +103,11 @@ export class NavbarButtons {
       this.buttons[groupName][buttonProps.id] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, null, {
+      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, {
+        handlerId: this.mapId,
         buttonPanel,
+        id: buttonProps.id,
+        groupName,
       });
 
       return buttonPanel;
@@ -181,7 +184,11 @@ export class NavbarButtons {
       const group = this.buttons[groupName];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, null, {});
+      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, {
+        handlerId: this.mapId,
+        id,
+        groupName,
+      });
 
       // delete the button or panel from the group
       delete group[id];
