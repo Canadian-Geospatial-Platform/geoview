@@ -34,6 +34,10 @@
     {
       "packageName": "geoview-basemap-switcher",
       "projectFolder": "packages/geoview-basemap-switcher"
+    },
+    {
+      "packageName": "geoview-layers-panel",
+      "projectFolder": "packages/geoview-layers-panel"
     }
   ]
 }
