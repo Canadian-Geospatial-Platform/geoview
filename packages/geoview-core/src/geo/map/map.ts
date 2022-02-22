@@ -3,6 +3,8 @@ import { i18n } from "i18next";
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import L from 'leaflet';
 
+import { valueToPercent } from "../../../../../common/temp/node_modules/.pnpm/@mui+base@5.0.0-alpha.68_b8fdba992ce7d797017dc07106486496/node_modules/@mui/base";
+
 import { LatLng, LatLngBounds } from "leaflet";
 
 import queryString from "query-string";
@@ -15,7 +17,10 @@ import { MapProjection } from "../projection/map-projection";
 import "../../core/types/cgp-leaflet-config";
 
 import { api } from "../../api/api";
-import { TypeMapConfigProps } from "../../core/types/cgpv-types";
+import {
+  TypeMapConfigProps,
+  TypeLayerConfig,
+} from "../../core/types/cgpv-types";
 
 import { generateId } from "../../core/utils/utilities";
 
@@ -223,4 +228,6 @@ export class MapViewer {
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
   };
+
+  changeLanguage = (language: string, layers?: TypeLayerConfig[]): void => {};
 }
