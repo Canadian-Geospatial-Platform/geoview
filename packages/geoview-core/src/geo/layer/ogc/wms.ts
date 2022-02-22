@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 import axios from "axios";
 
-import L, { LeafletMouseEvent, Layer } from "leaflet";
+import L, { LeafletMouseEvent, Layer, version } from "leaflet";
 
 import { mapService } from "esri-leaflet";
 
@@ -18,6 +18,7 @@ import {
 } from "../../../core/types/cgpv-types";
 
 import { api } from "../../../api/api";
+import { valueToPercent } from "../../../../../../common/temp/node_modules/.pnpm/@mui+base@5.0.0-alpha.68_b8fdba992ce7d797017dc07106486496/node_modules/@mui/base";
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -31,6 +32,7 @@ export class WMS {
   // TODO: try to avoid getCapabilities for WMS. Use Web Presence metadata return info to store, legend image link, layer name, and other needed properties.
   // ! This will maybe not happen because geoCore may not everything we need. We may have to use getCap
   // * We may have to do getCapabilites if we want to add layers not in the catalog
+  // map config properties
   /**
    * Add a WMS layer to the map.
    *
@@ -44,35 +46,33 @@ export class WMS {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
     if (layer.url.indexOf("?") === -1) {
-      url += `?service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
+      url += "?";
     }
+    let capUrl =
+      url +
+      `service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
+    let legendUrl =
+      url +
+      "service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=";
 
-    const data = getXMLHttpRequest(url);
+    const data = getXMLHttpRequest(capUrl);
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
         if (value !== "{}") {
           // check if entries exist
-          let isValid = false;
+          let isValid = true;
+          var boolArray: boolean[] = [true];
 
           // parse the xml string and convert to json
           const json = new WMSCapabilities(
             value
           ).toJSON() as TypeJSONObjectLoop;
 
-          // validate the entries
-          if (!json.Capability.Layer.Layer) {
-            isValid = this.validateEntries(
-              json.Capability.Layer,
-              layer.entries as string
-            );
-          } else {
-            Cast<TypeJSONObjectLoop[]>(json.Capability.Layer.Layer).forEach(
-              (item: TypeJSONObjectLoop) => {
-                isValid = this.validateEntries(item, layer.entries as string);
-              }
-            );
-          }
+          isValid = this.validateEntries(
+            json.Capability.Layer,
+            layer.entries as string
+          );
 
           if (isValid) {
             const wms = L.tileLayer.wms(layer.url, {
@@ -86,7 +86,7 @@ export class WMS {
               // add an array of the WMS layer ids / entries
               entries: {
                 value: layer.entries?.split(",").map((item: string) => {
-                  return item;
+                  return item.trim();
                 }),
               },
               mapService: {
@@ -161,6 +161,31 @@ export class WMS {
                   );
                 },
               },
+              getCapabilities: {
+                /**
+                 * Get capabilities of the current WMS service
+                 *
+                 * @returns {object} WMS capabilities in json format
+                 */
+                value: function _getCapabilities(): TypeJSONObjectLoop {
+                  return json;
+                },
+              },
+              getLegendGraphic: {
+                /**
+                 * Get the legend image of a layer
+                 *
+                 * @param {layerName} string the name of the layer to get the legend image for
+                 * @returns {blob} image blob
+                 */
+                value: function _getLegendGraphic(layerName: string): any {
+                  return axios
+                    .get(legendUrl + layerName, { responseType: "blob" })
+                    .then((response) => {
+                      return response.data;
+                    });
+                },
+              },
             });
 
             resolve(wms);
@@ -175,22 +200,40 @@ export class WMS {
 
     return new Promise((resolve) => resolve(geo));
   }
-
   /**
    * Check if the entries we try to create a layer exist in the getCapabilities layer object
-   * @param {object} layer layer WMS object to crawl
-   * @param {string} name name to check
+   * @param {object} layer layer of capability of a WMS object
+   * @param {string} entries names(comma delimited) to check
    * @returns {boolean} entry is valid
    */
-  private validateEntries(layer: TypeJSONObjectLoop, name: string): boolean {
-    let isValid = false;
+  private validateEntries(layer: TypeJSONObjectLoop, entries: string): boolean {
+    let isValid = true;
     // eslint-disable-next-line no-prototype-builtins
-    if (typeof layer === "object" && layer.hasOwnProperty("Layer")) {
-      isValid = this.validateEntries(layer.Layer[0], name);
-    } else if (name === Cast<string>(layer.Name)) {
-      // TODO: modify for multiple entries
-      isValid = true;
+
+    //Added support of multiple entries
+    let allNames = this.findAllByKey(layer, "Name");
+    const entryArray = entries.split(",").map((s) => s.trim());
+    for (let i = 0; i < entryArray.length; i++) {
+      isValid = isValid && allNames.includes(entryArray[i]);
     }
+
     return isValid;
+  }
+  /**
+   * Helper function. Find all values of a given key form a nested object
+   * @param {object} obj a object/nested object
+   * @param {string} keyToFind key to check
+   * @returns {any} all values found
+   */
+  private findAllByKey(obj: object, keyToFind: string): any {
+    return Object.entries(obj).reduce(
+      (acc, [key, v]) =>
+        key === keyToFind
+          ? acc.concat(v)
+          : typeof v === "object"
+          ? acc.concat(this.findAllByKey(v, keyToFind))
+          : acc,
+      []
+    );
   }
 }

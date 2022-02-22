@@ -1,3 +1,5 @@
+import axios from "axios";
+
 import { Layer } from "leaflet";
 
 import { dynamicMapLayer, mapService } from "esri-leaflet";
@@ -51,6 +53,35 @@ export class EsriDynamic {
               value: mapService({
                 url: api.geoUtilities.getMapServerUrl(layer.url),
               }),
+            },
+            getMeta: {
+              value: function _getLegendJson() {
+                return feat.metadata(function (error, metadata) {
+                  return metadata;
+                });
+              },
+            },
+
+            getLegendJson: {
+              value: function _getLegendJson() {
+                let queryUrl =
+                  layer.url.substr(-1) === "/" ? layer.url : layer.url + "/";
+                queryUrl += "legend?f=pjson";
+
+                return axios.get(queryUrl).then((res) => {
+                  let data = res.data;
+                  let entryArray = feat.getLayers();
+
+                  if (entryArray.length > 0) {
+                    let result = data.layers.filter((item: any) => {
+                      return entryArray.includes(item.layerId);
+                    });
+                    return result;
+                  } else {
+                    return data.layers;
+                  }
+                });
+              },
             },
           });
 
