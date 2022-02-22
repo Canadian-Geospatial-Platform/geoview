@@ -8,18 +8,18 @@ import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
  */
 export const LayersPanel: TypeButtonPanelProps = {
   button: {
-    id: "layer-panel",
-    tooltip: "appbar.layers",
+    id: "default-panel",
+    tooltip: "Default",
     tooltipPlacement: "right",
     icon: <HelpIcon />,
     type: "textWithIcon",
   },
   panel: {
-    title: "appbar.layers",
+    title: "Default",
     icon: HelpIcon,
     content: (
       <Typography variant="body2" color="textSecondary" component="p">
-        This is a place holder panel for the panel components
+        This is a placeholder panel for the panel components
       </Typography>
     ),
     width: 300,
