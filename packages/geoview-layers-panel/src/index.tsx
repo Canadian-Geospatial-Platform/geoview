@@ -61,7 +61,6 @@ class LayersPanelPlugin {
       tooltip: this.translations[language].layersPanel,
       tooltipPlacement: "right",
       icon: '<i class="material-icons">layers</i>',
-
       type: "textWithIcon",
     };
 
