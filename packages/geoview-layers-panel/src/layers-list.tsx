@@ -43,26 +43,14 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       display: "flex",
       alignItems: "center",
       width: "100%",
-    },
-    layerFeatureCount: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      width: "32px",
-      minWidth: "32px",
       height: "32px",
-      boxShadow:
-        "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
-      marginRight: "10px",
-      color: "black",
-      fontSize: "16px",
-      fontWeight: "bold",
     },
     layerItemText: {
       fontSize: "14px",
       whiteSpace: "nowrap",
       textOverflow: "ellipsis",
       overflow: "hidden",
+      marginLeft: "10px",
     },
   }));
 
@@ -101,7 +89,6 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                       disabled={layerData.length === 0}
                     >
                       <div className={classes.layerCountTextContainer}>
-                        <span className={classes.layerFeatureCount}>0</span>
                         <div
                           className={classes.layerItemText}
                           title={layer.name}
