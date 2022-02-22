@@ -195,10 +195,11 @@ export class Layer {
       layer.addTo(this.map);
 
       const id = payload.id || generateId("");
+      Object.defineProperties(layer, { id: { value: id } });
       this.layers.push({
         id,
         type: payload.type,
-        layer: Object.defineProperties(layer, { id: { value: id } }),
+        layer: layer,
       } as TypeLayerData);
     }
   }
