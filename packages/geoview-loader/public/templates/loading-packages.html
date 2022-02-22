@@ -195,7 +195,7 @@
 
                 // add event handler to the load basemap switcher button
                 loadLayersPanelBtn.addEventListener('click', function (e) {
-                    cgpv.api.addPlugin('layersPanel', window.plugins['layersPanel'], {
+                    cgpv.api.addPlugin('layersPanel', 'mapWM', window.plugins['layersPanel'], {
                         mapId: 'mapWM',
                     });
                 });
