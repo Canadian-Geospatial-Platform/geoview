@@ -2,6 +2,8 @@ import { TypePanelContentProps } from "geoview-core";
 import LayersList from "./layers-list";
 import getLayers from "./get-layers";
 
+const w = window as any;
+
 /**
  * A react component that displays the details panel content
  *
@@ -11,7 +13,6 @@ import getLayers from "./get-layers";
 const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { mapId } = props;
 
-  const w = window as any;
   const cgpv = w["cgpv"];
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;

@@ -1,25 +1,19 @@
 /* eslint-disable react/no-array-index-key */
 import { TypeLayersListProps } from "geoview-core";
 
-// get the window object
 const w = window as any;
 
 /**
  * A react component that will list the map server layers defined in the map config
- *
  * @param {TypeLayersListProps} props properties passed to the component
  * @returns a React JSX Element containing map server layers
  */
 const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { layersData } = props;
 
-  // access the cgpv object from the window object
   const cgpv = w["cgpv"];
-
-  // access the api calls
   const { ui } = cgpv;
 
-  // use material ui theming
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
       overflow: "hidden",
@@ -76,70 +70,53 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
 
   return (
     <div className={classes.layersContainer}>
-      {
-        // loop through each map server layer
-        Object.keys(layersData).map((dataKey) => {
-          const data = layersData[dataKey];
-          return (
-            <div key={data.id}>
-              {
-                // loop through each layer in the map server
-                Object.keys(data.layers).map(
-                  (layerKey: string, index: number) => {
-                    const { layer, layerData, groupLayer } =
-                      data.layers[layerKey];
-                    return (
-                      <div
-                        key={index}
-                        tabIndex={layerData.length > 0 && !groupLayer ? 0 : -1}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            if (!groupLayer) {
-                              e.preventDefault();
-                            }
-                          }
-                        }}
-                        role="button"
-                      >
-                        {
-                          // if the map server is a group layer then display its title as a header of it's sub layers
-                          groupLayer ? (
-                            <div
-                              className={classes.layerParentText}
-                              title={layer.name}
-                            >
-                              {layer.name}
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              className={classes.layerItem}
-                              disabled={layerData.length === 0}
-                            >
-                              <div className={classes.layerCountTextContainer}>
-                                <span className={classes.layerFeatureCount}>
-                                  0
-                                </span>
-                                <div
-                                  className={classes.layerItemText}
-                                  title={layer.name}
-                                >
-                                  {layer.name}
-                                </div>
-                              </div>
-                            </button>
-                          )
-                        }
+      {Object.keys(layersData).map((dataKey) => {
+        const data = layersData[dataKey];
+        return (
+          <div key={data.id}>
+            {Object.keys(data.layers).map((layerKey: string, index: number) => {
+              const { layer, layerData, groupLayer } = data.layers[layerKey];
+              return (
+                <div
+                  key={index}
+                  tabIndex={layerData.length > 0 && !groupLayer ? 0 : -1}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (!groupLayer) {
+                        e.preventDefault();
+                      }
+                    }
+                  }}
+                  role="button"
+                >
+                  {groupLayer ? (
+                    <div className={classes.layerParentText} title={layer.name}>
+                      {layer.name}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      className={classes.layerItem}
+                      disabled={layerData.length === 0}
+                    >
+                      <div className={classes.layerCountTextContainer}>
+                        <span className={classes.layerFeatureCount}>0</span>
+                        <div
+                          className={classes.layerItemText}
+                          title={layer.name}
+                        >
+                          {layer.name}
+                        </div>
                       </div>
-                    );
-                  }
-                )
-              }
-            </div>
-          );
-        })
-      }
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 };
