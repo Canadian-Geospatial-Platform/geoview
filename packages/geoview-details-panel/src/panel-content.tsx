@@ -580,7 +580,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
     return () => {
       mapInstance.off("click");
-      api.event.off(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER);
+      api.event.off(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId);
     };
   }, [handleOpenDetailsPanel, mapId, mapInstance]);
 

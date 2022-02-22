@@ -87,7 +87,10 @@ export class AppbarButtons {
       this.buttons[groupName][buttonProps.id] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, null, {
+      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, this.mapId, {
+        handlerId: this.mapId,
+        groupName,
+        id: buttonProps.id,
         buttonPanel,
       });
 
@@ -136,7 +139,11 @@ export class AppbarButtons {
       delete group[id];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, null, {});
+      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, this.mapId, {
+        handlerId: this.mapId,
+        id,
+        groupName,
+      });
     });
   };
 }

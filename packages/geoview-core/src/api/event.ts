@@ -17,6 +17,11 @@ export const EVENT_NAMES = {
   EVENT_MAP_MOVE_END: "map/moveend",
 
   /**
+   * Event triggered when a user stops zooming the map
+   */
+  EVENT_MAP_ZOOM_END: "map/zoomend",
+
+  /**
    * Event triggered when a user wants to add a component
    */
   EVENT_MAP_ADD_COMPONENT: "map/add_component",
@@ -236,7 +241,11 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.on(eventName, listen);
+    this.eventEmitter.on(
+      eventName +
+        (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
+      listen
+    );
   };
 
   /**
@@ -271,7 +280,11 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.once(eventName, listen);
+    this.eventEmitter.once(
+      eventName +
+        (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
+      listen
+    );
   };
 
   /**
@@ -311,9 +324,13 @@ export class Event {
    * Will remove the specified @listener from @eventname list
    *
    * @param {string} eventName the event name of the event to be removed
+   * @param {string} handlerName the name of the handler an event needs to be removed from
    */
-  off = (eventName: string): void => {
-    this.eventEmitter.off(eventName);
+  off = (eventName: string, handlerName?: string): void => {
+    this.eventEmitter.off(
+      eventName +
+        (handlerName && handlerName.length > 0 ? `/${handlerName}` : "")
+    );
   };
 
   /**
@@ -350,7 +367,11 @@ export class Event {
       ...payload,
     };
 
-    this.eventEmitter.emit(event, { ...payload, handlerName }, handlerName);
+    this.eventEmitter.emit(
+      event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
+      { ...payload, handlerName },
+      handlerName
+    );
   };
 
   /**

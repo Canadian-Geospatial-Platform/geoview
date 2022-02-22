@@ -81,9 +81,32 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // get a map reference from the moveend event
     const map: L.Map = event.target;
 
+    const position = map.getCenter();
+
+    api.map(id).currentPosition = position;
+
     // emit the moveend event to the api
-    api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || "", {
-      position: map.getCenter(),
+    api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id, {
+      position: position,
+    });
+  }
+
+  /**
+   * Get the zoom level of the map when zoom in / out has ended
+   * then emit it as an api event
+   * @param event Zoom end event container a reference to the map
+   */
+  function mapZoomEnd(event: L.LeafletEvent): void {
+    // get a map reference from the zoomend event
+    const map: L.Map = event.target;
+
+    const zoom = map.getZoom();
+
+    api.map(id).currentZoom = zoom;
+
+    // emit the moveend event to the api
+    api.event.emit(EVENT_NAMES.EVENT_MAP_ZOOM_END, id, {
+      zoom: zoom,
     });
   }
 
@@ -128,7 +151,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE);
+      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -164,6 +187,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         // listen to map move end events
         cgpMap.on("moveend", mapMoveEnd);
 
+        // listen to map zoom end events
+        cgpMap.on("zoomend", mapZoomEnd);
+
         // initialize the map viewer and load plugins
         viewer.initMap(cgpMap);
 
@@ -179,7 +205,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
-          // load plugins once map has rendered
+          // load plugins once all maps has rendered
           api.plugin.loadPlugins(id, plugins);
         });
 

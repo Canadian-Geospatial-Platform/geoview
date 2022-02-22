@@ -3,12 +3,11 @@ import { i18n } from "i18next";
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import L from 'leaflet';
 
-import { LatLngBounds } from "leaflet";
+import { LatLng, LatLngBounds } from "leaflet";
 
 import queryString from "query-string";
 import screenfull from "screenfull";
 
-import { Vector } from "../layer/vector/vector";
 import { Basemap } from "../layer/basemap/basemap";
 import { Layer } from "../layer/layer";
 import { MapProjection } from "../projection/map-projection";
@@ -16,11 +15,7 @@ import { MapProjection } from "../projection/map-projection";
 import "../../core/types/cgp-leaflet-config";
 
 import { api } from "../../api/api";
-import {
-  Cast,
-  TypeWindow,
-  TypeMapConfigProps,
-} from "../../core/types/cgpv-types";
+import { TypeMapConfigProps } from "../../core/types/cgpv-types";
 
 import { generateId } from "../../core/utils/utilities";
 
@@ -82,6 +77,12 @@ export class MapViewer {
   // get used projection
   currentProjection: number;
 
+  // store current zoom level
+  currentZoom: number;
+
+  // store current position
+  currentPosition: LatLng;
+
   // access projection functions for this map instance
   projection!: MapProjection;
 
@@ -104,6 +105,8 @@ export class MapViewer {
     this.language = mapProps.language;
     this.currentProjection = mapProps.projection;
     this.i18nInstance = i18n;
+    this.currentZoom = mapProps.zoom;
+    this.currentPosition = new LatLng(mapProps.center[0], mapProps.center[1]);
   }
 
   /**
@@ -120,9 +123,6 @@ export class MapViewer {
 
     // initialize the projection
     this.projection = new MapProjection(this.mapProps.projection);
-
-    this.appBarButtons = new AppbarButtons(this.id);
-    this.navBarButtons = new NavbarButtons(this.id);
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -214,5 +214,13 @@ export class MapViewer {
       // toogle fullscreen
       screenfull.toggle(element);
     }
+  };
+
+  /**
+   * Function called when the map has been rendered and ready to be customized
+   */
+  mapReady = (): void => {
+    this.appBarButtons = new AppbarButtons(this.id);
+    this.navBarButtons = new NavbarButtons(this.id);
   };
 }

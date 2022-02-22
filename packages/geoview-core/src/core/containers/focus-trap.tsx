@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@mui/material/styles";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 
@@ -48,7 +48,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down('md'));
+  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down("md"));
 
   const [open, setOpen] = useState(false);
 
@@ -133,30 +133,34 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       ?.addEventListener("keydown", manageBottomLink);
 
     // on map keyboard focus, show focus trap dialog
-    api.event.on(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, (payload) => {
-      if (payload && payload.handlerName.includes(id)) {
-        // when mnap element get focus and focus is not trap, show dialog window
-        const mapElement = document.getElementById(id);
+    api.event.on(
+      EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
+      (payload) => {
+        if (payload && payload.handlerName.includes(id)) {
+          // when mnap element get focus and focus is not trap, show dialog window
+          const mapElement = document.getElementById(id);
 
-        if (mapElement && !mapElement.classList.contains("map-focus-trap")) {
-          setOpen(true);
+          if (mapElement && !mapElement.classList.contains("map-focus-trap")) {
+            setOpen(true);
 
-          // if user move the mouse over the map, cancel the dialog
-          mapElement.addEventListener(
-            "mousemove",
-            () => {
-              setOpen(false);
-              exitFocus();
-            },
-            { once: true }
-          );
+            // if user move the mouse over the map, cancel the dialog
+            mapElement.addEventListener(
+              "mousemove",
+              () => {
+                setOpen(false);
+                exitFocus();
+              },
+              { once: true }
+            );
+          }
         }
-      }
-    });
+      },
+      id
+    );
 
     return () => {
       document.removeEventListener("keydown", manageBottomLink);
-      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS);
+      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

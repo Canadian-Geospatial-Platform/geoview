@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import FocusTrap from "focus-trap-react";
 
@@ -81,12 +81,16 @@ export function Shell(props: ShellProps): JSX.Element {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    api.event.on(EVENT_NAMES.EVENT_MAP_LOADED, (payload) => {
-      if (payload && payload.handlerName.includes(id)) {
-        // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
-        setIsLoaded(true);
-      }
-    });
+    api.event.on(
+      EVENT_NAMES.EVENT_MAP_LOADED,
+      (payload) => {
+        if (payload && payload.handlerName.includes(id)) {
+          // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
+          setIsLoaded(true);
+        }
+      },
+      id
+    );
   }, []);
 
   return (
