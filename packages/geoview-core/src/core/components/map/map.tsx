@@ -17,9 +17,7 @@ import { OverviewMap } from "../overview-map/overview-map";
 import { Attribution } from "../attribution/attribution";
 import { Snackbar } from "../../../ui/snackbar/snackbar";
 import { Appbar } from "../appbar/app-bar";
-import { AppbarButtons } from "../appbar/app-bar-buttons";
 import { NavBar } from "../navbar/nav-bar";
-import { NavbarButtons } from "../navbar/nav-bar-buttons";
 import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
 import { ClickMarker } from "../click-marker/click-marker";
 
@@ -83,9 +81,32 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // get a map reference from the moveend event
     const map: L.Map = event.target;
 
+    const position = map.getCenter();
+
+    api.map(id).currentPosition = position;
+
     // emit the moveend event to the api
-    api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || "", {
-      position: map.getCenter(),
+    api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id, {
+      position: position,
+    });
+  }
+
+  /**
+   * Get the zoom level of the map when zoom in / out has ended
+   * then emit it as an api event
+   * @param event Zoom end event container a reference to the map
+   */
+  function mapZoomEnd(event: L.LeafletEvent): void {
+    // get a map reference from the zoomend event
+    const map: L.Map = event.target;
+
+    const zoom = map.getZoom();
+
+    api.map(id).currentZoom = zoom;
+
+    // emit the moveend event to the api
+    api.event.emit(EVENT_NAMES.EVENT_MAP_ZOOM_END, id, {
+      zoom: zoom,
     });
   }
 
@@ -130,7 +151,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -165,6 +186,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // listen to map move end events
         cgpMap.on("moveend", mapMoveEnd);
+
+        // listen to map zoom end events
+        cgpMap.on("zoomend", mapZoomEnd);
 
         // initialize the map viewer and load plugins
         viewer.initMap(cgpMap);

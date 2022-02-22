@@ -6,7 +6,7 @@ export {
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
   Home as HomeIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  Close as CloseIcon
+  Add as ZoomInIcon,
+  Remove as ZoomOutIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";

@@ -17,6 +17,11 @@ export const EVENT_NAMES = {
   EVENT_MAP_MOVE_END: "map/moveend",
 
   /**
+   * Event triggered when a user stops zooming the map
+   */
+  EVENT_MAP_ZOOM_END: "map/zoomend",
+
+  /**
    * Event triggered when a user wants to add a component
    */
   EVENT_MAP_ADD_COMPONENT: "map/add_component",
