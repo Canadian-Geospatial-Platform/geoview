@@ -1,3 +1,8 @@
 # geoview-basemap-switcher
 
-A plugin that adds a new panel that allows the user to switch basemaps
+A plugin that displays all layers used on the map.
+
+Future functionality:
+
+- Add / Remove layers
+- Toggle layer/group visibility/transparency
