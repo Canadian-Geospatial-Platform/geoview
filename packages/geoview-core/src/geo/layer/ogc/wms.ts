@@ -18,7 +18,6 @@ import {
 } from "../../../core/types/cgpv-types";
 
 import { api } from "../../../api/api";
-import { valueToPercent } from "../../../../../../common/temp/node_modules/.pnpm/@mui+base@5.0.0-alpha.68_b8fdba992ce7d797017dc07106486496/node_modules/@mui/base";
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
