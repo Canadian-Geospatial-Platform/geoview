@@ -298,15 +298,15 @@ export type TypeProps<T = string & unknown> = Record<string, T>;
  * interface for the layers list properties
  */
 export type TypeLayersListProps = {
-  clickPos: L.LatLng | undefined;
-  getSymbol: (
+  clickPos?: L.LatLng | undefined;
+  getSymbol?: (
     renderer: TypeRendererSymbol,
     attributes: TypeJSONObject
   ) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
-  mapId: string;
-  selectFeature: (featureData: TypeJSONObject) => void;
-  selectLayer: (layerData?: TypeLayersEntry) => void;
+  mapId?: string;
+  selectFeature?: (featureData: TypeJSONObject) => void;
+  selectLayer?: (layerData?: TypeLayersEntry) => void;
 };
 
 /**

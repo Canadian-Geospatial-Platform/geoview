@@ -55,7 +55,8 @@
         "geoview-core": "workspace:~0.1.0",
         "geoview-details-panel": "workspace:~1.0.0",
         "geoview-overview-map": "workspace:*",
-        "geoview-basemap-switcher": "workspace:*"
+        "geoview-basemap-switcher": "workspace:*",
+        "geoview-layers-panel": "workspace:*"
     },
     "devDependencies": {
         "@babel/cli": "^7.17.0",

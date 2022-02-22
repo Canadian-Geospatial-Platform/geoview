@@ -2,7 +2,7 @@ import { api } from "../../../api/api";
 
 import { EVENT_NAMES } from "../../../api/event";
 
-import { ButtonApi, PanelApi, LayersPanel } from "../../../ui";
+import { ButtonApi, PanelApi } from "../../../ui";
 
 import {
   TypeButtonPanel,
@@ -34,33 +34,7 @@ export class AppbarButtons {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-
-    this.panel = new PanelApi(
-      LayersPanel.panel,
-      LayersPanel.button.id!,
-      this.mapId
-    );
-
-    this.createDefaultButtonPanels();
   }
-
-  /**
-   * Function used to create default buttons, button panels
-   */
-  private createDefaultButtonPanels = () => {
-    // create default group for appbar button panels
-    this.buttons.default = {};
-
-    // TODO: do not keep, just proof of concept
-    this.createAppbarPanel(
-      {
-        ...LayersPanel.button,
-        tooltip: api.map(this.mapId).i18nInstance.t("appbar.layers"),
-      },
-      LayersPanel.panel,
-      "default"
-    );
-  };
 
   /**
    * Create a group for the appbar buttons

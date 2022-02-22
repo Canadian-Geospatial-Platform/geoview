@@ -69,6 +69,8 @@
         <script src="geoview-overview-map.js"></script>
 
         <script src="geoview-basemap-switcher.js"></script>
+
+        <script src="geoview-layers-panel.js"></script>
     </head>
     <body>
         <div class="header-table">
@@ -103,6 +105,10 @@
         <div class="toolbar">
             <button id="load-basemap-switcher-btn">Load Basemap Switcher</button>
             <button id="unload-basemap-switcher-btn">Unload Basemap Switcher</button>
+        </div>
+        <div class="toolbar">
+            <button id="load-layers-panel-btn">Load Layers Panel</button>
+            <button id="unload-layers-panel-btn">Unload Layers Panel</button>
         </div>
         <div>
             <div
@@ -182,6 +188,24 @@
                 // add event handler to the unload basemap switcher button
                 unloadBasemapSwitcherBtn.addEventListener('click', function (e) {
                     cgpv.api.removePlugin('basemapSwitcher');
+                });
+
+                // get load basemap switcher button element
+                var loadLayersPanelBtn = document.getElementById('load-layers-panel-btn');
+
+                // add event handler to the load basemap switcher button
+                loadLayersPanelBtn.addEventListener('click', function (e) {
+                    cgpv.api.addPlugin('layersPanel', window.plugins['layersPanel'], {
+                        mapId: 'mapWM',
+                    });
+                });
+
+                // get unload basemap switcher button element
+                var unloadLayersPanelBtn = document.getElementById('unload-layers-panel-btn');
+
+                // add event handler to the unload basemap switcher button
+                unloadLayersPanelBtn.addEventListener('click', function (e) {
+                    cgpv.api.removePlugin('layersPanel');
                 });
             });
         </script>
