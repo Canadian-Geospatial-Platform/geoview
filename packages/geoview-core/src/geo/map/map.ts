@@ -3,8 +3,6 @@ import { i18n } from "i18next";
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import L from 'leaflet';
 
-import { valueToPercent } from "../../../../../common/temp/node_modules/.pnpm/@mui+base@5.0.0-alpha.68_b8fdba992ce7d797017dc07106486496/node_modules/@mui/base";
-
 import { LatLng, LatLngBounds } from "leaflet";
 
 import queryString from "query-string";
