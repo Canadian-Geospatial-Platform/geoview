@@ -60,7 +60,7 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
     // delete the map instance from the maps array
     delete api.maps[payload.handlerId];
 
-    // re-render map with updated config
+    // re-render map with updated config keeping previous values if unchanged
     ReactDOM.render(<AppStart configObj={payload.config} />, map);
   }
 });
