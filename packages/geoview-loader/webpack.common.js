@@ -32,6 +32,7 @@ const config = {
         'geoview-details-panel': 'geoview-details-panel',
         'geoview-overview-map': 'geoview-overview-map',
         'geoview-basemap-switcher': 'geoview-basemap-switcher',
+        'geoview-layers-panel': 'geoview-layers-panel',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

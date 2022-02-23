@@ -55,7 +55,7 @@ export class AppbarButtons {
     this.createAppbarPanel(
       {
         ...LayersPanel.button,
-        tooltip: api.map(this.mapId).i18nInstance.t("appbar.layers"),
+        tooltip: "Default",
       },
       LayersPanel.panel,
       "default"
