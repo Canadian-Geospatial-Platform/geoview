@@ -32,6 +32,10 @@ export class WMS {
   // ! This will maybe not happen because geoCore may not everything we need. We may have to use getCap
   // * We may have to do getCapabilites if we want to add layers not in the catalog
   // map config properties
+
+  // layer name with default
+  name: string = "WMS Layer";
+
   /**
    * Add a WMS layer to the map.
    *
@@ -40,6 +44,7 @@ export class WMS {
    */
   add(layer: TypeLayerConfig): Promise<Layer | string> {
     let { url } = layer;
+    console.log(layer);
 
     // if url has a '?' do not append to avoid errors, user must add this manually
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
@@ -72,6 +77,12 @@ export class WMS {
             json.Capability.Layer,
             layer.entries as string
           );
+          console.log(json);
+
+          let layerName = layer.hasOwnProperty("name")
+            ? layer.name
+            : json.Service.Name;
+          if (layerName) this.name = <string>layerName;
 
           if (isValid) {
             const wms = L.tileLayer.wms(layer.url, {
@@ -82,6 +93,12 @@ export class WMS {
             });
 
             Object.defineProperties(wms, {
+              //add name
+              name: {
+                value: layer.hasOwnProperty("name")
+                  ? layer.name
+                  : json.Service.Name,
+              },
               // add an array of the WMS layer ids / entries
               entries: {
                 value: layer.entries?.split(",").map((item: string) => {
@@ -225,14 +242,18 @@ export class WMS {
    * @returns {any} all values found
    */
   private findAllByKey(obj: object, keyToFind: string): any {
-    return Object.entries(obj).reduce(
-      (acc, [key, v]) =>
-        key === keyToFind
-          ? acc.concat(v)
-          : typeof v === "object"
-          ? acc.concat(this.findAllByKey(v, keyToFind))
-          : acc,
-      []
-    );
+    if (obj) {
+      return Object.entries(obj).reduce(
+        (acc, [key, v]) =>
+          key === keyToFind
+            ? acc.concat(v)
+            : typeof v === "object"
+            ? acc.concat(this.findAllByKey(v, keyToFind))
+            : acc,
+        []
+      );
+    } else {
+      return [];
+    }
   }
 }

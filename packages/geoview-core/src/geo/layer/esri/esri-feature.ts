@@ -16,6 +16,8 @@ import { api } from "../../../api/api";
  * @class EsriFeature
  */
 export class EsriFeature {
+  // layer name with default
+  name: string = "Esri Feature Layer";
   /**
    * Add a ESRI feature layer to the map.
    *
@@ -27,7 +29,10 @@ export class EsriFeature {
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
-        const { type } = JSON.parse(value);
+        const { name, type } = JSON.parse(value);
+
+        if (layer.hasOwnProperty("name")) this.name = layer.name;
+        else if (name) this.name = name;
 
         // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
         // if the path is bad, return will be {}

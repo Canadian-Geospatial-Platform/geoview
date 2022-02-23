@@ -16,6 +16,9 @@ import { api } from "../../../api/api";
  * @class EsriDynamic
  */
 export class EsriDynamic {
+  // layer name with default
+  name: string = "Esri Dynamic Layer";
+
   /**
    * Add a ESRI dynamic layer to the map.
    *
@@ -28,7 +31,11 @@ export class EsriDynamic {
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
         // get layers from service and parse layer entries as number
-        const { layers } = JSON.parse(value);
+        const { mapName, layers } = JSON.parse(value);
+
+        if (layer.hasOwnProperty("name")) this.name = layer.name;
+        else if (mapName) this.name = mapName;
+
         let entries = layer.entries?.split(",").map((item: string) => {
           return parseInt(item, 10);
         });
