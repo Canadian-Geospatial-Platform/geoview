@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import EventEmitter from "eventemitter3";
 
+import { generateId } from "../core/utils/utilities";
+
 /**
  * constant contains event names
  */
@@ -10,6 +12,11 @@ export const EVENT_NAMES = {
    * Event triggered when map is loaded and api ready
    */
   EVENT_MAP_LOADED: "map/loaded",
+
+  /**
+   * Event triggered to reload the map
+   */
+  EVENT_MAP_RELOAD: "map/reload",
 
   /**
    * Event triggered when a user stops moving the map
@@ -221,6 +228,10 @@ export class Event {
     listener: (...args: any[]) => void,
     handlerName?: string
   ): void => {
+    eventName =
+      eventName +
+      (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+
     /**
      * Listen callback, sets the data that will be returned back
      * @param args payload being passed when emitted
@@ -241,11 +252,7 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.on(
-      eventName +
-        (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
-      listen
-    );
+    this.eventEmitter.on(eventName, listen);
   };
 
   /**
@@ -260,6 +267,10 @@ export class Event {
     listener: (...args: any[]) => void,
     handlerName?: string
   ): void => {
+    eventName =
+      eventName +
+      (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+
     /**
      * Listen callback, sets the data that will be returned back
      * @param args payload being passed when emitted
@@ -280,11 +291,7 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.once(
-      eventName +
-        (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
-      listen
-    );
+    this.eventEmitter.once(eventName, listen);
   };
 
   /**
@@ -327,10 +334,26 @@ export class Event {
    * @param {string} handlerName the name of the handler an event needs to be removed from
    */
   off = (eventName: string, handlerName?: string): void => {
-    this.eventEmitter.off(
+    eventName =
       eventName +
-        (handlerName && handlerName.length > 0 ? `/${handlerName}` : "")
-    );
+      (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+
+    this.eventEmitter.off(eventName);
+
+    delete this.events[eventName];
+  };
+
+  /**
+   * Unsubscribe from all events on the map
+   *
+   * @param {string} handlerName the id of the map to turn unsubscribe the event from
+   */
+  offAll = (handlerName: string): void => {
+    Object.keys(this.events).map((event) => {
+      if (event.includes(handlerName)) {
+        this.off(event);
+      }
+    });
   };
 
   /**
@@ -345,33 +368,32 @@ export class Event {
     handlerName: string | undefined | null,
     payload: Record<string, unknown>
   ): void => {
+    // event name
+    let eventName =
+      event + (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+
     // handler name, registers a unique handler to be used when multiple events emit with same event name
     let hName = handlerName;
 
     if (!this.events[event]) {
-      this.events[event] = {};
+      this.events[eventName] = {};
     }
 
-    // TODO check if this value was null, undefined then generate a meaniningful name
     if (!hName) {
-      hName = new Date().getTime().toString();
+      hName = generateId("");
     }
 
-    if (!this.events[event][hName]) {
-      this.events[event][hName] = {};
+    if (!this.events[eventName][hName]) {
+      this.events[eventName][hName] = {};
     }
 
     // store the emitted event to the events array
-    this.events[event][hName] = {
+    this.events[eventName][hName] = {
       handlerName,
       ...payload,
     };
 
-    this.eventEmitter.emit(
-      event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
-      { ...payload, handlerName },
-      handlerName
-    );
+    this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };
 
   /**

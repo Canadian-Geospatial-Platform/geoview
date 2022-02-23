@@ -1,7 +1,6 @@
 import { Typography } from "@mui/material";
-import LayersIcon from "@mui/icons-material/Layers";
+import HelpIcon from "@mui/icons-material/Help";
 
-// import { LayersIcon } from "../../ui";
 import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
 
 /**
@@ -9,18 +8,18 @@ import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
  */
 export const LayersPanel: TypeButtonPanelProps = {
   button: {
-    id: "layer-panel",
-    tooltip: "appbar.layers",
+    id: "default-panel",
+    tooltip: "Default",
     tooltipPlacement: "right",
-    icon: <LayersIcon />,
+    icon: <HelpIcon />,
     type: "textWithIcon",
   },
   panel: {
-    title: "appbar.layers",
-    icon: LayersIcon,
+    title: "Default",
+    icon: HelpIcon,
     content: (
       <Typography variant="body2" color="textSecondary" component="p">
-        This is a place holder panel for the panel components
+        This is a placeholder panel for the panel components
       </Typography>
     ),
     width: 300,

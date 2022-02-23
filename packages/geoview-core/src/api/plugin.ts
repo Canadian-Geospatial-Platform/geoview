@@ -141,6 +141,26 @@ export class Plugin {
   };
 
   /**
+   * Delete all plugins loaded in a map
+   *
+   * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+   */
+  removePlugins = (mapId: string): void => {
+    if (mapId) {
+      const mapPlugins = this.plugins[mapId];
+
+      if (mapPlugins) {
+        // remove all plugins by map
+        for (var i = 0; i < Object.keys(mapPlugins).length; i++) {
+          const plugin = Object.keys(mapPlugins)[i];
+
+          this.removePlugin(plugin, mapId);
+        }
+      }
+    }
+  };
+
+  /**
    * Load plugins provided by map config
    *
    * @param mapId the map id to load the plugins to

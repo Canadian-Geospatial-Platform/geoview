@@ -1,4 +1,4 @@
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import { GITUHUB_REPO } from "../../../utils/constant";
 import { Cast, TypeAppVersion } from "../../../types/cgpv-types";
