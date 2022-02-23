@@ -111,14 +111,7 @@ export class API {
    * @returns {MapViewer | undefined} the map instance
    */
   mapInstance = (map: Map): MapViewer | undefined => {
-    for (let i = 0; i < Object.keys(this.maps).length; i++) {
-      var key = Object.keys(this.maps)[i];
-      var value = this.maps[key];
-
-      if (value.map === map) {
-        return this.maps[key];
-      }
-    }
+    return this.maps[map.id];
   };
 }
 
