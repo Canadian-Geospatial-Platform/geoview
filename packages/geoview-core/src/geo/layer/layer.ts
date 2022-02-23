@@ -138,8 +138,6 @@ export class Layer {
         api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.map.id, { layer })
       );
     }
-
-    //this._test = "Test";
   }
 
   /**
@@ -211,12 +209,18 @@ export class Layer {
     // Because there is no way to know GeoJSON is loaded (load event never trigger), we use a timeout
     // TODO: timeout is never a good idea, may have to find a workaround...
     setTimeout(() => {
-      const featElems = document
-        .getElementsByClassName(`leaflet-map-${this.map.id}`)[0]
-        .getElementsByClassName("leaflet-marker-pane")[0].children;
-      [...featElems].forEach((element) => {
-        element.setAttribute("tabindex", "-1");
-      });
+      const mapContainer = document.getElementsByClassName(
+        `leaflet-map-${this.map.id}`
+      )[0];
+
+      if (mapContainer) {
+        const featElems = document
+          .getElementsByClassName(`leaflet-map-${this.map.id}`)[0]
+          .getElementsByClassName("leaflet-marker-pane")[0].children;
+        [...featElems].forEach((element) => {
+          element.setAttribute("tabindex", "-1");
+        });
+      }
     }, 3000);
   }
 

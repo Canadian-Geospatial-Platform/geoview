@@ -159,6 +159,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
           setActionButtons((prev) => [
             ...prev,
             <IconButton
+              key={actionButton.id}
               tooltip={actionButton.title}
               tooltipPlacement="right"
               id={actionButton.id}
@@ -217,6 +218,14 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       },
       mapId
     );
+
+    return () => {
+      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
+    };
   }, []);
 
   useEffect(() => {

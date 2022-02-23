@@ -183,6 +183,12 @@ export class MapViewer {
     }
   }
 
+  /**
+   * Add a new custom component to the map
+   *
+   * @param {string} id an id to the new component
+   * @param {JSX.Element} component the component to add
+   */
   addComponent = (id: string, component: JSX.Element): void => {
     if (id && component) {
       // emit an event to add the component
@@ -193,6 +199,11 @@ export class MapViewer {
     }
   };
 
+  /**
+   * Remove an existing custom component from the map
+   *
+   * @param id the id of the component to remove
+   */
   removeComponent = (id: string): void => {
     if (id) {
       // emit an event to add the component
@@ -202,6 +213,12 @@ export class MapViewer {
     }
   };
 
+  /**
+   * Get map options configurations based on projection
+   *
+   * @param epsgCode projection number
+   * @returns {L.MapOptions} the map options based on the projection
+   */
   getMapOptions = (epsgCode: number): L.MapOptions => {
     return epsgCode === 3978 ? lccMapOptionsParam : wmMapOptionsParam;
   };
@@ -229,5 +246,25 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.id);
   };
 
-  changeLanguage = (language: string, layers?: TypeLayerConfig[]): void => {};
+  /**
+   * Change the language of the map
+   *
+   * @param {string} language the language to use (en-CA, fr-CA)
+   * @param {TypeLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
+   */
+  changeLanguage = (language: string, layers?: TypeLayerConfig[]): void => {
+    let updatedConfig = { ...this.mapProps };
+
+    updatedConfig["language"] = language;
+
+    if (layers && layers.length > 0) {
+      updatedConfig["layers"] = updatedConfig["layers"]?.concat(layers);
+    }
+
+    // emit an event to reload the map to change the language
+    api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
+      handlerId: this.id,
+      config: updatedConfig,
+    });
+  };
 }
