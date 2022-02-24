@@ -27,7 +27,8 @@ interface OverviewProps {
  */
 interface MiniboundProps {
   parentId: string;
-  parentMap: Map;
+  parentMap: L.Map;
+  minimap: L.Map;
   zoomFactor: number;
 }
 
@@ -36,6 +37,7 @@ interface MiniboundProps {
  */
 interface MinimapToggleProps {
   parentId: string;
+  minimap: L.Map;
 }
 
 /**
@@ -44,17 +46,15 @@ interface MinimapToggleProps {
  * @return {JSX.Element} the toggle control
  */
 function MinimapToggle(props: MinimapToggleProps): JSX.Element {
-  const { parentId } = props;
+  const { parentId, minimap } = props;
 
   // access the cgpv object from the window object
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { api, react, leaflet, reactLeaflet, ui, useTranslation } = cgpv;
+  const { api, react, leaflet, ui, useTranslation } = cgpv;
 
   const { DomEvent } = leaflet;
-
-  const { useMap } = reactLeaflet;
 
   // get event names
   const EVENT_NAMES = api.eventNames;
@@ -67,15 +67,10 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
 
   const [status, setStatus] = useState(true);
 
-  const minimap = useMap();
-
   // get available elements
-  const { IconButton } = ui.elements;
+  const { IconButton, ChevronLeftIcon } = ui.elements;
 
-  // get available icons
-  const { ChevronLeft } = ui.icons;
-
-  const useStyles = ui.makeStyles((theme) => ({
+  const useStyles = ui.makeStyles((theme: any) => ({
     toggleBtn: {
       transform: "rotate(45deg)",
       color: theme.palette.primary.contrastText,
@@ -103,6 +98,8 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   function toggleMinimap(): void {
     setStatus(!status);
 
+    console.log(minimap.getContainer().style);
+
     if (status) {
       const buttonSize = theme.overrides?.button?.size;
       // decrease size of overview map to the size of the toggle btn
@@ -127,17 +124,12 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   return (
     <div
       ref={divRef}
-      className={[
-        LEAFLET_POSITION_CLASSES.topright,
-        classes.toggleBtnContainer,
-      ].join(" ")}
+      className={`${LEAFLET_POSITION_CLASSES.topright} ${classes.toggleBtnContainer}`}
     >
       <IconButton
-        className={[
-          "leaflet-control",
-          classes.toggleBtn,
-          !status ? classes.minimapOpen : classes.minimapClosed,
-        ].join(" ")}
+        className={`leaflet-control ${classes.toggleBtn} ${
+          !status ? classes.minimapOpen : classes.minimapClosed
+        }`}
         style={{
           margin: `-${theme.spacing(3)}`,
           padding: 0,
@@ -146,7 +138,7 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
         onClick={toggleMinimap}
         size="large"
       >
-        <ChevronLeft />
+        <ChevronLeftIcon />
       </IconButton>
     </div>
   );
@@ -157,7 +149,7 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
  * @param {MiniboundProps} props bound properties
  */
 function MinimapBounds(props: MiniboundProps) {
-  const { parentId, parentMap, zoomFactor } = props;
+  const { parentId, parentMap, zoomFactor, minimap } = props;
 
   // access the cgpv object from the window object
   const cgpv = w["cgpv"];
@@ -166,7 +158,7 @@ function MinimapBounds(props: MiniboundProps) {
   const { api, react, reactLeaflet, reactLeafletCore, ui, useTranslation } =
     cgpv;
 
-  const { useMap, useMapEvent } = reactLeaflet;
+  const { useMapEvent } = reactLeaflet;
 
   const { useEventHandlers } = reactLeafletCore;
 
@@ -174,8 +166,6 @@ function MinimapBounds(props: MiniboundProps) {
   const EVENT_NAMES = api.eventNames;
 
   const { useState, useEffect, useCallback, useMemo } = react;
-
-  const minimap = useMap();
 
   const [toggle, setToggle] = useState(false);
 
@@ -202,6 +192,7 @@ function MinimapBounds(props: MiniboundProps) {
       parentMap.getZoom() - zoomFactor > 0
         ? parentMap.getZoom() - zoomFactor
         : 0;
+
     minimap.flyTo(parentMap.getCenter(), newZoom);
 
     // Set in timeout the calculation to create the bound so parentMap getBounds has the updated bounds
@@ -228,7 +219,7 @@ function MinimapBounds(props: MiniboundProps) {
     // listen to API event when the overview map is toggled
     api.event.on(
       EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE,
-      (payload) => {
+      (payload: any) => {
         if (payload && parentId === payload.handlerName) {
           updateMap();
           setToggle(payload.status);
@@ -297,12 +288,14 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
 
   const { MapContainer, TileLayer, useMap } = reactLeaflet;
 
-  const { useEffect, useRef, useMemo } = react;
+  const { useState, useEffect, useRef, useMemo } = react;
 
-  const useStyles = ui.makeStyles((theme) => ({
+  const [minimap, setMinimap] = useState();
+
+  const useStyles = ui.makeStyles((theme: any) => ({
     minimap: {
-      width: MINIMAP_SIZE.width,
-      height: MINIMAP_SIZE.height,
+      width: MINIMAP_SIZE.width + " !important",
+      height: MINIMAP_SIZE.height + " !important",
       "-webkit-transition": "300ms linear",
       "-moz-transition": "300ms linear",
       "-o-transition": "300ms linear",
@@ -344,14 +337,19 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
     DomEvent.disableScrollPropagation(overviewHTMLElement);
 
     // remove ability to tab to the overview map
-    overviewHTMLElement.children[0].setAttribute("tabIndex", "-1");
+    // overviewHTMLElement.children[0].setAttribute("tabIndex", "-1");
   }, []);
 
   // Memorize the minimap so it's not affected by position changes
-  const minimap = useMemo(
+  const minimapContainer = useMemo(
     () => (
       <MapContainer
+        tabIndex={-1}
         className={classes.minimap}
+        style={{
+          width: MINIMAP_SIZE.width,
+          height: MINIMAP_SIZE.height,
+        }}
         center={parentMap.getCenter()}
         zoom={mapZoom}
         crs={crs}
@@ -360,38 +358,50 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
         scrollWheelZoom={false}
         attributionControl={false}
         zoomControl={false}
-        whenCreated={(cgpMap) => {
+        whenCreated={(cgpMap: L.Map) => {
           const cgpMapContainer = cgpMap.getContainer();
           DomEvent.disableClickPropagation(cgpMapContainer);
           DomEvent.disableScrollPropagation(cgpMapContainer);
           const cgpMapContainerParentElement =
             cgpMapContainer.parentElement as HTMLElement;
           cgpMapContainerParentElement.style.margin = theme.spacing(3);
+
+          setMinimap(cgpMap);
         }}
       >
-        {basemaps
-          .getBasemapLayers()
-          .map(
-            (base: { id: string | number | null | undefined; url: string }) => (
-              <TileLayer key={base.id} url={base.url} />
-            )
-          )}
-        <MinimapBounds
-          parentId={id}
-          parentMap={parentMap}
-          zoomFactor={zoomFactor}
-        />
-        <MinimapToggle parentId={id} />
+        {minimap ? (
+          <>
+            {basemaps
+              .getBasemapLayers()
+              .map(
+                (base: {
+                  id: string | number | null | undefined;
+                  url: string;
+                }) => (
+                  <TileLayer key={base.id} url={base.url} />
+                )
+              )}
+            <MinimapBounds
+              parentId={id}
+              parentMap={parentMap}
+              minimap={minimap}
+              zoomFactor={zoomFactor}
+            />
+            <MinimapToggle parentId={id} minimap={minimap} />
+          </>
+        ) : (
+          <></>
+        )}
       </MapContainer>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parentMap, crs, mapZoom, basemaps, zoomFactor]
+    [parentMap, crs, mapZoom, basemaps, zoomFactor, minimap]
   );
 
   return (
     <div className={LEAFLET_POSITION_CLASSES.topright}>
       <div ref={overviewRef} className="leaflet-control leaflet-bar">
-        {minimap}
+        {minimapContainer}
       </div>
     </div>
   );

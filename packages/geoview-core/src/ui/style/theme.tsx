@@ -1,6 +1,12 @@
 import { CSSProperties } from "react";
 
-import { createTheme, DeprecatedThemeOptions, adaptV4Theme, Variant, TypographyStyleOptions } from "@mui/material/styles";
+import {
+  createTheme,
+  DeprecatedThemeOptions,
+  adaptV4Theme,
+  Variant,
+  TypographyStyleOptions,
+} from "@mui/material/styles";
 
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
