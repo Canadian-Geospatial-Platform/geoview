@@ -17,6 +17,9 @@ import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
 export class XYZTiles {
+  // layer name with default
+  name: string = "XYZ Tiles";
+
   /**
    * Add a XYZ Tiles layer to the map.
    *
@@ -25,7 +28,9 @@ export class XYZTiles {
    */
   add(layer: TypeLayerConfig): Promise<Layer | string> {
     const geo = new Promise<Layer | string>((resolve) => {
+      if (layer.hasOwnProperty("name")) this.name = layer.name;
       const xyzTiles = L.tileLayer(layer.url);
+
       resolve(xyzTiles);
     });
     return new Promise((resolve) => resolve(geo));

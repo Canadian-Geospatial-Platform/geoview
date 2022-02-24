@@ -132,6 +132,7 @@ export type TypeLayerConfig = {
 export type TypeLayerData = {
   id: string;
   type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles";
+  name: string;
   layer: {
     options: {
       url: string;

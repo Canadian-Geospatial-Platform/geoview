@@ -57,7 +57,7 @@
                 class="llwp-map"
                 data-leaflet=" { 'name': 'LCC', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true },
             'layers': [
-                { 'name': 'Census WMS', 'url': 'https://ows.mundialis.de/services/service?', 'type': 'ogcWMS', 'entries': 'TOPO-OSM-WMS' }
+                {'name':'Topographic OSM WMS',  'url': 'https://ows.mundialis.de/services/service?', 'type': 'ogcWMS', 'entries': 'TOPO-OSM-WMS' }
             ] } "
             ></div>
             <div>
@@ -93,7 +93,7 @@
                 class="llwp-map"
                 data-leaflet=" { 'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true },
             'layers': [
-                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 28, 29, 37' }
+                {  'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 16, 28, 29, 37' }
             ] } "
             ></div>
             <div id="esriDynamicLayerLegend">
@@ -111,7 +111,7 @@
                 class="llwp-map"
                 data-leaflet="{ 'name': 'LCC_SHADED', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA','basemapOptions': { 'id': 'shaded', 'shaded': false, 'labeled': false },
             'layers': [
-                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' }]
+                { 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' }]
             }"
             ></div>
             <p>This map has a Esri feature layer added from configuration.</p>
