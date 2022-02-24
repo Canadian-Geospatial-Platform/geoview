@@ -44,7 +44,6 @@ export class WMS {
    */
   add(layer: TypeLayerConfig): Promise<Layer | string> {
     let { url } = layer;
-    console.log(layer);
 
     // if url has a '?' do not append to avoid errors, user must add this manually
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
@@ -77,7 +76,6 @@ export class WMS {
             json.Capability.Layer,
             layer.entries as string
           );
-          console.log(json);
 
           let layerName = layer.hasOwnProperty("name")
             ? layer.name
