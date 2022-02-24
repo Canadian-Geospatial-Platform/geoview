@@ -92,29 +92,31 @@ export class Layer {
               );
             this.removeTabindex();
           } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
-            this.wms
-              .add(layerConf)
-              .then((layer: leafletLayer | string) =>
-                this.addToMap(layerConf, layer)
-              );
+            this.wms.add(layerConf).then((layer: leafletLayer | string) => {
+              layerConf.name = this.wms.name;
+              this.addToMap(layerConf, layer);
+            });
           } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
             this.xyzTiles
               .add(layerConf)
-              .then((layer: leafletLayer | string) =>
-                this.addToMap(layerConf, layer)
-              );
+              .then((layer: leafletLayer | string) => {
+                layerConf.name = this.xyzTiles.name;
+                this.addToMap(layerConf, layer);
+              });
           } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
             this.esriDynamic
               .add(layerConf)
-              .then((layer: leafletLayer | string) =>
-                this.addToMap(layerConf, layer)
-              );
+              .then((layer: leafletLayer | string) => {
+                layerConf.name = this.esriDynamic.name;
+                this.addToMap(layerConf, layer);
+              });
           } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
             this.esriFeature
               .add(layerConf)
-              .then((layer: leafletLayer | string) =>
-                this.addToMap(layerConf, layer)
-              );
+              .then((layer: leafletLayer | string) => {
+                layerConf.name = this.esriFeature.name;
+                this.addToMap(layerConf, layer);
+              });
             this.removeTabindex();
           }
         }
@@ -196,6 +198,7 @@ export class Layer {
       Object.defineProperties(layer, { id: { value: id } });
       this.layers.push({
         id,
+        name: payload.name,
         type: payload.type,
         layer: layer,
       } as TypeLayerData);

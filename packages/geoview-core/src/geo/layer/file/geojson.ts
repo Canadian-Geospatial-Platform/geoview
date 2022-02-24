@@ -10,7 +10,11 @@ import { TypeLayerConfig } from "../../../core/types/cgpv-types";
  * @class GeoJSON
  */
 export class GeoJSON {
+  // layer name with default
+  name: string = "GeoJson Layer";
+
   /**
+   *
    * Add a GeoJSON layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
@@ -24,6 +28,8 @@ export class GeoJSON {
         if (value !== "{}") {
           // parse the json string and convert it to a json object
           const featureCollection = JSON.parse(value);
+
+          if (layer.hasOwnProperty("name")) this.name = layer.name;
 
           // add the geojson to the map
           const geojson = L.geoJSON(featureCollection, {
