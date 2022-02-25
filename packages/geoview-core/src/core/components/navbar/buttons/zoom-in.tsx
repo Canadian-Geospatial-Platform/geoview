@@ -2,7 +2,12 @@ import { useMap } from "react-leaflet";
 
 import { Button, ZoomInIcon } from "../../../../ui";
 
-export default function ZoomIn(): JSX.Element {
+interface ZoomInProps {
+  className?: string | undefined;
+}
+
+export default function ZoomIn(props: ZoomInProps): JSX.Element {
+  const { className } = props;
   // get map to use in zoom function
   const map = useMap();
 
@@ -18,6 +23,7 @@ export default function ZoomIn(): JSX.Element {
       tooltipPlacement="left"
       icon={<ZoomInIcon />}
       onClick={zoomIn}
+      className={className}
     />
   );
 }
