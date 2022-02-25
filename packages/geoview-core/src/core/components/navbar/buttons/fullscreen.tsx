@@ -6,8 +6,13 @@ import { api } from "../../../../api/api";
 
 import { Button, FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
 
+interface FullscreenProps {
+  className?: string | undefined;
+}
 
-export default function Fullscreen(): JSX.Element {
+export default function Fullscreen(props: FullscreenProps): JSX.Element {
+  const { className } = props;
+
   const map = useMap();
 
   // TODO: need to trap the exit full screen event by ESC to arrange the fs state and icon
@@ -25,6 +30,7 @@ export default function Fullscreen(): JSX.Element {
       tooltipPlacement="left"
       icon={!fs ? <FullscreenIcon /> : <FullscreenExitIcon />}
       onClick={setFullscreen}
+      className={className}
     />
   );
 }

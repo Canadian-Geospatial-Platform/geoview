@@ -13,7 +13,6 @@ import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
 import { TypeButtonPanel } from "../../types/cgpv-types";
-import { AppbarButtons } from "./app-bar-buttons";
 
 export const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -190,7 +189,6 @@ export function Appbar(): JSX.Element {
                           state={drawerStatus ? "expanded" : "collapsed"}
                         />
                       </ListItem>
-                      <Divider grow={true} />
                       <Divider />
                     </Fragment>
                   ) : null;
@@ -200,7 +198,6 @@ export function Appbar(): JSX.Element {
           })}
         </div>
         <Divider grow={true} />
-        <Divider />
         <Version drawerStatus={drawerStatus} />
       </Drawer>
       {Object.keys(buttonPanelGroups).map((groupName: string) => {

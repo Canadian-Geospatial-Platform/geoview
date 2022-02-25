@@ -76,9 +76,11 @@ export class GeoUtilities {
 
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
         if (activeEl?.className.match(/leaflet-map-*/g) !== null) {
+          const mapId = activeEl?.getAttribute("id");
+
           activeEl?.classList.forEach((item) => {
             if (item.includes("leaflet-map-")) {
-              api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, item, {});
+              api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId, {});
             }
           });
         }

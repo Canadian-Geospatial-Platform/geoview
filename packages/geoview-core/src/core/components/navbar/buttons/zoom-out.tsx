@@ -2,7 +2,13 @@ import { useMap } from "react-leaflet";
 
 import { Button, ZoomOutIcon } from "../../../../ui";
 
-export default function ZoomOut(): JSX.Element {
+interface ZoomOutProps {
+  className?: string | undefined;
+}
+
+export default function ZoomOut(props: ZoomOutProps): JSX.Element {
+  const { className } = props;
+
   // get map to use in zoom function
   const map = useMap();
 
@@ -18,6 +24,7 @@ export default function ZoomOut(): JSX.Element {
       tooltipPlacement="left"
       icon={<ZoomOutIcon />}
       onClick={zoomOut}
+      className={className}
     />
   );
 }

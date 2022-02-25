@@ -2,7 +2,12 @@ import { useMap } from "react-leaflet";
 
 import { Button, HomeIcon } from "../../../../ui";
 
-export default function Home(): JSX.Element {
+interface HomeProps {
+  className?: string | undefined;
+}
+
+export default function Home(props: HomeProps): JSX.Element {
+  const { className } = props;
   // get map and set initial bounds to use in zoom home
   const map = useMap();
   const initBounds = map.getBounds();
@@ -19,6 +24,7 @@ export default function Home(): JSX.Element {
       tooltipPlacement="left"
       icon={<HomeIcon />}
       onClick={setHome}
+      className={className}
     />
   );
 }
