@@ -20,18 +20,21 @@ import { EVENT_NAMES } from "../../api/event";
 import { HtmlToReact } from "../../core/containers/html-to-react";
 
 import { IconButton, CloseIcon, Divider, Fade } from "..";
-import { styles } from "../style/theme";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    maxWidth: 600,
     minWidth: 300,
+    width: 300,
     height: "100%",
     marginLeft: theme.spacing(2),
     borderRadius: 0,
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.up("xl")]: {
       width: "auto !important",
       minWidth: 100,
+    },
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+      minWidth: "100%",
     },
   },
   cardContainer: {
@@ -44,6 +47,17 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     color: theme.palette.primary.contrastText,
     padding: theme.spacing(3, 7),
+  },
+  buttonIcon: {
+    width: "1em",
+    height: "1em",
+    display: "inherit",
+    fontSize: theme.typography.button?.fontSize,
+    alignItems: "inherit",
+    justifyContent: "inherit",
+    transition: "fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+    flexShrink: 0,
+    userSelect: "none",
   },
 }));
 
@@ -246,7 +260,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         ref={panelRef as React.MutableRefObject<null>}
         className={`leaflet-control ${classes.root}`}
         style={{
-          width: panel.width,
           display: panelStatus ? "block" : "none",
         }}
         onKeyDown={(e) => {
@@ -260,7 +273,10 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
           className={classes.avatar}
           avatar={
             typeof panel.icon === "string" ? (
-              <HtmlToReact style={styles.buttonIcon} htmlContent={panel.icon} />
+              <HtmlToReact
+                className={classes.buttonIcon}
+                htmlContent={panel.icon}
+              />
             ) : typeof panel.icon === "object" ? (
               <panel.icon />
             ) : (

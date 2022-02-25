@@ -98,8 +98,6 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   function toggleMinimap(): void {
     setStatus(!status);
 
-    console.log(minimap.getContainer().style);
-
     if (status) {
       const buttonSize = theme.overrides?.button?.size;
       // decrease size of overview map to the size of the toggle btn
@@ -133,6 +131,8 @@ function MinimapToggle(props: MinimapToggleProps): JSX.Element {
         style={{
           margin: `-${theme.spacing(3)}`,
           padding: 0,
+          height: "initial",
+          minWidth: "initial",
         }}
         aria-label={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}
@@ -270,6 +270,44 @@ function MinimapBounds(props: MiniboundProps) {
   ) : null;
 }
 
+// access the cgpv object from the window object
+const cgpv = w["cgpv"];
+
+// access the api calls
+const { react, leaflet, reactLeaflet, ui } = cgpv;
+
+const { useState, useEffect, useRef, useMemo } = react;
+
+const { DomEvent } = leaflet;
+
+const { MapContainer, TileLayer, useMap } = reactLeaflet;
+
+const useStyles = ui.makeStyles((theme: any) => ({
+  minimap: {
+    width: MINIMAP_SIZE.width,
+    height: MINIMAP_SIZE.height,
+    "-webkit-transition": "300ms linear",
+    "-moz-transition": "300ms linear",
+    "-o-transition": "300ms linear",
+    "-ms-transition": "300ms linear",
+    transition: "300ms linear",
+    "&::before": {
+      content: '""',
+      display: "block",
+      position: "absolute",
+      width: 0,
+      height: 0,
+      borderTop: "32px solid hsla(0,0%,98%,0.9)",
+      borderLeft: "32px solid transparent",
+      zIndex: theme.zIndex.appBar,
+      right: 0,
+      top: 0,
+    },
+  },
+}));
+
+const age = 20;
+
 /**
  * Create the overview map component
  * @param {OverviewProps} props the overview map properties
@@ -278,43 +316,7 @@ function MinimapBounds(props: MiniboundProps) {
 export function OverviewMap(props: OverviewProps): JSX.Element {
   const { id, crs, language, zoomFactor } = props;
 
-  // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
-
-  // access the api calls
-  const { react, leaflet, reactLeaflet, ui } = cgpv;
-
-  const { DomEvent } = leaflet;
-
-  const { MapContainer, TileLayer, useMap } = reactLeaflet;
-
-  const { useState, useEffect, useRef, useMemo } = react;
-
   const [minimap, setMinimap] = useState();
-
-  const useStyles = ui.makeStyles((theme: any) => ({
-    minimap: {
-      width: MINIMAP_SIZE.width + " !important",
-      height: MINIMAP_SIZE.height + " !important",
-      "-webkit-transition": "300ms linear",
-      "-moz-transition": "300ms linear",
-      "-o-transition": "300ms linear",
-      "-ms-transition": "300ms linear",
-      transition: "300ms linear",
-      "&::before": {
-        content: '""',
-        display: "block",
-        position: "absolute",
-        width: 0,
-        height: 0,
-        borderTop: "32px solid hsla(0,0%,98%,0.9)",
-        borderLeft: "32px solid transparent",
-        zIndex: theme.zIndex.appBar,
-        right: 0,
-        top: 0,
-      },
-    },
-  }));
 
   const classes = useStyles();
 
@@ -330,6 +332,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   );
 
   const overviewRef = useRef(null);
+
   useEffect(() => {
     // disable events on container
     const overviewHTMLElement = Cast<HTMLElement>(overviewRef.current);
@@ -338,18 +341,16 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
 
     // remove ability to tab to the overview map
     // overviewHTMLElement.children[0].setAttribute("tabIndex", "-1");
+
+    console.log(age);
   }, []);
 
   // Memorize the minimap so it's not affected by position changes
   const minimapContainer = useMemo(
     () => (
       <MapContainer
-        tabIndex={-1}
+        // tabIndex={-1}
         className={classes.minimap}
-        style={{
-          width: MINIMAP_SIZE.width,
-          height: MINIMAP_SIZE.height,
-        }}
         center={parentMap.getCenter()}
         zoom={mapZoom}
         crs={crs}
@@ -401,7 +402,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   return (
     <div className={LEAFLET_POSITION_CLASSES.topright}>
       <div ref={overviewRef} className="leaflet-control leaflet-bar">
-        {minimapContainer}
+        {/* {minimapContainer} */}
       </div>
     </div>
   );

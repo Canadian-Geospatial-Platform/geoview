@@ -158,6 +158,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   return (
     <MapContainer
+      id={id}
       center={center}
       zoom={zoom}
       crs={api.projection.getProjection(projection)}
