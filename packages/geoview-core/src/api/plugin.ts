@@ -8,6 +8,8 @@ import * as translate from "react-i18next";
 
 import makeStyles from "@mui/styles/makeStyles";
 
+import { MapViewer } from "./../geo/map/map";
+
 import { api } from "./api";
 import { Cast, TypeWindow } from "../core/types/cgpv-types";
 
@@ -162,25 +164,30 @@ export class Plugin {
 
   /**
    * Load plugins provided by map config
-   *
-   * @param mapId the map id to load the plugins to
-   * @param plugins the plugins to load
    */
-  loadPlugins = (mapId: string, plugins: string[]): void => {
-    // load plugins if provided in the config
-    if (plugins && plugins.length > 0) {
-      plugins.forEach((plugin) => {
-        const { plugins } = Cast<TypeWindow>(window);
-        if (plugins && plugins[plugin]) {
-          this.addPlugin(plugin, mapId, plugins[plugin], {
-            mapId: mapId,
-          });
-        } else {
-          this.addPlugin(plugin, mapId, null, {
-            mapId: mapId,
-          });
-        }
-      });
-    }
+  loadPlugins = (): void => {
+    // loop through each map and check if the config contains any plugins to load
+    const maps = api.maps;
+
+    Object.keys(api.maps).forEach((mapId: string) => {
+      const map = api.maps[mapId] as MapViewer;
+      const plugins = map.mapProps.plugins;
+
+      // load plugins if provided in the config
+      if (plugins && plugins.length > 0) {
+        plugins.forEach((plugin) => {
+          const { plugins } = Cast<TypeWindow>(window);
+          if (plugins && plugins[plugin]) {
+            this.addPlugin(plugin, mapId, plugins[plugin], {
+              mapId: mapId,
+            });
+          } else {
+            this.addPlugin(plugin, mapId, null, {
+              mapId: mapId,
+            });
+          }
+        });
+      }
+    });
   };
 }
