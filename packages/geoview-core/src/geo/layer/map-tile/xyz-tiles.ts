@@ -6,7 +6,9 @@
  */
 
 import L, { Layer } from "leaflet";
+
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
+import { generateId } from "../../../core/utils/utilities";
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -17,8 +19,33 @@ import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
 export class XYZTiles {
+  // layer id with default
+  id: string;
+
   // layer name with default
-  name: string = "XYZ Tiles";
+  name?: string = "XYZ Tiles";
+
+  // layer type
+  type: string;
+
+  // layer from leaflet
+  layer: Layer | string;
+
+  //layer or layer service url
+  url: string;
+
+  /**
+   * Initialize layer
+   *
+   * @param {TypeLayerConfig} layerConfig the layer configuration
+   */
+  constructor(layerConfig: TypeLayerConfig) {
+    this.id = layerConfig.id || generateId("");
+    if (layerConfig.hasOwnProperty("name")) this.name = layerConfig.name;
+    this.type = layerConfig.type;
+    this.url = layerConfig.url;
+    this.layer = new Layer();
+  }
 
   /**
    * Add a XYZ Tiles layer to the map.
@@ -28,7 +55,6 @@ export class XYZTiles {
    */
   add(layer: TypeLayerConfig): Promise<Layer | string> {
     const geo = new Promise<Layer | string>((resolve) => {
-      if (layer.hasOwnProperty("name")) this.name = layer.name;
       const xyzTiles = L.tileLayer(layer.url);
 
       resolve(xyzTiles);
