@@ -8,7 +8,7 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { useMediaQuery, IconButton } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import makeStyles from "@mui/styles/makeStyles";
 
@@ -28,6 +28,7 @@ import AppStart from "./core/app-start";
 import * as types from "./core/types/cgpv-types";
 import { Config } from "./core/utils/config";
 import { EVENT_NAMES } from "./api/event";
+import { LEAFLET_POSITION_CLASSES } from "./geo/utils/constant";
 
 export * from "./core/types/cgpv-types";
 
@@ -116,6 +117,9 @@ export const cgpv: types.TypeCGPV = {
   },
   useTranslation: useTranslation,
   types: types,
+  constants: {
+    leafletPositionClasses: LEAFLET_POSITION_CLASSES,
+  },
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
