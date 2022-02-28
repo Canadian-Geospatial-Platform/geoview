@@ -13,7 +13,6 @@ import { SnackbarProvider } from "notistack";
 
 import { Crosshair } from "../crosshair/crosshair";
 import { MousePosition } from "../mouse-position/mouse-position";
-import { OverviewMap } from "../overview-map/overview-map";
 import { Attribution } from "../attribution/attribution";
 import { Snackbar } from "../../../ui/snackbar/snackbar";
 import { Appbar } from "../appbar/app-bar";
