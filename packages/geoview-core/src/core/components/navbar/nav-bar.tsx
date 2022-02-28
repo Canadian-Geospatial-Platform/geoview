@@ -21,55 +21,41 @@ import { Panel, ButtonGroup, Button } from "../../../ui";
 
 import { Cast, TypeButtonPanel } from "../../types/cgpv-types";
 
-const navBtnWidth = "38px";
+const navBtnWidth = "32px";
+const navBtnHeight = "32px";
+
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
     display: "flex",
     flexDirection: "row",
-    margin: theme.spacing(0, 0, 14, 0),
+    marginRight: 5,
+    marginBottom: 30,
     zIndex: theme.zIndex.appBar,
   },
   navBtnGroupContainer: {
     display: "flex",
-    overflow: "auto",
     position: "relative",
     flexDirection: "column",
     pointerEvents: "auto",
-    overflowX: "hidden",
   },
   navBtnGroup: {
-    margin: theme.spacing(3),
-    width: navBtnWidth,
-    "& > button": {
-      width: navBtnWidth,
-      maxWidth: navBtnWidth,
-      minWidth: navBtnWidth,
-      padding: theme.spacing(5, 5, 5),
-      height: "initial",
-      borderRadius: theme.spacing(5),
-      "&:first-child": {
-        margin: theme.spacing(0, 0, 1, 0),
-      },
-      "&:last-child": {
-        margin: theme.spacing(1, 0, 0, 0),
-      },
+    "&:not(:last-child)": {
+      marginBottom: theme.spacing(2),
     },
-    "& > button.MuiButtonGroup-groupedVertical:not(:first-child)": {
-      borderTopLeftRadius: theme.spacing(5),
-      borderTopRightRadius: theme.spacing(5),
-    },
-    "& > button.MuiButtonGroup-groupedVertical:not(:last-child)": {
-      borderBottomLeftRadius: theme.spacing(5),
-      borderBottomRightRadius: theme.spacing(5),
-    },
+    borderTopLeftRadius: theme.spacing(5),
+    borderTopRightRadius: theme.spacing(5),
+    borderBottomLeftRadius: theme.spacing(5),
+    borderBottomRightRadius: theme.spacing(5),
   },
   navBarButton: {
-    height: "initial",
-    paddingLeft: "initial",
-    paddingRight: "initial",
     backgroundColor: "rgba(255,255,255,1)",
     color: theme.palette.primary.contrastText,
     borderRadius: theme.spacing(5),
+    width: navBtnWidth,
+    height: navBtnHeight,
+    maxWidth: navBtnWidth,
+    minWidth: navBtnWidth,
+    padding: "initial",
     "&:hover": {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.primary.dark,
@@ -270,8 +256,8 @@ export function NavBar(): JSX.Element {
           variant="contained"
           className={classes.navBtnGroup}
         >
-          <ZoomIn />
-          <ZoomOut />
+          <ZoomIn className={classes.navBarButton} />
+          <ZoomOut className={classes.navBarButton} />
         </ButtonGroup>
         <ButtonGroup
           orientation="vertical"
@@ -279,8 +265,8 @@ export function NavBar(): JSX.Element {
           variant="contained"
           className={classes.navBtnGroup}
         >
-          <Fullscreen />
-          <Home />
+          <Fullscreen className={classes.navBarButton} />
+          <Home className={classes.navBarButton} />
         </ButtonGroup>
       </div>
     </div>

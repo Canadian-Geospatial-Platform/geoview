@@ -13,7 +13,6 @@ import { SnackbarProvider } from "notistack";
 
 import { Crosshair } from "../crosshair/crosshair";
 import { MousePosition } from "../mouse-position/mouse-position";
-import { OverviewMap } from "../overview-map/overview-map";
 import { Attribution } from "../attribution/attribution";
 import { Snackbar } from "../../../ui/snackbar/snackbar";
 import { Appbar } from "../appbar/app-bar";
@@ -158,6 +157,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   return (
     <MapContainer
+      id={id}
       center={center}
       zoom={zoom}
       crs={api.projection.getProjection(projection)}
@@ -206,7 +206,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
           // load plugins once all maps has rendered
-          api.plugin.loadPlugins(id, plugins);
+          api.plugin.loadPlugins();
         });
 
         // emit the map loaded event
@@ -239,14 +239,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           >
             <Appbar />
           </div>
-          {deviceSizeMedUp && (
-            <OverviewMap
-              id={id}
-              crs={crs!}
-              language={language}
-              zoomFactor={mapOptions.zoomFactor as number}
-            />
-          )}
           <NorthArrow projection={crs!} />
           <NorthPoleFlag projection={crs!} />
           <Crosshair id={id} />

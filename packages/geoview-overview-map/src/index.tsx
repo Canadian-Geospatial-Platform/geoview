@@ -49,7 +49,7 @@ class OverviewMapPlugin {
           id={mapId}
           language={language}
           crs={projection.getCRS()}
-          zoomFactor={getMapOptions(currentProjection)}
+          zoomFactor={getMapOptions(currentProjection).zoomFactor}
         />
       );
   };

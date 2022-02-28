@@ -4,8 +4,6 @@ import L from "leaflet";
 
 import { TooltipProps } from "@mui/material";
 
-import { Projection } from "../../geo/projection/projection";
-
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
 
@@ -30,6 +28,7 @@ export type TypeCGPV = {
   ui: Object;
   useTranslation: Object;
   types: Object;
+  constants: Object;
 };
 
 export type TypeCallback = (callback: () => void) => void;

@@ -1,13 +1,11 @@
-import { CSSProperties } from "react";
-
-import { createTheme, DeprecatedThemeOptions, adaptV4Theme, Variant, TypographyStyleOptions } from "@mui/material/styles";
+import { createTheme, ThemeOptions } from "@mui/material/styles";
 
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
   fontWeight: 700,
 };
 
-const themeOptions: DeprecatedThemeOptions = {
+const themeOptions: ThemeOptions = {
   palette: {
     primary: {
       light: "#ffffff",
@@ -65,9 +63,9 @@ const themeOptions: DeprecatedThemeOptions = {
     values: {
       xs: 0,
       sm: 600,
-      md: 960,
-      lg: 1280,
-      xl: 1920,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
     },
   },
   zIndex: {
@@ -79,7 +77,7 @@ const themeOptions: DeprecatedThemeOptions = {
     snackbar: 1400,
     tooltip: 1500,
     leafletControl: 500,
-    focusDialog: 100,
+    focusDialog: 1300,
   },
   transitions: {
     duration: {
@@ -110,9 +108,28 @@ const themeOptions: DeprecatedThemeOptions = {
   },
   shape: {
     borderRadius: 6,
-    left: "0%",
     center: "50%",
     right: "100%",
+    left: "0%",
+  },
+  components: {
+    MuiFab: {
+      styleOverrides: {
+        root: { padding: "0 24px" },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: { position: "relative" },
+      },
+    },
+    MuiButtonGroup: {
+      styleOverrides: {
+        grouped: {
+          minWidth: "auto",
+        },
+      },
+    },
   },
   overrides: {
     button: {
@@ -124,33 +141,7 @@ const themeOptions: DeprecatedThemeOptions = {
     crosshairIcon: {
       size: { width: 275, height: 275 },
     },
-    MuiFab: {
-      extended: {
-        padding: "0 24px",
-      },
-      label: {
-        fontSize: "1rem",
-      },
-    },
-    MuiDrawer: {
-      paper: { position: "relative" },
-    },
   },
 };
 
-type TypeTypography = Partial<Record<Variant, TypographyStyleOptions>>;
-export const styles: Record<string, CSSProperties> = {
-  buttonIcon: {
-    width: "1em",
-    height: "1em",
-    display: "inherit",
-    fontSize: (themeOptions.typography as TypeTypography).button?.fontSize,
-    alignItems: "inherit",
-    justifyContent: "inherit",
-    transition: "fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-    flexShrink: 0,
-    userSelect: "none",
-  },
-};
-
-export const theme = createTheme(adaptV4Theme(themeOptions));
+export const theme = createTheme(themeOptions);
