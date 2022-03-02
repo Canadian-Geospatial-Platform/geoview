@@ -266,9 +266,9 @@ export const CONST_VECTOR_TYPES = {
  * Interface for panel properties
  */
 export type TypePanelAppProps = {
-  panel: PanelApi;
+  panel: TypePanelProps;
   //   panelOpen: boolean;
-  button: ButtonApi;
+  button: TypeButtonProps;
 };
 
 /**
@@ -457,16 +457,17 @@ export const CONST_PANEL_TYPES = {
  * Interface for the panel properties used when creating a new panel
  */
 export type TypePanelProps = {
+  buttonId?: string;
   // panel type (appbar, navbar)
-  type?: string;
+  type: "appbar" | "navbar";
   // panel open status (open/closed)
   status?: boolean;
   // width of the panel
-  width: string | number;
+  width?: string | number;
   // panel header icon
-  icon: React.ReactNode | Element;
+  icon?: React.ReactNode | Element;
   // panel header title
-  title: string;
+  title?: string;
   // panel body content
   content?: React.ReactNode | Element;
 };

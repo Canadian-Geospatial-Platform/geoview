@@ -23,6 +23,9 @@ declare module "@mui/styles/defaultTheme" {
   interface DefaultTheme extends Theme {}
 }
 
+// create a state that will hold map config information
+export const MapContext = React.createContext<TypeMapConfigProps | Object>({});
+
 /**
  * interface used when passing configuration from the maps
  */
@@ -50,7 +53,9 @@ const AppStart = (props: AppStartProps): JSX.Element => {
 
     return (
       <I18nextProvider i18n={i18nInstance}>
-        <Shell id={configObj.id!} config={configObj} />
+        <MapContext.Provider value={configObj}>
+          <Shell id={configObj.id!} config={configObj} />
+        </MapContext.Provider>
       </I18nextProvider>
     );
   }

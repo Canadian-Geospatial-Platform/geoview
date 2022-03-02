@@ -1,12 +1,18 @@
-import { Typography } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
 
 import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
 
 /**
- * Create a layers button panel for the appbar
+ * Create a default button panel for the appbar
  */
-export const LayersPanel: TypeButtonPanelProps = {
+export const DefaultPanel: TypeButtonPanelProps = {
   button: {
     id: "default-panel",
     tooltip: "Default",
@@ -18,10 +24,22 @@ export const LayersPanel: TypeButtonPanelProps = {
     title: "Default",
     icon: HelpIcon,
     content: (
-      <Typography variant="body2" color="textSecondary" component="p">
-        This is a placeholder panel for the panel components
-      </Typography>
+      <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">Age</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={10}
+          label="Age"
+          onChange={() => {}}
+        >
+          <MenuItem value={10}>Ten</MenuItem>
+          <MenuItem value={20}>Twenty</MenuItem>
+          <MenuItem value={30}>Thirty</MenuItem>
+        </Select>
+      </FormControl>
     ),
     width: 300,
+    status: false,
   },
 };
