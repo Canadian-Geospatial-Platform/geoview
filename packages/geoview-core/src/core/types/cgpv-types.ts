@@ -443,6 +443,8 @@ export type TypeButtonProps = {
   children?: TypeChildren;
   // focus used for accessibility to enable focus
   autoFocus?: boolean;
+  // button disabling
+  disabled?: boolean;
 };
 
 /**

@@ -18,6 +18,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { useState, useEffect } = react;
   const [layersData, setLayersData] = useState({});
 
+  const { AddLayerStepper } = ui.elements;
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
       display: "flex",
@@ -30,7 +31,8 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
   return (
     <div className={classes.mainContainer}>
-      <LayersList layersData={layersData} />
+      {/* <LayersList layersData={layersData} /> */}
+      <AddLayerStepper mapId={mapId} />
     </div>
   );
 };

@@ -1,5 +1,6 @@
+export * from "./add-layer-stepper";
 export * from "./button";
-export * from "./button-group/button-group";
+export * from "./button-group";
 export * from "./circular-progress/circular-progress";
 export * from "./dialog/dialog";
 export * from "./divider/divider";
