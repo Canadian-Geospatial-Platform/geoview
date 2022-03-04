@@ -238,66 +238,47 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
     </>
   );
 
-  const Step1 = () => (
-    <>
-      <StepLabel>Upload data</StepLabel>
-      <StepContent>
-        <Typography>Upload a file or enter a URL</Typography>
-        <TextField
-          label="URL"
-          variant="standard"
-          value={layerURL}
-          onChange={handleInput}
-        />
-        <NavButtons isFirst />
-      </StepContent>
-    </>
-  );
-
-  const Step2 = () => (
-    <>
-      <StepLabel>Select format</StepLabel>
-      <StepContent>
-        <FormControl fullWidth>
-          <InputLabel id="service-type-label">Service Type</InputLabel>
-          <Select
-            labelId="service-type-label"
-            value={layerType}
-            onChange={handleSelectType}
-            label="Service Type"
-          >
-            {layerOptions.map(([value, label]) => (
-              <MenuItem key={value} value={value}>
-                {label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <NavButtons />
-      </StepContent>
-    </>
-  );
-
-  const Step3 = () => (
-    <>
-      <StepLabel>Configure layer</StepLabel>
-      <StepContent>
-        <LayersList />
-        <NavButtons isLast />
-      </StepContent>
-    </>
-  );
-
   return (
     <Stepper activeStep={activeStep} orientation="vertical">
       <Step>
-        <Step1 />
+        <StepLabel>Enter URL</StepLabel>
+        <StepContent>
+          <TextField
+            label="URL"
+            variant="standard"
+            value={layerURL}
+            onChange={handleInput}
+          />
+          <NavButtons isFirst />
+        </StepContent>
       </Step>
       <Step>
-        <Step2 />
+        <StepLabel>Select format</StepLabel>
+        <StepContent>
+          <FormControl fullWidth>
+            <InputLabel id="service-type-label">Service Type</InputLabel>
+            <Select
+              labelId="service-type-label"
+              value={layerType}
+              onChange={handleSelectType}
+              label="Service Type"
+            >
+              {layerOptions.map(([value, label]) => (
+                <MenuItem key={value} value={value}>
+                  {label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <NavButtons />
+        </StepContent>
       </Step>
       <Step>
-        <Step3 />
+        <StepLabel>Configure layer</StepLabel>
+        <StepContent>
+          <LayersList />
+          <NavButtons isLast />
+        </StepContent>
       </Step>
     </Stepper>
   );
