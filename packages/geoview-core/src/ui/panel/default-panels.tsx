@@ -4,9 +4,9 @@ import HelpIcon from "@mui/icons-material/Help";
 import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
 
 /**
- * Create a layers button panel for the appbar
+ * Create a default button panel for the appbar
  */
-export const LayersPanel: TypeButtonPanelProps = {
+export const DefaultPanel: TypeButtonPanelProps = {
   button: {
     id: "default-panel",
     tooltip: "Default",
@@ -23,5 +23,6 @@ export const LayersPanel: TypeButtonPanelProps = {
       </Typography>
     ),
     width: 300,
+    status: false,
   },
 };

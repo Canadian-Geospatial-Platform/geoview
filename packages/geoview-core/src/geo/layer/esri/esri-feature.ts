@@ -2,10 +2,15 @@ import axios from "axios";
 
 import { Layer } from "leaflet";
 
-import { featureLayer, mapService } from "esri-leaflet";
+import {
+  featureLayer,
+  mapService as esriMapService,
+  MapService,
+} from "esri-leaflet";
 
 import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
+import { generateId } from "../../../core/utils/utilities";
 
 import { api } from "../../../api/api";
 
@@ -16,8 +21,40 @@ import { api } from "../../../api/api";
  * @class EsriFeature
  */
 export class EsriFeature {
+  // layer id with default
+  id: string;
+
   // layer name with default
-  name: string = "Esri Feature Layer";
+  name?: string = "Esri Feature Layer";
+
+  // layer type
+  type: string;
+
+  // layer from leaflet
+  layer: Layer | string;
+
+  //layer or layer service url
+  url: string;
+
+  //mapService property
+  mapService: MapService;
+
+  /**
+   * Initialize layer
+   *
+   * @param {TypeLayerConfig} layerConfig the layer configuration
+   */
+  constructor(layerConfig: TypeLayerConfig) {
+    this.id = layerConfig.id || generateId("");
+    if (layerConfig.hasOwnProperty("name")) this.name = layerConfig.name;
+    this.type = layerConfig.type;
+    this.url = layerConfig.url;
+    this.layer = new Layer();
+    this.mapService = esriMapService({
+      url: api.geoUtilities.getMapServerUrl(layerConfig.url),
+    });
+  }
+
   /**
    * Add a ESRI feature layer to the map.
    *
@@ -29,10 +66,7 @@ export class EsriFeature {
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
-        const { name, type } = JSON.parse(value);
-
-        if (layer.hasOwnProperty("name")) this.name = layer.name;
-        else if (name) this.name = name;
+        const { type } = JSON.parse(value);
 
         // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
         // if the path is bad, return will be {}
@@ -45,31 +79,6 @@ export class EsriFeature {
             url: layer.url,
           });
 
-          Object.defineProperties(feat, {
-            mapService: {
-              value: mapService({
-                url: api.geoUtilities.getMapServerUrl(layer.url),
-              }),
-            },
-            getMeta: {
-              value: function _getLegendJson() {
-                return feat.metadata(function (error, metadata) {
-                  return metadata;
-                });
-              },
-            },
-            getLegendJson: {
-              value: function _getLegendJson() {
-                let queryUrl =
-                  layer.url.substr(-1) === "/" ? layer.url : layer.url + "/";
-                queryUrl += "legend?f=pjson";
-                return axios.get(queryUrl).then((res) => {
-                  return res.data;
-                });
-              },
-            },
-          });
-
           resolve(feat);
         } else {
           resolve("{}");
@@ -79,4 +88,29 @@ export class EsriFeature {
 
     return new Promise((resolve) => resolve(geo));
   }
+
+  /**
+   * Get metadata of the current service
+   *
+   @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   */
+  getMetadata = async (): Promise<Record<string, unknown>> => {
+    const response = await fetch(`${this.url}?f=json`);
+    const result = await response.json();
+
+    return result;
+  };
+
+  /**
+   * Get legend configuration of the current layer
+   *
+   * @returns {any} legend configuration in json format
+   */
+  getLegendJson = (): any => {
+    let queryUrl = this.url.substr(-1) === "/" ? this.url : this.url + "/";
+    queryUrl += "legend?f=pjson";
+    return axios.get(queryUrl).then((res) => {
+      return res.data;
+    });
+  };
 }

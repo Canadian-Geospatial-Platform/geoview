@@ -83,10 +83,6 @@ export const EVENT_NAMES = {
   EVENT_NAVBAR_BUTTON_PANEL_REMOVE: "navbar/button_panel_remove",
 
   /**
-   * Event triggered when a panel has been opened or closed
-   */
-  EVENT_PANEL_OPEN_CLOSE: "panel/open_close",
-  /**
    * Event triggered when a request is made to open a panel
    */
   EVENT_PANEL_OPEN: "panel/open",
@@ -102,10 +98,6 @@ export const EVENT_NAMES = {
    * Event triggered when a request is made to remove an action button
    */
   EVENT_PANEL_REMOVE_ACTION: "panel/remove_action",
-  /**
-   * Event triggered when a request is made to change panel header title
-   */
-  EVENT_PANEL_CHANGE_TITLE: "panel/change_title",
   /**
    * Event triggered when a request is made to change panel content
    */

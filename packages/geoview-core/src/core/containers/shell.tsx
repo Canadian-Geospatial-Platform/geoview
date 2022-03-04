@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from "@mui/styles/makeStyles";
-
 import FocusTrap from "focus-trap-react";
 
-import { TypeMapConfigProps } from "../types/cgpv-types";
+import makeStyles from "@mui/styles/makeStyles";
+
 import { Map } from "../components/map/map";
+import { Appbar } from "../components/appbar/app-bar";
+import { Navbar } from "../components/navbar/nav-bar";
+
 import { FocusTrapDialog } from "./focus-trap";
+import { TypeMapConfigProps } from "../types/cgpv-types";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
@@ -25,7 +28,6 @@ const useStyles = makeStyles((theme) => {
       overflow: "hidden",
       zIndex: -1,
       height: "100%",
-      pointerEvents: "none",
     },
     skip: {
       position: "absolute",
@@ -108,6 +110,8 @@ export function Shell(props: ShellProps): JSX.Element {
         >
           {t("keyboardnav.start")}
         </a>
+        <Appbar />
+        <Navbar />
         <Map
           id={id}
           center={config.center}

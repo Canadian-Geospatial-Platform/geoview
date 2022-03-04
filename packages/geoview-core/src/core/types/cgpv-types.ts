@@ -118,7 +118,7 @@ export const CONST_LAYER_TYPES = {
  */
 export type TypeLayerConfig = {
   id?: string;
-  name: string;
+  name?: string;
   url: string;
   type: string;
   entries?: string;
@@ -321,7 +321,7 @@ export type TypePanelContentProps = {
  * Interface used when creating a map to validate configuration object
  */
 export type TypeMapConfigProps = {
-  id?: string;
+  id: string;
   name?: string;
   center: L.LatLngTuple;
   zoom: number;

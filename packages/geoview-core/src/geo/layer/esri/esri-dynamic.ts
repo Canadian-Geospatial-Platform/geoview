@@ -2,10 +2,15 @@ import axios from "axios";
 
 import { Layer } from "leaflet";
 
-import { dynamicMapLayer, mapService } from "esri-leaflet";
+import {
+  dynamicMapLayer,
+  mapService as esriMapService,
+  MapService,
+} from "esri-leaflet";
 
 import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
+import { generateId } from "../../../core/utils/utilities";
 
 import { api } from "../../../api/api";
 
@@ -16,8 +21,46 @@ import { api } from "../../../api/api";
  * @class EsriDynamic
  */
 export class EsriDynamic {
+  // layer id with default
+  id: string;
+
   // layer name with default
-  name: string = "Esri Dynamic Layer";
+  name?: string = "Esri Dynamic Layer";
+
+  // layer type
+  type: string;
+
+  // layer from leaflet
+  layer: Layer | string;
+
+  //layer or layer service url
+  url: string;
+
+  //mapService property
+  mapService: MapService;
+
+  //service entries
+  entries?: number[];
+
+  /**
+   * Initialize layer
+   *
+   * @param {TypeLayerConfig} layerConfig the layer configuration
+   */
+  constructor(layerConfig: TypeLayerConfig) {
+    this.id = layerConfig.id || generateId("");
+    if (layerConfig.hasOwnProperty("name")) this.name = layerConfig.name;
+    this.type = layerConfig.type;
+    this.url = layerConfig.url;
+    this.layer = new Layer();
+    let entries = layerConfig.entries?.split(",").map((item: string) => {
+      return parseInt(item, 10);
+    });
+    this.entries = entries?.filter((item) => !Number.isNaN(item));
+    this.mapService = esriMapService({
+      url: api.geoUtilities.getMapServerUrl(layerConfig.url),
+    });
+  }
 
   /**
    * Add a ESRI dynamic layer to the map.
@@ -31,65 +74,20 @@ export class EsriDynamic {
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
         // get layers from service and parse layer entries as number
-        const { mapName, layers } = JSON.parse(value);
-
-        if (layer.hasOwnProperty("name")) this.name = layer.name;
-        else if (mapName) this.name = mapName;
-
-        let entries = layer.entries?.split(",").map((item: string) => {
-          return parseInt(item, 10);
-        });
-        entries = entries?.filter((item) => !Number.isNaN(item));
+        const { layers } = JSON.parse(value);
 
         // check if the entries are part of the service
         if (
           value !== "{}" &&
           layers &&
           layers.find((item: Record<string, number>) =>
-            entries?.includes(item.id)
+            this.entries?.includes(item.id)
           )
         ) {
           const feat = dynamicMapLayer({
             url: layer.url,
-            layers: entries,
+            layers: this.entries,
             attribution: "",
-          });
-
-          Object.defineProperties(feat, {
-            mapService: {
-              value: mapService({
-                url: api.geoUtilities.getMapServerUrl(layer.url),
-              }),
-            },
-            getMeta: {
-              value: function _getLegendJson() {
-                return feat.metadata(function (error, metadata) {
-                  return metadata;
-                });
-              },
-            },
-
-            getLegendJson: {
-              value: function _getLegendJson() {
-                let queryUrl =
-                  layer.url.substr(-1) === "/" ? layer.url : layer.url + "/";
-                queryUrl += "legend?f=pjson";
-
-                return axios.get(queryUrl).then((res) => {
-                  let data = res.data;
-                  let entryArray = feat.getLayers();
-
-                  if (entryArray.length > 0) {
-                    let result = data.layers.filter((item: any) => {
-                      return entryArray.includes(item.layerId);
-                    });
-                    return result;
-                  } else {
-                    return data.layers;
-                  }
-                });
-              },
-            },
           });
 
           resolve(feat);
@@ -101,4 +99,52 @@ export class EsriDynamic {
 
     return new Promise((resolve) => resolve(geo));
   }
+
+  /**
+   * Get metadata of the current service
+   *
+   @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   */
+  getMetadata = async (): Promise<Record<string, unknown>> => {
+    // const feat = featureLayer({
+    //   url: this.url,
+    // });
+    // return feat.metadata(function (error, metadata) {
+    //   return metadata;
+    // });
+    const response = await fetch(`${this.url}?f=json`);
+    const result = await response.json();
+
+    return result;
+  };
+
+  /**
+   * Get legend configuration of the current layer
+   *
+   * @returns {any} legend configuration in json format
+   */
+  getLegendJson = (): any => {
+    let queryUrl = this.url.substr(-1) === "/" ? this.url : this.url + "/";
+    queryUrl += "legend?f=pjson";
+
+    const feat = dynamicMapLayer({
+      url: this.url,
+      layers: this.entries,
+      attribution: "",
+    });
+
+    return axios.get(queryUrl).then((res) => {
+      let data = res.data;
+      let entryArray = feat.getLayers();
+
+      if (entryArray.length > 0) {
+        let result = data.layers.filter((item: any) => {
+          return entryArray.includes(item.layerId);
+        });
+        return result;
+      } else {
+        return data.layers;
+      }
+    });
+  };
 }

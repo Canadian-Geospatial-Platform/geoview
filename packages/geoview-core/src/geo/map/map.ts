@@ -110,6 +110,9 @@ export class MapViewer {
     this.i18nInstance = i18n;
     this.currentZoom = mapProps.zoom;
     this.currentPosition = new LatLng(mapProps.center[0], mapProps.center[1]);
+
+    this.appBarButtons = new AppbarButtons(this.id);
+    this.navBarButtons = new NavbarButtons(this.id);
   }
 
   /**
@@ -239,10 +242,7 @@ export class MapViewer {
   /**
    * Function called when the map has been rendered and ready to be customized
    */
-  mapReady = (): void => {
-    this.appBarButtons = new AppbarButtons(this.id);
-    this.navBarButtons = new NavbarButtons(this.id);
-  };
+  mapReady = (): void => {};
 
   /**
    * Change the language of the map

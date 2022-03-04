@@ -302,7 +302,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
             // clear previous entry data for this layer
             clearResults(dataKey, l);
 
-            const layerMap = Cast<{ _map: L.Map }>(layer)._map;
+            const layerMap = Cast<{ _map: L.Map }>(layer.layer)._map;
             // get map size
             const size = layerMap.getSize();
 
@@ -319,42 +319,69 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
               },
             };
 
-            // TODO check layer type if WMS then use getFeatureInfo to query the data
+            //check layer type if WMS then use getFeatureInfo to query the data
+            let res = null;
 
-            // generate an identify query url
-            const identifyUrl =
-              `${layer.mapService.options.url}identify?` +
-              `f=json` +
-              `&tolerance=3` +
-              `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
-              `&imageDisplay=${size.x},${size.y},96` +
-              `&layers=visible:${layers[l].layer.id}` +
-              `&returnFieldName=true` +
-              `&sr=4326` +
-              `&returnGeometry=true` +
-              `&geometryType=esriGeometryPoint&geometry=${latlng.lng},${latlng.lat}`;
+            if (layer.type == "ogcWMS") {
+              res = await layer.getFeatureInfo(latlng, layerMap);
 
-            // fetch the result from the map server
-            const response = await fetch(identifyUrl);
-            const res = (await response.json()) as { results: TypeEntry[] };
+              if (res && res.results && res.results.length > 0) {
+                layersFound.push({
+                  layer: layers[l],
+                  entries: res.results,
+                } as TypeFoundLayers);
 
-            if (res && res.results && res.results.length > 0) {
-              layersFound.push({
-                layer: layers[l],
-                entries: res.results,
-              } as TypeFoundLayers);
+                // add the found entries to the array
+                layers[l].layerData?.push(...res.results);
 
-              // add the found entries to the array
-              layers[l].layerData?.push(...res.results);
+                // save the data
+                setLayersData((prevState: any) => ({
+                  ...prevState,
+                  [dataKey]: {
+                    ...prevState[dataKey],
+                    layers,
+                  },
+                }));
+              }
+            } else if (
+              layer.type == "esriFeature" ||
+              layer.type == "esriDynamic"
+            ) {
+              // generate an identify query url
+              const identifyUrl =
+                `${layer.mapService.options.url}identify?` +
+                `f=json` +
+                `&tolerance=7` +
+                `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
+                `&imageDisplay=${size.x},${size.y},96` +
+                `&layers=visible:${layers[l].layer.id}` +
+                `&returnFieldName=true` +
+                `&sr=4326` +
+                `&returnGeometry=true` +
+                `&geometryType=esriGeometryPoint&geometry=${latlng.lng},${latlng.lat}`;
 
-              // save the data
-              setLayersData((prevState: any) => ({
-                ...prevState,
-                [dataKey]: {
-                  ...prevState[dataKey],
-                  layers,
-                },
-              }));
+              // fetch the result from the map server
+              const response = await fetch(identifyUrl);
+              res = (await response.json()) as { results: TypeEntry[] };
+
+              if (res && res.results && res.results.length > 0) {
+                layersFound.push({
+                  layer: layers[l],
+                  entries: res.results,
+                } as TypeFoundLayers);
+
+                // add the found entries to the array
+                layers[l].layerData?.push(...res.results);
+
+                // save the data
+                setLayersData((prevState: any) => ({
+                  ...prevState,
+                  [dataKey]: {
+                    ...prevState[dataKey],
+                    layers,
+                  },
+                }));
+              }
             }
           }
         }
@@ -399,16 +426,6 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         selectLayersList();
       }
 
-      // emit an event to display a marker on the click position
-      // if there is only one layer with entries the symbology will be of that layer
-      // if there is multiple layers with entries then symbology will be of the first layer
-      // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
-      // if no layers contains any entry then the default symbology with crosshair will show
-      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
-        latlng,
-        symbology,
-      });
-
       // save click position
       setClickPos(latlng);
 
@@ -419,11 +436,21 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         `[data-id=${buttonPanel.id}]`
       )[0];
 
+      // emit an event to display a marker on the click position
+      // if there is only one layer with entries the symbology will be of that layer
+      // if there is multiple layers with entries then symbology will be of the first layer
+      // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
+      // if no layers contains any entry then the default symbology with crosshair will show
+      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
+        latlng,
+        symbology,
+      });
+
       // set focus to the close button of the panel
       if (panelContainer) {
         const closeBtn =
           panelContainer.querySelectorAll(".cgpv-panel-close")[0];
-        (closeBtn as HTMLElement).focus();
+        if (closeBtn) (closeBtn as HTMLElement).focus();
       }
     },
     [
@@ -447,14 +474,18 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     const data: Record<string, TypeLayerData> = {};
 
     // loop through each map server layer loaded from the map config and created using the API
-    mapLayers.forEach(async (mapLayer: TypeLayerData) => {
+    const layerIds = Object.keys(mapLayers);
+
+    layerIds.forEach(async (id: string) => {
+      let mapLayer = mapLayers[id];
       data[mapLayer.id] = {
         // the map server layer id
         id: mapLayer.id,
+        name: mapLayer.name,
         // the type of the map server layer (WMS, Dynamic, Feature)
         type: mapLayer.type,
         // the layer class
-        layer: mapLayer.layer,
+        layer: mapLayer,
         // an object that will contains added layers from the map server layer
         layers: {},
       };
@@ -462,34 +493,36 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       // check each map server layer type and add it to the layers object of the map server in the data array
       if (mapLayer.type === "ogcWMS") {
         // get layer ids / entries from the loaded WMS layer
-        const { entries } = mapLayer.layer;
+        const { entries } = mapLayer;
 
-        for (let i = 0; i < entries.length; i++) {
-          const layerId = entries[i];
+        if (entries)
+          for (let i = 0; i < entries.length; i++) {
+            const layerId = entries[i];
 
-          // query the layer information
-          const layerInfo = await queryServer(
-            mapLayer.layer.mapService.options.url + layerId
-          );
+            // query the layer information
+            const layerInfo = await queryServer(
+              mapLayer.mapService.options.url + layerId
+            );
 
-          // try to add the legend image url for the WMS layer
-          const legendImageUrl = `${mapLayer.layer._url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
+            // try to add the legend image url for the WMS layer
+            //const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
+            const legendImageUrl = mapLayer.getLegendGraphic(layerId);
 
-          // assign the url to the renderer
-          if (
-            layerInfo.drawingInfo &&
-            layerInfo.drawingInfo.renderer &&
-            layerInfo.drawingInfo.renderer.symbol
-          ) {
-            Object.defineProperties(layerInfo.drawingInfo.renderer.symbol, {
-              legendImageUrl: {
-                value: legendImageUrl,
-              },
-            });
+            // assign the url to the renderer
+            if (
+              layerInfo.drawingInfo &&
+              layerInfo.drawingInfo.renderer &&
+              layerInfo.drawingInfo.renderer.symbol
+            ) {
+              Object.defineProperties(layerInfo.drawingInfo.renderer.symbol, {
+                legendImageUrl: {
+                  value: legendImageUrl,
+                },
+              });
+            }
+
+            addLayer(mapLayer, data, layerInfo, false);
           }
-
-          addLayer(mapLayer, data, layerInfo, false);
-        }
       } else if (mapLayer.type === "esriFeature") {
         // query the layer information, feature layer URL will end by a number provided in the map config
         const layerInfo = await queryServer(mapLayer.layer.options.url);
