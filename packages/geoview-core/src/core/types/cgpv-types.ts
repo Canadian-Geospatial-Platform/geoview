@@ -266,9 +266,9 @@ export const CONST_VECTOR_TYPES = {
  * Interface for panel properties
  */
 export type TypePanelAppProps = {
-  panel: TypePanelProps;
+  panel: PanelApi;
   //   panelOpen: boolean;
-  button: TypeButtonProps;
+  button: ButtonApi;
 };
 
 /**
@@ -321,7 +321,7 @@ export type TypePanelContentProps = {
  * Interface used when creating a map to validate configuration object
  */
 export type TypeMapConfigProps = {
-  id?: string;
+  id: string;
   name?: string;
   center: L.LatLngTuple;
   zoom: number;
@@ -457,17 +457,16 @@ export const CONST_PANEL_TYPES = {
  * Interface for the panel properties used when creating a new panel
  */
 export type TypePanelProps = {
-  buttonId?: string;
   // panel type (appbar, navbar)
-  type: "appbar" | "navbar";
+  type?: string;
   // panel open status (open/closed)
   status?: boolean;
   // width of the panel
-  width?: string | number;
+  width: string | number;
   // panel header icon
-  icon?: React.ReactNode | Element;
+  icon: React.ReactNode | Element;
   // panel header title
-  title?: string;
+  title: string;
   // panel body content
   content?: React.ReactNode | Element;
 };

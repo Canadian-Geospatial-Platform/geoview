@@ -325,7 +325,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
             const identifyUrl =
               `${layer.mapService.options.url}identify?` +
               `f=json` +
-              `&tolerance=3` +
+              `&tolerance=10` +
               `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
               `&imageDisplay=${size.x},${size.y},96` +
               `&layers=visible:${layers[l].layer.id}` +
@@ -334,27 +334,31 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
               `&returnGeometry=true` +
               `&geometryType=esriGeometryPoint&geometry=${latlng.lng},${latlng.lat}`;
 
-            // fetch the result from the map server
-            const response = await fetch(identifyUrl);
-            const res = (await response.json()) as { results: TypeEntry[] };
+            try {
+              // fetch the result from the map server
+              const response = await fetch(identifyUrl);
+              const res = (await response.json()) as { results: TypeEntry[] };
 
-            if (res && res.results && res.results.length > 0) {
-              layersFound.push({
-                layer: layers[l],
-                entries: res.results,
-              } as TypeFoundLayers);
+              if (res && res.results && res.results.length > 0) {
+                layersFound.push({
+                  layer: layers[l],
+                  entries: res.results,
+                } as TypeFoundLayers);
 
-              // add the found entries to the array
-              layers[l].layerData?.push(...res.results);
+                // add the found entries to the array
+                layers[l].layerData?.push(...res.results);
 
-              // save the data
-              setLayersData((prevState: any) => ({
-                ...prevState,
-                [dataKey]: {
-                  ...prevState[dataKey],
-                  layers,
-                },
-              }));
+                // save the data
+                setLayersData((prevState: any) => ({
+                  ...prevState,
+                  [dataKey]: {
+                    ...prevState[dataKey],
+                    layers,
+                  },
+                }));
+              }
+            } catch (error) {
+              console.log(error);
             }
           }
         }
@@ -399,16 +403,6 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         selectLayersList();
       }
 
-      // emit an event to display a marker on the click position
-      // if there is only one layer with entries the symbology will be of that layer
-      // if there is multiple layers with entries then symbology will be of the first layer
-      // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
-      // if no layers contains any entry then the default symbology with crosshair will show
-      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
-        latlng,
-        symbology,
-      });
-
       // save click position
       setClickPos(latlng);
 
@@ -419,11 +413,21 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         `[data-id=${buttonPanel.id}]`
       )[0];
 
+      // emit an event to display a marker on the click position
+      // if there is only one layer with entries the symbology will be of that layer
+      // if there is multiple layers with entries then symbology will be of the first layer
+      // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
+      // if no layers contains any entry then the default symbology with crosshair will show
+      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
+        latlng,
+        symbology,
+      });
+
       // set focus to the close button of the panel
       if (panelContainer) {
         const closeBtn =
           panelContainer.querySelectorAll(".cgpv-panel-close")[0];
-        (closeBtn as HTMLElement).focus();
+        if (closeBtn) (closeBtn as HTMLElement).focus();
       }
     },
     [

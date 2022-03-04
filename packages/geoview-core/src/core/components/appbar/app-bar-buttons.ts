@@ -100,7 +100,7 @@ export class AppbarButtons {
       }
 
       // set panel type
-      panelProps.type = CONST_PANEL_TYPES.APPBAR as "appbar";
+      panelProps.type = CONST_PANEL_TYPES.APPBAR;
 
       const buttonPanel: TypeButtonPanel = {
         id: buttonProps.id,

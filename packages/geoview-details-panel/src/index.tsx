@@ -65,9 +65,9 @@ class DetailsPlugin {
       id: "detailsPanelButton",
       tooltip: this.translations[language].detailsPanel,
       tooltipPlacement: "right",
-      icon: '<i class="material-icons">details</i><div>Test</div>',
+      icon: '<i class="material-icons">details</i>',
       visible: false,
-      type: "textWithIcon",
+      type: "icon",
     };
 
     // panel props

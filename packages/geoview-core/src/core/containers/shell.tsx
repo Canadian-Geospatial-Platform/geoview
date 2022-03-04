@@ -14,6 +14,8 @@ import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
 
 import { CircularProgress } from "../../ui";
+import { Appbar } from "../components/appbar/app-bar";
+import { Navbar } from "../components/navbar/nav-bar";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -25,7 +27,6 @@ const useStyles = makeStyles((theme) => {
       overflow: "hidden",
       zIndex: -1,
       height: "100%",
-      pointerEvents: "none",
     },
     skip: {
       position: "absolute",
@@ -108,6 +109,8 @@ export function Shell(props: ShellProps): JSX.Element {
         >
           {t("keyboardnav.start")}
         </a>
+        <Appbar />
+        <Navbar />
         <Map
           id={id}
           center={config.center}

@@ -1,30 +1,32 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-nested-ternary */
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useContext,
+} from "react";
 
 import { useTranslation } from "react-i18next";
 
+import makeStyles from "@mui/styles/makeStyles";
+
+import { Card, CardHeader, CardContent } from "@mui/material";
+
 import FocusTrap from "focus-trap-react";
 
-import { DomEvent } from "leaflet";
-
-import makeStyles from "@mui/styles/makeStyles";
-import { Card, CardContent, CardHeader, Divider } from "@mui/material";
-
-import { CloseIcon, IconButton } from "..";
-
-import { MapContext } from "../../core/app-start";
-import { HtmlToReact } from "../../core/containers/html-to-react";
-import {
-  TypePanelProps,
-  TypeMapConfigProps,
-  TypeChildren,
-  Cast,
-} from "../../core/types/cgpv-types";
+import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
+import { HtmlToReact } from "../../core/containers/html-to-react";
+
+import { IconButton, CloseIcon, Divider, Fade } from "..";
+import { MapContext } from "../../core/app-start";
 
 const useStyles = makeStyles((theme) => ({
-  panelContainer: {
+  root: {
     minWidth: 300,
     width: 300,
     height: "100%",
@@ -63,122 +65,191 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const Panel = (props: TypePanelProps): JSX.Element => {
-  const { title, icon, content, status, type, width, buttonId } = props;
+/**
+ * Create a panel with a header title, icon and content
+ * @param {TypePanelAppProps} props panel properties
+ *
+ * @returns {JSX.Element} the created Panel element
+ */
+export const Panel = (props: TypePanelAppProps): JSX.Element => {
+  const { panel, button } = props;
 
-  const mapConfig = useContext(MapContext) as TypeMapConfigProps;
+  // set the active trap value for FocusTrap
+  const [panelStatus, setPanelStatus] = useState(false);
 
-  // panel props
-  const [panelTitle, setPanelTitle] = useState<string | undefined>();
-  const [panelContent, setPanelContent] = useState<React.ReactNode | Element>();
-  const [panelIcon, setPanelIcon] = useState<React.ReactNode | Element>();
-  const [panelStatus, setPanelStatus] = useState<boolean | undefined>(false);
-  const [panelType, setPanelType] = useState<"appbar" | "navbar">();
-  const [panelWidth, setPanelWidth] = useState<string | number>();
+  const [actionButtons, setActionButtons] = useState<
+    JSX.Element[] & React.ReactNode[]
+  >([]);
+  const [, updatePanelContent] = useState(0);
+
+  const classes = useStyles(props);
+  const { t } = useTranslation<string>();
+
+  const mapConfig = useContext(MapContext)!;
+  const mapId = mapConfig.id;
 
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  const classes = useStyles();
+  const PanelContent = (panel.content as React.ReactElement).type;
 
-  const { t } = useTranslation();
+  /**
+   * function that causes rerender when changing panel content
+   */
+  const updateComponent = useCallback(() => {
+    updatePanelContent((count) => count + 1);
+  }, []);
 
-  const closePanel = (): void => {
+  /**
+   * Close the panel
+   */
+  function closePanel(): void {
+    // emit an event to hide the marker when using the details panel
+    api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
+
+    const buttonElement = document.getElementById(button.id!);
+
+    if (buttonElement) {
+      // put back focus on calling button
+      document.getElementById(button.id!)?.focus();
+    } else {
+      const mapCont = api.map(mapConfig.id).map.getContainer();
+      mapCont.focus();
+
+      // if in focus trap mode, trigger the event
+      if (mapCont.closest(".llwp-map")?.classList.contains("map-focus-trap")) {
+        mapCont.classList.add("keyboard-focus");
+        api.event.emit(
+          EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
+          `leaflet-map-${mapId}`,
+          {}
+        );
+      }
+    }
+
     setPanelStatus(false);
-  };
-
-  const Icon = icon ? (icon as React.ReactElement).type : <></>;
-
-  const map = api.map(mapConfig.id!).map;
+  }
 
   useEffect(() => {
-    if (panelRef && panelRef.current) {
-      // disable events on container
-      DomEvent.disableClickPropagation(panelHeader.current as HTMLElement);
-      DomEvent.disableScrollPropagation(panelRef.current as HTMLElement);
-      panelRef.current.onmouseenter = (e) => map.dragging.disable();
-      panelRef.current.onmouseleave = (e) => map.dragging.enable();
+    // if the panel was still open on reload then close it
+    if (panel.status) {
+      setPanelStatus(true);
     }
 
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if (args.handlerName === mapConfig.id && args.buttonId === buttonId) {
+        if (args.buttonId === button.id! && args.handlerId === mapId) {
           // set focus on close button on panel open
-          setTimeout(() => {
-            setPanelStatus(true);
+          setPanelStatus(true);
 
-            if (closeBtnRef && closeBtnRef.current) {
-              Cast<HTMLElement>(closeBtnRef.current).focus();
-            }
-          }, 0);
+          if (closeBtnRef && closeBtnRef.current) {
+            Cast<HTMLElement>(closeBtnRef.current).focus();
+          }
         }
       },
-      mapConfig.id
+      mapId
     );
 
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if (args.handlerName === mapConfig.id && args.buttonId === buttonId)
+        if (args.buttonId === button.id! && args.handlerId === mapId)
           closePanel();
       },
-      mapConfig.id
+      mapId
     );
 
+    // listen to add action button event
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_ADD_ACTION,
+      (args) => {
+        if (args.buttonId === button.id!) {
+          const { actionButton } = args;
+
+          setActionButtons((prev) => [
+            ...prev,
+            <IconButton
+              key={actionButton.id}
+              tooltip={actionButton.title}
+              tooltipPlacement="right"
+              id={actionButton.id}
+              ariaLabel={actionButton.title}
+              onClick={actionButton.action}
+              size="large"
+            >
+              {typeof actionButton.icon === "string" ? (
+                <HtmlToReact
+                  style={{
+                    display: "flex",
+                  }}
+                  htmlContent={actionButton.icon}
+                />
+              ) : typeof actionButton.icon === "object" ? (
+                actionButton.icon
+              ) : (
+                <actionButton.icon />
+              )}
+            </IconButton>,
+          ]);
+        }
+      },
+      mapId
+    );
+
+    // listen to remove action button event
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION,
+      (args) => {
+        if (args.buttonId === button.id!) {
+          const { actionButtonId } = args;
+          setActionButtons((list) =>
+            list.filter((item) => {
+              return item.props.id !== actionButtonId;
+            })
+          );
+        }
+      },
+      mapId
+    );
+
+    // listen to change panel content and rerender
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
       (args) => {
-        console.log(buttonId);
+        // set focus on close button on panel content change
+        setTimeout(() => {
+          if (closeBtnRef && closeBtnRef.current)
+            Cast<HTMLElement>(closeBtnRef.current).focus();
+        }, 100);
 
-        if (args.handlerName === mapConfig.id && args.buttonId === buttonId) {
-          setPanelContent(args.content);
+        if (args.buttonId === button.id!) {
+          updateComponent();
         }
       },
-      mapConfig.id
-    );
-
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_UPDATE,
-      (args) => {
-        if (args.handlerName === mapConfig.id && args.buttonId === buttonId) {
-          console.log("update");
-          const panelProps = args.panelProps as TypePanelProps;
-
-          setPanelContent(panelProps.content);
-          setPanelTitle(panelProps.title);
-          setPanelWidth(panelProps.width);
-          setPanelType(panelProps.type);
-          setPanelStatus(panelProps.status);
-          setPanelIcon(panelProps.icon);
-        }
-      },
-      mapConfig.id
+      mapId
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapConfig.id);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapConfig.id);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapConfig.id);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_UPDATE, mapConfig.id);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
     };
   }, []);
 
-  let PanelContent = null;
-  if (panelContent && (panelContent as React.ReactElement).type) {
-    PanelContent = (panelContent as React.ReactElement).type;
-  }
-
-  let PanelIcon = null;
-  if (panelIcon && (panelIcon as React.ReactElement).type) {
-    PanelIcon = (panelIcon as React.ReactElement).type;
-  }
+  useEffect(() => {
+    // set focus on close button on panel open
+    if (closeBtnRef && closeBtnRef.current)
+      if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
+  }, [button, closeBtnRef]);
 
   return (
     <FocusTrap
-      active={panelStatus || status}
+      active={panelStatus}
       focusTrapOptions={{
         escapeDeactivates: false,
         clickOutsideDeactivates: true,
@@ -186,76 +257,62 @@ export const Panel = (props: TypePanelProps): JSX.Element => {
     >
       <Card
         ref={panelRef as React.MutableRefObject<null>}
-        className={`leaflet-control ${classes.panelContainer}`}
+        className={`${classes.root}`}
         style={{
-          display: panelStatus || status ? "block" : "none",
+          display: panelStatus ? "block" : "none",
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             closePanel();
           }
         }}
-        // {...{ "data-id": button.id }}
+        {...{ "data-id": button.id }}
       >
         <CardHeader
           className={classes.avatar}
           ref={panelHeader}
           avatar={
-            panelIcon ? (
-              typeof panelIcon === "string" ? (
-                <HtmlToReact
-                  className={classes.buttonIcon}
-                  htmlContent={panelIcon}
-                />
-              ) : typeof panelIcon === "object" ? (
-                <PanelIcon />
-              ) : (
-                <PanelIcon />
-              )
-            ) : typeof icon === "string" ? (
-              <HtmlToReact className={classes.buttonIcon} htmlContent={icon} />
-            ) : typeof icon === "object" ? (
-              <Icon />
+            typeof panel.icon === "string" ? (
+              <HtmlToReact
+                className={classes.buttonIcon}
+                htmlContent={panel.icon}
+              />
+            ) : typeof panel.icon === "object" ? (
+              <panel.icon />
             ) : (
-              <Icon />
+              <panel.icon />
             )
           }
-          title={panelTitle ? t(panelTitle) : title ? t(title) : ""}
+          title={t(panel.title)}
           action={
-            (panelStatus || status) && (
+            panelStatus ? (
               <>
-                {/* {actionButtons} */}
+                {actionButtons}
                 <IconButton
                   tooltip={t("general.close")}
                   tooltipPlacement="right"
                   className="cgpv-panel-close"
                   ariaLabel={t("general.close")}
                   size="large"
-                  onClick={closePanel}
+                  onClick={panel.close}
                   iconRef={closeBtnRef}
                 >
                   <CloseIcon />
                 </IconButton>
               </>
+            ) : (
+              <></>
             )
           }
         />
         <Divider />
         <CardContent className={classes.cardContainer}>
-          {panelContent ? (
-            typeof panelContent === "string" ? (
-              <HtmlToReact htmlContent={panelContent} />
-            ) : typeof panelContent === "object" ? (
-              panelContent
-            ) : (
-              <PanelContent />
-            )
-          ) : typeof content === "string" ? (
-            <HtmlToReact htmlContent={content} />
-          ) : typeof content === "object" ? (
-            content
+          {typeof panel.content === "string" ? (
+            <HtmlToReact htmlContent={panel.content} />
+          ) : typeof panel.content === "object" ? (
+            panel.content
           ) : (
-            <content />
+            <panel.content />
           )}
         </CardContent>
       </Card>

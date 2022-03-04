@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { DomEvent } from "leaflet";
 import { useMap } from "react-leaflet";
@@ -20,6 +20,7 @@ import { EVENT_NAMES } from "../../../api/event";
 import { Panel, ButtonGroup, Button } from "../../../ui";
 
 import { Cast, TypeButtonPanel } from "../../types/cgpv-types";
+import { MapContext } from "../../app-start";
 
 const navBtnWidth = "32px";
 const navBtnHeight = "32px";
@@ -48,8 +49,8 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: theme.spacing(5),
   },
   navBarButton: {
-    backgroundColor: "rgba(255,255,255,1)",
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
     borderRadius: theme.spacing(5),
     width: navBtnWidth,
     height: navBtnHeight,
@@ -57,8 +58,9 @@ const useStyles = makeStyles((theme) => ({
     minWidth: navBtnWidth,
     padding: "initial",
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.dark,
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.light,
+      borderRadius: theme.spacing(5),
     },
   },
 }));
@@ -66,60 +68,24 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Create a navbar with buttons that can call functions or open custom panels
  */
-export function NavBar(): JSX.Element {
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<
-    Record<string, Record<string, TypeButtonPanel>>
-  >({});
+export function Navbar(): JSX.Element {
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const classes = useStyles();
+
   const { t } = useTranslation<string>();
 
   const navBarRef = useRef<HTMLDivElement>(null);
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext)!;
 
-  const mapId = api.mapInstance(map)!.id;
-
-  const addButtonPanel = useCallback(
-    (payload) => {
-      const group = buttonPanelGroups[payload.groupName];
-
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        [payload.groupName]: {
-          ...group,
-          [payload.id]: payload.buttonPanel,
-        },
-      });
-    },
-    [setButtonPanelGroups, buttonPanelGroups]
-  );
-
-  const removeButtonPanel = useCallback(
-    (payload) => {
-      setButtonPanelGroups((prevState) => {
-        const state = { ...prevState };
-
-        const group = state[payload.groupName];
-
-        delete group[payload.id];
-
-        return state;
-      });
-    },
-    [setButtonPanelGroups, buttonPanelGroups]
-  );
+  const mapId = mapConfig.id;
 
   /**
-   * listen to events to open/close the panel and to create the buttons
+   * function that causes rerender when changing navbar content
    */
-  useEffect(() => {
-    // disable events on container
-    const navBarChildrenHTMLElements = Cast<HTMLElement[]>(
-      navBarRef.current?.children
-    );
-    DomEvent.disableClickPropagation(navBarChildrenHTMLElements[0]);
-    DomEvent.disableScrollPropagation(navBarChildrenHTMLElements[0]);
+  const updateComponent = useCallback(() => {
+    setRefreshCount((refresh) => refresh + 1);
   }, []);
 
   useEffect(() => {
@@ -128,7 +94,7 @@ export function NavBar(): JSX.Element {
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
-          addButtonPanel(payload);
+          updateComponent();
         }
       },
       mapId
@@ -139,7 +105,7 @@ export function NavBar(): JSX.Element {
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
-          removeButtonPanel(payload);
+          updateComponent();
         }
       },
       mapId
@@ -149,32 +115,15 @@ export function NavBar(): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
     };
-  }, [addButtonPanel, removeButtonPanel]);
-
-  /**
-   * Close all open panels
-   */
-  const closeAllPanels = (): void => {
-    Object.keys(buttonPanelGroups).map((groupName: string) => {
-      // get button panels from group
-      const buttonPanels = buttonPanelGroups[groupName];
-
-      // get all button panels in each group
-      Object.keys(buttonPanels).map((buttonId) => {
-        const buttonPanel = buttonPanels[buttonId];
-
-        buttonPanel.panel?.close();
-      });
-    });
-  };
+  }, []);
 
   return (
     <div
       ref={navBarRef}
       className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}
     >
-      {Object.keys(buttonPanelGroups).map((groupName) => {
-        const buttons = buttonPanelGroups[groupName];
+      {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
+        const buttons = api.map(mapId).navBarButtons.buttons[groupName];
 
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
@@ -194,8 +143,8 @@ export function NavBar(): JSX.Element {
         }
       })}
       <div className={classes.navBtnGroupContainer}>
-        {Object.keys(buttonPanelGroups).map((groupName) => {
-          const buttons = buttonPanelGroups[groupName];
+        {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
+          const buttons = api.map(mapId).navBarButtons.buttons[groupName];
 
           // if not an empty object, only then render any HTML
           if (Object.keys(buttons).length !== 0) {
@@ -238,7 +187,6 @@ export function NavBar(): JSX.Element {
                           if (buttonPanel.panel?.status) {
                             buttonPanel.panel?.close();
                           } else {
-                            closeAllPanels();
                             buttonPanel.panel?.open();
                           }
                         }}

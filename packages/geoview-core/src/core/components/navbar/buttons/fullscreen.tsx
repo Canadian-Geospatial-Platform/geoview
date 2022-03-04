@@ -1,25 +1,40 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 
-import { useMap } from "react-leaflet";
+import { MapContext } from "../../../app-start";
 
 import { api } from "../../../../api/api";
 
 import { Button, FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
 
+/**
+ * Interface used for fullscreen button properties
+ */
 interface FullscreenProps {
   className?: string | undefined;
 }
 
+/**
+ * Create a toggle button to toggle between fullscreen
+ *
+ * @param {FullscreenProps} props the fullscreen button properties
+ * @returns {JSX.Element} the fullscreen toggle button
+ */
 export default function Fullscreen(props: FullscreenProps): JSX.Element {
   const { className } = props;
 
-  const map = useMap();
+  const [fs, setFs] = useState(false);
+
+  const mapConfig = useContext(MapContext)!;
+
+  const mapId = mapConfig.id;
 
   // TODO: need to trap the exit full screen event by ESC to arrange the fs state and icon
-  const [fs, setFs] = useState(false);
+  /**
+   * Toggle between fullscreen and window mode
+   */
   function setFullscreen() {
     setFs(!fs);
-    api.map(map.id).toggleFullscreen(map.getContainer());
+    api.map(mapId).toggleFullscreen(api.map(mapId).map.getContainer());
   }
 
   return (
