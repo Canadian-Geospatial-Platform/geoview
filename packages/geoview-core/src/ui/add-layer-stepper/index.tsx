@@ -6,6 +6,7 @@ import StepContent from "@mui/material/StepContent";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { Button } from "../button";
@@ -60,11 +61,11 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
       const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, "");
       const supportedProj = wms.Capability.Layer.CRS;
       if (!supportedProj.includes(proj)) throw "proj";
-      const layers = wms.Capability.Layer.Layer.map(({ Name, Title }) => [
-        Name,
-        Title,
-      ]);
-      setLayerList(layers);
+      const layers = wms.Capability.Layer.Layer.map((x) => [x.Name, x.Title]);
+      if (layers.length === 1) {
+        setLayerName(layers[0][1]);
+        setLayerEntry(layers[0][0]);
+      } else setLayerList(layers);
     } catch (err) {
       if (err == "proj") emitErrorProj(mapId, "WMS", proj);
       else emitErrorServer(mapId, "WMS");
@@ -79,7 +80,10 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
       if (esri.capabilities.includes(esriOptions[type].capability)) {
         if ("layers" in esri) {
           const layers = esri.layers.map(({ id, name }) => [String(id), name]);
-          setLayerList(layers);
+          if (layers.length === 1) {
+            setLayerName(layers[0][1]);
+            setLayerEntry(layers[0][0]);
+          } else setLayerList(layers);
         } else {
           setLayerName(esri.name);
           setLayerEntry(String(esri.id));
@@ -215,18 +219,21 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
         <Typography>{layerName}</Typography>
       )}
       {layerList.length > 1 && (
-        <Select
-          labelId="service-layer-label"
-          value={layerEntry}
-          onChange={handleSelectLayer}
-          label="Select Layer"
-        >
-          {layerList.map(([value, label]) => (
-            <MenuItem key={value} value={value}>
-              {label}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="service-layer-label">Select Layer</InputLabel>
+          <Select
+            labelId="service-layer-label"
+            value={layerEntry}
+            onChange={handleSelectLayer}
+            label="Select Layer"
+          >
+            {layerList.map(([value, label]) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       )}
     </>
   );
@@ -251,19 +258,21 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
     <>
       <StepLabel>Select format</StepLabel>
       <StepContent>
-        <InputLabel id="service-type-label">Service</InputLabel>
-        <Select
-          labelId="service-type-label"
-          value={layerType}
-          onChange={handleSelectType}
-          label="Service Type"
-        >
-          {layerOptions.map(([value, label]) => (
-            <MenuItem key={value} value={value}>
-              {label}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl fullWidth>
+          <InputLabel id="service-type-label">Service Type</InputLabel>
+          <Select
+            labelId="service-type-label"
+            value={layerType}
+            onChange={handleSelectType}
+            label="Service Type"
+          >
+            {layerOptions.map(([value, label]) => (
+              <MenuItem key={value} value={value}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <NavButtons />
       </StepContent>
     </>
@@ -273,7 +282,6 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
     <>
       <StepLabel>Configure layer</StepLabel>
       <StepContent>
-        <InputLabel id="service-layer-label">Layer</InputLabel>
         <LayersList />
         <NavButtons isLast />
       </StepContent>
