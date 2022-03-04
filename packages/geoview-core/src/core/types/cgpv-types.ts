@@ -118,7 +118,7 @@ export const CONST_LAYER_TYPES = {
  */
 export type TypeLayerConfig = {
   id?: string;
-  name: string;
+  name?: string;
   url: string;
   type: string;
   entries?: string;
