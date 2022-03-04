@@ -1,10 +1,3 @@
-/**
- * a class to add xyz-tiles layer
- *
- * @export
- * @class XYZTiles
- */
-
 import L, { Layer } from "leaflet";
 
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
@@ -18,6 +11,12 @@ import { generateId } from "../../../core/utils/utilities";
 
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
+/**
+ * a class to add xyz-tiles layer
+ *
+ * @export
+ * @class XYZTiles
+ */
 export class XYZTiles {
   // layer id with default
   id: string;

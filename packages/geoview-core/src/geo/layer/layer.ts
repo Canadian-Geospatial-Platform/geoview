@@ -29,7 +29,6 @@ import { generateId } from "../../core/utils/utilities";
  */
 export class Layer {
   // variable used to store all added layers
-  //layers: Array<TypeLayerData> = [];
   layers: { [key: string]: TypeLayerData } = {};
 
   // used to access vector API to create and manage geometries
@@ -151,7 +150,7 @@ export class Layer {
    * Add the layer to the map if valid. If not (is a string) emit an error
    * @param {any} cgpvLayer the layer config
    */
-  private addToMap(cgpvLayer: any): void {
+  private addToMap(cgpvLayer: TypeLayerData): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
     if (typeof cgpvLayer.layer === "string") {
