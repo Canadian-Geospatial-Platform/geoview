@@ -66,21 +66,25 @@ const addLayer = (
 const getLayers = (setState: Function, api: TypeApi, mapId: string) => {
   const mapLayers = api.map(mapId).layer.layers;
   const data: Record<string, TypeLayerData> = {};
-  mapLayers.forEach(async (mapLayer: TypeLayerData) => {
+  const layerIds = Object.keys(mapLayers);
+
+  layerIds.forEach(async (id: string) => {
+    const mapLayer = mapLayers[id];
     data[mapLayer.id] = {
       id: mapLayer.id,
+      name: mapLayer.name,
       type: mapLayer.type,
       layer: mapLayer.layer,
       layers: {},
     };
     if (mapLayer.type === "ogcWMS") {
-      const { entries } = mapLayer.layer;
+      const { entries } = mapLayer;
       for (let i = 0; i < entries.length; i++) {
         const layerId = entries[i];
         const layerInfo = await queryServer(
-          mapLayer.layer.mapService.options.url + layerId
+          mapLayer.mapService.options.url + layerId
         );
-        const legendImageUrl = `${mapLayer.layer._url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
+        const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
         if (
           layerInfo.drawingInfo &&
           layerInfo.drawingInfo.renderer &&

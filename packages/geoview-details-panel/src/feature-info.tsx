@@ -113,7 +113,8 @@ const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
           )}
         </div>
         <span className={classes.featureInfoHeaderText}>
-          {(attributes[displayField as string] as TypeJSONObject[]).length > 0
+          {attributes[displayField as string] &&
+          (attributes[displayField as string] as TypeJSONObject[]).length > 0
             ? `${attributes[displayField as string]}`
             : `${attributes.OBJECTID}`}
         </span>
@@ -122,8 +123,10 @@ const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
         {
           // loop through each attribute in the selected entry / feature
           Object.keys(attributes).map((attrKey) => {
-            const attributeAlias = fieldAliases[attrKey] as string;
+            let attributeAlias = fieldAliases[attrKey] as string;
             const attributeValue = attributes[attrKey] as string;
+
+            if (!attributeAlias) attributeAlias = attrKey;
 
             return (
               attributeValue.length > 0 &&
