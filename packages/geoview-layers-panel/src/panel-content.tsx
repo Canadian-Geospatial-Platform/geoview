@@ -17,8 +17,9 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;
   const [layersData, setLayersData] = useState({});
+  const [addLayerVisible, setAddLayerVisible] = useState(false);
+  const { AddLayerStepper, Button } = ui.elements;
 
-  const { AddLayerStepper } = ui.elements;
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
       display: "flex",
@@ -29,10 +30,24 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
   useEffect(() => getLayers(setLayersData, api, mapId), []);
 
+  const onClick = () => setAddLayerVisible((state: boolean) => !state);
+
   return (
-    <div className={classes.mainContainer}>
-      {/* <LayersList layersData={layersData} /> */}
-      <AddLayerStepper mapId={mapId} />
+    <div>
+      <div className={classes.mainContainer}>
+        <Button
+          variant="contained"
+          type="text"
+          onClick={onClick}
+          children="Add"
+        />
+      </div>
+      <br />
+      {addLayerVisible ? (
+        <AddLayerStepper mapId={mapId} />
+      ) : (
+        <LayersList layersData={layersData} />
+      )}
     </div>
   );
 };

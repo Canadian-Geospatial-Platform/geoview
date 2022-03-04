@@ -26,6 +26,14 @@ const esriOptions = {
   esriFeature: { err: "ESRI Feature", capability: "Query" },
 };
 
+const emitErrorEmpty = (mapId: string, inputType: string) =>
+  api.event.emit("snackbar/open", mapId, {
+    message: {
+      type: "string",
+      value: `${inputType} cannot be empty`,
+    },
+  });
+
 const emitErrorServer = (mapId: string, serviceType: string) =>
   api.event.emit("snackbar/open", mapId, {
     message: {
@@ -127,8 +135,12 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
   };
 
   const handleNext = async () => {
+    if (activeStep === 0) {
+      if (layerURL.trim() === "") return emitErrorEmpty(mapId, "URL");
+    }
     if (activeStep === 1) {
       let valid = true;
+      if (layerType === "") return emitErrorEmpty(mapId, "Service Type");
       if (layerType === "ogcWMS") valid = await wmsValidation();
       else if (layerType === "xyzTiles") valid = xyzValidation();
       else if (layerType === "esriDynamic")
@@ -148,6 +160,7 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
         url = api.geoUtilities.getMapServerUrl(layerURL) + "/" + layerEntry;
         entries = "";
       }
+      if (layerName === "") return emitErrorEmpty(mapId, "Layer");
       api.map(mapId).layer.addLayer({ name, type: layerType, url, entries });
     }
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
