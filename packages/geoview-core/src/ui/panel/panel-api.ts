@@ -74,6 +74,7 @@ export class PanelApi {
     api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
+      type: this.type,
     });
   };
 
@@ -81,23 +82,43 @@ export class PanelApi {
    * Close all other panels
    */
   closeAll = (): void => {
-    Object.keys(api.map(this.mapId).appBarButtons.buttons).map(
-      (groupName: string) => {
-        // get button panels from group
-        const buttonPanels = api.map(this.mapId).appBarButtons.buttons[
-          groupName
-        ];
+    if (this.type === "appbar") {
+      Object.keys(api.map(this.mapId).appBarButtons.buttons).map(
+        (groupName: string) => {
+          // get button panels from group
+          const buttonPanels = api.map(this.mapId).appBarButtons.buttons[
+            groupName
+          ];
 
-        // get all button panels in each group
-        Object.keys(buttonPanels).map((buttonId) => {
-          const buttonPanel = buttonPanels[buttonId];
+          // get all button panels in each group
+          Object.keys(buttonPanels).map((buttonId) => {
+            const buttonPanel = buttonPanels[buttonId];
 
-          if (this.buttonId !== buttonPanel.id) {
-            buttonPanel.panel?.close();
-          }
-        });
-      }
-    );
+            if (this.buttonId !== buttonPanel.id) {
+              buttonPanel.panel?.close();
+            }
+          });
+        }
+      );
+    } else if (this.type === "navbar") {
+      Object.keys(api.map(this.mapId).navBarButtons.buttons).map(
+        (groupName: string) => {
+          // get button panels from group
+          const buttonPanels = api.map(this.mapId).navBarButtons.buttons[
+            groupName
+          ];
+
+          // get all button panels in each group
+          Object.keys(buttonPanels).map((buttonId) => {
+            const buttonPanel = buttonPanels[buttonId];
+
+            if (this.buttonId !== buttonPanel.id) {
+              buttonPanel.panel?.close();
+            }
+          });
+        }
+      );
+    }
   };
 
   /**
@@ -109,6 +130,7 @@ export class PanelApi {
     api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
+      type: this.type,
     });
   };
 

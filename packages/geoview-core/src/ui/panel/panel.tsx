@@ -92,8 +92,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  const PanelContent = (panel.content as React.ReactElement).type;
-
   /**
    * function that causes rerender when changing panel content
    */
@@ -156,8 +154,9 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if (args.buttonId === button.id! && args.handlerId === mapId)
+        if (args.buttonId === button.id! && args.handlerId === mapId) {
           closePanel();
+        }
       },
       mapId
     );

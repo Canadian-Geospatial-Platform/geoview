@@ -1,9 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
-import { DomEvent } from "leaflet";
-import { useMap } from "react-leaflet";
-
 import { useTranslation } from "react-i18next";
 
 import makeStyles from "@mui/styles/makeStyles";
@@ -19,7 +16,7 @@ import { EVENT_NAMES } from "../../../api/event";
 
 import { Panel, ButtonGroup, Button } from "../../../ui";
 
-import { Cast, TypeButtonPanel } from "../../types/cgpv-types";
+import { TypeButtonPanel } from "../../types/cgpv-types";
 import { MapContext } from "../../app-start";
 
 const navBtnWidth = "32px";
@@ -30,14 +27,18 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "row",
     marginRight: 5,
-    marginBottom: 30,
+    paddingBottom: 30,
     zIndex: theme.zIndex.appBar,
+    pointerEvents: "all",
+    height: "100%",
+    overflow: "auto",
   },
   navBtnGroupContainer: {
     display: "flex",
     position: "relative",
     flexDirection: "column",
     pointerEvents: "auto",
+    justifyContent: "end",
   },
   navBtnGroup: {
     "&:not(:last-child)": {
@@ -111,11 +112,34 @@ export function Navbar(): JSX.Element {
       mapId
     );
 
+    // listen to open panel to activate focus trap and focus on close
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_OPEN,
+      (args) => {
+        if (args.handlerName === mapId && args.type === "navbar") {
+          updateComponent();
+        }
+      },
+      mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_CLOSE,
+      (args) => {
+        if (args.handlerName === mapId && args.type === "navbar") {
+          updateComponent();
+        }
+      },
+      mapId
+    );
+
     return () => {
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
     };
-  }, []);
+  }, [updateComponent]);
 
   return (
     <div
@@ -184,10 +208,10 @@ export function Navbar(): JSX.Element {
                         icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
                         onClick={() => {
-                          if (buttonPanel.panel?.status) {
-                            buttonPanel.panel?.close();
-                          } else {
+                          if (!buttonPanel.panel?.status) {
                             buttonPanel.panel?.open();
+                          } else {
+                            buttonPanel.panel?.close();
                           }
                         }}
                       />

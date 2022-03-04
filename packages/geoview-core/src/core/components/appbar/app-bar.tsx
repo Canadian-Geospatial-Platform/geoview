@@ -9,9 +9,7 @@ import {
 
 import makeStyles from "@mui/styles/makeStyles";
 
-import Version from "./buttons/version";
-
-import { Divider, Drawer, List, ListItem, Panel, Button } from "../../../ui";
+import { Divider, List, ListItem, Panel, Button } from "../../../ui";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
@@ -82,7 +80,9 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if (args.handlerName === mapId) updateComponent();
+        if (args.handlerName === mapId && args.type === "appbar") {
+          updateComponent();
+        }
       },
       mapId
     );
@@ -90,7 +90,9 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if (args.handlerName === mapId) updateComponent();
+        if (args.handlerName === mapId && args.type === "appbar") {
+          updateComponent();
+        }
       },
       mapId
     );
@@ -123,7 +125,7 @@ export function Appbar(): JSX.Element {
 
                   return buttonPanel?.button.visible !== undefined &&
                     buttonPanel?.button.visible ? (
-                    <Fragment key={buttonPanel.button.id}>
+                    <Fragment key={buttonPanel.button.id + "-" + refreshCount}>
                       <ListItem>
                         <Button
                           id={buttonPanel.button.id}
@@ -164,7 +166,7 @@ export function Appbar(): JSX.Element {
 
                 return buttonPanel?.panel ? (
                   <Panel
-                    key={buttonPanel.button.id + "-" + refreshCount}
+                    key={buttonPanel.button.id}
                     panel={buttonPanel.panel}
                     button={buttonPanel.button}
                   />
