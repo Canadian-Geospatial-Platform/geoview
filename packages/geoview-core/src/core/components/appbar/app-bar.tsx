@@ -1,18 +1,22 @@
-import { useState, useRef, useEffect, useCallback, Fragment } from "react";
-
-import { DomEvent } from "leaflet";
-import { useMap } from "react-leaflet";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  Fragment,
+  useContext,
+} from "react";
 
 import makeStyles from "@mui/styles/makeStyles";
 
-import Version from "./buttons/version";
-
-import { Divider, Drawer, List, ListItem, Panel, Button } from "../../../ui";
+import { Divider, List, ListItem, Panel, Button } from "../../../ui";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
 
-import { TypeButtonPanel } from "../../types/cgpv-types";
+import { MapContext } from "../../app-start";
+
+import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
 
 export const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -20,105 +24,35 @@ export const useStyles = makeStyles((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     height: "100%",
-    margin: theme.spacing(2, 2),
-    border: "2px solid rgba(0, 0, 0, 0.2)",
+    zIndex: theme.zIndex.appBar,
+    pointerEvents: "all",
+    backgroundColor: theme.palette.primary.dark,
   },
+  appBarButtons: {
+    overflowY: "auto",
+  },
+  appBarPanels: {},
 }));
 
 /**
  * Create an appbar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  const [drawerStatus, setDrawerStatus] = useState<boolean>(false);
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<
-    Record<string, Record<string, TypeButtonPanel>>
-  >({});
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const classes = useStyles();
 
-  const map = useMap();
-
   const appBar = useRef<HTMLDivElement>(null);
 
-  const mapId = api.mapInstance(map)!.id;
+  const mapConfig = useContext(MapContext)!;
 
-  const addButtonPanel = useCallback(
-    (payload) => {
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        [payload.groupName]: {
-          ...buttonPanelGroups[payload.groupName],
-          [payload.id]: payload.buttonPanel,
-        },
-      });
-    },
-    [setButtonPanelGroups, buttonPanelGroups]
-  );
-
-  const removeButtonPanel = useCallback(
-    (payload) => {
-      setButtonPanelGroups((prevState) => {
-        const state = { ...prevState };
-
-        const group = state[payload.groupName];
-
-        delete group[payload.id];
-
-        return state;
-      });
-    },
-    [setButtonPanelGroups, buttonPanelGroups]
-  );
+  const mapId = mapConfig.id;
 
   /**
-   * Open / Close drawer
+   * function that causes rerender when changing appbar content
    */
-  const openClosePanel = (): void => {
-    // if appbar is open then close it
-    api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
-      status: false,
-    });
-  };
-
-  /**
-   * Close all open panels
-   */
-  const closeAllPanels = (): void => {
-    Object.keys(api.map(mapId).appBarButtons.buttons).map(
-      (groupName: string) => {
-        // get button panels from group
-        const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
-
-        // get all button panels in each group
-        Object.keys(buttonPanels).map((buttonId) => {
-          const buttonPanel = buttonPanels[buttonId];
-
-          buttonPanel.panel?.close();
-        });
-      }
-    );
-  };
-
-  useEffect(() => {
-    const appBarChildren = appBar.current?.children[0] as HTMLElement;
-    // disable events on container
-    DomEvent.disableClickPropagation(appBarChildren);
-    DomEvent.disableScrollPropagation(appBarChildren);
-
-    // listen to drawer open/close events
-    api.event.on(
-      EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE,
-      (payload) => {
-        if (payload && payload.handlerName === mapId) {
-          setDrawerStatus(payload.status);
-        }
-      },
-      mapId
-    );
-
-    return () => {
-      api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId);
-    };
+  const updateComponent = useCallback(() => {
+    setRefreshCount((refresh) => refresh + 1);
   }, []);
 
   useEffect(() => {
@@ -127,7 +61,7 @@ export function Appbar(): JSX.Element {
       EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
-          addButtonPanel(payload);
+          updateComponent();
         }
       },
       mapId
@@ -138,7 +72,28 @@ export function Appbar(): JSX.Element {
       EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
-          removeButtonPanel(payload);
+          updateComponent();
+        }
+      },
+      mapId
+    );
+
+    // listen to open panel to activate focus trap and focus on close
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_OPEN,
+      (args) => {
+        if (args.handlerName === mapId && args.type === "appbar") {
+          updateComponent();
+        }
+      },
+      mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_CLOSE,
+      (args) => {
+        if (args.handlerName === mapId && args.type === "appbar") {
+          updateComponent();
         }
       },
       mapId
@@ -147,17 +102,22 @@ export function Appbar(): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
     };
-  }, [addButtonPanel, removeButtonPanel]);
+  }, [updateComponent]);
 
   return (
-    <div className={classes.appBar} ref={appBar}>
-      <Drawer>
-        <Divider />
-        <div>
-          {Object.keys(buttonPanelGroups).map((groupName: string) => {
+    <div
+      className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`}
+      ref={appBar}
+    >
+      <div className={classes.appBarButtons}>
+        {Object.keys(api.map(mapId).appBarButtons.buttons).map(
+          (groupName: string) => {
             // get button panels from group
-            const buttonPanels = buttonPanelGroups[groupName];
+            const buttonPanels =
+              api.map(mapId).appBarButtons.buttons[groupName];
 
             // display the button panels in the list
             return (
@@ -165,28 +125,25 @@ export function Appbar(): JSX.Element {
                 {Object.keys(buttonPanels).map((buttonId) => {
                   const buttonPanel = buttonPanels[buttonId];
 
-                  return buttonPanel?.button.visible ? (
-                    <Fragment key={buttonPanel.button.id}>
+                  return buttonPanel?.button.visible !== undefined &&
+                    buttonPanel?.button.visible ? (
+                    <Fragment key={buttonPanel.button.id + "-" + refreshCount}>
                       <ListItem>
                         <Button
                           id={buttonPanel.button.id}
                           variant="text"
                           tooltip={buttonPanel.button.tooltip}
                           tooltipPlacement="right"
-                          type="textWithIcon"
+                          type="icon"
                           onClick={() => {
-                            if (buttonPanel.panel?.status) {
-                              buttonPanel.panel?.close();
-                            } else {
-                              closeAllPanels();
-
+                            if (!buttonPanel.panel?.status) {
                               buttonPanel.panel?.open();
+                            } else {
+                              buttonPanel.panel?.close();
                             }
-                            openClosePanel();
                           }}
                           icon={buttonPanel.button.icon}
                           children={buttonPanel.button.tooltip}
-                          state={drawerStatus ? "expanded" : "collapsed"}
                         />
                       </ListItem>
                       <Divider />
@@ -195,32 +152,32 @@ export function Appbar(): JSX.Element {
                 })}
               </List>
             );
-          })}
-        </div>
-        <Divider grow={true} />
-        <Version drawerStatus={drawerStatus} />
-      </Drawer>
-      {Object.keys(buttonPanelGroups).map((groupName: string) => {
-        // get button panels from group
-        const buttonPanels = buttonPanelGroups[groupName];
+          }
+        )}
+      </div>
+      {Object.keys(api.map(mapId).appBarButtons.buttons).map(
+        (groupName: string) => {
+          // get button panels from group
+          const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
 
-        // display the panels in the list
-        return (
-          <div key={groupName}>
-            {Object.keys(buttonPanels).map((buttonId) => {
-              const buttonPanel = buttonPanels[buttonId];
+          // display the panels in the list
+          return (
+            <div key={groupName}>
+              {Object.keys(buttonPanels).map((buttonId) => {
+                const buttonPanel = buttonPanels[buttonId];
 
-              return buttonPanel?.panel ? (
-                <Panel
-                  key={buttonPanel.button.id}
-                  panel={buttonPanel.panel}
-                  button={buttonPanel.button}
-                />
-              ) : null;
-            })}
-          </div>
-        );
-      })}
+                return buttonPanel?.panel ? (
+                  <Panel
+                    key={buttonPanel.button.id}
+                    panel={buttonPanel.panel}
+                    button={buttonPanel.button}
+                  />
+                ) : null;
+              })}
+            </div>
+          );
+        }
+      )}
     </div>
   );
 }

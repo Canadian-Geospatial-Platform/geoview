@@ -19,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
     zIndex: theme.zIndex.leafletControl,
     textAlign: "center",
     bottom: theme.spacing(0),
-    marginBottom: theme.spacing(),
     padding: theme.spacing(2),
     display: "flex !important",
     flexDirection: "column",

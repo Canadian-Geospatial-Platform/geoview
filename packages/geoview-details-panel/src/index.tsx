@@ -67,7 +67,7 @@ class DetailsPlugin {
       tooltipPlacement: "right",
       icon: '<i class="material-icons">details</i>',
       visible: false,
-      type: "textWithIcon",
+      type: "icon",
     };
 
     // panel props

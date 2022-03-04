@@ -2,7 +2,7 @@ import { api } from "../../../api/api";
 
 import { EVENT_NAMES } from "../../../api/event";
 
-import { ButtonApi, PanelApi, LayersPanel } from "../../../ui";
+import { ButtonApi, PanelApi, DefaultPanel } from "../../../ui";
 
 import {
   TypeButtonPanel,
@@ -36,8 +36,8 @@ export class AppbarButtons {
     this.mapId = mapId;
 
     this.panel = new PanelApi(
-      LayersPanel.panel,
-      LayersPanel.button.id!,
+      DefaultPanel.panel,
+      DefaultPanel.button.id!,
       this.mapId
     );
 
@@ -54,10 +54,10 @@ export class AppbarButtons {
     // TODO: do not keep, just proof of concept
     this.createAppbarPanel(
       {
-        ...LayersPanel.button,
+        ...DefaultPanel.button,
         tooltip: "Default",
       },
-      LayersPanel.panel,
+      DefaultPanel.panel,
       "default"
     );
   };

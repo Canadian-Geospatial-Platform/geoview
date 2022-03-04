@@ -426,16 +426,6 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         selectLayersList();
       }
 
-      // emit an event to display a marker on the click position
-      // if there is only one layer with entries the symbology will be of that layer
-      // if there is multiple layers with entries then symbology will be of the first layer
-      // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
-      // if no layers contains any entry then the default symbology with crosshair will show
-      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
-        latlng,
-        symbology,
-      });
-
       // save click position
       setClickPos(latlng);
 
@@ -446,11 +436,21 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         `[data-id=${buttonPanel.id}]`
       )[0];
 
+      // emit an event to display a marker on the click position
+      // if there is only one layer with entries the symbology will be of that layer
+      // if there is multiple layers with entries then symbology will be of the first layer
+      // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
+      // if no layers contains any entry then the default symbology with crosshair will show
+      api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
+        latlng,
+        symbology,
+      });
+
       // set focus to the close button of the panel
       if (panelContainer) {
         const closeBtn =
           panelContainer.querySelectorAll(".cgpv-panel-close")[0];
-        (closeBtn as HTMLElement).focus();
+        if (closeBtn) (closeBtn as HTMLElement).focus();
       }
     },
     [

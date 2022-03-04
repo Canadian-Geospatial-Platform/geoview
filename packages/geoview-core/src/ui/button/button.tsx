@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    color: theme.palette.primary.light,
   },
   text: {
     width: "100%",
@@ -44,11 +45,12 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     width: "100%",
     height: 50,
-    backgroundColor: "rgba(255,255,255,1)",
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.dark,
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.contrastText,
+      borderRadius: 0,
     },
   },
 }));
