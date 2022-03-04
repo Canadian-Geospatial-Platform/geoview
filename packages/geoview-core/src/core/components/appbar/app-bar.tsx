@@ -13,7 +13,9 @@ import { Divider, List, ListItem, Panel, Button } from "../../../ui";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
+
 import { MapContext } from "../../app-start";
+
 import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
 
 export const useStyles = makeStyles((theme) => ({

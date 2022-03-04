@@ -10,20 +10,19 @@ import React, {
 
 import { useTranslation } from "react-i18next";
 
-import makeStyles from "@mui/styles/makeStyles";
-
-import { Card, CardHeader, CardContent } from "@mui/material";
-
 import FocusTrap from "focus-trap-react";
 
+import makeStyles from "@mui/styles/makeStyles";
+import { Card, CardHeader, CardContent } from "@mui/material";
+
 import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
+import { HtmlToReact } from "../../core/containers/html-to-react";
+import { MapContext } from "../../core/app-start";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
-import { HtmlToReact } from "../../core/containers/html-to-react";
 
-import { IconButton, CloseIcon, Divider, Fade } from "..";
-import { MapContext } from "../../core/app-start";
+import { IconButton, CloseIcon, Divider } from "..";
 
 const useStyles = makeStyles((theme) => ({
   root: {
