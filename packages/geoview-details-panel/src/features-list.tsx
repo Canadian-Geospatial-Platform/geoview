@@ -154,7 +154,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
           // get the title from the attributes, if no title was defined in the layer then set it to the objectId
           const attributesDisplayField = attributes[displayField] as string;
           const title =
-            attributesDisplayField.length > 0
+            attributesDisplayField && attributesDisplayField.length > 0
               ? `${attributesDisplayField}`
               : `${attributes.OBJECTID}`;
 

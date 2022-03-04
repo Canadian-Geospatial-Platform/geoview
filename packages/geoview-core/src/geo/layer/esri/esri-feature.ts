@@ -95,12 +95,6 @@ export class EsriFeature {
    @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
    */
   getMetadata = async (): Promise<Record<string, unknown>> => {
-    // const feat = featureLayer({
-    //   url: this.url,
-    // });
-    // return feat.metadata(function (error, metadata) {
-    //   return metadata;
-    // });
     const response = await fetch(`${this.url}?f=json`);
     const result = await response.json();
 

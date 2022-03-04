@@ -210,60 +210,130 @@ export class WMS {
   };
 
   /**
-   * Get feature info from a WMS Layer
+   * Get feature info given a latlng
    *
-   * @param {LeafletMouseEvent} evt Event received on any interaction with the map
+   * @param {L.LatLng} latlng lat/lng coordinates received on any interaction with the map
+   * @param {L.Map} map the map odject
+   * @param {number} featureCount the map odject
    * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
    */
   getFeatureInfo = async (
-    evt: LeafletMouseEvent,
-    map: L.Map
+    latlng: L.LatLng,
+    map: L.Map,
+    featureCount = 10
   ): Promise<TypeJSONObject | null> => {
-    const res = await axios.get(this.getFeatureInfoUrl(evt.latlng, map));
-    const featureInfoResponse = (
-      xmlToJson(res.request.responseXML) as TypeJSONObjectLoop
-    ).FeatureInfoResponse;
-    if (
-      featureInfoResponse &&
-      featureInfoResponse.FIELDS &&
-      featureInfoResponse.FIELDS["@attributes"]
-    ) {
-      return featureInfoResponse.FIELDS["@attributes"] as TypeJSONObject;
+    let inforFormat = "text/xml";
+
+    if (this.#capabilities.Capability.Request.GetFeatureInfo) {
+      let formatArray = this.#capabilities.Capability.Request.GetFeatureInfo
+        .Format as any;
+      if (formatArray.includes("application/geojson"))
+        inforFormat = "application/geojson";
     }
 
-    return null;
+    let params = this.getFeatureInfoParams(latlng, map);
+    params["info_format"] = inforFormat;
+    params["feature_count"] = featureCount;
+
+    const res = await axios.get(this.url, { params: params });
+
+    if (inforFormat == "application/geojson") {
+      if (res.data.features.length > 0) {
+        let results: any[] = [];
+        res.data.features.forEach((element) => {
+          results.push({
+            attributes: element.properties,
+            geometry: element.geometry,
+            layerId: this.id,
+            layerName: element.layerName,
+            //displayFieldName: "OBJECTID",
+            //value: element.properties.OBJECTID,
+            geometryType: element.type,
+          });
+        });
+
+        return { results: results };
+      } else {
+        return null;
+      }
+    } else {
+      const featureInfoResponse = (
+        xmlToJson(res.request.responseXML) as TypeJSONObjectLoop
+      ).FeatureInfoResponse;
+
+      if (featureInfoResponse && featureInfoResponse.FIELDS) {
+        let results: any[] = [];
+        // only one feature
+        if (featureInfoResponse.FIELDS["@attributes"]) {
+          results.push({
+            attributes: featureInfoResponse.FIELDS["@attributes"],
+            geometry: null,
+            layerId: this.id,
+            layerName: this.name,
+            //displayFieldName: "OBJECTID",
+            //value: element.properties.OBJECTID,
+            geometryType: null,
+          });
+        } else {
+          featureInfoResponse.FIELDS.forEach((element) => {
+            results.push({
+              attributes: element["@attributes"],
+              geometry: null,
+              layerId: this.id,
+              layerName: this.name,
+              //displayFieldName: "OBJECTID",
+              //value: element.properties.OBJECTID,
+              geometryType: null,
+            });
+          });
+        }
+        return { results: results };
+      } else {
+        return null;
+      }
+    }
   };
+
   /**
-   * Get feature info url from a lat lng point
+   * Get the parameters used ro query feature info url from a lat lng point
    *
    * @param {LatLng} latlng a latlng point to generate the feature url from
+   * @param {L.Map} map the map odject
    * @returns the map service url including the feature query
    */
-  private getFeatureInfoUrl(latlng: L.LatLng, map: L.Map): any {
-    // Construct a GetFeatureInfo request URL given a point
+  private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): any {
     const point = map.latLngToContainerPoint(latlng);
 
     const size = map.getSize();
 
+    let crs = map.options.crs;
+
+    // these are the SouthWest and NorthEast points
+    // projected from LatLng into used crs
+    let sw = crs.project(map.getBounds().getSouthWest());
+    let ne = crs.project(map.getBounds().getNorthEast());
+
     const params: Record<string, unknown> = {
       request: "GetFeatureInfo",
       service: "WMS",
-      srs: "EPSG:4326",
-      styles: this.#wmsParams.styles,
-      transparent: this.#wmsParams.transparent,
       version: this.#wmsParams.version,
-      format: this.#wmsParams.format,
-      bbox: map.getBounds().toBBoxString(),
-      height: size.y,
-      width: size.x,
       layers: this.#wmsParams.layers,
       query_layers: this.#wmsParams.layers,
-      info_format: "text/xml",
+      height: size.y,
+      width: size.x,
     };
 
-    params[params.version === "1.3.0" ? "i" : "x"] = point.x;
-    params[params.version === "1.3.0" ? "j" : "y"] = point.y;
+    // Define version-related request parameters.
+    var version = window.parseFloat(this.#wmsParams.version);
+    params[version >= 1.3 ? "crs" : "srs"] = crs.code;
+    params["bbox"] = sw.x + "," + sw.y + "," + ne.x + "," + ne.y;
+    params["bbox"] =
+      version >= 1.3 && crs.code === "EPSG:4326"
+        ? sw.y + "," + sw.x + "," + ne.y + "," + ne.x
+        : sw.x + "," + sw.y + "," + ne.x + "," + ne.y;
+    params[version >= 1.3 ? "i" : "x"] = point.x;
+    params[version >= 1.3 ? "j" : "y"] = point.y;
 
-    return this.url + L.Util.getParamString(params, this.url, true);
+    return params;
   }
 }
