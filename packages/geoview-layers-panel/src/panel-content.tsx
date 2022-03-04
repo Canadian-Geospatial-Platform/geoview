@@ -39,7 +39,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
           variant="contained"
           type="text"
           onClick={onClick}
-          children="Add"
+          children="Add Layer"
         />
       </div>
       <br />

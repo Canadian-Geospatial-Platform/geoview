@@ -9,6 +9,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import makeStyles from "@mui/styles/makeStyles";
 import { Button } from "../button";
 import { ButtonGroup } from "../button-group";
 import { api } from "../../api/api";
@@ -62,6 +63,13 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
   const [layerList, setLayerList] = useState([]);
   const [layerName, setLayerName] = useState("");
   const [layerEntry, setLayerEntry] = useState("");
+
+  const useStyles = makeStyles(() => ({
+    buttonGroup: {
+      paddingTop: "12px",
+    },
+  }));
+  const classes = useStyles();
 
   const wmsValidation = async (): Promise<boolean> => {
     const proj = api.map(mapId).projection.getCRS().code;
@@ -193,29 +201,27 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
   };
 
   const NavButtons = ({ isFirst = false, isLast = false }) => (
-    <>
-      <br />
-      <ButtonGroup
-        children={
-          <>
+    <ButtonGroup
+      className={classes.buttonGroup}
+      children={
+        <>
+          <Button
+            variant="contained"
+            type="text"
+            onClick={handleNext}
+            children={isLast ? "Finish" : "Continue"}
+          />
+          {!isFirst && (
             <Button
               variant="contained"
               type="text"
-              onClick={handleNext}
-              children={isLast ? "Finish" : "Continue"}
+              onClick={handleBack}
+              children="Back"
             />
-            {!isFirst && (
-              <Button
-                variant="contained"
-                type="text"
-                onClick={handleBack}
-                children="Back"
-              />
-            )}
-          </>
-        }
-      ></ButtonGroup>
-    </>
+          )}
+        </>
+      }
+    ></ButtonGroup>
   );
 
   const LayersList = () => (
