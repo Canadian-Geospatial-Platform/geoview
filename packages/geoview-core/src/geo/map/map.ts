@@ -26,6 +26,8 @@ import { EVENT_NAMES } from "../../api/event";
 import { AppbarButtons } from "../../core/components/appbar/app-bar-buttons";
 import { NavbarButtons } from "../../core/components/navbar/nav-bar-buttons";
 
+import { ModalApi } from "../../ui";
+
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
 const lccMapOptionsParam: L.MapOptions = {
@@ -92,6 +94,9 @@ export class MapViewer {
   // i18n instance
   i18nInstance!: i18n;
 
+  // modals creation
+  modal!: ModalApi;
+
   /**
    * Add the map instance to the maps array in the api
    *
@@ -113,6 +118,8 @@ export class MapViewer {
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
+
+    this.modal = new ModalApi(this.id);
   }
 
   /**
