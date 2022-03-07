@@ -77,8 +77,9 @@ class ModalModel {
   mapId?: string;
 
   /**
+   * constructor to initiate the modal properties
    *
-   * @param content is the body copy (description) of the modal
+   * @param { string } content is the body copy (description) of the modal
    */
   constructor(content: string) {
     this.id = undefined;
@@ -117,7 +118,7 @@ class ModalModel {
    * Function to update the content of currently existing modal. Only the
    * passed properties will replace the old ones
    *
-   * @param modal must be an object with the above defined (TypeModalProps) properties
+   * @param { TypeModalProps } modal must be an object with the above defined (TypeModalProps) properties
    */
   update = (modal: TypeModalProps): void => {
     this.id = modal.id || this.id;
@@ -131,7 +132,7 @@ class ModalModel {
   /**
    * Function to add more actions to header e.g. close button, back button etc.
    *
-   * @param action must be an object with id and content
+   * @param { ActionsType } action must be an object with id and content
    */
   addHeaderActions = (action: ActionsType): void => {
     // if header.content has already been defined by the user
@@ -147,7 +148,7 @@ class ModalModel {
   /**
    * Function to add more actions to footer
    *
-   * @param action must be an object with id and content
+   * @param { ActionsType } action must be an object with id and content
    */
   addFooterActions = (action: ActionsType): void => {
     if (typeof this.header?.actions === "object") {
@@ -161,7 +162,7 @@ class ModalModel {
   /**
    * Function to remove actions from header
    *
-   * @param id of the action to be deleted
+   * @param { string } id of the action to be deleted
    */
   removeHeaderActions = (id: string): void => {
     if (!this.header?.actions || typeof this.header?.actions !== "object") {
@@ -178,7 +179,7 @@ class ModalModel {
   /**
    * Function to remove actions from footer
    *
-   * @param id of the action to be deleted
+   * @param { string } id of the action to be deleted
    */
   removeFooterActions = (id: string): void => {
     if (!this.footer?.actions || typeof this.header?.actions !== "object")
@@ -210,8 +211,9 @@ export class ModalApi {
   modals: Record<string, ModalModel> = {};
 
   /**
+   * constructor to initiate the map id
    *
-   * @param mapId the id of the map where the modal is to be generated
+   * @param { string } mapId the id of the map where the modal is to be generated
    */
   constructor(mapId: string) {
     this.mapId = mapId;
@@ -220,7 +222,7 @@ export class ModalApi {
   /**
    * Function that creates the modal
    *
-   * @param modal the modal object of type TypeModalProps
+   * @param { TypeModalProps } modal the modal object of type TypeModalProps
    */
   createModal = (modal: TypeModalProps): void => {
     if (!modal.content) return;
@@ -237,7 +239,7 @@ export class ModalApi {
   /**
    * Function that deletes the modal by the id specified
    *
-   * @param id of the modal that is to be deleted
+   * @param { string | any } id of the modal that is to be deleted
    */
   deleteModal = (id: string | any): void => {
     if (!Object.keys(this.modals)) return;

@@ -199,8 +199,10 @@ export const EVENT_NAMES = {
    * Event is triggered when a modal is closed
    */
   EVENT_MODAL_CLOSE: "modal/close",
-
-  EVENT_MODAL_UPDATE: "modal/update"
+  /**
+   * Event is triggered when a modal is updated
+   */
+  EVENT_MODAL_UPDATE: "modal/update",
 };
 
 /**

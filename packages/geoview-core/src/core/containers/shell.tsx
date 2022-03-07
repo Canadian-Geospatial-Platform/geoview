@@ -81,6 +81,9 @@ export function Shell(props: ShellProps): JSX.Element {
     setActivetrap(dialogTrap);
   }
 
+  /**
+   * Causes the shell to re-render
+   */
   const updateShell = useCallback(() => {
     setUpdate((prevState) => {
       return ++prevState;
@@ -112,6 +115,11 @@ export function Shell(props: ShellProps): JSX.Element {
       },
       id
     );
+
+    return () => {
+      api.event.off(EVENT_NAMES.EVENT_MAP_LOADED, id);
+      api.event.off(EVENT_NAMES.EVENT_MODAL_CREATE, id);
+    };
   }, []);
 
   return (

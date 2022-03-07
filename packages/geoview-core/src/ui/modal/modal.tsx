@@ -121,12 +121,21 @@ export const Modal = (props: DialogProps): JSX.Element => {
     mapId,
   } = props;
 
+  /**
+   * Causes the modal to re-render
+   */
   const updateModal = useCallback(() => {
     setUpdate((prevState) => {
       return ++prevState;
     });
   }, [update]);
 
+  /**
+   * to return the updated / newly-created modal
+   *
+   * @param { TypeModalProps } modal the object with modal properties
+   * @returns { JSX.Element } JSX for the newly created / updated modal
+   */
   const ceatedModalJSXReturner = (modal: TypeModalProps) => (
     <Dialog
       open={openEvent}
