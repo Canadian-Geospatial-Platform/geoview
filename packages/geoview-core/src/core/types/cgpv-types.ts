@@ -25,6 +25,7 @@ export type TypeCGPV = {
   leaflet: Object;
   reactLeaflet: Object;
   reactLeafletCore: Object;
+  mui?: Object;
   ui: Object;
   useTranslation: Object;
   types: Object;

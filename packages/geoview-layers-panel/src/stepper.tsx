@@ -1,18 +1,11 @@
-import { useState } from "react";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import StepContent from "@mui/material/StepContent";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import makeStyles from "@mui/styles/makeStyles";
-import { Button } from "../button";
-import { ButtonGroup } from "../button-group";
-import { api } from "../../api/api";
+interface Props {
+  mapId: string;
+  setAddLayerVisible: Function;
+}
+
+type LayerList = [string, string][];
+
+const w = window as any;
 
 const layerOptions = [
   ["ogcWMS", "OGC Web Map Service (WMS)"],
@@ -22,41 +15,41 @@ const layerOptions = [
   ["geoJSON", "GeoJSON"],
 ];
 
-const esriOptions = {
-  esriDynamic: { err: "ESRI Map", capability: "Map" },
-  esriFeature: { err: "ESRI Feature", capability: "Query" },
+const esriOptions = (option: string) => {
+  switch (option) {
+    case "esriDynamic":
+      return { err: "ESRI Map", capability: "Map" };
+    case "esriFeature":
+      return { err: "ESRI Feature", capability: "Query" };
+    default:
+      return { err: "", capability: "" };
+  }
 };
-
-const emitErrorEmpty = (mapId: string, inputType: string) =>
-  api.event.emit("snackbar/open", mapId, {
-    message: {
-      type: "string",
-      value: `${inputType} cannot be empty`,
-    },
-  });
-
-const emitErrorServer = (mapId: string, serviceType: string) =>
-  api.event.emit("snackbar/open", mapId, {
-    message: {
-      type: "string",
-      value: `URL is not a valid ${serviceType} Server`,
-    },
-  });
-
-const emitErrorProj = (mapId: string, service: string, proj: string) =>
-  api.event.emit("snackbar/open", mapId, {
-    message: {
-      type: "string",
-      value: `${service} does not support current map projection ${proj}`,
-    },
-  });
 
 /**
  * A react component that displays the details panel content
  *
  * @returns A React JSX Element with the details panel
  */
-export const AddLayerStepper = ({ mapId }): JSX.Element => {
+const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
+  const cgpv = w["cgpv"];
+  const { api, react, ui, mui } = cgpv;
+
+  const { useState } = react;
+  const { Button, ButtonGroup } = ui.elements;
+  const {
+    Stepper,
+    Step,
+    StepLabel,
+    StepContent,
+    TextField,
+    Typography,
+    InputLabel,
+    FormControl,
+    Select,
+    MenuItem,
+  } = mui;
+
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState("");
   const [layerType, setLayerType] = useState("");
@@ -64,12 +57,37 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
   const [layerName, setLayerName] = useState("");
   const [layerEntry, setLayerEntry] = useState("");
 
-  const useStyles = makeStyles(() => ({
+  const useStyles = ui.makeStyles(() => ({
     buttonGroup: {
-      paddingTop: "12px",
+      paddingTop: 12,
+      gap: 6,
     },
   }));
   const classes = useStyles();
+
+  const emitErrorEmpty = (inputType: string) =>
+    api.event.emit("snackbar/open", mapId, {
+      message: {
+        type: "string",
+        value: `${inputType} cannot be empty`,
+      },
+    });
+
+  const emitErrorServer = (serviceType: string) =>
+    api.event.emit("snackbar/open", mapId, {
+      message: {
+        type: "string",
+        value: `URL is not a valid ${serviceType} Server`,
+      },
+    });
+
+  const emitErrorProj = (service: string, proj: string) =>
+    api.event.emit("snackbar/open", mapId, {
+      message: {
+        type: "string",
+        value: `${service} does not support current map projection ${proj}`,
+      },
+    });
 
   const wmsValidation = async (): Promise<boolean> => {
     const proj = api.map(mapId).projection.getCRS().code;
@@ -77,14 +95,17 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
       const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, "");
       const supportedProj = wms.Capability.Layer.CRS;
       if (!supportedProj.includes(proj)) throw "proj";
-      const layers = wms.Capability.Layer.Layer.map((x) => [x.Name, x.Title]);
+      const layers = wms.Capability.Layer.Layer.map((x: any) => [
+        x.Name,
+        x.Title,
+      ]);
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
       } else setLayerList(layers);
     } catch (err) {
-      if (err == "proj") emitErrorProj(mapId, "WMS", proj);
-      else emitErrorServer(mapId, "WMS");
+      if (err == "proj") emitErrorProj("WMS", proj);
+      else emitErrorServer("WMS");
       return false;
     }
     return true;
@@ -93,9 +114,12 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
   const esriValidation = async (type: string): Promise<boolean> => {
     try {
       const esri = await api.geoUtilities.getESRIServiceMetadata(layerURL);
-      if (esri.capabilities.includes(esriOptions[type].capability)) {
+      if (esri.capabilities.includes(esriOptions(type).capability)) {
         if ("layers" in esri) {
-          const layers = esri.layers.map(({ id, name }) => [String(id), name]);
+          const layers = esri.layers.map(({ id, name }: any) => [
+            String(id),
+            name,
+          ]);
           if (layers.length === 1) {
             setLayerName(layers[0][1]);
             setLayerEntry(layers[0][0]);
@@ -108,7 +132,7 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
         throw "err";
       }
     } catch (err) {
-      emitErrorServer(mapId, esriOptions[type].err);
+      emitErrorServer(esriOptions(type).err);
       return false;
     }
     return true;
@@ -119,12 +143,12 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
     const tiles = ["{x}", "{y}", "{z}"];
     for (const tile of tiles) {
       if (!layerURL.includes(tile)) {
-        emitErrorServer(mapId, "XYZ Tile");
+        emitErrorServer("XYZ Tile");
         return false;
       }
     }
     if (proj !== "EPSG:3857") {
-      emitErrorProj(mapId, "XYZ Tiles", proj);
+      emitErrorProj("XYZ Tiles", proj);
       return false;
     }
     return true;
@@ -136,7 +160,7 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
       const json = await response.json();
       if (!["FeatureCollection", "Feature"].includes(json.type)) throw "err";
     } catch (err) {
-      emitErrorServer(mapId, "GeoJSON");
+      emitErrorServer("GeoJSON");
       return false;
     }
     return true;
@@ -144,11 +168,11 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
 
   const handleNext = async () => {
     if (activeStep === 0) {
-      if (layerURL.trim() === "") return emitErrorEmpty(mapId, "URL");
+      if (layerURL.trim() === "") return emitErrorEmpty("URL");
     }
     if (activeStep === 1) {
       let valid = true;
-      if (layerType === "") return emitErrorEmpty(mapId, "Service Type");
+      if (layerType === "") return emitErrorEmpty("Service Type");
       if (layerType === "ogcWMS") valid = await wmsValidation();
       else if (layerType === "xyzTiles") valid = xyzValidation();
       else if (layerType === "esriDynamic")
@@ -168,8 +192,10 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
         url = api.geoUtilities.getMapServerUrl(layerURL) + "/" + layerEntry;
         entries = "";
       }
-      if (layerName === "") return emitErrorEmpty(mapId, "Layer");
-      api.map(mapId).layer.addLayer({ name, type: layerType, url, entries });
+      if (layerName === "") return emitErrorEmpty("Layer");
+      const layerConfig = { name, type: layerType, url, entries };
+      api.map(mapId).layer.addLayer(layerConfig);
+      setAddLayerVisible(false);
     }
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
   };
@@ -196,7 +222,7 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
 
   const handleSelectLayer = (e: any) => {
     setLayerEntry(e.target.value);
-    const name = layerList.find((x) => x[0] === e.target.value)[1];
+    const name = layerList.find((x: LayerList) => x[0] === e.target.value)[1];
     setLayerName(name);
   };
 
@@ -224,39 +250,6 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
     ></ButtonGroup>
   );
 
-  const LayersList = () => (
-    <>
-      {layerList.length === 0 && layerEntry === "" && (
-        <TextField
-          label="Name"
-          variant="standard"
-          value={layerName}
-          onChange={handleNameLayer}
-        />
-      )}
-      {layerList.length === 0 && layerEntry !== "" && (
-        <Typography>{layerName}</Typography>
-      )}
-      {layerList.length > 1 && (
-        <FormControl fullWidth>
-          <InputLabel id="service-layer-label">Select Layer</InputLabel>
-          <Select
-            labelId="service-layer-label"
-            value={layerEntry}
-            onChange={handleSelectLayer}
-            label="Select Layer"
-          >
-            {layerList.map(([value, label]) => (
-              <MenuItem key={value} value={value}>
-                {label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-    </>
-  );
-
   return (
     <Stepper activeStep={activeStep} orientation="vertical">
       <Step>
@@ -268,6 +261,7 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
             value={layerURL}
             onChange={handleInput}
           />
+          <br />
           <NavButtons isFirst />
         </StepContent>
       </Step>
@@ -295,10 +289,40 @@ export const AddLayerStepper = ({ mapId }): JSX.Element => {
       <Step>
         <StepLabel>Configure layer</StepLabel>
         <StepContent>
-          <LayersList />
+          {layerList.length === 0 && layerEntry === "" && (
+            <TextField
+              label="Name"
+              variant="standard"
+              value={layerName}
+              onChange={handleNameLayer}
+            />
+          )}
+          {layerList.length === 0 && layerEntry !== "" && (
+            <Typography>{layerName}</Typography>
+          )}
+          {layerList.length > 1 && (
+            <FormControl fullWidth>
+              <InputLabel id="service-layer-label">Select Layer</InputLabel>
+              <Select
+                labelId="service-layer-label"
+                value={layerEntry}
+                onChange={handleSelectLayer}
+                label="Select Layer"
+              >
+                {layerList.map(([value, label]: LayerList) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          <br />
           <NavButtons isLast />
         </StepContent>
       </Step>
     </Stepper>
   );
 };
+
+export default AddLayerStepper;
