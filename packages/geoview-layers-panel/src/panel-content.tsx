@@ -1,4 +1,5 @@
 import { TypePanelContentProps } from "geoview-core";
+
 import Stepper from "./stepper";
 import LayersList from "./layers-list";
 import addLayers from "./add-layers";

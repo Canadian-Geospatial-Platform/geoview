@@ -7,16 +7,25 @@ type LayerList = [string, string][];
 
 const w = window as any;
 
+/**
+ * List of layer types and labels
+ */
 const layerOptions = [
-  ["ogcWMS", "OGC Web Map Service (WMS)"],
-  ["xyzTiles", "XYZ Raster Tiles"],
   ["esriDynamic", "ESRI Dynamic Service"],
   ["esriFeature", "ESRI Feature Service"],
   ["geoJSON", "GeoJSON"],
+  ["ogcWMS", "OGC Web Map Service (WMS)"],
+  ["xyzTiles", "XYZ Raster Tiles"],
 ];
 
-const esriOptions = (option: string) => {
-  switch (option) {
+/**
+ * Returns the appropriate error config for ESRI layer types
+ *
+ * @param type one of esriDynamic or esriFeature
+ * @returns
+ */
+const esriOptions = (type: string) => {
+  switch (type) {
     case "esriDynamic":
       return { err: "ESRI Map", capability: "Map" };
     case "esriFeature":
@@ -65,30 +74,56 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   }));
   const classes = useStyles();
 
-  const emitErrorEmpty = (inputType: string) =>
+  /**
+   * Emits an error dialogue when a text field is empty
+   *
+   * @param textField label for the TextField input that cannot be empty
+   */
+  const emitErrorEmpty = (textField: string) => {
     api.event.emit("snackbar/open", mapId, {
       message: {
         type: "string",
-        value: `${inputType} cannot be empty`,
+        value: `${textField} cannot be empty`,
       },
     });
+  };
 
-  const emitErrorServer = (serviceType: string) =>
+  /**
+   * Emits an error when the URL does not support the selected service type
+   *
+   * @param serviceName type of service provided by the URL
+   */
+  const emitErrorServer = (serviceName: string) => {
     api.event.emit("snackbar/open", mapId, {
       message: {
         type: "string",
-        value: `URL is not a valid ${serviceType} Server`,
+        value: `URL is not a valid ${serviceName} Server`,
       },
     });
+  };
 
-  const emitErrorProj = (service: string, proj: string) =>
+  /**
+   * Emits an error when a service does not support the current map projection
+   *
+   * @param serviceName type of service provided by the URL
+   * @param proj current map projection
+   */
+  const emitErrorProj = (serviceName: string, proj: string) => {
     api.event.emit("snackbar/open", mapId, {
       message: {
         type: "string",
-        value: `${service} does not support current map projection ${proj}`,
+        value: `${serviceName} does not support current map projection ${proj}`,
       },
     });
+  };
 
+  /**
+   * Using the layerURL state object, check whether URL is a valid WMS,
+   * and add either Name and Entry directly to state if a single layer,
+   * or a list of Names / Entries if multiple layer options exist.
+   *
+   * @returns Promise<boolean>
+   */
   const wmsValidation = async (): Promise<boolean> => {
     const proj = api.map(mapId).projection.getCRS().code;
     try {
@@ -111,6 +146,13 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     return true;
   };
 
+  /**
+   * Using the layerURL state object, check whether URL is a valid ESRI Server,
+   * and add either Name and Entry directly to state if a single layer,
+   * or a list of Names / Entries if multiple layer options exist.
+   *
+   * @returns Promise<boolean>
+   */
   const esriValidation = async (type: string): Promise<boolean> => {
     try {
       const esri = await api.geoUtilities.getESRIServiceMetadata(layerURL);
@@ -138,6 +180,11 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     return true;
   };
 
+  /**
+   * Using the layerURL state object, check whether URL is a valid XYZ Server.
+   *
+   * @returns boolean
+   */
   const xyzValidation = (): boolean => {
     const proj = api.map(mapId).projection.getCRS().code;
     const tiles = ["{x}", "{y}", "{z}"];
@@ -154,6 +201,11 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     return true;
   };
 
+  /**
+   * Using the layerURL state object, check whether URL is a valid GeoJSON.
+   *
+   * @returns Promise<boolean>
+   */
   const geoJSONValidation = async (): Promise<boolean> => {
     try {
       const response = await fetch(layerURL);
@@ -166,6 +218,9 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     return true;
   };
 
+  /**
+   * Handle the behavior of the 'Continue' button in the Stepper UI
+   */
   const handleNext = async () => {
     if (activeStep === 0) {
       if (layerURL.trim() === "") return emitErrorEmpty("URL");
@@ -200,9 +255,18 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
   };
 
-  const handleBack = () =>
+  /**
+   * Handle the behavior of the 'Back' button in the Stepper UI
+   */
+  const handleBack = () => {
     setActiveStep((prevActiveStep: number) => prevActiveStep - 1);
+  };
 
+  /**
+   * Set layer URL from form input
+   *
+   * @param e TextField event
+   */
   const handleInput = (e: any) => {
     setLayerURL(e.target.value);
     setLayerType("");
@@ -211,6 +275,11 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     setLayerEntry("");
   };
 
+  /**
+   * Set layerType from form input
+   *
+   * @param e TextField event
+   */
   const handleSelectType = (e: any) => {
     setLayerType(e.target.value);
     setLayerList([]);
@@ -218,14 +287,32 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     setLayerEntry("");
   };
 
-  const handleNameLayer = (e: any) => setLayerName(e.target.value);
+  /**
+   * Set the layer name from form input
+   *
+   * @param e TextField event
+   */
+  const handleNameLayer = (e: any) => {
+    setLayerName(e.target.value);
+  };
 
+  /**
+   * Set the currently selected layer from a list
+   *
+   * @param e Select event
+   */
   const handleSelectLayer = (e: any) => {
     setLayerEntry(e.target.value);
     const name = layerList.find((x: LayerList) => x[0] === e.target.value)[1];
     setLayerName(name);
   };
 
+  /**
+   * Creates a set of Continue / Back buttons
+   *
+   * @param param0 specify if button is first or last in the list
+   * @returns
+   */
   const NavButtons = ({ isFirst = false, isLast = false }) => (
     <ButtonGroup
       className={classes.buttonGroup}
@@ -247,7 +334,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
           )}
         </>
       }
-    ></ButtonGroup>
+    />
   );
 
   return (

@@ -7,12 +7,24 @@ import {
   TypeApi,
 } from "geoview-core";
 
+/**
+ * Fetch the json response from the map server
+ *
+ * @param {string} url the url of the map server
+ * @returns {Promise<TypeLayerInfo>} a json containing the result of the query
+ */
 const queryServer = async (url: string): Promise<TypeLayerInfo> => {
   const response = await fetch(`${url}?f=json`);
   const result = await response.json();
   return result;
 };
 
+/**
+ * Get all aliases from the defined layer list, will be used when displaying entry / feature info
+ *
+ * @param {TypeFieldNameAlias[]} fields a list of the fields defined in the layer
+ * @returns {TypeJSONObject} an object containing field name and it's alias
+ */
 const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
   const fieldAliases: TypeJSONObject = {};
   if (fields) {
@@ -24,6 +36,14 @@ const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
   return fieldAliases;
 };
 
+/**
+ * Adds a single layer to it's parent setState function
+ *
+ * @param setState React setState function
+ * @param layerData layer configuration information
+ * @param layerInfo additional layer metadata fetched from URL
+ * @param isGroupLayer flag to specify if ESRI Dynamic layer is a group
+ */
 const addLayer = (
   setState: Function,
   layerData: TypeLayerData,
@@ -50,6 +70,12 @@ const addLayer = (
   });
 };
 
+/**
+ * Fetches metadata for layer based on type
+ *
+ * @param mapLayer layer configuration information
+ * @param setState React setState function
+ */
 const addMapLayer = async (mapLayer: any, setState: Function) => {
   const layerData = {
     id: mapLayer.id,
@@ -120,6 +146,15 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
   }
 };
 
+/**
+ * Adds all layers to state, unless optional layer parameter is passed,
+ * in which case only that layer is updated.
+ *
+ * @param setState React setState function
+ * @param api GeoView core api functions
+ * @param mapId string of current map ID
+ * @param layer layer configuration information
+ */
 const addLayers = (
   setState: Function,
   api: TypeApi,
