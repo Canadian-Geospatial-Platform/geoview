@@ -127,10 +127,10 @@ export const ClickMarker = (): JSX.Element => {
             let iconHtml = "";
 
             // get symbology image
-            if (symbology.legendImageUrl) {
+            if (symbology.imageData) {
+              iconHtml = `<img class='${classes.symbologyIcon}' src='data:${symbology.contentType};base64,${symbology.imageData}' alt="" />`;
+            } else if (symbology.legendImageUrl) {
               iconHtml = `<img class='${classes.symbologyIcon}' src='${symbology.legendImageUrl}' alt='' />`;
-            } else if (symbology.imageData) {
-              iconHtml = `<img class='${classes.symbologyIcon}' src='data:${symbology.contentType};base64, ${symbology.imageData}' alt="" />`;
             }
 
             setMarkerIcon(

@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { CircularProgress as MaterialCircularProgress } from "@mui/material";
 
 const useStyles = makeStyles((theme) => {
@@ -48,16 +48,14 @@ export const CircularProgress = (props: CircularProgressProps): JSX.Element => {
   const { className, style, isLoaded } = props;
   const classes = useStyles();
 
-  return (
+  return !isLoaded ? (
     <div
       className={`${classes.loading} ${className !== undefined && className}`}
-      style={{
-        ...style,
-        opacity: isLoaded ? "0" : "1",
-        visibility: isLoaded ? "hidden" : "visible",
-      }}
+      style={{ ...style }}
     >
       <MaterialCircularProgress className={classes.progress} />
     </div>
+  ) : (
+    <></>
   );
 };
