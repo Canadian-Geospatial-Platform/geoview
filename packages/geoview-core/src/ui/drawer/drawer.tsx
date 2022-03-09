@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useState } from "react";
+import { CSSProperties, useContext, useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +11,7 @@ import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
+import { MapContext } from "../../core/app-start";
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
@@ -74,9 +75,9 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
 
   const classes = useStyles();
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext)!;
 
-  const mapId = api.mapInstance(map)!.id;
+  const mapId = mapConfig.id;
 
   const openCloseDrawer = (status: boolean): void => {
     setOpen(status);

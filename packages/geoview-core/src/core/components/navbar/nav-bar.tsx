@@ -1,8 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect, useRef, useState } from "react";
-
-import { DomEvent } from "leaflet";
-import { useMap } from "react-leaflet";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -19,60 +16,52 @@ import { EVENT_NAMES } from "../../../api/event";
 
 import { Panel, ButtonGroup, Button } from "../../../ui";
 
-import { Cast, TypeButtonPanel } from "../../types/cgpv-types";
+import { TypeButtonPanel } from "../../types/cgpv-types";
+import { MapContext } from "../../app-start";
 
-const navBtnWidth = "38px";
+const navBtnWidth = "32px";
+const navBtnHeight = "32px";
+
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
     display: "flex",
     flexDirection: "row",
-    margin: theme.spacing(0, 0, 14, 0),
+    marginRight: 5,
+    paddingBottom: 30,
     zIndex: theme.zIndex.appBar,
+    pointerEvents: "all",
+    height: "100%",
+    overflow: "auto",
   },
   navBtnGroupContainer: {
     display: "flex",
-    overflow: "auto",
     position: "relative",
     flexDirection: "column",
     pointerEvents: "auto",
-    overflowX: "hidden",
+    justifyContent: "end",
   },
   navBtnGroup: {
-    margin: theme.spacing(3),
-    width: navBtnWidth,
-    "& > button": {
-      width: navBtnWidth,
-      maxWidth: navBtnWidth,
-      minWidth: navBtnWidth,
-      padding: theme.spacing(5, 5, 5),
-      height: "initial",
-      borderRadius: theme.spacing(5),
-      "&:first-child": {
-        margin: theme.spacing(0, 0, 1, 0),
-      },
-      "&:last-child": {
-        margin: theme.spacing(1, 0, 0, 0),
-      },
+    "&:not(:last-child)": {
+      marginBottom: theme.spacing(2),
     },
-    "& > button.MuiButtonGroup-groupedVertical:not(:first-child)": {
-      borderTopLeftRadius: theme.spacing(5),
-      borderTopRightRadius: theme.spacing(5),
-    },
-    "& > button.MuiButtonGroup-groupedVertical:not(:last-child)": {
-      borderBottomLeftRadius: theme.spacing(5),
-      borderBottomRightRadius: theme.spacing(5),
-    },
+    borderTopLeftRadius: theme.spacing(5),
+    borderTopRightRadius: theme.spacing(5),
+    borderBottomLeftRadius: theme.spacing(5),
+    borderBottomRightRadius: theme.spacing(5),
   },
   navBarButton: {
-    height: "initial",
-    paddingLeft: "initial",
-    paddingRight: "initial",
-    backgroundColor: "rgba(255,255,255,1)",
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
     borderRadius: theme.spacing(5),
+    width: navBtnWidth,
+    height: navBtnHeight,
+    maxWidth: navBtnWidth,
+    minWidth: navBtnWidth,
+    padding: "initial",
     "&:hover": {
-      backgroundColor: theme.palette.primary.main,
-      color: theme.palette.primary.dark,
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.light,
+      borderRadius: theme.spacing(5),
     },
   },
 }));
@@ -80,60 +69,24 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Create a navbar with buttons that can call functions or open custom panels
  */
-export function NavBar(): JSX.Element {
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<
-    Record<string, Record<string, TypeButtonPanel>>
-  >({});
+export function Navbar(): JSX.Element {
+  const [refreshCount, setRefreshCount] = useState(0);
 
   const classes = useStyles();
+
   const { t } = useTranslation<string>();
 
   const navBarRef = useRef<HTMLDivElement>(null);
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext)!;
 
-  const mapId = api.mapInstance(map)!.id;
-
-  const addButtonPanel = useCallback(
-    (payload) => {
-      const group = buttonPanelGroups[payload.groupName];
-
-      setButtonPanelGroups({
-        ...buttonPanelGroups,
-        [payload.groupName]: {
-          ...group,
-          [payload.id]: payload.buttonPanel,
-        },
-      });
-    },
-    [setButtonPanelGroups, buttonPanelGroups]
-  );
-
-  const removeButtonPanel = useCallback(
-    (payload) => {
-      setButtonPanelGroups((prevState) => {
-        const state = { ...prevState };
-
-        const group = state[payload.groupName];
-
-        delete group[payload.id];
-
-        return state;
-      });
-    },
-    [setButtonPanelGroups, buttonPanelGroups]
-  );
+  const mapId = mapConfig.id;
 
   /**
-   * listen to events to open/close the panel and to create the buttons
+   * function that causes rerender when changing navbar content
    */
-  useEffect(() => {
-    // disable events on container
-    const navBarChildrenHTMLElements = Cast<HTMLElement[]>(
-      navBarRef.current?.children
-    );
-    DomEvent.disableClickPropagation(navBarChildrenHTMLElements[0]);
-    DomEvent.disableScrollPropagation(navBarChildrenHTMLElements[0]);
+  const updateComponent = useCallback(() => {
+    setRefreshCount((refresh) => refresh + 1);
   }, []);
 
   useEffect(() => {
@@ -142,7 +95,7 @@ export function NavBar(): JSX.Element {
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
-          addButtonPanel(payload);
+          updateComponent();
         }
       },
       mapId
@@ -153,7 +106,28 @@ export function NavBar(): JSX.Element {
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
-          removeButtonPanel(payload);
+          updateComponent();
+        }
+      },
+      mapId
+    );
+
+    // listen to open panel to activate focus trap and focus on close
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_OPEN,
+      (args) => {
+        if (args.handlerName === mapId && args.type === "navbar") {
+          updateComponent();
+        }
+      },
+      mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.EVENT_PANEL_CLOSE,
+      (args) => {
+        if (args.handlerName === mapId && args.type === "navbar") {
+          updateComponent();
         }
       },
       mapId
@@ -162,33 +136,18 @@ export function NavBar(): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
     };
-  }, [addButtonPanel, removeButtonPanel]);
-
-  /**
-   * Close all open panels
-   */
-  const closeAllPanels = (): void => {
-    Object.keys(buttonPanelGroups).map((groupName: string) => {
-      // get button panels from group
-      const buttonPanels = buttonPanelGroups[groupName];
-
-      // get all button panels in each group
-      Object.keys(buttonPanels).map((buttonId) => {
-        const buttonPanel = buttonPanels[buttonId];
-
-        buttonPanel.panel?.close();
-      });
-    });
-  };
+  }, [updateComponent]);
 
   return (
     <div
       ref={navBarRef}
       className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}
     >
-      {Object.keys(buttonPanelGroups).map((groupName) => {
-        const buttons = buttonPanelGroups[groupName];
+      {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
+        const buttons = api.map(mapId).navBarButtons.buttons[groupName];
 
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
@@ -208,8 +167,8 @@ export function NavBar(): JSX.Element {
         }
       })}
       <div className={classes.navBtnGroupContainer}>
-        {Object.keys(buttonPanelGroups).map((groupName) => {
-          const buttons = buttonPanelGroups[groupName];
+        {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
+          const buttons = api.map(mapId).navBarButtons.buttons[groupName];
 
           // if not an empty object, only then render any HTML
           if (Object.keys(buttons).length !== 0) {
@@ -249,11 +208,10 @@ export function NavBar(): JSX.Element {
                         icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
                         onClick={() => {
-                          if (buttonPanel.panel?.status) {
-                            buttonPanel.panel?.close();
-                          } else {
-                            closeAllPanels();
+                          if (!buttonPanel.panel?.status) {
                             buttonPanel.panel?.open();
+                          } else {
+                            buttonPanel.panel?.close();
                           }
                         }}
                       />
@@ -270,8 +228,8 @@ export function NavBar(): JSX.Element {
           variant="contained"
           className={classes.navBtnGroup}
         >
-          <ZoomIn />
-          <ZoomOut />
+          <ZoomIn className={classes.navBarButton} />
+          <ZoomOut className={classes.navBarButton} />
         </ButtonGroup>
         <ButtonGroup
           orientation="vertical"
@@ -279,8 +237,8 @@ export function NavBar(): JSX.Element {
           variant="contained"
           className={classes.navBtnGroup}
         >
-          <Fullscreen />
-          <Home />
+          <Fullscreen className={classes.navBarButton} />
+          <Home className={classes.navBarButton} />
         </ButtonGroup>
       </div>
     </div>

@@ -4,8 +4,6 @@ import L from "leaflet";
 
 import { TooltipProps } from "@mui/material";
 
-import { Projection } from "../../geo/projection/projection";
-
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
 
@@ -27,9 +25,11 @@ export type TypeCGPV = {
   leaflet: Object;
   reactLeaflet: Object;
   reactLeafletCore: Object;
+  mui?: Object;
   ui: Object;
   useTranslation: Object;
   types: Object;
+  constants: Object;
 };
 
 export type TypeCallback = (callback: () => void) => void;
@@ -119,7 +119,7 @@ export const CONST_LAYER_TYPES = {
  */
 export type TypeLayerConfig = {
   id?: string;
-  name: string;
+  name?: string;
   url: string;
   type: string;
   entries?: string;
@@ -132,6 +132,7 @@ export type TypeLayerConfig = {
 export type TypeLayerData = {
   id: string;
   type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles";
+  name: string;
   layer: {
     options: {
       url: string;
@@ -321,7 +322,7 @@ export type TypePanelContentProps = {
  * Interface used when creating a map to validate configuration object
  */
 export type TypeMapConfigProps = {
-  id?: string;
+  id: string;
   name?: string;
   center: L.LatLngTuple;
   zoom: number;
@@ -443,6 +444,8 @@ export type TypeButtonProps = {
   children?: TypeChildren;
   // focus used for accessibility to enable focus
   autoFocus?: boolean;
+  // button disabling
+  disabled?: boolean;
 };
 
 /**

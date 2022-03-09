@@ -1,13 +1,33 @@
-import { useMap } from "react-leaflet";
-
+import { useContext } from "react";
+import { api } from "../../../../api/api";
 import { Button, ZoomOutIcon } from "../../../../ui";
+import { MapContext } from "../../../app-start";
 
-export default function ZoomOut(): JSX.Element {
-  // get map to use in zoom function
-  const map = useMap();
+/**
+ * Zoom out button properties
+ */
+interface ZoomOutProps {
+  className?: string | undefined;
+}
 
+/**
+ * Create a zoom out button
+ *
+ * @param {ZoomOutProps} props the zoom out button properties
+ * @returns {JSX.Element} return the new created zoom out button
+ */
+export default function ZoomOut(props: ZoomOutProps): JSX.Element {
+  const { className } = props;
+
+  const mapConfig = useContext(MapContext)!;
+
+  const mapId = mapConfig.id;
+
+  /**
+   * Causes the map to zoom out
+   */
   function zoomOut() {
-    map.zoomOut();
+    api.map(mapId).map.zoomOut();
   }
 
   return (
@@ -18,6 +38,7 @@ export default function ZoomOut(): JSX.Element {
       tooltipPlacement="left"
       icon={<ZoomOutIcon />}
       onClick={zoomOut}
+      className={className}
     />
   );
 }

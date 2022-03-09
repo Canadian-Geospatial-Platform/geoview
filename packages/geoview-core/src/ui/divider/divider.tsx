@@ -1,16 +1,18 @@
 import { CSSProperties } from "react";
 
 import { Divider as MaterialDivider } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = makeStyles((theme) => ({
   vertical: {
     alignSelf: "center",
     height: 40,
     width: 1,
+    backgroundColor: theme.palette.primary.contrastText,
   },
   horizontal: {
     height: 1,
+    backgroundColor: theme.palette.primary.contrastText,
   },
   grow: {
     flexGrow: 1,

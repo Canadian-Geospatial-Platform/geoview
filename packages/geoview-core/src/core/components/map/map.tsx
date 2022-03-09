@@ -13,11 +13,8 @@ import { SnackbarProvider } from "notistack";
 
 import { Crosshair } from "../crosshair/crosshair";
 import { MousePosition } from "../mouse-position/mouse-position";
-import { OverviewMap } from "../overview-map/overview-map";
 import { Attribution } from "../attribution/attribution";
 import { Snackbar } from "../../../ui/snackbar/snackbar";
-import { Appbar } from "../appbar/app-bar";
-import { NavBar } from "../navbar/nav-bar";
 import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
 import { ClickMarker } from "../click-marker/click-marker";
 
@@ -151,13 +148,15 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
+      api.event.off(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, id);
+      api.event.off(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, id);
       api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <MapContainer
+      id={id}
       center={center}
       zoom={zoom}
       crs={api.projection.getProjection(projection)}
@@ -206,7 +205,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
           // load plugins once all maps has rendered
-          api.plugin.loadPlugins(id, plugins);
+          api.plugin.loadPlugins();
         });
 
         // emit the map loaded event
@@ -230,28 +229,10 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           {deviceSizeMedUp && <MousePosition id={id} />}
           <ScaleControl position="bottomright" imperial={false} />
           {deviceSizeMedUp && <Attribution attribution={attribution} />}
-          <div
-            className="leaflet-control cgp-appbar"
-            style={{
-              boxSizing: "content-box",
-              zIndex: defaultTheme.zIndex.appBar,
-            }}
-          >
-            <Appbar />
-          </div>
-          {deviceSizeMedUp && (
-            <OverviewMap
-              id={id}
-              crs={crs!}
-              language={language}
-              zoomFactor={mapOptions.zoomFactor as number}
-            />
-          )}
           <NorthArrow projection={crs!} />
           <NorthPoleFlag projection={crs!} />
           <Crosshair id={id} />
           <ClickMarker />
-          <NavBar />
           <SnackbarProvider
             maxSnack={3}
             dense

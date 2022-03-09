@@ -41,14 +41,15 @@ export class PanelApi {
   /**
    * Initialize a new panel
    *
-   * @param panel the passed in panel properties when panel is created
-   * @param buttonId the button id of the button that will manage the panel
+   * @param {TypePanelProps} panel the passed in panel properties when panel is created
+   * @param {string} buttonId the button id of the button that will manage the panel
+   * @param {string} mapId the map id that this panel belongs to
    */
   constructor(panel: TypePanelProps, buttonId: string, mapId: string) {
     this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
-    this.title = panel.title;
+    this.title = panel.title || "";
     this.icon = panel.icon;
     this.content =
       panel.content !== undefined && panel.content !== null
@@ -58,7 +59,7 @@ export class PanelApi {
       panel.status !== undefined && panel.status !== null
         ? panel.status
         : false;
-    this.width = panel.width;
+    this.width = panel.width || 300;
   }
 
   /**
@@ -67,10 +68,57 @@ export class PanelApi {
   open = (): void => {
     this.status = true;
 
+    // close all other panels
+    this.closeAll();
+
     api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
+      type: this.type,
     });
+  };
+
+  /**
+   * Close all other panels
+   */
+  closeAll = (): void => {
+    if (this.type === "appbar") {
+      Object.keys(api.map(this.mapId).appBarButtons.buttons).map(
+        (groupName: string) => {
+          // get button panels from group
+          const buttonPanels = api.map(this.mapId).appBarButtons.buttons[
+            groupName
+          ];
+
+          // get all button panels in each group
+          Object.keys(buttonPanels).map((buttonId) => {
+            const buttonPanel = buttonPanels[buttonId];
+
+            if (this.buttonId !== buttonPanel.id) {
+              buttonPanel.panel?.close();
+            }
+          });
+        }
+      );
+    } else if (this.type === "navbar") {
+      Object.keys(api.map(this.mapId).navBarButtons.buttons).map(
+        (groupName: string) => {
+          // get button panels from group
+          const buttonPanels = api.map(this.mapId).navBarButtons.buttons[
+            groupName
+          ];
+
+          // get all button panels in each group
+          Object.keys(buttonPanels).map((buttonId) => {
+            const buttonPanel = buttonPanels[buttonId];
+
+            if (this.buttonId !== buttonPanel.id) {
+              buttonPanel.panel?.close();
+            }
+          });
+        }
+      );
+    }
   };
 
   /**
@@ -82,6 +130,7 @@ export class PanelApi {
     api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
+      type: this.type,
     });
   };
 

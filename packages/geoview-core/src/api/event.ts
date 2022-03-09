@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import EventEmitter from "eventemitter3";
 
+import { generateId } from "../core/utils/utilities";
+
 /**
  * constant contains event names
  */
@@ -10,6 +12,11 @@ export const EVENT_NAMES = {
    * Event triggered when map is loaded and api ready
    */
   EVENT_MAP_LOADED: "map/loaded",
+
+  /**
+   * Event triggered to reload the map
+   */
+  EVENT_MAP_RELOAD: "map/reload",
 
   /**
    * Event triggered when a user stops moving the map
@@ -76,10 +83,6 @@ export const EVENT_NAMES = {
   EVENT_NAVBAR_BUTTON_PANEL_REMOVE: "navbar/button_panel_remove",
 
   /**
-   * Event triggered when a panel has been opened or closed
-   */
-  EVENT_PANEL_OPEN_CLOSE: "panel/open_close",
-  /**
    * Event triggered when a request is made to open a panel
    */
   EVENT_PANEL_OPEN: "panel/open",
@@ -96,10 +99,6 @@ export const EVENT_NAMES = {
    */
   EVENT_PANEL_REMOVE_ACTION: "panel/remove_action",
   /**
-   * Event triggered when a request is made to change panel header title
-   */
-  EVENT_PANEL_CHANGE_TITLE: "panel/change_title",
-  /**
    * Event triggered when a request is made to change panel content
    */
   EVENT_PANEL_CHANGE_CONTENT: "panel/change_content",
@@ -108,6 +107,10 @@ export const EVENT_NAMES = {
    * Event triggered when adding a new layer
    */
   EVENT_LAYER_ADD: "layer/add",
+  /**
+   * Event triggered when adding a new layer
+   */
+  EVENT_LAYER_ADDED: "layer/added",
   /**
    * Event triggered when removing a layer
    */
@@ -187,6 +190,23 @@ export const EVENT_NAMES = {
    * Event is triggered when a call is made to hide the marker
    */
   EVENT_MARKER_ICON_HIDE: "marker_icon/hide",
+
+  /**
+   * Event is triggered when a new modal is created
+   */
+  EVENT_MODAL_CREATE: "modal/create",
+  /**
+   * Event is triggered when a modal opens
+   */
+  EVENT_MODAL_OPEN: "modal/open",
+  /**
+   * Event is triggered when a modal is closed
+   */
+  EVENT_MODAL_CLOSE: "modal/close",
+  /**
+   * Event is triggered when a modal is updated
+   */
+  EVENT_MODAL_UPDATE: "modal/update",
 };
 
 /**
@@ -221,6 +241,10 @@ export class Event {
     listener: (...args: any[]) => void,
     handlerName?: string
   ): void => {
+    eventName =
+      eventName +
+      (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+
     /**
      * Listen callback, sets the data that will be returned back
      * @param args payload being passed when emitted
@@ -241,11 +265,7 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.on(
-      eventName +
-        (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
-      listen
-    );
+    this.eventEmitter.on(eventName, listen);
   };
 
   /**
@@ -260,6 +280,10 @@ export class Event {
     listener: (...args: any[]) => void,
     handlerName?: string
   ): void => {
+    eventName =
+      eventName +
+      (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+
     /**
      * Listen callback, sets the data that will be returned back
      * @param args payload being passed when emitted
@@ -280,11 +304,7 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.once(
-      eventName +
-        (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
-      listen
-    );
+    this.eventEmitter.once(eventName, listen);
   };
 
   /**
@@ -327,10 +347,26 @@ export class Event {
    * @param {string} handlerName the name of the handler an event needs to be removed from
    */
   off = (eventName: string, handlerName?: string): void => {
-    this.eventEmitter.off(
+    eventName =
       eventName +
-        (handlerName && handlerName.length > 0 ? `/${handlerName}` : "")
-    );
+      (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+
+    this.eventEmitter.off(eventName);
+
+    delete this.events[eventName];
+  };
+
+  /**
+   * Unsubscribe from all events on the map
+   *
+   * @param {string} handlerName the id of the map to turn unsubscribe the event from
+   */
+  offAll = (handlerName: string): void => {
+    Object.keys(this.events).map((event) => {
+      if (event.includes(handlerName)) {
+        this.off(event);
+      }
+    });
   };
 
   /**
@@ -345,33 +381,32 @@ export class Event {
     handlerName: string | undefined | null,
     payload: Record<string, unknown>
   ): void => {
+    // event name
+    let eventName =
+      event + (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+
     // handler name, registers a unique handler to be used when multiple events emit with same event name
     let hName = handlerName;
 
     if (!this.events[event]) {
-      this.events[event] = {};
+      this.events[eventName] = {};
     }
 
-    // TODO check if this value was null, undefined then generate a meaniningful name
     if (!hName) {
-      hName = new Date().getTime().toString();
+      hName = generateId("");
     }
 
-    if (!this.events[event][hName]) {
-      this.events[event][hName] = {};
+    if (!this.events[eventName][hName]) {
+      this.events[eventName][hName] = {};
     }
 
     // store the emitted event to the events array
-    this.events[event][hName] = {
+    this.events[eventName][hName] = {
       handlerName,
       ...payload,
     };
 
-    this.eventEmitter.emit(
-      event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : ""),
-      { ...payload, handlerName },
-      handlerName
-    );
+    this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };
 
   /**

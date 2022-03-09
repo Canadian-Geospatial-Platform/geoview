@@ -29,10 +29,10 @@ const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) =>
 const config = {
     entry: {
         'gcpv-main': 'geoview-core',
-        'geoview-details-panel': 'geoview-details-panel',
-        'geoview-overview-map': 'geoview-overview-map',
-        'geoview-basemap-switcher': 'geoview-basemap-switcher',
-        'geoview-layers-panel': 'geoview-layers-panel',
+        'geoview-details-panel': { import: 'geoview-details-panel', dependOn: 'gcpv-main' },
+        'geoview-overview-map': { import: 'geoview-overview-map', dependOn: 'gcpv-main' },
+        'geoview-basemap-switcher': { import: 'geoview-basemap-switcher', dependOn: 'gcpv-main' },
+        'geoview-layers-panel': { import: 'geoview-layers-panel', dependOn: 'gcpv-main' },
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

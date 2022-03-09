@@ -76,9 +76,11 @@ export class GeoUtilities {
 
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
         if (activeEl?.className.match(/leaflet-map-*/g) !== null) {
+          const mapId = activeEl?.getAttribute("id");
+
           activeEl?.classList.forEach((item) => {
             if (item.includes("leaflet-map-")) {
-              api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, item, {});
+              api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId, {});
             }
           });
         }
@@ -98,10 +100,19 @@ export class GeoUtilities {
    * @returns the map server url
    */
   getMapServerUrl = (url: string, rest = false): string => {
-    let mapServerUrl = url.slice(
-      0,
-      url.indexOf("MapServer") + "MapServer".length
-    );
+    let mapServerUrl = url;
+    if (mapServerUrl.includes("MapServer")) {
+      mapServerUrl = mapServerUrl.slice(
+        0,
+        mapServerUrl.indexOf("MapServer") + "MapServer".length
+      );
+    }
+    if (mapServerUrl.includes("FeatureServer")) {
+      mapServerUrl = mapServerUrl.slice(
+        0,
+        mapServerUrl.indexOf("FeatureServer") + "FeatureServer".length
+      );
+    }
 
     if (rest) {
       const urlRightSide = mapServerUrl.slice(

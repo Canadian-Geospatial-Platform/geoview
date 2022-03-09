@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { Suspense } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 
 import "./translation/i18n";
 import i18n from "i18next";
@@ -12,21 +12,27 @@ import {
 } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import { Config } from "./utils/config";
 import { Shell } from "./containers/shell";
 import { theme } from "../ui/style/theme";
 import { MapViewer } from "../geo/map/map";
+
+import { TypeMapConfigProps } from "./types/cgpv-types";
 
 declare module "@mui/styles/defaultTheme" {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme {}
 }
 
+// create a state that will hold map config information
+export const MapContext = React.createContext<TypeMapConfigProps | undefined>(
+  undefined
+);
+
 /**
  * interface used when passing configuration from the maps
  */
 interface AppStartProps {
-  configObj: Config;
+  configObj: TypeMapConfigProps;
 }
 
 /**
@@ -45,11 +51,13 @@ const AppStart = (props: AppStartProps): JSX.Element => {
     });
 
     // create a new map instance
-    const mapInstance = new MapViewer(configObj.configuration, i18nInstance);
+    new MapViewer(configObj, i18nInstance);
 
     return (
       <I18nextProvider i18n={i18nInstance}>
-        <Shell id={configObj.id} config={configObj.configuration} />
+        <MapContext.Provider value={configObj}>
+          <Shell id={configObj.id} config={configObj} />
+        </MapContext.Provider>
       </I18nextProvider>
     );
   }

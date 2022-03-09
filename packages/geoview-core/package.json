@@ -6,6 +6,11 @@
   "main": "src/app.tsx",
   "license": "MIT",
   "dependencies": {
+    "@mui/material": "^5.4.3",
+    "@mui/styles": "^5.4.2",
+    "@mui/icons-material": "^5.4.2",
+    "@emotion/react": "^11.8.1",
+    "@emotion/styled": "^11.8.1",
     "@react-leaflet/core": "^1.1.1",
     "prop-types": "^15.8.1",
     "axios": "^0.25.0",
@@ -29,12 +34,7 @@
     "react-i18next": "^11.8.0",
     "react-leaflet": "^3.2.5",
     "screenfull": "^6.0.1",
-    "wms-capabilities": "^0.5.1",
-    "@mui/material": "~5.4.1",
-    "@mui/styles": "~5.4.1",
-    "@mui/icons-material": "~5.4.1",
-    "@emotion/react": "~11.7.1",
-    "@emotion/styled": "~11.6.0"
+    "wms-capabilities": "^0.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",

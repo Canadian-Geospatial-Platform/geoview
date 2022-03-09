@@ -8,6 +8,8 @@ import * as translate from "react-i18next";
 
 import makeStyles from "@mui/styles/makeStyles";
 
+import { MapViewer } from "./../geo/map/map";
+
 import { api } from "./api";
 import { Cast, TypeWindow } from "../core/types/cgpv-types";
 
@@ -141,26 +143,51 @@ export class Plugin {
   };
 
   /**
-   * Load plugins provided by map config
+   * Delete all plugins loaded in a map
    *
-   * @param mapId the map id to load the plugins to
-   * @param plugins the plugins to load
+   * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
-  loadPlugins = (mapId: string, plugins: string[]): void => {
-    // load plugins if provided in the config
-    if (plugins && plugins.length > 0) {
-      plugins.forEach((plugin) => {
-        const { plugins } = Cast<TypeWindow>(window);
-        if (plugins && plugins[plugin]) {
-          this.addPlugin(plugin, mapId, plugins[plugin], {
-            mapId: mapId,
-          });
-        } else {
-          this.addPlugin(plugin, mapId, null, {
-            mapId: mapId,
-          });
+  removePlugins = (mapId: string): void => {
+    if (mapId) {
+      const mapPlugins = this.plugins[mapId];
+
+      if (mapPlugins) {
+        // remove all plugins by map
+        for (var i = 0; i < Object.keys(mapPlugins).length; i++) {
+          const plugin = Object.keys(mapPlugins)[i];
+
+          this.removePlugin(plugin, mapId);
         }
-      });
+      }
     }
+  };
+
+  /**
+   * Load plugins provided by map config
+   */
+  loadPlugins = (): void => {
+    // loop through each map and check if the config contains any plugins to load
+    const maps = api.maps;
+
+    Object.keys(api.maps).forEach((mapId: string) => {
+      const map = api.maps[mapId] as MapViewer;
+      const plugins = map.mapProps.plugins;
+
+      // load plugins if provided in the config
+      if (plugins && plugins.length > 0) {
+        plugins.forEach((plugin) => {
+          const { plugins } = Cast<TypeWindow>(window);
+          if (plugins && plugins[plugin]) {
+            this.addPlugin(plugin, mapId, plugins[plugin], {
+              mapId: mapId,
+            });
+          } else {
+            this.addPlugin(plugin, mapId, null, {
+              mapId: mapId,
+            });
+          }
+        });
+      }
+    });
   };
 }

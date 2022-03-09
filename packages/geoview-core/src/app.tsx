@@ -8,9 +8,12 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
-import { useMediaQuery, IconButton } from "@mui/material";
+// TODO: remove as soon as element UI components are created
+import * as MUI from "@mui/material";
+
+import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -27,6 +30,8 @@ import AppStart from "./core/app-start";
 
 import * as types from "./core/types/cgpv-types";
 import { Config } from "./core/utils/config";
+import { EVENT_NAMES } from "./api/event";
+import { LEAFLET_POSITION_CLASSES } from "./geo/utils/constant";
 
 export * from "./core/types/cgpv-types";
 
@@ -38,6 +43,31 @@ const DefaultIcon = new Icon({
   shadowUrl: iconShadow,
 });
 Marker.prototype.options.icon = DefaultIcon;
+
+// TODO look for a better place to put this when working on issue #8
+
+// listen to map reload event
+api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
+  if (payload && payload.handlerId) {
+    // unsubscribe from all events registered on this map
+    api.event.offAll(payload.handlerId);
+
+    // unload all loaded plugins on the map
+    api.plugin.removePlugins(payload.handlerId);
+
+    // get the map container
+    const map = document.getElementById(payload.handlerId);
+
+    // remove the dom element (remove rendered map)
+    ReactDOM.unmountComponentAtNode(map!);
+
+    // delete the map instance from the maps array
+    delete api.maps[payload.handlerId];
+
+    // re-render map with updated config keeping previous values if unchanged
+    ReactDOM.render(<AppStart configObj={payload.config} />, map);
+  }
+});
 
 /**
  * Initialize the cgpv and render it to root element
@@ -62,7 +92,10 @@ function init(callback: () => void) {
       (mapElement.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
     );
 
-    ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+    ReactDOM.render(
+      <AppStart configObj={configObj.configuration} />,
+      mapElement
+    );
   }
 }
 
@@ -79,6 +112,7 @@ export const cgpv: types.TypeCGPV = {
   leaflet: L,
   reactLeaflet: ReactLeaflet,
   reactLeafletCore: ReactLeafletCore,
+  mui: MUI,
   ui: {
     useTheme: useTheme,
     useMediaQuery: useMediaQuery,
@@ -87,6 +121,9 @@ export const cgpv: types.TypeCGPV = {
   },
   useTranslation: useTranslation,
   types: types,
+  constants: {
+    leafletPositionClasses: LEAFLET_POSITION_CLASSES,
+  },
 };
 
 // freeze variable name so a variable with same name can't be defined from outside
