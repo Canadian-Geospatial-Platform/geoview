@@ -22,17 +22,17 @@ const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) =>
         title: 'Canadian Geospatial Platform Viewer',
         inject: 'head',
         scriptLoading: 'blocking',
-        chunks: ['gcpv-main'],
+        chunks: ['cgpv-main'],
     });
 });
 
 const config = {
     entry: {
-        'gcpv-main': 'geoview-core',
-        'geoview-details-panel': { import: 'geoview-details-panel', dependOn: 'gcpv-main' },
-        'geoview-overview-map': { import: 'geoview-overview-map', dependOn: 'gcpv-main' },
-        'geoview-basemap-switcher': { import: 'geoview-basemap-switcher', dependOn: 'gcpv-main' },
-        'geoview-layers-panel': { import: 'geoview-layers-panel', dependOn: 'gcpv-main' },
+        'cgpv-main': 'geoview-core',
+        'geoview-details-panel': { import: 'geoview-details-panel', dependOn: 'cgpv-main' },
+        'geoview-overview-map': { import: 'geoview-overview-map', dependOn: 'cgpv-main' },
+        'geoview-basemap-switcher': { import: 'geoview-basemap-switcher', dependOn: 'cgpv-main' },
+        'geoview-layers-panel': { import: 'geoview-layers-panel', dependOn: 'cgpv-main' },
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

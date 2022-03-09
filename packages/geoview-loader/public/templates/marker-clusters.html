@@ -148,7 +148,7 @@
                 mapViewer.layer.vector.addCircleMarker(56, -97, { radius: 1 }, 'CircleMarker-1');
                 mapViewer.layer.vector.addCircle(57.7, -99, { radius: 10 }, 'Circle-1');
 
-                mapViewer.layer.vector.createGeometryGroup('myGroup', { visible: true });
+                mapViewer.layer.vector.createGeometryGroup('myGroup', { visible: clickCounter != 1 });
                 mapViewer.layer.vector.setActiveGeometryGroup('myGroup');
 
                 marker = mapViewer.layer.vector.addMarker(57, -98, {
@@ -196,7 +196,7 @@
             }
 
             function addMarkerCluster(mapViewer) {
-                mapViewer.layer.markerCluster.createClusterGroup('myGroup', { ...mapViewer.layer.markerCluster.clusterGroupOptions, visible: false });
+                mapViewer.layer.markerCluster.createClusterGroup('myGroup', { ...mapViewer.layer.markerCluster.clusterGroupOptions, visible: clickCounter == 1 });
                 mapViewer.layer.markerCluster.setActiveClusterGroup('myGroup');
 
                 marker = mapViewer.layer.markerCluster.addMarkerElement(57, -98, {
@@ -285,7 +285,7 @@
                     if (pressedKeys['C'.charCodeAt(0)] || pressedKeys['T'.charCodeAt(0)] ) clickCounter = ++clickCounter & 1;
                 });
 
-                const layerPanel = mapViewer.appBarButtons.getAppBarButtonPanelById('layer-panel').panel;
+                const layerPanel = mapViewer.appBarButtons.getAppBarButtonPanelById('default-panel').panel;
                 layerPanel.attachCheckBoxList(['layer 1', 'layer 2', 'layer 3', 'layer 4', ], true);
 
                 addModelsToAppbarPane(mapViewer);
