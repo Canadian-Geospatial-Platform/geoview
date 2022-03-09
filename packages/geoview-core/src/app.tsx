@@ -29,6 +29,7 @@ import * as types from "./core/types/cgpv-types";
 import { Config } from "./core/utils/config";
 import { EVENT_NAMES } from "./api/event";
 import { LEAFLET_POSITION_CLASSES } from "./geo/utils/constant";
+import { generateId } from "./core/utils/utilities";
 
 export * from "./core/types/cgpv-types";
 
@@ -95,6 +96,69 @@ function init(callback: () => void) {
     );
   }
 }
+
+function loadMapFromUrl(configParams: string) {
+  // get parameters from path. Ex: ?z=4 will get {"z": "123"}
+  var id = configParams.split("?")[0];
+  var data = configParams.split("?")[1];
+  var obj: Record<string, any> = {};
+
+  if (data !== undefined) {
+    var params = data.split("&");
+
+    for (var i = 0; i < params.length; i++) {
+      var param = params[i].split("=");
+
+      obj[param[0]] = param[1];
+    }
+  }
+
+  // either look for a map with class llwp-map or "create new one?"
+  const maps = document.getElementsByClassName("llwp-map");
+
+  if (maps.length) {
+    const map = maps[0];
+
+    const mapId = map.getAttribute("id")!;
+
+    // TODO validate the params with schema, use defaults from schema for not provided config
+
+    // // validate configuration and appply default if problem occurs then setup language
+    // const configObj = new Config(
+    //   map.getAttribute("id")!,
+    //   (map.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
+    // );
+
+    let center = obj["c"]?.split(",");
+
+    if (!center) center = [0, 0];
+
+    // create a config object
+    const configObj = {
+      zoom: parseInt(obj["z"]),
+      center: [parseInt(center[0]), parseInt(center[1])],
+      projection: parseInt(obj["b"]),
+      language: obj["l"],
+    };
+
+    // emit an event to reload the map to change the language
+    api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
+      handlerId: mapId,
+      config: { ...api.map(mapId).mapProps, ...configObj },
+    });
+
+    console.log("second");
+  }
+}
+
+window.onload = () => {
+  console.log(location);
+  loadMapFromUrl(location.search);
+};
+
+window.onhashchange = () => {
+  loadMapFromUrl(location.search);
+};
 
 // cgpv object to be exported with the api for outside use
 export const cgpv: types.TypeCGPV = {
