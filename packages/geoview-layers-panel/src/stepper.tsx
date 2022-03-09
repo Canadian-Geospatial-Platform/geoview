@@ -4,6 +4,10 @@ interface Props {
 }
 
 type LayerList = [string, string][];
+type EsriOptions = {
+  err: string;
+  capability: string;
+};
 
 const w = window as any;
 
@@ -22,9 +26,9 @@ const layerOptions = [
  * Returns the appropriate error config for ESRI layer types
  *
  * @param type one of esriDynamic or esriFeature
- * @returns
+ * @returns an error configuration object for populating dialogues
  */
-const esriOptions = (type: string) => {
+const esriOptions = (type: string): EsriOptions => {
   switch (type) {
     case "esriDynamic":
       return { err: "ESRI Map", capability: "Map" };
@@ -122,7 +126,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * and add either Name and Entry directly to state if a single layer,
    * or a list of Names / Entries if multiple layer options exist.
    *
-   * @returns Promise<boolean>
+   * @returns True if layer passes validation
    */
   const wmsValidation = async (): Promise<boolean> => {
     const proj = api.map(mapId).projection.getCRS().code;
@@ -151,7 +155,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * and add either Name and Entry directly to state if a single layer,
    * or a list of Names / Entries if multiple layer options exist.
    *
-   * @returns Promise<boolean>
+   * @returns True if layer passes validation
    */
   const esriValidation = async (type: string): Promise<boolean> => {
     try {
@@ -183,7 +187,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   /**
    * Using the layerURL state object, check whether URL is a valid XYZ Server.
    *
-   * @returns boolean
+   * @returns True if layer passes validation
    */
   const xyzValidation = (): boolean => {
     const proj = api.map(mapId).projection.getCRS().code;
@@ -204,7 +208,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   /**
    * Using the layerURL state object, check whether URL is a valid GeoJSON.
    *
-   * @returns Promise<boolean>
+   * @returns True if layer passes validation
    */
   const geoJSONValidation = async (): Promise<boolean> => {
     try {
@@ -311,7 +315,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * Creates a set of Continue / Back buttons
    *
    * @param param0 specify if button is first or last in the list
-   * @returns
+   * @returns React component
    */
   const NavButtons = ({ isFirst = false, isLast = false }) => (
     <ButtonGroup
