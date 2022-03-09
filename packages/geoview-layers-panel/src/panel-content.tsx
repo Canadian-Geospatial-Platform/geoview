@@ -1,4 +1,4 @@
-import { TypePanelContentProps } from "geoview-core";
+import { TypePanelContentProps, TypeProps } from "geoview-core";
 
 import Stepper from "./stepper";
 import LayersList from "./layers-list";
@@ -21,6 +21,17 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const [layersData, setLayersData] = useState({});
   const [addLayerVisible, setAddLayerVisible] = useState(false);
   const { Button } = ui.elements;
+
+  const { language } = api.map(mapId);
+
+  const translations: TypeProps<TypeProps<any>> = {
+    "en-CA": {
+      addLayer: "Add Layer",
+    },
+    "fr-CA": {
+      addLayer: "Ajouter Couche",
+    },
+  };
 
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
@@ -60,10 +71,12 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       <div className={classes.mainContainer}>
         <Button
           className={classes.addLayerButton}
+          tooltip={translations[language].addLayer}
+          tooltipPlacement="right"
           variant="contained"
-          type="text"
+          type="icon"
+          icon='<i class="material-icons">add</i>'
           onClick={onClick}
-          children="+"
         />
       </div>
       <br />
