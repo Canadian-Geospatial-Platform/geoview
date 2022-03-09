@@ -76,6 +76,7 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     type,
     state,
     autoFocus,
+    disabled,
   } = props;
 
   const { t } = useTranslation<string>();
@@ -164,6 +165,7 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
         style={style ? style : undefined}
         onClick={onClick}
         autoFocus={autoFocus !== undefined && autoFocus ? autoFocus : undefined}
+        disabled={disabled ? disabled : undefined}
       >
         {content}
       </MaterialButton>
