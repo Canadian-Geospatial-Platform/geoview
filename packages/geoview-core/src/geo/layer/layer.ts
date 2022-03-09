@@ -168,6 +168,9 @@ export class Layer {
       cgpvLayer.layer.addTo(this.#map);
       //this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = cgpvLayer;
+      api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
+        layer: cgpvLayer.layer,
+      });
     }
   }
 

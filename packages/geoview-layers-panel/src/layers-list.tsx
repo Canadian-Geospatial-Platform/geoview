@@ -6,7 +6,7 @@ const w = window as any;
 /**
  * A react component that will list the map server layers defined in the map config
  * @param {TypeLayersListProps} props properties passed to the component
- * @returns a React JSX Element containing map server layers
+ * @returns {JSX.Element} a React JSX Element containing map server layers
  */
 const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { layersData } = props;

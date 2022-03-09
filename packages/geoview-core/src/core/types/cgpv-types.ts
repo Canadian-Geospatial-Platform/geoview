@@ -25,6 +25,7 @@ export type TypeCGPV = {
   leaflet: Object;
   reactLeaflet: Object;
   reactLeafletCore: Object;
+  mui?: Object;
   ui: Object;
   useTranslation: Object;
   types: Object;
@@ -443,6 +444,8 @@ export type TypeButtonProps = {
   children?: TypeChildren;
   // focus used for accessibility to enable focus
   autoFocus?: boolean;
+  // button disabling
+  disabled?: boolean;
 };
 
 /**
