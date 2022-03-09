@@ -10,7 +10,7 @@ const w = window as any;
  * A react component that displays the details panel content
  *
  * @param {TypePanelContentProps} props the properties of the pane content
- * @returns A React JSX Element with the details panel
+ * @returns {JSX.Element} A React JSX Element with the details panel
  */
 const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { mapId } = props;
