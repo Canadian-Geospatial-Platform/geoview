@@ -2,6 +2,10 @@ interface Props {
   mapId: string;
   setAddLayerVisible: Function;
 }
+interface ButtonProps {
+  isFirst?: boolean;
+  isLast?: boolean;
+}
 
 type LayerList = [string, string][];
 type EsriOptions = {
@@ -317,7 +321,10 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * @param param0 specify if button is first or last in the list
    * @returns {JSX.Element} React component
    */
-  const NavButtons = ({ isFirst = false, isLast = false }): JSX.Element => (
+  const NavButtons = ({
+    isFirst = false,
+    isLast = false,
+  }: ButtonProps): JSX.Element => (
     <ButtonGroup
       className={classes.buttonGroup}
       children={

@@ -12,7 +12,9 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { layersData } = props;
 
   const cgpv = w["cgpv"];
-  const { ui } = cgpv;
+  const { ui, react, leaflet } = cgpv;
+  const { useState } = react;
+  const [selectedLayer, setSelectedLayer] = useState("");
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
@@ -51,42 +53,36 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       textOverflow: "ellipsis",
       overflow: "hidden",
       marginLeft: "10px",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
     },
   }));
 
   const classes = useStyles();
 
+  const onClick = (value: string) => {
+    const selected = value !== selectedLayer ? value : "";
+    setSelectedLayer(selected);
+  };
+
   return (
     <div className={classes.layersContainer}>
-      {Object.keys(layersData).map((dataKey) => {
-        const data = layersData[dataKey];
-        return (
-          <div key={data.id}>
-            {Object.keys(data.layers).map((layerKey: string, index: number) => {
-              const { layer, layerData, groupLayer } = data.layers[layerKey];
-              return (
-                <div
-                  key={index}
-                  tabIndex={layerData.length > 0 && !groupLayer ? 0 : -1}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (!groupLayer) {
-                        e.preventDefault();
-                      }
-                    }
-                  }}
-                  role="button"
-                >
-                  {groupLayer ? (
-                    <div className={classes.layerParentText} title={layer.name}>
-                      {layer.name}
-                    </div>
-                  ) : (
+      {Object.values(layersData).map((data) => (
+        <div key={data.id}>
+          {Object.values(data.layers).map(
+            ({ layer, groupLayer }, index: number) => (
+              <div key={index}>
+                {groupLayer ? (
+                  <div className={classes.layerParentText} title={layer.name}>
+                    {layer.name}
+                  </div>
+                ) : (
+                  <>
                     <button
                       type="button"
-                      tabIndex={-1}
                       className={classes.layerItem}
-                      disabled={layerData.length === 0}
+                      onClick={() => onClick(data.id + layer.id)}
                     >
                       <div className={classes.layerCountTextContainer}>
                         <div
@@ -97,13 +93,59 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                         </div>
                       </div>
                     </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+                    {selectedLayer === data.id + layer.id && (
+                      <div>
+                        {(layer.drawingInfo?.renderer.type === "simple" ||
+                          data.type === "geoJSON") && (
+                          <div className={classes.layerItemText}>
+                            <img
+                              src={
+                                ["esriFeature", "geoJSON"].includes(data.type)
+                                  ? leaflet.Marker.prototype.options.icon
+                                      .options.iconUrl
+                                  : "data:" +
+                                    layer.drawingInfo?.renderer.symbol
+                                      .contentType +
+                                    ";base64," +
+                                    layer.drawingInfo?.renderer.symbol.imageData
+                              }
+                            />
+                            {layer.drawingInfo?.renderer.label || layer.name}
+                          </div>
+                        )}
+                        {layer.drawingInfo?.renderer.type === "uniqueValue" &&
+                          layer.drawingInfo?.renderer.uniqueValueInfos.map(
+                            (uniqueValue, index) => (
+                              <div
+                                key={index}
+                                className={classes.layerItemText}
+                              >
+                                <img
+                                  src={
+                                    ["esriFeature", "geoJSON"].includes(
+                                      data.type
+                                    )
+                                      ? leaflet.Marker.prototype.options.icon
+                                          .options.iconUrl
+                                      : "data:" +
+                                        uniqueValue.symbol.contentType +
+                                        ";base64," +
+                                        uniqueValue.symbol.imageData
+                                  }
+                                />
+                                {uniqueValue.label}
+                              </div>
+                            )
+                          )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          )}
+        </div>
+      ))}
     </div>
   );
 };

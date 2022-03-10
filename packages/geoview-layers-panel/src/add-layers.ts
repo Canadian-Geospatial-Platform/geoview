@@ -107,7 +107,7 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
     const layerInfo = await queryServer(mapLayer.layer.options.url);
     addLayer(setState, layerData, layerInfo, false);
   } else if (mapLayer.type === "esriDynamic") {
-    const entries = mapLayer.layer.getLayers();
+    const layerIds = mapLayer.layer.getLayers();
     mapLayer.layer.metadata(
       async (
         error: any,
@@ -116,7 +116,7 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
         if (error) return;
         if (res.layers) {
           for (const subLayerData of res.layers) {
-            if (subLayerData.id in entries) {
+            if (layerIds.includes(subLayerData.id)) {
               const layerInfo = await queryServer(
                 mapLayer.layer.options.url + subLayerData.id
               );
