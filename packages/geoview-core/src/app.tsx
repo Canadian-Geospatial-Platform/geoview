@@ -8,6 +8,9 @@ import * as ReactLeafletCore from "@react-leaflet/core";
 
 import { useTranslation } from "react-i18next";
 
+// TODO: remove as soon as element UI components are created
+import * as MUI from "@mui/material";
+
 import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import makeStyles from "@mui/styles/makeStyles";
@@ -86,7 +89,12 @@ function init(callback: () => void) {
     // validate configuration and appply default if problem occurs then setup language
     const configObj = new Config(
       mapElement.getAttribute("id")!,
-      (mapElement.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
+      (mapElement.getAttribute("data-leaflet") || "")
+        .replace(/'/g, '"')
+        .replace(
+          /(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g,
+          "\\\\'"
+        )
     );
 
     ReactDOM.render(
@@ -109,6 +117,7 @@ export const cgpv: types.TypeCGPV = {
   leaflet: L,
   reactLeaflet: ReactLeaflet,
   reactLeafletCore: ReactLeafletCore,
+  mui: MUI,
   ui: {
     useTheme: useTheme,
     useMediaQuery: useMediaQuery,

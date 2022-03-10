@@ -1,5 +1,5 @@
 export * from "./button";
-export * from "./button-group/button-group";
+export * from "./button-group";
 export * from "./circular-progress/circular-progress";
 export * from "./divider/divider";
 export * from "./drawer/drawer";
