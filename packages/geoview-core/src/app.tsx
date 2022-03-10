@@ -15,6 +15,8 @@ import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import makeStyles from "@mui/styles/makeStyles";
 
+import ZSchema from "z-schema";
+
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
@@ -116,46 +118,50 @@ function loadMapFromUrl(configParams: string) {
     }
   }
 
-  // either look for a map with class llwp-map or "create new one?"
-  const maps = document.getElementsByClassName("llwp-map");
+  if (Object.keys(obj).length > 0) {
+    // either look for a map with class llwp-map or "create new one?"
+    const maps = document.getElementsByClassName("llwp-map");
 
-  if (maps.length) {
-    const map = maps[0];
+    if (maps.length) {
+      const map = maps[0];
 
-    const mapId = map.getAttribute("id")!;
+      const mapId = map.getAttribute("id")!;
 
-    // TODO validate the params with schema, use defaults from schema for not provided config
+      // TODO validate the params with schema, use defaults from schema for not provided config
 
-    // // validate configuration and appply default if problem occurs then setup language
-    // const configObj = new Config(
-    //   map.getAttribute("id")!,
-    //   (map.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
-    // );
+      // // validate configuration and appply default if problem occurs then setup language
+      // const configObj = new Config(
+      //   map.getAttribute("id")!,
+      //   (map.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
+      // );
 
-    let center = obj["c"]?.split(",");
+      let center = obj["c"]?.split(",");
 
-    if (!center) center = [0, 0];
+      if (!center) center = [0, 0];
 
-    // create a config object
-    const configObj = {
-      zoom: parseInt(obj["z"]),
-      center: [parseInt(center[0]), parseInt(center[1])],
-      projection: parseInt(obj["b"]),
-      language: obj["l"],
-    };
+      // create a config object
+      const configObj = {
+        ...api.map(mapId).mapProps,
+        zoom: parseInt(obj["z"]),
+        center: [parseInt(center[0]), parseInt(center[1])],
+        projection: parseInt(obj["b"]),
+        language: obj["l"],
+      };
 
-    // emit an event to reload the map to change the language
-    api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
-      handlerId: mapId,
-      config: { ...api.map(mapId).mapProps, ...configObj },
-    });
+      console.log(configObj);
 
-    console.log("second");
+      const validator = new ZSchema({});
+
+      // emit an event to reload the map to change the language
+      api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
+        handlerId: mapId,
+        config: configObj,
+      });
+    }
   }
 }
 
 window.onload = () => {
-  console.log(location);
   loadMapFromUrl(location.search);
 };
 

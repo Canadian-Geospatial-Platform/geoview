@@ -13,7 +13,6 @@ import { EVENT_NAMES } from "../../api/event";
 
 import {
   CONST_LAYER_TYPES,
-  TypeLayerData,
   TypeLayerConfig,
 } from "../../core/types/cgpv-types";
 import { generateId } from "../../core/utils/utilities";
@@ -29,7 +28,9 @@ import { generateId } from "../../core/utils/utilities";
  */
 export class Layer {
   // variable used to store all added layers
-  layers: { [key: string]: TypeLayerData } = {};
+  layers: {
+    [key: string]: WMS | XYZTiles | GeoJSON | EsriDynamic | EsriFeature;
+  } = {};
 
   // used to access vector API to create and manage geometries
   vector: Vector;
@@ -150,7 +151,9 @@ export class Layer {
    * Add the layer to the map if valid. If not (is a string) emit an error
    * @param {any} cgpvLayer the layer config
    */
-  private addToMap(cgpvLayer: TypeLayerData): void {
+  private addToMap(
+    cgpvLayer: WMS | GeoJSON | XYZTiles | EsriDynamic | EsriFeature
+  ): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
     if (typeof cgpvLayer.layer === "string") {
@@ -163,14 +166,27 @@ export class Layer {
       });
     } else {
       if (cgpvLayer.type !== "geoJSON")
-        this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+        this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer);
 
-      cgpvLayer.layer.addTo(this.#map);
-      //this.layers.push(cgpvLayer);
-      this.layers[cgpvLayer.id] = cgpvLayer;
-      api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
-        layer: cgpvLayer.layer,
-      });
+      try {
+        if (this.#map.getContainer()) {
+          cgpvLayer.layer.addTo(this.#map);
+          //this.layers.push(cgpvLayer);
+          this.layers[cgpvLayer.id] = cgpvLayer;
+          api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
+            layer: cgpvLayer.layer,
+          });
+        }
+      } catch (error) {
+        // TODO Find the cause of it not loading layers, could be that map is not ready yet
+        api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.#map.id, {
+          message: {
+            type: "key",
+            value: "validation.layer.loadfailed",
+            params: [cgpvLayer.name, this.#map.id],
+          },
+        });
+      }
     }
   }
 
@@ -207,7 +223,7 @@ export class Layer {
     //   if (item.id === id) item.layer.removeFrom(this.#map);
     //   return item.id !== id;
     // });
-    this.layers[id].layer.removeFrom(this.#map);
+    (this.layers[id].layer as L.Layer).removeFrom(this.#map);
     delete this.layers[id];
   };
 
@@ -230,7 +246,9 @@ export class Layer {
    * @param {string} id the layer id to look for
    * @returns the found layer data object
    */
-  getLayerById = (id: string): TypeLayerData | null => {
+  getLayerById = (
+    id: string
+  ): WMS | XYZTiles | EsriDynamic | EsriFeature | GeoJSON | null => {
     //return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
     return this.layers.hasOwnProperty(id) ? this.layers[id] : null;
   };
