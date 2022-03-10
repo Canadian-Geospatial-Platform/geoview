@@ -1,627 +1,650 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema#",
-    "title": "GeoView Core Config Schema",
-    "type": "object",
-    "version": 1.0,
-    "comments": "Configuration for GeoView core packages, each packages manages it own schema.",
-    "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Core Config Schema",
+  "type": "object",
+  "version": 1.0,
+  "comments": "Configuration for GeoView core packages, each packages manages it own schema.",
+  "additionalProperties": false,
 
-    "definitions": {
-        "detailsLayerSettings": {
-            "type": "object",
-            "properties": {
-                "parser": {
-                    "type": "string",
-                    "description": "A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is being used."
-                },
-                "template": {
-                    "type": "string",
-                    "description": "A path to an html template that will override default identify output."
-                }
-            },
-            "required": ["template"],
-            "additionalProperties": false
+  "definitions": {
+    "detailsLayerSettings": {
+      "type": "object",
+      "properties": {
+        "parser": {
+          "type": "string",
+          "description": "A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is being used."
         },
-
-        "initialLayerSettings": {
-            "type": "object",
-            "properties": {
-                "opacity": {
-                    "type": "number",
-                    "default": 1,
-                    "description": "Initial opacity setting."
-                },
-                "visibility": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Initial visibility setting."
-                },
-                "boundingBox": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Display bounding box."
-                },
-                "query": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Allow querying."
-                }
-            },
-            "additionalProperties": false
-        },
-
-        "basicLayer": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer. It should match the type provided in layerType."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["ogcWms", "ogcWfs", "geoJson", "csv", "esriDynamic", "esriFeature", "esriImage", "esriTile"]
-                }
-            },
-            "required": ["id", "layerType", "url"]
-        },
-        "basicLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer. It should match the type provided in layerType."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["esriImage", "esriTile"]
-                },
-                "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "layerType", "url"],
-            "additionalProperties": false
-        },
-        "featureLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["esriFeature"]
-                },
-                "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
-                },
-                "nameField": {
-                    "type": "string",
-                    "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "tooltipField": {
-                    "type": "string",
-                    "description": "The field to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
-                },
-                "outfields": {
-                    "type": "string",
-                    "default": "*",
-                    "description": "A comma separated list of attribute names that should be requested on query."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "layerType", "url"],
-            "additionalProperties": false
-        },
-        "dynamicLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer.  If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["esriDynamic"]
-                },
-                "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
-                },
-                "layerEntries": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dynamicLayerEntryNode"
-                    },
-                    "minItems": 1
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "layerType", "layerEntries", "url"],
-            "additionalProperties": false
-        },
-        "dynamicLayerEntryNode": {
-            "type": "object",
-            "properties": {
-                "index": {
-                    "type": "number",
-                    "description": "The index of the layer in the map service."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "A descriptive name for the layer, can override the name coming from the service."
-                },
-                "nameField": {
-                    "type": "string",
-                    "description": "The display field of the layer.  If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "outfields": {
-                    "type": "string",
-                    "default": "*",
-                    "description": "A comma separated list of attribute names that should be requested on query."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                }
-            },
-            "required": ["index"],
-            "additionalProperties": false
-        },
-        "geoJsonLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The url path to the file. It should match the type provided in layerType."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["geojson"]
-                },
-                "nameField": {
-                    "type": "string",
-                    "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field."
-                },
-                "tooltipField": {
-                    "type": "string",
-                    "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
-                },
-                "renderer": {
-                    "type": "object",
-                    "additionalProperties": true,
-                    "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "name", "layerType", "url"],
-            "additionalProperties": false
-        },
-        "wfsLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["ogcWfs"]
-                },
-                "nameField": {
-                    "type": "string",
-                    "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "tooltipField": {
-                    "type": "string",
-                    "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
-                },
-                "renderer": {
-                    "type": "object",
-                    "additionalProperties": true,
-                    "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "layerType", "url"],
-            "additionalProperties": false
-        },
-        "wmsLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer.  If it is not present the viewer will make an attempt to scrape this information."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
-                },
-                "layerEntries": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/wmsLayerEntryNode"
-                    },
-                    "minItems": 1
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["ogcWms"]
-                },
-                "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "layerType", "layerEntries", "url"],
-            "additionalProperties": false
-        },
-        "wmsLayerEntryNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer entry in the WMS."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "A descriptive name for the layer. To be used in the legend."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                }
-            },
-            "required": ["id"],
-            "additionalProperties": false
-        },
-        "geometryEndpointLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
-                },
-                "name": {
-                    "type": "string",
-                    "description": "The display name of the layer."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The url path to the geometry endpoint who will send back GeoJSON features."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["geojsonEndpoint"]
-                },
-                "nameField": {
-                    "type": "string",
-                    "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field."
-                },
-                "tooltipField": {
-                    "type": "string",
-                    "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
-                },
-                "renderer": {
-                    "type": "object",
-                    "additionalProperties": true,
-                    "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
-                },
-                "state": {
-                    "$ref": "#/definitions/initialLayerSettings"
-                },
-                "details": {
-                    "$ref": "#/definitions/detailsLayerSettings"
-                }
-            },
-            "required": ["id", "name", "layerType", "url"],
-            "additionalProperties": false
-        },
-        "geoCoreLayerNode": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "The GeoCore catalog uuid of the layer."
-                },
-                "url": {
-                    "type": "string",
-                    "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView)."
-                },
-                "layerType": {
-                    "type": "string",
-                    "enum": ["geoCore"]
-                }
-            },
-            "required": ["id", "layerType"],
-            "additionalProperties": false
-        },
-
-        "layerNode": {
-            "oneOf": [{
-                    "$ref": "#/definitions/basicLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/featureLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/dynamicLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/geoJsonLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/wfsLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/wmsLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/geometryEndpointLayerNode"
-                },
-                {
-                    "$ref": "#/definitions/geoCoreLayerNode"
-                }
-            ]
-        },
-
-        "layerList": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/layerNode"
-            },
-            "minItems": 0
+        "template": {
+          "type": "string",
+          "description": "A path to an html template that will override default identify output."
         }
+      },
+      "required": ["template"],
+      "additionalProperties": false
     },
 
-    "properties": {
-        "map": {
-            "type": "object",
-            "properties": {
-                "interaction": {
-                    "type": "string",
-                    "enum": ["static", "dynamic"],
-                    "default": "dynamic",
-                    "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail."
-                },
-                "projection": {
-                    "type": "integer",
-                    "enum": [3978, 3857],
-                    "default": 3978,
-                    "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
-                },
-                "initialView": {
-                    "type": "object",
-                    "properties": {
-                        "zoom": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 28,
-                            "default": 12,
-                            "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
-                        },
-                        "center": {
-                            "type": "array",
-                            "prefixItems": [
-                                {
-                                    "type": "integer",
-                                    "minimum": -80,
-                                    "maximum": 80,
-                                    "default": 45,
-                                    "description": "Initial latitude value for map center."
-                                }, {
-                                    "type": "integer",
-                                    "minimum": -160,
-                                    "maximum": 160,
-                                    "default": 75,
-                                    "description": "Initial longitude value for map center."
-                                }
-                            ]
-                        }
-                    },
-                    "required": ["zoom", "center"]
-                },
-                "basemapOptions": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "string",
-                            "enum": ["transport", "shaded", "simple"],
-                            "default": "transport",
-                            "description": "Id of the basemap to use."
-                        },
-                        "shaded": {
-                            "type": "boolean",
-                            "default": true,
-                            "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
-                        },
-                        "labeled": {
-                            "type": "boolean",
-                            "default": true,
-                            "description": "Enable or disable basemap labels"
-                        }
-                    },
-                    "required": ["id", "shaded", "labeled"]
-                },
-                "layers": {
-                    "$ref": "#/definitions/layerList",
-                    "description": "Layer list in the order which they should be added to the map."
-                }
-            },
-            "required": ["interaction", "projection", "initialView", "basemapOptions"]
+    "initialLayerSettings": {
+      "type": "object",
+      "properties": {
+        "opacity": {
+          "type": "number",
+          "default": 1,
+          "description": "Initial opacity setting."
         },
-
-        "theme": {
-            "type": "string",
-            "enum": ["dark", "light"],
-            "default": "dark",
-            "description": "Theme style the viewer."
+        "visibility": {
+          "type": "boolean",
+          "default": true,
+          "description": "Initial visibility setting."
         },
-
-        "appBar": {
-            "type": "object",
-            "properties": {
-                "about": {
-                    "type": "string",
-                    "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel."
-                }
-            }
+        "boundingBox": {
+          "type": "boolean",
+          "default": false,
+          "description": "Display bounding box."
         },
-
-        "components": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "type": "string",
-                "enum": ["appbar", "navbar", "northArrow"]
-            },
-            "default": ["appbar", "navbar", "northArrow"],
-            "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
-            "minItems": 0
-        },
-        "corePackages": {
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "type": "string",
-                "enum": ["overview-map", "basemap-switcher", "layers-panel", "details-panel", "geolocator"]
-            },
-            "default": ["overview-map", "basemap-switcher", "layers-panel", "details-panel", "geolocator"],
-            "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
-            "minItems": 0
-        },
-        "externalPackages": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "External Package name. The name must be ideintical to the window external package object to load."
-                    },
-                    "configUrl": {
-                        "type": "string",
-                        "description": "The url to the external package configuration setting. The core package will read the configuration and pass it inside the package."
-                    }
-                },
-                "required": ["name"]
-            },
-            "default": [],
-            "description": "List of external packages to initialize on viewer load.",
-            "minItems": 0
-        },
-
-        "serviceUrls": {
-            "type": "object",
-            "description": "Service endpoint urls",
-            "properties": {
-                "keys": {
-                    "type": "string",
-                    "default": "https://geocore.api.geo.ca",
-                    "description": "Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can be another endpoint with similar output."
-                }
-            }
-        },
-
-        "language": {
-            "type": "string",
-            "enum": ["en-CA", "fr-CA"],
-            "description": "ISO 639-1 code indicating the language of strings in the schema file."
-        },
-        "version": {
-            "type": "string",
-            "enum": ["1.0"],
-            "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+        "query": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow querying."
         }
+      },
+      "additionalProperties": false
     },
-    "required": ["map", "language"]
+
+    "basicLayer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "url": {
+          "type": "string",
+          "description": "The service endpoint of the layer. It should match the type provided in layerType."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": [
+            "ogcWms",
+            "ogcWfs",
+            "geoJson",
+            "csv",
+            "esriDynamic",
+            "esriFeature",
+            "esriImage",
+            "esriTile"
+          ]
+        }
+      },
+      "required": ["id", "layerType", "url"]
+    },
+    "basicLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "url": {
+          "type": "string",
+          "description": "The service endpoint of the layer. It should match the type provided in layerType."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["esriImage", "esriTile"]
+        },
+        "metadataUrl": {
+          "type": "string",
+          "default": null,
+          "description": "The metadata url of the layer service."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "url"],
+      "additionalProperties": false
+    },
+    "featureLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "url": {
+          "type": "string",
+          "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["esriFeature"]
+        },
+        "metadataUrl": {
+          "type": "string",
+          "default": null,
+          "description": "The metadata url of the layer service."
+        },
+        "nameField": {
+          "type": "string",
+          "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "tooltipField": {
+          "type": "string",
+          "description": "The field to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
+        },
+        "outfields": {
+          "type": "string",
+          "default": "*",
+          "description": "A comma separated list of attribute names that should be requested on query."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "url"],
+      "additionalProperties": false
+    },
+    "dynamicLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer.  If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "url": {
+          "type": "string",
+          "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["esriDynamic"]
+        },
+        "metadataUrl": {
+          "type": "string",
+          "default": null,
+          "description": "The metadata url of the layer service."
+        },
+        "layerEntries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dynamicLayerEntryNode"
+          },
+          "minItems": 1
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "layerEntries", "url"],
+      "additionalProperties": false
+    },
+    "dynamicLayerEntryNode": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "number",
+          "description": "The index of the layer in the map service."
+        },
+        "name": {
+          "type": "string",
+          "description": "A descriptive name for the layer, can override the name coming from the service."
+        },
+        "nameField": {
+          "type": "string",
+          "description": "The display field of the layer.  If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "outfields": {
+          "type": "string",
+          "default": "*",
+          "description": "A comma separated list of attribute names that should be requested on query."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        }
+      },
+      "required": ["index"],
+      "additionalProperties": false
+    },
+    "geoJsonLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer."
+        },
+        "url": {
+          "type": "string",
+          "description": "The url path to the file. It should match the type provided in layerType."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["geojson"]
+        },
+        "nameField": {
+          "type": "string",
+          "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field."
+        },
+        "tooltipField": {
+          "type": "string",
+          "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
+        },
+        "renderer": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "name", "layerType", "url"],
+      "additionalProperties": false
+    },
+    "wfsLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "url": {
+          "type": "string",
+          "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["ogcWfs"]
+        },
+        "nameField": {
+          "type": "string",
+          "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "tooltipField": {
+          "type": "string",
+          "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
+        },
+        "renderer": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "url"],
+      "additionalProperties": false
+    },
+    "wmsLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer.  If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "url": {
+          "type": "string",
+          "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+        },
+        "layerEntries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wmsLayerEntryNode"
+          },
+          "minItems": 1
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["ogcWms"]
+        },
+        "metadataUrl": {
+          "type": "string",
+          "default": null,
+          "description": "The metadata url of the layer service."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "layerEntries", "url"],
+      "additionalProperties": false
+    },
+    "wmsLayerEntryNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer entry in the WMS."
+        },
+        "name": {
+          "type": "string",
+          "description": "A descriptive name for the layer. To be used in the legend."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "geometryEndpointLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the layer."
+        },
+        "url": {
+          "type": "string",
+          "description": "The url path to the geometry endpoint who will send back GeoJSON features."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["geojsonEndpoint"]
+        },
+        "nameField": {
+          "type": "string",
+          "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field."
+        },
+        "tooltipField": {
+          "type": "string",
+          "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
+        },
+        "renderer": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "name", "layerType", "url"],
+      "additionalProperties": false
+    },
+    "geoCoreLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The GeoCore catalog uuid of the layer."
+        },
+        "url": {
+          "type": "string",
+          "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView)."
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["geoCore"]
+        }
+      },
+      "required": ["id", "layerType"],
+      "additionalProperties": false
+    },
+
+    "layerNode": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/basicLayerNode"
+        },
+        {
+          "$ref": "#/definitions/featureLayerNode"
+        },
+        {
+          "$ref": "#/definitions/dynamicLayerNode"
+        },
+        {
+          "$ref": "#/definitions/geoJsonLayerNode"
+        },
+        {
+          "$ref": "#/definitions/wfsLayerNode"
+        },
+        {
+          "$ref": "#/definitions/wmsLayerNode"
+        },
+        {
+          "$ref": "#/definitions/geometryEndpointLayerNode"
+        },
+        {
+          "$ref": "#/definitions/geoCoreLayerNode"
+        }
+      ]
+    },
+
+    "layerList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/layerNode"
+      },
+      "minItems": 0
+    }
+  },
+
+  "properties": {
+    "map": {
+      "type": "object",
+      "properties": {
+        "interaction": {
+          "type": "string",
+          "enum": ["static", "dynamic"],
+          "default": "dynamic",
+          "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail."
+        },
+        "projection": {
+          "type": "integer",
+          "enum": [3978, 3857],
+          "default": 3978,
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+        },
+        "initialView": {
+          "type": "object",
+          "properties": {
+            "zoom": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 28,
+              "default": 12,
+              "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
+            },
+            "center": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": -80,
+                  "maximum": 80,
+                  "default": 45,
+                  "description": "Initial latitude value for map center."
+                },
+                {
+                  "type": "integer",
+                  "minimum": -160,
+                  "maximum": 160,
+                  "default": 75,
+                  "description": "Initial longitude value for map center."
+                }
+              ]
+            }
+          },
+          "required": ["zoom", "center"]
+        },
+        "basemapOptions": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "enum": ["transport", "shaded", "simple"],
+              "default": "transport",
+              "description": "Id of the basemap to use."
+            },
+            "shaded": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
+            },
+            "labeled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable or disable basemap labels"
+            }
+          },
+          "required": ["id", "shaded", "labeled"]
+        },
+        "layers": {
+          "$ref": "#/definitions/layerList",
+          "description": "Layer list in the order which they should be added to the map."
+        }
+      },
+      "required": ["interaction", "projection", "initialView", "basemapOptions"]
+    },
+
+    "theme": {
+      "type": "string",
+      "enum": ["dark", "light"],
+      "default": "dark",
+      "description": "Theme style the viewer."
+    },
+
+    "appBar": {
+      "type": "object",
+      "properties": {
+        "about": {
+          "type": "string",
+          "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel."
+        }
+      }
+    },
+
+    "components": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["appbar", "navbar", "northArrow"]
+      },
+      "default": ["appbar", "navbar", "northArrow"],
+      "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
+      "minItems": 0
+    },
+    "corePackages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "overview-map",
+          "basemap-switcher",
+          "layers-panel",
+          "details-panel",
+          "geolocator"
+        ]
+      },
+      "default": [
+        "overview-map",
+        "basemap-switcher",
+        "layers-panel",
+        "details-panel",
+        "geolocator"
+      ],
+      "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
+      "minItems": 0
+    },
+    "externalPackages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "External Package name. The name must be ideintical to the window external package object to load."
+          },
+          "configUrl": {
+            "type": "string",
+            "description": "The url to the external package configuration setting. The core package will read the configuration and pass it inside the package."
+          }
+        },
+        "required": ["name"]
+      },
+      "default": [],
+      "description": "List of external packages to initialize on viewer load.",
+      "minItems": 0
+    },
+
+    "serviceUrls": {
+      "type": "object",
+      "description": "Service endpoint urls",
+      "properties": {
+        "keys": {
+          "type": "string",
+          "default": "https://geocore.api.geo.ca",
+          "description": "Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can be another endpoint with similar output."
+        }
+      }
+    },
+
+    "language": {
+      "type": "string",
+      "enum": ["en-CA", "fr-CA"],
+      "description": "ISO 639-1 code indicating the language of strings in the schema file."
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    }
+  },
+  "required": ["map", "language"]
 }

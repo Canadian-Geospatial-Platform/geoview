@@ -15,7 +15,7 @@ import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import makeStyles from "@mui/styles/makeStyles";
 
-import ZSchema from "z-schema";
+import Ajv from "ajv";
 
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -73,6 +73,65 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
 });
 
 /**
+ * Parse the search parameters passed from a url
+ *
+ * @param {string} configParams a search string passed from the url "?..."
+ * @returns {Object} object containing the parsed params
+ */
+function getMapPropsFromUrlParams(configParams: string): Record<string, any> {
+  // get parameters from path. Ex: ?z=4 will get {"z": "123"}
+  var data = configParams.split("?")[1];
+  var obj: Record<string, any> = {};
+
+  if (data !== undefined) {
+    var params = data.split("&");
+
+    for (var i = 0; i < params.length; i++) {
+      var param = params[i].split("=");
+
+      obj[param[0]] = param[1];
+    }
+  }
+
+  return obj;
+}
+
+function parseObjectFromUrl(objStr: string): Record<string, any> {
+  let obj: Record<string, any> = {};
+
+  if (objStr && objStr.length) {
+    // get the text in between { }
+    const objStrPropRegex = /(?<=[{_.])(.*?)(?=[}_.])/g;
+
+    const objStrProps = objStr.match(objStrPropRegex);
+
+    if (objStrProps && objStrProps.length) {
+      const objProps = objStrProps[0].split(",");
+
+      if (objProps) {
+        for (let i = 0; i < objProps.length; i++) {
+          let prop = objProps[i].split(":");
+          if (prop && prop.length) {
+            let key = prop[0] as string;
+            let value: any = prop[1];
+
+            if (prop[1] === "true") {
+              value = true;
+            } else if (prop[1] === "false") {
+              value = false;
+            }
+
+            obj[key] = value;
+          }
+        }
+      }
+    }
+  }
+
+  return obj;
+}
+
+/**
  * Initialize the cgpv and render it to root element
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
@@ -89,90 +148,76 @@ function init(callback: () => void) {
   for (var i = 0; i < mapElements.length; i++) {
     const mapElement = mapElements[i] as Element;
 
-    // validate configuration and appply default if problem occurs then setup language
-    const configObj = new Config(
-      mapElement.getAttribute("id")!,
-      (mapElement.getAttribute("data-leaflet") || "")
-        .replace(/'/g, '"')
-        .replace(
-          /(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g,
-          "\\\\'"
-        )
-    );
+    const mapId = mapElement.getAttribute("id");
 
-    ReactDOM.render(
-      <AppStart configObj={configObj.configuration} />,
-      mapElement
-    );
-  }
-}
+    // check if url contains any params
+    const urlParams = getMapPropsFromUrlParams(location.search);
 
-function loadMapFromUrl(configParams: string) {
-  // get parameters from path. Ex: ?z=4 will get {"z": "123"}
-  var id = configParams.split("?")[0];
-  var data = configParams.split("?")[1];
-  var obj: Record<string, any> = {};
+    let configObj = {};
 
-  if (data !== undefined) {
-    var params = data.split("&");
+    if (Object.keys(urlParams).length) {
+      // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
 
-    for (var i = 0; i < params.length; i++) {
-      var param = params[i].split("=");
-
-      obj[param[0]] = param[1];
-    }
-  }
-
-  if (Object.keys(obj).length > 0) {
-    // either look for a map with class llwp-map or "create new one?"
-    const maps = document.getElementsByClassName("llwp-map");
-
-    if (maps.length) {
-      const map = maps[0];
-
-      const mapId = map.getAttribute("id")!;
-
-      // TODO validate the params with schema, use defaults from schema for not provided config
-
-      // // validate configuration and appply default if problem occurs then setup language
-      // const configObj = new Config(
-      //   map.getAttribute("id")!,
-      //   (map.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
-      // );
-
-      let center = obj["c"]?.split(",");
-
+      let center = urlParams["c"]?.split(",");
       if (!center) center = [0, 0];
 
-      // create a config object
-      const configObj = {
-        ...api.map(mapId).mapProps,
-        zoom: parseInt(obj["z"]),
-        center: [parseInt(center[0]), parseInt(center[1])],
-        projection: parseInt(obj["b"]),
-        language: obj["l"],
+      let basemapOptions = parseObjectFromUrl(urlParams["b"]);
+
+      configObj = {
+        map: {
+          interaction: urlParams["i"],
+          initialView: {
+            zoom: parseInt(urlParams["z"]),
+            center: [parseInt(center[0]), parseInt(center[1])],
+          },
+          projection: parseInt(urlParams["p"]),
+          basemapOptions,
+        },
+        language: urlParams["l"],
       };
-
-      console.log(configObj);
-
-      const validator = new ZSchema({});
-
-      // emit an event to reload the map to change the language
-      api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
-        handlerId: mapId,
-        config: configObj,
-      });
+    } else {
+      // validate configuration and appply default if problem occurs then setup language
+      configObj = new Config(
+        mapElement.getAttribute("id")!,
+        (mapElement.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
+      ).configuration;
     }
+
+    // validate and use defaults for not provided fields
+    const validator = new Ajv({
+      strict: false,
+    });
+
+    const schema = require("../schema.json");
+
+    const validate = validator.compile(schema);
+
+    const valid = validate(configObj);
+    if (!valid && validate.errors && validate.errors.length) {
+      for (var i = 0; i < validate.errors.length; i++) {
+        const error = validate.errors[i];
+        console.log(error);
+        // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
+        //   message: {
+        //     type: "key",
+        //     value: validate.errors["message"],
+        //     params: [, mapId],
+        //   },
+        // });
+      }
+    } else {
+      ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+    }
+
+    // if (!valid) {
+    //   const errors = validator.getLastErrors();
+
+    //   console.log(errors);
+    // } else {
+    //   ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+    // }
   }
 }
-
-window.onload = () => {
-  loadMapFromUrl(location.search);
-};
-
-window.onhashchange = () => {
-  loadMapFromUrl(location.search);
-};
 
 // cgpv object to be exported with the api for outside use
 export const cgpv: types.TypeCGPV = {
