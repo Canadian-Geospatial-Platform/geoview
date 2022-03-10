@@ -67,7 +67,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   }, []);
 
   return (
-    <div>
+    <>
       <div className={classes.mainContainer}>
         <Button
           className={classes.addLayerButton}
@@ -85,7 +85,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       ) : (
         <LayersList layersData={layersData} />
       )}
-    </div>
+    </>
   );
 };
 
