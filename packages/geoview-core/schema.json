@@ -15,8 +15,18 @@
                     "description": "A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is being used."
                 },
                 "template": {
-                    "type": "string",
-                    "description": "A path to an html template that will override default identify output."
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                        "en": {
+                            "type": "string",
+                            "description": "A path to an html template (English) that will override default identify output."
+                        },
+                        "fr": {
+                            "type": "string",
+                            "description": "A path to an html template (French) that will override default identify output."
+                        }
+                    }
                 }
             },
             "required": ["template"],
@@ -50,20 +60,60 @@
             "additionalProperties": false
         },
 
+        "layerNameNode": {
+            "type": "object",
+            "properties": {
+                "en": {
+                    "type": "string",
+                    "description": "The display name of the layer (English). If it is not present the viewer will make an attempt to scrape this information."
+                },
+                "fr": {
+                    "type": "string",
+                    "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
+                }
+            }
+        },
+        "layerUrlNode": {
+            "type": "object",
+            "properties": {
+                "en": {
+                    "type": "string",
+                    "description": "The service endpoint of the layer (English). It should match the type provided in layerType."
+                },
+                "fr": {
+                    "type": "string",
+                    "description": "The service endpoint of the layer (French). It should match the type provided in layerType."
+                }
+            }
+        },
+        "layerMetadataUrlNode": {
+            "type": "object",
+            "properties": {
+                "en": {
+                    "type": "string",
+                    "default": null,
+                    "description": "The metadata url of the layer service (English)."
+                },
+                "fr": {
+                    "type": "string",
+                    "default": null,
+                    "description": "The metadata url of the layer service (French)."
+                }
+            }
+        },
+
         "basicLayer": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer. It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
@@ -77,24 +127,20 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer. It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
                     "enum": ["esriImage", "esriTile"]
                 },
                 "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
+                    "$ref": "#/definitions/layerMetadataUrlNode"
                 },
                 "state": {
                     "$ref": "#/definitions/initialLayerSettings"
@@ -111,24 +157,20 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
                     "enum": ["esriFeature"]
                 },
                 "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
+                    "$ref": "#/definitions/layerMetadataUrlNode"
                 },
                 "nameField": {
                     "type": "string",
@@ -158,24 +200,20 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer.  If it is not present the viewer will make an attempt to scrape this information."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
                     "enum": ["esriDynamic"]
                 },
                 "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
+                    "$ref": "#/definitions/layerMetadataUrlNode"
                 },
                 "layerEntries": {
                     "type": "array",
@@ -202,8 +240,7 @@
                     "description": "The index of the layer in the map service."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "A descriptive name for the layer, can override the name coming from the service."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "nameField": {
                     "type": "string",
@@ -226,15 +263,13 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The url path to the file. It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
@@ -268,15 +303,13 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
@@ -310,15 +343,13 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer.  If it is not present the viewer will make an attempt to scrape this information."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The service endpoint of the layer.  It should match the type provided in layerType."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerEntries": {
                     "type": "array",
@@ -332,9 +363,7 @@
                     "enum": ["ogcWms"]
                 },
                 "metadataUrl": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The metadata url of the layer service."
+                    "$ref": "#/definitions/layerMetadataUrlNode"
                 },
                 "state": {
                     "$ref": "#/definitions/initialLayerSettings"
@@ -354,8 +383,7 @@
                     "description": "The id of the layer entry in the WMS."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "A descriptive name for the layer. To be used in the legend."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "state": {
                     "$ref": "#/definitions/initialLayerSettings"
@@ -369,15 +397,13 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service)."
+                    "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
                 },
                 "name": {
-                    "type": "string",
-                    "description": "The display name of the layer."
+                    "$ref": "#/definitions/layerNameNode"
                 },
                 "url": {
-                    "type": "string",
-                    "description": "The url path to the geometry endpoint who will send back GeoJSON features."
+                    "$ref": "#/definitions/layerUrlNode"
                 },
                 "layerType": {
                     "type": "string",
@@ -411,7 +437,7 @@
             "properties": {
                 "id": {
                     "type": "string",
-                    "description": "The GeoCore catalog uuid of the layer."
+                    "description": "The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang')."
                 },
                 "url": {
                     "type": "string",
@@ -472,6 +498,19 @@
                     "enum": ["static", "dynamic"],
                     "default": "dynamic",
                     "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail."
+                },
+                "controls": {
+                    "type": "object",
+                    "properties": {
+                        "boxZoom": {
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "selectBox": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
                 },
                 "projection": {
                     "type": "integer",
@@ -534,7 +573,7 @@
                 },
                 "layers": {
                     "$ref": "#/definitions/layerList",
-                    "description": "Layer list in the order which they should be added to the map."
+                    "description": "Layers list in the order which they should be added to the map."
                 }
             },
             "required": ["interaction", "projection", "initialView", "basemapOptions"]
@@ -551,7 +590,16 @@
             "type": "object",
             "properties": {
                 "about": {
-                    "type": "string",
+                    "type": "object",
+                    "properties": {
+                        "en": {
+                            "type": "string"
+                        },
+                        "fr": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["en", "fr"],
                     "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel."
                 }
             }
@@ -612,10 +660,16 @@
             }
         },
 
-        "language": {
-            "type": "string",
-            "enum": ["en-CA", "fr-CA"],
-            "description": "ISO 639-1 code indicating the language of strings in the schema file."
+        "languages": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "enum": ["en-CA", "fr-CA"]
+            },
+            "default": ["en-CA", "fr-CA"],
+            "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
+            "minItems": 1
         },
         "version": {
             "type": "string",
@@ -623,5 +677,5 @@
             "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
         }
     },
-    "required": ["map", "language"]
+    "required": ["map", "languages"]
 }
