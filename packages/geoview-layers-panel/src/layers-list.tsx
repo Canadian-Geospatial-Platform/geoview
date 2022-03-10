@@ -103,11 +103,7 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                                 ["esriFeature", "geoJSON"].includes(data.type)
                                   ? leaflet.Marker.prototype.options.icon
                                       .options.iconUrl
-                                  : "data:" +
-                                    layer.drawingInfo?.renderer.symbol
-                                      .contentType +
-                                    ";base64," +
-                                    layer.drawingInfo?.renderer.symbol.imageData
+                                  : `data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`
                               }
                             />
                             {layer.drawingInfo?.renderer.label || layer.name}
@@ -121,17 +117,7 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                                 className={classes.layerItemText}
                               >
                                 <img
-                                  src={
-                                    ["esriFeature", "geoJSON"].includes(
-                                      data.type
-                                    )
-                                      ? leaflet.Marker.prototype.options.icon
-                                          .options.iconUrl
-                                      : "data:" +
-                                        uniqueValue.symbol.contentType +
-                                        ";base64," +
-                                        uniqueValue.symbol.imageData
-                                  }
+                                  src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
                                 />
                                 {uniqueValue.label}
                               </div>
