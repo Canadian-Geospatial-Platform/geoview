@@ -71,6 +71,11 @@ export function Attribution(props: AttributionProps): JSX.Element {
       },
       mapId
     );
+
+    return () => {
+      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, mapId);
+    };
   }, []);
 
   return (
