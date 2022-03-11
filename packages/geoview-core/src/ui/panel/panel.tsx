@@ -49,7 +49,14 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     color: theme.palette.primary.contrastText,
-    padding: theme.spacing(3, 7),
+    height: 50,
+    padding: 0,
+    paddingLeft: 10,
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  actionButton: {
+    margin: 0,
   },
   buttonIcon: {
     width: "1em",
@@ -268,6 +275,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       >
         <CardHeader
           className={classes.avatar}
+          classes={{ action: classes.actionButton }}
           ref={panelHeader}
           avatar={
             typeof panel.icon === "string" ? (
