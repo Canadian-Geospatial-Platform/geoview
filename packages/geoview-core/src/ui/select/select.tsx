@@ -9,44 +9,10 @@ import {
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
-// import { styled } from '@mui/material/styles';
-// import InputBase from '@mui/material/InputBase';
-
-// const BootstrapInput = styled(InputBase)(({ theme }) => ({
-//   "label + &": {
-//     marginTop: theme.spacing(3),
-//   },
-//   "& .MuiInputBase-input": {
-//     borderRadius: 4,
-//     position: "relative",
-//     backgroundColor: theme.palette.background.paper,
-//     border: "1px solid #ced4da",
-//     fontSize: 16,
-//     padding: "10px 26px 10px 12px",
-//     transition: theme.transitions.create(["border-color", "box-shadow"]),
-//     // Use the system font instead of the default Roboto font.
-//     fontFamily: [
-//       "-apple-system",
-//       "BlinkMacSystemFont",
-//       '"Segoe UI"',
-//       "Roboto",
-//       '"Helvetica Neue"',
-//       "Arial",
-//       "sans-serif",
-//       '"Apple Color Emoji"',
-//       '"Segoe UI Emoji"',
-//       '"Segoe UI Symbol"',
-//     ].join(","),
-//     "&:focus": {
-//       borderRadius: 4,
-//       borderColor: "#80bdff",
-//       boxShadow: "0 0 0 0.2rem rgba(0,123,255,.25)",
-//     },
-//   },
-// }));
-
 const useStyles = makeStyles((theme) => ({
-  formControlClass: {
+  formControl: {
+    width: "50%",
+    margin: "15px 0",
     "& .MuiInputLabel-shrink": {
       color: "#80bdff",
     },
@@ -55,14 +21,16 @@ const useStyles = makeStyles((theme) => ({
     //   boxShadow: "0 0 0 2px rgba(0,123,255,.25)",
     // },
   },
-  selectClass: {
-    width: 120,
+  select: {
+    width: "100%",
   },
 }));
 
 interface TypeSelectItems {
-  id?: string;
-  value?: string;
+  id: string;
+  value: string;
+  default?: boolean;
+  // disabled?: boolean;
 }
 
 /**
@@ -127,32 +95,29 @@ export const Select = (props: SelectProps): JSX.Element => {
       variant={variant || "outlined"}
       disabled={disabled || false}
       required={required || false}
-      className={classes.formControlClass}
+      className={classes.formControl}
     >
-      <InputLabel color="primary" id={id || ""}>
-        {label || undefined}{" "}
+      <InputLabel color="primary" id={id}>
+        {label}
       </InputLabel>
       <MaterialSelect
-        className={
-          className
-            ? `${className} ${classes.selectClass}`
-            : classes.selectClass
-        }
+        className={`${classes.select} ${className && className}`}
         style={style}
-        labelId={id || ""}
-        id={id && id.slice(0, -1)}
+        labelId={id}
+        id={`select-${id}`}
         label={label || undefined}
         value={!multiple ? value : multipleValue}
         onChange={changeHandler}
-        // input={<BootstrapInput />}
         multiple={multiple || false}
+        defaultValue={selectItems.map((item: any) =>
+          item.default === true ? item.value : null
+        )}
       >
-        {selectItems &&
-          selectItems.map((item: any) => (
-            <MenuItem key={item.id} id={item.id} value={item.value}>
-              {item.value}
-            </MenuItem>
-          ))}
+        {selectItems.map((item: any) => (
+          <MenuItem key={item.id} id={item.id} value={item.value}>
+            {item.value}
+          </MenuItem>
+        ))}
       </MaterialSelect>
       {helperText && <FormHelperText>{helperText}</FormHelperText>}
     </FormControl>

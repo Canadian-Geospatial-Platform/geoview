@@ -1,26 +1,32 @@
 import { CSSProperties, useState } from "react";
 
-import { InputAdornment, TextField as MaterialTextField } from "@mui/material";
+import {
+  BaseTextFieldProps,
+  InputAdornment,
+  TextField as MaterialTextField,
+} from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = makeStyles((theme) => ({
   textField: {
-    width: 120,
+    width: "50%",
+    margin: "10px 0",
   },
 }));
 
 /**
  * Properties for the TextField
  */
-interface TextFieldProps {
-  className?: string | undefined;
-  style?: CSSProperties;
+interface TextFieldProps extends BaseTextFieldProps {
   id: string;
-  placeholder: string;
+  className?: string;
+  style?: CSSProperties;
+  placeholder?: string;
   variant?: "outlined" | "filled" | "standard" | undefined;
-  size?: "small" | "medium" | undefined;
+  size?: "medium" | "small" | undefined;
+  autoComplete?: string;
   fullWidth?: boolean;
-  label?: string;
+  label: string;
   defaultValue?: string | undefined;
   required?: boolean;
   disabled?: boolean;
@@ -54,7 +60,9 @@ export const TextField = (props: TextFieldProps): JSX.Element => {
     setValue(event.target.value);
   };
 
+  // get the props from MUI (BaseTextFieldProps)
   const {
+    autoComplete,
     className,
     style,
     id,
@@ -68,7 +76,6 @@ export const TextField = (props: TextFieldProps): JSX.Element => {
     disabled,
     type,
     readonly,
-    shrink,
     helperText,
     error,
     errorHelperText,
@@ -78,6 +85,7 @@ export const TextField = (props: TextFieldProps): JSX.Element => {
     maxRows,
     prefix,
     suffix,
+    // focused and color required?
     focused,
     color,
     callBack,
@@ -87,15 +95,18 @@ export const TextField = (props: TextFieldProps): JSX.Element => {
 
   const classes = useStyles();
 
+  const shrink = placeholder ? { shrink: true } : undefined;
+
+  // {...props}
+
   return (
     <MaterialTextField
-      className={
-        className ? `${className} ${classes.textField}` : classes.textField
-      }
+      className={`${classes.textField} ${className && className}`}
       style={style}
-      id={id || ""}
-      value={defaultValue ? undefined : value}
+      id={id}
+      value={value}
       onChange={changeHandler}
+      autoComplete={autoComplete || "false"}
       variant={variant === undefined ? "outlined" : variant}
       size={size === undefined ? "medium" : size}
       fullWidth={fullWidth || false}
@@ -113,24 +124,21 @@ export const TextField = (props: TextFieldProps): JSX.Element => {
         endAdornment: suffix && (
           <InputAdornment position="end">{suffix}</InputAdornment>
         ),
-        "aria-labelledby": id,
-        "aria-describedby": id,
       }}
-      InputLabelProps={{
-        shrink: shrink === false ? false : true,
-      }}
+      InputLabelProps={shrink}
       error={error || false}
+      // modify this?
       helperText={
-        helperText && !error
-          ? helperText || undefined
-          : errorHelperText || undefined
+        helperText
+          ? helperText
+          : helperText && error
+          ? errorHelperText
+          : undefined
       }
       multiline={multiline || false}
       rows={rows || undefined}
       minRows={minRows || undefined}
       maxRows={maxRows || undefined}
-      focused={focused || false}
-      color={focused && color ? color : undefined}
     />
   );
 };

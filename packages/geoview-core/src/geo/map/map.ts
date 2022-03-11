@@ -97,6 +97,8 @@ export class MapViewer {
   // modals creation
   modal!: ModalApi;
 
+  // attributions
+
   /**
    * Add the map instance to the maps array in the api
    *

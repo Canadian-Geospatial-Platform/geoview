@@ -15,7 +15,8 @@ import { EVENT_NAMES } from "../../api/event";
 import { api } from "../../api/api";
 
 import { TypeModalProps } from ".";
-import { CloseIcon, IconButton } from "..";
+import { CloseIcon, IconButton, TextField, Stepper, Select } from "..";
+import { Search } from "@mui/icons-material";
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     background: theme.palette.backdrop,
   },
   content: {
-    padding: theme.spacing(5, 0),
+    padding: theme.spacing(6, 0),
   },
   modalTitleContainer: {
     display: "flex",
@@ -281,6 +282,48 @@ export const Modal = (props: DialogProps): JSX.Element => {
           }`}
           style={contentTextStyle}
         >
+          <TextField
+            id="text-1"
+            label="Test label"
+            placeholder="this is placeholder"
+            // readonly
+            // disabled
+            variant="filled"
+            defaultValue="def Value"
+            error
+            helperText="Helper text"
+            suffix={
+              <IconButton>
+                <Search></Search>
+              </IconButton>
+            }
+          ></TextField>
+
+          <Select
+            id="Select-1"
+            label="Select any one"
+            multiple
+            selectItems={[
+              //  default and disabled not working ATM
+              { id: "option-1", value: "Option 1", default: true },
+              { id: "option-2", value: "Option 2" },
+              { id: "option-3", value: "Option 3" },
+            ]}
+          ></Select>
+
+          <Stepper
+            id="stepper-1"
+            // description as JSX Element or HTML
+            steps={[
+              { label: "1st Step", description: "This is the First Step" },
+              { label: "2nd Step", description: "Container for Second Step" },
+              { label: "3rd Step", description: "Last step is the Third Step" },
+            ]}
+            orientation="horizontal"
+            // buttonedLabels not working
+            buttonedLabels
+            // alternativeLabel
+          ></Stepper>
           {content}
         </div>
       </DialogContent>

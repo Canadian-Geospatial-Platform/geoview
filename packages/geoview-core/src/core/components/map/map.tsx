@@ -226,9 +226,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
               />
             );
           })}
-          {deviceSizeMedUp && <MousePosition id={id} />}
-          <ScaleControl position="bottomright" imperial={false} />
-          {deviceSizeMedUp && <Attribution attribution={attribution} />}
+          {/* {deviceSizeMedUp && <MousePosition id={id} />} */}
+          {/* <ScaleControl position="bottomright" imperial={false} /> */}
+          {/* {deviceSizeMedUp && <Attribution attribution={attribution} />} */}
           <NorthArrow projection={crs!} />
           <NorthPoleFlag projection={crs!} />
           <Crosshair id={id} />

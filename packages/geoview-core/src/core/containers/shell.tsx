@@ -151,6 +151,10 @@ export function Shell(props: ShellProps): JSX.Element {
           basemapOptions={config.basemapOptions}
           plugins={config.plugins}
         />
+        {/* <FooterBar
+              
+        >*/}
+
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}

@@ -144,14 +144,14 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
             setOpen(true);
 
             // if user move the mouse over the map, cancel the dialog
-            mapElement.addEventListener(
-              "mousemove",
-              () => {
-                setOpen(false);
-                exitFocus();
-              },
-              { once: true }
-            );
+            // mapElement.addEventListener(
+            //   "mousemove",
+            //   () => {
+            //     setOpen(false);
+            //     exitFocus();
+            //   },
+            //   { once: true }
+            // );
           }
         }
       },

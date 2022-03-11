@@ -12,12 +12,16 @@ import { Button as MaterialButton } from "@mui/material";
 const useStyles = makeStyles((theme) => ({
   stepperContainer: {
     padding: 15,
-    width: 500,
+    width: "100%",
     minWidth: 150,
+    margin: "15px 0",
     border: "0.5px solid grey",
     flexWrap: "wrap",
     "& .MuiSvgIcon-root.Mui-active": {
       color: "#90caf9",
+    },
+    "& .MuiSvgIcon-root.Mui-completed": {
+      color: "#666666",
     },
   },
   actionContainer: {
@@ -52,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface TypeStepperSteps {
-  label?: string;
+  label: string;
   description?: string;
 }
 
@@ -60,13 +64,13 @@ interface TypeStepperSteps {
  * Properties for the Stepper
  */
 interface StepperProps {
+  id: string;
+  steps: Array<Record<string, TypeStepperSteps>> | any;
   className?: string;
   style?: CSSProperties;
   orientation?: "horizontal" | "vertical";
   alternativeLabel?: boolean;
-  nonLinear?: boolean;
   buttonedLabels?: boolean;
-  steps?: Array<Record<string, TypeStepperSteps>> | any;
 }
 
 /**
@@ -78,11 +82,11 @@ interface StepperProps {
 export const Stepper = (props: StepperProps): JSX.Element => {
   const [activeStep, setActiveStep] = useState(0);
   const {
+    id,
     className,
     style,
     orientation,
     alternativeLabel,
-    nonLinear,
     buttonedLabels,
     steps,
   } = props;
@@ -108,14 +112,15 @@ export const Stepper = (props: StepperProps): JSX.Element => {
   return (
     <Box>
       <MaterialStepper
+        id={id}
         className={`${classes.stepperContainer} ${className && className}`}
         style={style || undefined}
         orientation={orientation !== undefined ? orientation : "horizontal"}
         activeStep={activeStep}
+        // make alternativeLabel as default
         alternativeLabel={
           orientation === "horizontal" ? alternativeLabel : false
         }
-        nonLinear={nonLinear || buttonedLabels || false}
       >
         {steps?.map((step: any, index: number) => {
           return (
@@ -151,6 +156,7 @@ export const Stepper = (props: StepperProps): JSX.Element => {
               <>
                 {activeStep < 1 ? (
                   <MaterialButton disabled className={classes.disabledButton}>
+                    {/* Be able to provice buttons' text by the users */}
                     BACK
                   </MaterialButton>
                 ) : (
