@@ -27,9 +27,8 @@ import { IconButton, CloseIcon, Divider } from "..";
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 300,
-    width: 300,
+    width: 400,
     height: "100%",
-    marginLeft: theme.spacing(2),
     borderRadius: 0,
     [theme.breakpoints.up("xl")]: {
       width: "auto !important",
@@ -135,6 +134,23 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     setPanelStatus(false);
   }
 
+  // listen to change panel content and rerender right after the panel has been created
+  api.event.on(
+    EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
+    (args) => {
+      // set focus on close button on panel content change
+      setTimeout(() => {
+        if (closeBtnRef && closeBtnRef.current)
+          Cast<HTMLElement>(closeBtnRef.current).focus();
+      }, 100);
+
+      if (args.buttonId === button.id!) {
+        updateComponent();
+      }
+    },
+    mapId
+  );
+
   useEffect(() => {
     // if the panel was still open on reload then close it
     if (panel.status) {
@@ -215,23 +231,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
               return item.props.id !== actionButtonId;
             })
           );
-        }
-      },
-      mapId
-    );
-
-    // listen to change panel content and rerender
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
-      (args) => {
-        // set focus on close button on panel content change
-        setTimeout(() => {
-          if (closeBtnRef && closeBtnRef.current)
-            Cast<HTMLElement>(closeBtnRef.current).focus();
-        }, 100);
-
-        if (args.buttonId === button.id!) {
-          updateComponent();
         }
       },
       mapId
