@@ -30,10 +30,6 @@ const useStyles = makeStyles((theme) => ({
     width: 400,
     height: "100%",
     borderRadius: 0,
-    [theme.breakpoints.up("xl")]: {
-      width: "auto !important",
-      minWidth: 100,
-    },
     [theme.breakpoints.down("sm")]: {
       width: "100%",
       minWidth: "100%",

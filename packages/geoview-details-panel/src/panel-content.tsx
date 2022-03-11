@@ -33,7 +33,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const cgpv = w["cgpv"];
 
   // access the api calls
-  const { api, react, ui } = cgpv;
+  const { api, react, ui, useTranslation } = cgpv;
 
   // get event names
   const EVENT_NAMES = api.eventNames;
@@ -59,6 +59,8 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   }));
 
   const classes = useStyles();
+
+  const { t } = useTranslation();
 
   // get the map instance
   const mapInstance = api.map(mapId).map;
@@ -622,6 +624,9 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   // It takes 3 arguments, the tag element name, the attributes of the element and the content of the element
   return (
     <div className={classes.mainContainer}>
+      {!layersList && !featureList && !featureInfo && (
+        <div>{t("click_map")}</div>
+      )}
       {layersList && (
         <LayersList
           clickPos={clickPos}
