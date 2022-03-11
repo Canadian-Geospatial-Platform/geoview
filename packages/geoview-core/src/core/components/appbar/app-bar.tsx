@@ -30,6 +30,8 @@ export const useStyles = makeStyles((theme) => ({
   },
   appBarButtons: {
     overflowY: "auto",
+    overflowX: "hidden",
+    width: 50,
   },
   appBarPanels: {},
 }));
@@ -107,7 +109,8 @@ export function Appbar(): JSX.Element {
     };
   }, [updateComponent]);
 
-  return (
+  return Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels())
+    .length ? (
     <div
       className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`}
       ref={appBar}
@@ -179,5 +182,7 @@ export function Appbar(): JSX.Element {
         }
       )}
     </div>
+  ) : (
+    <></>
   );
 }
