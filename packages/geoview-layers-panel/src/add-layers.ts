@@ -200,7 +200,7 @@ const addLayers = (
   layer = { id: null }
 ) => {
   const mapLayers = api.map(mapId).layer.layers;
-  if (layer.id) addMapLayer(layer, setState);
+  if (layer.id) addMapLayer(mapLayers[layer.id], setState);
   else
     Object.values(mapLayers).forEach((mapLayer) =>
       addMapLayer(mapLayer, setState)
