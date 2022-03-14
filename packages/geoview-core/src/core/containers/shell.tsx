@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => {
       left: theme.spacing(0),
       bottom: theme.spacing(0),
       overflow: "hidden",
-      zIndex: -1,
+      zIndex: 0,
       height: "100%",
     },
     skip: {
