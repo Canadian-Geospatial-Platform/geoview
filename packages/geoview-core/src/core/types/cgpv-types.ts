@@ -134,6 +134,7 @@ export type TypeLayerData = {
   type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles";
   name: string;
   layer: {
+    setOpacity?: Function;
     options: {
       url: string;
     };
@@ -216,7 +217,10 @@ export type TypeFeaturesListProps = {
 
 export type TypeRendererSymbol = {
   symbol: {
+    contentType: string;
+    label: string;
     legendImageUrl: string;
+    type: "simple" | "uniqueValue";
   };
   uniqueValueInfos: TypeJSONObject[];
   field1: string;

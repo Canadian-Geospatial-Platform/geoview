@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps } from "geoview-core";
+import { TypeLayersListProps, TypeLayerData } from "geoview-core";
 
 const w = window as any;
 
@@ -12,9 +12,12 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { layersData } = props;
 
   const cgpv = w["cgpv"];
-  const { ui, react, leaflet } = cgpv;
-  const { useState } = react;
+  const { mui, ui, react, leaflet } = cgpv;
+  const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState("");
+  const [sliderPosition, setSliderPosition] = useState({});
+
+  const { Slider } = mui;
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
@@ -57,79 +60,138 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       alignItems: "center",
       gap: 6,
     },
+    layerItemGroup: {
+      paddingBottom: 12,
+    },
+    sliderGroup: {
+      display: "flex",
+    },
+    slider: {
+      width: "100%",
+      paddingLeft: 20,
+      paddingRight: 20,
+    },
   }));
+
+  useEffect(() => {
+    const defaultSliders = Object.values(layersData).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: 100 }),
+      {}
+    );
+    setSliderPosition((state) => ({ ...defaultSliders, ...state }));
+  }, [layersData]);
 
   const classes = useStyles();
 
+  /**
+   * Sets the currently selected layer,
+   * sets to blank if value is same as currently selecetd layer
+   *
+   * @param value layer button value
+   */
   const onClick = (value: string) => {
     const selected = value !== selectedLayer ? value : "";
     setSelectedLayer(selected);
+  };
+
+  /**
+   * Adjusts layer opacity when slider is moved
+   *
+   * @param value slider opacity value (0-100)
+   * @param data Layer data
+   */
+  const onSliderChange = (value: number, data: TypeLayerData) => {
+    setSliderPosition((state) => ({ ...state, [data.id]: value }));
+    data.layer.setOpacity(value / 100);
   };
 
   return (
     <div className={classes.layersContainer}>
       {Object.values(layersData).map((data) => (
         <div key={data.id}>
-          {Object.values(data.layers).map(
-            ({ layer, groupLayer }, index: number) => (
-              <div key={index}>
-                {groupLayer ? (
-                  <div className={classes.layerParentText} title={layer.name}>
-                    {layer.name}
+          <>
+            <button
+              type="button"
+              className={classes.layerItem}
+              onClick={() => onClick(data.id)}
+            >
+              <div className={classes.layerCountTextContainer}>
+                <div className={classes.layerItemText} title={data.name}>
+                  {data.name}
+                </div>
+              </div>
+            </button>
+            {selectedLayer === data.id && (
+              <>
+                {data.layer.setOpacity && (
+                  <div className={classes.sliderGroup}>
+                    <i className="material-icons">contrast</i>
+                    <div className={classes.slider}>
+                      <Slider
+                        size="small"
+                        value={sliderPosition[data.id]}
+                        valueLabelDisplay="auto"
+                        onChange={(e) => onSliderChange(e.target.value, data)}
+                      />
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className={classes.layerItem}
-                      onClick={() => onClick(data.id + layer.id)}
-                    >
-                      <div className={classes.layerCountTextContainer}>
+                )}
+                {Object.values(data.layers).map(
+                  ({ layer, groupLayer }, index: number) => (
+                    <div key={index} className={classes.layerItemGroup}>
+                      {groupLayer ? (
                         <div
-                          className={classes.layerItemText}
+                          className={classes.layerParentText}
                           title={layer.name}
                         >
                           {layer.name}
                         </div>
-                      </div>
-                    </button>
-                    {selectedLayer === data.id + layer.id && (
-                      <div>
-                        {(layer.drawingInfo?.renderer.type === "simple" ||
-                          data.type === "geoJSON") && (
-                          <div className={classes.layerItemText}>
-                            <img
-                              src={
-                                ["esriFeature", "geoJSON"].includes(data.type)
-                                  ? leaflet.Marker.prototype.options.icon
-                                      .options.iconUrl
-                                  : `data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`
-                              }
-                            />
-                            {layer.drawingInfo?.renderer.label || layer.name}
-                          </div>
-                        )}
-                        {layer.drawingInfo?.renderer.type === "uniqueValue" &&
-                          layer.drawingInfo?.renderer.uniqueValueInfos.map(
-                            (uniqueValue, index) => (
-                              <div
-                                key={index}
-                                className={classes.layerItemText}
-                              >
-                                <img
-                                  src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
-                                />
-                                {uniqueValue.label}
-                              </div>
-                            )
+                      ) : (
+                        <>
+                          {Object.values(data.layers).length > 1 && (
+                            <div
+                              className={classes.layerItemText}
+                              title={layer.name}
+                            >
+                              {layer.name}
+                            </div>
                           )}
-                      </div>
-                    )}
-                  </>
+                          {(layer.drawingInfo?.renderer.type === "simple" ||
+                            data.type === "geoJSON") && (
+                            <div className={classes.layerItemText}>
+                              <img
+                                src={
+                                  ["esriFeature", "geoJSON"].includes(data.type)
+                                    ? leaflet.Marker.prototype.options.icon
+                                        .options.iconUrl
+                                    : `data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`
+                                }
+                              />
+                              {layer.drawingInfo?.renderer.label || layer.name}
+                            </div>
+                          )}
+                          {layer.drawingInfo?.renderer.type === "uniqueValue" &&
+                            layer.drawingInfo?.renderer.uniqueValueInfos.map(
+                              (uniqueValue, index) => (
+                                <div
+                                  key={index}
+                                  className={classes.layerItemText}
+                                >
+                                  <img
+                                    src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
+                                  />
+                                  {uniqueValue.label}
+                                </div>
+                              )
+                            )}
+                        </>
+                      )}
+                    </div>
+                  )
                 )}
-              </div>
-            )
-          )}
+              </>
+            )}
+          </>
         </div>
       ))}
     </div>
