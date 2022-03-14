@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps } from "geoview-core";
+import { TypeLayersListProps, TypeLayerData } from "geoview-core";
 
 const w = window as any;
 
@@ -83,12 +83,24 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
 
   const classes = useStyles();
 
+  /**
+   * Sets the currently selected layer,
+   * sets to blank if value is same as currently selecetd layer
+   *
+   * @param value layer button value
+   */
   const onClick = (value: string) => {
     const selected = value !== selectedLayer ? value : "";
     setSelectedLayer(selected);
   };
 
-  const onSliderChange = (value, data) => {
+  /**
+   * Adjusts layer opacity when slider is moved
+   *
+   * @param value slider opacity value (0-100)
+   * @param data Layer data
+   */
+  const onSliderChange = (value: number, data: TypeLayerData) => {
     setSliderPosition((state) => ({ ...state, [data.id]: value }));
     data.layer.setOpacity(value / 100);
   };

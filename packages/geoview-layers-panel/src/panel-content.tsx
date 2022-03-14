@@ -2,7 +2,7 @@ import { TypePanelContentProps, TypeProps } from "geoview-core";
 
 import Stepper from "./stepper";
 import LayersList from "./layers-list";
-import addLayers from "./add-layers";
+import getLayerMeta from "./layer-meta";
 
 const w = window as any;
 
@@ -51,12 +51,12 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const onClick = () => setAddLayerVisible((state: boolean) => !state);
 
   useEffect(() => {
-    addLayers(setLayersData, api, mapId);
+    getLayerMeta(setLayersData, api, mapId);
     api.event.on(
       "layer/added",
       (payload: any) => {
         if (payload && payload.handlerName.includes(mapId))
-          addLayers(setLayersData, api, mapId, payload.layer);
+          getLayerMeta(setLayersData, api, mapId, payload.layer);
       },
       mapId
     );
