@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   cardContainer: {
-    height: "100%",
+    flexBasis: "auto",
     overflow: "hidden",
     overflowY: "auto",
     paddingBottom: "10px !important",
@@ -259,7 +259,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         ref={panelRef as React.MutableRefObject<null>}
         className={`${classes.root}`}
         style={{
-          display: panelStatus ? "block" : "none",
+          display: panelStatus ? "flex" : "none",
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {

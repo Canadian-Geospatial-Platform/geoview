@@ -37,6 +37,25 @@ const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
 };
 
 /**
+ * Converts URL to Base64 dataURL
+ *
+ * @param url URL
+ * @returns {Promise<string>}
+ */
+const toDataURL = (url: string): Promise<string> =>
+  fetch(url)
+    .then((response) => response.blob())
+    .then(
+      (blob) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        })
+    );
+
+/**
  * Adds a single layer to it's parent setState function
  *
  * @param setState React setState function
@@ -84,17 +103,36 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
     layer: mapLayer.layer || {},
     layers: {},
   };
-  if (mapLayer.type === "ogcWMS") {
+  if (
+    mapLayer.type === "ogcWMS" &&
+    !mapLayer.mapService.options.url.includes("/MapServer")
+  ) {
+    const legendImageUrl = `${mapLayer.url}request=GetLegendGraphic&version=1.1.1&Service=WMS&format=image/png&layer=${mapLayer.entries}`;
+    const layerInfo = {
+      name: mapLayer.name,
+      drawingInfo: {
+        renderer: {
+          type: "simple",
+          label: " ",
+          symbol: {
+            imageData: await toDataURL(legendImageUrl),
+            contentType: "image/png",
+            legendImageUrl,
+          },
+        },
+      },
+    };
+    addLayer(setState, layerData, layerInfo, false);
+  } else if (
+    mapLayer.type === "ogcWMS" &&
+    mapLayer.mapService.options.url.includes("/MapServer")
+  ) {
     for (const layerId of mapLayer.entries) {
       const layerInfo = await queryServer(
         mapLayer.mapService.options.url + layerId
       );
-      const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
-      if (
-        layerInfo.drawingInfo &&
-        layerInfo.drawingInfo.renderer &&
-        layerInfo.drawingInfo.renderer.symbol
-      ) {
+      const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.1.1&Service=WMS&format=image/png&layer=${layerId}`;
+      if (layerInfo.drawingInfo?.renderer?.symbol) {
         Object.defineProperties(layerInfo.drawingInfo.renderer.symbol, {
           legendImageUrl: {
             value: legendImageUrl,
@@ -107,7 +145,7 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
     const layerInfo = await queryServer(mapLayer.layer.options.url);
     addLayer(setState, layerData, layerInfo, false);
   } else if (mapLayer.type === "esriDynamic") {
-    const entries = mapLayer.layer.getLayers();
+    const layerIds = mapLayer.layer.getLayers();
     mapLayer.layer.metadata(
       async (
         error: any,
@@ -116,7 +154,7 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
         if (error) return;
         if (res.layers) {
           for (const subLayerData of res.layers) {
-            if (subLayerData.id in entries) {
+            if (layerIds.includes(subLayerData.id)) {
               const layerInfo = await queryServer(
                 mapLayer.layer.options.url + subLayerData.id
               );
