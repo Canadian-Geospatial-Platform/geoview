@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps, TypeLayerData } from "geoview-core";
+import { TypeLayersListProps, TypeLayerData, TypeProps } from "geoview-core";
 
 const w = window as any;
 
@@ -9,15 +9,27 @@ const w = window as any;
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
 const LayersList = (props: TypeLayersListProps): JSX.Element => {
-  const { layersData } = props;
+  const { layersData, language } = props;
 
   const cgpv = w["cgpv"];
   const { mui, ui, react, leaflet } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState("");
   const [sliderPosition, setSliderPosition] = useState({});
+  const [visibility, setVisibility] = useState({});
 
-  const { Slider } = mui;
+  const { Slider, Tooltip, Checkbox } = mui;
+
+  const translations: TypeProps<TypeProps<any>> = {
+    "en-CA": {
+      opacity: "Adjust Opacity",
+      visibility: "Toggle Visibility",
+    },
+    "fr-CA": {
+      opacity: "Ajuster l'opacité",
+      visibility: "Basculer la visibilité",
+    },
+  };
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
@@ -65,6 +77,8 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
     },
     sliderGroup: {
       display: "flex",
+      justifyContent: "flex-end",
+      alignItems: "baseline",
     },
     slider: {
       width: "100%",
@@ -79,6 +93,12 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       {}
     );
     setSliderPosition((state) => ({ ...defaultSliders, ...state }));
+
+    const defaultVisibility = Object.values(layersData).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: true }),
+      {}
+    );
+    setVisibility((state) => ({ ...defaultVisibility, ...state }));
   }, [layersData]);
 
   const classes = useStyles();
@@ -102,7 +122,18 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
    */
   const onSliderChange = (value: number, data: TypeLayerData) => {
     setSliderPosition((state) => ({ ...state, [data.id]: value }));
-    data.layer.setOpacity(value / 100);
+    data.layer.getPane().style.opacity = value / 100;
+  };
+
+  /**
+   * Adjusts layer visibility when checkbox is toggled
+   *
+   * @param value checkbox boolean
+   * @param data Layer data
+   */
+  const onCheckboxChange = (value: number, data: TypeLayerData) => {
+    setVisibility((state) => ({ ...state, [data.id]: value }));
+    data.layer.getPane().style.display = value ? "" : "none";
   };
 
   return (
@@ -123,19 +154,25 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
             </button>
             {selectedLayer === data.id && (
               <>
-                {data.layer.setOpacity && (
-                  <div className={classes.sliderGroup}>
+                <div className={classes.sliderGroup}>
+                  <Tooltip title={translations[language].opacity}>
                     <i className="material-icons">contrast</i>
-                    <div className={classes.slider}>
-                      <Slider
-                        size="small"
-                        value={sliderPosition[data.id]}
-                        valueLabelDisplay="auto"
-                        onChange={(e) => onSliderChange(e.target.value, data)}
-                      />
-                    </div>
+                  </Tooltip>
+                  <div className={classes.slider}>
+                    <Slider
+                      size="small"
+                      value={sliderPosition[data.id]}
+                      valueLabelDisplay="auto"
+                      onChange={(e) => onSliderChange(e.target.value, data)}
+                    />
                   </div>
-                )}
+                  <Tooltip title={translations[language].visibility}>
+                    <Checkbox
+                      checked={visibility[data.id]}
+                      onChange={(e) => onCheckboxChange(e.target.checked, data)}
+                    />
+                  </Tooltip>
+                </div>
                 {Object.values(data.layers).map(
                   ({ layer, groupLayer }, index: number) => (
                     <div key={index} className={classes.layerItemGroup}>

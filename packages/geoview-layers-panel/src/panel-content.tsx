@@ -83,7 +83,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         <Stepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
       </div>
       <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
-        <LayersList layersData={layersData} />
+        <LayersList layersData={layersData} language={language} />
       </div>
     </>
   );

@@ -310,6 +310,7 @@ export type TypeLayersListProps = {
   ) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
   mapId?: string;
+  language?: string;
   selectFeature?: (featureData: TypeJSONObject) => void;
   selectLayer?: (layerData?: TypeLayersEntry) => void;
 };
