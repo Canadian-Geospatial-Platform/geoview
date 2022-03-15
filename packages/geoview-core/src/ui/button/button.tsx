@@ -53,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       backgroundColor: theme.palette.primary.light,
       color: theme.palette.primary.dark,
-      borderRadius: 0,
     },
   },
 }));
