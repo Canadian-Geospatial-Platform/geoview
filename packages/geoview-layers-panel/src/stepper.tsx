@@ -259,6 +259,8 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const layerConfig = { name, type: layerType, url, entries };
       api.map(mapId).layer.addLayer(layerConfig);
       setAddLayerVisible(false);
+      handleInput({ target: { value: "" } });
+      setActiveStep(-1);
     }
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
   };
