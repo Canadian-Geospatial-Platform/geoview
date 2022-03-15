@@ -135,6 +135,7 @@ export type TypeLayerData = {
   name: string;
   layer: {
     setOpacity?: Function;
+    eachFeature?: Function;
     options: {
       url: string;
     };

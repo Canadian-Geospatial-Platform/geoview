@@ -15,8 +15,8 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { mui, ui, react, leaflet } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState("");
-  const [sliderPosition, setSliderPosition] = useState({});
-  const [visibility, setVisibility] = useState({});
+  const [layerOpacity, setLayerOpacity] = useState({});
+  const [layerVisibility, setLayerVisibility] = useState({});
 
   const { Slider, Tooltip, Checkbox } = mui;
 
@@ -92,13 +92,13 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       (prev, curr) => ({ ...prev, [curr.id]: 100 }),
       {}
     );
-    setSliderPosition((state) => ({ ...defaultSliders, ...state }));
+    setLayerOpacity((state) => ({ ...defaultSliders, ...state }));
 
     const defaultVisibility = Object.values(layersData).reduce(
       (prev, curr) => ({ ...prev, [curr.id]: true }),
       {}
     );
-    setVisibility((state) => ({ ...defaultVisibility, ...state }));
+    setLayerVisibility((state) => ({ ...defaultVisibility, ...state }));
   }, [layersData]);
 
   const classes = useStyles();
@@ -121,8 +121,11 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
    * @param data Layer data
    */
   const onSliderChange = (value: number, data: TypeLayerData) => {
-    setSliderPosition((state) => ({ ...state, [data.id]: value }));
-    data.layer.getPane().style.opacity = value / 100;
+    setLayerOpacity((state) => ({ ...state, [data.id]: value }));
+    const opacity = layerVisibility[data.id] ? value / 100 : 0;
+    if (data.layer.setOpacity) data.layer.setOpacity(opacity);
+    else if (data.layer.eachFeature)
+      data.layer.eachFeature((x) => x.setOpacity(opacity));
   };
 
   /**
@@ -132,8 +135,11 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
    * @param data Layer data
    */
   const onCheckboxChange = (value: number, data: TypeLayerData) => {
-    setVisibility((state) => ({ ...state, [data.id]: value }));
-    data.layer.getPane().style.display = value ? "" : "none";
+    setLayerVisibility((state) => ({ ...state, [data.id]: value }));
+    const opacity = value ? layerOpacity[data.id] / 100 : 0;
+    if (data.layer.setOpacity) data.layer.setOpacity(opacity);
+    else if (data.layer.eachFeature)
+      data.layer.eachFeature((x) => x.setOpacity(opacity));
   };
 
   return (
@@ -161,14 +167,14 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                   <div className={classes.slider}>
                     <Slider
                       size="small"
-                      value={sliderPosition[data.id]}
+                      value={layerOpacity[data.id]}
                       valueLabelDisplay="auto"
                       onChange={(e) => onSliderChange(e.target.value, data)}
                     />
                   </div>
                   <Tooltip title={translations[language].visibility}>
                     <Checkbox
-                      checked={visibility[data.id]}
+                      checked={layerVisibility[data.id]}
                       onChange={(e) => onCheckboxChange(e.target.checked, data)}
                     />
                   </Tooltip>
