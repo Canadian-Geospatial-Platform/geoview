@@ -11,6 +11,7 @@ import { Button, FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
  */
 interface FullscreenProps {
   className?: string | undefined;
+  iconClassName?: string | undefined;
 }
 
 /**
@@ -20,7 +21,7 @@ interface FullscreenProps {
  * @returns {JSX.Element} the fullscreen toggle button
  */
 export default function Fullscreen(props: FullscreenProps): JSX.Element {
-  const { className } = props;
+  const { className, iconClassName } = props;
 
   const [fs, setFs] = useState(false);
 
@@ -48,6 +49,7 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
       icon={!fs ? <FullscreenIcon /> : <FullscreenExitIcon />}
       onClick={setFullscreen}
       className={className}
+      iconClassName={iconClassName}
     />
   );
 }

@@ -210,7 +210,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // emit the map loaded event
         setIsLoaded(true);
-        api.event.emit(EVENT_NAMES.EVENT_MAP_LOADED, id, { map: cgpMap });
       }}
     >
       {isLoaded && (

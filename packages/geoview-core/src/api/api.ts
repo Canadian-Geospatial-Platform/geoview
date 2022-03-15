@@ -89,7 +89,7 @@ export class API {
 
       // Run the callback
       if (this.readyCallback) this.readyCallback();
-    }, 1000);
+    }, 500);
   };
 
   /**

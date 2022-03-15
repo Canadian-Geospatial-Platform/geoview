@@ -249,7 +249,9 @@ export class MapViewer {
   /**
    * Function called when the map has been rendered and ready to be customized
    */
-  mapReady = (): void => {};
+  mapReady = (): void => {
+    api.event.emit(EVENT_NAMES.EVENT_MAP_LOADED, this.id, { map: this.map });
+  };
 
   /**
    * Change the language of the map
