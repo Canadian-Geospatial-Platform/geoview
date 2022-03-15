@@ -26,11 +26,14 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    color: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
+    "&:hover *": {
+      fontSize: "1.6rem",
+    },
   },
   text: {
     width: "100%",
-    textAlign: "left",
+    textAlign: "center",
     textTransform: "none",
     marginLeft: 20,
     "& $buttonClass": {
@@ -45,11 +48,11 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     width: "100%",
     height: 50,
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.light,
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
     "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      color: theme.palette.primary.contrastText,
+      backgroundColor: theme.palette.primary.light,
+      color: theme.palette.primary.dark,
       borderRadius: 0,
     },
   },
@@ -71,6 +74,8 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     onClick,
     icon,
     className,
+    iconClassName,
+    textClassName,
     style,
     children,
     type,
@@ -90,13 +95,13 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
       <div></div>
     ) : typeof children === "string" ? (
       <HtmlToReact
-        className={classes.text}
+        className={`${classes.text} ${textClassName}`}
         style={type === "text" ? { marginLeft: "initial" } : {}}
         htmlContent={children}
       />
     ) : (
       <div
-        className={classes.text}
+        className={`${classes.text} ${textClassName}`}
         style={type === "text" ? { marginLeft: "initial" } : {}}
       >
         {children}
@@ -108,9 +113,12 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
     return typeof icon === "undefined" ? (
       <div></div>
     ) : typeof icon === "string" ? (
-      <HtmlToReact className={classes.icon} htmlContent={icon} />
+      <HtmlToReact
+        className={`${classes.icon} ${iconClassName}`}
+        htmlContent={icon}
+      />
     ) : (
-      <div className={classes.icon}>{icon}</div>
+      <div className={`${classes.icon} ${iconClassName}`}>{icon}</div>
     );
   };
 

@@ -33,6 +33,18 @@ export const useStyles = makeStyles((theme) => ({
     overflowX: "hidden",
     width: 50,
   },
+  appBarButton: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.light,
+    },
+  },
+  appBarButtonIcon: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
+  },
   appBarPanels: {},
 }));
 
@@ -145,6 +157,8 @@ export function Appbar(): JSX.Element {
                             tooltip={buttonPanel.button.tooltip}
                             tooltipPlacement="right"
                             type="icon"
+                            className={classes.appBarButton}
+                            iconClassName={classes.appBarButtonIcon}
                             onClick={() => {
                               if (!buttonPanel.panel?.status) {
                                 buttonPanel.panel?.open();

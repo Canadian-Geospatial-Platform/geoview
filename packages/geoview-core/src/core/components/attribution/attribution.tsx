@@ -12,7 +12,7 @@ import { MapContext } from "../../app-start";
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
     marginLeft: "50px",
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.light,
     padding: theme.spacing(0, 4),
   },
   attributionText: {

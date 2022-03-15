@@ -11,6 +11,7 @@ import { Button, ZoomInIcon } from "../../../../ui";
  */
 interface ZoomInProps {
   className?: string | undefined;
+  iconClassName?: string | undefined;
 }
 
 /**
@@ -20,7 +21,7 @@ interface ZoomInProps {
  * @returns {JSX.Element} return the created zoom in button
  */
 export default function ZoomIn(props: ZoomInProps): JSX.Element {
-  const { className } = props;
+  const { className, iconClassName } = props;
 
   const mapConfig = useContext(MapContext)!;
 
@@ -42,6 +43,7 @@ export default function ZoomIn(props: ZoomInProps): JSX.Element {
       icon={<ZoomInIcon />}
       onClick={zoomIn}
       className={className}
+      iconClassName={iconClassName}
     />
   );
 }
