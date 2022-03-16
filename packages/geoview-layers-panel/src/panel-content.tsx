@@ -1,6 +1,6 @@
 import { TypePanelContentProps, TypeProps } from "geoview-core";
 
-import Stepper from "./stepper";
+import LayerStepper from "./layer-stepper";
 import LayersList from "./layers-list";
 import getLayerMeta from "./layer-meta";
 
@@ -80,7 +80,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         />
       </div>
       <div style={{ display: addLayerVisible ? "inherit" : "none" }}>
-        <Stepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
+        <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
       </div>
       <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
         <LayersList layersData={layersData} language={language} />

@@ -123,9 +123,17 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const setOpacity = (opacity: number, data: TypeLayerData) => {
     if (data.layer.setOpacity) data.layer.setOpacity(opacity);
     else if (data.layer.eachFeature)
-      data.layer.eachFeature((x) => x.setOpacity(opacity));
+      data.layer.eachFeature((x) => {
+        if (x.setOpacity) x.setOpacity(opacity);
+        else if (x.setStyle)
+          x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+      });
     else if (data.layer.getLayers)
-      data.layer.getLayers().forEach((x) => x.setOpacity(opacity));
+      data.layer.getLayers().forEach((x) => {
+        if (x.setOpacity) x.setOpacity(opacity);
+        else if (x.setStyle)
+          x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+      });
   };
 
   /**
@@ -209,16 +217,10 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                               {layer.name}
                             </div>
                           )}
-                          {(layer.drawingInfo?.renderer.type === "simple" ||
-                            data.type === "geoJSON") && (
+                          {layer.drawingInfo?.renderer.type === "simple" && (
                             <div className={classes.layerItemText}>
                               <img
-                                src={
-                                  ["esriFeature", "geoJSON"].includes(data.type)
-                                    ? leaflet.Marker.prototype.options.icon
-                                        .options.iconUrl
-                                    : `data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`
-                                }
+                                src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
                               />
                               {layer.drawingInfo?.renderer.label || layer.name}
                             </div>

@@ -48,7 +48,7 @@ const esriOptions = (type: string): EsriOptions => {
  *
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
-const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
+const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   const cgpv = w["cgpv"];
   const { api, react, ui, mui } = cgpv;
 
@@ -425,4 +425,4 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   );
 };
 
-export default AddLayerStepper;
+export default LayerStepper;
