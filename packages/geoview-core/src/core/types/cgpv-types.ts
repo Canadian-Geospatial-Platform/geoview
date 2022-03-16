@@ -438,6 +438,10 @@ export type TypeButtonProps = {
   visible?: boolean;
   // optional class names
   className?: string | undefined;
+  // optional class names
+  iconClassName?: string | undefined;
+  // optional class names
+  textClassName?: string | undefined;
   // optional style properties
   style?: CSSProperties | undefined;
   // button type
