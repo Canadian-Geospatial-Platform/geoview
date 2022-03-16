@@ -6,6 +6,9 @@ import { CircularProgress as MaterialCircularProgress } from "@mui/material";
 const useStyles = makeStyles((theme) => {
   return {
     loading: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
       position: "absolute",
       top: "0px",
       bottom: "0px",
@@ -23,7 +26,6 @@ const useStyles = makeStyles((theme) => {
     progress: {
       width: "100px !important",
       height: "100px !important",
-      top: "50%",
       position: "absolute",
     },
   };

@@ -25,6 +25,7 @@ export type TypeCGPV = {
   leaflet: Object;
   reactLeaflet: Object;
   reactLeafletCore: Object;
+  mui?: Object;
   ui: Object;
   useTranslation: Object;
   types: Object;
@@ -140,6 +141,7 @@ export type TypeLayerData = {
     | "ogcWFS";
   name: string;
   layer: {
+    setOpacity?: Function;
     options: {
       url: string;
     };
@@ -222,7 +224,10 @@ export type TypeFeaturesListProps = {
 
 export type TypeRendererSymbol = {
   symbol: {
+    contentType: string;
+    label: string;
     legendImageUrl: string;
+    type: "simple" | "uniqueValue";
   };
   uniqueValueInfos: TypeJSONObject[];
   field1: string;
@@ -438,6 +443,10 @@ export type TypeButtonProps = {
   visible?: boolean;
   // optional class names
   className?: string | undefined;
+  // optional class names
+  iconClassName?: string | undefined;
+  // optional class names
+  textClassName?: string | undefined;
   // optional style properties
   style?: CSSProperties | undefined;
   // button type
@@ -450,6 +459,8 @@ export type TypeButtonProps = {
   children?: TypeChildren;
   // focus used for accessibility to enable focus
   autoFocus?: boolean;
+  // button disabling
+  disabled?: boolean;
 };
 
 /**

@@ -50,8 +50,8 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: theme.spacing(5),
   },
   navBarButton: {
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.light,
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
     borderRadius: theme.spacing(5),
     width: navBtnWidth,
     height: navBtnHeight,
@@ -59,9 +59,15 @@ const useStyles = makeStyles((theme) => ({
     minWidth: navBtnWidth,
     padding: "initial",
     "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      color: theme.palette.primary.light,
-      borderRadius: theme.spacing(5),
+      backgroundColor: theme.palette.primary.light,
+      color: theme.palette.primary.dark,
+    },
+  },
+  navBarButtonIcon: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
+    "&:hover *": {
+      fontSize: "1.8rem",
     },
   },
 }));
@@ -228,8 +234,14 @@ export function Navbar(): JSX.Element {
           variant="contained"
           className={classes.navBtnGroup}
         >
-          <ZoomIn className={classes.navBarButton} />
-          <ZoomOut className={classes.navBarButton} />
+          <ZoomIn
+            className={classes.navBarButton}
+            iconClassName={classes.navBarButtonIcon}
+          />
+          <ZoomOut
+            className={classes.navBarButton}
+            iconClassName={classes.navBarButtonIcon}
+          />
         </ButtonGroup>
         <ButtonGroup
           orientation="vertical"
@@ -237,8 +249,14 @@ export function Navbar(): JSX.Element {
           variant="contained"
           className={classes.navBtnGroup}
         >
-          <Fullscreen className={classes.navBarButton} />
-          <Home className={classes.navBarButton} />
+          <Fullscreen
+            className={classes.navBarButton}
+            iconClassName={classes.navBarButtonIcon}
+          />
+          <Home
+            className={classes.navBarButton}
+            iconClassName={classes.navBarButtonIcon}
+          />
         </ButtonGroup>
       </div>
     </div>

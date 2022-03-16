@@ -30,6 +30,20 @@ export const useStyles = makeStyles((theme) => ({
   },
   appBarButtons: {
     overflowY: "auto",
+    overflowX: "hidden",
+    width: 50,
+  },
+  appBarButton: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.light,
+    },
+  },
+  appBarButtonIcon: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
   },
   appBarPanels: {},
 }));
@@ -112,49 +126,62 @@ export function Appbar(): JSX.Element {
       className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`}
       ref={appBar}
     >
-      <div className={classes.appBarButtons}>
-        {Object.keys(api.map(mapId).appBarButtons.buttons).map(
-          (groupName: string) => {
-            // get button panels from group
-            const buttonPanels =
-              api.map(mapId).appBarButtons.buttons[groupName];
+      {Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter(
+        (buttonPanel) => {
+          return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel]
+            .button?.visible;
+        }
+      ).length ? (
+        <div className={classes.appBarButtons}>
+          {Object.keys(api.map(mapId).appBarButtons.buttons).map(
+            (groupName: string) => {
+              // get button panels from group
+              const buttonPanels =
+                api.map(mapId).appBarButtons.buttons[groupName];
 
-            // display the button panels in the list
-            return (
-              <List key={groupName}>
-                {Object.keys(buttonPanels).map((buttonId) => {
-                  const buttonPanel = buttonPanels[buttonId];
+              // display the button panels in the list
+              return (
+                <List key={groupName}>
+                  {Object.keys(buttonPanels).map((buttonId) => {
+                    const buttonPanel = buttonPanels[buttonId];
 
-                  return buttonPanel?.button.visible !== undefined &&
-                    buttonPanel?.button.visible ? (
-                    <Fragment key={buttonPanel.button.id + "-" + refreshCount}>
-                      <ListItem>
-                        <Button
-                          id={buttonPanel.button.id}
-                          variant="text"
-                          tooltip={buttonPanel.button.tooltip}
-                          tooltipPlacement="right"
-                          type="icon"
-                          onClick={() => {
-                            if (!buttonPanel.panel?.status) {
-                              buttonPanel.panel?.open();
-                            } else {
-                              buttonPanel.panel?.close();
-                            }
-                          }}
-                          icon={buttonPanel.button.icon}
-                          children={buttonPanel.button.tooltip}
-                        />
-                      </ListItem>
-                      <Divider />
-                    </Fragment>
-                  ) : null;
-                })}
-              </List>
-            );
-          }
-        )}
-      </div>
+                    return buttonPanel?.button.visible !== undefined &&
+                      buttonPanel?.button.visible ? (
+                      <Fragment
+                        key={buttonPanel.button.id + "-" + refreshCount}
+                      >
+                        <ListItem>
+                          <Button
+                            id={buttonPanel.button.id}
+                            variant="text"
+                            tooltip={buttonPanel.button.tooltip}
+                            tooltipPlacement="right"
+                            type="icon"
+                            className={classes.appBarButton}
+                            iconClassName={classes.appBarButtonIcon}
+                            onClick={() => {
+                              if (!buttonPanel.panel?.status) {
+                                buttonPanel.panel?.open();
+                              } else {
+                                buttonPanel.panel?.close();
+                              }
+                            }}
+                            icon={buttonPanel.button.icon}
+                            children={buttonPanel.button.tooltip}
+                          />
+                        </ListItem>
+                        <Divider />
+                      </Fragment>
+                    ) : null;
+                  })}
+                </List>
+              );
+            }
+          )}
+        </div>
+      ) : (
+        <></>
+      )}
       {Object.keys(api.map(mapId).appBarButtons.buttons).map(
         (groupName: string) => {
           // get button panels from group

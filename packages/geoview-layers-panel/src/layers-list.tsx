@@ -1,18 +1,23 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps } from "geoview-core";
+import { TypeLayersListProps, TypeLayerData } from "geoview-core";
 
 const w = window as any;
 
 /**
  * A react component that will list the map server layers defined in the map config
  * @param {TypeLayersListProps} props properties passed to the component
- * @returns a React JSX Element containing map server layers
+ * @returns {JSX.Element} a React JSX Element containing map server layers
  */
 const LayersList = (props: TypeLayersListProps): JSX.Element => {
   const { layersData } = props;
 
   const cgpv = w["cgpv"];
-  const { ui } = cgpv;
+  const { mui, ui, react, leaflet } = cgpv;
+  const { useState, useEffect } = react;
+  const [selectedLayer, setSelectedLayer] = useState("");
+  const [sliderPosition, setSliderPosition] = useState({});
+
+  const { Slider } = mui;
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
@@ -51,59 +56,144 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       textOverflow: "ellipsis",
       overflow: "hidden",
       marginLeft: "10px",
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+    },
+    layerItemGroup: {
+      paddingBottom: 12,
+    },
+    sliderGroup: {
+      display: "flex",
+    },
+    slider: {
+      width: "100%",
+      paddingLeft: 20,
+      paddingRight: 20,
     },
   }));
 
+  useEffect(() => {
+    const defaultSliders = Object.values(layersData).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: 100 }),
+      {}
+    );
+    setSliderPosition((state) => ({ ...defaultSliders, ...state }));
+  }, [layersData]);
+
   const classes = useStyles();
+
+  /**
+   * Sets the currently selected layer,
+   * sets to blank if value is same as currently selecetd layer
+   *
+   * @param value layer button value
+   */
+  const onClick = (value: string) => {
+    const selected = value !== selectedLayer ? value : "";
+    setSelectedLayer(selected);
+  };
+
+  /**
+   * Adjusts layer opacity when slider is moved
+   *
+   * @param value slider opacity value (0-100)
+   * @param data Layer data
+   */
+  const onSliderChange = (value: number, data: TypeLayerData) => {
+    setSliderPosition((state) => ({ ...state, [data.id]: value }));
+    data.layer.setOpacity(value / 100);
+  };
 
   return (
     <div className={classes.layersContainer}>
-      {Object.keys(layersData).map((dataKey) => {
-        const data = layersData[dataKey];
-        return (
-          <div key={data.id}>
-            {Object.keys(data.layers).map((layerKey: string, index: number) => {
-              const { layer, layerData, groupLayer } = data.layers[layerKey];
-              return (
-                <div
-                  key={index}
-                  tabIndex={layerData.length > 0 && !groupLayer ? 0 : -1}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (!groupLayer) {
-                        e.preventDefault();
-                      }
-                    }
-                  }}
-                  role="button"
-                >
-                  {groupLayer ? (
-                    <div className={classes.layerParentText} title={layer.name}>
-                      {layer.name}
+      {Object.values(layersData).map((data) => (
+        <div key={data.id}>
+          <>
+            <button
+              type="button"
+              className={classes.layerItem}
+              onClick={() => onClick(data.id)}
+            >
+              <div className={classes.layerCountTextContainer}>
+                <div className={classes.layerItemText} title={data.name}>
+                  {data.name}
+                </div>
+              </div>
+            </button>
+            {selectedLayer === data.id && (
+              <>
+                {data.layer.setOpacity && (
+                  <div className={classes.sliderGroup}>
+                    <i className="material-icons">contrast</i>
+                    <div className={classes.slider}>
+                      <Slider
+                        size="small"
+                        value={sliderPosition[data.id]}
+                        valueLabelDisplay="auto"
+                        onChange={(e) => onSliderChange(e.target.value, data)}
+                      />
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      className={classes.layerItem}
-                      disabled={layerData.length === 0}
-                    >
-                      <div className={classes.layerCountTextContainer}>
+                  </div>
+                )}
+                {Object.values(data.layers).map(
+                  ({ layer, groupLayer }, index: number) => (
+                    <div key={index} className={classes.layerItemGroup}>
+                      {groupLayer ? (
                         <div
-                          className={classes.layerItemText}
+                          className={classes.layerParentText}
                           title={layer.name}
                         >
                           {layer.name}
                         </div>
-                      </div>
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+                      ) : (
+                        <>
+                          {Object.values(data.layers).length > 1 && (
+                            <div
+                              className={classes.layerItemText}
+                              title={layer.name}
+                            >
+                              {layer.name}
+                            </div>
+                          )}
+                          {(layer.drawingInfo?.renderer.type === "simple" ||
+                            data.type === "geoJSON") && (
+                            <div className={classes.layerItemText}>
+                              <img
+                                src={
+                                  ["esriFeature", "geoJSON"].includes(data.type)
+                                    ? leaflet.Marker.prototype.options.icon
+                                        .options.iconUrl
+                                    : `data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`
+                                }
+                              />
+                              {layer.drawingInfo?.renderer.label || layer.name}
+                            </div>
+                          )}
+                          {layer.drawingInfo?.renderer.type === "uniqueValue" &&
+                            layer.drawingInfo?.renderer.uniqueValueInfos.map(
+                              (uniqueValue, index) => (
+                                <div
+                                  key={index}
+                                  className={classes.layerItemText}
+                                >
+                                  <img
+                                    src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
+                                  />
+                                  {uniqueValue.label}
+                                </div>
+                              )
+                            )}
+                        </>
+                      )}
+                    </div>
+                  )
+                )}
+              </>
+            )}
+          </>
+        </div>
+      ))}
     </div>
   );
 };

@@ -100,10 +100,19 @@ export class GeoUtilities {
    * @returns the map server url
    */
   getMapServerUrl = (url: string, rest = false): string => {
-    let mapServerUrl = url.slice(
-      0,
-      url.indexOf("MapServer") + "MapServer".length
-    );
+    let mapServerUrl = url;
+    if (mapServerUrl.includes("MapServer")) {
+      mapServerUrl = mapServerUrl.slice(
+        0,
+        mapServerUrl.indexOf("MapServer") + "MapServer".length
+      );
+    }
+    if (mapServerUrl.includes("FeatureServer")) {
+      mapServerUrl = mapServerUrl.slice(
+        0,
+        mapServerUrl.indexOf("FeatureServer") + "FeatureServer".length
+      );
+    }
 
     if (rest) {
       const urlRightSide = mapServerUrl.slice(

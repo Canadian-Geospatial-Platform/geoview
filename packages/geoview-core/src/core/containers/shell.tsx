@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => {
       left: theme.spacing(0),
       bottom: theme.spacing(0),
       overflow: "hidden",
-      zIndex: -1,
+      zIndex: 0,
       height: "100%",
     },
     skip: {
@@ -73,6 +73,9 @@ export function Shell(props: ShellProps): JSX.Element {
 
   const [update, setUpdate] = useState<number>(0);
 
+  // show a splash screen before map is loaded
+  const [isLoaded, setIsLoaded] = useState(false);
+
   /**
    * Set the focus trap
    * @param {boolean} dialogTrap the callback value from dialog trap
@@ -89,9 +92,6 @@ export function Shell(props: ShellProps): JSX.Element {
       return ++prevState;
     });
   }, [update]);
-
-  // show a splash screen before map is loaded
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     api.event.on(
