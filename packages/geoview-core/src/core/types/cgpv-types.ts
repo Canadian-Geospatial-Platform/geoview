@@ -344,6 +344,7 @@ export type TypeMapConfigProps = {
   basemapOptions: TypeBasemapOptions;
   layers?: TypeLayerConfig[];
   plugins: string[];
+  extraOptions: TypeJSONObject;
 };
 
 /**

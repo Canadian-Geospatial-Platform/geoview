@@ -25,6 +25,7 @@ export class Config {
     basemapOptions: { id: "transport", shaded: true, labeled: true },
     layers: [],
     plugins: [],
+    extraOptions: {},
   };
 
   // validations values
@@ -122,7 +123,7 @@ export class Config {
     const plugins = this.validatePlugins(tmpConfig.plugins);
 
     // validation is done in layer class
-    const { layers } = tmpConfig;
+    const { layers, extraOptions } = tmpConfig;
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapConfigProps = {
@@ -137,6 +138,7 @@ export class Config {
       boxZoom,
       layers,
       plugins,
+      extraOptions,
     };
     this.logModifs(tmpConfig, validConfig);
 
