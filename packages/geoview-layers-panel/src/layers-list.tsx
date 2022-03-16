@@ -217,15 +217,19 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
                               {layer.name}
                             </div>
                           )}
-                          {layer.drawingInfo?.renderer.type === "simple" && (
-                            <div className={classes.layerItemText}>
-                              <img
-                                src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
-                              />
-                              {layer.drawingInfo?.renderer.label || layer.name}
-                            </div>
-                          )}
+                          {layer.drawingInfo?.renderer.type === "simple" &&
+                            layer.drawingInfo?.renderer.symbol.imageData && (
+                              <div className={classes.layerItemText}>
+                                <img
+                                  src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
+                                />
+                                {layer.drawingInfo?.renderer.label ||
+                                  layer.name}
+                              </div>
+                            )}
                           {layer.drawingInfo?.renderer.type === "uniqueValue" &&
+                            layer.drawingInfo?.renderer.uniqueValueInfos[0]
+                              .symbol.imageData &&
                             layer.drawingInfo?.renderer.uniqueValueInfos.map(
                               (uniqueValue, index) => (
                                 <div

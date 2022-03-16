@@ -193,7 +193,7 @@ const addMapLayer = async (mapLayer: any, setState: Function) => {
  * @param mapId string of current map ID
  * @param layer layer configuration information
  */
-const addLayers = (
+const getLayerInfo = (
   setState: Function,
   api: TypeApi,
   mapId: string,
@@ -207,4 +207,4 @@ const addLayers = (
     );
 };
 
-export default addLayers;
+export default getLayerInfo;
