@@ -16,7 +16,6 @@ import { api } from "../../api/api";
 
 import { TypeModalProps } from ".";
 import { CloseIcon, IconButton, TextField, Stepper, Select } from "..";
-import { Search } from "@mui/icons-material";
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -258,6 +257,12 @@ export const Modal = (props: DialogProps): JSX.Element => {
     };
   }, [updateModal]);
 
+  const getValue = (value: any) => {
+    if (!value) return;
+    console.log(value);
+    return value;
+  };
+
   return createdModal ? (
     createdModal
   ) : (
@@ -286,15 +291,10 @@ export const Modal = (props: DialogProps): JSX.Element => {
             id="text-1"
             label="Test label"
             placeholder="this is placeholder"
-            // readonly
-            // disabled
-            variant="filled"
-            defaultValue="def Value"
-            error
-            helperText="Helper text"
+            callBack={getValue}
             suffix={
               <IconButton>
-                <Search></Search>
+                <CloseIcon></CloseIcon>
               </IconButton>
             }
           ></TextField>
@@ -302,26 +302,46 @@ export const Modal = (props: DialogProps): JSX.Element => {
           <Select
             id="Select-1"
             label="Select any one"
-            multiple
+            // callBack={getValue}
+            // placeholder="this is placeholder"
             selectItems={[
-              //  default and disabled not working ATM
-              { id: "option-1", value: "Option 1", default: true },
-              { id: "option-2", value: "Option 2" },
-              { id: "option-3", value: "Option 3" },
+              {
+                category: "yo",
+                items: [
+                  { id: "option-1", value: "Option 1" },
+                  { id: "option-4", value: "Option 4" },
+                ],
+              },
+              {
+                category: "wassup",
+                items: [{ id: "option-2", value: "Option 2" }],
+              },
+              {
+                category: "lmao",
+                items: [{ id: "option-3", value: "Option 3" }],
+              },
+              { items: [{ id: "option-5", value: "Option 5" }] },
             ]}
           ></Select>
 
           <Stepper
             id="stepper-1"
-            // description as JSX Element or HTML
             steps={[
-              { label: "1st Step", description: "This is the First Step" },
+              {
+                label: "1st Step",
+                description:
+                  "<button>First button</button><p>Test of <strong>boldness</strong> with a <a href='#'>link</a>.</p>",
+              },
               { label: "2nd Step", description: "Container for Second Step" },
-              { label: "3rd Step", description: "Last step is the Third Step" },
+              { label: "3rd Step", description: "<h3>Third heading</h3>" },
             ]}
-            orientation="horizontal"
+            // orientation="vertical"
+            // buttonedLabels
+            nonLinear
+            // alternativeLabel={true}
+            // orientation="horizontal"
             // buttonedLabels not working
-            buttonedLabels
+            // buttonedLabels
             // alternativeLabel
           ></Stepper>
           {content}
