@@ -198,15 +198,21 @@ export class WMS {
    * @param {layerName} string the name of the layer to get the legend image for
    * @returns {blob} image blob
    */
-  getLegendGraphic = (layerName: string): any => {
+  getLegendGraphic = async (): Promise<string | ArrayBuffer | null> => {
+    const readAsyncFile = (blob: Blob): Promise<string | ArrayBuffer | null> =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
     let legendUrl =
       this.url +
-      "service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=";
-    return axios
-      .get(legendUrl + layerName, { responseType: "blob" })
-      .then((response) => {
-        return response.data;
-      });
+      "service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=" +
+      this.entries;
+    const response = await axios.get(legendUrl, { responseType: "blob" });
+    return readAsyncFile(response.data);
   };
 
   /**

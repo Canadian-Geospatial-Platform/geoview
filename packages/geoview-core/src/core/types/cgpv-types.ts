@@ -126,13 +126,153 @@ export type TypeLayerConfig = {
 };
 
 /**
+ * Leaflet layer
+ */
+export type TypeLeafletLayer = {
+  setOpacity?: Function;
+  setStyle?: Function;
+} & L.Layer;
+
+/**
+ * ESRI Json Legend for Dynamic Layer
+ */
+export type TypeLegendJsonDynamic = {
+  layerId: string;
+  layerName: string;
+  layerType: string;
+  maxScale: number;
+  minScale: number;
+  legend: {
+    contentType: string;
+    height: number;
+    imageData: string;
+    label: string;
+    url: string;
+    width: number;
+  }[];
+}[];
+
+/**
+ * ESRI Json Legend for Feature Layer
+ */
+export type TypeLegendJsonFeature = {
+  currentVersion: number;
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  geometryType: string;
+  sourceSpatialReference: {
+    wkid: number;
+    latestWkid: number;
+  };
+  copyrightText: string;
+  parentLayer: {
+    id: number;
+    name: string;
+  };
+  subLayers: any[];
+  minScale: number;
+  maxScale: number;
+  drawingInfo: {
+    renderer: {
+      type: string;
+      symbol: {
+        type: string;
+        url: string;
+        imageData: string;
+        contentType: string;
+        width: number;
+        height: number;
+        angle: number;
+        xoffset: number;
+        yoffset: number;
+      };
+      label: string;
+      description: string;
+    };
+    transparency: number;
+    labelingInfo: any;
+  };
+  defaultVisibility: boolean;
+  extent: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+    spatialReference: {
+      wkid: number;
+      latestWkid: number;
+    };
+  };
+  hasAttachments: boolean;
+  htmlPopupType: string;
+  displayField: string;
+  typeIdField: any;
+  subtypeFieldName: any;
+  subtypeField: any;
+  defaultSubtypeCode: any;
+  fields: {
+    name: string;
+    type: string;
+    alias: string;
+    domain: any;
+  }[];
+  geometryField: {
+    name: string;
+    type: string;
+    alias: string;
+  };
+  indexes: {
+    name: string;
+    fields: string;
+    isAscending: boolean;
+    isUnique: boolean;
+    description: string;
+  }[];
+  subtypes: [];
+  relationships: [];
+  canModifyLayer: boolean;
+  canScaleSymbols: boolean;
+  hasLabels: boolean;
+  capabilities: string;
+  maxRecordCount: number;
+  supportsStatistics: boolean;
+  supportsAdvancedQueries: boolean;
+  supportedQueryFormats: string;
+  isDataVersioned: boolean;
+  ownershipBasedAccessControlForFeatures: {
+    allowOthersToQuery: boolean;
+  };
+  useStandardizedQueries: boolean;
+  advancedQueryCapabilities: {
+    useStandardizedQueries: boolean;
+    supportsStatistics: boolean;
+    supportsHavingClause: boolean;
+    supportsCountDistinct: boolean;
+    supportsOrderBy: boolean;
+    supportsDistinct: boolean;
+    supportsPagination: boolean;
+    supportsbooleanCurve: boolean;
+    supportsReturningQueryExtent: boolean;
+    supportsQueryWithDistance: boolean;
+    supportsSqlExpression: boolean;
+  };
+  supportsDatumTransformation: boolean;
+  supportsCoordinatesQuantization: boolean;
+};
+
+export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
+
+/**
  * interface used when adding a new layer
  */
-
 export type TypeLayerData = {
   id: string;
   type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles";
   name: string;
+  url: string;
+  entries: string[];
   layer: {
     setOpacity?: Function;
     eachFeature?: Function;
@@ -154,9 +294,11 @@ export type TypeLayerData = {
         url: string;
       };
     };
-    getLayers: () => Array<number>;
+    getLayers: () => TypeLeafletLayer[];
   } & L.Layer;
   layers: TypeLayersInLayerData;
+  getLegendGraphic?: () => Promise<string>;
+  getLegendJson?: () => Promise<TypeLegendJson>;
 };
 
 export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
@@ -301,19 +443,26 @@ export type TypeSelectedFeature = {
 export type TypeProps<T = string & unknown> = Record<string, T>;
 
 /**
- * interface for the layers list properties
+ * interface for the layers list properties in details panel
  */
 export type TypeLayersListProps = {
-  clickPos?: L.LatLng | undefined;
-  getSymbol?: (
+  clickPos: L.LatLng | undefined;
+  getSymbol: (
     renderer: TypeRendererSymbol,
     attributes: TypeJSONObject
   ) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
-  mapId?: string;
-  language?: string;
-  selectFeature?: (featureData: TypeJSONObject) => void;
-  selectLayer?: (layerData?: TypeLayersEntry) => void;
+  mapId: string;
+  selectFeature: (featureData: TypeJSONObject) => void;
+  selectLayer: (layerData?: TypeLayersEntry) => void;
+};
+
+/**
+ * interface for the layers list properties in layers panel
+ */
+export type TypeLayersPanelListProps = {
+  layers: Record<string, TypeLayerData>;
+  language: string;
 };
 
 /**
