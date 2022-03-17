@@ -112,6 +112,7 @@ export const CONST_LAYER_TYPES = {
   ESRI_DYNAMIC: "esriDynamic",
   ESRI_FEATURE: "esriFeature",
   XYZ_TILES: "xyzTiles",
+  WFS: "ogcWFS",
 };
 
 /**
@@ -269,7 +270,13 @@ export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
  */
 export type TypeLayerData = {
   id: string;
-  type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles";
+  type:
+    | "ogcWMS"
+    | "geoJSON"
+    | "esriDynamic"
+    | "esriFeature"
+    | "xyzTiles"
+    | "ogcWFS";
   name: string;
   url: string;
   entries: string[];
@@ -488,6 +495,7 @@ export type TypeMapConfigProps = {
   basemapOptions: TypeBasemapOptions;
   layers?: TypeLayerConfig[];
   plugins: string[];
+  extraOptions: TypeJSONObject;
 };
 
 /**

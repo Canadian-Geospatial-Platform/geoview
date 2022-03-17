@@ -42,8 +42,15 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const id = props.id ? props.id : generateId("");
 
-  const { center, zoom, projection, language, selectBox, boxZoom, plugins } =
-    props;
+  const {
+    center,
+    zoom,
+    projection,
+    language,
+    selectBox,
+    boxZoom,
+    extraOptions,
+  } = props;
 
   const [basemapLayers, setBasemapLayers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -168,6 +175,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       maxZoom={mapOptions.maxZoom}
       maxBounds={mapOptions.maxBounds}
       keyboardPanDelta={20}
+      {...extraOptions}
       whenCreated={(cgpMap: L.Map) => {
         // eslint-disable-next-line no-param-reassign
         cgpMap.id = id;

@@ -3,6 +3,7 @@ import { Layer as leafletLayer } from "leaflet";
 import { EsriDynamic } from "./esri/esri-dynamic";
 import { EsriFeature } from "./esri/esri-feature";
 import { WMS } from "./ogc/wms";
+import { WFS } from "./ogc/wfs";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
 import { Vector } from "./vector/vector";
@@ -93,6 +94,12 @@ export class Layer {
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
+          } else if (layerConf.type === CONST_LAYER_TYPES.WFS) {
+            const wfsLayer = new WFS(layerConf);
+            wfsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+              wfsLayer.layer = layer;
+              this.addToMap(wfsLayer);
+            });
           }
         }
       },
