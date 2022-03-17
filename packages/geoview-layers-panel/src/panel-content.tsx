@@ -53,20 +53,20 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     setMapLayers(() => ({ ...api.map(mapId).layer.layers }));
 
     api.event.on(
-      "layer/added",
+      api.eventNames.EVENT_LAYER_ADDED,
       () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })),
       mapId
     );
 
     api.event.on(
-      "layer/remove",
+      api.eventNames.EVENT_LAYER_REMOVE,
       () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })),
       mapId
     );
 
     return () => {
-      api.event.off("layer/added", mapId);
-      api.event.off("layer/remove", mapId);
+      api.event.off(api.eventNames.EVENT_LAYER_ADDED, mapId);
+      api.event.off(api.eventNames.EVENT_LAYER_REMOVE, mapId);
     };
   }, []);
 

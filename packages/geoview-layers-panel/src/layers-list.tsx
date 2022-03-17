@@ -92,13 +92,10 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     },
   }));
 
-  useEffect(async () => {
-    const defaultLegends = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: [] }),
-      {}
-    );
-    setLayerLegend((state) => ({ ...defaultLegends, ...state }));
-
+  /**
+   * Calls setLayerLegend for all layers
+   */
+  const setLayerLegends = async () => {
     for (const layer of Object.values(layers)) {
       if (layer.getLegendGraphic) {
         const dataUrl = await layer.getLegendGraphic();
@@ -111,6 +108,15 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
         setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
       }
     }
+  };
+
+  useEffect(() => {
+    const defaultLegends = Object.values(layers).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: [] }),
+      {}
+    );
+    setLayerLegend((state) => ({ ...defaultLegends, ...state }));
+    setLayerLegends();
 
     const defaultSliders = Object.values(layers).reduce(
       (prev, curr) => ({ ...prev, [curr.id]: 100 }),
