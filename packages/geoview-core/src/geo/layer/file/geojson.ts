@@ -90,4 +90,15 @@ export class GeoJSON {
 
     return new Promise((resolve) => resolve(geo));
   }
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.getLayers().forEach((x) => {
+      if (x.setOpacity) x.setOpacity(opacity);
+      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+    });
+  };
 }

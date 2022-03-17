@@ -147,4 +147,12 @@ export class EsriDynamic {
       }
     });
   };
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.setOpacity(opacity);
+  };
 }

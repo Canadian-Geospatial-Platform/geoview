@@ -2,7 +2,6 @@
 import {
   TypeLayersPanelListProps,
   TypeLayerData,
-  TypeLeafletLayer,
   TypeProps,
 } from "geoview-core";
 
@@ -140,28 +139,6 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   };
 
   /**
-   * Sets opacity value for layer
-   *
-   * @param opacity opacity value for layer (0-1)
-   * @param data Layer data
-   */
-  const setOpacity = (opacity: number, data: TypeLayerData) => {
-    if (data.layer.setOpacity) data.layer.setOpacity(opacity);
-    else if (data.layer.eachFeature)
-      data.layer.eachFeature((x: TypeLeafletLayer) => {
-        if (x.setOpacity) x.setOpacity(opacity);
-        else if (x.setStyle)
-          x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
-      });
-    else if (data.layer.getLayers)
-      data.layer.getLayers().forEach((x) => {
-        if (x.setOpacity) x.setOpacity(opacity);
-        else if (x.setStyle)
-          x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
-      });
-  };
-
-  /**
    * Adjusts layer opacity when slider is moved
    *
    * @param value slider opacity value (0-100)
@@ -170,7 +147,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const onSliderChange = (value: number, data: TypeLayerData) => {
     setLayerOpacity((state) => ({ ...state, [data.id]: value }));
     const opacity = layerVisibility[data.id] ? value / 100 : 0;
-    setOpacity(opacity, data);
+    data.setOpacity(opacity);
   };
 
   /**
@@ -182,7 +159,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const onCheckboxChange = (value: number, data: TypeLayerData) => {
     setLayerVisibility((state) => ({ ...state, [data.id]: value }));
     const opacity = value ? layerOpacity[data.id] / 100 : 0;
-    setOpacity(opacity, data);
+    data.setOpacity(opacity);
   };
 
   return (

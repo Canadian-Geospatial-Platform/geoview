@@ -127,14 +127,6 @@ export type TypeLayerConfig = {
 };
 
 /**
- * Leaflet layer
- */
-export type TypeLeafletLayer = {
-  setOpacity?: Function;
-  setStyle?: Function;
-} & L.Layer;
-
-/**
  * ESRI Json Legend for Dynamic Layer
  */
 export type TypeLegendJsonDynamic = {
@@ -301,11 +293,12 @@ export type TypeLayerData = {
         url: string;
       };
     };
-    getLayers: () => TypeLeafletLayer[];
+    getLayers: () => L.Layer[];
   } & L.Layer;
   layers: TypeLayersInLayerData;
   getLegendGraphic?: () => Promise<string>;
   getLegendJson?: () => Promise<TypeLegendJson>;
+  setOpacity: (opacity: number) => void;
 };
 
 export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;

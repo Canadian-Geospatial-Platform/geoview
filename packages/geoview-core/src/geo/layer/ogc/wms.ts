@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 import axios from "axios";
 
-import L, { LeafletMouseEvent, Layer, version } from "leaflet";
+import L, { Layer } from "leaflet";
 
 import { mapService as esriMapService, MapService } from "esri-leaflet";
 
@@ -11,7 +11,6 @@ import WMSCapabilities from "wms-capabilities";
 import { getXMLHttpRequest, xmlToJson } from "../../../core/utils/utilities";
 
 import {
-  Cast,
   TypeJSONObject,
   TypeJSONObjectLoop,
   TypeLayerConfig,
@@ -342,4 +341,12 @@ export class WMS {
 
     return params;
   }
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.setOpacity(opacity);
+  };
 }
