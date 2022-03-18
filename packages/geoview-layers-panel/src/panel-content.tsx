@@ -59,14 +59,14 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     );
 
     api.event.on(
-      api.eventNames.EVENT_LAYER_REMOVE,
+      api.eventNames.EVENT_REMOVE_LAYER,
       () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })),
       mapId
     );
 
     return () => {
       api.event.off(api.eventNames.EVENT_LAYER_ADDED, mapId);
-      api.event.off(api.eventNames.EVENT_LAYER_REMOVE, mapId);
+      api.event.off(api.eventNames.EVENT_REMOVE_LAYER, mapId);
     };
   }, []);
 
@@ -87,7 +87,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
       </div>
       <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
-        <LayersList layers={mapLayers} language={language} />
+        <LayersList mapId={mapId} layers={mapLayers} language={language} />
       </div>
     </>
   );

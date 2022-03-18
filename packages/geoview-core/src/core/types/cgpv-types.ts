@@ -461,6 +461,7 @@ export type TypeLayersListProps = {
  * interface for the layers list properties in layers panel
  */
 export type TypeLayersPanelListProps = {
+  mapId: string;
   layers: Record<string, TypeLayerData>;
   language: string;
 };
