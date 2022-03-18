@@ -15,17 +15,17 @@ import {
   DialogActions,
   DialogProps as MaterialDialogProps,
 } from "@mui/material";
+import { ClassNameMap, withStyles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
 
 import { TypeChildren } from "../../core/types/cgpv-types";
+import { HtmlToReact } from "../../core/containers/html-to-react";
 
 import { EVENT_NAMES } from "../../api/event";
 import { api } from "../../api/api";
 
 import { TypeModalProps } from ".";
 import { CloseIcon, IconButton } from "..";
-import { HtmlToReact } from "../../core/containers/html-to-react";
-import { ClassNameMap, withStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
