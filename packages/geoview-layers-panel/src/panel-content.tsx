@@ -1,8 +1,7 @@
 import { TypePanelContentProps, TypeProps } from "geoview-core";
 
-import Stepper from "./stepper";
+import LayerStepper from "./layer-stepper";
 import LayersList from "./layers-list";
-import getLayerMeta from "./layer-meta";
 
 const w = window as any;
 
@@ -18,8 +17,8 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const cgpv = w["cgpv"];
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;
-  const [layersData, setLayersData] = useState({});
   const [addLayerVisible, setAddLayerVisible] = useState(false);
+  const [mapLayers, setMapLayers] = useState({});
   const { Button } = ui.elements;
 
   const { language } = api.map(mapId);
@@ -51,18 +50,23 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const onClick = () => setAddLayerVisible((state: boolean) => !state);
 
   useEffect(() => {
-    getLayerMeta(setLayersData, api, mapId);
+    setMapLayers(() => ({ ...api.map(mapId).layer.layers }));
+
     api.event.on(
-      "layer/added",
-      (payload: any) => {
-        if (payload && payload.handlerName.includes(mapId))
-          getLayerMeta(setLayersData, api, mapId, payload.layer);
-      },
+      api.eventNames.EVENT_LAYER_ADDED,
+      () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })),
+      mapId
+    );
+
+    api.event.on(
+      api.eventNames.EVENT_LAYER_REMOVE,
+      () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })),
       mapId
     );
 
     return () => {
-      api.event.off("layer/added", mapId);
+      api.event.off(api.eventNames.EVENT_LAYER_ADDED, mapId);
+      api.event.off(api.eventNames.EVENT_LAYER_REMOVE, mapId);
     };
   }, []);
 
@@ -80,10 +84,10 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         />
       </div>
       <div style={{ display: addLayerVisible ? "inherit" : "none" }}>
-        <Stepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
+        <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
       </div>
       <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
-        <LayersList layersData={layersData} />
+        <LayersList layers={mapLayers} language={language} />
       </div>
     </>
   );

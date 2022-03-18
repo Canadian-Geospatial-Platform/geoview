@@ -60,4 +60,12 @@ export class XYZTiles {
     });
     return new Promise((resolve) => resolve(geo));
   }
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.setOpacity(opacity);
+  };
 }
