@@ -1,4 +1,12 @@
-import React, { CSSProperties, useState, useEffect, useCallback } from "react";
+import React, {
+  CSSProperties,
+  useState,
+  useEffect,
+  useCallback,
+  Fragment,
+} from "react";
+
+import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -7,9 +15,11 @@ import {
   DialogActions,
   DialogProps as MaterialDialogProps,
 } from "@mui/material";
+import { ClassNameMap, withStyles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
 
 import { TypeChildren } from "../../core/types/cgpv-types";
+import { HtmlToReact } from "../../core/containers/html-to-react";
 
 import { EVENT_NAMES } from "../../api/event";
 import { api } from "../../api/api";
@@ -35,14 +45,19 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    padding: "5px 10px",
+  },
+  modalTitleLabel: {
+    display: "flex",
+    justifyContent: "flex-start",
   },
   modalTitleActions: {
+    display: "flex",
     justifyContent: "flex-end",
   },
   headerActionsContainer: {
     display: "flex",
-    alignItems: "center",
-    padding: "16px 0 16px 24px",
+    padding: "5px 10px",
     "& > *:not(:last-child)": {
       marginRight: theme.spacing(3),
     },
@@ -100,8 +115,10 @@ export const Modal = (props: DialogProps): JSX.Element => {
   const [createdModal, setCreatedModal] = useState<JSX.Element>();
   const [update, setUpdate] = useState<number>(0);
 
+  const { t } = useTranslation();
+
   let openEvent = false;
-  const classes = useStyles();
+  const dialogClasses = useStyles();
   const {
     id,
     title,
@@ -136,78 +153,106 @@ export const Modal = (props: DialogProps): JSX.Element => {
    * @param { TypeModalProps } modal the object with modal properties
    * @returns { JSX.Element } JSX for the newly created / updated modal
    */
-  const ceatedModalJSXReturner = (modal: TypeModalProps) => (
-    <Dialog
-      open={openEvent}
-      onClose={modal.close}
-      container={document.querySelector(`#${modal.mapId}`)}
-      className={`${classes.dialog} ${className && className}`}
-      aria-labelledby={props["aria-labelledby"]}
-      aria-describedby={props["aria-describedby"]}
-      fullScreen={fullScreen}
-      BackdropProps={{ classes: { root: classes.backdrop } }}
-    >
-      <div
-        className={`${classes.modalTitleContainer} ${
-          modal.header?.title || classes.modalTitleActions
-        }`}
+  const ceatedModalJSXReturner = (modal: TypeModalProps): JSX.Element => {
+    const CustomDialog = withStyles({
+      dialogContent: {
+        width: modal.width,
+        height: modal.height,
+        maxWidth: "none",
+      },
+    })(({ classes }: { classes: ClassNameMap }) => (
+      <Dialog
+        open={openEvent}
+        onClose={modal.close}
+        container={document.querySelector(`#${modal.mapId}`)}
+        className={`${dialogClasses.dialog} ${className && className}`}
+        classes={{
+          paper: classes.dialogContent,
+        }}
+        aria-labelledby={props["aria-labelledby"]}
+        aria-describedby={props["aria-describedby"]}
+        fullScreen={fullScreen}
+        BackdropProps={{ classes: { root: dialogClasses.backdrop } }}
       >
-        {modal.header?.title ? (
-          <DialogTitle>{modal.header?.title}</DialogTitle>
-        ) : null}
-        {modal.header?.actions !== undefined &&
-        modal.header?.actions.length >= 1 ? (
-          <div className={classes.headerActionsContainer}>
-            {modal.header?.actions.map((action) => {
-              if (typeof action.content === "string") {
-                return (
-                  <div
-                    key={action.id}
-                    id={action.id}
-                    dangerouslySetInnerHTML={{
-                      __html: `${action.content}`,
-                    }}
-                  ></div>
-                );
-              } else return action.content;
-            })}
-            <IconButton id={`${id}-close-button`} onClick={modal.close}>
+        <div className={dialogClasses.modalTitleContainer}>
+          {modal.header?.title ? (
+            <DialogTitle className={dialogClasses.modalTitleLabel}>
+              {modal.header?.title}
+            </DialogTitle>
+          ) : null}
+          <div className={dialogClasses.modalTitleActions}>
+            {modal.header?.actions !== undefined &&
+            modal.header?.actions.length >= 1 ? (
+              <div className={dialogClasses.headerActionsContainer}>
+                {modal.header?.actions.map((action) => {
+                  if (typeof action.content === "string") {
+                    return (
+                      <Fragment key={action.id}>
+                        <HtmlToReact
+                          extraOptions={{
+                            id: action.id,
+                          }}
+                          htmlContent={action.content}
+                        />
+                      </Fragment>
+                    );
+                  } else
+                    return (
+                      <Fragment key={action.id}>{action.content}</Fragment>
+                    );
+                })}
+              </div>
+            ) : null}
+            <IconButton
+              id={`${id}-close-button`}
+              tooltip={t("close")}
+              tooltipPlacement="right"
+              onClick={modal.close}
+              className={classes.headerActionsContainer}
+            >
               <CloseIcon />
             </IconButton>
           </div>
+        </div>
+        <DialogContent>
+          <div
+            id={contentTextId}
+            className={`${dialogClasses.content} ${
+              contentTextClassName && contentTextClassName
+            }`}
+            style={contentTextStyle}
+          >
+            {typeof modal.content === "string" ? (
+              <HtmlToReact htmlContent={modal.content} />
+            ) : (
+              modal.content
+            )}
+          </div>
+        </DialogContent>
+        {modal.footer?.actions && modal.footer?.actions.length >= 1 ? (
+          <DialogActions>
+            {modal.footer?.actions.map((action) => {
+              if (typeof action.content === "string") {
+                return (
+                  <Fragment key={action.id}>
+                    <HtmlToReact
+                      extraOptions={{
+                        id: action.id,
+                      }}
+                      htmlContent={action.content}
+                    />
+                  </Fragment>
+                );
+              } else
+                return <Fragment key={action.id}>{action.content}</Fragment>;
+            }) || null}
+          </DialogActions>
         ) : null}
-      </div>
-      <DialogContent>
-        <div
-          id={contentTextId}
-          className={`${classes.content} ${
-            contentTextClassName && contentTextClassName
-          }`}
-          style={contentTextStyle}
-          dangerouslySetInnerHTML={{
-            __html: `${modal.content}`,
-          }}
-        ></div>
-      </DialogContent>
-      {modal.footer?.actions && modal.footer?.actions.length >= 1 ? (
-        <DialogActions>
-          {modal.footer?.actions.map((action) => {
-            if (typeof action.content === "string") {
-              return (
-                <div
-                  key={action.id}
-                  id={action.id}
-                  dangerouslySetInnerHTML={{
-                    __html: `${action.content}`,
-                  }}
-                ></div>
-              );
-            } else return action.content;
-          }) || null}
-        </DialogActions>
-      ) : null}
-    </Dialog>
-  );
+      </Dialog>
+    ));
+
+    return <CustomDialog />;
+  };
 
   useEffect(() => {
     // to open the modal
@@ -230,6 +275,9 @@ export const Modal = (props: DialogProps): JSX.Element => {
       (args) => {
         if (id === args.id && args.handlerName === mapId) {
           const modal = api.map(mapId).modal.modals[args.id] as TypeModalProps;
+
+          console.log(modal.content);
+
           setCreatedModal(ceatedModalJSXReturner(modal));
         }
       },
@@ -243,7 +291,10 @@ export const Modal = (props: DialogProps): JSX.Element => {
         if (id === args.id && args.handlerName === mapId) {
           if (!args.open) openEvent = false;
           setCreatedModal(
-            <Dialog open={openEvent} className={classes.closedModal}></Dialog>
+            <Dialog
+              open={openEvent}
+              className={dialogClasses.closedModal}
+            ></Dialog>
           );
         }
       },
@@ -255,20 +306,20 @@ export const Modal = (props: DialogProps): JSX.Element => {
       api.event.off(EVENT_NAMES.EVENT_MODAL_CLOSE, mapId);
       api.event.off(EVENT_NAMES.EVENT_MODAL_UPDATE, mapId);
     };
-  }, [updateModal]);
+  }, [updateModal, createdModal]);
 
   return createdModal ? (
     createdModal
   ) : (
     <Dialog
       open={open || openEvent}
-      className={`${classes.dialog} ${className && className}`}
+      className={`${dialogClasses.dialog} ${className && className}`}
       style={{ ...style, position: "absolute" }}
       aria-labelledby={props["aria-labelledby"]}
       aria-describedby={props["aria-describedby"]}
       fullScreen={fullScreen}
       BackdropProps={{
-        classes: { root: classes.backdrop },
+        classes: { root: dialogClasses.backdrop },
       }}
       container={container}
     >
@@ -276,7 +327,7 @@ export const Modal = (props: DialogProps): JSX.Element => {
       <DialogContent className={contentClassName} style={contentStyle}>
         <div
           id={contentTextId}
-          className={`${classes.content} ${
+          className={`${dialogClasses.content} ${
             contentTextClassName && contentTextClassName
           }`}
           style={contentTextStyle}

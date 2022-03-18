@@ -39,28 +39,34 @@ interface modalFooter {
  */
 export type TypeModalProps = {
   // id of the modal. Must be unique. If not provided, it will be generated
-  id?: string | undefined;
+  id?: string;
 
   // header of modal. Contains heading (title) of modal and/or action buttons, if provided. If header is not provided, modal will have no header content
-  header?: modalHeader | undefined;
+  header?: modalHeader;
 
   // content (description) of the modal. The HTML passed will be displayed inside a <div> element
-  content: string | undefined;
+  content: string;
 
   // footer object for the modal. Can contain buttons list as an array of JSX elements. If none provided, there will be no action buttons or footer
-  footer?: modalFooter | undefined;
+  footer?: modalFooter;
 
   // boolean condition to check if modal is active (open) or not
-  active?: boolean | undefined;
+  active?: boolean;
 
   // function that opens a modal
-  open?: TypeFunction | undefined;
+  open?: TypeFunction;
 
   // function that closes a modal
-  close?: TypeFunction | undefined;
+  close?: TypeFunction;
 
   // the id of map whose modal is generated
   mapId?: string;
+
+  // width of the modal
+  width?: string | number;
+
+  // height of the modal
+  height?: string | number;
 };
 
 /**
@@ -69,12 +75,14 @@ export type TypeModalProps = {
  * @class ModalModel
  */
 class ModalModel {
-  id?: string | undefined;
-  header?: modalHeader | undefined;
-  content: string | undefined;
-  footer?: modalFooter | undefined;
-  active?: boolean | undefined;
+  id?: string;
+  header?: modalHeader;
+  content: string;
+  footer?: modalFooter;
+  active?: boolean;
   mapId?: string;
+  width?: string | number;
+  height?: string | number;
 
   /**
    * constructor to initiate the modal properties
@@ -82,12 +90,7 @@ class ModalModel {
    * @param { string } content is the body copy (description) of the modal
    */
   constructor(content: string) {
-    this.id = undefined;
-    this.header = undefined;
     this.content = content;
-    this.footer = undefined;
-    this.active = undefined;
-    this.mapId = undefined;
   }
 
   /**
@@ -122,10 +125,17 @@ class ModalModel {
    */
   update = (modal: TypeModalProps): void => {
     this.id = modal.id || this.id;
-    this.header!.title = modal.header?.title || this.header?.title;
-    this.header!.actions = modal.header?.actions || this.header?.actions;
+
+    if (this.header) {
+      if (this.header.title)
+        this.header.title = modal.header?.title || this.header.title;
+      if (this.header.actions)
+        this.header.actions = modal.header?.actions || this.header?.actions;
+    }
     this.content = modal.content || this.content;
     this.footer = modal.footer || this.footer;
+    this.width = modal.width || this.width;
+    this.height = modal.height || this.height;
     this.reRender();
   };
 
@@ -233,7 +243,12 @@ export class ModalApi {
     this.modals[id].header = modal.header || this.modals[id].header;
     this.modals[id].content = modal.content;
     this.modals[id].footer = modal.footer || this.modals[id].footer;
-    api.event.emit(EVENT_NAMES.EVENT_MODAL_CREATE, this.mapId, {});
+    this.modals[id].width = modal.width || this.modals[id].width;
+    this.modals[id].height = modal.height || this.modals[id].height;
+
+    api.event.emit(EVENT_NAMES.EVENT_MODAL_CREATE, this.mapId, {
+      id,
+    });
   };
 
   /**
