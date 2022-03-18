@@ -13,10 +13,10 @@ const w = window as any;
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
 const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
-  const { layers, language } = props;
+  const { mapId, layers, language } = props;
 
   const cgpv = w["cgpv"];
-  const { mui, ui, react } = cgpv;
+  const { mui, ui, react, api } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState("");
   const [layerLegend, setLayerLegend] = useState({});
@@ -24,15 +24,18 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const [layerVisibility, setLayerVisibility] = useState({});
 
   const { Slider, Tooltip, Checkbox } = mui;
+  const { Button } = ui.elements;
 
   const translations: TypeProps<TypeProps<any>> = {
     "en-CA": {
+      removeLayer: "Remove Layer",
       opacity: "Adjust Opacity",
       visibility: "Toggle Visibility",
     },
     "fr-CA": {
+      removeLayer: "Supprimer la Couche",
       opacity: "Ajuster l'opacité",
-      visibility: "Basculer la visibilité",
+      visibility: "Basculer la Visibilité",
     },
   };
 
@@ -80,7 +83,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     layerItemGroup: {
       paddingBottom: 12,
     },
-    sliderGroup: {
+    flexGroup: {
       display: "flex",
       justifyContent: "flex-end",
       alignItems: "baseline",
@@ -89,6 +92,15 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       width: "100%",
       paddingLeft: 20,
       paddingRight: 20,
+    },
+    removeLayerButton: {
+      height: 38,
+      minHeight: 38,
+      width: 25,
+      minWidth: 25,
+      "& > div": {
+        textAlign: "center",
+      },
     },
   }));
 
@@ -145,6 +157,14 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   };
 
   /**
+   * Removes selcted layer from map
+   *
+   * @param layer layer config
+   */
+  const onRemove = (layer: TypeLayerData) =>
+    api.map(mapId).layer.removeLayer(layer);
+
+  /**
    * Adjusts layer opacity when slider is moved
    *
    * @param value slider opacity value (0-100)
@@ -172,93 +192,100 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     <div className={classes.layersContainer}>
       {Object.values(layers).map((layer) => (
         <div key={layer.id}>
-          <>
-            <button
-              type="button"
-              className={classes.layerItem}
-              onClick={() => onClick(layer.id)}
-            >
-              <div className={classes.layerCountTextContainer}>
-                <div className={classes.layerItemText} title={layer.name}>
-                  {layer.name}
-                </div>
+          <button
+            type="button"
+            className={classes.layerItem}
+            onClick={() => onClick(layer.id)}
+          >
+            <div className={classes.layerCountTextContainer}>
+              <div className={classes.layerItemText} title={layer.name}>
+                {layer.name}
               </div>
-            </button>
-            {selectedLayer === layer.id && (
-              <>
-                <div className={classes.sliderGroup}>
-                  <Tooltip title={translations[language].opacity}>
-                    <i className="material-icons">contrast</i>
-                  </Tooltip>
-                  <div className={classes.slider}>
-                    <Slider
-                      size="small"
-                      value={layerOpacity[layer.id]}
-                      valueLabelDisplay="auto"
-                      onChange={(e) => onSliderChange(e.target.value, layer)}
-                    />
-                  </div>
-                  <Tooltip title={translations[language].visibility}>
-                    <Checkbox
-                      checked={layerVisibility[layer.id]}
-                      onChange={(e) =>
-                        onCheckboxChange(e.target.checked, layer)
-                      }
-                    />
-                  </Tooltip>
+            </div>
+          </button>
+          {selectedLayer === layer.id && (
+            <>
+              <div className={classes.flexGroup}>
+                <Button
+                  className={classes.removeLayerButton}
+                  tooltip={translations[language].removeLayer}
+                  tooltipPlacement="right"
+                  variant="contained"
+                  type="icon"
+                  icon='<i class="material-icons">remove</i>'
+                  onClick={() => onRemove(layer)}
+                />
+              </div>
+              <div className={classes.flexGroup}>
+                <Tooltip title={translations[language].opacity}>
+                  <i className="material-icons">contrast</i>
+                </Tooltip>
+                <div className={classes.slider}>
+                  <Slider
+                    size="small"
+                    value={layerOpacity[layer.id]}
+                    valueLabelDisplay="auto"
+                    onChange={(e) => onSliderChange(e.target.value, layer)}
+                  />
                 </div>
-                {layerLegend[layer.id].map((layer, index: number) => (
-                  <div key={index} className={classes.layerItemGroup}>
-                    {layer.legend && Object.values(layer.legend).length > 1 && (
-                      <div
-                        className={classes.layerItemText}
-                        title={layer.layerName}
-                      >
-                        {layer.layerName}
+                <Tooltip title={translations[language].visibility}>
+                  <Checkbox
+                    checked={layerVisibility[layer.id]}
+                    onChange={(e) => onCheckboxChange(e.target.checked, layer)}
+                  />
+                </Tooltip>
+              </div>
+              {layerLegend[layer.id].map((layer, index: number) => (
+                <div key={index} className={classes.layerItemGroup}>
+                  {layer.legend && Object.values(layer.legend).length > 1 && (
+                    <div
+                      className={classes.layerItemText}
+                      title={layer.layerName}
+                    >
+                      {layer.layerName}
+                    </div>
+                  )}
+                  {layer.drawingInfo?.renderer.type === "simple" &&
+                    layer.drawingInfo?.renderer.symbol.imageData && (
+                      <div className={classes.layerItemText}>
+                        <img
+                          src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
+                        />
+                        {layer.drawingInfo?.renderer.label || layer.name}
                       </div>
                     )}
-                    {layer.drawingInfo?.renderer.type === "simple" &&
-                      layer.drawingInfo?.renderer.symbol.imageData && (
-                        <div className={classes.layerItemText}>
-                          <img
-                            src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
-                          />
-                          {layer.drawingInfo?.renderer.label || layer.name}
-                        </div>
-                      )}
-                    {layer.drawingInfo?.renderer.type === "uniqueValue" &&
-                      layer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
-                        .imageData &&
-                      layer.drawingInfo?.renderer.uniqueValueInfos.map(
-                        (uniqueValue, index) => (
-                          <div key={index} className={classes.layerItemText}>
-                            <img
-                              src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
-                            />
-                            {uniqueValue.label}
-                          </div>
-                        )
-                      )}
-                    {layer.legend &&
-                      layer.legend.map((uniqueValue, index) => (
+                  {layer.drawingInfo?.renderer.type === "uniqueValue" &&
+                    layer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
+                      .imageData &&
+                    layer.drawingInfo?.renderer.uniqueValueInfos.map(
+                      (uniqueValue, index) => (
                         <div key={index} className={classes.layerItemText}>
                           <img
-                            src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`}
+                            src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
                           />
-                          {uniqueValue.label || layer.layerName}
+                          {uniqueValue.label}
                         </div>
-                      ))}
-                    {layer.dataUrl && (
-                      <div className={classes.layerItemText}>
-                        <img src={layer.dataUrl} />
-                        {layer.name}
-                      </div>
+                      )
                     )}
-                  </div>
-                ))}
-              </>
-            )}
-          </>
+                  {layer.legend &&
+                    layer.legend.map((uniqueValue, index) => (
+                      <div key={index} className={classes.layerItemText}>
+                        <img
+                          src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`}
+                        />
+                        {uniqueValue.label || layer.layerName}
+                      </div>
+                    ))}
+                  {layer.dataUrl && (
+                    <div className={classes.layerItemText}>
+                      <img src={layer.dataUrl} />
+                      {layer.name}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       ))}
     </div>

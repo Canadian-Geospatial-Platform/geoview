@@ -111,7 +111,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.id);
+        this.removeLayerById(payload.layer.id);
       },
       this.#map.id
     );
@@ -227,6 +227,19 @@ export class Layer {
     // eslint-disable-next-line no-param-reassign
     layer.id = generateId(layer.id);
     api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#map.id, { layer });
+
+    return layer.id;
+  };
+
+  /**
+   * Remove a layer from the map
+   *
+   * @param {TypeLayerConfig} layer the layer configuration to remove
+   */
+  removeLayer = (layer: TypeLayerConfig): string => {
+    // eslint-disable-next-line no-param-reassign
+    layer.id = generateId(layer.id);
+    api.event.emit(EVENT_NAMES.EVENT_REMOVE_LAYER, this.#map.id, { layer });
 
     return layer.id;
   };
