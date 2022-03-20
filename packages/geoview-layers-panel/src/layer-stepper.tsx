@@ -2,6 +2,10 @@ interface Props {
   mapId: string;
   setAddLayerVisible: Function;
 }
+interface ButtonProps {
+  isFirst?: boolean;
+  isLast?: boolean;
+}
 
 type LayerList = [string, string][];
 type EsriOptions = {
@@ -44,7 +48,7 @@ const esriOptions = (type: string): EsriOptions => {
  *
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
-const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
+const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   const cgpv = w["cgpv"];
   const { api, react, ui, mui } = cgpv;
 
@@ -255,6 +259,8 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const layerConfig = { name, type: layerType, url, entries };
       api.map(mapId).layer.addLayer(layerConfig);
       setAddLayerVisible(false);
+      handleInput({ target: { value: "" } });
+      setActiveStep(-1);
     }
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
   };
@@ -317,7 +323,10 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * @param param0 specify if button is first or last in the list
    * @returns {JSX.Element} React component
    */
-  const NavButtons = ({ isFirst = false, isLast = false }): JSX.Element => (
+  const NavButtons = ({
+    isFirst = false,
+    isLast = false,
+  }: ButtonProps): JSX.Element => (
     <ButtonGroup
       className={classes.buttonGroup}
       children={
@@ -416,4 +425,4 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   );
 };
 
-export default AddLayerStepper;
+export default LayerStepper;

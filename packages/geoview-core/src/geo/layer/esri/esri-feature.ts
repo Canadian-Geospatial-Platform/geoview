@@ -113,4 +113,15 @@ export class EsriFeature {
       return res.data;
     });
   };
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.eachFeature((x) => {
+      if (x.setOpacity) x.setOpacity(opacity);
+      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+    });
+  };
 }

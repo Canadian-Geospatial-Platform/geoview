@@ -150,6 +150,7 @@ export function Shell(props: ShellProps): JSX.Element {
           layers={config.layers}
           basemapOptions={config.basemapOptions}
           plugins={config.plugins}
+          extraOptions={config.extraOptions}
         />
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />

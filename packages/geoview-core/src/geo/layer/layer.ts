@@ -3,6 +3,7 @@ import { Layer as leafletLayer } from "leaflet";
 import { EsriDynamic } from "./esri/esri-dynamic";
 import { EsriFeature } from "./esri/esri-feature";
 import { WMS } from "./ogc/wms";
+import { WFS } from "./ogc/wfs";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
 import { Vector } from "./vector/vector";
@@ -93,6 +94,12 @@ export class Layer {
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
+          } else if (layerConf.type === CONST_LAYER_TYPES.WFS) {
+            const wfsLayer = new WFS(layerConf);
+            wfsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+              wfsLayer.layer = layer;
+              this.addToMap(wfsLayer);
+            });
           }
         }
       },
@@ -104,7 +111,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.id);
+        this.removeLayerById(payload.layer.id);
       },
       this.#map.id
     );
@@ -220,6 +227,19 @@ export class Layer {
     // eslint-disable-next-line no-param-reassign
     layer.id = generateId(layer.id);
     api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#map.id, { layer });
+
+    return layer.id;
+  };
+
+  /**
+   * Remove a layer from the map
+   *
+   * @param {TypeLayerConfig} layer the layer configuration to remove
+   */
+  removeLayer = (layer: TypeLayerConfig): string => {
+    // eslint-disable-next-line no-param-reassign
+    layer.id = generateId(layer.id);
+    api.event.emit(EVENT_NAMES.EVENT_REMOVE_LAYER, this.#map.id, { layer });
 
     return layer.id;
   };

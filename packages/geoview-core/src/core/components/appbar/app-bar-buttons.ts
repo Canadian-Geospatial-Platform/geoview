@@ -51,15 +51,15 @@ export class AppbarButtons {
     // create default group for appbar button panels
     this.buttons.default = {};
 
-    // TODO: do not keep, just proof of concept
-    this.createAppbarPanel(
-      {
-        ...DefaultPanel.button,
-        tooltip: "Default",
-      },
-      DefaultPanel.panel,
-      "default"
-    );
+    // // TODO: do not keep, just proof of concept
+    // this.createAppbarPanel(
+    //   {
+    //     ...DefaultPanel.button,
+    //     tooltip: "Default",
+    //   },
+    //   DefaultPanel.panel,
+    //   "default"
+    // );
   };
 
   /**
@@ -149,6 +149,28 @@ export class AppbarButtons {
     }
 
     return null;
+  };
+
+  /**
+   * Get all created buttons panels regardless of group
+   *
+   * @returns {Record<string, TypeButtonPanels>} an object with all the button panels
+   */
+  getAllButtonPanels = (): Record<string, TypeButtonPanel> => {
+    let buttonPanels: Record<string, TypeButtonPanel> = {};
+
+    for (let i = 0; i < Object.keys(this.buttons).length; i++) {
+      const group = this.buttons[Object.keys(this.buttons)[i]];
+
+      // eslint-disable-next-line no-plusplus
+      for (let j = 0; j < Object.keys(group).length; j++) {
+        const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
+
+        buttonPanels[buttonPanel.id] = buttonPanel;
+      }
+    }
+
+    return buttonPanels;
   };
 
   /**

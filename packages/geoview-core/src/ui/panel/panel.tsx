@@ -27,21 +27,17 @@ import { IconButton, CloseIcon, Divider } from "..";
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 300,
-    width: 300,
+    width: 400,
     height: "100%",
-    marginLeft: theme.spacing(2),
     borderRadius: 0,
-    [theme.breakpoints.up("xl")]: {
-      width: "auto !important",
-      minWidth: 100,
-    },
+    flexDirection: "column",
     [theme.breakpoints.down("sm")]: {
       width: "100%",
       minWidth: "100%",
     },
   },
   cardContainer: {
-    height: "100%",
+    flexBasis: "auto",
     overflow: "hidden",
     overflowY: "auto",
     paddingBottom: "10px !important",
@@ -49,7 +45,14 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     color: theme.palette.primary.contrastText,
-    padding: theme.spacing(3, 7),
+    height: 50,
+    padding: 0,
+    paddingLeft: 10,
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  actionButton: {
+    margin: 0,
   },
   buttonIcon: {
     width: "1em",
@@ -127,6 +130,23 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
 
     setPanelStatus(false);
   }
+
+  // listen to change panel content and rerender right after the panel has been created
+  api.event.on(
+    EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
+    (args) => {
+      // set focus on close button on panel content change
+      setTimeout(() => {
+        if (closeBtnRef && closeBtnRef.current)
+          Cast<HTMLElement>(closeBtnRef.current).focus();
+      }, 100);
+
+      if (args.buttonId === button.id!) {
+        updateComponent();
+      }
+    },
+    mapId
+  );
 
   useEffect(() => {
     // if the panel was still open on reload then close it
@@ -213,23 +233,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       mapId
     );
 
-    // listen to change panel content and rerender
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
-      (args) => {
-        // set focus on close button on panel content change
-        setTimeout(() => {
-          if (closeBtnRef && closeBtnRef.current)
-            Cast<HTMLElement>(closeBtnRef.current).focus();
-        }, 100);
-
-        if (args.buttonId === button.id!) {
-          updateComponent();
-        }
-      },
-      mapId
-    );
-
     return () => {
       api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
@@ -257,7 +260,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         ref={panelRef as React.MutableRefObject<null>}
         className={`${classes.root}`}
         style={{
-          display: panelStatus ? "block" : "none",
+          display: panelStatus ? "flex" : "none",
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
@@ -268,6 +271,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       >
         <CardHeader
           className={classes.avatar}
+          classes={{ action: classes.actionButton }}
           ref={panelHeader}
           avatar={
             typeof panel.icon === "string" ? (
