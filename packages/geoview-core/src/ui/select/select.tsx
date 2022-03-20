@@ -1,4 +1,4 @@
-import { CSSProperties, Fragment, useState } from "react";
+import { CSSProperties, useState } from "react";
 
 import {
   FormControl,
@@ -48,7 +48,7 @@ interface TypeItemProps {
  */
 interface TypeSelectItems {
   category?: string;
-  item: TypeItemProps;
+  items: Array<TypeItemProps>;
 }
 
 /**
@@ -63,10 +63,10 @@ interface SelectProps {
   label: string;
 
   // the menu items (<option>) for <select>
-  selectItems?: Array<Record<string, TypeSelectItems>> | any;
-
-  // a placeholder that is disabled
-  placeholder?: string;
+  selectItems:
+    | Array<Record<string, TypeSelectItems>>
+    | Array<Record<string, TypeItemProps>>
+    | any;
 
   // callback that is passed for the select component
   callBack?: Function;
@@ -85,16 +85,14 @@ interface SelectProps {
  * @returns {JSX.Element} the created Select element
  */
 export const Select = (props: SelectProps): JSX.Element => {
+  const classes = useStyles();
   const [value, setValue] = useState("");
   const [multipleValue, setMultipleValue] = useState([]);
-  const [clickedDefault, setClickedDefault] = useState(false);
-
   const {
     className,
     style,
     id,
     label,
-    placeholder,
     selectItems,
     callBack,
     helperText,
@@ -109,7 +107,6 @@ export const Select = (props: SelectProps): JSX.Element => {
    */
   const changeHandler = (event: any) => {
     if (!multiple) setValue(event.target.value);
-
     if (multiple) {
       const {
         target: { value },
@@ -118,55 +115,30 @@ export const Select = (props: SelectProps): JSX.Element => {
     }
   };
 
-  /**
-   * Selects the default value
-   *
-   * @returns the default menu item
-   */
-  const defaultSelectJSXReturner = () => {
-    const item = selectItems.filter((item: any) => item.default);
-    if (item.length === 0) return;
-    return (
-      <MenuItem selected value={clickedDefault ? item[0].value : ""}>
-        {item[0].value}
-      </MenuItem>
-    );
-  };
-
   !multiple && typeof callBack === "function" && callBack(value);
   multiple && typeof callBack === "function" && callBack(multipleValue);
 
-  // let categories: any = [];
-  // selectItems.forEach((item: any) => {
-  //   categories.indexOf(item.category) === -1 &&
-  //     categories.push(
-  //       // { category: item.category }
-  //       item.category
-  //     );
-  // });
-  // console.log(categories);
+  const isGrouped = selectItems.some((item: any) => item.category);
 
-  // let categorizedSelectedItems: any = [];
-  // const categorizedSelectedItems = selectItems.map((item: any) => {
-  //   if (categories.includes(item.category))
-  //     return {
-  //       category: item.category,
-  //       data: item,
-  //     };
-  //   // return { `${item.category}`: item };
-  // });
-  // console.log(categorizedSelectedItems);
+  const isDefault = !isGrouped
+    ? selectItems.some((item: any) => item.default)
+    : selectItems.some((item: any) =>
+        item.items.some((item: any) => item.default)
+      );
 
-  // selectItems.sort((a: any, b: any) => {
-  //   if (a.category === b.category) return (a.category = b.category);
-  //   else return a.category - b.category;
-  // });
+  isGrouped &&
+    selectItems.forEach((item: any) => {
+      item.items.forEach((item: any) => {
+        if (value) return;
+        if (item.default) setValue(item.value);
+      });
+    });
 
-  // console.log(selectItems);
-
-  const isDefault = selectItems.some((item: any) => item.default);
-
-  const classes = useStyles();
+  !isGrouped &&
+    selectItems.forEach((item: any) => {
+      if (value) return;
+      if (item.default) setValue(item.value);
+    });
 
   return (
     <FormControl className={classes.formControl} {...otherProps}>
@@ -183,45 +155,28 @@ export const Select = (props: SelectProps): JSX.Element => {
         onChange={changeHandler}
         multiple={multiple || false}
         displayEmpty={true}
-        // defaultValue={"Option 3"}
-        onClick={() => setClickedDefault(true)}
       >
-        {placeholder ? (
-          <MenuItem disabled value="">
-            {placeholder}
-          </MenuItem>
-        ) : null}
-        {defaultSelectJSXReturner()}
-        {/* {selectItems.map(
-          (item: any, i: any) => {
-            !item.default && 
-              return (<>
-                <ListSubheader>{item.category}</ListSubheader>
-                {item.items.map((item: any) => (
-                  <MenuItem id={item.id} value={item.value}>
-                    {item.value}
-                  </MenuItem>
-                ))}
-              </>)
-                })} */}
-        {selectItems.map((item: any, i: any) => {
-          console.log(item);
-          return (
-            <div key={i}>
-              <ListSubheader>
-                {item.category ? item.category : "Others"}
-              </ListSubheader>
-              {item.items.map((item: any) => {
-                console.log(item);
-                return (
-                  <MenuItem key={item.id} value={item.value}>
-                    {item.value}
-                  </MenuItem>
+        {isGrouped
+          ? selectItems.map((item: any) => {
+              const options: JSX.Element[] = [];
+              if (item.category)
+                options.push(
+                  <ListSubheader>
+                    {item.category ? item.category : "Others"}
+                  </ListSubheader>
                 );
-              })}
-            </div>
-          );
-        })}
+              item.items.map((item: any) => {
+                options.push(
+                  <MenuItem value={item.value}>{item.value}</MenuItem>
+                );
+              });
+              return options;
+            })
+          : selectItems.map((item: any) => (
+              <MenuItem key={item.id} value={item.value}>
+                {item.value}
+              </MenuItem>
+            ))}
       </MaterialSelect>
       {helperText && <FormHelperText>{helperText}</FormHelperText>}
     </FormControl>

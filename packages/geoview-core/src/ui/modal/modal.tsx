@@ -257,11 +257,19 @@ export const Modal = (props: DialogProps): JSX.Element => {
     };
   }, [updateModal]);
 
-  const getValue = (value: any) => {
-    if (!value) return;
-    console.log(value);
-    return value;
+  // REMOVE START
+  const [enableNext, setEnableNext] = useState(false);
+  const [textFieldVal, setTextFieldVal] = useState("");
+
+  const changeHandler = (event: any) => {
+    setTextFieldVal(event.target.value);
   };
+
+  useEffect(() => {
+    if (textFieldVal.includes("@")) setEnableNext(true);
+    else setEnableNext(false);
+  });
+  // REMOVE END
 
   return createdModal ? (
     createdModal
@@ -287,42 +295,38 @@ export const Modal = (props: DialogProps): JSX.Element => {
           }`}
           style={contentTextStyle}
         >
-          <TextField
-            id="text-1"
-            label="Test label"
-            placeholder="this is placeholder"
-            callBack={getValue}
-            suffix={
-              <IconButton>
-                <CloseIcon></CloseIcon>
-              </IconButton>
-            }
-          ></TextField>
-
-          <Select
+          {/* <Select
             id="Select-1"
             label="Select any one"
-            // callBack={getValue}
-            // placeholder="this is placeholder"
             selectItems={[
               {
-                category: "yo",
+                category: "Cat 1",
                 items: [
                   { id: "option-1", value: "Option 1" },
-                  { id: "option-4", value: "Option 4" },
+                  { id: "option-1a", value: "Option 1a" },
                 ],
               },
               {
-                category: "wassup",
-                items: [{ id: "option-2", value: "Option 2" }],
+                category: "Cat 2",
+                items: [{ id: "option-2", value: "Option 2", default: true }],
               },
               {
-                category: "lmao",
+                category: "Cat 3",
                 items: [{ id: "option-3", value: "Option 3" }],
               },
-              { items: [{ id: "option-5", value: "Option 5" }] },
+              {
+                category: "Cat 4",
+                items: [{ id: "option-4", value: "Option 4" }],
+              },
             ]}
-          ></Select>
+            // selectItems={[
+            //   { id: "option-1", value: "Option 1" },
+            //   { id: "option-2", value: "Option 2" },
+            //   { id: "option-3", value: "Option 3" },
+            //   { id: "option-4", value: "Option 4" },
+            //   { id: "option-5", value: "Option 5" },
+            // ]}
+          ></Select> */}
 
           <Stepper
             id="stepper-1"
@@ -332,18 +336,36 @@ export const Modal = (props: DialogProps): JSX.Element => {
                 description:
                   "<button>First button</button><p>Test of <strong>boldness</strong> with a <a href='#'>link</a>.</p>",
               },
-              { label: "2nd Step", description: "Container for Second Step" },
-              { label: "3rd Step", description: "<h3>Third heading</h3>" },
+              {
+                disableStepMovement: false,
+                label: "2nd Step",
+                description: "Container for Second Step",
+              },
+              {
+                disableStepMovement: !enableNext,
+                label: "3rd Step",
+                description: (
+                  <TextField
+                    id="id"
+                    label="Text Label"
+                    value={textFieldVal}
+                    changeHandler={changeHandler}
+                    required
+                  ></TextField>
+                  //   <input
+                  //     type="text"
+                  //     onChange={(e) =>
+                  //       e.target.value.includes("@") &&
+                  //       e.target.value.includes(".") &&
+                  //       setEnableNext(true)
+                  //     }
+                  //   />
+                ),
+              },
             ]}
-            // orientation="vertical"
-            // buttonedLabels
-            nonLinear
-            // alternativeLabel={true}
-            // orientation="horizontal"
-            // buttonedLabels not working
-            // buttonedLabels
-            // alternativeLabel
+            orientation="vertical"
           ></Stepper>
+
           {content}
         </div>
       </DialogContent>

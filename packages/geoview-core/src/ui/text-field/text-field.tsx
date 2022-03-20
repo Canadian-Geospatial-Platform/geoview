@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from "react";
+import React, { CSSProperties } from "react";
 
 import {
   BaseTextFieldProps,
@@ -44,11 +44,14 @@ interface TextFieldProps extends BaseTextFieldProps {
   // the HTML Element (for example, an icon) that is embedded inside the text field (right side)
   suffix?: string | JSX.Element | HTMLElement | undefined;
 
-  // callback function for this component
-  callBack?: Function;
+  // Function that handles change in input
+  changeHandler?: Function;
 
-  // ref for this component
-  inputRef?: React.RefObject<any> | null | undefined;
+  // Event Listener for value change in input
+  onChange?: EventListener | any;
+
+  // Value to be shown in the TextField
+  value?: string | null | undefined;
 }
 
 /**
@@ -58,7 +61,6 @@ interface TextFieldProps extends BaseTextFieldProps {
  * @returns {JSX.Element} the created TextField element
  */
 export const TextField = (props: TextFieldProps): JSX.Element => {
-  const [value, setValue] = useState("");
   const classes = useStyles();
 
   const {
@@ -71,20 +73,10 @@ export const TextField = (props: TextFieldProps): JSX.Element => {
     prefix,
     suffix,
     inputRef,
-    callBack,
+    value,
+    changeHandler,
     ...otherProps
   } = props;
-
-  /**
-   * Handles the change that is made to the text field
-   *
-   * @param event the text input event
-   */
-  const changeHandler = (event: any) => {
-    setValue(event.target.value);
-  };
-
-  typeof callBack === "function" && callBack(value);
 
   return (
     <MaterialTextField

@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
+import { TypeChildren } from "../../app";
 import { Button } from "../button";
 
 const useStyles = makeStyles((theme) => ({
@@ -56,6 +57,8 @@ const useStyles = makeStyles((theme) => ({
 interface TypeStepperSteps {
   label?: string;
   description: JSX.Element | HTMLElement | string;
+  disableStepMovement?: boolean;
+  condition?: TypeChildren;
 }
 
 /**
@@ -101,6 +104,7 @@ interface StepperProps {
 export const Stepper = (props: StepperProps): JSX.Element => {
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<any>({});
+  const [isReset, setIsReset] = useState<any>(false);
   const classes = useStyles();
   const {
     className,
@@ -154,10 +158,22 @@ export const Stepper = (props: StepperProps): JSX.Element => {
           ? // find the first step that has been completed
             steps.findIndex((step: any, i: any) => !(i in completed))
           : activeStep + 1;
+
+      if (allStepsCompleted() && newActiveStep !== totalSteps()) {
+        setIsReset(true);
+      }
+
+      if (nonLinear && newActiveStep === steps.length) {
+        setIsReset(true);
+      }
       setActiveStep(newActiveStep);
     }
 
     !nonLinear && setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
+    if (!nonLinear && activeStep === steps.length - 1) {
+      setIsReset(true);
+    }
   };
 
   /**
@@ -174,6 +190,9 @@ export const Stepper = (props: StepperProps): JSX.Element => {
     setActiveStep(stepIndex);
   };
 
+  /**
+   * When the complete step button is clicked to mark it as complete
+   */
   const handleComplete = () => {
     const newCompleted: any = completed;
     newCompleted[activeStep] = true;
@@ -187,10 +206,17 @@ export const Stepper = (props: StepperProps): JSX.Element => {
   const handleReset = () => {
     setActiveStep(0);
     setCompleted({});
+    setIsReset(false);
   };
 
   const stepsOrientation =
     orientation !== undefined ? orientation : "horizontal";
+
+  const disabledStepMovement = steps.findIndex(
+    (step: any) => step.disableStepMovement
+  );
+
+  const stepIsDisabled = activeStep === disabledStepMovement;
 
   return (
     <Box>
@@ -246,11 +272,9 @@ export const Stepper = (props: StepperProps): JSX.Element => {
         <Box className={classes.actionContainer}>
           <>
             <Typography>
-              {activeStep === steps.length
-                ? "Steps Completed"
-                : `Step ${activeStep + 1}`}
+              {isReset ? "Steps Completed" : `Step ${activeStep + 1}`}
             </Typography>
-            {activeStep === steps.length || (
+            {!isReset && (
               <>
                 <Button
                   type="text"
@@ -260,7 +284,13 @@ export const Stepper = (props: StepperProps): JSX.Element => {
                 >
                   {backButtonText ? backButtonText : "Back"}
                 </Button>
-                <Button type="text" onClick={handleNext}>
+
+                <Button
+                  type="text"
+                  onClick={handleNext}
+                  disabled={stepIsDisabled}
+                  className={stepIsDisabled ? classes.disabledButton : ""}
+                >
                   {nextButtonText ? nextButtonText : "Next"}
                 </Button>
 
@@ -282,7 +312,7 @@ export const Stepper = (props: StepperProps): JSX.Element => {
                   ))}
               </>
             )}
-            {activeStep === steps.length && (
+            {isReset && (
               <Button type="text" onClick={handleReset}>
                 {resetButtonText ? resetButtonText : "Reset"}
               </Button>
