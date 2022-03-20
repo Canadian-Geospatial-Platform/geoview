@@ -21,11 +21,11 @@ A component that can be used to create an `<input>` element.
   - _suffix_: the HTML Element (for example, an icon) that is embedded inside the text field (right side)
   - _changeHandler_: the function that handles change in input
   - _onChange_: event listener for value change in input
-  - _value_: default value to be shown in the `` element when it is renderd.
+  - _value_: default value to be shown in the `<input>` element when it is renderd
 
 ## Props
 
-The custom TextField takes all of the props defined under BaseTextFieldProps by MUI. Plus a few props to make it more customizable. Some of the commonly used props are defind below:
+The custom TextField takes all of the props defined under BaseTextFieldProps by MUI. Plus a few props to make it more customizable. Some of the commonly used props are defined below:
 
 - ### `id`:
 
@@ -61,4 +61,4 @@ The custom TextField takes all of the props defined under BaseTextFieldProps by 
 
 ## More information
 
-Refer to Material UI Stepper component and Stepper API for more information on props and how the HTML gets rendered from Stepper component. https://mui.com/components/steppers/ and https://mui.com/api/stepper/
+Refer to Material UI TextField component and TextField API for more information on props and how the HTML gets rendered from TextField component. https://mui.com/components/text-fields/ and https://mui.com/api/text-field/
