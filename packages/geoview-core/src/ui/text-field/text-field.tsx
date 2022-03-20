@@ -29,12 +29,6 @@ interface TextFieldProps extends BaseTextFieldProps {
   className?: string;
   style?: CSSProperties;
 
-  // the helper text that goes right under the text field. It is mostly used to show warnings/errors
-  helperText?: string | JSX.Element | HTMLElement | undefined;
-
-  // if there is an error or not
-  error?: boolean;
-
   // the helper text (as defined above) but only if there is an error
   errorHelpertext?: string | undefined;
 

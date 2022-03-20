@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
-import { TypeChildren } from "../../app";
 import { Button } from "../button";
 
 const useStyles = makeStyles((theme) => ({
@@ -55,10 +54,14 @@ const useStyles = makeStyles((theme) => ({
  * Properties for the Steps of Stepper
  */
 interface TypeStepperSteps {
+  // the text label for the step
   label?: string;
+
+  // the body of the step
   description: JSX.Element | HTMLElement | string;
+
+  // whether the user is allowed to move to the next step or not
   disableStepMovement?: boolean;
-  condition?: TypeChildren;
 }
 
 /**
