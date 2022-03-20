@@ -1,5 +1,4 @@
 {
   "editor.detectIndentation": false,
-  "editor.renderWhitespace": "all",
-  "git.ignoreLimitWarning": true
+  "editor.renderWhitespace": "all"
 }
