@@ -224,4 +224,15 @@ export class WFS {
   getCapabilities = (): TypeJSONObjectLoop => {
     return this.#capabilities;
   };
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.getLayers().forEach((x) => {
+      if (x.setOpacity) x.setOpacity(opacity);
+      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.8 });
+    });
+  };
 }
