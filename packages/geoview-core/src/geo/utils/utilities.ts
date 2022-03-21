@@ -1,7 +1,12 @@
+import axios from "axios";
 import WMSCapabilities from "wms-capabilities";
 
-import { Cast, TypeCSSStyleDeclaration } from "../../core/types/cgpv-types";
-import { getXMLHttpRequest } from "../../core/utils/utilities";
+import {
+  Cast,
+  TypeCSSStyleDeclaration,
+  TypeJSONObjectLoop,
+} from "../../core/types/cgpv-types";
+import { getXMLHttpRequest, xmlToJson } from "../../core/utils/utilities";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
@@ -43,6 +48,24 @@ export class GeoUtilities {
     const result = new WMSCapabilities(response).toJSON();
 
     return result;
+  };
+
+  /**
+   * Fetch the json response from the XML response of a WFS getCapabilities request
+   * @function getWFSServiceMetadata
+   * @param {string} url the url of the WFS server
+   * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   */
+  getWFSServiceMetadata = async (
+    url: string
+  ): Promise<Record<string, unknown>> => {
+    const res = await axios.get(url, {
+      params: { request: "getcapabilities", service: "WFS" },
+    });
+    var xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
+    const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
+    const capabilities = json["wfs:WFS_Capabilities"];
+    return capabilities;
   };
 
   /**
