@@ -113,6 +113,7 @@ export const CONST_LAYER_TYPES = {
   ESRI_FEATURE: "esriFeature",
   XYZ_TILES: "xyzTiles",
   WFS: "ogcWFS",
+  OGC_FEATURE: "ogcFeature",
 };
 
 /**
@@ -268,7 +269,8 @@ export type TypeLayerData = {
     | "esriDynamic"
     | "esriFeature"
     | "xyzTiles"
-    | "ogcWFS";
+    | "ogcWFS"
+    | "ogcFeature";
   name: string;
   url: string;
   entries: string[];
