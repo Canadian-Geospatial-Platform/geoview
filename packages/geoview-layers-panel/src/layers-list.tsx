@@ -1,23 +1,43 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps, TypeLayerData } from "geoview-core";
+import {
+  TypeLayersPanelListProps,
+  TypeLayerData,
+  TypeProps,
+} from "geoview-core";
 
 const w = window as any;
 
 /**
  * A react component that will list the map server layers defined in the map config
- * @param {TypeLayersListProps} props properties passed to the component
+ * @param {TypeLayersPanelListProps} props properties passed to the component
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
-const LayersList = (props: TypeLayersListProps): JSX.Element => {
-  const { layersData } = props;
+const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
+  const { mapId, layers, language } = props;
 
   const cgpv = w["cgpv"];
-  const { mui, ui, react, leaflet } = cgpv;
+  const { mui, ui, react, api } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState("");
-  const [sliderPosition, setSliderPosition] = useState({});
+  const [layerLegend, setLayerLegend] = useState({});
+  const [layerOpacity, setLayerOpacity] = useState({});
+  const [layerVisibility, setLayerVisibility] = useState({});
 
-  const { Slider } = mui;
+  const { Slider, Tooltip, Checkbox } = mui;
+  const { Button } = ui.elements;
+
+  const translations: TypeProps<TypeProps<any>> = {
+    "en-CA": {
+      removeLayer: "Remove Layer",
+      opacity: "Adjust Opacity",
+      visibility: "Toggle Visibility",
+    },
+    "fr-CA": {
+      removeLayer: "Supprimer la Couche",
+      opacity: "Ajuster l'opacité",
+      visibility: "Basculer la Visibilité",
+    },
+  };
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
@@ -63,23 +83,65 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
     layerItemGroup: {
       paddingBottom: 12,
     },
-    sliderGroup: {
+    flexGroup: {
       display: "flex",
+      justifyContent: "flex-end",
+      alignItems: "baseline",
     },
     slider: {
       width: "100%",
       paddingLeft: 20,
       paddingRight: 20,
     },
+    removeLayerButton: {
+      height: 38,
+      minHeight: 38,
+      width: 25,
+      minWidth: 25,
+      "& > div": {
+        textAlign: "center",
+      },
+    },
   }));
 
+  /**
+   * Calls setLayerLegend for all layers
+   */
+  const setLayerLegends = async () => {
+    for (const layer of Object.values(layers)) {
+      if (layer.getLegendGraphic) {
+        const dataUrl = await layer.getLegendGraphic();
+        const name = layer.url.includes("/MapServer") ? layer.name : "";
+        const legend = [{ name, dataUrl }];
+        setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
+      } else if (layer.getLegendJson) {
+        const legend = await layer.getLegendJson();
+        const legendArray = Array.isArray(legend) ? legend : [legend];
+        setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
+      }
+    }
+  };
+
   useEffect(() => {
-    const defaultSliders = Object.values(layersData).reduce(
+    const defaultLegends = Object.values(layers).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: [] }),
+      {}
+    );
+    setLayerLegend((state) => ({ ...defaultLegends, ...state }));
+    setLayerLegends();
+
+    const defaultSliders = Object.values(layers).reduce(
       (prev, curr) => ({ ...prev, [curr.id]: 100 }),
       {}
     );
-    setSliderPosition((state) => ({ ...defaultSliders, ...state }));
-  }, [layersData]);
+    setLayerOpacity((state) => ({ ...defaultSliders, ...state }));
+
+    const defaultVisibility = Object.values(layers).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: true }),
+      {}
+    );
+    setLayerVisibility((state) => ({ ...defaultVisibility, ...state }));
+  }, [layers]);
 
   const classes = useStyles();
 
@@ -95,103 +157,135 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
   };
 
   /**
+   * Removes selcted layer from map
+   *
+   * @param layer layer config
+   */
+  const onRemove = (layer: TypeLayerData) =>
+    api.map(mapId).layer.removeLayer(layer);
+
+  /**
    * Adjusts layer opacity when slider is moved
    *
    * @param value slider opacity value (0-100)
    * @param data Layer data
    */
   const onSliderChange = (value: number, data: TypeLayerData) => {
-    setSliderPosition((state) => ({ ...state, [data.id]: value }));
-    data.layer.setOpacity(value / 100);
+    setLayerOpacity((state) => ({ ...state, [data.id]: value }));
+    const opacity = layerVisibility[data.id] ? value / 100 : 0;
+    data.setOpacity(opacity);
+  };
+
+  /**
+   * Adjusts layer visibility when checkbox is toggled
+   *
+   * @param value checkbox boolean
+   * @param data Layer data
+   */
+  const onCheckboxChange = (value: number, data: TypeLayerData) => {
+    setLayerVisibility((state) => ({ ...state, [data.id]: value }));
+    const opacity = value ? layerOpacity[data.id] / 100 : 0;
+    data.setOpacity(opacity);
   };
 
   return (
     <div className={classes.layersContainer}>
-      {Object.values(layersData).map((data) => (
-        <div key={data.id}>
-          <>
-            <button
-              type="button"
-              className={classes.layerItem}
-              onClick={() => onClick(data.id)}
-            >
-              <div className={classes.layerCountTextContainer}>
-                <div className={classes.layerItemText} title={data.name}>
-                  {data.name}
-                </div>
+      {Object.values(layers).map((layer) => (
+        <div key={layer.id}>
+          <button
+            type="button"
+            className={classes.layerItem}
+            onClick={() => onClick(layer.id)}
+          >
+            <div className={classes.layerCountTextContainer}>
+              <div className={classes.layerItemText} title={layer.name}>
+                {layer.name}
               </div>
-            </button>
-            {selectedLayer === data.id && (
-              <>
-                {data.layer.setOpacity && (
-                  <div className={classes.sliderGroup}>
-                    <i className="material-icons">contrast</i>
-                    <div className={classes.slider}>
-                      <Slider
-                        size="small"
-                        value={sliderPosition[data.id]}
-                        valueLabelDisplay="auto"
-                        onChange={(e) => onSliderChange(e.target.value, data)}
-                      />
+            </div>
+          </button>
+          {selectedLayer === layer.id && (
+            <>
+              <div className={classes.flexGroup}>
+                <Button
+                  className={classes.removeLayerButton}
+                  tooltip={translations[language].removeLayer}
+                  tooltipPlacement="right"
+                  variant="contained"
+                  type="icon"
+                  icon='<i class="material-icons">remove</i>'
+                  onClick={() => onRemove(layer)}
+                />
+              </div>
+              <div className={classes.flexGroup}>
+                <Tooltip title={translations[language].opacity}>
+                  <i className="material-icons">contrast</i>
+                </Tooltip>
+                <div className={classes.slider}>
+                  <Slider
+                    size="small"
+                    value={layerOpacity[layer.id]}
+                    valueLabelDisplay="auto"
+                    onChange={(e) => onSliderChange(e.target.value, layer)}
+                  />
+                </div>
+                <Tooltip title={translations[language].visibility}>
+                  <Checkbox
+                    checked={layerVisibility[layer.id]}
+                    onChange={(e) => onCheckboxChange(e.target.checked, layer)}
+                  />
+                </Tooltip>
+              </div>
+              {layerLegend[layer.id].map((layer, index: number) => (
+                <div key={index} className={classes.layerItemGroup}>
+                  {layer.legend && Object.values(layer.legend).length > 1 && (
+                    <div
+                      className={classes.layerItemText}
+                      title={layer.layerName}
+                    >
+                      {layer.layerName}
                     </div>
-                  </div>
-                )}
-                {Object.values(data.layers).map(
-                  ({ layer, groupLayer }, index: number) => (
-                    <div key={index} className={classes.layerItemGroup}>
-                      {groupLayer ? (
-                        <div
-                          className={classes.layerParentText}
-                          title={layer.name}
-                        >
-                          {layer.name}
+                  )}
+                  {layer.drawingInfo?.renderer.type === "simple" &&
+                    layer.drawingInfo?.renderer.symbol.imageData && (
+                      <div className={classes.layerItemText}>
+                        <img
+                          src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
+                        />
+                        {layer.drawingInfo?.renderer.label || layer.name}
+                      </div>
+                    )}
+                  {layer.drawingInfo?.renderer.type === "uniqueValue" &&
+                    layer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
+                      .imageData &&
+                    layer.drawingInfo?.renderer.uniqueValueInfos.map(
+                      (uniqueValue, index) => (
+                        <div key={index} className={classes.layerItemText}>
+                          <img
+                            src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
+                          />
+                          {uniqueValue.label}
                         </div>
-                      ) : (
-                        <>
-                          {Object.values(data.layers).length > 1 && (
-                            <div
-                              className={classes.layerItemText}
-                              title={layer.name}
-                            >
-                              {layer.name}
-                            </div>
-                          )}
-                          {(layer.drawingInfo?.renderer.type === "simple" ||
-                            data.type === "geoJSON") && (
-                            <div className={classes.layerItemText}>
-                              <img
-                                src={
-                                  ["esriFeature", "geoJSON"].includes(data.type)
-                                    ? leaflet.Marker.prototype.options.icon
-                                        .options.iconUrl
-                                    : `data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`
-                                }
-                              />
-                              {layer.drawingInfo?.renderer.label || layer.name}
-                            </div>
-                          )}
-                          {layer.drawingInfo?.renderer.type === "uniqueValue" &&
-                            layer.drawingInfo?.renderer.uniqueValueInfos.map(
-                              (uniqueValue, index) => (
-                                <div
-                                  key={index}
-                                  className={classes.layerItemText}
-                                >
-                                  <img
-                                    src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
-                                  />
-                                  {uniqueValue.label}
-                                </div>
-                              )
-                            )}
-                        </>
-                      )}
+                      )
+                    )}
+                  {layer.legend &&
+                    layer.legend.map((uniqueValue, index) => (
+                      <div key={index} className={classes.layerItemText}>
+                        <img
+                          src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`}
+                        />
+                        {uniqueValue.label || layer.layerName}
+                      </div>
+                    ))}
+                  {layer.dataUrl && (
+                    <div className={classes.layerItemText}>
+                      <img src={layer.dataUrl} />
+                      {layer.name}
                     </div>
-                  )
-                )}
-              </>
-            )}
-          </>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
         </div>
       ))}
     </div>

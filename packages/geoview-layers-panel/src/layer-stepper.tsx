@@ -7,7 +7,7 @@ interface ButtonProps {
   isLast?: boolean;
 }
 
-type LayerList = [string, string][];
+type LayerList = [string, string];
 type EsriOptions = {
   err: string;
   capability: string;
@@ -23,6 +23,7 @@ const layerOptions = [
   ["esriFeature", "ESRI Feature Service"],
   ["geoJSON", "GeoJSON"],
   ["ogcWMS", "OGC Web Map Service (WMS)"],
+  ["ogcWFS", "OGC Web Feature Service (WFS)"],
   ["xyzTiles", "XYZ Raster Tiles"],
 ];
 
@@ -48,7 +49,7 @@ const esriOptions = (type: string): EsriOptions => {
  *
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
-const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
+const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   const cgpv = w["cgpv"];
   const { api, react, ui, mui } = cgpv;
 
@@ -155,6 +156,31 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   };
 
   /**
+   * Using the layerURL state object, check whether URL is a valid WFS,
+   * and add either Name and Entry directly to state if a single layer,
+   * or a list of Names / Entries if multiple layer options exist.
+   *
+   * @returns {Promise<boolean>} True if layer passes validation
+   */
+  const wfsValidation = async (): Promise<boolean> => {
+    try {
+      const wfs = await api.geoUtilities.getWFSServiceMetadata(layerURL);
+      const layers = wfs.FeatureTypeList.FeatureType.map((x: any) => [
+        x.Name["#text"].split(":")[1],
+        x.Title["#text"],
+      ]);
+      if (layers.length === 1) {
+        setLayerName(layers[0][1]);
+        setLayerEntry(layers[0][0]);
+      } else setLayerList(layers);
+    } catch (err) {
+      emitErrorServer("WFS");
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * Using the layerURL state object, check whether URL is a valid ESRI Server,
    * and add either Name and Entry directly to state if a single layer,
    * or a list of Names / Entries if multiple layer options exist.
@@ -237,6 +263,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       let valid = true;
       if (layerType === "") return emitErrorEmpty("Service Type");
       if (layerType === "ogcWMS") valid = await wmsValidation();
+      if (layerType === "ogcWFS") valid = await wfsValidation();
       else if (layerType === "xyzTiles") valid = xyzValidation();
       else if (layerType === "esriDynamic")
         valid = await esriValidation("esriDynamic");
@@ -259,6 +286,8 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const layerConfig = { name, type: layerType, url, entries };
       api.map(mapId).layer.addLayer(layerConfig);
       setAddLayerVisible(false);
+      handleInput({ target: { value: "" } });
+      setActiveStep(-1);
     }
     setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
   };
@@ -408,7 +437,7 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
                 label="Select Layer"
               >
                 {layerList.map(([value, label]: LayerList) => (
-                  <MenuItem key={value} value={value}>
+                  <MenuItem key={value + label} value={value}>
                     {label}
                   </MenuItem>
                 ))}
@@ -423,4 +452,4 @@ const AddLayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   );
 };
 
-export default AddLayerStepper;
+export default LayerStepper;
