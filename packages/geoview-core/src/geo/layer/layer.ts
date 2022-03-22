@@ -4,6 +4,7 @@ import { EsriDynamic } from "./esri/esri-dynamic";
 import { EsriFeature } from "./esri/esri-feature";
 import { WMS } from "./ogc/wms";
 import { WFS } from "./ogc/wfs";
+import { OgcFeature } from "./ogc/ogc_feature";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
 import { Vector } from "./vector/vector";
@@ -100,6 +101,14 @@ export class Layer {
               wfsLayer.layer = layer;
               this.addToMap(wfsLayer);
             });
+          } else if (layerConf.type === CONST_LAYER_TYPES.OGC_FEATURE) {
+            const ogcFeatureLayer = new OgcFeature(layerConf);
+            ogcFeatureLayer
+              .add(layerConf)
+              .then((layer: leafletLayer | string) => {
+                ogcFeatureLayer.layer = layer;
+                this.addToMap(ogcFeatureLayer);
+              });
           }
         }
       },
