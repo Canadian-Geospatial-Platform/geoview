@@ -8,7 +8,7 @@ import { OgcFeature } from "./ogc/ogc_feature";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
 import { Vector } from "./vector/vector";
-import { MarkerCluster } from "./vector/marker-cluster";
+import { MarkerClusterClass } from "./vector/marker-cluster";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
@@ -54,7 +54,7 @@ export class Layer {
     this.#map = map;
 
     this.vector = new Vector(map);
-    this.markerCluster = new MarkerCluster(map);
+    this.markerCluster = new MarkerClusterClass(map);
 
     // listen to outside events to add layers
     api.event.on(
