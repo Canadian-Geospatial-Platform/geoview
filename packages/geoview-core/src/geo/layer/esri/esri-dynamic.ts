@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import L, { Layer } from "leaflet";
+import L, { bounds, Layer } from "leaflet";
 
 import {
   dynamicMapLayer,
@@ -162,11 +162,16 @@ export class EsriDynamic {
    * @returns {Promise<L.LatLngBounds>} layer bounds
    */
   getBounds = async (): Promise<L.LatLngBounds> => {
-    const meta = await this.getMetadata();
-    const { xmin, xmax, ymin, ymax } = meta.fullExtent;
-    return L.latLngBounds([
-      [ymin, xmin],
-      [ymax, xmax],
-    ]);
+    const bounds = L.latLngBounds([]);
+    for (const entry of this.entries) {
+      const response = await fetch(`${this.url}/${entry}?f=json`);
+      const meta = await response.json();
+      const { xmin, xmax, ymin, ymax } = meta.extent;
+      bounds.extend([
+        [ymin, xmin],
+        [ymax, xmax],
+      ]);
+    }
+    return bounds;
   };
 }
