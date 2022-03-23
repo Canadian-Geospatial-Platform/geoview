@@ -235,4 +235,11 @@ export class WFS {
       else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds => this.layer.getBounds();
 }

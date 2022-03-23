@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { Layer } from "leaflet";
+import L, { Layer } from "leaflet";
 
 import {
   dynamicMapLayer,
@@ -154,5 +154,19 @@ export class EsriDynamic {
    */
   setOpacity = (opacity: number) => {
     this.layer.setOpacity(opacity);
+  };
+
+  /**
+   * Get bounds through external metadata
+   *
+   * @returns {Promise<L.LatLngBounds>} layer bounds
+   */
+  getBounds = async (): Promise<L.LatLngBounds> => {
+    const meta = await this.getMetadata();
+    const { xmin, xmax, ymin, ymax } = meta.fullExtent;
+    return L.latLngBounds([
+      [ymin, xmin],
+      [ymax, xmax],
+    ]);
   };
 }

@@ -16,10 +16,11 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const { mapId, layers, language } = props;
 
   const cgpv = w["cgpv"];
-  const { mui, ui, react, api } = cgpv;
+  const { mui, ui, react, api, leaflet: L } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState("");
   const [layerLegend, setLayerLegend] = useState({});
+  const [layerBounds, setLayerBounds] = useState({});
   const [layerOpacity, setLayerOpacity] = useState({});
   const [layerVisibility, setLayerVisibility] = useState({});
 
@@ -107,7 +108,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   /**
    * Calls setLayerLegend for all layers
    */
-  const setLayerLegends = async () => {
+  const setLayerLegendAll = async () => {
     for (const layer of Object.values(layers)) {
       if (layer.getLegendGraphic) {
         const dataUrl = await layer.getLegendGraphic();
@@ -122,13 +123,30 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     }
   };
 
+  /**
+   * Calls setLayerExtent for all layers
+   */
+  const setLayerBoundsAll = async () => {
+    for (const layer of Object.values(layers)) {
+      const bounds = await layer.getBounds();
+      setLayerBounds((state) => ({ ...state, [layer.id]: bounds }));
+    }
+  };
+
   useEffect(() => {
     const defaultLegends = Object.values(layers).reduce(
       (prev, curr) => ({ ...prev, [curr.id]: [] }),
       {}
     );
     setLayerLegend((state) => ({ ...defaultLegends, ...state }));
-    setLayerLegends();
+    setLayerLegendAll();
+
+    const defaultBounds = Object.values(layers).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: L.latLngBounds([]) }),
+      {}
+    );
+    setLayerBounds((state) => ({ ...defaultBounds, ...state }));
+    setLayerBoundsAll();
 
     const defaultSliders = Object.values(layers).reduce(
       (prev, curr) => ({ ...prev, [curr.id]: 100 }),
