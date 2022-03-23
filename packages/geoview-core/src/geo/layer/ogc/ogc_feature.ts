@@ -19,19 +19,19 @@ import { generateId } from "../../../core/utils/utilities";
 import { api } from "../../../api/api";
 
 /**
- * a class to add WFS layer
+ * a class to add OGC api feature layer
  *
  * @export
- * @class WFS
+ * @class OgcFeature
  */
-export class WFS {
+export class OgcFeature {
   // map config properties
 
-  // layer id with default
+  // layer id
   id: string;
 
   // layer name with default
-  name: string = "WFS Layer";
+  name: string = "OGC Feature Layer";
 
   // layer type
   type: string;
@@ -69,58 +69,32 @@ export class WFS {
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url;
+    this.url = layerConfig.url.trim();
 
     this.layer = new Layer();
   }
 
   /**
-   * Add a WFS layer to the map.
+   * Add a OGC API feature layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
   async add(layer: TypeLayerConfig): Promise<Layer | string> {
-    let capUrl = this.url + "request=getcapabilities&service=WFS";
+    let rootUrl = this.url.slice(-1) == "/" ? this.url : this.url + "/";
 
-    //const data = getXMLHttpRequest(capUrl);
-    const res = await axios.get(this.url, {
-      params: { request: "getcapabilities", service: "WFS" },
-    });
+    let featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
+    let metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
 
-    //need to pass a xmldom to xmlToJson
-    var xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
-    const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
-
-    this.#capabilities = json["wfs:WFS_Capabilities"];
-    this.#version = json["wfs:WFS_Capabilities"]["@attributes"]["version"];
-    let featTypeInfo = this.getFeatyreTypeInfo(
-      json["wfs:WFS_Capabilities"].FeatureTypeList.FeatureType,
-      layer.entries
-    );
-
-    if (!featTypeInfo) {
-      return new Promise((resolve) => resolve("{}"));
-    }
+    let res = await axios.get(metaUrl);
+    this.#capabilities = res.data;
 
     let layerName = layer.hasOwnProperty("name")
       ? layer.name
-      : featTypeInfo.Name["#text"].split(":")[1];
+      : this.#capabilities.title;
     if (layerName) this.name = <string>layerName;
 
-    let layerEPSG = featTypeInfo.DefaultCRS["#text"].split("crs:")[1];
-    layerEPSG = layerEPSG.replace("::", ":");
-
-    let params = {
-      service: "WFS",
-      version: this.#version,
-      request: "GetFeature",
-      typename: layer.entries,
-      srsname: "EPSG:4326",
-      outputFormat: "application/json",
-    };
-
-    const featRes = axios.get(this.url, { params: params });
+    const featRes = axios.get(featureUrl);
 
     const geo = new Promise<Layer | string>((resolve) => {
       featRes
@@ -128,7 +102,7 @@ export class WFS {
           let geojson = res.data;
 
           if (geojson && geojson !== "{}") {
-            const wfs = L.geoJSON(geojson, {
+            const featureLayer = L.geoJSON(geojson, {
               pointToLayer: function (feature, latlng) {
                 if (feature.geometry.type == "Point") {
                   const lId = generateId("");
@@ -144,13 +118,13 @@ export class WFS {
                 return {
                   stroke: true,
                   color: "#333",
-                  fillColor: "#FFB27F",
+                  fillColor: "#0094FF",
                   fillOpacity: 0.8,
                 };
               },
             });
 
-            resolve(wfs);
+            resolve(featureLayer);
           } else {
             resolve("{}");
           }
@@ -225,25 +199,7 @@ export class WFS {
    *
    * @returns {TypeJSONObjectLoop} WFS capabilities in json format
    */
-  getCapabilities = (): TypeJSONObjectLoop => {
+  getMeta = (): TypeJSONObjectLoop => {
     return this.#capabilities;
   };
-
-  /**
-   * Set Layer Opacity
-   * @param {number} opacity layer opacity
-   */
-  setOpacity = (opacity: number) => {
-    this.layer.getLayers().forEach((x) => {
-      if (x.setOpacity) x.setOpacity(opacity);
-      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.8 });
-    });
-  };
-
-  /**
-   * Get bounds through Leaflet built-in functions
-   *
-   * @returns {L.LatLngBounds} layer bounds
-   */
-  getBounds = (): L.LatLngBounds => this.layer.getBounds();
 }
