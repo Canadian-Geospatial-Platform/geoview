@@ -212,8 +212,8 @@
                     .map('LYR1')
                     .layer.layers['wmsLYR1'].getLegendGraphic('TOPO-OSM-WMS')
                     .then((res) => {
-                        var imgURL = URL.createObjectURL(res);
-                        document.getElementById('wmsLegend').src = imgURL;
+                        //var imgURL = URL.createObjectURL(res);
+                        document.getElementById('wmsLegend').src = res;
                     });
             }
 
