@@ -65,7 +65,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
   const map = useMap();
 
-  const mapId = api.mapInstance(map).id;
+  const mapId = api.mapInstance(map)!.id;
 
   const mapContainer = map.getContainer();
 

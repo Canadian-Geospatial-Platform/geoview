@@ -46,7 +46,7 @@ export const ClickMarker = (): JSX.Element => {
   const classes = useStyles();
 
   const map = useMap();
-  const mapId = api.mapInstance(map).id;
+  const mapId = api.mapInstance(map)!.id;
   const overlay = document.createElement("div");
 
   /**
