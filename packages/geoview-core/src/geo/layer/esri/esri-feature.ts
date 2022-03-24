@@ -11,6 +11,7 @@ import {
 import { getXMLHttpRequest } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 import { generateId } from "../../../core/utils/utilities";
+import { blueCircleIcon } from "../../../core/types/marker-definitions";
 
 import { api } from "../../../api/api";
 
@@ -61,7 +62,26 @@ export class EsriFeature {
    * @param {TypeLayerConfig} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+    let queryUrl = this.url.substr(-1) === "/" ? this.url : this.url + "/";
+    queryUrl += "legend?f=pjson";
+    // define a default blue icon
+    let iconSymbol = blueCircleIcon;
+
+    let res = await axios.get(queryUrl);
+
+    if (res.data.drawingInfo.renderer && res.data.drawingInfo.renderer.symbol) {
+      let symbolInfo = res.data.drawingInfo.renderer.symbol;
+      iconSymbol = new L.Icon({
+        iconUrl: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
+        iconSize: [symbolInfo.width, symbolInfo.height],
+        iconAnchor: [
+          Math.round(symbolInfo.width / 2),
+          Math.round(symbolInfo.height / 2),
+        ],
+      });
+    }
+
     const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
     const geo = new Promise<Layer | string>((resolve) => {
@@ -77,6 +97,9 @@ export class EsriFeature {
         ) {
           const feat = featureLayer({
             url: layer.url,
+            pointToLayer: function (feature, latlng) {
+              return L.marker(latlng, { icon: iconSymbol });
+            },
           });
 
           resolve(feat);
