@@ -274,4 +274,6 @@ export class MapViewer {
       config: updatedConfig,
     });
   };
+
+  fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
 }
