@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { Layer } from "leaflet";
+import L, { Layer } from "leaflet";
 
 import {
   featureLayer,
@@ -153,5 +153,19 @@ export class EsriFeature {
       if (x.setOpacity) x.setOpacity(opacity);
       else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
     });
+  };
+
+  /**
+   * Get bounds through external metadata
+   *
+   * @returns {Promise<L.LatLngBounds>} layer bounds
+   */
+  getBounds = async (): Promise<L.LatLngBounds> => {
+    const meta = await this.getMetadata();
+    const { xmin, xmax, ymin, ymax } = meta.extent;
+    return L.latLngBounds([
+      [ymin, xmin],
+      [ymax, xmax],
+    ]);
   };
 }
