@@ -12,10 +12,12 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const { mapId, layers, language } = props;
 
   const cgpv = w['cgpv'];
-  const { mui, ui, react, api } = cgpv;
+  const { mui, ui, react, api, leaflet: L } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState('');
   const [layerLegend, setLayerLegend] = useState({});
+  const [layerBounds, setLayerBounds] = useState({});
+  const [layerBbox, setLayerBbox] = useState(L.polygon([]));
   const [layerOpacity, setLayerOpacity] = useState({});
   const [layerVisibility, setLayerVisibility] = useState({});
 
@@ -24,12 +26,16 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
 
   const translations: TypeProps<TypeProps<any>> = {
     'en-CA': {
-      removeLayer: 'Remove Layer',
+      bounds: 'Toggle Bounds',
+      zoom: 'Zoom to Layer',
+      remove: 'Remove Layer',
       opacity: 'Adjust Opacity',
       visibility: 'Toggle Visibility',
     },
     'fr-CA': {
-      removeLayer: 'Supprimer la Couche',
+      bounds: 'Basculer la limite',
+      zoom: 'Zoom sur la Couche',
+      remove: 'Supprimer la Couche',
       opacity: "Ajuster l'opacité",
       visibility: 'Basculer la Visibilité',
     },
@@ -83,13 +89,9 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       display: 'flex',
       justifyContent: 'flex-end',
       alignItems: 'baseline',
+      gap: 12,
     },
-    slider: {
-      width: '100%',
-      paddingLeft: 20,
-      paddingRight: 20,
-    },
-    removeLayerButton: {
+    flexGroupButton: {
       height: 38,
       minHeight: 38,
       width: 25,
@@ -98,12 +100,17 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
         textAlign: 'center',
       },
     },
+    slider: {
+      width: '100%',
+      paddingLeft: 20,
+      paddingRight: 20,
+    },
   }));
 
   /**
    * Calls setLayerLegend for all layers
    */
-  const setLayerLegends = async () => {
+  const setLayerLegendAll = async () => {
     for (const layer of Object.values(layers)) {
       if (layer.getLegendGraphic) {
         const dataUrl = await layer.getLegendGraphic();
@@ -118,10 +125,25 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     }
   };
 
+  /**
+   * Calls setLayerExtent for all layers
+   */
+  const setLayerBoundsAll = async () => {
+    for (const layer of Object.values(layers)) {
+      const bounds = await layer.getBounds();
+      //   console.log(layer, bounds);
+      setLayerBounds((state) => ({ ...state, [layer.id]: bounds }));
+    }
+  };
+
   useEffect(() => {
     const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
     setLayerLegend((state) => ({ ...defaultLegends, ...state }));
-    setLayerLegends();
+    setLayerLegendAll();
+
+    const defaultBounds = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: L.latLngBounds([]) }), {});
+    setLayerBounds((state) => ({ ...defaultBounds, ...state }));
+    setLayerBoundsAll();
 
     const defaultSliders = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: 100 }), {});
     setLayerOpacity((state) => ({ ...defaultSliders, ...state }));
@@ -148,7 +170,69 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    *
    * @param layer layer config
    */
-  const onRemove = (layer: TypeLayerData) => api.map(mapId).layer.removeLayer(layer);
+  const onZoom = (layer: TypeLayerData) => api.map(mapId).fitBounds(layerBounds[layer.id]);
+
+  /**
+   * Returns polygon with segmented top and bottom to handle curved projection
+   *
+   * @param bounds layer bounds
+   * @param segment layer bounds
+   * @returns {L.Polygon} Polygon from bounds
+   */
+  const polygonFromBounds = (bounds: L.LatLngBounds, segments = 100): L.Polygon => {
+    const width = bounds.getEast() - bounds.getWest();
+    const latlngs = [];
+    latlngs.push(bounds.getSouthWest());
+    for (let i = 1; i <= segments; i++) {
+      const segmentWidth = width * (i / (segments + 1));
+      const lng = bounds.getWest() + segmentWidth;
+      latlngs.push({ lat: bounds.getSouth(), lng });
+    }
+    latlngs.push(bounds.getSouthEast());
+    latlngs.push(bounds.getNorthEast());
+    for (let i = 1; i <= segments; i++) {
+      const segmentWidth = width * (i / (segments + 1));
+      const lng = bounds.getEast() - segmentWidth;
+      latlngs.push({ lat: bounds.getNorth(), lng });
+    }
+    latlngs.push(bounds.getNorthWest());
+    return L.polygon(latlngs, { color: 'red' });
+  };
+
+  /**
+   * Adds bounding box to map
+   *
+   * @param layer layer config
+   */
+  const onBounds = (layer: TypeLayerData) => {
+    const bbox = polygonFromBounds(layerBounds[layer.id]);
+    const newBbox = JSON.stringify(bbox.toGeoJSON());
+    const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
+    if (newBbox === oldBbox) {
+      layerBbox.remove();
+      setLayerBbox(L.polygon([]));
+    } else {
+      layerBbox.remove();
+      bbox.addTo(api.map(mapId).map);
+      setLayerBbox(bbox);
+    }
+  };
+
+  /**
+   * Removes selcted layer from map, also removing bbox if active
+   *
+   * @param layer layer config
+   */
+  const onRemove = (layer: TypeLayerData) => {
+    const bbox = polygonFromBounds(layerBounds[layer.id]);
+    const newBbox = JSON.stringify(bbox.toGeoJSON());
+    const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
+    if (newBbox === oldBbox) {
+      layerBbox.remove();
+      setLayerBbox(L.polygon([]));
+    }
+    api.map(mapId).layer.removeLayer(layer);
+  };
 
   /**
    * Adjusts layer opacity when slider is moved
@@ -189,9 +273,27 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
             <>
               <div className={classes.flexGroup}>
                 <Button
-                  className={classes.removeLayerButton}
-                  tooltip={translations[language].removeLayer}
-                  tooltipPlacement="right"
+                  className={classes.flexGroupButton}
+                  tooltip={translations[language].zoom}
+                  tooltipPlacement="top"
+                  variant="contained"
+                  type="icon"
+                  icon='<i class="material-icons">zoom_in</i>'
+                  onClick={() => onZoom(layer)}
+                />
+                <Button
+                  className={classes.flexGroupButton}
+                  tooltip={translations[language].bounds}
+                  tooltipPlacement="top"
+                  variant="contained"
+                  type="icon"
+                  icon='<i class="material-icons">crop_free</i>'
+                  onClick={() => onBounds(layer)}
+                />
+                <Button
+                  className={classes.flexGroupButton}
+                  tooltip={translations[language].remove}
+                  tooltipPlacement="top"
                   variant="contained"
                   type="icon"
                   icon='<i class="material-icons">remove</i>'

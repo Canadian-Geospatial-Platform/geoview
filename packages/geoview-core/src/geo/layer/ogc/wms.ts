@@ -310,4 +310,19 @@ export class WMS {
   setOpacity = (opacity: number) => {
     this.layer.setOpacity(opacity);
   };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds => {
+    const capabilities = this.getCapabilities();
+    const bbox = capabilities.Capability.Layer.EX_GeographicBoundingBox;
+    const [xmin, ymin, xmax, ymax] = bbox;
+    return L.latLngBounds([
+      [ymin, xmin],
+      [ymax, xmax],
+    ]);
+  };
 }

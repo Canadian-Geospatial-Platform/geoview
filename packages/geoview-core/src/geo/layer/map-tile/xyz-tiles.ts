@@ -68,4 +68,15 @@ export class XYZTiles {
   setOpacity = (opacity: number) => {
     this.layer.setOpacity(opacity);
   };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds =>
+    L.latLngBounds([
+      [-85.05112877980660357, -180],
+      [85.05112877980660357, 180],
+    ]);
 }

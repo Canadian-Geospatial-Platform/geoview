@@ -291,6 +291,7 @@ export type TypeLayerData = {
   getLegendGraphic?: () => Promise<string>;
   getLegendJson?: () => Promise<TypeLegendJson>;
   setOpacity: (opacity: number) => void;
+  getBounds: () => L.LatLngBounds | Promise<L.LatLngBounds>;
 };
 
 export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
