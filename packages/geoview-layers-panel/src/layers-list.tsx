@@ -239,12 +239,20 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   };
 
   /**
-   * Removes selcted layer from map
+   * Removes selcted layer from map, also removing bbox if active
    *
    * @param layer layer config
    */
-  const onRemove = (layer: TypeLayerData) =>
+  const onRemove = (layer: TypeLayerData) => {
+    const bbox = polygonFromBounds(layerBounds[layer.id]);
+    const newBbox = JSON.stringify(bbox.toGeoJSON());
+    const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
+    if (newBbox === oldBbox) {
+      layerBbox.remove();
+      setLayerBbox(L.polygon([]));
+    }
     api.map(mapId).layer.removeLayer(layer);
+  };
 
   /**
    * Adjusts layer opacity when slider is moved
