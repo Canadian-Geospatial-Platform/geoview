@@ -51,7 +51,6 @@ export function ClickMarker(): JSX.Element {
   const mapId = mapConfig.id;
 
   const map = useMap();
-
   const overlay = document.createElement('div');
 
   /**

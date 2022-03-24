@@ -162,4 +162,14 @@ export class EsriDynamic {
     }
     return bounds;
   };
+
+  /**
+   * Sets Layer entries to toggle sublayers
+   *
+   * @param entries MapServer layer IDs
+   */
+  setEntries = (entries: number[]) => {
+    this.layer.options.layers = entries;
+    this.layer.redraw();
+  };
 }
