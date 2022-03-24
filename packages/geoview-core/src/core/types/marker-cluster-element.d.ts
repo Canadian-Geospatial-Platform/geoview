@@ -1,6 +1,6 @@
 // Type modification for Leaflet.markercluster 1.0
 
-/// <reference types="leaflet" />
+/// <reference types="leaflet.markercluster" />
 
 declare namespace L {
     export interface MarkerClusterElementMouseEvent extends LeafletMouseEvent {
@@ -28,25 +28,22 @@ declare namespace L {
         on?: MarkerClusterElementOnOptions;
     }
 
-    interface MarkerClusterElement {
+    interface MarkerClusterElement extends MarkerCluster {
         id: string;
         type: string;
         options: MarkerClusterElementOptions;
         blinking: boolean;
         selected: boolean;
-        setSelectedMarkerIconCreator(f: () => L.DivIcon): void;
-        setUnselectedMarkerIconCreator(f: () => L.DivIcon): void;
-        getSelectedMarkerIcon(): L.DivIcon;
-        getUnselectedMarkerIcon(): L.DivIcon;
+        setSelectedMarkerIconCreator(f: () => DivIcon): void;
+        setUnselectedMarkerIconCreator(f: () => DivIcon): void;
+        getSelectedMarkerIcon(): DivIcon;
+        getUnselectedMarkerIcon(): DivIcon;
         setSelectedFlag(newValue: boolean): void;
         startBlinking(): void;
         stopBlinking(): void;
-        addTo(map: L.Map | L.MarkerClusterGroup): this;
         remove(): this;
         getLatLng(): LatLng;
-        on(type: 'click', fn: MarkerClusterElementMouseEventHandlerFn): void;
-        off(type: 'click', fn: MarkerClusterElementMouseEventHandlerFn): void;
     }
 
-    function markerClusterElement(latlng: L.LatLngExpression, options?: MarkerClusterElementOptions): MarkerClusterElement;
+    function markerClusterElement(latlng: LatLngExpression, options?: MarkerClusterElementOptions): MarkerClusterElement;
 }

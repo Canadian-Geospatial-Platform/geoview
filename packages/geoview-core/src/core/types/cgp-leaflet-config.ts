@@ -212,7 +212,7 @@ L.Circle.addInitHook(function fn(this: L.Circle) {
 
 /*-----------------------------------------------------------------------------
  *
- * L.Polyline and Polygon configuration
+ * L.Polyline and L.Polygon configuration
  *
  *---------------------------------------------------------------------------*/
 
@@ -249,14 +249,7 @@ declare module "leaflet" {
   }
 
   interface Marker {
-    initialize: (latLng: L.LatLng, options: L.MarkerOptions) => void;
-  }
-
-  interface MarkerCluster {
-    spiderfy: () => void;
-    unspiderfy: () => void;
-    getAllChildMarkers(): L.MarkerClusterElement[];
-    zoomToBounds(options: { padding: [number, number] }): void;
+    initialize: (latLng: LatLng, options: MarkerOptions) => void;
   }
 }
 
@@ -289,12 +282,28 @@ declare module "leaflet" {
     options?: FeatureGroupOptions
   ): FeatureGroup;
 
+  export interface Evented extends Class {
+    on(
+        type: "clusterclick" | "unspiderfied" | "spiderfied",
+        fn: MarkerClusterMouseEventHandlerFn
+      ): void;
+      off(
+        type: "clusterclick" | "unspiderfied" | "spiderfied",
+        fn: MarkerClusterMouseEventHandlerFn
+      ): void;
+      fire(
+        type: "click",
+        event: MarkerClusterMouseEvent,
+        propagate: boolean
+      ): void;
+  }
+
   export interface MarkerClusterMouseEvent extends LeafletMouseEvent {
     latlng: LatLng;
     layerPoint: Point;
     containerPoint: Point;
     originalEvent: MouseEvent;
-    propagatedFrom: MarkerCluster;
+    propagatedFrom: MarkerClusterElement;
     target: MarkerClusterGroup;
     type: string;
   }
@@ -309,7 +318,7 @@ declare module "leaflet" {
     spiderfied?: MarkerClusterMouseEventHandlerFn;
   }
 
-  interface MarkerClusterGroupOptions {
+  interface MarkerClusterGroupOptions extends LayerOptions {
     id?: string;
     visible?: boolean;
     on?: MarkerClusterGroupOnOptions;
@@ -318,25 +327,9 @@ declare module "leaflet" {
   interface MarkerClusterGroup extends FeatureGroup {
     visible: boolean;
     type: string;
-    addLayer(marker: MarkerClusterElement): this;
-    removeLayer(marker: MarkerClusterElement): this;
-    eachLayer(fn: (layer: L.MarkerClusterElement) => void, context?: any): this;
-    getLayers(): MarkerClusterElement[];
     getVisibleParent(marker: MarkerClusterElement): MarkerCluster;
     unspiderfy(): void;
-    on(
-      type: "clusterclick" | "unspiderfied" | "spiderfied",
-      fn: MarkerClusterMouseEventHandlerFn
-    ): void;
-    off(
-      type: "clusterclick" | "unspiderfied" | "spiderfied",
-      fn: MarkerClusterMouseEventHandlerFn
-    ): void;
-    fire(
-      type: "click",
-      event: MarkerClusterMouseEvent,
-      propagate: boolean
-    ): void;
+    eachLayer(fn: (marker: MarkerClusterElement) => void, context?: any): this;
   }
 }
 
