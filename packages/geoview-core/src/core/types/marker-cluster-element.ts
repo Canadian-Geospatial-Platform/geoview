@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-underscore-dangle */
 import L, { LeafletEventHandlerFn } from "leaflet";
-import "./marker-cluster-element.d"
+import "./marker-cluster-element.d";
 import "leaflet.markercluster/src";
 
 import { api } from "../../api/api";

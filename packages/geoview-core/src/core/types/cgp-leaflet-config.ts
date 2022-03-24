@@ -284,18 +284,18 @@ declare module "leaflet" {
 
   export interface Evented extends Class {
     on(
-        type: "clusterclick" | "unspiderfied" | "spiderfied",
-        fn: MarkerClusterMouseEventHandlerFn
-      ): void;
-      off(
-        type: "clusterclick" | "unspiderfied" | "spiderfied",
-        fn: MarkerClusterMouseEventHandlerFn
-      ): void;
-      fire(
-        type: "click",
-        event: MarkerClusterMouseEvent,
-        propagate: boolean
-      ): void;
+      type: "clusterclick" | "unspiderfied" | "spiderfied",
+      fn: MarkerClusterMouseEventHandlerFn
+    ): void;
+    off(
+      type: "clusterclick" | "unspiderfied" | "spiderfied",
+      fn: MarkerClusterMouseEventHandlerFn
+    ): void;
+    fire(
+      type: "click",
+      event: MarkerClusterMouseEvent,
+      propagate: boolean
+    ): void;
   }
 
   export interface MarkerClusterMouseEvent extends LeafletMouseEvent {

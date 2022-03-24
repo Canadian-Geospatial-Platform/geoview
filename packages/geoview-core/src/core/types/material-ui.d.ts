@@ -1,6 +1,6 @@
-import { ComponentsVariants } from "@mui/material/styles/variants";
-import { ComponentsProps } from "@mui/material/styles/props";
-import { ComponentsOverrides } from "@mui/material/styles/overrides";
+import { ComponentsVariants } from "@mui/material/styles/variants.d";
+import { ComponentsProps } from "@mui/material/styles/props.d";
+import { ComponentsOverrides } from "@mui/material/styles/overrides.d";
 
 /** https://material-ui.com/guides/typescript/ */
 

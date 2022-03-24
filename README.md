@@ -44,3 +44,11 @@ $ rush build
 ```
 $ rush serve
 ```
+
+### Configure eslint and prettier (for developers)
+
+```
+$ npm install
+```
+
+To complete the configuration, you must install the ```Prettier - Code formatter``` and ```ESLint``` VS Code Plugins.
