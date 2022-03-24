@@ -24,6 +24,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const [layerBbox, setLayerBbox] = useState(L.polygon([]));
   const [layerOpacity, setLayerOpacity] = useState({});
   const [layerVisibility, setLayerVisibility] = useState({});
+  const [subLayerVisibility, setSubLayerVisibility] = useState({});
 
   const { Slider, Tooltip, Checkbox } = mui;
   const { Button } = ui.elements;
@@ -86,9 +87,6 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       alignItems: "center",
       gap: 6,
     },
-    layerItemGroup: {
-      paddingBottom: 12,
-    },
     flexGroup: {
       display: "flex",
       justifyContent: "flex-end",
@@ -108,6 +106,10 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       width: "100%",
       paddingLeft: 20,
       paddingRight: 20,
+    },
+    legendSubLayerGroup: {
+      display: "flex",
+      justifyContent: "space-between",
     },
   }));
 
@@ -166,6 +168,12 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       {}
     );
     setLayerVisibility((state) => ({ ...defaultVisibility, ...state }));
+
+    const defaultSubVisibility = Object.values(layers).reduce(
+      (prev, curr) => ({ ...prev, [curr.id]: curr.entries }),
+      {}
+    );
+    setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
   }, [layers]);
 
   const classes = useStyles();
@@ -272,10 +280,46 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param value checkbox boolean
    * @param data Layer data
    */
-  const onCheckboxChange = (value: number, data: TypeLayerData) => {
+  const onVisibilityChange = (value: number, data: TypeLayerData) => {
     setLayerVisibility((state) => ({ ...state, [data.id]: value }));
     const opacity = value ? layerOpacity[data.id] / 100 : 0;
     data.setOpacity(opacity);
+    if (value && data.setEntries) {
+      setSubLayerVisibility((state) => ({ ...state, [data.id]: data.entries }));
+      data.setEntries(data.entries);
+    }
+    if (!value && data.setEntries) {
+      setSubLayerVisibility((state) => ({ ...state, [data.id]: [] }));
+      data.setEntries([]);
+    }
+  };
+
+  /**
+   * Adjusts sublayer visibility when checkbox is toggled
+   *
+   * @param value checkbox boolean
+   * @param data Layer data
+   * @param id sublayer ID
+   */
+  const onSubVisibilityChange = (
+    value: number,
+    data: TypeLayerData,
+    id: number
+  ) => {
+    const oldEntries = subLayerVisibility[data.id];
+    const entries = value
+      ? [...new Set([...oldEntries, id])]
+      : oldEntries.filter((x) => x !== id);
+    if (oldEntries.length === 0) {
+      setLayerVisibility((state) => ({ ...state, [data.id]: true }));
+      data.setOpacity(layerOpacity[data.id] / 100);
+    }
+    if (entries.length === 0) {
+      setLayerVisibility((state) => ({ ...state, [data.id]: false }));
+      data.setOpacity(0);
+    }
+    setSubLayerVisibility((state) => ({ ...state, [data.id]: entries }));
+    data.setEntries(entries);
   };
 
   return (
@@ -339,33 +383,51 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                 <Tooltip title={translations[language].visibility}>
                   <Checkbox
                     checked={layerVisibility[layer.id]}
-                    onChange={(e) => onCheckboxChange(e.target.checked, layer)}
+                    onChange={(e) =>
+                      onVisibilityChange(e.target.checked, layer)
+                    }
                   />
                 </Tooltip>
               </div>
-              {layerLegend[layer.id].map((layer, index: number) => (
-                <div key={index} className={classes.layerItemGroup}>
-                  {layer.legend && Object.values(layer.legend).length > 1 && (
-                    <div
-                      className={classes.layerItemText}
-                      title={layer.layerName}
-                    >
-                      {layer.layerName}
+              {layerLegend[layer.id].map((subLayer, index: number) => (
+                <div key={index}>
+                  {subLayer.legend && (
+                    <div className={classes.legendSubLayerGroup}>
+                      <div
+                        className={classes.layerItemText}
+                        title={subLayer.layerName}
+                      >
+                        {subLayer.layerName}
+                      </div>
+                      <Tooltip title={translations[language].visibility}>
+                        <Checkbox
+                          checked={subLayerVisibility[layer.id].includes(
+                            subLayer.layerId
+                          )}
+                          onChange={(e) =>
+                            onSubVisibilityChange(
+                              e.target.checked,
+                              layer,
+                              subLayer.layerId
+                            )
+                          }
+                        />
+                      </Tooltip>
                     </div>
                   )}
-                  {layer.drawingInfo?.renderer.type === "simple" &&
-                    layer.drawingInfo?.renderer.symbol.imageData && (
+                  {subLayer.drawingInfo?.renderer.type === "simple" &&
+                    subLayer.drawingInfo?.renderer.symbol.imageData && (
                       <div className={classes.layerItemText}>
                         <img
-                          src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
+                          src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
                         />
-                        {layer.drawingInfo?.renderer.label || layer.name}
+                        {subLayer.drawingInfo?.renderer.label || subLayer.name}
                       </div>
                     )}
-                  {layer.drawingInfo?.renderer.type === "uniqueValue" &&
-                    layer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
+                  {subLayer.drawingInfo?.renderer.type === "uniqueValue" &&
+                    subLayer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
                       .imageData &&
-                    layer.drawingInfo?.renderer.uniqueValueInfos.map(
+                    subLayer.drawingInfo?.renderer.uniqueValueInfos.map(
                       (uniqueValue, index) => (
                         <div key={index} className={classes.layerItemText}>
                           <img
@@ -375,19 +437,19 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                         </div>
                       )
                     )}
-                  {layer.legend &&
-                    layer.legend.map((uniqueValue, index) => (
+                  {subLayer.legend &&
+                    subLayer.legend.map((uniqueValue, index) => (
                       <div key={index} className={classes.layerItemText}>
                         <img
                           src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`}
                         />
-                        {uniqueValue.label || layer.layerName}
+                        {uniqueValue.label || subLayer.layerName}
                       </div>
                     ))}
-                  {layer.dataUrl && (
+                  {subLayer.dataUrl && (
                     <div className={classes.layerItemText}>
-                      <img src={layer.dataUrl} />
-                      {layer.name}
+                      <img src={subLayer.dataUrl} />
+                      {subLayer.name}
                     </div>
                   )}
                 </div>
