@@ -97,7 +97,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   /**
    * Close the panel
    */
-  const closePanel = useCallback((): void => {
+  const closePanel = (): void => {
     // emit an event to hide the marker when using the details panel
     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
 
@@ -118,7 +118,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     }
 
     setPanelStatus(false);
-  }, [button.id, mapConfig.id, mapId]);
+  };
 
   // listen to change panel content and rerender right after the panel has been created
   api.event.on(
@@ -228,7 +228,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
     };
-  }, [button.id, closePanel, mapId, panel.status]);
+  }, []);
 
   useEffect(() => {
     // set focus on close button on panel open

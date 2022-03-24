@@ -2,13 +2,13 @@
 /* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 
-import L, { LeafletMouseEvent, Layer, version } from 'leaflet';
+import L, { Layer } from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { xmlToJson, generateId } from '../../../core/utils/utilities';
+import { generateId } from '../../../core/utils/utilities';
 
-import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -75,7 +75,7 @@ export class OgcFeature {
    * @return {Promise<Layer | string>} layers to add to the map
    */
   async add(layer: TypeLayerConfig): Promise<Layer | string> {
-    const rootUrl = this.url.slice(-1) == '/' ? this.url : `${this.url}/`;
+    const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
     const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
@@ -83,30 +83,31 @@ export class OgcFeature {
     const res = await axios.get(metaUrl);
     this.#capabilities = res.data;
 
-    const layerName = layer.hasOwnProperty('name') ? layer.name : this.#capabilities.title;
+    const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
     if (layerName) this.name = <string>layerName;
 
     const featRes = axios.get(featureUrl);
 
     const geo = new Promise<Layer | string>((resolve) => {
       featRes
-        .then((res) => {
-          const geojson = res.data;
+        .then((result) => {
+          const geojson = result.data;
 
           if (geojson && geojson !== '{}') {
             const featureLayer = L.geoJSON(geojson, {
-              pointToLayer: function (feature, latlng) {
-                if (feature.geometry.type == 'Point') {
-                  const lId = generateId('');
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              pointToLayer: (feature, latlng) => {
+                if (feature.geometry.type === 'Point') {
                   return L.circleMarker(latlng);
                 }
+
                 // if need to use specific style for point
                 // return L.circleMarker(latlng, {
                 //  ...geojsonMarkerOptions,
                 //  id: lId,
                 // });
               },
-              style: function (feature) {
+              style: () => {
                 return {
                   stroke: true,
                   color: '#333',
@@ -121,7 +122,7 @@ export class OgcFeature {
             resolve('{}');
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
@@ -141,7 +142,7 @@ export class OgcFeature {
           resolve('{}');
         });
     });
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**
@@ -154,16 +155,18 @@ export class OgcFeature {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
-      for (let i = 0; i < FeatureTypeList.length; i++) {
+      for (let i = 0; i < FeatureTypeList.length; i += 1) {
         let fName = FeatureTypeList[i].Name['#text'];
         const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-        const entrySplit = entries!.split(':');
-        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+        if (entries) {
+          const entrySplit = entries.split(':');
+          const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-        if (entryName == fName) {
-          return FeatureTypeList[i];
+          if (entryName === fName) {
+            return FeatureTypeList[i];
+          }
         }
       }
     } else {
@@ -172,11 +175,13 @@ export class OgcFeature {
       const fNameSplit = fName.split(':');
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-      const entrySplit = entries!.split(':');
-      const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+      if (entries) {
+        const entrySplit = entries.split(':');
+        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-      if (entryName == fName) {
-        return FeatureTypeList;
+        if (entryName === fName) {
+          return FeatureTypeList;
+        }
       }
     }
 

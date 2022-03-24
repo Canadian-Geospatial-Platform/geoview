@@ -40,7 +40,7 @@ export class XYZTiles {
    */
   constructor(layerConfig: TypeLayerConfig) {
     this.id = layerConfig.id || generateId('');
-    if (layerConfig.hasOwnProperty('name')) this.name = layerConfig.name;
+    if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();

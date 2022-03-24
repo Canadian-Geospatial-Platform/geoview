@@ -9,8 +9,8 @@ import { TypeChildren } from '../../core/types/cgpv-types';
  */
 interface ButtonGroupProps {
   children?: TypeChildren;
-  className?: string | undefined;
-  style?: CSSProperties | undefined;
+  className?: string;
+  style?: CSSProperties;
   ariaLabel?: string;
   orientation?: 'vertical' | 'horizontal';
   variant?: 'text' | 'outlined' | 'contained';

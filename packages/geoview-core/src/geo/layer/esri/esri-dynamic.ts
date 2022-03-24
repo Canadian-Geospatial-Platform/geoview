@@ -5,7 +5,7 @@ import L, { Layer } from 'leaflet';
 import { dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeLayerConfig, TypeJSONObject } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -44,7 +44,7 @@ export class EsriDynamic {
    */
   constructor(layerConfig: TypeLayerConfig) {
     this.id = layerConfig.id || generateId('');
-    if (layerConfig.hasOwnProperty('name')) this.name = layerConfig.name;
+    if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();
@@ -86,7 +86,7 @@ export class EsriDynamic {
       });
     });
 
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**
@@ -110,9 +110,9 @@ export class EsriDynamic {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {any} legend configuration in json format
+   * @returns {TypeJSONObject} legend configuration in json format
    */
-  getLegendJson = (): any => {
+  getLegendJson = (): TypeJSONObject => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 

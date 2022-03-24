@@ -115,7 +115,7 @@ export class EsriFeature {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {any} legend configuration in json format
+   * @returns {TypeJSONObject} legend configuration in json format
    */
   getLegendJson = (): Promise<TypeJSONObject> => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;

@@ -49,6 +49,7 @@ export type TypeChildren =
   | number
   | boolean
   | TypeJSONObject
+  | unknown
   | JSX.Element
   | Element
   | React.ReactElement<never, never | string | React.JSXElementConstructor<unknown>>
@@ -382,7 +383,7 @@ export type TypePlugin = {
   // id of the plugin
   id: string;
   // plugin class object
-  plugin: any;
+  plugin: unknown;
 };
 
 /**
