@@ -285,7 +285,7 @@ importers:
       eslint-config-airbnb: 19.0.4_35fa392e85ed0dff2335b4a0d11226ab
       eslint-config-prettier: 8.5.0_eslint@8.11.0
       eslint-plugin-import: 2.25.4_eslint@8.11.0
-      eslint-plugin-jest: 26.1.2_37483eea03cb2a5bbfbe402e58f1b05b
+      eslint-plugin-jest: 26.1.3_37483eea03cb2a5bbfbe402e58f1b05b
       eslint-plugin-jsx-a11y: 6.5.1_eslint@8.11.0
       eslint-plugin-prettier: 4.0.0_68edcf5670f37721baf5d2cac6124e4d
       eslint-plugin-react: 7.29.4_eslint@8.11.0
@@ -3578,8 +3578,8 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
     dependencies:
-      caniuse-lite: 1.0.30001319
-      electron-to-chromium: 1.4.91
+      caniuse-lite: 1.0.30001320
+      electron-to-chromium: 1.4.92
       escalade: 3.1.1
       node-releases: 2.0.2
       picocolors: 1.0.0
@@ -3637,8 +3637,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /caniuse-lite/1.0.30001319:
-    resolution: {integrity: sha512-xjlIAFHucBRSMUo1kb5D4LYgcN1M45qdKP++lhqowDpwJwGkpIRTt5qQqnhxjj1vHcI7nrJxWhCC1ATrCEBTcw==}
+  /caniuse-lite/1.0.30001320:
+    resolution: {integrity: sha512-MWPzG54AGdo3nWx7zHZTefseM5Y1ccM7hlQKHRqJkPozUaw3hNbBTMmLn16GG2FUzjR13Cr3NPfhIieX5PzXDA==}
     dev: true
 
   /chalk/2.4.2:
@@ -4199,8 +4199,8 @@ packages:
     resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
-  /electron-to-chromium/1.4.91:
-    resolution: {integrity: sha512-Z7Jkc4+ouEg8F6RrrgLOs0kkJjI0cnyFQmnGVpln8pPifuKBNbUr37GMgJsCTSwy6Z9TK7oTwW33Oe+3aERYew==}
+  /electron-to-chromium/1.4.92:
+    resolution: {integrity: sha512-YAVbvQIcDE/IJ/vzDMjD484/hsRbFPW2qXJPaYTfOhtligmfYEYOep+5QojpaEU9kq6bMvNeC2aG7arYvTHYsA==}
     dev: true
 
   /email-addresses/3.1.0:
@@ -4412,9 +4412,9 @@ packages:
       tsconfig-paths: 3.14.1
     dev: true
 
-  /eslint-plugin-jest/26.1.2_37483eea03cb2a5bbfbe402e58f1b05b:
-    resolution: {integrity: sha512-1bXCoRODPkGN06n9KAMls4Jm0eyS+0Q/LWcIxhqWR2ycV0Z7lnx2c10idk4dtFIJY5xStgiIr5snC6/rxcXpbw==}
-    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+  /eslint-plugin-jest/26.1.3_37483eea03cb2a5bbfbe402e58f1b05b:
+    resolution: {integrity: sha512-Pju+T7MFpo5VFhFlwrkK/9jRUu18r2iugvgyrWOnnGRaVTFFmFXp+xFJpHyqmjjLmGJPKLeEFLVTAxezkApcpQ==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': ^5.0.0
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
