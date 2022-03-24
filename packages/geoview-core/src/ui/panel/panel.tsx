@@ -1,69 +1,64 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
-import React, {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  useContext,
-} from "react";
+import React, { useRef, useState, useEffect, useCallback, useContext } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import FocusTrap from "focus-trap-react";
+import FocusTrap from 'focus-trap-react';
 
-import makeStyles from "@mui/styles/makeStyles";
-import { Card, CardHeader, CardContent } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
+import { Card, CardHeader, CardContent } from '@mui/material';
 
-import { Cast, TypePanelAppProps } from "../../core/types/cgpv-types";
-import { HtmlToReact } from "../../core/containers/html-to-react";
-import { MapContext } from "../../core/app-start";
+import { Cast, TypePanelAppProps } from '../../core/types/cgpv-types';
+import { HtmlToReact } from '../../core/containers/html-to-react';
+import { MapContext } from '../../core/app-start';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { IconButton, CloseIcon, Divider } from "..";
+import { IconButton, CloseIcon, Divider } from '..';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 300,
     width: 400,
-    height: "100%",
+    height: '100%',
     borderRadius: 0,
-    flexDirection: "column",
-    [theme.breakpoints.down("sm")]: {
-      width: "100%",
-      minWidth: "100%",
+    flexDirection: 'column',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+      minWidth: '100%',
     },
   },
   cardContainer: {
-    flexBasis: "auto",
-    overflow: "hidden",
-    overflowY: "auto",
-    paddingBottom: "10px !important",
-    boxSizing: "border-box",
+    flexBasis: 'auto',
+    overflow: 'hidden',
+    overflowY: 'auto',
+    paddingBottom: '10px !important',
+    boxSizing: 'border-box',
   },
   avatar: {
     color: theme.palette.primary.contrastText,
     height: 50,
     padding: 0,
     paddingLeft: 10,
-    justifyContent: "space-around",
-    alignItems: "center",
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   actionButton: {
     margin: 0,
   },
   buttonIcon: {
-    width: "1em",
-    height: "1em",
-    display: "inherit",
+    width: '1em',
+    height: '1em',
+    display: 'inherit',
     fontSize: theme.typography.button?.fontSize,
-    alignItems: "inherit",
-    justifyContent: "inherit",
-    transition: "fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+    alignItems: 'inherit',
+    justifyContent: 'inherit',
+    transition: 'fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     flexShrink: 0,
-    userSelect: "none",
+    userSelect: 'none',
   },
 }));
 
@@ -73,15 +68,13 @@ const useStyles = makeStyles((theme) => ({
  *
  * @returns {JSX.Element} the created Panel element
  */
-export const Panel = (props: TypePanelAppProps): JSX.Element => {
+export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button } = props;
 
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
 
-  const [actionButtons, setActionButtons] = useState<
-    JSX.Element[] & React.ReactNode[]
-  >([]);
+  const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
 
   const classes = useStyles(props);
@@ -104,7 +97,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
   /**
    * Close the panel
    */
-  function closePanel(): void {
+  const closePanel = useCallback((): void => {
     // emit an event to hide the marker when using the details panel
     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
 
@@ -118,18 +111,14 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       mapCont.focus();
 
       // if in focus trap mode, trigger the event
-      if (mapCont.closest(".llwp-map")?.classList.contains("map-focus-trap")) {
-        mapCont.classList.add("keyboard-focus");
-        api.event.emit(
-          EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
-          `leaflet-map-${mapId}`,
-          {}
-        );
+      if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
+        mapCont.classList.add('keyboard-focus');
+        api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`, {});
       }
     }
 
     setPanelStatus(false);
-  }
+  }, [button.id, mapConfig.id, mapId]);
 
   // listen to change panel content and rerender right after the panel has been created
   api.event.on(
@@ -137,8 +126,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
     (args) => {
       // set focus on close button on panel content change
       setTimeout(() => {
-        if (closeBtnRef && closeBtnRef.current)
-          Cast<HTMLElement>(closeBtnRef.current).focus();
+        if (closeBtnRef && closeBtnRef.current) Cast<HTMLElement>(closeBtnRef.current).focus();
       }, 100);
 
       if (args.buttonId === button.id!) {
@@ -198,14 +186,14 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
               onClick={actionButton.action}
               size="large"
             >
-              {typeof actionButton.icon === "string" ? (
+              {typeof actionButton.icon === 'string' ? (
                 <HtmlToReact
                   style={{
-                    display: "flex",
+                    display: 'flex',
                   }}
                   htmlContent={actionButton.icon}
                 />
-              ) : typeof actionButton.icon === "object" ? (
+              ) : typeof actionButton.icon === 'object' ? (
                 actionButton.icon
               ) : (
                 <actionButton.icon />
@@ -240,12 +228,11 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
     };
-  }, []);
+  }, [button.id, closePanel, mapId, panel.status]);
 
   useEffect(() => {
     // set focus on close button on panel open
-    if (closeBtnRef && closeBtnRef.current)
-      if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
+    if (closeBtnRef && closeBtnRef.current) if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
   }, [button, closeBtnRef]);
 
   return (
@@ -260,26 +247,23 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         ref={panelRef as React.MutableRefObject<null>}
         className={`${classes.root}`}
         style={{
-          display: panelStatus ? "flex" : "none",
+          display: panelStatus ? 'flex' : 'none',
         }}
         onKeyDown={(e) => {
-          if (e.key === "Escape") {
+          if (e.key === 'Escape') {
             closePanel();
           }
         }}
-        {...{ "data-id": button.id }}
+        {...{ 'data-id': button.id }}
       >
         <CardHeader
           className={classes.avatar}
           classes={{ action: classes.actionButton }}
           ref={panelHeader}
           avatar={
-            typeof panel.icon === "string" ? (
-              <HtmlToReact
-                className={classes.buttonIcon}
-                htmlContent={panel.icon}
-              />
-            ) : typeof panel.icon === "object" ? (
+            typeof panel.icon === 'string' ? (
+              <HtmlToReact className={classes.buttonIcon} htmlContent={panel.icon} />
+            ) : typeof panel.icon === 'object' ? (
               <panel.icon />
             ) : (
               <panel.icon />
@@ -291,10 +275,10 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
               <>
                 {actionButtons}
                 <IconButton
-                  tooltip={t("general.close")}
+                  tooltip={t('general.close')}
                   tooltipPlacement="right"
                   className="cgpv-panel-close"
-                  ariaLabel={t("general.close")}
+                  ariaLabel={t('general.close')}
                   size="large"
                   onClick={panel.close}
                   iconRef={closeBtnRef}
@@ -309,9 +293,9 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         />
         <Divider />
         <CardContent className={classes.cardContainer}>
-          {typeof panel.content === "string" ? (
+          {typeof panel.content === 'string' ? (
             <HtmlToReact htmlContent={panel.content} />
-          ) : typeof panel.content === "object" ? (
+          ) : typeof panel.content === 'object' ? (
             panel.content
           ) : (
             <panel.content />
@@ -320,4 +304,4 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       </Card>
     </FocusTrap>
   );
-};
+}

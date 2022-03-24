@@ -12,7 +12,7 @@ interface NorthArrowIconProps {
  *
  * @param {NorthArrowIconProps} props north arrow icon properties
  */
-export const NorthArrowIcon = (props: NorthArrowIconProps): JSX.Element => {
+export function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
   const { classes } = props;
 
   return (
@@ -38,20 +38,8 @@ export const NorthArrowIcon = (props: NorthArrowIconProps): JSX.Element => {
           stroke="#6d6d6d"
           strokeWidth=".799"
         />
-        <path
-          id="path3774"
-          d="M297.256 156.648v-8.525"
-          fill="none"
-          stroke="#000"
-          strokeWidth=".067"
-        />
-        <path
-          d="M297.258 143.48l8.793 22.432-8.811-8.812-8.812 8.812z"
-          id="path3778"
-          fill="#fff"
-          stroke="#fff"
-          strokeWidth=".912"
-        />
+        <path id="path3774" d="M297.256 156.648v-8.525" fill="none" stroke="#000" strokeWidth=".067" />
+        <path d="M297.258 143.48l8.793 22.432-8.811-8.812-8.812 8.812z" id="path3778" fill="#fff" stroke="#fff" strokeWidth=".912" />
         <path
           d="M297.256 144.805l7.726 19.568-7.726-7.726-7.726 7.726z"
           id="path3780"
@@ -60,17 +48,11 @@ export const NorthArrowIcon = (props: NorthArrowIconProps): JSX.Element => {
           strokeWidth=".266"
           strokeLinecap="square"
         />
-        <path
-          id="path6038"
-          d="M297.256 144.666l-7.726 19.568 7.726-7.726"
-          fill="#6d6d6d"
-          strokeWidth=".296"
-          strokeLinecap="square"
-        />
+        <path id="path6038" d="M297.256 144.666l-7.726 19.568 7.726-7.726" fill="#6d6d6d" strokeWidth=".296" strokeLinecap="square" />
       </g>
     </svg>
   );
-};
+}
 
 /**
  * Create a north pole svg icon

@@ -1,13 +1,13 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties } from 'react';
 
-import L from "leaflet";
+import L from 'leaflet';
 
-import { TooltipProps } from "@mui/material";
+import { TooltipProps } from '@mui/material';
 
-import { Plugin } from "../../api/plugin";
-import { API } from "../../api/api";
+import { Plugin } from '../../api/plugin';
+import { API } from '../../api/api';
 
-import { PanelApi, ButtonApi } from "../../ui";
+import { PanelApi, ButtonApi } from '../../ui';
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
@@ -21,37 +21,37 @@ export interface TypeWindow extends Window {
 export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
-  react: Object;
-  leaflet: Object;
-  reactLeaflet: Object;
-  reactLeafletCore: Object;
-  mui?: Object;
-  ui: Object;
-  useTranslation: Object;
-  types: Object;
-  constants: Object;
+  react: TypeJSONObject;
+  leaflet: TypeJSONObject;
+  reactLeaflet: TypeJSONObject;
+  reactLeafletCore: TypeJSONObject;
+  mui?: TypeJSONObject;
+  ui: TypeJSONObject;
+  useTranslation: TypeJSONObject;
+  types: TypeJSONObject;
+  constants: TypeJSONObject;
 };
 
 export type TypeCallback = (callback: () => void) => void;
 
 export type TypeFunction = () => void;
 
-//export interface TypeApi extends API, Event, Projection, Plugin {} //#427
+// export interface TypeApi extends API, Event, Projection, Plugin {} //#427
 export interface TypeApi extends API, Event, Plugin {}
 
 export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
 
-export type TypeChild = React.ReactElement<any, any> | undefined;
+export type TypeChild = React.ReactElement<never, never> | undefined;
 
 export type TypeChildren =
   | number
   | boolean
-  | {}
+  | TypeJSONObject
   | JSX.Element
   | Element
-  | React.ReactElement<any, any | string | React.JSXElementConstructor<any>>
+  | React.ReactElement<never, never | string | React.JSXElementConstructor<unknown>>
   | Iterable<React.ReactNode>
   | React.ReactPortal
   | (JSX.Element | null)[]
@@ -65,19 +65,20 @@ export type TypeMapComponent = {
   component: JSX.Element;
 };
 
+/**
+ * Map context
+ */
+export type TypeMapContext = {
+  id: string;
+};
+
 /*-----------------------------------------------------------------------------
  *
  * General Json type
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONValue =
-  | string
-  | number
-  | boolean
-  | null
-  | TypeJSONValue[]
-  | TypeJSONObject;
+export type TypeJSONValue = string | number | boolean | null | TypeJSONValue[] | TypeJSONObject;
 
 export type TypeJSONObject = {
   [key: string]: TypeJSONValue;
@@ -107,13 +108,13 @@ export type TypeIconCreationFunction = () => L.DivIcon;
  * constant contains layer types
  */
 export const CONST_LAYER_TYPES = {
-  WMS: "ogcWMS",
-  GEOJSON: "geoJSON",
-  ESRI_DYNAMIC: "esriDynamic",
-  ESRI_FEATURE: "esriFeature",
-  XYZ_TILES: "xyzTiles",
-  WFS: "ogcWFS",
-  OGC_FEATURE: "ogcFeature",
+  WMS: 'ogcWMS',
+  GEOJSON: 'geoJSON',
+  ESRI_DYNAMIC: 'esriDynamic',
+  ESRI_FEATURE: 'esriFeature',
+  XYZ_TILES: 'xyzTiles',
+  WFS: 'ogcWFS',
+  OGC_FEATURE: 'ogcFeature',
 };
 
 /**
@@ -165,7 +166,7 @@ export type TypeLegendJsonFeature = {
     id: number;
     name: string;
   };
-  subLayers: any[];
+  subLayers: unknown[];
   minScale: number;
   maxScale: number;
   drawingInfo: {
@@ -186,7 +187,7 @@ export type TypeLegendJsonFeature = {
       description: string;
     };
     transparency: number;
-    labelingInfo: any;
+    labelingInfo: unknown;
   };
   defaultVisibility: boolean;
   extent: {
@@ -202,15 +203,15 @@ export type TypeLegendJsonFeature = {
   hasAttachments: boolean;
   htmlPopupType: string;
   displayField: string;
-  typeIdField: any;
-  subtypeFieldName: any;
-  subtypeField: any;
-  defaultSubtypeCode: any;
+  typeIdField: unknown;
+  subtypeFieldName: unknown;
+  subtypeField: unknown;
+  defaultSubtypeCode: unknown;
   fields: {
     name: string;
     type: string;
     alias: string;
-    domain: any;
+    domain: unknown;
   }[];
   geometryField: {
     name: string;
@@ -263,29 +264,18 @@ export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
  */
 export type TypeLayerData = {
   id: string;
-  type:
-    | "ogcWMS"
-    | "geoJSON"
-    | "esriDynamic"
-    | "esriFeature"
-    | "xyzTiles"
-    | "ogcWFS"
-    | "ogcFeature";
+  type: 'ogcWMS' | 'geoJSON' | 'esriDynamic' | 'esriFeature' | 'xyzTiles' | 'ogcWFS' | 'ogcFeature';
   name: string;
   url: string;
   entries: string[];
   layer: {
-    setOpacity?: Function;
-    eachFeature?: Function;
+    setOpacity?: (opacity: number) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    eachFeature?: (x: any) => void;
     options: {
       url: string;
     };
-    metadata: (
-      fn: (
-        error: any,
-        res: { layers: { id: string; subLayerIds: string[] }[] }
-      ) => void
-    ) => void;
+    metadata: (fn: (error: unknown, res: { layers: { id: string; subLayerIds: string[] }[] }) => void) => void;
     _url: string;
     entries: {
       attributes: TypeJSONObject;
@@ -345,19 +335,12 @@ export type TypeFoundLayers = {
  */
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
-  getSymbol: (
-    renderer: TypeRendererSymbol,
-    attributes: TypeJSONObject
-  ) => TypeJSONObject;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject;
   selectFeature: (featureData: TypeJSONObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
-  setPanel: (
-    showLayersList: boolean,
-    showFeaturesList: boolean,
-    showFeaturesInfo: boolean
-  ) => void;
+  setPanel: (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => void;
 };
 
 export type TypeRendererSymbol = {
@@ -365,7 +348,7 @@ export type TypeRendererSymbol = {
     contentType: string;
     label: string;
     legendImageUrl: string;
-    type: "simple" | "uniqueValue";
+    type: 'simple' | 'uniqueValue';
   };
   uniqueValueInfos: TypeJSONObject[];
   field1: string;
@@ -405,11 +388,11 @@ export type TypePlugin = {
  * constant used to specify available vectors to draw
  */
 export const CONST_VECTOR_TYPES = {
-  POLYLINE: "polyline",
-  POLYGON: "polygon",
-  CIRCLE: "circle",
-  CIRCLE_MARKER: "circle_marker",
-  MARKER: "marker",
+  POLYLINE: 'polyline',
+  POLYGON: 'polygon',
+  CIRCLE: 'circle',
+  CIRCLE_MARKER: 'circle_marker',
+  MARKER: 'marker',
 };
 
 /**
@@ -427,11 +410,7 @@ export type TypePanelAppProps = {
 export type TypeFeatureInfoProps = {
   buttonPanel: TypeButtonPanel;
   selectedFeature: TypeSelectedFeature;
-  setPanel: (
-    showLayersList: boolean,
-    showFeaturesList: boolean,
-    showFeaturesInfo: boolean
-  ) => void;
+  setPanel: (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => void;
 };
 
 export type TypeSelectedFeature = {
@@ -449,10 +428,7 @@ export type TypeProps<T = string & unknown> = Record<string, T>;
  */
 export type TypeLayersListProps = {
   clickPos: L.LatLng | undefined;
-  getSymbol: (
-    renderer: TypeRendererSymbol,
-    attributes: TypeJSONObject
-  ) => TypeJSONValue;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
   mapId: string;
   selectFeature: (featureData: TypeJSONObject) => void;
@@ -537,8 +513,8 @@ export type TypeZoomLevels = {
  * interface for attribution value
  */
 export type TypeAttribution = {
-  "en-CA": string;
-  "fr-CA": string;
+  'en-CA': string;
+  'fr-CA': string;
 };
 
 /**
@@ -580,7 +556,7 @@ export type TypeButtonProps = {
   // button tooltip
   tooltip?: string;
   // location for tooltip
-  tooltipPlacement?: TooltipProps["placement"];
+  tooltipPlacement?: TooltipProps['placement'];
   // button icon
   icon?: TypeChildren;
   // optional callback function to run on button click
@@ -598,11 +574,11 @@ export type TypeButtonProps = {
   // optional style properties
   style?: CSSProperties | undefined;
   // button type
-  type: "text" | "textWithIcon" | "icon";
+  type: 'text' | 'textWithIcon' | 'icon';
   // button state
-  state?: "expanded" | "collapsed";
+  state?: 'expanded' | 'collapsed';
   // button style variant
-  variant?: "text" | "contained" | "outlined";
+  variant?: 'text' | 'contained' | 'outlined';
   // button children
   children?: TypeChildren;
   // focus used for accessibility to enable focus
@@ -615,8 +591,8 @@ export type TypeButtonProps = {
  * constant that defines the panel types
  */
 export const CONST_PANEL_TYPES = {
-  APPBAR: "appbar",
-  NAVBAR: "navbar",
+  APPBAR: 'appbar',
+  NAVBAR: 'navbar',
 };
 
 /**

@@ -1,8 +1,8 @@
-import { CSSProperties } from "react";
+import { CSSProperties } from 'react';
 
-import { ButtonGroup as MaterialButtonGroup } from "@mui/material";
+import { ButtonGroup as MaterialButtonGroup } from '@mui/material';
 
-import { TypeChildren } from "../../core/types/cgpv-types";
+import { TypeChildren } from '../../core/types/cgpv-types';
 
 /**
  * Button Group properties
@@ -12,8 +12,8 @@ interface ButtonGroupProps {
   className?: string | undefined;
   style?: CSSProperties | undefined;
   ariaLabel?: string;
-  orientation?: "vertical" | "horizontal";
-  variant?: "text" | "outlined" | "contained";
+  orientation?: 'vertical' | 'horizontal';
+  variant?: 'text' | 'outlined' | 'contained';
 }
 
 /**
@@ -22,18 +22,18 @@ interface ButtonGroupProps {
  * @param {ButtonGroupProps} props the properties passed to the button group element
  * @returns {JSX.Element} the created Button Group element
  */
-export const ButtonGroup = (props: ButtonGroupProps): JSX.Element => {
+export function ButtonGroup(props: ButtonGroupProps): JSX.Element {
   const { className, style, children, ariaLabel, variant, orientation } = props;
 
   return (
     <MaterialButtonGroup
-      aria-label={ariaLabel ? ariaLabel : undefined}
-      variant={variant ? variant : undefined}
-      orientation={orientation ? orientation : undefined}
-      style={style ? style : undefined}
-      className={className ? className : undefined}
+      aria-label={ariaLabel || undefined}
+      variant={variant || undefined}
+      orientation={orientation || undefined}
+      style={style || undefined}
+      className={className || undefined}
     >
       {children && children}
     </MaterialButtonGroup>
   );
-};
+}

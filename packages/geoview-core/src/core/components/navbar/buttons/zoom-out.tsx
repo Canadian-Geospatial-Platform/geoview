@@ -1,15 +1,23 @@
-import { useContext } from "react";
-import { api } from "../../../../api/api";
-import { Button, ZoomOutIcon } from "../../../../ui";
-import { MapContext } from "../../../app-start";
+import { useContext } from 'react';
+import { api } from '../../../../api/api';
+import { Button, ZoomOutIcon } from '../../../../ui';
+import { MapContext } from '../../../app-start';
 
 /**
  * Zoom out button properties
  */
 interface ZoomOutProps {
-  className?: string | undefined;
-  iconClassName?: string | undefined;
+  className?: string;
+  iconClassName?: string;
 }
+
+/**
+ * default properties values
+ */
+const defaultProps = {
+  className: '',
+  iconClassName: '',
+};
 
 /**
  * Create a zoom out button
@@ -20,7 +28,7 @@ interface ZoomOutProps {
 export default function ZoomOut(props: ZoomOutProps): JSX.Element {
   const { className, iconClassName } = props;
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -38,9 +46,11 @@ export default function ZoomOut(props: ZoomOutProps): JSX.Element {
       tooltip="mapnav.zoomOut"
       tooltipPlacement="left"
       icon={<ZoomOutIcon />}
-      onClick={zoomOut}
+      onClick={() => zoomOut()}
       className={className}
       iconClassName={iconClassName}
     />
   );
 }
+
+ZoomOut.defaultProps = defaultProps;

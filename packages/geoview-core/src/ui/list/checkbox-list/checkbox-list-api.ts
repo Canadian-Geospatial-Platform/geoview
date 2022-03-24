@@ -1,6 +1,6 @@
-import { createElement } from "react";
+import { createElement } from 'react';
 
-import { CheckboxList } from "./checkbox-list";
+import { CheckboxList } from './checkbox-list';
 
 /**
  * Class used to handle CheckboxList

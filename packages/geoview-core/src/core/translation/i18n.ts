@@ -1,8 +1,9 @@
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
+/* eslint-disable import/no-relative-packages */
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
 
-import translationEn from "../../../../geoview-loader/public/locales/en-CA/translation.json";
-import translationFr from "../../../../geoview-loader/public/locales/fr-CA/translation.json";
+import translationEn from '../../../public/locales/en-CA/translation.json';
+import translationFr from '../../../public/locales/fr-CA/translation.json';
 
 i18n
   .use(initReactI18next)
@@ -10,17 +11,17 @@ i18n
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     debug: false,
-    lng: "en-CA",
-    fallbackLng: ["en-CA", "fr-CA"],
-    whitelist: ["en-CA", "fr-CA"],
+    lng: 'en-CA',
+    fallbackLng: ['en-CA', 'fr-CA'],
+    whitelist: ['en-CA', 'fr-CA'],
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     },
     resources: {
-      "en-CA": {
+      'en-CA': {
         translation: translationEn,
       },
-      "fr-CA": {
+      'fr-CA': {
         translation: translationFr,
       },
     },

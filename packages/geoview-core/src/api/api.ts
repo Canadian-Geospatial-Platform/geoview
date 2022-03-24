@@ -1,16 +1,16 @@
-import { Map } from "leaflet";
+import { Map } from 'leaflet';
 
 /* eslint-disable no-plusplus */
-import { Event, EVENT_NAMES } from "./event";
+import { Event, EVENT_NAMES } from './event';
 
-import { Projection, PROJECTION_NAMES } from "../geo/projection/projection";
+import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';
 
-import { MapViewer } from "../geo/map/map";
+import { MapViewer } from '../geo/map/map';
 
-import { Plugin } from "./plugin";
-import { GeoUtilities } from "../geo/utils/utilities";
-import { CONST_LAYER_TYPES } from "../core/types/cgpv-types";
-import * as MarkerDefinitions from "../core/types/marker-definitions";
+import { Plugin } from './plugin';
+import { GeoUtilities } from '../geo/utils/utilities';
+import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
+import * as MarkerDefinitions from '../core/types/marker-definitions';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -81,8 +81,8 @@ export class API {
       if (callback) callback();
 
       // run the map ready function on each map instance
-      for (var i = 0; i < Object.keys(this.maps).length; i++) {
-        var mapId = Object.keys(this.maps)[i];
+      for (let i = 0; i < Object.keys(this.maps).length; i++) {
+        const mapId = Object.keys(this.maps)[i];
 
         this.map(mapId).mapReady();
       }

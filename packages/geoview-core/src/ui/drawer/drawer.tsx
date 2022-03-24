@@ -1,50 +1,50 @@
-import { CSSProperties, useContext, useEffect, useState } from "react";
+import { CSSProperties, useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import { useMap } from "react-leaflet";
+import { useMap } from 'react-leaflet';
 
-import makeStyles from "@mui/styles/makeStyles";
-import { Drawer as MaterialDrawer } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
+import { Drawer as MaterialDrawer } from '@mui/material';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
-import { MapContext } from "../../core/app-start";
+import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
+import { MapContext } from '../../core/app-start';
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
-    whiteSpace: "nowrap",
+    whiteSpace: 'nowrap',
   },
   drawerOpen: {
     width: drawerWidth,
-    transition: theme.transitions.create("width", {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    "& $toolbar": {
-      justifyContent: "flex-end",
+    '& $toolbar': {
+      justifyContent: 'flex-end',
     },
   },
   drawerClose: {
-    transition: theme.transitions.create("width", {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    overflowX: "hidden",
-    width: "61px",
-    "& $toolbar": {
-      justifyContent: "center",
+    overflowX: 'hidden',
+    width: '61px',
+    '& $toolbar': {
+      justifyContent: 'center',
     },
   },
   toolbar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: theme.spacing(0, 1),
   },
 }));
@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
  * Drawer Properties
  */
 interface DrawerProps {
-  variant?: "permanent" | "persistent" | "temporary" | undefined;
+  variant?: 'permanent' | 'persistent' | 'temporary' | undefined;
   className?: string | undefined;
   style?: CSSProperties | undefined;
   status?: boolean;
@@ -66,7 +66,7 @@ interface DrawerProps {
  * @param {DrawerProps} props the properties passed to the Drawer element
  * @returns {JSX.Element} the created Drawer element
  */
-export const Drawer = (props: DrawerProps): JSX.Element => {
+export function Drawer(props: DrawerProps): JSX.Element {
   const { variant, status, className, style, children } = props;
 
   const [open, setOpen] = useState(false);
@@ -84,7 +84,7 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
 
     // if appbar is open then close it
     api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
-      status: status,
+      status,
     });
 
     // if panel is open then close it
@@ -116,20 +116,16 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
 
   return (
     <MaterialDrawer
-      variant={variant ? variant : "permanent"}
+      variant={variant || 'permanent'}
       className={open ? classes.drawerOpen : classes.drawerClose}
       classes={{
-        paper: className
-          ? className
-          : open
-          ? classes.drawerOpen
-          : classes.drawerClose,
+        paper: className || (open ? classes.drawerOpen : classes.drawerClose),
       }}
-      style={style ? style : undefined}
+      style={style || undefined}
     >
       <div className={classes.toolbar}>
         <IconButton
-          tooltip={open ? t("general.close") : t("general.open")}
+          tooltip={open ? t('general.close') : t('general.open')}
           tooltipPlacement="right"
           onClick={() => {
             openCloseDrawer(!open);
@@ -142,4 +138,4 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
       {children !== undefined && children}
     </MaterialDrawer>
   );
-};
+}

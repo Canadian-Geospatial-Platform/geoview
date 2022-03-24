@@ -1,9 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import {
-  TypeLayersPanelListProps,
-  TypeLayerData,
-  TypeProps,
-} from "geoview-core";
+import { TypeLayersPanelListProps, TypeLayerData, TypeProps } from 'geoview-core';
 
 const w = window as any;
 
@@ -15,10 +11,10 @@ const w = window as any;
 const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const { mapId, layers, language } = props;
 
-  const cgpv = w["cgpv"];
+  const cgpv = w['cgpv'];
   const { mui, ui, react, api } = cgpv;
   const { useState, useEffect } = react;
-  const [selectedLayer, setSelectedLayer] = useState("");
+  const [selectedLayer, setSelectedLayer] = useState('');
   const [layerLegend, setLayerLegend] = useState({});
   const [layerOpacity, setLayerOpacity] = useState({});
   const [layerVisibility, setLayerVisibility] = useState({});
@@ -27,69 +23,69 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const { Button } = ui.elements;
 
   const translations: TypeProps<TypeProps<any>> = {
-    "en-CA": {
-      removeLayer: "Remove Layer",
-      opacity: "Adjust Opacity",
-      visibility: "Toggle Visibility",
+    'en-CA': {
+      removeLayer: 'Remove Layer',
+      opacity: 'Adjust Opacity',
+      visibility: 'Toggle Visibility',
     },
-    "fr-CA": {
-      removeLayer: "Supprimer la Couche",
+    'fr-CA': {
+      removeLayer: 'Supprimer la Couche',
       opacity: "Ajuster l'opacité",
-      visibility: "Basculer la Visibilité",
+      visibility: 'Basculer la Visibilité',
     },
   };
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
-      overflow: "hidden",
-      overflowY: "auto",
-      width: "100%",
+      overflow: 'hidden',
+      overflowY: 'auto',
+      width: '100%',
     },
     layerItem: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      margin: "5px 0",
-      padding: "10px 5px",
-      boxSizing: "content-box",
-      "&:hover": {
-        cursor: "pointer",
-        backgroundColor: "#c9c9c9",
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      margin: '5px 0',
+      padding: '10px 5px',
+      boxSizing: 'content-box',
+      '&:hover': {
+        cursor: 'pointer',
+        backgroundColor: '#c9c9c9',
       },
       zIndex: 1000,
-      border: "none",
-      width: "100%",
+      border: 'none',
+      width: '100%',
     },
     layerParentText: {
-      fontSize: "16px",
-      fontWeight: "bold",
+      fontSize: '16px',
+      fontWeight: 'bold',
     },
     layerCountTextContainer: {
-      display: "flex",
-      alignItems: "center",
-      width: "100%",
-      height: "32px",
+      display: 'flex',
+      alignItems: 'center',
+      width: '100%',
+      height: '32px',
     },
     layerItemText: {
-      fontSize: "14px",
-      whiteSpace: "nowrap",
-      textOverflow: "ellipsis",
-      overflow: "hidden",
-      marginLeft: "10px",
-      display: "flex",
-      alignItems: "center",
+      fontSize: '14px',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      marginLeft: '10px',
+      display: 'flex',
+      alignItems: 'center',
       gap: 6,
     },
     layerItemGroup: {
       paddingBottom: 12,
     },
     flexGroup: {
-      display: "flex",
-      justifyContent: "flex-end",
-      alignItems: "baseline",
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'baseline',
     },
     slider: {
-      width: "100%",
+      width: '100%',
       paddingLeft: 20,
       paddingRight: 20,
     },
@@ -98,8 +94,8 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       minHeight: 38,
       width: 25,
       minWidth: 25,
-      "& > div": {
-        textAlign: "center",
+      '& > div': {
+        textAlign: 'center',
       },
     },
   }));
@@ -111,7 +107,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     for (const layer of Object.values(layers)) {
       if (layer.getLegendGraphic) {
         const dataUrl = await layer.getLegendGraphic();
-        const name = layer.url.includes("/MapServer") ? layer.name : "";
+        const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
       } else if (layer.getLegendJson) {
@@ -123,23 +119,14 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   };
 
   useEffect(() => {
-    const defaultLegends = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: [] }),
-      {}
-    );
+    const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
     setLayerLegend((state) => ({ ...defaultLegends, ...state }));
     setLayerLegends();
 
-    const defaultSliders = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: 100 }),
-      {}
-    );
+    const defaultSliders = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: 100 }), {});
     setLayerOpacity((state) => ({ ...defaultSliders, ...state }));
 
-    const defaultVisibility = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: true }),
-      {}
-    );
+    const defaultVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: true }), {});
     setLayerVisibility((state) => ({ ...defaultVisibility, ...state }));
   }, [layers]);
 
@@ -152,7 +139,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param value layer button value
    */
   const onClick = (value: string) => {
-    const selected = value !== selectedLayer ? value : "";
+    const selected = value !== selectedLayer ? value : '';
     setSelectedLayer(selected);
   };
 
@@ -161,8 +148,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    *
    * @param layer layer config
    */
-  const onRemove = (layer: TypeLayerData) =>
-    api.map(mapId).layer.removeLayer(layer);
+  const onRemove = (layer: TypeLayerData) => api.map(mapId).layer.removeLayer(layer);
 
   /**
    * Adjusts layer opacity when slider is moved
@@ -192,11 +178,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     <div className={classes.layersContainer}>
       {Object.values(layers).map((layer) => (
         <div key={layer.id}>
-          <button
-            type="button"
-            className={classes.layerItem}
-            onClick={() => onClick(layer.id)}
-          >
+          <button type="button" className={classes.layerItem} onClick={() => onClick(layer.id)}>
             <div className={classes.layerCountTextContainer}>
               <div className={classes.layerItemText} title={layer.name}>
                 {layer.name}
@@ -229,50 +211,36 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                   />
                 </div>
                 <Tooltip title={translations[language].visibility}>
-                  <Checkbox
-                    checked={layerVisibility[layer.id]}
-                    onChange={(e) => onCheckboxChange(e.target.checked, layer)}
-                  />
+                  <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onCheckboxChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
               {layerLegend[layer.id].map((layer, index: number) => (
                 <div key={index} className={classes.layerItemGroup}>
                   {layer.legend && Object.values(layer.legend).length > 1 && (
-                    <div
-                      className={classes.layerItemText}
-                      title={layer.layerName}
-                    >
+                    <div className={classes.layerItemText} title={layer.layerName}>
                       {layer.layerName}
                     </div>
                   )}
-                  {layer.drawingInfo?.renderer.type === "simple" &&
-                    layer.drawingInfo?.renderer.symbol.imageData && (
-                      <div className={classes.layerItemText}>
-                        <img
-                          src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
-                        />
-                        {layer.drawingInfo?.renderer.label || layer.name}
+                  {layer.drawingInfo?.renderer.type === 'simple' && layer.drawingInfo?.renderer.symbol.imageData && (
+                    <div className={classes.layerItemText}>
+                      <img
+                        src={`data:${layer.drawingInfo?.renderer.symbol.contentType};base64,${layer.drawingInfo?.renderer.symbol.imageData}`}
+                      />
+                      {layer.drawingInfo?.renderer.label || layer.name}
+                    </div>
+                  )}
+                  {layer.drawingInfo?.renderer.type === 'uniqueValue' &&
+                    layer.drawingInfo?.renderer.uniqueValueInfos[0].symbol.imageData &&
+                    layer.drawingInfo?.renderer.uniqueValueInfos.map((uniqueValue, index) => (
+                      <div key={index} className={classes.layerItemText}>
+                        <img src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
+                        {uniqueValue.label}
                       </div>
-                    )}
-                  {layer.drawingInfo?.renderer.type === "uniqueValue" &&
-                    layer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
-                      .imageData &&
-                    layer.drawingInfo?.renderer.uniqueValueInfos.map(
-                      (uniqueValue, index) => (
-                        <div key={index} className={classes.layerItemText}>
-                          <img
-                            src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
-                          />
-                          {uniqueValue.label}
-                        </div>
-                      )
-                    )}
+                    ))}
                   {layer.legend &&
                     layer.legend.map((uniqueValue, index) => (
                       <div key={index} className={classes.layerItemText}>
-                        <img
-                          src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`}
-                        />
+                        <img src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
                         {uniqueValue.label || layer.layerName}
                       </div>
                     ))}

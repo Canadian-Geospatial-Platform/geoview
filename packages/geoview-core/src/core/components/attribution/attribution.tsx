@@ -1,22 +1,22 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
+import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
-import { api } from "../../../api/api";
-import { EVENT_NAMES } from "../../../api/event";
+import { api } from '../../../api/api';
+import { EVENT_NAMES } from '../../../api/event';
 
-import { MapContext } from "../../app-start";
+import { MapContext } from '../../app-start';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
-    marginLeft: "50px",
+    marginLeft: '50px',
     backgroundColor: theme.palette.primary.light,
     padding: theme.spacing(0, 4),
   },
   attributionText: {
-    margin: "0 !important",
+    margin: '0 !important',
     padding: theme.spacing(2),
     fontSize: theme.typography.subtitle2.fontSize,
   },
@@ -38,7 +38,7 @@ export function Attribution(props: AttributionProps): JSX.Element {
 
   const classes = useStyles();
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -76,28 +76,20 @@ export function Attribution(props: AttributionProps): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, mapId);
     };
-  }, []);
+  }, [mapId, updateComponent]);
 
   return (
     <div
-      className={[
-        classes.attributionContainer,
-        LEAFLET_POSITION_CLASSES.bottomleft,
-      ].join(" ")}
+      className={[classes.attributionContainer, LEAFLET_POSITION_CLASSES.bottomleft].join(' ')}
       style={{
-        marginLeft: Object.keys(
-          api.map(mapId).appBarButtons.getAllButtonPanels()
-        ).filter((buttonPanel) => {
-          return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel]
-            .button?.visible;
+        marginLeft: Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter((buttonPanel) => {
+          return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel].button?.visible;
         }).length
           ? 50
           : 0,
       }}
     >
-      <span className={["leaflet-control", classes.attributionText].join(" ")}>
-        {attribution}
-      </span>
+      <span className={['leaflet-control', classes.attributionText].join(' ')}>{attribution}</span>
     </div>
   );
 }

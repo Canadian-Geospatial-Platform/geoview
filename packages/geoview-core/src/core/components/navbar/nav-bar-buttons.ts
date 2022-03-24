@@ -1,17 +1,12 @@
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
-import { EVENT_NAMES } from "../../../api/event";
+import { EVENT_NAMES } from '../../../api/event';
 
-import { ButtonApi, PanelApi } from "../../../ui";
+import { ButtonApi, PanelApi } from '../../../ui';
 
-import {
-  TypeButtonPanel,
-  TypeButtonProps,
-  TypePanelProps,
-  CONST_PANEL_TYPES,
-} from "../../types/cgpv-types";
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
-import { generateId } from "../../utils/utilities";
+import { generateId } from '../../utils/utilities';
 
 /**
  * Class to manage buttons on the navbar
@@ -69,45 +64,46 @@ export class NavbarButtons {
   ): TypeButtonPanel | null => {
     if (buttonProps) {
       // generate an id if not provided
-      buttonProps.id = generateId(buttonProps.id);
+      const id = generateId(buttonProps.id);
 
       // if group was not specified then add button panels to the default group
-      if (!groupName) {
-        groupName = "default";
-      }
+      const group = groupName || 'default';
 
       // if group does not exist then create it
-      if (!this.buttons[groupName]) {
-        this.buttons[groupName] = {};
+      if (!this.buttons[group]) {
+        this.buttons[group] = {};
       }
 
+      const button = {
+        ...buttonProps,
+        id,
+      };
+
       const buttonPanel: TypeButtonPanel = {
-        id: buttonProps.id,
-        button: new ButtonApi(buttonProps),
-        groupName,
+        id,
+        button: new ButtonApi(button),
+        groupName: group,
       };
 
       // if adding a panel
       if (panelProps) {
-        // set panel type
-        if (panelProps) panelProps.type = CONST_PANEL_TYPES.NAVBAR;
+        const panel: TypePanelProps = {
+          ...panelProps,
+          type: CONST_PANEL_TYPES.NAVBAR,
+        };
 
-        buttonPanel.panel = new PanelApi(
-          panelProps,
-          buttonProps.id,
-          this.mapId
-        );
+        buttonPanel.panel = new PanelApi(panel, id, this.mapId);
       }
 
       // add the new button panel to the correct group
-      this.buttons[groupName][buttonProps.id] = buttonPanel;
+      this.buttons[group][id] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
       api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, {
         handlerId: this.mapId,
         buttonPanel,
         id: buttonProps.id,
-        groupName,
+        groupName: group,
       });
 
       return buttonPanel;
@@ -125,11 +121,7 @@ export class NavbarButtons {
    *
    * @returns the created button panel
    */
-  createNavbarButtonPanel = (
-    buttonProps: TypeButtonProps,
-    panelProps: TypePanelProps,
-    groupName: string
-  ): TypeButtonPanel | null => {
+  createNavbarButtonPanel = (buttonProps: TypeButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
     return this.createButtonPanel(buttonProps, panelProps, groupName);
   };
 
@@ -141,10 +133,7 @@ export class NavbarButtons {
    *
    * @returns the create button
    */
-  createNavbarButton = (
-    buttonProps: TypeButtonProps,
-    groupName: string
-  ): TypeButtonPanel | null => {
+  createNavbarButton = (buttonProps: TypeButtonProps, groupName: string): TypeButtonPanel | null => {
     return this.createButtonPanel(buttonProps, null, groupName);
   };
 

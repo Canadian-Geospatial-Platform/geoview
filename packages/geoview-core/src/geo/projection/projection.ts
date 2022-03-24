@@ -1,15 +1,15 @@
 /* eslint-disable no-plusplus */
-import L from "leaflet";
-import proj4 from "proj4";
-import "proj4leaflet";
+import L from 'leaflet';
+import proj4 from 'proj4';
+import 'proj4leaflet';
 
 /**
  * constant used for the available projection names
  */
 export const PROJECTION_NAMES = {
-  LCC: "EPSG:3978",
-  WM: "EPSG:3857",
-  LATLNG: "EPSG:4326",
+  LCC: 'EPSG:3978',
+  WM: 'EPSG:3857',
+  LATLNG: 'EPSG:4326',
 };
 
 /**
@@ -30,11 +30,7 @@ export class Projection {
    * @param {string} fromProj projection to be converted from
    * @param {string} toProj projection to be converted to
    */
-  transformPoints = (
-    points: unknown,
-    fromProj: string,
-    toProj: string
-  ): Array<Array<number> | number> => {
+  transformPoints = (points: unknown, fromProj: string, toProj: string): Array<Array<number> | number> => {
     // initialize empty array for the converted points
     const converted: Array<number | Array<number>> = [];
 
@@ -50,7 +46,7 @@ export class Projection {
           // add the converted points
           converted.push(coords);
         }
-      } else if (typeof points[0] === "number") {
+      } else if (typeof points[0] === 'number') {
         // if the array contain one point then convert the point
         const coords = proj4(fromProj, toProj, points);
 
@@ -67,14 +63,8 @@ export class Projection {
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  latLngToLCC = (
-    points: Array<number | Array<number>>
-  ): Array<Array<number> | number> => {
-    return this.transformPoints(
-      points,
-      PROJECTION_NAMES.LATLNG,
-      PROJECTION_NAMES.LCC
-    );
+  latLngToLCC = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LATLNG, PROJECTION_NAMES.LCC);
   };
 
   /**
@@ -82,14 +72,8 @@ export class Projection {
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  latLngToWm = (
-    points: Array<number | Array<number>>
-  ): Array<Array<number> | number> => {
-    return this.transformPoints(
-      points,
-      PROJECTION_NAMES.LATLNG,
-      PROJECTION_NAMES.WM
-    );
+  latLngToWm = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LATLNG, PROJECTION_NAMES.WM);
   };
 
   /**
@@ -97,14 +81,8 @@ export class Projection {
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  lccToWm = (
-    points: Array<number | Array<number>>
-  ): Array<Array<number> | number> => {
-    return this.transformPoints(
-      points,
-      PROJECTION_NAMES.LCC,
-      PROJECTION_NAMES.WM
-    );
+  lccToWm = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LCC, PROJECTION_NAMES.WM);
   };
 
   /**
@@ -112,14 +90,8 @@ export class Projection {
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  lccToLatLng = (
-    points: Array<number | Array<number>>
-  ): Array<Array<number> | number> => {
-    return this.transformPoints(
-      points,
-      PROJECTION_NAMES.LCC,
-      PROJECTION_NAMES.LATLNG
-    );
+  lccToLatLng = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LCC, PROJECTION_NAMES.LATLNG);
   };
 
   /**
@@ -127,14 +99,8 @@ export class Projection {
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  wmToLatLng = (
-    points: Array<number | Array<number>>
-  ): Array<Array<number> | number> => {
-    return this.transformPoints(
-      points,
-      PROJECTION_NAMES.WM,
-      PROJECTION_NAMES.LATLNG
-    );
+  wmToLatLng = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LATLNG);
   };
 
   /**
@@ -142,14 +108,8 @@ export class Projection {
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  wmToLcc = (
-    points: Array<number | Array<number>>
-  ): Array<Array<number> | number> => {
-    return this.transformPoints(
-      points,
-      PROJECTION_NAMES.WM,
-      PROJECTION_NAMES.LCC
-    );
+  wmToLcc = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LCC);
   };
 
   /**
@@ -178,12 +138,9 @@ export class Projection {
 
     // tile layer scales[i] = 1 / resolutions[i]
     const resolutions = [
-      38364.660062653464, 22489.62831258996, 13229.193125052918,
-      7937.5158750317505, 4630.2175937685215, 2645.8386250105837,
-      1587.5031750063501, 926.0435187537042, 529.1677250021168,
-      317.50063500127004, 185.20870375074085, 111.12522225044451,
-      66.1459656252646, 38.36466006265346, 22.48962831258996,
-      13.229193125052918, 7.9375158750317505, 4.6302175937685215,
+      38364.660062653464, 22489.62831258996, 13229.193125052918, 7937.5158750317505, 4630.2175937685215, 2645.8386250105837,
+      1587.5031750063501, 926.0435187537042, 529.1677250021168, 317.50063500127004, 185.20870375074085, 111.12522225044451,
+      66.1459656252646, 38.36466006265346, 22.48962831258996, 13.229193125052918, 7.9375158750317505, 4.6302175937685215,
       2.6458386250105836, 1.5875031750063502,
     ];
 
@@ -197,8 +154,8 @@ export class Projection {
 
     // LCC projection
     const projection = new L.Proj.CRS(
-      "EPSG:3978",
-      "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      'EPSG:3978',
+      '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
       {
         resolutions,
         origin: [-3.46558e7, 3.931e7],

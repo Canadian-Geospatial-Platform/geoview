@@ -1,6 +1,6 @@
-import LayersList from "./layers-list";
-import FeaturesList from "./features-list";
-import FeatureInfo from "./feature-info";
+import LayersList from './layers-list';
+import FeaturesList from './features-list';
+import FeatureInfo from './feature-info';
 
 // get the window object
 const w = window as any;
@@ -18,7 +18,7 @@ import {
   TypeLayersEntry,
   TypeEntry,
   TypePanelContentProps,
-} from "geoview-core";
+} from 'geoview-core';
 
 /**
  * A react component that displays the details panel content
@@ -30,7 +30,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { buttonPanel, mapId } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const cgpv = w['cgpv'];
 
   // access the api calls
   const { api, react, ui, useTranslation } = cgpv;
@@ -53,8 +53,8 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   // use material ui theming
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
-      display: "flex",
-      flexDirection: "row",
+      display: 'flex',
+      flexDirection: 'row',
     },
   }));
 
@@ -72,37 +72,22 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
    * @param {TypeJSONObject} attributes the attributes of the selected layer features
    * @returns {TypeJSONObject} the symbology containing the imageData
    */
-  const getSymbol = useCallback(
-    (
-      renderer: TypeRendererSymbol,
-      attributes: TypeJSONObject
-    ): TypeJSONObject => {
-      let symbolImage: TypeJSONObject | null = null;
+  const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJSONObject): TypeJSONObject => {
+    let symbolImage: TypeJSONObject | null = null;
 
-      // check if a symbol object exists in the renderer
-      if (renderer && renderer.symbol) {
-        symbolImage = renderer.symbol;
-      } else if (
-        renderer &&
-        renderer.uniqueValueInfos &&
-        renderer.uniqueValueInfos.length > 0
-      ) {
-        // if symbol not found then check if there are multiple symbologies
-        symbolImage = renderer.uniqueValueInfos.filter((info) => {
-          // return the correct symbology matching the layer using the layer defined fields
-          return (
-            info.value ===
-            (attributes[renderer.field1] ||
-              attributes[renderer.field2] ||
-              attributes[renderer.field3])
-          );
-        })[0].symbol as TypeJSONObject;
-      }
+    // check if a symbol object exists in the renderer
+    if (renderer && renderer.symbol) {
+      symbolImage = renderer.symbol;
+    } else if (renderer && renderer.uniqueValueInfos && renderer.uniqueValueInfos.length > 0) {
+      // if symbol not found then check if there are multiple symbologies
+      symbolImage = renderer.uniqueValueInfos.filter((info) => {
+        // return the correct symbology matching the layer using the layer defined fields
+        return info.value === (attributes[renderer.field1] || attributes[renderer.field2] || attributes[renderer.field3]);
+      })[0].symbol as TypeJSONObject;
+    }
 
-      return symbolImage as TypeJSONObject;
-    },
-    []
-  );
+    return symbolImage as TypeJSONObject;
+  }, []);
 
   /**
    * Fetch the json response from the map server
@@ -127,13 +112,9 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
    * @param {boolean} showFeaturesInfo a boolean value to show the entry / feature info content
    */
   const setPanel = useCallback(
-    (
-      showLayersList: boolean,
-      showFeaturesList: boolean,
-      showFeaturesInfo: boolean
-    ) => {
+    (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => {
       // remove the back button if it exists
-      buttonPanel.panel?.removeActionButton("back");
+      buttonPanel.panel?.removeActionButton('back');
 
       // show the correct panel content
       setLayersList(showLayersList);
@@ -216,19 +197,12 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
    * @param {TypeLayerInfo} layerInfo the layer information
    * @param {boolean} isGroupLayer a boolean value to check if this layer is a group layer
    */
-  const addLayer = (
-    mapLayer: TypeLayerData,
-    data: Record<string, TypeLayerData>,
-    layerInfo: TypeLayerInfo,
-    isGroupLayer: boolean
-  ) => {
+  const addLayer = (mapLayer: TypeLayerData, data: Record<string, TypeLayerData>, layerInfo: TypeLayerInfo, isGroupLayer: boolean) => {
     // get the layers object from the map, it begins with an empty object then adds each layer
     const { layers } = data[mapLayer.id];
 
     // add the layer to the layers object, the layer will have a key generated from the id and name of the layer seperated by dashes
-    layers[
-      `${layerInfo.id}-${layerInfo.name.replace(/\s+/g, "-").toLowerCase()}`
-    ] = {
+    layers[`${layerInfo.id}-${layerInfo.name.replace(/\s+/g, '-').toLowerCase()}`] = {
       // the information about this layer
       layer: layerInfo,
       // is it a group layer or not
@@ -236,7 +210,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       // the layer entry / feature data, will be filled / reset when a click / crosshair event is triggered on an element
       layerData: [] as TypeJSONValue[],
       // the default display field or field name defined in the layer
-      displayField: layerInfo.displayField || layerInfo.displayFieldName || "",
+      displayField: layerInfo.displayField || layerInfo.displayFieldName || '',
       // the defined field aliases by the layer
       fieldAliases: getFieldAliases(layerInfo.fields),
       // the renderer object containing the symbology
@@ -324,7 +298,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
             //check layer type if WMS then use getFeatureInfo to query the data
             let res = null;
 
-            if (layer.type == "ogcWMS") {
+            if (layer.type == 'ogcWMS') {
               res = await layer.getFeatureInfo(latlng, layerMap);
 
               if (res && res.results && res.results.length > 0) {
@@ -345,10 +319,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
                   },
                 }));
               }
-            } else if (
-              layer.type == "esriFeature" ||
-              layer.type == "esriDynamic"
-            ) {
+            } else if (layer.type == 'esriFeature' || layer.type == 'esriDynamic') {
               // generate an identify query url
               const identifyUrl =
                 `${layer.mapService.options.url}identify?` +
@@ -396,11 +367,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         // set the entry data
         selectLayer(layersFound[0].layer);
 
-        if (layersFound[0])
-          symbology = getSymbol(
-            layersFound[0].layer.renderer,
-            layersFound[0].entries[0].attributes
-          );
+        if (layersFound[0]) symbology = getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes);
 
         // if there are only one entry found in this layer then go directly to the entry / feature info
         if (layersFound[0].entries.length === 1) {
@@ -408,20 +375,14 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
             attributes: layersFound[0].entries[0].attributes,
             displayField: layersFound[0].layer.displayField,
             fieldAliases: layersFound[0].layer.fieldAliases,
-            symbol: getSymbol(
-              layersFound[0].layer.renderer,
-              layersFound[0].entries[0].attributes
-            ),
+            symbol: getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes),
             numOfEntries: 1,
           });
         }
       } else {
         // if multiple layers contains entries then use the symbology of first layer
         if (layersFound.length > 0) {
-          symbology = getSymbol(
-            layersFound[0].layer.renderer,
-            layersFound[0].entries[0].attributes
-          );
+          symbology = getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes);
         }
 
         // if there are multiple layers with entries then display the layer list panel content
@@ -434,9 +395,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       // open the details panel
       buttonPanel.panel?.open();
 
-      const panelContainer = document.querySelectorAll(
-        `[data-id=${buttonPanel.id}]`
-      )[0];
+      const panelContainer = document.querySelectorAll(`[data-id=${buttonPanel.id}]`)[0];
 
       // emit an event to display a marker on the click position
       // if there is only one layer with entries the symbology will be of that layer
@@ -450,22 +409,11 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
       // set focus to the close button of the panel
       if (panelContainer) {
-        const closeBtn =
-          panelContainer.querySelectorAll(".cgpv-panel-close")[0];
+        const closeBtn = panelContainer.querySelectorAll('.cgpv-panel-close')[0];
         if (closeBtn) (closeBtn as HTMLElement).focus();
       }
     },
-    [
-      mapId,
-      buttonPanel.panel,
-      buttonPanel.id,
-      layersData,
-      clearResults,
-      selectLayer,
-      getSymbol,
-      selectFeature,
-      selectLayersList,
-    ]
+    [mapId, buttonPanel.panel, buttonPanel.id, layersData, clearResults, selectLayer, getSymbol, selectFeature, selectLayersList]
   );
 
   useEffect(() => {
@@ -493,7 +441,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       };
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (mapLayer.type === "ogcWMS") {
+      if (mapLayer.type === 'ogcWMS') {
         // get layer ids / entries from the loaded WMS layer
         const { entries } = mapLayer;
 
@@ -502,20 +450,14 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
             const layerId = entries[i];
 
             // query the layer information
-            const layerInfo = await queryServer(
-              mapLayer.mapService.options.url + layerId
-            );
+            const layerInfo = await queryServer(mapLayer.mapService.options.url + layerId);
 
             // try to add the legend image url for the WMS layer
             //const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
             const legendImageUrl = mapLayer.getLegendGraphic(layerId);
 
             // assign the url to the renderer
-            if (
-              layerInfo.drawingInfo &&
-              layerInfo.drawingInfo.renderer &&
-              layerInfo.drawingInfo.renderer.symbol
-            ) {
+            if (layerInfo.drawingInfo && layerInfo.drawingInfo.renderer && layerInfo.drawingInfo.renderer.symbol) {
               Object.defineProperties(layerInfo.drawingInfo.renderer.symbol, {
                 legendImageUrl: {
                   value: legendImageUrl,
@@ -525,12 +467,12 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
             addLayer(mapLayer, data, layerInfo, false);
           }
-      } else if (mapLayer.type === "esriFeature") {
+      } else if (mapLayer.type === 'esriFeature') {
         // query the layer information, feature layer URL will end by a number provided in the map config
         const layerInfo = await queryServer(mapLayer.layer.options.url);
 
         addLayer(mapLayer, data, layerInfo, false);
-      } else if (mapLayer.type === "esriDynamic") {
+      } else if (mapLayer.type === 'esriDynamic') {
         // get active layers
         const entries = mapLayer.layer.getLayers();
 
@@ -543,50 +485,35 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
         // get the metadata of the dynamic layer
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mapLayer.layer.metadata(
-          async (
-            error: any,
-            res: { layers: { id: string; subLayerIds: string[] }[] }
-          ) => {
-            if (error) return;
+        mapLayer.layer.metadata(async (error: any, res: { layers: { id: string; subLayerIds: string[] }[] }) => {
+          if (error) return;
 
-            if (res.layers) {
-              // loop through each layer in the dynamic layer
-              for (let i = 0; i < res.layers.length; i++) {
-                const layerData = res.layers[i];
+          if (res.layers) {
+            // loop through each layer in the dynamic layer
+            for (let i = 0; i < res.layers.length; i++) {
+              const layerData = res.layers[i];
 
-                // if the index of the layer is one of the entries provided in the map config
-                if (layerData.id in activeLayers) {
-                  // query the layer information from the map server by appending the index at the end of the URL
-                  const layerInfo = await queryServer(
-                    mapLayer.layer.options.url + layerData.id
-                  );
+              // if the index of the layer is one of the entries provided in the map config
+              if (layerData.id in activeLayers) {
+                // query the layer information from the map server by appending the index at the end of the URL
+                const layerInfo = await queryServer(mapLayer.layer.options.url + layerData.id);
 
-                  addLayer(
-                    mapLayer,
-                    data,
-                    layerInfo,
-                    layerData.subLayerIds !== null &&
-                      layerData.subLayerIds !== undefined
-                  );
+                addLayer(mapLayer, data, layerInfo, layerData.subLayerIds !== null && layerData.subLayerIds !== undefined);
 
-                  // if this layer is a group layer then loop through the sub layers and add them
-                  if (layerData.subLayerIds) {
-                    for (let j = 0; j < layerData.subLayerIds.length; j++) {
-                      const subLayer = layerData.subLayerIds[j];
+                // if this layer is a group layer then loop through the sub layers and add them
+                if (layerData.subLayerIds) {
+                  for (let j = 0; j < layerData.subLayerIds.length; j++) {
+                    const subLayer = layerData.subLayerIds[j];
 
-                      const subLayerInfo = await queryServer(
-                        mapLayer.layer.options.url + subLayer
-                      );
+                    const subLayerInfo = await queryServer(mapLayer.layer.options.url + subLayer);
 
-                      addLayer(mapLayer, data, subLayerInfo, false);
-                    }
+                    addLayer(mapLayer, data, subLayerInfo, false);
                   }
                 }
               }
             }
           }
-        );
+        });
       }
     });
 
@@ -596,7 +523,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
 
   useEffect(() => {
     // handle map click
-    mapInstance.on("click", async (e: L.LeafletMouseEvent) => {
+    mapInstance.on('click', async (e: L.LeafletMouseEvent) => {
       if (!e.originalEvent.shiftKey) {
         handleOpenDetailsPanel(e.latlng);
       }
@@ -614,7 +541,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     );
 
     return () => {
-      mapInstance.off("click");
+      mapInstance.off('click');
       api.event.off(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId);
     };
   }, [handleOpenDetailsPanel, mapId, mapInstance]);
@@ -624,9 +551,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   // It takes 3 arguments, the tag element name, the attributes of the element and the content of the element
   return (
     <div className={classes.mainContainer}>
-      {!layersList && !featureList && !featureInfo && (
-        <div>{t("click_map")}</div>
-      )}
+      {!layersList && !featureList && !featureInfo && <div>{t('click_map')}</div>}
       {layersList && (
         <LayersList
           clickPos={clickPos}
@@ -648,11 +573,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
         />
       )}
       {featureInfo && (
-        <FeatureInfo
-          buttonPanel={buttonPanel}
-          selectedFeature={selectedFeature as TypeSelectedFeature}
-          setPanel={setPanel}
-        />
+        <FeatureInfo buttonPanel={buttonPanel} selectedFeature={selectedFeature as TypeSelectedFeature} setPanel={setPanel} />
       )}
     </div>
   );

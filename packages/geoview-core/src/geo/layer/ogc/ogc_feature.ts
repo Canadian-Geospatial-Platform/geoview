@@ -1,22 +1,16 @@
 /* eslint-disable object-shorthand */
 /* eslint-disable no-underscore-dangle */
-import axios from "axios";
+import axios from 'axios';
 
-import L, { LeafletMouseEvent, Layer, version } from "leaflet";
+import L, { LeafletMouseEvent, Layer, version } from 'leaflet';
 
-import { mapService as esriMapService, MapService } from "esri-leaflet";
+import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { xmlToJson } from "../../../core/utils/utilities";
+import { xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import {
-  Cast,
-  TypeJSONObject,
-  TypeJSONObjectLoop,
-  TypeLayerConfig,
-} from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
+import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
 /**
  * a class to add OGC api feature layer
@@ -31,7 +25,7 @@ export class OgcFeature {
   id: string;
 
   // layer name with default
-  name: string = "OGC Feature Layer";
+  name = 'OGC Feature Layer';
 
   // layer type
   type: string;
@@ -39,20 +33,20 @@ export class OgcFeature {
   // layer from leaflet
   layer: Layer | string;
 
-  //layer entries
+  // layer entries
   entries: string[] | undefined;
 
-  //layer or layer service url
+  // layer or layer service url
   url: string;
 
-  //mapService property
+  // mapService property
   mapService: MapService;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJSONObjectLoop;
 
   // private varibale holding wms paras
-  #version: string = "2.0.0";
+  #version = '2.0.0';
 
   /**
    * Initialize layer
@@ -60,10 +54,10 @@ export class OgcFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId("");
+    this.id = layerConfig.id || generateId('');
     this.type = layerConfig.type;
     this.#capabilities = {};
-    this.entries = layerConfig.entries?.split(",").map((item: string) => {
+    this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
     this.mapService = esriMapService({
@@ -81,17 +75,15 @@ export class OgcFeature {
    * @return {Promise<Layer | string>} layers to add to the map
    */
   async add(layer: TypeLayerConfig): Promise<Layer | string> {
-    let rootUrl = this.url.slice(-1) == "/" ? this.url : this.url + "/";
+    const rootUrl = this.url.slice(-1) == '/' ? this.url : `${this.url}/`;
 
-    let featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
-    let metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
+    const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
+    const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
 
-    let res = await axios.get(metaUrl);
+    const res = await axios.get(metaUrl);
     this.#capabilities = res.data;
 
-    let layerName = layer.hasOwnProperty("name")
-      ? layer.name
-      : this.#capabilities.title;
+    const layerName = layer.hasOwnProperty('name') ? layer.name : this.#capabilities.title;
     if (layerName) this.name = <string>layerName;
 
     const featRes = axios.get(featureUrl);
@@ -99,26 +91,26 @@ export class OgcFeature {
     const geo = new Promise<Layer | string>((resolve) => {
       featRes
         .then((res) => {
-          let geojson = res.data;
+          const geojson = res.data;
 
-          if (geojson && geojson !== "{}") {
+          if (geojson && geojson !== '{}') {
             const featureLayer = L.geoJSON(geojson, {
               pointToLayer: function (feature, latlng) {
-                if (feature.geometry.type == "Point") {
-                  const lId = generateId("");
+                if (feature.geometry.type == 'Point') {
+                  const lId = generateId('');
                   return L.circleMarker(latlng);
                 }
-                //if need to use specific style for point
-                //return L.circleMarker(latlng, {
+                // if need to use specific style for point
+                // return L.circleMarker(latlng, {
                 //  ...geojsonMarkerOptions,
                 //  id: lId,
-                //});
+                // });
               },
               style: function (feature) {
                 return {
                   stroke: true,
-                  color: "#333",
-                  fillColor: "#0094FF",
+                  color: '#333',
+                  fillColor: '#0094FF',
                   fillOpacity: 0.8,
                 };
               },
@@ -126,27 +118,27 @@ export class OgcFeature {
 
             resolve(featureLayer);
           } else {
-            resolve("{}");
+            resolve('{}');
           }
         })
         .catch(function (error) {
           if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
-            //console.log(error.response.data);
-            //console.log(error.response.status);
-            //console.log(error.response.headers);
+            // console.log(error.response.data);
+            // console.log(error.response.status);
+            // console.log(error.response.headers);
           } else if (error.request) {
             // The request was made but no response was received
             // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
             // http.ClientRequest in node.js
-            //console.log(error.request);
+            // console.log(error.request);
           } else {
             // Something happened in setting up the request that triggered an Error
-            //console.log("Error", error.message);
+            // console.log("Error", error.message);
           }
-          //console.log(error.config);
-          resolve("{}");
+          // console.log(error.config);
+          resolve('{}');
         });
     });
     return new Promise((resolve) => resolve(geo));
@@ -158,33 +150,30 @@ export class OgcFeature {
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJSONObject | null} feature type object or null
    */
-  private getFeatyreTypeInfo(
-    FeatureTypeList: TypeJSONObject,
-    entries?: string
-  ): TypeJSONObject | null {
-    let res = null;
+  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+    const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
       for (let i = 0; i < FeatureTypeList.length; i++) {
-        let fName = FeatureTypeList[i].Name["#text"];
-        let fNameSplit = fName.split(":");
+        let fName = FeatureTypeList[i].Name['#text'];
+        const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-        let entrySplit = entries!.split(":");
-        let entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+        const entrySplit = entries!.split(':');
+        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
         if (entryName == fName) {
           return FeatureTypeList[i];
         }
       }
     } else {
-      let fName = FeatureTypeList["Name"]["#text"];
+      let fName = FeatureTypeList.Name['#text'];
 
-      let fNameSplit = fName.split(":");
+      const fNameSplit = fName.split(':');
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-      let entrySplit = entries!.split(":");
-      let entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+      const entrySplit = entries!.split(':');
+      const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
       if (entryName == fName) {
         return FeatureTypeList;

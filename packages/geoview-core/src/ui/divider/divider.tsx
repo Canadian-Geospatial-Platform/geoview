@@ -1,11 +1,11 @@
-import { CSSProperties } from "react";
+import { CSSProperties } from 'react';
 
-import { Divider as MaterialDivider } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Divider as MaterialDivider } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles((theme) => ({
   vertical: {
-    alignSelf: "center",
+    alignSelf: 'center',
     height: 40,
     width: 1,
     backgroundColor: theme.palette.primary.contrastText,
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
 interface DividerProps {
   className?: string;
   style?: CSSProperties;
-  orientation?: "horizontal" | "vertical";
+  orientation?: 'horizontal' | 'vertical';
   grow?: boolean;
 }
 
@@ -36,25 +36,17 @@ interface DividerProps {
  * @param {DividerProps} props the properties passed to the Divider element
  * @returns {JSX.Element} the created Divider element
  */
-export const Divider = (props: DividerProps): JSX.Element => {
+export function Divider(props: DividerProps): JSX.Element {
   const { className, style, grow, orientation } = props;
 
   const classes = useStyles();
 
   return (
     <MaterialDivider
-      className={
-        (orientation !== undefined
-          ? orientation === "horizontal"
-            ? classes.horizontal
-            : classes.vertical
-          : classes.horizontal) +
-        " " +
-        (grow !== undefined && grow ? classes.grow : "") +
-        " " +
-        (className !== undefined ? className : "")
-      }
+      className={`${
+        orientation !== undefined ? (orientation === 'horizontal' ? classes.horizontal : classes.vertical) : classes.horizontal
+      } ${grow !== undefined && grow ? classes.grow : ''} ${className !== undefined ? className : ''}`}
       style={style}
     />
   );
-};
+}

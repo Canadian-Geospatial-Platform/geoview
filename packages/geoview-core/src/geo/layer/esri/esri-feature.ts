@@ -1,18 +1,13 @@
-import axios from "axios";
+import axios from 'axios';
 
-import { Layer } from "leaflet";
+import { Layer } from 'leaflet';
 
-import {
-  featureLayer,
-  mapService as esriMapService,
-  MapService,
-} from "esri-leaflet";
+import { featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { getXMLHttpRequest } from "../../../core/utils/utilities";
-import { TypeLayerConfig } from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
+import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
+import { TypeLayerConfig, TypeJSONObject } from '../../../core/types/cgpv-types';
 
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
 /**
  * a class to add esri feature layer
@@ -25,7 +20,7 @@ export class EsriFeature {
   id: string;
 
   // layer name with default
-  name?: string = "Esri Feature Layer";
+  name?: string = 'Esri Feature Layer';
 
   // layer type
   type: string;
@@ -33,10 +28,10 @@ export class EsriFeature {
   // layer from leaflet
   layer: Layer | string;
 
-  //layer or layer service url
+  // layer or layer service url
   url: string;
 
-  //mapService property
+  // mapService property
   mapService: MapService;
 
   /**
@@ -45,8 +40,8 @@ export class EsriFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId("");
-    if (layerConfig.hasOwnProperty("name")) this.name = layerConfig.name;
+    this.id = layerConfig.id || generateId('');
+    if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();
@@ -70,23 +65,19 @@ export class EsriFeature {
 
         // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
         // if the path is bad, return will be {}
-        if (
-          value !== "{}" &&
-          typeof type !== "undefined" &&
-          type === "Feature Layer"
-        ) {
+        if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
           const feat = featureLayer({
             url: layer.url,
           });
 
           resolve(feat);
         } else {
-          resolve("{}");
+          resolve('{}');
         }
       });
     });
 
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**
@@ -106,9 +97,9 @@ export class EsriFeature {
    *
    * @returns {any} legend configuration in json format
    */
-  getLegendJson = (): any => {
-    let queryUrl = this.url.substr(-1) === "/" ? this.url : this.url + "/";
-    queryUrl += "legend?f=pjson";
+  getLegendJson = (): Promise<TypeJSONObject> => {
+    let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
+    queryUrl += 'legend?f=pjson';
     return axios.get(queryUrl).then((res) => {
       return res.data;
     });
@@ -119,7 +110,7 @@ export class EsriFeature {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.eachFeature((x) => {
+    this.layer.eachFeature((x: any) => {
       if (x.setOpacity) x.setOpacity(opacity);
       else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
     });

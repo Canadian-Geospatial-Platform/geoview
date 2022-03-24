@@ -1,36 +1,29 @@
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useState } from 'react';
 
-import {
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  ListSubheader,
-  MenuItem,
-  Select as MaterialSelect,
-} from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { FormControl, FormHelperText, InputLabel, ListSubheader, MenuItem, Select as MaterialSelect } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
-    width: "50%",
-    margin: "15px 0",
-    "& .MuiFormLabel-root.Mui-focused": {
+    width: '50%',
+    margin: '15px 0',
+    '& .MuiFormLabel-root.Mui-focused': {
       color: theme.palette.primary.contrastText,
       background: theme.palette.primary.light,
     },
-    "& .MuiOutlinedInput-root.Mui-focused": {
+    '& .MuiOutlinedInput-root.Mui-focused': {
       border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },
   label: {
-    position: "absolute",
+    position: 'absolute',
     left: 0,
     top: 0,
-    transform: "translate(14px, -9px) scale(0.75)",
+    transform: 'translate(14px, -9px) scale(0.75)',
     background: theme.palette.primary.light,
   },
   select: {
-    width: "100%",
+    width: '100%',
   },
 }));
 
@@ -63,10 +56,7 @@ interface SelectProps {
   label: string;
 
   // the menu items (<option>) for <select>
-  selectItems:
-    | Array<Record<string, TypeSelectItems>>
-    | Array<Record<string, TypeItemProps>>
-    | any;
+  selectItems: Array<Record<string, TypeSelectItems>> | Array<Record<string, TypeItemProps>> | any;
 
   // callback that is passed for the select component
   callBack?: Function;
@@ -84,21 +74,11 @@ interface SelectProps {
  * @param {SelectProps} props the properties passed to the Select component
  * @returns {JSX.Element} the created Select element
  */
-export const Select = (props: SelectProps): JSX.Element => {
+export function Select(props: SelectProps): JSX.Element {
   const classes = useStyles();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [multipleValue, setMultipleValue] = useState([]);
-  const {
-    className,
-    style,
-    id,
-    label,
-    selectItems,
-    callBack,
-    helperText,
-    multiple,
-    ...otherProps
-  } = props;
+  const { className, style, id, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
 
   /**
    * Runs when a selection is changed
@@ -111,20 +91,18 @@ export const Select = (props: SelectProps): JSX.Element => {
       const {
         target: { value },
       } = event;
-      setMultipleValue(typeof value === "string" ? value.split(",") : value);
+      setMultipleValue(typeof value === 'string' ? value.split(',') : value);
     }
   };
 
-  !multiple && typeof callBack === "function" && callBack(value);
-  multiple && typeof callBack === "function" && callBack(multipleValue);
+  !multiple && typeof callBack === 'function' && callBack(value);
+  multiple && typeof callBack === 'function' && callBack(multipleValue);
 
   const isGrouped = selectItems.some((item: any) => item.category);
 
   const isDefault = !isGrouped
     ? selectItems.some((item: any) => item.default)
-    : selectItems.some((item: any) =>
-        item.items.some((item: any) => item.default)
-      );
+    : selectItems.some((item: any) => item.items.some((item: any) => item.default));
 
   isGrouped &&
     selectItems.forEach((item: any) => {
@@ -154,21 +132,14 @@ export const Select = (props: SelectProps): JSX.Element => {
         value={!multiple ? value : multipleValue}
         onChange={changeHandler}
         multiple={multiple || false}
-        displayEmpty={true}
+        displayEmpty
       >
         {isGrouped
           ? selectItems.map((item: any) => {
               const options: JSX.Element[] = [];
-              if (item.category)
-                options.push(
-                  <ListSubheader>
-                    {item.category ? item.category : "Others"}
-                  </ListSubheader>
-                );
+              if (item.category) options.push(<ListSubheader>{item.category ? item.category : 'Others'}</ListSubheader>);
               item.items.map((item: any) => {
-                options.push(
-                  <MenuItem value={item.value}>{item.value}</MenuItem>
-                );
+                options.push(<MenuItem value={item.value}>{item.value}</MenuItem>);
               });
               return options;
             })
@@ -181,4 +152,4 @@ export const Select = (props: SelectProps): JSX.Element => {
       {helperText && <FormHelperText>{helperText}</FormHelperText>}
     </FormControl>
   );
-};
+}

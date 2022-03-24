@@ -1,16 +1,14 @@
-import { Cast, TypeJSONObject, TypeJSONValue } from "../types/cgpv-types";
+import { Cast, TypeJSONObject, TypeJSONValue } from '../types/cgpv-types';
 
 /**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id
  */
-export function generateId(id: string | undefined | null): string {
+export function generateId(id?: string): string {
   return id !== null && id !== undefined && id.length > 0
     ? id
-    : (
-        Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
-      ).toUpperCase();
+    : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
 }
 
 /**
@@ -20,7 +18,7 @@ export function generateId(id: string | undefined | null): string {
  */
 export function isJsonString(str: string): boolean {
   try {
-    if (str !== "") {
+    if (str !== '') {
       JSON.parse(str);
     } else {
       return false;
@@ -37,9 +35,7 @@ export function isJsonString(str: string): boolean {
  * @param {Document | Node | Element} xml the XML document object
  * @returns the converted json object
  */
-export function xmlToJson(
-  xml: Document | Node | Element
-): TypeJSONObject | TypeJSONValue {
+export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | TypeJSONValue {
   // Create the return object
   let obj: TypeJSONObject | TypeJSONValue = {};
 
@@ -49,12 +45,11 @@ export function xmlToJson(
     const element = Cast<Element>(xml);
     if (element.attributes) {
       if (element.attributes.length > 0) {
-        obj["@attributes"] = {};
+        obj['@attributes'] = {};
         // eslint-disable-next-line no-plusplus
         for (let j = 0; j < element.attributes.length; j++) {
           const attribute = element.attributes.item(j) as Node;
-          (obj["@attributes"] as TypeJSONObject)[attribute.nodeName] =
-            attribute.nodeValue as string;
+          (obj['@attributes'] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
         }
       }
     }
@@ -70,12 +65,10 @@ export function xmlToJson(
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
       const jsonObject = obj as TypeJSONObject;
-      if (typeof jsonObject[nodeName] === "undefined") {
+      if (typeof jsonObject[nodeName] === 'undefined') {
         jsonObject[nodeName] = xmlToJson(item);
       } else {
-        if (
-          typeof (jsonObject[nodeName] as TypeJSONValue[]).push === "undefined"
-        ) {
+        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === 'undefined') {
           jsonObject[nodeName] = [jsonObject[nodeName]];
         }
         (jsonObject[nodeName] as TypeJSONValue[]).push(xmlToJson(item));
@@ -95,20 +88,20 @@ export function getXMLHttpRequest(url: string): Promise<string> {
   const request = new Promise<string>((resolve) => {
     try {
       const jsonObj = new XMLHttpRequest();
-      jsonObj.open("GET", url, true);
+      jsonObj.open('GET', url, true);
       jsonObj.onreadystatechange = () => {
         if (jsonObj.readyState === 4 && jsonObj.status === 200) {
           resolve(jsonObj.responseText);
         } else if (jsonObj.readyState === 4 && jsonObj.status >= 400) {
-          resolve("{}");
+          resolve('{}');
         }
       };
       jsonObj.onerror = () => {
-        resolve("{}");
+        resolve('{}');
       };
       jsonObj.send(null);
     } catch (error) {
-      resolve("{}");
+      resolve('{}');
     }
   });
 

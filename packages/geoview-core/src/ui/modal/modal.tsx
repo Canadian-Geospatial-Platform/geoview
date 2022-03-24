@@ -1,75 +1,63 @@
-import React, {
-  CSSProperties,
-  useState,
-  useEffect,
-  useCallback,
-  Fragment,
-} from "react";
+import React, { CSSProperties, useState, useEffect, useCallback, Fragment } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogProps as MaterialDialogProps,
-} from "@mui/material";
-import { ClassNameMap, withStyles } from "@mui/styles";
-import makeStyles from "@mui/styles/makeStyles";
+import { Dialog, DialogTitle, DialogContent, DialogActions, DialogProps as MaterialDialogProps } from '@mui/material';
+import { ClassNameMap, withStyles } from '@mui/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeChildren } from "../../core/types/cgpv-types";
-import { HtmlToReact } from "../../core/containers/html-to-react";
+import { TypeChildren } from '../../core/types/cgpv-types';
+import { HtmlToReact } from '../../core/containers/html-to-react';
 
-import { EVENT_NAMES } from "../../api/event";
-import { api } from "../../api/api";
+import { EVENT_NAMES } from '../../api/event';
+import { api } from '../../api/api';
 
-import { TypeModalProps } from ".";
-import { CloseIcon, IconButton } from "..";
+import { TypeModalProps } from '.';
+import { CloseIcon, IconButton } from '..';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
-    position: "absolute",
+    position: 'absolute',
     "& ~ & > div[class*='backdrop']": {
-      backgroundColor: "transparent",
+      backgroundColor: 'transparent',
     },
   },
   backdrop: {
-    position: "absolute",
+    position: 'absolute',
     background: theme.palette.backdrop,
   },
   content: {
     padding: theme.spacing(5, 0),
   },
   modalTitleContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "5px 10px",
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '5px 10px',
   },
   modalTitleLabel: {
-    display: "flex",
-    justifyContent: "flex-start",
+    display: 'flex',
+    justifyContent: 'flex-start',
   },
   modalTitleActions: {
-    display: "flex",
-    justifyContent: "flex-end",
+    display: 'flex',
+    justifyContent: 'flex-end',
   },
   headerActionsContainer: {
-    display: "flex",
-    padding: "5px 10px",
-    "& > *:not(:last-child)": {
+    display: 'flex',
+    padding: '5px 10px',
+    '& > *:not(:last-child)': {
       marginRight: theme.spacing(3),
     },
   },
   closedModal: {
-    display: "none",
+    display: 'none',
   },
   createdAction: {
     width: `30%`,
-    alignSelf: "flex-end",
-    "& > * ": {
-      textAlign: "center",
+    alignSelf: 'flex-end',
+    '& > * ': {
+      textAlign: 'center',
     },
   },
 }));
@@ -77,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Customized Material UI Dialog Properties
  */
-interface DialogProps extends Omit<MaterialDialogProps, "title"> {
+interface DialogProps extends Omit<MaterialDialogProps, 'title'> {
   id?: string;
 
   // custom dialog classes and styles
@@ -111,7 +99,7 @@ interface DialogProps extends Omit<MaterialDialogProps, "title"> {
  * @param {DialogProps} props the properties passed to the Dialog element
  * @returns {JSX.Element} the created Dialog element
  */
-export const Modal = (props: DialogProps): JSX.Element => {
+export function Modal(props: DialogProps): JSX.Element {
   const [createdModal, setCreatedModal] = useState<JSX.Element>();
   const [update, setUpdate] = useState<number>(0);
 
@@ -158,7 +146,7 @@ export const Modal = (props: DialogProps): JSX.Element => {
       dialogContent: {
         width: modal.width,
         height: modal.height,
-        maxWidth: "none",
+        maxWidth: 'none',
       },
     })(({ classes }: { classes: ClassNameMap }) => (
       <Dialog
@@ -169,23 +157,18 @@ export const Modal = (props: DialogProps): JSX.Element => {
         classes={{
           paper: classes.dialogContent,
         }}
-        aria-labelledby={props["aria-labelledby"]}
-        aria-describedby={props["aria-describedby"]}
+        aria-labelledby={props['aria-labelledby']}
+        aria-describedby={props['aria-describedby']}
         fullScreen={fullScreen}
         BackdropProps={{ classes: { root: dialogClasses.backdrop } }}
       >
         <div className={dialogClasses.modalTitleContainer}>
-          {modal.header?.title ? (
-            <DialogTitle className={dialogClasses.modalTitleLabel}>
-              {modal.header?.title}
-            </DialogTitle>
-          ) : null}
+          {modal.header?.title ? <DialogTitle className={dialogClasses.modalTitleLabel}>{modal.header?.title}</DialogTitle> : null}
           <div className={dialogClasses.modalTitleActions}>
-            {modal.header?.actions !== undefined &&
-            modal.header?.actions.length >= 1 ? (
+            {modal.header?.actions !== undefined && modal.header?.actions.length >= 1 ? (
               <div className={dialogClasses.headerActionsContainer}>
                 {modal.header?.actions.map((action) => {
-                  if (typeof action.content === "string") {
+                  if (typeof action.content === 'string') {
                     return (
                       <Fragment key={action.id}>
                         <HtmlToReact
@@ -196,16 +179,14 @@ export const Modal = (props: DialogProps): JSX.Element => {
                         />
                       </Fragment>
                     );
-                  } else
-                    return (
-                      <Fragment key={action.id}>{action.content}</Fragment>
-                    );
+                  }
+                  return <Fragment key={action.id}>{action.content}</Fragment>;
                 })}
               </div>
             ) : null}
             <IconButton
               id={`${id}-close-button`}
-              tooltip={t("close")}
+              tooltip={t('close')}
               tooltipPlacement="right"
               onClick={modal.close}
               className={classes.headerActionsContainer}
@@ -217,22 +198,16 @@ export const Modal = (props: DialogProps): JSX.Element => {
         <DialogContent>
           <div
             id={contentTextId}
-            className={`${dialogClasses.content} ${
-              contentTextClassName && contentTextClassName
-            }`}
+            className={`${dialogClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
-            {typeof modal.content === "string" ? (
-              <HtmlToReact htmlContent={modal.content} />
-            ) : (
-              modal.content
-            )}
+            {typeof modal.content === 'string' ? <HtmlToReact htmlContent={modal.content} /> : modal.content}
           </div>
         </DialogContent>
         {modal.footer?.actions && modal.footer?.actions.length >= 1 ? (
           <DialogActions>
             {modal.footer?.actions.map((action) => {
-              if (typeof action.content === "string") {
+              if (typeof action.content === 'string') {
                 return (
                   <Fragment key={action.id}>
                     <HtmlToReact
@@ -243,8 +218,8 @@ export const Modal = (props: DialogProps): JSX.Element => {
                     />
                   </Fragment>
                 );
-              } else
-                return <Fragment key={action.id}>{action.content}</Fragment>;
+              }
+              return <Fragment key={action.id}>{action.content}</Fragment>;
             }) || null}
           </DialogActions>
         ) : null}
@@ -276,8 +251,6 @@ export const Modal = (props: DialogProps): JSX.Element => {
         if (id === args.id && args.handlerName === mapId) {
           const modal = api.map(mapId).modal.modals[args.id] as TypeModalProps;
 
-          console.log(modal.content);
-
           setCreatedModal(ceatedModalJSXReturner(modal));
         }
       },
@@ -290,12 +263,7 @@ export const Modal = (props: DialogProps): JSX.Element => {
       (args) => {
         if (id === args.id && args.handlerName === mapId) {
           if (!args.open) openEvent = false;
-          setCreatedModal(
-            <Dialog
-              open={openEvent}
-              className={dialogClasses.closedModal}
-            ></Dialog>
-          );
+          setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
         }
       },
       mapId
@@ -308,34 +276,32 @@ export const Modal = (props: DialogProps): JSX.Element => {
     };
   }, [updateModal, createdModal]);
 
-  return createdModal ? (
-    createdModal
-  ) : (
-    <Dialog
-      open={open || openEvent}
-      className={`${dialogClasses.dialog} ${className && className}`}
-      style={{ ...style, position: "absolute" }}
-      aria-labelledby={props["aria-labelledby"]}
-      aria-describedby={props["aria-describedby"]}
-      fullScreen={fullScreen}
-      BackdropProps={{
-        classes: { root: dialogClasses.backdrop },
-      }}
-      container={container}
-    >
-      <DialogTitle id={titleId}>{title}</DialogTitle>
-      <DialogContent className={contentClassName} style={contentStyle}>
-        <div
-          id={contentTextId}
-          className={`${dialogClasses.content} ${
-            contentTextClassName && contentTextClassName
-          }`}
-          style={contentTextStyle}
-        >
-          {content}
-        </div>
-      </DialogContent>
-      <DialogActions>{actions}</DialogActions>
-    </Dialog>
+  return (
+    createdModal || (
+      <Dialog
+        open={open || openEvent}
+        className={`${dialogClasses.dialog} ${className && className}`}
+        style={{ ...style, position: 'absolute' }}
+        aria-labelledby={props['aria-labelledby']}
+        aria-describedby={props['aria-describedby']}
+        fullScreen={fullScreen}
+        BackdropProps={{
+          classes: { root: dialogClasses.backdrop },
+        }}
+        container={container}
+      >
+        <DialogTitle id={titleId}>{title}</DialogTitle>
+        <DialogContent className={contentClassName} style={contentStyle}>
+          <div
+            id={contentTextId}
+            className={`${dialogClasses.content} ${contentTextClassName && contentTextClassName}`}
+            style={contentTextStyle}
+          >
+            {content}
+          </div>
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
+      </Dialog>
+    )
   );
-};
+}

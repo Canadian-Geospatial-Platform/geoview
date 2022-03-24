@@ -2,7 +2,7 @@
 const w = window as any;
 
 // access the cgpv object from the window object
-const cgpv = w["cgpv"];
+const cgpv = w['cgpv'];
 
 // access the api calls
 const { api, react, reactLeaflet, reactLeafletCore } = cgpv;
@@ -45,7 +45,7 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
     },
     [parentMap]
   );
-  useMapEvent("click", onClick);
+  useMapEvent('click', onClick);
 
   // Keep track of bounds in state to trigger renders
   const [bounds, setBounds] = useState({
@@ -57,22 +57,15 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
 
   function updateMap(): void {
     // Update the minimap's view to match the parent map's center and zoom
-    const newZoom =
-      parentMap.getZoom() - zoomFactor > 0
-        ? parentMap.getZoom() - zoomFactor
-        : 0;
+    const newZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
 
     minimap.flyTo(parentMap.getCenter(), newZoom);
 
     // Set in timeout the calculation to create the bound so parentMap getBounds has the updated bounds
     setTimeout(() => {
       minimap.invalidateSize();
-      const pMin = minimap.latLngToContainerPoint(
-        parentMap.getBounds().getSouthWest()
-      );
-      const pMax = minimap.latLngToContainerPoint(
-        parentMap.getBounds().getNorthEast()
-      );
+      const pMin = minimap.latLngToContainerPoint(parentMap.getBounds().getSouthWest());
+      const pMax = minimap.latLngToContainerPoint(parentMap.getBounds().getNorthEast());
       setBounds({
         height: pMin.y - pMax.y,
         width: pMax.x - pMin.x,
@@ -110,10 +103,7 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
   }, [minimap, parentMap, zoomFactor]);
 
   // Listen to events on the parent map
-  const handlers = useMemo(
-    () => ({ moveend: onChange, zoomend: onChange }),
-    [onChange]
-  );
+  const handlers = useMemo(() => ({ moveend: onChange, zoomend: onChange }), [onChange]);
   const context = { __version: 1, map: parentMap };
   const leafletElement = {
     instance: parentMap,
@@ -128,11 +118,11 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
         top: `${bounds.top}px`,
         width: `${bounds.width}px`,
         height: `${bounds.height}px`,
-        display: "block",
+        display: 'block',
         opacity: 0.5,
-        position: "absolute",
-        border: "1px solid rgb(0, 0, 0)",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        position: 'absolute',
+        border: '1px solid rgb(0, 0, 0)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         zIndex: 1000,
       }}
     />

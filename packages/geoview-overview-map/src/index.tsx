@@ -1,5 +1,5 @@
-import { TypeProps } from "geoview-core";
-import { OverviewMap } from "./overview-map";
+import { TypeProps } from 'geoview-core';
+import { OverviewMap } from './overview-map';
 
 const w = window as any;
 
@@ -22,8 +22,8 @@ class OverviewMapPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {},
-    "fr-CA": {},
+    'en-CA': {},
+    'fr-CA': {},
   };
 
   /**
@@ -33,24 +33,18 @@ class OverviewMapPlugin {
     const { mapId } = this.OverviewMapPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const cgpv = w['cgpv'];
 
     // access the api calls
     const { api } = cgpv;
 
-    const { language, projection, getMapOptions, currentProjection } =
-      api.map(mapId);
+    const { language, projection, getMapOptions, currentProjection } = api.map(mapId);
 
     api
       .map(mapId)
       .addComponent(
-        "overviewMap",
-        <OverviewMap
-          id={mapId}
-          language={language}
-          crs={projection.getCRS()}
-          zoomFactor={getMapOptions(currentProjection).zoomFactor}
-        />
+        'overviewMap',
+        <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor} />
       );
   };
 
@@ -61,16 +55,16 @@ class OverviewMapPlugin {
     const { mapId } = this.OverviewMapPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const cgpv = w['cgpv'];
 
     // access the api calls
     const { api } = cgpv;
 
-    api.map(mapId).removeComponent("overviewMap");
+    api.map(mapId).removeComponent('overviewMap');
   }
 }
 
 export default OverviewMapPlugin;
 
-w["plugins"] = w["plugins"] || {};
-w["plugins"]["overviewMap"] = OverviewMapPlugin;
+w['plugins'] = w['plugins'] || {};
+w['plugins']['overviewMap'] = OverviewMapPlugin;

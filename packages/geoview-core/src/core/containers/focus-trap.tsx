@@ -1,30 +1,33 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react/no-danger */
+import { useEffect, useState } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from '@mui/material/styles';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import useMediaQuery from "@mui/material/useMediaQuery";
+import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { Modal, Button } from "../../ui";
+import { HtmlToReact } from './html-to-react';
+
+import { Modal, Button } from '../../ui';
 
 const useStyles = makeStyles((theme) => ({
   trap: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
     top: theme.spacing(0),
     left: theme.spacing(0),
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     zIndex: theme.zIndex.focusDialog,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
 }));
 
@@ -48,7 +51,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down("md"));
+  const fullScreen = useMediaQuery(defaultTheme.breakpoints.down('md'));
 
   const [open, setOpen] = useState(false);
 
@@ -60,10 +63,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     callback(false);
-    mapElement?.classList.remove("map-focus-trap");
-    mapElement
-      ?.querySelectorAll(`a[id*="link-${id}"]`)
-      .forEach((elem) => elem.setAttribute("tabindex", "0"));
+    mapElement?.classList.remove('map-focus-trap');
+    mapElement?.querySelectorAll(`a[id*="link-${id}"]`).forEach((elem) => elem.setAttribute('tabindex', '0'));
     document.getElementById(`toplink-${id}`)?.focus();
   }
 
@@ -74,23 +75,21 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     const mapElement = document.getElementById(id);
 
     // add a class to specify the viewer is in focus trap mode
-    mapElement?.classList.add("map-focus-trap");
+    mapElement?.classList.add('map-focus-trap');
 
     // remove the top and bottom link from focus cycle and start the FocusTrap
-    mapElement
-      ?.querySelectorAll(`a[id*="link-${id}"]`)
-      .forEach((elem) => elem.setAttribute("tabindex", "-1"));
+    mapElement?.querySelectorAll(`a[id*="link-${id}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
     callback(true);
 
     // manage the exit of FocusTrap, remove the trap and focus the top link
     const manageExit = (evt2: KeyboardEvent) => {
-      if (evt2.code === "KeyQ" && evt2.ctrlKey) {
+      if (evt2.code === 'KeyQ' && evt2.ctrlKey) {
         exitFocus();
-        mapElement?.removeEventListener("keydown", manageExit);
+        mapElement?.removeEventListener('keydown', manageExit);
       }
     };
 
-    mapElement?.addEventListener("keydown", manageExit);
+    mapElement?.addEventListener('keydown', manageExit);
   }
 
   const handleEnable = () => {
@@ -110,27 +109,21 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   function manageBottomLink(evt: KeyboardEvent): void {
     // if Enter, skip before the map element
     // if shift+Tab, focus the map element
-    if (evt.code === "Enter") {
+    if (evt.code === 'Enter') {
       document.getElementById(`toplink-${id}`)?.focus();
-    } else if (evt.code === "Tab" && evt.shiftKey) {
+    } else if (evt.code === 'Tab' && evt.shiftKey) {
       // prevent the event to tab to inner map
       evt.preventDefault();
       evt.stopPropagation();
 
       // focus the map element and emit the map keyboard focus event
-      (
-        document
-          .getElementById(id)
-          ?.getElementsByClassName(`leaflet-map-${id}`)[0] as HTMLElement
-      ).focus();
+      (document.getElementById(id)?.getElementsByClassName(`leaflet-map-${id}`)[0] as HTMLElement).focus();
       api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, id, {});
     }
   }
 
   useEffect(() => {
-    document
-      .getElementById(`bottomlink-${id}`)
-      ?.addEventListener("keydown", manageBottomLink);
+    document.getElementById(`bottomlink-${id}`)?.addEventListener('keydown', manageBottomLink);
 
     // on map keyboard focus, show focus trap dialog
     api.event.on(
@@ -140,12 +133,12 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           // when mnap element get focus and focus is not trap, show dialog window
           const mapElement = document.getElementById(id);
 
-          if (mapElement && !mapElement.classList.contains("map-focus-trap")) {
+          if (mapElement && !mapElement.classList.contains('map-focus-trap')) {
             setOpen(true);
 
             // if user move the mouse over the map, cancel the dialog
             mapElement.addEventListener(
-              "mousemove",
+              'mousemove',
               () => {
                 setOpen(false);
                 exitFocus();
@@ -159,7 +152,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     );
 
     return () => {
-      document.removeEventListener("keydown", manageBottomLink);
+      document.removeEventListener('keydown', manageBottomLink);
       api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -167,7 +160,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   return (
     <Modal
-      container={document.getElementsByClassName("llwp-map")[0]}
+      container={document.getElementsByClassName('llwp-map')[0]}
       mapId={id}
       open={open}
       aria-labelledby="wcag-dialog-title"
@@ -175,41 +168,35 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       fullScreen={fullScreen}
       className={classes.trap}
       titleId="wcag-dialog-title"
-      title={t("keyboardnav.focusdialog.title")}
+      title={t('keyboardnav.focusdialog.title')}
       contentTextId="wcag-dialog-description"
-      content={
-        <div
-          dangerouslySetInnerHTML={{
-            __html: t("keyboardnav.focusdialog.main"),
-          }}
-        ></div>
-      }
+      content={<HtmlToReact htmlContent={t('keyboardnav.focusdialog.main')} />}
       actions={
         <>
           <Button
             id="enable-focus"
-            tooltip={t("keyboardnav.focusdialog.button.enable")}
+            tooltip={t('keyboardnav.focusdialog.button.enable')}
             tooltipPlacement="top-end"
             autoFocus
             onClick={handleEnable}
             type="text"
             style={{
-              width: "initial",
+              width: 'initial',
             }}
           >
-            {t("keyboardnav.focusdialog.button.enable")}
+            {t('keyboardnav.focusdialog.button.enable')}
           </Button>
           <Button
             id="skip-focus"
-            tooltip={t("keyboardnav.focusdialog.button.skip")}
+            tooltip={t('keyboardnav.focusdialog.button.skip')}
             tooltipPlacement="top-end"
             onClick={handleSkip}
             type="text"
             style={{
-              width: "initial",
+              width: 'initial',
             }}
           >
-            {t("keyboardnav.focusdialog.button.skip")}
+            {t('keyboardnav.focusdialog.button.skip')}
           </Button>
         </>
       }

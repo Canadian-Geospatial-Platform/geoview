@@ -1,23 +1,18 @@
 /* eslint-disable object-shorthand */
 /* eslint-disable no-underscore-dangle */
-import axios from "axios";
+import axios from 'axios';
 
-import L, { Layer } from "leaflet";
+import L, { Layer } from 'leaflet';
 
-import { mapService as esriMapService, MapService } from "esri-leaflet";
+import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import WMSCapabilities from "wms-capabilities";
+import WMSCapabilities from 'wms-capabilities';
 
-import { getXMLHttpRequest, xmlToJson } from "../../../core/utils/utilities";
+import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import {
-  TypeJSONObject,
-  TypeJSONObjectLoop,
-  TypeLayerConfig,
-} from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
+import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -37,7 +32,7 @@ export class WMS {
   id: string;
 
   // layer name with default
-  name: string = "WMS Layer";
+  name = 'WMS Layer';
 
   // layer type
   type: string;
@@ -45,13 +40,13 @@ export class WMS {
   // layer from leaflet
   layer: Layer | string;
 
-  //layer entries
+  // layer entries
   entries: string[] | undefined;
 
-  //layer or layer service url
+  // layer or layer service url
   url: string;
 
-  //mapService property
+  // mapService property
   mapService: MapService;
 
   // private varibale holding wms capabilities
@@ -66,19 +61,16 @@ export class WMS {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId("");
+    this.id = layerConfig.id || generateId('');
     this.type = layerConfig.type;
     this.#capabilities = {};
-    this.entries = layerConfig.entries?.split(",").map((item: string) => {
+    this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url =
-      layerConfig.url.indexOf("?") === -1
-        ? layerConfig.url + "?"
-        : layerConfig.url;
+    this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
     this.layer = new Layer();
   }
 
@@ -92,49 +84,40 @@ export class WMS {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
-    let capUrl =
-      this.url +
-      `service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
+    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
 
     const data = getXMLHttpRequest(capUrl);
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
-        if (value !== "{}") {
+        if (value !== '{}') {
           // check if entries exist
           let isValid = true;
 
           // parse the xml string and convert to json
-          const json = new WMSCapabilities(
-            value
-          ).toJSON() as TypeJSONObjectLoop;
+          const json = new WMSCapabilities(value).toJSON() as TypeJSONObjectLoop;
           this.#capabilities = json;
 
-          isValid = this.validateEntries(
-            json.Capability.Layer,
-            layer.entries as string
-          );
+          isValid = this.validateEntries(json.Capability.Layer, layer.entries as string);
 
-          let layerName = layer.hasOwnProperty("name")
-            ? layer.name
-            : json.Service.Name;
+          const layerName = layer.hasOwnProperty('name') ? layer.name : json.Service.Name;
           if (layerName) this.name = <string>layerName;
 
           if (isValid) {
             const wms = L.tileLayer.wms(layer.url, {
               layers: layer.entries,
-              format: "image/png",
+              format: 'image/png',
               transparent: true,
-              attribution: "",
+              attribution: '',
             });
             this.#wmsParams = wms.wmsParams;
 
             resolve(wms);
           } else {
-            resolve("{}");
+            resolve('{}');
           }
         } else {
-          resolve("{}");
+          resolve('{}');
         }
       });
     });
@@ -151,15 +134,16 @@ export class WMS {
     let isValid = true;
     // eslint-disable-next-line no-prototype-builtins
 
-    //Added support of multiple entries
-    let allNames = this.findAllByKey(layer, "Name");
-    const entryArray = entries.split(",").map((s) => s.trim());
+    // Added support of multiple entries
+    const allNames = this.findAllByKey(layer, 'Name');
+    const entryArray = entries.split(',').map((s) => s.trim());
     for (let i = 0; i < entryArray.length; i++) {
       isValid = isValid && allNames.includes(entryArray[i]);
     }
 
     return isValid;
   }
+
   /**
    * Helper function. Find all values of a given key form a nested object
    * @param {object} obj a object/nested object
@@ -169,17 +153,11 @@ export class WMS {
   private findAllByKey(obj: object, keyToFind: string): any {
     if (obj) {
       return Object.entries(obj).reduce(
-        (acc, [key, v]) =>
-          key === keyToFind
-            ? acc.concat(v)
-            : typeof v === "object"
-            ? acc.concat(this.findAllByKey(v, keyToFind))
-            : acc,
+        (acc, [key, v]) => (key === keyToFind ? acc.concat(v) : typeof v === 'object' ? acc.concat(this.findAllByKey(v, keyToFind)) : acc),
         []
       );
-    } else {
-      return [];
     }
+    return [];
   }
 
   /**
@@ -206,11 +184,8 @@ export class WMS {
         reader.readAsDataURL(blob);
       });
 
-    let legendUrl =
-      this.url +
-      "service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=" +
-      this.entries;
-    const response = await axios.get(legendUrl, { responseType: "blob" });
+    const legendUrl = `${this.url}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${this.entries}`;
+    const response = await axios.get(legendUrl, { responseType: 'blob' });
     return readAsyncFile(response.data);
   };
 
@@ -222,81 +197,70 @@ export class WMS {
    * @param {number} featureCount the map odject
    * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
    */
-  getFeatureInfo = async (
-    latlng: L.LatLng,
-    map: L.Map,
-    featureCount = 10
-  ): Promise<TypeJSONObject | null> => {
-    let inforFormat = "text/xml";
+  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJSONObject | null> => {
+    let inforFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
-      let formatArray = this.#capabilities.Capability.Request.GetFeatureInfo
-        .Format as any;
-      if (formatArray.includes("application/geojson"))
-        inforFormat = "application/geojson";
+      const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format as any;
+      if (formatArray.includes('application/geojson')) inforFormat = 'application/geojson';
     }
 
-    let params = this.getFeatureInfoParams(latlng, map);
-    params["info_format"] = inforFormat;
-    params["feature_count"] = featureCount;
+    const params = this.getFeatureInfoParams(latlng, map);
+    params.info_format = inforFormat;
+    params.feature_count = featureCount;
 
     const res = await axios.get(this.url, { params: params });
 
-    if (inforFormat == "application/geojson") {
+    if (inforFormat == 'application/geojson') {
       if (res.data.features.length > 0) {
-        let results: any[] = [];
+        const results: any[] = [];
         res.data.features.forEach((element) => {
           results.push({
             attributes: element.properties,
             geometry: element.geometry,
             layerId: this.id,
             layerName: element.layerName,
-            //displayFieldName: "OBJECTID",
-            //value: element.properties.OBJECTID,
+            // displayFieldName: "OBJECTID",
+            // value: element.properties.OBJECTID,
             geometryType: element.type,
           });
         });
 
         return { results: results };
-      } else {
-        return null;
       }
-    } else {
-      const featureInfoResponse = (
-        xmlToJson(res.request.responseXML) as TypeJSONObjectLoop
-      ).FeatureInfoResponse;
+      return null;
+    }
+    const featureInfoResponse = (xmlToJson(res.request.responseXML) as TypeJSONObjectLoop).FeatureInfoResponse;
 
-      if (featureInfoResponse && featureInfoResponse.FIELDS) {
-        let results: any[] = [];
-        // only one feature
-        if (featureInfoResponse.FIELDS["@attributes"]) {
+    if (featureInfoResponse && featureInfoResponse.FIELDS) {
+      const results: any[] = [];
+      // only one feature
+      if (featureInfoResponse.FIELDS['@attributes']) {
+        results.push({
+          attributes: featureInfoResponse.FIELDS['@attributes'],
+          geometry: null,
+          layerId: this.id,
+          layerName: this.name,
+          // displayFieldName: "OBJECTID",
+          // value: element.properties.OBJECTID,
+          geometryType: null,
+        });
+      } else {
+        featureInfoResponse.FIELDS.forEach((element) => {
           results.push({
-            attributes: featureInfoResponse.FIELDS["@attributes"],
+            attributes: element['@attributes'],
             geometry: null,
             layerId: this.id,
             layerName: this.name,
-            //displayFieldName: "OBJECTID",
-            //value: element.properties.OBJECTID,
+            // displayFieldName: "OBJECTID",
+            // value: element.properties.OBJECTID,
             geometryType: null,
           });
-        } else {
-          featureInfoResponse.FIELDS.forEach((element) => {
-            results.push({
-              attributes: element["@attributes"],
-              geometry: null,
-              layerId: this.id,
-              layerName: this.name,
-              //displayFieldName: "OBJECTID",
-              //value: element.properties.OBJECTID,
-              geometryType: null,
-            });
-          });
-        }
-        return { results: results };
-      } else {
-        return null;
+        });
       }
+      return { results: results };
     }
+    return null;
   };
 
   /**
@@ -311,16 +275,16 @@ export class WMS {
 
     const size = map.getSize();
 
-    let crs = map.options.crs;
+    const { crs } = map.options;
 
     // these are the SouthWest and NorthEast points
     // projected from LatLng into used crs
-    let sw = crs.project(map.getBounds().getSouthWest());
-    let ne = crs.project(map.getBounds().getNorthEast());
+    const sw = crs.project(map.getBounds().getSouthWest());
+    const ne = crs.project(map.getBounds().getNorthEast());
 
     const params: Record<string, unknown> = {
-      request: "GetFeatureInfo",
-      service: "WMS",
+      request: 'GetFeatureInfo',
+      service: 'WMS',
       version: this.#wmsParams.version,
       layers: this.#wmsParams.layers,
       query_layers: this.#wmsParams.layers,
@@ -329,15 +293,12 @@ export class WMS {
     };
 
     // Define version-related request parameters.
-    var version = window.parseFloat(this.#wmsParams.version);
-    params[version >= 1.3 ? "crs" : "srs"] = crs.code;
-    params["bbox"] = sw.x + "," + sw.y + "," + ne.x + "," + ne.y;
-    params["bbox"] =
-      version >= 1.3 && crs.code === "EPSG:4326"
-        ? sw.y + "," + sw.x + "," + ne.y + "," + ne.x
-        : sw.x + "," + sw.y + "," + ne.x + "," + ne.y;
-    params[version >= 1.3 ? "i" : "x"] = point.x;
-    params[version >= 1.3 ? "j" : "y"] = point.y;
+    const version = window.parseFloat(this.#wmsParams.version);
+    params[version >= 1.3 ? 'crs' : 'srs'] = crs.code;
+    params.bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    params.bbox = version >= 1.3 && crs.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    params[version >= 1.3 ? 'i' : 'x'] = point.x;
+    params[version >= 1.3 ? 'j' : 'y'] = point.y;
 
     return params;
   }

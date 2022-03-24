@@ -1,20 +1,19 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable no-plusplus */
-import L from "leaflet";
-import "leaflet.markercluster/src";
+import L from 'leaflet';
+import 'leaflet.markercluster/src';
 
-import { EVENT_NAMES } from "../../../api/event";
-import { api } from "../../../api/api";
-import { TypeStampedIconCreationFunction } from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
+import { EVENT_NAMES } from '../../../api/event';
+import { api } from '../../../api/api';
+import { TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+import { generateId } from '../../../core/utils/utilities';
 
-import "./marker-cluster-element";
+import './marker-cluster-element';
 
-import * as MarkerDefinitions from "../../../core/types/marker-definitions";
+import * as MarkerDefinitions from '../../../core/types/marker-definitions';
 
-let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } =
-  MarkerDefinitions;
+let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } = MarkerDefinitions;
 
 /**
  * function used for creating a marker cluster icon
@@ -42,8 +41,7 @@ const createMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
     icon = getClusterIconPart(Stamp);
   }
 
-  if (blinkingIcon)
-    L.DomUtil.addClass(icon.options as HTMLElement, "blinking-icon-enabled");
+  if (blinkingIcon) L.DomUtil.addClass(icon.options as HTMLElement, 'blinking-icon-enabled');
 
   return icon;
 };
@@ -67,23 +65,21 @@ export const defaultClusterGroupOptions: L.MarkerClusterGroupOptions = {
  */
 const createSpiderfiedMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
   const icon = createMarkerIcon(cluster);
-  icon.options.className =
-    "leaflet-marker-icon cluster-div-icon spiderfied-marker";
+  icon.options.className = 'leaflet-marker-icon cluster-div-icon spiderfied-marker';
 
   return icon;
 };
 
 // default options used by spiderfied cluster groups
-export const defaultSpiderfiedClusterGroupOptions: L.MarkerClusterGroupOptions =
-  {
-    maxClusterRadius: 100,
-    iconCreateFunction: createSpiderfiedMarkerIcon,
-    animate: false,
-    zoomToBoundsOnClick: false,
-    spiderfyOnMaxZoom: false,
-    removeOutsideVisibleBounds: false,
-    visible: true,
-  };
+export const defaultSpiderfiedClusterGroupOptions: L.MarkerClusterGroupOptions = {
+  maxClusterRadius: 100,
+  iconCreateFunction: createSpiderfiedMarkerIcon,
+  animate: false,
+  zoomToBoundsOnClick: false,
+  spiderfyOnMaxZoom: false,
+  removeOutsideVisibleBounds: false,
+  visible: true,
+};
 
 /**
  * Class used to manage marker groups
@@ -117,7 +113,7 @@ export class MarkerCluster {
   activeClusterGroupIndex = 0;
 
   // default marker cluster group name
-  defaultClusterGroupID = "defaultClusterGroup";
+  defaultClusterGroupID = 'defaultClusterGroup';
 
   // options used by cluster groups
   clusterGroupOptions = defaultClusterGroupOptions;
@@ -161,18 +157,12 @@ export class MarkerCluster {
     // initialize clusterGroupOptions
     this.setClusterGroupOptions(defaultClusterGroupOptions);
     // create default cluster group and set it as visible
-    this.createClusterGroup(
-      this.defaultClusterGroupID,
-      this.clusterGroupOptions
-    );
+    this.createClusterGroup(this.defaultClusterGroupID, this.clusterGroupOptions);
 
     // initialize spiderfiedClusterGroupOptions
     this.setSpiderfiedClusterGroupOptions(defaultSpiderfiedClusterGroupOptions);
     // create a spiderfied marker cluster group
-    this.spiderfiedMarkerGroup = this.newClusterGroupInstance(
-      "SpiderfiedClusterGroup",
-      this.spiderfiedClusterGroupOptions
-    );
+    this.spiderfiedMarkerGroup = this.newClusterGroupInstance('SpiderfiedClusterGroup', this.spiderfiedClusterGroupOptions);
 
     // listen to marker cluster element start blinking events
     api.event.on(
@@ -182,12 +172,10 @@ export class MarkerCluster {
         if (this.blinkingElement && this.blinkingElement.id !== payload.id) {
           const blinkingElementId = this.blinkingElement.id;
           if (this.spiderfiedModeOn) {
-            const spiderfiedVersion =
-              this.getSpiderfiedMarkerClusterElement(blinkingElementId);
+            const spiderfiedVersion = this.getSpiderfiedMarkerClusterElement(blinkingElementId);
             if (spiderfiedVersion) spiderfiedVersion.stopBlinking();
           }
-          const unspiderfiedVersion =
-            this.getMarkerClusterElement(blinkingElementId);
+          const unspiderfiedVersion = this.getMarkerClusterElement(blinkingElementId);
           if (unspiderfiedVersion) unspiderfiedVersion.stopBlinking();
         }
         this.blinkingElement = this.getMarkerClusterElement(payload.id);
@@ -213,12 +201,7 @@ export class MarkerCluster {
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADD,
       (payload) => {
         const id = payload.id ? payload.id : null;
-        this.addMarkerElement(
-          payload.latitude,
-          payload.longitude,
-          payload.options,
-          id
-        );
+        this.addMarkerElement(payload.latitude, payload.longitude, payload.options, id);
       },
       map.id
     );
@@ -247,19 +230,15 @@ export class MarkerCluster {
             // Test the spiderfied maker cluster elements to find those that are inside the selection box.
             if (bbox.contains(markerClusterElements[i].getLatLng())) {
               // Since spiderfied markers are clones, find the originals and toggle the selected flag.
-              const originalMarker = this.getMarkerClusterElement(
-                markerClusterElements[i].id
-              );
+              const originalMarker = this.getMarkerClusterElement(markerClusterElements[i].id);
               originalMarker.setSelectedFlag(!originalMarker.selected);
               // Refresh all marker cluster groups that contain the updated original marker
               // so the marker cluster they contains reflect the new reality
-              this.getClusterGroupsByMarkerId(originalMarker.id).forEach(
-                (masterClusterGroup) => {
-                  masterClusterGroup.refreshClusters();
-                }
-              );
+              this.getClusterGroupsByMarkerId(originalMarker.id).forEach((masterClusterGroup) => {
+                masterClusterGroup.refreshClusters();
+              });
               // Also, refresh the blinking css of the modified marker
-              this.controlClickOnMarkerElement(originalMarker, "refresh");
+              this.controlClickOnMarkerElement(originalMarker, 'refresh');
             }
           }
           // Set the flag used to restore the last spiderfied marker that was unspiderfy by
@@ -275,27 +254,18 @@ export class MarkerCluster {
               // for each marker cluster element...
               for (let j = 0; j < markerClusterElements.length; j++) {
                 // get the visible marker, it may be an element or a cluster...
-                const visibleMarker = this.clusterGroups[i].getVisibleParent(
-                  markerClusterElements[j]
-                );
+                const visibleMarker = this.clusterGroups[i].getVisibleParent(markerClusterElements[j]);
                 // if it is in the selection box...
                 if (bbox.contains(visibleMarker.getLatLng())) {
                   // toggle the selected flag
-                  markerClusterElements[j].setSelectedFlag(
-                    !markerClusterElements[j].selected
-                  );
+                  markerClusterElements[j].setSelectedFlag(!markerClusterElements[j].selected);
                   // Refresh all marker cluster groups that contain the updated marker
                   // so the marker cluster they contains reflect the new reality
-                  this.getClusterGroupsByMarkerId(
-                    markerClusterElements[j].id
-                  ).forEach((masterClusterGroup) => {
+                  this.getClusterGroupsByMarkerId(markerClusterElements[j].id).forEach((masterClusterGroup) => {
                     masterClusterGroup.refreshClusters();
                   });
                   // Also, refresh the blinking css of the modified marker
-                  this.controlClickOnMarkerElement(
-                    markerClusterElements[j],
-                    "refresh"
-                  );
+                  this.controlClickOnMarkerElement(markerClusterElements[j], 'refresh');
                 }
               }
             }
@@ -355,9 +325,7 @@ export class MarkerCluster {
    *
    * @param {MarkerClusterGroupOptions} options marker options including styling
    */
-  setSpiderfiedClusterGroupOptions = (
-    options: L.MarkerClusterGroupOptions
-  ): void => {
+  setSpiderfiedClusterGroupOptions = (options: L.MarkerClusterGroupOptions): void => {
     this.spiderfiedClusterGroupOptions = {
       ...options,
       on: {
@@ -387,7 +355,7 @@ export class MarkerCluster {
       ...options,
       id: markerId,
     });
-    marker.on("click", this.onMarkerElementClick);
+    marker.on('click', this.onMarkerElementClick);
 
     return marker;
   };
@@ -402,33 +370,19 @@ export class MarkerCluster {
    *
    * @returns {L.MarkerClusterElement} the created marker cluster element.
    */
-  addMarkerElement = (
-    latitude: number,
-    longitude: number,
-    options: L.MarkerClusterElementOptions,
-    id?: string
-  ): L.MarkerClusterElement => {
+  addMarkerElement = (latitude: number, longitude: number, options: L.MarkerClusterElementOptions, id?: string): L.MarkerClusterElement => {
     const MarkerClusterElementId = generateId(id);
 
-    const marker = this.createMarkerElement(
-      MarkerClusterElementId,
-      latitude,
-      longitude,
-      {
-        ...options,
-        mapId: this.markerClusterMap.id,
-      }
-    );
+    const marker = this.createMarkerElement(MarkerClusterElementId, latitude, longitude, {
+      ...options,
+      mapId: this.markerClusterMap.id,
+    });
 
     this.markerClusterElements.push(marker);
     marker.addTo(this.clusterGroups[this.activeClusterGroupIndex]);
 
     // emit an event that a marker vector has been added
-    api.event.emit(
-      EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADDED,
-      this.markerClusterMap.id,
-      { ...marker }
-    );
+    api.event.emit(EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADDED, this.markerClusterMap.id, { ...marker });
 
     return marker;
   };
@@ -451,9 +405,7 @@ export class MarkerCluster {
    *
    * @returns {L.MarkerClusterElement} a marker cluster element with the specified id
    */
-  getSpiderfiedMarkerClusterElement = (
-    id: string
-  ): L.MarkerClusterElement | null => {
+  getSpiderfiedMarkerClusterElement = (id: string): L.MarkerClusterElement | null => {
     let returnValue: L.MarkerClusterElement | null = null;
     this.spiderfiedMarkerGroup.eachLayer((marker) => {
       if (marker.id === id) returnValue = marker;
@@ -476,8 +428,7 @@ export class MarkerCluster {
       const markerClusterElements = this.clusterGroups[i].getLayers();
       for (let j = 0; j < markerClusterElements.length; j++) {
         const markerClusterElement = markerClusterElements[j];
-        if (markerClusterElement.id === id)
-          returnValue.push(this.clusterGroups[i]);
+        if (markerClusterElement.id === id) returnValue.push(this.clusterGroups[i]);
       }
     }
 
@@ -492,10 +443,7 @@ export class MarkerCluster {
    *
    * @returns {L.MarkerClusterGroup} the new marker cluster group instance
    */
-  newClusterGroupInstance = (
-    clusterGroupid: string,
-    options: L.MarkerClusterGroupOptions
-  ): L.MarkerClusterGroup => {
+  newClusterGroupInstance = (clusterGroupid: string, options: L.MarkerClusterGroupOptions): L.MarkerClusterGroup => {
     const clusterGroup = L.markerClusterGroup({
       ...options,
       id: clusterGroupid,
@@ -522,17 +470,11 @@ export class MarkerCluster {
    * @param {string} clusterGroupid the id of the marker cluster group to use when managing this group
    * @param {MarkerClusterGroupOptions>} options marker cluster group options
    */
-  createClusterGroup = (
-    clusterGroupid: string,
-    options?: L.MarkerClusterGroupOptions
-  ): L.MarkerClusterGroup => {
+  createClusterGroup = (clusterGroupid: string, options?: L.MarkerClusterGroupOptions): L.MarkerClusterGroup => {
     let markerClusterGroup = this.getMarkerClusterGroup(clusterGroupid);
     if (!markerClusterGroup) {
       const markerClusterGroupOptions = options || this.clusterGroupOptions;
-      markerClusterGroup = this.newClusterGroupInstance(
-        clusterGroupid,
-        markerClusterGroupOptions
-      );
+      markerClusterGroup = this.newClusterGroupInstance(clusterGroupid, markerClusterGroupOptions);
       if (markerClusterGroup.visible) {
         markerClusterGroup.addTo(this.markerClusterMap);
       }
@@ -600,8 +542,7 @@ export class MarkerCluster {
    */
   turnOnGeometryGroups = (): void => {
     for (let i = 0; i < this.clusterGroups.length; i++) {
-      if (this.clusterGroups[i].visible)
-        this.clusterGroups[i].addTo(this.markerClusterMap);
+      if (this.clusterGroups[i].visible) this.clusterGroups[i].addTo(this.markerClusterMap);
     }
   };
 
@@ -612,8 +553,7 @@ export class MarkerCluster {
    */
   turnOffGeometryGroups = (): void => {
     for (let i = 0; i < this.clusterGroups.length; i++) {
-      if (this.clusterGroups[i].visible)
-        this.clusterGroups[i].removeFrom(this.markerClusterMap);
+      if (this.clusterGroups[i].visible) this.clusterGroups[i].removeFrom(this.markerClusterMap);
     }
   };
 
@@ -628,9 +568,7 @@ export class MarkerCluster {
   getMarkerClusterGroup = (clusterGroupid?: string): L.MarkerClusterGroup => {
     let markerClusterGroup: L.MarkerClusterGroup;
     if (clusterGroupid) {
-      [markerClusterGroup] = this.clusterGroups.filter(
-        (clusterGroup) => clusterGroup.id === clusterGroupid
-      );
+      [markerClusterGroup] = this.clusterGroups.filter((clusterGroup) => clusterGroup.id === clusterGroupid);
     } else {
       markerClusterGroup = this.clusterGroups[this.activeClusterGroupIndex];
     }
@@ -665,10 +603,7 @@ export class MarkerCluster {
    * @param {L.MarkerClusterElement} the marker cluster element to be added to the group
    * @param {string} geometryGroupId optional id of the group to add the geometry to
    */
-  addElementToMarkerClusterGroup = (
-    markerClusterElement: L.MarkerClusterElement,
-    clusterGroupId?: string
-  ): void => {
+  addElementToMarkerClusterGroup = (markerClusterElement: L.MarkerClusterElement, clusterGroupId?: string): void => {
     let markerClusterGroup: L.MarkerClusterGroup;
     if (clusterGroupId) {
       // create marker cluster group if it does not exist
@@ -685,12 +620,8 @@ export class MarkerCluster {
    *
    * @param {string} markerClusterElementId the marker cluster element id
    */
-  deleteMarkerClusterElementFromGroups = (
-    markerClusterElementId: string
-  ): void => {
-    const markerClusterElement = this.getMarkerClusterElement(
-      markerClusterElementId
-    );
+  deleteMarkerClusterElementFromGroups = (markerClusterElementId: string): void => {
+    const markerClusterElement = this.getMarkerClusterElement(markerClusterElementId);
     for (let i = 0; i < this.clusterGroups.length; i++) {
       this.clusterGroups[i].getLayers().forEach((layer) => {
         if (markerClusterElement === layer) {
@@ -707,13 +638,8 @@ export class MarkerCluster {
    * @param {string} markerClusterElementId the marker cluster id to be deleted
    * @param {string} clusterGroupid optional group id
    */
-  deleteMarkerClusterFromGroup = (
-    markerClusterElementId: string,
-    clusterGroupid?: string
-  ): void => {
-    const markerClusterElement = this.getMarkerClusterElement(
-      markerClusterElementId
-    );
+  deleteMarkerClusterFromGroup = (markerClusterElementId: string, clusterGroupid?: string): void => {
+    const markerClusterElement = this.getMarkerClusterElement(markerClusterElementId);
     const clusterGroup = this.getMarkerClusterGroup(clusterGroupid);
     clusterGroup.getLayers().forEach((layer) => {
       if (markerClusterElement === layer) {
@@ -730,9 +656,7 @@ export class MarkerCluster {
    *
    * @returns {L.MarkerClusterGroup} the marker cluster group used by the méthode
    */
-  deleteMarkerClusterElementsFromGroup = (
-    clusterGroupid?: string
-  ): L.MarkerClusterGroup => {
+  deleteMarkerClusterElementsFromGroup = (clusterGroupid?: string): L.MarkerClusterGroup => {
     const clusterGroup = this.getMarkerClusterGroup(clusterGroupid);
     clusterGroup.clearLayers();
     return clusterGroup;
@@ -746,8 +670,7 @@ export class MarkerCluster {
    * @param {string} clusterGroupid optional id of the marker cluster group to delete
    */
   deleteMarkerClusterGroup = (clusterGroupid?: string): void => {
-    const clusterGroup =
-      this.deleteMarkerClusterElementsFromGroup(clusterGroupid);
+    const clusterGroup = this.deleteMarkerClusterElementsFromGroup(clusterGroupid);
     if (clusterGroup.id !== this.defaultClusterGroupID) {
       for (let i = 0; i < this.clusterGroups.length; i++) {
         if (this.clusterGroups[i].id === clusterGroup.id) {
@@ -763,28 +686,13 @@ export class MarkerCluster {
    * @param {MarkerClusterMouseEvent} event the event information
    */
   onClusterClick = (event: L.MarkerClusterMouseEvent): void => {
-    if (
-      !event.originalEvent.shiftKey &&
-      !event.originalEvent.ctrlKey &&
-      event.originalEvent.altKey
-    ) {
+    if (!event.originalEvent.shiftKey && !event.originalEvent.ctrlKey && event.originalEvent.altKey) {
       // toggle the cluster selection of the cluster you alt-clicked on (i.e.: selected becomes unselected and inversly)
-      this.altClickOnMarkerCluster(
-        event.propagatedFrom.getAllChildMarkers(),
-        event.target
-      );
-    } else if (
-      event.originalEvent.shiftKey &&
-      !event.originalEvent.ctrlKey &&
-      !event.originalEvent.altKey
-    ) {
+      this.altClickOnMarkerCluster(event.propagatedFrom.getAllChildMarkers(), event.target);
+    } else if (event.originalEvent.shiftKey && !event.originalEvent.ctrlKey && !event.originalEvent.altKey) {
       // zoom to the cluster you shift clicked on
       event.propagatedFrom.zoomToBounds({ padding: [20, 20] });
-    } else if (
-      !event.originalEvent.shiftKey &&
-      !event.originalEvent.ctrlKey &&
-      !event.originalEvent.altKey
-    ) {
+    } else if (!event.originalEvent.shiftKey && !event.originalEvent.ctrlKey && !event.originalEvent.altKey) {
       // spiderfy the cluster you clicked on (i.e.: hide everything but a spider version of the cluster)
       event.propagatedFrom.unspiderfy();
       if (!this.respiderfyTheLastSpiderfiedClusterGroup) {
@@ -800,9 +708,7 @@ export class MarkerCluster {
    *
    * @param {L.MarkerClusterElement[]} childMarkers the marker cluster elements that compopse the marker cluster.
    */
-  private clickOnMarkerCluster = (
-    childMarkers: L.MarkerClusterElement[]
-  ): void => {
+  private clickOnMarkerCluster = (childMarkers: L.MarkerClusterElement[]): void => {
     // activate spiderfied mode (this flag is used by event handler)
     this.spiderfiedModeOn = true;
     // disable blink events since the spiderfied marker cluster is a copy of the original cluster.
@@ -810,15 +716,10 @@ export class MarkerCluster {
     this.disableblinkingEvent = true;
     // turn off all visible cluster groups
     this.clusterGroups.forEach((clusterGroup) => {
-      if (clusterGroup.options.visible)
-        clusterGroup.removeFrom(this.markerClusterMap);
+      if (clusterGroup.options.visible) clusterGroup.removeFrom(this.markerClusterMap);
     });
     // turn off all visible geometry groups
-    api.event.emit(
-      api.eventNames.EVENT_VECTOR_OFF,
-      this.markerClusterMap.id,
-      {}
-    );
+    api.event.emit(api.eventNames.EVENT_VECTOR_OFF, this.markerClusterMap.id, {});
     // Insert only the markers associated to the current group in the new spiderfied cluster
     // and keep a reference to the last child marker clone
     let i = 0;
@@ -848,10 +749,7 @@ export class MarkerCluster {
    * @param {L.MarkerClusterElement[]} childMarkers the marker cluster elements that compopse the marker cluster.
    * @param {L.MarkerClusterGroup} markerClusterGroup the marker cluster group that contains the marker cluster elements.
    */
-  private altClickOnMarkerCluster = (
-    childMarkers: L.MarkerClusterElement[],
-    markerClusterGroup: L.MarkerClusterGroup
-  ): void => {
+  private altClickOnMarkerCluster = (childMarkers: L.MarkerClusterElement[], markerClusterGroup: L.MarkerClusterGroup): void => {
     for (let i = 0; i < childMarkers.length; i++) {
       // toggle the value of the selected flag
       childMarkers[i].setSelectedFlag(!childMarkers[i].selected);
@@ -878,34 +776,19 @@ export class MarkerCluster {
    * @param {MarkerClusterMouseEvent} event the event information
    */
   onUnspiderfyCluster = (event: L.MarkerClusterMouseEvent): void => {
-    event.target.off("unspiderfied", this.onUnspiderfyCluster);
+    event.target.off('unspiderfied', this.onUnspiderfyCluster);
     this.spiderfiedMarkerGroup.clearLayers();
-    this.spiderfiedMarkerGroup = this.newClusterGroupInstance(
-      "SpiderfiedClusterGroup",
-      this.spiderfiedClusterGroupOptions
-    );
-    event.target.on("unspiderfied", this.onUnspiderfyCluster);
+    this.spiderfiedMarkerGroup = this.newClusterGroupInstance('SpiderfiedClusterGroup', this.spiderfiedClusterGroupOptions);
+    event.target.on('unspiderfied', this.onUnspiderfyCluster);
     // turn on all visible geometry groups
-    api.event.emit(
-      api.eventNames.EVENT_VECTOR_ON,
-      this.markerClusterMap.id,
-      {}
-    );
+    api.event.emit(api.eventNames.EVENT_VECTOR_ON, this.markerClusterMap.id, {});
     // turn on all visible cluster group
     this.clusterGroups.forEach((clusterGroup) => {
-      if (clusterGroup.options.visible)
-        clusterGroup.addTo(this.markerClusterMap);
+      if (clusterGroup.options.visible) clusterGroup.addTo(this.markerClusterMap);
     });
 
-    if (
-      this.respiderfyTheLastSpiderfiedClusterGroup &&
-      this.lastUnspidefiedClusterGroupEvent
-    ) {
-      this.lastUnspidefiedClusterGroupEvent.target.fire(
-        "click",
-        this.lastUnspidefiedClusterGroupEvent,
-        true
-      );
+    if (this.respiderfyTheLastSpiderfiedClusterGroup && this.lastUnspidefiedClusterGroupEvent) {
+      this.lastUnspidefiedClusterGroupEvent.target.fire('click', this.lastUnspidefiedClusterGroupEvent, true);
       this.respiderfyTheLastSpiderfiedClusterGroup = false;
     } else {
       // deactivate spiderfied mode
@@ -920,39 +803,19 @@ export class MarkerCluster {
    */
   onMarkerElementClick = (event: L.MarkerClusterElementMouseEvent): void => {
     const clickedMarker = event.target;
-    if (
-      !event.originalEvent.shiftKey &&
-      event.originalEvent.ctrlKey &&
-      !event.originalEvent.altKey
-    ) {
-      this.controlClickOnMarkerElement(clickedMarker, "toggle");
-    } else if (
-      event.originalEvent.shiftKey &&
-      !event.originalEvent.ctrlKey &&
-      !event.originalEvent.altKey
-    ) {
+    if (!event.originalEvent.shiftKey && event.originalEvent.ctrlKey && !event.originalEvent.altKey) {
+      this.controlClickOnMarkerElement(clickedMarker, 'toggle');
+    } else if (event.originalEvent.shiftKey && !event.originalEvent.ctrlKey && !event.originalEvent.altKey) {
       // zoom to the element you shift clicked on
       // get the visible marker, it may be an element or a cluster...
-      const originalMarker = this.spiderfiedModeOn
-        ? this.getMarkerClusterElement(clickedMarker.id)
-        : clickedMarker;
+      const originalMarker = this.spiderfiedModeOn ? this.getMarkerClusterElement(clickedMarker.id) : clickedMarker;
       this.markerClusterMap.fitBounds(
         L.latLngBounds(
-          [
-            originalMarker.getLatLng().lat - 0.5,
-            originalMarker.getLatLng().lng - 0.5,
-          ],
-          [
-            originalMarker.getLatLng().lat + 0.5,
-            originalMarker.getLatLng().lng + 0.5,
-          ]
+          [originalMarker.getLatLng().lat - 0.5, originalMarker.getLatLng().lng - 0.5],
+          [originalMarker.getLatLng().lat + 0.5, originalMarker.getLatLng().lng + 0.5]
         )
       );
-    } else if (
-      !event.originalEvent.shiftKey &&
-      !event.originalEvent.ctrlKey &&
-      event.originalEvent.altKey
-    ) {
+    } else if (!event.originalEvent.shiftKey && !event.originalEvent.ctrlKey && event.originalEvent.altKey) {
       this.altClickOnMarkerElement(clickedMarker);
     }
   };
@@ -963,12 +826,8 @@ export class MarkerCluster {
    * @param {L.MarkerClusterElement} clickedMarker the marker cluster element that has been clicked on
    * @param {'refresh' | 'toggle'} action type of action to apply to the blinking flag
    */
-  private controlClickOnMarkerElement = (
-    clickedMarker: L.MarkerClusterElement,
-    action: "refresh" | "toggle"
-  ): void => {
-    const stopCondition =
-      action === "toggle" ? clickedMarker.blinking : !clickedMarker.blinking;
+  private controlClickOnMarkerElement = (clickedMarker: L.MarkerClusterElement, action: 'refresh' | 'toggle'): void => {
+    const stopCondition = action === 'toggle' ? clickedMarker.blinking : !clickedMarker.blinking;
 
     // Update the clicked marker
     if (stopCondition) clickedMarker.stopBlinking();
@@ -977,8 +836,7 @@ export class MarkerCluster {
     // in spiderfied mode the clicked marker is a copy of a marker saved in the markerClusterElements
     // array. So, we must retreive the original marker and update it.
     if (this.spiderfiedModeOn) {
-      if (stopCondition)
-        this.setMarkerElementBlinkingFlags(clickedMarker.id, false);
+      if (stopCondition) this.setMarkerElementBlinkingFlags(clickedMarker.id, false);
       else this.setMarkerElementBlinkingFlags(clickedMarker.id, true);
 
       // refresh the cluster group used by the spiderfy feature.
@@ -986,11 +844,9 @@ export class MarkerCluster {
     }
 
     // refresh the cluster groups that contain the clicked marker.
-    this.getClusterGroupsByMarkerId(clickedMarker.id).forEach(
-      (clusterGroup) => {
-        clusterGroup.refreshClusters();
-      }
-    );
+    this.getClusterGroupsByMarkerId(clickedMarker.id).forEach((clusterGroup) => {
+      clusterGroup.refreshClusters();
+    });
   };
 
   /**
@@ -999,10 +855,7 @@ export class MarkerCluster {
    * @param {string} clickedMarkerId the id of the marker to update
    * @param {boolean} blinkingValueToAssign the value to assign to the flags
    */
-  private setMarkerElementBlinkingFlags = (
-    clickedMarkerId: string,
-    blinkingValueToAssign: boolean
-  ): void => {
+  private setMarkerElementBlinkingFlags = (clickedMarkerId: string, blinkingValueToAssign: boolean): void => {
     const unspiderfiedVersion = this.getMarkerClusterElement(clickedMarkerId);
     if (unspiderfiedVersion) {
       unspiderfiedVersion.options.blinking = blinkingValueToAssign;
@@ -1016,24 +869,20 @@ export class MarkerCluster {
    *
    * @param {L.MarkerClusterElement} clickedMarker the marker cluster element that has been clicked on
    */
-  private altClickOnMarkerElement = (
-    clickedMarker: L.MarkerClusterElement
-  ): void => {
+  private altClickOnMarkerElement = (clickedMarker: L.MarkerClusterElement): void => {
     // toggle the value of the selected flag
     clickedMarker.setSelectedFlag(!clickedMarker.selected);
 
     // in spiderfied mode the clicked marker is a copy of a marker saved in the markerClusterElements
     // array. So, we retreive the original marker and toggle its selection too.
     if (this.spiderfiedModeOn) {
-      const unspiderfiedVersion = this.getMarkerClusterElement(
-        clickedMarker.id
-      );
+      const unspiderfiedVersion = this.getMarkerClusterElement(clickedMarker.id);
       if (unspiderfiedVersion) {
         // toggle the value of the selected flag
         unspiderfiedVersion.setSelectedFlag(!unspiderfiedVersion.selected);
       }
     }
     // Since the toggleSelection method updates the marker, we must refresh its blinking behaviour.
-    this.controlClickOnMarkerElement(clickedMarker, "refresh");
+    this.controlClickOnMarkerElement(clickedMarker, 'refresh');
   };
 }

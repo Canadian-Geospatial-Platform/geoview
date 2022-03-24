@@ -1,12 +1,8 @@
-import { CSSProperties } from "react";
+import { CSSProperties } from 'react';
 
-import { TooltipProps } from "@mui/material";
+import { TooltipProps } from '@mui/material';
 
-import {
-  TypeChildren,
-  TypeButtonProps,
-  TypeFunction,
-} from "../../core/types/cgpv-types";
+import { TypeChildren, TypeButtonProps, TypeFunction } from '../../core/types/cgpv-types';
 
 /**
  * Class used to handle creating a new button
@@ -22,16 +18,16 @@ export class ButtonApi {
   tooltip?: string;
 
   // location of the tooltip (left, right,...)
-  tooltipPlacement: TooltipProps["placement"];
+  tooltipPlacement: TooltipProps['placement'];
 
   // type of button (text, textWithIcon, icon)
-  type: "text" | "textWithIcon" | "icon";
+  type: 'text' | 'textWithIcon' | 'icon';
 
   // state of the button (expanded, collapsed)
-  state?: "expanded" | "collapsed";
+  state?: 'expanded' | 'collapsed';
 
   // style variant of the button (text, contained, outlined)
-  variant?: "text" | "contained" | "outlined";
+  variant?: 'text' | 'contained' | 'outlined';
 
   // custom class names
   className?: string | undefined;

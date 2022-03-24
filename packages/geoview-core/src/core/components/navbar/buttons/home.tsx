@@ -1,10 +1,10 @@
-import { useContext } from "react";
+import { useContext } from 'react';
 
-import { MapContext } from "../../../app-start";
+import { MapContext } from '../../../app-start';
 
-import { Button, HomeIcon } from "../../../../ui";
+import { Button, HomeIcon } from '../../../../ui';
 
-import { api } from "../../../../api/api";
+import { api } from '../../../../api/api';
 
 /**
  * Interface used for home button properties
@@ -15,6 +15,14 @@ interface HomeProps {
 }
 
 /**
+ * default properties values
+ */
+const defaultProps = {
+  className: '',
+  iconClassName: '',
+};
+
+/**
  * Create a home button to return the user to the map center
  *
  * @param {HomeProps} props the home button properties
@@ -23,7 +31,7 @@ interface HomeProps {
 export default function Home(props: HomeProps): JSX.Element {
   const { className, iconClassName } = props;
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -32,8 +40,8 @@ export default function Home(props: HomeProps): JSX.Element {
    */
   function setHome() {
     // get map and set initial bounds to use in zoom home
-    const center = api.map(mapId).mapProps.center;
-    const zoom = api.map(mapId).mapProps.zoom;
+    const { center } = api.map(mapId).mapProps;
+    const { zoom } = api.map(mapId).mapProps;
 
     api.map(mapId).map.setView(new L.LatLng(center[0], center[1]), zoom);
   }
@@ -45,9 +53,11 @@ export default function Home(props: HomeProps): JSX.Element {
       tooltip="mapnav.home"
       tooltipPlacement="left"
       icon={<HomeIcon />}
-      onClick={setHome}
+      onClick={() => setHome()}
       className={className}
       iconClassName={iconClassName}
     />
   );
 }
+
+Home.defaultProps = defaultProps;
