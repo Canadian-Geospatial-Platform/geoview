@@ -64,9 +64,16 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       mapId
     );
 
+    api.event.on(
+      api.eventNames.EVENT_PANEL_CLOSE,
+      () => setAddLayerVisible(false),
+      mapId
+    );
+
     return () => {
       api.event.off(api.eventNames.EVENT_LAYER_ADDED, mapId);
       api.event.off(api.eventNames.EVENT_REMOVE_LAYER, mapId);
+      api.event.off(api.eventNames.EVENT_PANEL_CLOSE, mapId);
     };
   }, []);
 
