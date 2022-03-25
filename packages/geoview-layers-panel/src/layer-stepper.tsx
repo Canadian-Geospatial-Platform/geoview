@@ -83,6 +83,8 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   }));
   const classes = useStyles();
 
+  const isMultiple = () => layerType === "esriDynamic";
+
   /**
    * Emits an error dialogue when a text field is empty
    *
@@ -276,6 +278,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       let name = layerName;
       let url = layerURL;
       let entries = layerEntry;
+      if (Array.isArray(entries)) entries = entries.join(",");
       if (layerType === "esriDynamic")
         url = api.geoUtilities.getMapServerUrl(layerURL);
       else if (layerType === "esriFeature") {
@@ -340,8 +343,17 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    */
   const handleSelectLayer = (e: any) => {
     setLayerEntry(e.target.value);
-    const name = layerList.find((x: LayerList) => x[0] === e.target.value)[1];
-    setLayerName(name);
+    if (Array.isArray(e.target.value)) {
+      const names = [];
+      for (const value of e.target.value) {
+        const name = layerList.find((x: LayerList) => x[0] === value)[1];
+        names.push(name);
+      }
+      setLayerName(names.join(", "));
+    } else {
+      const name = layerList.find((x: LayerList) => x[0] === e.target.value)[1];
+      setLayerName(name);
+    }
   };
 
   /**
@@ -383,6 +395,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
         <StepLabel>Enter URL</StepLabel>
         <StepContent>
           <TextField
+            sx={{ width: "100%" }}
             label="URL"
             variant="standard"
             value={layerURL}
@@ -431,8 +444,15 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
             <FormControl fullWidth>
               <InputLabel id="service-layer-label">Select Layer</InputLabel>
               <Select
+                multiple={isMultiple()}
                 labelId="service-layer-label"
-                value={layerEntry}
+                value={
+                  isMultiple()
+                    ? Array.isArray(layerEntry)
+                      ? layerEntry
+                      : []
+                    : layerEntry
+                }
                 onChange={handleSelectLayer}
                 label="Select Layer"
               >

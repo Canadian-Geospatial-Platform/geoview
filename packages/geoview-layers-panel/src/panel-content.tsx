@@ -83,9 +83,9 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
           onClick={onClick}
         />
       </div>
-      <div style={{ display: addLayerVisible ? "inherit" : "none" }}>
+      {addLayerVisible && (
         <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
-      </div>
+      )}
       <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
         <LayersList mapId={mapId} layers={mapLayers} language={language} />
       </div>
