@@ -5,6 +5,45 @@ importers:
   .:
     specifiers: {}
 
+  ../../packages:
+    specifiers:
+      '@babel/core': ^7.17.0
+      '@babel/eslint-parser': ^7.17.0
+      '@typescript-eslint/eslint-plugin': ^5.10.2
+      '@typescript-eslint/parser': ^5.10.2
+      eslint: ^8.8.0
+      eslint-config-airbnb: ^19.0.4
+      eslint-config-prettier: ^8.3.0
+      eslint-plugin-import: ^2.25.4
+      eslint-plugin-jest: ^26.0.0
+      eslint-plugin-jsx-a11y: ^6.5.1
+      eslint-plugin-prettier: ^4.0.0
+      eslint-plugin-react: ^7.28.0
+      eslint-plugin-react-hooks: ^4.3.0
+      prettier: ^2.6.0
+      react: ^17.0.2
+      react-dom: ^17.0.2
+      typescript: ^4.5.5
+    dependencies:
+      react: 17.0.2
+      react-dom: 17.0.2_react@17.0.2
+    devDependencies:
+      '@babel/core': 7.17.8
+      '@babel/eslint-parser': 7.17.0_@babel+core@7.17.8+eslint@8.11.0
+      '@typescript-eslint/eslint-plugin': 5.16.0_3fed250b11519414a4c7d52468dd6bf5
+      '@typescript-eslint/parser': 5.16.0_eslint@8.11.0+typescript@4.6.2
+      eslint: 8.11.0
+      eslint-config-airbnb: 19.0.4_35fa392e85ed0dff2335b4a0d11226ab
+      eslint-config-prettier: 8.5.0_eslint@8.11.0
+      eslint-plugin-import: 2.25.4_eslint@8.11.0
+      eslint-plugin-jest: 26.1.3_686cb7cbb66462c533222a3f4a3aa551
+      eslint-plugin-jsx-a11y: 6.5.1_eslint@8.11.0
+      eslint-plugin-prettier: 4.0.0_68edcf5670f37721baf5d2cac6124e4d
+      eslint-plugin-react: 7.29.4_eslint@8.11.0
+      eslint-plugin-react-hooks: 4.3.0_eslint@8.11.0
+      prettier: 2.6.0
+      typescript: 4.6.2
+
   ../../packages/geoview-basemap-switcher:
     specifiers:
       '@babel/runtime': ^7.17.0
@@ -155,7 +194,6 @@ importers:
     specifiers:
       '@babel/cli': ^7.17.0
       '@babel/core': ^7.17.0
-      '@babel/eslint-parser': ^7.17.0
       '@babel/plugin-proposal-class-properties': ^7.16.7
       '@babel/plugin-proposal-decorators': ^7.17.0
       '@babel/plugin-proposal-do-expressions': ^7.16.7
@@ -187,23 +225,12 @@ importers:
       '@types/react': ^17.0.39
       '@types/react-dom': ^17.0.11
       '@types/react-router-dom': ^5.3.3
-      '@typescript-eslint/eslint-plugin': ^5.10.2
-      '@typescript-eslint/parser': ^5.10.2
       babel-jest: ^27.4.6
       babel-loader: ^8.2.3
       babel-plugin-import: ^1.13.3
       babel-plugin-lodash: ^3.3.4
       copy-webpack-plugin: ^10.2.4
       css-loader: ^6.6.0
-      eslint: ^8.8.0
-      eslint-config-airbnb: ^19.0.4
-      eslint-config-prettier: ^8.3.0
-      eslint-plugin-import: ^2.25.4
-      eslint-plugin-jest: ^26.0.0
-      eslint-plugin-jsx-a11y: ^6.5.1
-      eslint-plugin-prettier: ^4.0.0
-      eslint-plugin-react: ^7.28.0
-      eslint-plugin-react-hooks: ^4.3.0
       file-loader: ^6.2.0
       geoview-basemap-switcher: workspace:*
       geoview-core: workspace:~0.1.0
@@ -215,7 +242,6 @@ importers:
       jest: ^27.4.7
       lodash: ^4.17.21
       lodash-webpack-plugin: ^0.11.6
-      prettier: ^2.5.1
       prop-types: ^15.8.1
       react: ^17.0.2
       react-dom: ^17.0.2
@@ -241,7 +267,6 @@ importers:
     devDependencies:
       '@babel/cli': 7.17.6_@babel+core@7.17.8
       '@babel/core': 7.17.8
-      '@babel/eslint-parser': 7.17.0_@babel+core@7.17.8+eslint@8.11.0
       '@babel/plugin-proposal-class-properties': 7.16.7_@babel+core@7.17.8
       '@babel/plugin-proposal-decorators': 7.17.8_@babel+core@7.17.8
       '@babel/plugin-proposal-do-expressions': 7.16.7_@babel+core@7.17.8
@@ -273,30 +298,18 @@ importers:
       '@types/react': 17.0.42
       '@types/react-dom': 17.0.14
       '@types/react-router-dom': 5.3.3
-      '@typescript-eslint/eslint-plugin': 5.16.0_3fed250b11519414a4c7d52468dd6bf5
-      '@typescript-eslint/parser': 5.16.0_eslint@8.11.0+typescript@4.6.2
       babel-jest: 27.5.1_@babel+core@7.17.8
       babel-loader: 8.2.4_fa907c5a4f16ccc493e21649ccc59574
       babel-plugin-import: 1.13.3
       babel-plugin-lodash: 3.3.4
       copy-webpack-plugin: 10.2.4_webpack@5.70.0
       css-loader: 6.7.1_webpack@5.70.0
-      eslint: 8.11.0
-      eslint-config-airbnb: 19.0.4_35fa392e85ed0dff2335b4a0d11226ab
-      eslint-config-prettier: 8.5.0_eslint@8.11.0
-      eslint-plugin-import: 2.25.4_eslint@8.11.0
-      eslint-plugin-jest: 26.1.3_37483eea03cb2a5bbfbe402e58f1b05b
-      eslint-plugin-jsx-a11y: 6.5.1_eslint@8.11.0
-      eslint-plugin-prettier: 4.0.0_68edcf5670f37721baf5d2cac6124e4d
-      eslint-plugin-react: 7.29.4_eslint@8.11.0
-      eslint-plugin-react-hooks: 4.3.0_eslint@8.11.0
       file-loader: 6.2.0_webpack@5.70.0
       gh-pages: 3.2.3
       html-webpack-plugin: 5.5.0_webpack@5.70.0
       jest: 27.5.1
       lodash: 4.17.21
       lodash-webpack-plugin: 0.11.6_webpack@5.70.0
-      prettier: 2.6.0
       prop-types: 15.8.1
       react-test-renderer: 17.0.2_react@17.0.2
       sass: 1.49.9
@@ -4412,7 +4425,7 @@ packages:
       tsconfig-paths: 3.14.1
     dev: true
 
-  /eslint-plugin-jest/26.1.3_37483eea03cb2a5bbfbe402e58f1b05b:
+  /eslint-plugin-jest/26.1.3_686cb7cbb66462c533222a3f4a3aa551:
     resolution: {integrity: sha512-Pju+T7MFpo5VFhFlwrkK/9jRUu18r2iugvgyrWOnnGRaVTFFmFXp+xFJpHyqmjjLmGJPKLeEFLVTAxezkApcpQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
@@ -4428,7 +4441,6 @@ packages:
       '@typescript-eslint/eslint-plugin': 5.16.0_3fed250b11519414a4c7d52468dd6bf5
       '@typescript-eslint/utils': 5.16.0_eslint@8.11.0+typescript@4.6.2
       eslint: 8.11.0
-      jest: 27.5.1
     transitivePeerDependencies:
       - supports-color
       - typescript

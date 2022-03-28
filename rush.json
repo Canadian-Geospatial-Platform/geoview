@@ -38,6 +38,10 @@
     {
       "packageName": "geoview-layers-panel",
       "projectFolder": "packages/geoview-layers-panel"
+    },
+    {
+      "packageName": "eslint-and-prettier-config",
+      "projectFolder": "packages"
     }
   ]
 }
