@@ -66,6 +66,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
     FormControl,
     Select,
     MenuItem,
+    Autocomplete,
   } = mui;
 
   const [activeStep, setActiveStep] = useState(0);
@@ -119,11 +120,17 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * @param serviceName type of service provided by the URL
    * @param proj current map projection
    */
-  const emitErrorProj = (serviceName: string, proj: string) => {
+  const emitErrorProj = (
+    serviceName: string,
+    proj: string,
+    supportedProj: string[]
+  ) => {
     api.event.emit("snackbar/open", mapId, {
       message: {
         type: "string",
-        value: `${serviceName} does not support current map projection ${proj}`,
+        value: `${serviceName} does not support current map projection ${proj}, only ${supportedProj.join(
+          ", "
+        )}`,
       },
     });
   };
@@ -137,9 +144,10 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    */
   const wmsValidation = async (): Promise<boolean> => {
     const proj = api.map(mapId).projection.getCRS().code;
+    let supportedProj = [];
     try {
       const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, "");
-      const supportedProj = wms.Capability.Layer.CRS;
+      supportedProj = wms.Capability.Layer.CRS;
       if (!supportedProj.includes(proj)) throw "proj";
       const layers = wms.Capability.Layer.Layer.map((x: any) => [
         x.Name,
@@ -150,7 +158,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
         setLayerEntry(layers[0][0]);
       } else setLayerList(layers);
     } catch (err) {
-      if (err == "proj") emitErrorProj("WMS", proj);
+      if (err == "proj") emitErrorProj("WMS", proj, supportedProj);
       else emitErrorServer("WMS");
       return false;
     }
@@ -339,20 +347,16 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   /**
    * Set the currently selected layer from a list
    *
-   * @param e Select event
+   * @param _ Select event
+   * @param newValue value/label pairs of select options
    */
-  const handleSelectLayer = (e: any) => {
-    setLayerEntry(e.target.value);
-    if (Array.isArray(e.target.value)) {
-      const names = [];
-      for (const value of e.target.value) {
-        const name = layerList.find((x: LayerList) => x[0] === value)[1];
-        names.push(name);
-      }
-      setLayerName(names.join(", "));
+  const handleSelectLayer = (_: any, newValue: string[]) => {
+    if (isMultiple()) {
+      setLayerEntry(newValue.map((x) => x[0]));
+      setLayerName(newValue.map((x) => x[1]).join(", "));
     } else {
-      const name = layerList.find((x: LayerList) => x[0] === e.target.value)[1];
-      setLayerName(name);
+      setLayerEntry(newValue[0]);
+      setLayerName(newValue[1]);
     }
   };
 
@@ -442,26 +446,21 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
           )}
           {layerList.length > 1 && (
             <FormControl fullWidth>
-              <InputLabel id="service-layer-label">Select Layer</InputLabel>
-              <Select
+              <Autocomplete
                 multiple={isMultiple()}
-                labelId="service-layer-label"
-                value={
-                  isMultiple()
-                    ? Array.isArray(layerEntry)
-                      ? layerEntry
-                      : []
-                    : layerEntry
-                }
+                disableCloseOnSelect={isMultiple()}
+                disableClearable={!isMultiple()}
+                id="service-layer-label"
+                options={layerList}
+                getOptionLabel={(option) => `${option[1]} (${option[0]})`}
+                renderOption={(props, option) => (
+                  <span {...props}>{option[1]}</span>
+                )}
                 onChange={handleSelectLayer}
-                label="Select Layer"
-              >
-                {layerList.map(([value, label]: LayerList) => (
-                  <MenuItem key={value + label} value={value}>
-                    {label}
-                  </MenuItem>
-                ))}
-              </Select>
+                renderInput={(params) => (
+                  <TextField {...params} label="Select Layer" />
+                )}
+              />
             </FormControl>
           )}
           <br />
