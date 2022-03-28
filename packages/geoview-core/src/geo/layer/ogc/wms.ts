@@ -100,7 +100,7 @@ export class WMS {
 
           isValid = this.validateEntries(json.Capability.Layer, layer.entries as string);
 
-          const layerName = layer.hasOwnProperty("name") ? layer.name : json.Service.Name;
+          const layerName = "name" in layer ? layer.name : json.Service.Name;
           if (layerName) this.name = <string>layerName;
 
           if (isValid) {
@@ -121,7 +121,7 @@ export class WMS {
         }
       });
     });
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**
@@ -137,7 +137,7 @@ export class WMS {
     // Added support of multiple entries
     const allNames = this.findAllByKey(layer, "Name");
     const entryArray = entries.split(",").map((s) => s.trim());
-    for (let i = 0; i < entryArray.length; i++) {
+    for (let i = 0; i < entryArray.length; i += 1) {
       isValid = isValid && allNames.includes(entryArray[i]);
     }
 
@@ -153,6 +153,7 @@ export class WMS {
   private findAllByKey(obj: object, keyToFind: string): any {
     if (obj) {
       return Object.entries(obj).reduce(
+        // eslint-disable-next-line no-nested-ternary
         (acc, [key, v]) => (key === keyToFind ? acc.concat(v) : typeof v === "object" ? acc.concat(this.findAllByKey(v, keyToFind)) : acc),
         []
       );

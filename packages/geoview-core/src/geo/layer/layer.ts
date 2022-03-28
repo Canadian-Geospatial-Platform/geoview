@@ -250,7 +250,7 @@ export class Layer {
    */
   getLayerById = (id: string): TypeLayerData | null => {
     // return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
-    return this.layers.hasOwnProperty(id) ? this.layers[id] : null;
+    return this.layers[id];
   };
 
   // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS

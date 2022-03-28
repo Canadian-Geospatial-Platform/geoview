@@ -2,13 +2,13 @@
 /* eslint-disable no-underscore-dangle */
 import axios from "axios";
 
-import L, { LeafletMouseEvent, Layer, version } from "leaflet";
+import L, { Layer } from "leaflet";
 
 import { mapService as esriMapService, MapService } from "esri-leaflet";
 
 import { xmlToJson, generateId } from "../../../core/utils/utilities";
 
-import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from "../../../core/types/cgpv-types";
+import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from "../../../core/types/cgpv-types";
 
 import { api } from "../../../api/api";
 
@@ -75,15 +75,13 @@ export class WFS {
    * @return {Promise<Layer | string>} layers to add to the map
    */
   async add(layer: TypeLayerConfig): Promise<Layer | string> {
-    const capUrl = `${this.url}request=getcapabilities&service=WFS`;
-
     // const data = getXMLHttpRequest(capUrl);
-    const res = await axios.get(this.url, {
+    const resCapabilities = await axios.get(this.url, {
       params: { request: "getcapabilities", service: "WFS" },
     });
 
     // need to pass a xmldom to xmlToJson
-    const xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
+    const xmlDOM = new DOMParser().parseFromString(resCapabilities.data, "text/xml");
     const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
 
     this.#capabilities = json["wfs:WFS_Capabilities"];
@@ -91,14 +89,11 @@ export class WFS {
     const featTypeInfo = this.getFeatyreTypeInfo(json["wfs:WFS_Capabilities"].FeatureTypeList.FeatureType, layer.entries);
 
     if (!featTypeInfo) {
-      return new Promise((resolve) => resolve("{}"));
+      return "{}";
     }
 
-    const layerName = layer.hasOwnProperty("name") ? layer.name : featTypeInfo.Name["#text"].split(":")[1];
+    const layerName = "name" in layer ? layer.name : featTypeInfo.Name["#text"].split(":")[1];
     if (layerName) this.name = <string>layerName;
-
-    let layerEPSG = featTypeInfo.DefaultCRS["#text"].split("crs:")[1];
-    layerEPSG = layerEPSG.replace("::", ":");
 
     const params = {
       service: "WFS",
@@ -118,18 +113,19 @@ export class WFS {
 
           if (geojson && geojson !== "{}") {
             const wfs = L.geoJSON(geojson, {
-              pointToLayer: function (feature, latlng) {
-                if (feature.geometry.type == "Point") {
-                  const lId = generateId("");
+              pointToLayer: (feature, latlng): Layer | undefined => {
+                if (feature.geometry.type === "Point") {
                   return L.circleMarker(latlng);
                 }
+
+                return undefined;
                 // if need to use specific style for point
                 // return L.circleMarker(latlng, {
                 //  ...geojsonMarkerOptions,
                 //  id: lId,
                 // });
               },
-              style: function (feature) {
+              style: () => {
                 return {
                   stroke: true,
                   color: "#333",
@@ -144,7 +140,7 @@ export class WFS {
             resolve("{}");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           if (error.response) {
             // The request was made and the server responded with a status code
             // that falls out of the range of 2xx
@@ -164,7 +160,7 @@ export class WFS {
           resolve("{}");
         });
     });
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**
@@ -177,7 +173,7 @@ export class WFS {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
-      for (let i = 0; i < FeatureTypeList.length; i++) {
+      for (let i = 0; i < FeatureTypeList.length; i += 1) {
         let fName = FeatureTypeList[i].Name["#text"];
         const fNameSplit = fName.split(":");
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
@@ -185,7 +181,7 @@ export class WFS {
         const entrySplit = entries!.split(":");
         const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-        if (entryName == fName) {
+        if (entryName === fName) {
           return FeatureTypeList[i];
         }
       }
@@ -198,7 +194,7 @@ export class WFS {
       const entrySplit = entries!.split(":");
       const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-      if (entryName == fName) {
+      if (entryName === fName) {
         return FeatureTypeList;
       }
     }

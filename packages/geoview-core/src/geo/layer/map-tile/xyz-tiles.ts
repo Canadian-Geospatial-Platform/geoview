@@ -58,7 +58,7 @@ export class XYZTiles {
 
       resolve(xyzTiles);
     });
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**

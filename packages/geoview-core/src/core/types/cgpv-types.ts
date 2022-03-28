@@ -667,6 +667,7 @@ export interface TypeIconButtonProps extends IconButtonProps {
   tooltipPlacement?: TooltipProps["placement"];
   id?: string;
   tabIndex?: number;
+  iconRef?: React.RefObject<HTMLButtonElement>;
 }
 
 /**

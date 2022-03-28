@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => {
  * @param {TypeCircularProgressProps} props the properties passed to the circular progress element
  * @returns {JSX.Element} the created Circular Progress element
  */
-export function CircularProgress(props: TypeCircularProgressProps): JSX.Element | undefined {
+export function CircularProgress(props: TypeCircularProgressProps): JSX.Element {
   const { className, style, isLoaded } = props;
   const classes = useStyles();
 
@@ -45,5 +45,8 @@ export function CircularProgress(props: TypeCircularProgressProps): JSX.Element 
     <div className={`${classes.loading} ${className !== undefined && className}`} style={{ ...style }}>
       <MaterialCircularProgress className={classes.progress} />
     </div>
-  ) : undefined;
+  ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <></>
+  );
 }

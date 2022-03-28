@@ -282,7 +282,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                   aria-label={t("general.close")}
                   size="large"
                   onClick={panel.close}
-                  ref={closeBtnRef}
+                  iconRef={closeBtnRef}
                 >
                   <CloseIcon />
                 </IconButton>

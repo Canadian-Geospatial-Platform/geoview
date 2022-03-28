@@ -1,12 +1,12 @@
-import { Cast } from "geoview-core";
+import { Cast, TypeWindow } from "geoview-core";
 
 import { MINIMAP_SIZE } from "./overview-map";
 
 // access window object
-const w = window as any;
+const w = window as TypeWindow;
 
 // access the cgpv object from the window object
-const cgpv = w["cgpv"];
+const { cgpv } = w;
 
 // access the api calls
 const { api, react, leaflet, ui, constants, useTranslation } = cgpv;
@@ -56,7 +56,7 @@ interface MinimapToggleProps {
  * @param {MinimapToggleProps} props toggle properties
  * @return {JSX.Element} the toggle control
  */
-export const MinimapToggle = (props: MinimapToggleProps): JSX.Element => {
+export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   const { parentId, minimap } = props;
 
   const divRef = useRef(null);
@@ -108,11 +108,11 @@ export const MinimapToggle = (props: MinimapToggleProps): JSX.Element => {
           minWidth: "initial",
         }}
         aria-label={t("mapctrl.overviewmap.toggle")}
-        onClick={toggleMinimap}
+        onClick={() => toggleMinimap()}
         size="large"
       >
         <ChevronLeftIcon />
       </IconButton>
     </div>
   );
-};
+}

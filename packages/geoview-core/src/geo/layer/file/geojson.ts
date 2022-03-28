@@ -87,7 +87,7 @@ export class GeoJSON {
       });
     });
 
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
 
   /**

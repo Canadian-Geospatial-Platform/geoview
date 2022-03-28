@@ -96,10 +96,12 @@ export class OgcFeature {
           if (geojson && geojson !== "{}") {
             const featureLayer = L.geoJSON(geojson, {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              pointToLayer: (feature, latlng) => {
+              pointToLayer: (feature, latlng): Layer | undefined => {
                 if (feature.geometry.type === "Point") {
                   return L.circleMarker(latlng);
                 }
+
+                return undefined;
 
                 // if need to use specific style for point
                 // return L.circleMarker(latlng, {
@@ -170,17 +172,19 @@ export class OgcFeature {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name["#text"];
+      let fName = FeatureTypeList.Name && FeatureTypeList.Name["#text"];
 
-      const fNameSplit = fName.split(":");
-      fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
+      if (fName) {
+        const fNameSplit = fName.split(":");
+        fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-      if (entries) {
-        const entrySplit = entries.split(":");
-        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+        if (entries) {
+          const entrySplit = entries.split(":");
+          const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-        if (entryName === fName) {
-          return FeatureTypeList;
+          if (entryName === fName) {
+            return FeatureTypeList;
+          }
         }
       }
     }
