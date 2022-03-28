@@ -1,8 +1,8 @@
-import { TypeFunction, TypeChildren } from '../../core/types/cgpv-types';
-import { generateId } from '../../core/utils/utilities';
+import { TypeFunction, TypeChildren } from "../../core/types/cgpv-types";
+import { generateId } from "../../core/utils/utilities";
 
-import { api } from '../../api/api';
-import { EVENT_NAMES } from '../../api/event';
+import { api } from "../../api/api";
+import { EVENT_NAMES } from "../../api/event";
 
 /**
  * Both header and footer actions' properties interface
@@ -151,7 +151,7 @@ class ModalModel {
    */
   addHeaderActions = (action: ActionsType): void => {
     // if header.content has already been defined by the user
-    if (typeof this.header?.actions === 'object') {
+    if (typeof this.header?.actions === "object") {
       this.header?.actions?.push(action);
     } else {
       this.header!.actions = [action];
@@ -166,7 +166,7 @@ class ModalModel {
    * @param { ActionsType } action must be an object with id and content
    */
   addFooterActions = (action: ActionsType): void => {
-    if (typeof this.header?.actions === 'object') {
+    if (typeof this.header?.actions === "object") {
       this.footer?.actions?.push(action);
     } else {
       this.footer!.actions = [action];
@@ -180,7 +180,7 @@ class ModalModel {
    * @param { string } id of the action to be deleted
    */
   removeHeaderActions = (id: string): void => {
-    if (!this.header?.actions || typeof this.header?.actions !== 'object') {
+    if (!this.header?.actions || typeof this.header?.actions !== "object") {
       return;
     }
     const actionIndex = this.header?.actions?.findIndex((action) => action.id === id);
@@ -195,7 +195,7 @@ class ModalModel {
    * @param { string } id of the action to be deleted
    */
   removeFooterActions = (id: string): void => {
-    if (!this.footer?.actions || typeof this.header?.actions !== 'object') return;
+    if (!this.footer?.actions || typeof this.header?.actions !== "object") return;
     const actionIndex = this.footer?.actions?.findIndex((action) => action.id === id);
     if (actionIndex === -1) return;
     this.footer?.actions?.splice(actionIndex, 1);
@@ -237,7 +237,7 @@ export class ModalApi {
    */
   createModal = (modal: TypeModalProps): void => {
     if (!modal.content) return;
-    const id = modal.id ? modal.id : generateId('');
+    const id = modal.id ? modal.id : generateId("");
     this.modals[id] = new ModalModel(modal.content);
     this.modals[id].id = id;
     this.modals[id].mapId = this.mapId;

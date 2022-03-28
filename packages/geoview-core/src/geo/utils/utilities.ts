@@ -1,11 +1,11 @@
-import axios from 'axios';
-import WMSCapabilities from 'wms-capabilities';
+import axios from "axios";
+import WMSCapabilities from "wms-capabilities";
 
-import { Cast, TypeCSSStyleDeclaration, TypeJSONObjectLoop } from '../../core/types/cgpv-types';
-import { getXMLHttpRequest, xmlToJson } from '../../core/utils/utilities';
+import { Cast, TypeCSSStyleDeclaration, TypeJSONObjectLoop } from "../../core/types/cgpv-types";
+import { getXMLHttpRequest, xmlToJson } from "../../core/utils/utilities";
 
-import { api } from '../../api/api';
-import { EVENT_NAMES } from '../../api/event';
+import { api } from "../../api/api";
+import { EVENT_NAMES } from "../../api/event";
 
 export class GeoUtilities {
   /**
@@ -47,11 +47,11 @@ export class GeoUtilities {
    */
   getWFSServiceMetadata = async (url: string): Promise<Record<string, unknown>> => {
     const res = await axios.get(url, {
-      params: { request: 'getcapabilities', service: 'WFS' },
+      params: { request: "getcapabilities", service: "WFS" },
     });
-    const xmlDOM = new DOMParser().parseFromString(res.data, 'text/xml');
+    const xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
     const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
-    const capabilities = json['wfs:WFS_Capabilities'];
+    const capabilities = json["wfs:WFS_Capabilities"];
     return capabilities;
   };
 
@@ -63,29 +63,29 @@ export class GeoUtilities {
   manageKeyboardFocus = (): void => {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass() {
-      const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
-      if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle('keyboard-focused');
+      const previouslyFocusedElement = document.getElementsByClassName("keyboard-focused")[0];
+      if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle("keyboard-focused");
     }
 
     // Add event listener for when tab pressed
-    document.addEventListener('keyup', (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+    document.addEventListener("keyup", (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
 
       // get array of map elements
-      const elements: Element[] = Array.from(document.getElementsByClassName('llwp-map'));
+      const elements: Element[] = Array.from(document.getElementsByClassName("llwp-map"));
       const activeEl = document.activeElement;
 
       if (elements.some((element) => element.contains(activeEl))) {
         // Remove class on previous element then add the 'keyboard-focused' class to the currently focused element
         removeFocusedClass();
-        activeEl?.classList.toggle('keyboard-focused');
+        activeEl?.classList.toggle("keyboard-focused");
 
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
         if (activeEl?.className.match(/leaflet-map-*/g) !== null) {
-          const mapId = activeEl?.getAttribute('id');
+          const mapId = activeEl?.getAttribute("id");
 
           activeEl?.classList.forEach((item) => {
-            if (item.includes('leaflet-map-')) {
+            if (item.includes("leaflet-map-")) {
               api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId, {});
             }
           });
@@ -94,8 +94,8 @@ export class GeoUtilities {
     });
 
     // Remove the class when the user interacts with the page with their mouse, or when the page looses focus
-    document.addEventListener('click', removeFocusedClass);
-    document.addEventListener('focusout', removeFocusedClass);
+    document.addEventListener("click", removeFocusedClass);
+    document.addEventListener("focusout", removeFocusedClass);
   };
 
   /**
@@ -107,16 +107,16 @@ export class GeoUtilities {
    */
   getMapServerUrl = (url: string, rest = false): string => {
     let mapServerUrl = url;
-    if (mapServerUrl.includes('MapServer')) {
-      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('MapServer') + 'MapServer'.length);
+    if (mapServerUrl.includes("MapServer")) {
+      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf("MapServer") + "MapServer".length);
     }
-    if (mapServerUrl.includes('FeatureServer')) {
-      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf('FeatureServer') + 'FeatureServer'.length);
+    if (mapServerUrl.includes("FeatureServer")) {
+      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf("FeatureServer") + "FeatureServer".length);
     }
 
     if (rest) {
-      const urlRightSide = mapServerUrl.slice(mapServerUrl.indexOf('/services/'));
-      mapServerUrl = `${mapServerUrl.slice(0, url.indexOf('services/'))}rest${urlRightSide}`;
+      const urlRightSide = mapServerUrl.slice(mapServerUrl.indexOf("/services/"));
+      mapServerUrl = `${mapServerUrl.slice(0, url.indexOf("services/"))}rest${urlRightSide}`;
     }
 
     return mapServerUrl;
@@ -140,17 +140,17 @@ export class GeoUtilities {
     const values = { x: 0, y: 0, z: 0 };
 
     // No transform property. Simply return 0 values.
-    if (matrix === 'none' || typeof matrix === 'undefined') return values;
+    if (matrix === "none" || typeof matrix === "undefined") return values;
 
     // Can either be 2d or 3d transform
-    const matrixType = matrix.includes('3d') ? '3d' : '2d';
+    const matrixType = matrix.includes("3d") ? "3d" : "2d";
     const matrixMatch = matrix.match(/matrix.*\((.+)\)/);
-    const matrixValues = matrixMatch && matrixMatch[1].split(', ');
+    const matrixValues = matrixMatch && matrixMatch[1].split(", ");
 
     // 2d matrices have 6 values
     // Last 2 values are X and Y.
     // 2d matrices does not have Z value.
-    if (matrixType === '2d') {
+    if (matrixType === "2d") {
       return {
         x: Number(matrixValues && matrixValues[4]),
         y: Number(matrixValues && matrixValues[5]),
@@ -160,7 +160,7 @@ export class GeoUtilities {
 
     // 3d matrices have 16 values
     // The 13th, 14th, and 15th values are X, Y, and Z
-    if (matrixType === '3d') {
+    if (matrixType === "3d") {
       return {
         x: Number(matrixValues && matrixValues[12]),
         y: Number(matrixValues && matrixValues[13]),

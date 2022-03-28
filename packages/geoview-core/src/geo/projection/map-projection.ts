@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { CRS } from 'leaflet';
+import { CRS } from "leaflet";
 
-import { Projection } from './projection';
+import { Projection } from "./projection";
 
-import { api } from '../../api/api';
+import { api } from "../../api/api";
 
 /**
  * A class that manages the projection for the loaded map

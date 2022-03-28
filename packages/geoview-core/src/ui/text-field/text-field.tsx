@@ -1,17 +1,17 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties } from "react";
 
-import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = makeStyles((theme) => ({
   textField: {
-    width: '50%',
-    margin: '10px 0',
-    '& .MuiFormLabel-root.Mui-focused': {
+    width: "50%",
+    margin: "10px 0",
+    "& .MuiFormLabel-root.Mui-focused": {
       color: theme.palette.primary.contrastText,
       background: theme.palette.primary.light,
     },
-    '& .MuiOutlinedInput-root.Mui-focused': {
+    "& .MuiOutlinedInput-root.Mui-focused": {
       border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },

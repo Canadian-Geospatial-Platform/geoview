@@ -56,97 +56,97 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
-        console.log('api is ready');
+        console.log("api is ready");
 
         //create snippets
         createCodeSnippet();
 
         // get add panel button element for WM map
-        var addAppbarPanelBtn = document.getElementsByClassName('add-appbar-panel-btn')[0];
+        var addAppbarPanelBtn = document.getElementsByClassName("add-appbar-panel-btn")[0];
 
         // add appbar panel btn click event handler
         // button will open a panel on the appbar
-        addAppbarPanelBtn.addEventListener('click', function (e) {
+        addAppbarPanelBtn.addEventListener("click", function (e) {
           const button = {
-            tooltip: 'Test',
+            tooltip: "Test",
             icon: '<i class="material-icons">apps</i>',
-            variant: 'text',
-            tooltipPlacement: 'right',
-            type: 'textWithIcon',
-            children: 'Test',
+            variant: "text",
+            tooltipPlacement: "right",
+            type: "textWithIcon",
+            children: "Test",
           };
 
           const panel = {
-            title: 'Test',
+            title: "Test",
             icon: `<i class="material-icons">apps</i>`,
             content: `<div>Test content</div>`,
             width: 200,
           };
 
           // call an api function to add a panel with a button in the default group
-          cgpv.api.map('mapWM').appBarButtons.createAppbarPanel(button, panel, null);
+          cgpv.api.map("mapWM").appBarButtons.createAppbarPanel(button, panel, null);
         });
 
         // get add navbar panel button element for WM map
-        var addNavbarPanelBtn = document.getElementsByClassName('add-navbar-panel-btn')[0];
+        var addNavbarPanelBtn = document.getElementsByClassName("add-navbar-panel-btn")[0];
 
         // add navbar panel btn click event handler
         // button will open a panel on the navbar
-        addNavbarPanelBtn.addEventListener('click', function (e) {
+        addNavbarPanelBtn.addEventListener("click", function (e) {
           const button = {
-            tooltip: 'Test',
+            tooltip: "Test",
             icon: '<i class="material-icons">apps</i>',
           };
 
           const panel = {
-            title: 'Test',
+            title: "Test",
             icon: `<i class="material-icons">apps</i>`,
             content: `<div>Test content</div>`,
             width: 200,
           };
 
           // call an api function to add a panel with a button
-          cgpv.api.map('mapWM').navBarButtons.createNavbarButtonPanel(button, panel, null);
+          cgpv.api.map("mapWM").navBarButtons.createNavbarButtonPanel(button, panel, null);
         });
 
         // get add navbar button element for WM map
-        var addNavbarButtonBtn = document.getElementsByClassName('add-navbar-button-btn')[0];
+        var addNavbarButtonBtn = document.getElementsByClassName("add-navbar-button-btn")[0];
 
         // add navbar button btn click event handler
         // button will call a function
-        addNavbarButtonBtn.addEventListener('click', function (e) {
+        addNavbarButtonBtn.addEventListener("click", function (e) {
           const button = {
-            tooltip: 'Test',
+            tooltip: "Test",
             icon: '<i class="material-icons">open_in_browser</i>',
             callback: function () {
-              alert('test function');
+              alert("test function");
             },
           };
 
           // call an api function to add a panel with a button
-          cgpv.api.map('mapWM').navBarButtons.createNavbarButton(button, null);
+          cgpv.api.map("mapWM").navBarButtons.createNavbarButton(button, null);
         });
 
         // get add navbar button group element for WM map
-        var addNavbarButtonGroupBtn = document.getElementsByClassName('add-navbar-button-group-btn')[0];
+        var addNavbarButtonGroupBtn = document.getElementsByClassName("add-navbar-button-group-btn")[0];
 
         // add navbar button group btn click event handler
         // button will add a button panel on the navbar in a new group
-        addNavbarButtonGroupBtn.addEventListener('click', function (e) {
+        addNavbarButtonGroupBtn.addEventListener("click", function (e) {
           const button = {
-            tooltip: 'Group',
+            tooltip: "Group",
             icon: '<i class="material-icons">group</i>',
           };
 
           const panel = {
-            title: 'Group',
+            title: "Group",
             icon: `<i class="material-icons">group</i>`,
             content: `<div>Test content</div>`,
             width: 400,
           };
 
           // call an api function to add a new button panel in the navbar in a new group
-          cgpv.api.map('mapWM').navBarButtons.createNavbarButtonPanel(button, panel, 'newGroup');
+          cgpv.api.map("mapWM").navBarButtons.createNavbarButtonPanel(button, panel, "newGroup");
         });
       });
     </script>

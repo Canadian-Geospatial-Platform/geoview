@@ -1,4 +1,4 @@
-import { ClassNameMap } from '@mui/styles';
+import { ClassNameMap } from "@mui/styles";
 
 /**
  * interface for north arrow icon properties

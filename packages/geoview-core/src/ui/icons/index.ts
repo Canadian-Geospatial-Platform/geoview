@@ -9,4 +9,4 @@ export {
   Add as ZoomInIcon,
   Remove as ZoomOutIcon,
   Close as CloseIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";

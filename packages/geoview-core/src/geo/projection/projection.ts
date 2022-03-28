@@ -1,15 +1,15 @@
 /* eslint-disable no-plusplus */
-import L from 'leaflet';
-import proj4 from 'proj4';
-import 'proj4leaflet';
+import L from "leaflet";
+import proj4 from "proj4";
+import "proj4leaflet";
 
 /**
  * constant used for the available projection names
  */
 export const PROJECTION_NAMES = {
-  LCC: 'EPSG:3978',
-  WM: 'EPSG:3857',
-  LATLNG: 'EPSG:4326',
+  LCC: "EPSG:3978",
+  WM: "EPSG:3857",
+  LATLNG: "EPSG:4326",
 };
 
 /**
@@ -46,7 +46,7 @@ export class Projection {
           // add the converted points
           converted.push(coords);
         }
-      } else if (typeof points[0] === 'number') {
+      } else if (typeof points[0] === "number") {
         // if the array contain one point then convert the point
         const coords = proj4(fromProj, toProj, points);
 
@@ -154,8 +154,8 @@ export class Projection {
 
     // LCC projection
     const projection = new L.Proj.CRS(
-      'EPSG:3978',
-      '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+      "EPSG:3978",
+      "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
       {
         resolutions,
         origin: [-3.46558e7, 3.931e7],

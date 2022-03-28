@@ -1,13 +1,13 @@
-import React, { CSSProperties } from 'react';
+import React from "react";
 
-import L from 'leaflet';
+import L from "leaflet";
 
-import { TooltipProps } from '@mui/material';
+import { TooltipProps, ButtonProps } from "@mui/material";
 
-import { Plugin } from '../../api/plugin';
-import { API } from '../../api/api';
+import { Plugin } from "../../api/plugin";
+import { API } from "../../api/api";
 
-import { PanelApi, ButtonApi } from '../../ui';
+import { PanelApi } from "../../ui";
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
@@ -45,18 +45,7 @@ export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 
 export type TypeChild = React.ReactElement<never, never> | undefined;
 
-export type TypeChildren =
-  | number
-  | boolean
-  | TypeJSONObject
-  | unknown
-  | JSX.Element
-  | Element
-  | React.ReactElement<never, never | string | React.JSXElementConstructor<unknown>>
-  | Iterable<React.ReactNode>
-  | React.ReactPortal
-  | (JSX.Element | null)[]
-  | null;
+export type TypeChildren = React.ReactNode;
 
 /**
  * Map types
@@ -109,13 +98,13 @@ export type TypeIconCreationFunction = () => L.DivIcon;
  * constant contains layer types
  */
 export const CONST_LAYER_TYPES = {
-  WMS: 'ogcWMS',
-  GEOJSON: 'geoJSON',
-  ESRI_DYNAMIC: 'esriDynamic',
-  ESRI_FEATURE: 'esriFeature',
-  XYZ_TILES: 'xyzTiles',
-  WFS: 'ogcWFS',
-  OGC_FEATURE: 'ogcFeature',
+  WMS: "ogcWMS",
+  GEOJSON: "geoJSON",
+  ESRI_DYNAMIC: "esriDynamic",
+  ESRI_FEATURE: "esriFeature",
+  XYZ_TILES: "xyzTiles",
+  WFS: "ogcWFS",
+  OGC_FEATURE: "ogcFeature",
 };
 
 /**
@@ -146,7 +135,17 @@ export type TypeLegendJsonDynamic = {
     url: string;
     width: number;
   }[];
-}[];
+  extent: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+    spatialReference: {
+      wkid: number;
+      latestWkid: number;
+    };
+  };
+};
 
 /**
  * ESRI Json Legend for Feature Layer
@@ -265,7 +264,7 @@ export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
  */
 export type TypeLayerData = {
   id: string;
-  type: 'ogcWMS' | 'geoJSON' | 'esriDynamic' | 'esriFeature' | 'xyzTiles' | 'ogcWFS' | 'ogcFeature';
+  type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles" | "ogcWFS" | "ogcFeature";
   name: string;
   url: string;
   entries: string[];
@@ -350,7 +349,7 @@ export type TypeRendererSymbol = {
     contentType: string;
     label: string;
     legendImageUrl: string;
-    type: 'simple' | 'uniqueValue';
+    type: "simple" | "uniqueValue";
   };
   uniqueValueInfos: TypeJSONObject[];
   field1: string;
@@ -372,8 +371,8 @@ export type TypeButtonPanelProps = {
 export type TypeButtonPanel = {
   id: string;
   panel?: PanelApi;
-  button: ButtonApi;
-  groupName?: string | null;
+  button: TypeButtonProps;
+  groupName?: string;
 };
 
 /**
@@ -390,11 +389,11 @@ export type TypePlugin = {
  * constant used to specify available vectors to draw
  */
 export const CONST_VECTOR_TYPES = {
-  POLYLINE: 'polyline',
-  POLYGON: 'polygon',
-  CIRCLE: 'circle',
-  CIRCLE_MARKER: 'circle_marker',
-  MARKER: 'marker',
+  POLYLINE: "polyline",
+  POLYGON: "polygon",
+  CIRCLE: "circle",
+  CIRCLE_MARKER: "circle_marker",
+  MARKER: "marker",
 };
 
 /**
@@ -403,7 +402,7 @@ export const CONST_VECTOR_TYPES = {
 export type TypePanelAppProps = {
   panel: PanelApi;
   //   panelOpen: boolean;
-  button: ButtonApi;
+  button: TypeButtonProps;
 };
 
 /**
@@ -515,8 +514,8 @@ export type TypeZoomLevels = {
  * interface for attribution value
  */
 export type TypeAttribution = {
-  'en-CA': string;
-  'fr-CA': string;
+  "en-CA": string;
+  "fr-CA": string;
 };
 
 /**
@@ -552,49 +551,33 @@ export type TypeAppVersion = {
 /**
  * Interface for the button properties used when creating a new button
  */
-export type TypeButtonProps = {
+export interface TypeButtonProps extends Omit<ButtonProps, "type"> {
   // generated button id
   id?: string;
   // button tooltip
   tooltip?: string;
   // location for tooltip
-  tooltipPlacement?: TooltipProps['placement'];
+  tooltipPlacement?: TooltipProps["placement"];
   // button icon
   icon?: TypeChildren;
-  // optional callback function to run on button click
-  callback?: TypeFunction;
-  // on click function
-  onClick?: TypeFunction;
-  // should the button be displayed in the appbar/navbar?
-  visible?: boolean;
   // optional class names
-  className?: string | undefined;
+  iconClassName?: string;
   // optional class names
-  iconClassName?: string | undefined;
-  // optional class names
-  textClassName?: string | undefined;
-  // optional style properties
-  style?: CSSProperties | undefined;
-  // button type
-  type: 'text' | 'textWithIcon' | 'icon';
+  textClassName?: string;
   // button state
-  state?: 'expanded' | 'collapsed';
-  // button style variant
-  variant?: 'text' | 'contained' | 'outlined';
-  // button children
-  children?: TypeChildren;
-  // focus used for accessibility to enable focus
-  autoFocus?: boolean;
-  // button disabling
-  disabled?: boolean;
-};
+  state?: "expanded" | "collapsed";
+  // button type
+  type: "text" | "textWithIcon" | "icon";
+  // button visibility
+  visible?: boolean;
+}
 
 /**
  * constant that defines the panel types
  */
 export const CONST_PANEL_TYPES = {
-  APPBAR: 'appbar',
-  NAVBAR: 'navbar',
+  APPBAR: "appbar",
+  NAVBAR: "navbar",
 };
 
 /**

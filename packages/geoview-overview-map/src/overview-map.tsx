@@ -1,18 +1,18 @@
-import { Cast } from 'geoview-core';
+import { Cast } from "geoview-core";
 
-import { MinimapBounds } from './minimap-bounds';
-import { MinimapToggle } from './minimap-toggle';
+import { MinimapBounds } from "./minimap-bounds";
+import { MinimapToggle } from "./minimap-toggle";
 
 export const MINIMAP_SIZE = {
-  width: '150px',
-  height: '150px',
+  width: "150px",
+  height: "150px",
 };
 
 // get the window object
 const w = window as any;
 
 // access the cgpv object from the window object
-const cgpv = w['cgpv'];
+const cgpv = w["cgpv"];
 
 // access the api calls
 const { api, react, leaflet, reactLeaflet, ui, constants } = cgpv;
@@ -31,19 +31,19 @@ const useStyles = makeStyles((theme: any) => ({
   minimap: {
     width: MINIMAP_SIZE.width,
     height: MINIMAP_SIZE.height,
-    '-webkit-transition': '300ms linear',
-    '-moz-transition': '300ms linear',
-    '-o-transition': '300ms linear',
-    '-ms-transition': '300ms linear',
-    transition: '300ms linear',
-    '&::before': {
+    "-webkit-transition": "300ms linear",
+    "-moz-transition": "300ms linear",
+    "-o-transition": "300ms linear",
+    "-ms-transition": "300ms linear",
+    transition: "300ms linear",
+    "&::before": {
       content: '""',
-      display: 'block',
-      position: 'absolute',
+      display: "block",
+      position: "absolute",
       width: 0,
       height: 0,
-      borderTop: '32px solid hsla(0,0%,98%,0.9)',
-      borderLeft: '32px solid transparent',
+      borderTop: "32px solid hsla(0,0%,98%,0.9)",
+      borderLeft: "32px solid transparent",
       zIndex: theme.zIndex.appBar,
       right: 0,
       top: 0,
@@ -76,7 +76,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   const theme = useTheme();
 
   // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('md'));
+  const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const parentMap = useMap();
   const mapZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;

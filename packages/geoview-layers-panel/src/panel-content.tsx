@@ -1,7 +1,7 @@
-import { TypePanelContentProps, TypeProps } from 'geoview-core';
+import { TypePanelContentProps, TypeProps } from "geoview-core";
 
-import LayerStepper from './layer-stepper';
-import LayersList from './layers-list';
+import LayerStepper from "./layer-stepper";
+import LayersList from "./layers-list";
 
 const w = window as any;
 
@@ -14,7 +14,7 @@ const w = window as any;
 const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { mapId } = props;
 
-  const cgpv = w['cgpv'];
+  const cgpv = w["cgpv"];
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;
   const [addLayerVisible, setAddLayerVisible] = useState(false);
@@ -24,24 +24,24 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const { language } = api.map(mapId);
 
   const translations: TypeProps<TypeProps<any>> = {
-    'en-CA': {
-      addLayer: 'Add Layer',
+    "en-CA": {
+      addLayer: "Add Layer",
     },
-    'fr-CA': {
-      addLayer: 'Ajouter Couche',
+    "fr-CA": {
+      addLayer: "Ajouter Couche",
     },
   };
 
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
-      display: 'flex',
-      flexDirection: 'row',
+      display: "flex",
+      flexDirection: "row",
     },
     addLayerButton: {
       width: 50,
       minWidth: 50,
-      '& > div': {
-        textAlign: 'center',
+      "& > div": {
+        textAlign: "center",
       },
     },
   }));
@@ -75,10 +75,10 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
           onClick={onClick}
         />
       </div>
-      <div style={{ display: addLayerVisible ? 'inherit' : 'none' }}>
+      <div style={{ display: addLayerVisible ? "inherit" : "none" }}>
         <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
       </div>
-      <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
+      <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
         <LayersList mapId={mapId} layers={mapLayers} language={language} />
       </div>
     </>

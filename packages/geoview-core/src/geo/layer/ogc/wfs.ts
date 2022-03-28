@@ -1,16 +1,16 @@
 /* eslint-disable object-shorthand */
 /* eslint-disable no-underscore-dangle */
-import axios from 'axios';
+import axios from "axios";
 
-import L, { LeafletMouseEvent, Layer, version } from 'leaflet';
+import L, { LeafletMouseEvent, Layer, version } from "leaflet";
 
-import { mapService as esriMapService, MapService } from 'esri-leaflet';
+import { mapService as esriMapService, MapService } from "esri-leaflet";
 
-import { xmlToJson, generateId } from '../../../core/utils/utilities';
+import { xmlToJson, generateId } from "../../../core/utils/utilities";
 
-import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from "../../../core/types/cgpv-types";
 
-import { api } from '../../../api/api';
+import { api } from "../../../api/api";
 
 /**
  * a class to add WFS layer
@@ -25,7 +25,7 @@ export class WFS {
   id: string;
 
   // layer name with default
-  name = 'WFS Layer';
+  name = "WFS Layer";
 
   // layer type
   type: string;
@@ -46,7 +46,7 @@ export class WFS {
   #capabilities: TypeJSONObjectLoop;
 
   // private varibale holding wms paras
-  #version = '2.0.0';
+  #version = "2.0.0";
 
   /**
    * Initialize layer
@@ -54,10 +54,10 @@ export class WFS {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
+    this.id = layerConfig.id || generateId("");
     this.type = layerConfig.type;
     this.#capabilities = {};
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
+    this.entries = layerConfig.entries?.split(",").map((item: string) => {
       return item.trim();
     });
     this.mapService = esriMapService({
@@ -79,34 +79,34 @@ export class WFS {
 
     // const data = getXMLHttpRequest(capUrl);
     const res = await axios.get(this.url, {
-      params: { request: 'getcapabilities', service: 'WFS' },
+      params: { request: "getcapabilities", service: "WFS" },
     });
 
     // need to pass a xmldom to xmlToJson
-    const xmlDOM = new DOMParser().parseFromString(res.data, 'text/xml');
+    const xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
     const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
 
-    this.#capabilities = json['wfs:WFS_Capabilities'];
-    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version;
-    const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
+    this.#capabilities = json["wfs:WFS_Capabilities"];
+    this.#version = json["wfs:WFS_Capabilities"]["@attributes"].version;
+    const featTypeInfo = this.getFeatyreTypeInfo(json["wfs:WFS_Capabilities"].FeatureTypeList.FeatureType, layer.entries);
 
     if (!featTypeInfo) {
-      return new Promise((resolve) => resolve('{}'));
+      return new Promise((resolve) => resolve("{}"));
     }
 
-    const layerName = layer.hasOwnProperty('name') ? layer.name : featTypeInfo.Name['#text'].split(':')[1];
+    const layerName = layer.hasOwnProperty("name") ? layer.name : featTypeInfo.Name["#text"].split(":")[1];
     if (layerName) this.name = <string>layerName;
 
-    let layerEPSG = featTypeInfo.DefaultCRS['#text'].split('crs:')[1];
-    layerEPSG = layerEPSG.replace('::', ':');
+    let layerEPSG = featTypeInfo.DefaultCRS["#text"].split("crs:")[1];
+    layerEPSG = layerEPSG.replace("::", ":");
 
     const params = {
-      service: 'WFS',
+      service: "WFS",
       version: this.#version,
-      request: 'GetFeature',
+      request: "GetFeature",
       typename: layer.entries,
-      srsname: 'EPSG:4326',
-      outputFormat: 'application/json',
+      srsname: "EPSG:4326",
+      outputFormat: "application/json",
     };
 
     const featRes = axios.get(this.url, { params: params });
@@ -116,11 +116,11 @@ export class WFS {
         .then((res) => {
           const geojson = res.data;
 
-          if (geojson && geojson !== '{}') {
+          if (geojson && geojson !== "{}") {
             const wfs = L.geoJSON(geojson, {
               pointToLayer: function (feature, latlng) {
-                if (feature.geometry.type == 'Point') {
-                  const lId = generateId('');
+                if (feature.geometry.type == "Point") {
+                  const lId = generateId("");
                   return L.circleMarker(latlng);
                 }
                 // if need to use specific style for point
@@ -132,8 +132,8 @@ export class WFS {
               style: function (feature) {
                 return {
                   stroke: true,
-                  color: '#333',
-                  fillColor: '#FFB27F',
+                  color: "#333",
+                  fillColor: "#FFB27F",
                   fillOpacity: 0.8,
                 };
               },
@@ -141,7 +141,7 @@ export class WFS {
 
             resolve(wfs);
           } else {
-            resolve('{}');
+            resolve("{}");
           }
         })
         .catch(function (error) {
@@ -161,7 +161,7 @@ export class WFS {
             // console.log("Error", error.message);
           }
           // console.log(error.config);
-          resolve('{}');
+          resolve("{}");
         });
     });
     return new Promise((resolve) => resolve(geo));
@@ -178,11 +178,11 @@ export class WFS {
 
     if (Array.isArray(FeatureTypeList)) {
       for (let i = 0; i < FeatureTypeList.length; i++) {
-        let fName = FeatureTypeList[i].Name['#text'];
-        const fNameSplit = fName.split(':');
+        let fName = FeatureTypeList[i].Name["#text"];
+        const fNameSplit = fName.split(":");
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-        const entrySplit = entries!.split(':');
+        const entrySplit = entries!.split(":");
         const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
         if (entryName == fName) {
@@ -190,12 +190,12 @@ export class WFS {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name['#text'];
+      let fName = FeatureTypeList.Name["#text"];
 
-      const fNameSplit = fName.split(':');
+      const fNameSplit = fName.split(":");
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-      const entrySplit = entries!.split(':');
+      const entrySplit = entries!.split(":");
       const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
       if (entryName == fName) {

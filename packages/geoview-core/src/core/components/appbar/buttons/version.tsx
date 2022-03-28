@@ -1,9 +1,9 @@
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
-import { GITUHUB_REPO } from '../../../utils/constant';
-import { TypeAppVersion } from '../../../types/cgpv-types';
+import { GITUHUB_REPO } from "../../../utils/constant";
+import { TypeAppVersion } from "../../../types/cgpv-types";
 
-import { Button, GitHubIcon } from '../../../../ui';
+import { Button, GitHubIcon } from "../../../../ui";
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -11,15 +11,15 @@ declare const __VERSION__: TypeAppVersion;
 const useStyles = makeStyles((theme) => {
   return {
     github: {
-      textAlign: 'center',
+      textAlign: "center",
       lineHeight: theme.typography.subtitle1.lineHeight,
-      '& .cgp-version': {
-        fontWeight: 'bold',
-        display: 'block',
+      "& .cgp-version": {
+        fontWeight: "bold",
+        display: "block",
         fontSize: theme.typography.subtitle1.fontSize,
       },
-      '& .cgp-timestamp': {
-        fontWeight: 'normal',
+      "& .cgp-timestamp": {
+        fontWeight: "normal",
         fontSize: theme.typography.subtitle2.fontSize,
       },
     },
@@ -36,7 +36,7 @@ export default function Version(props: VersionProps): JSX.Element {
   const classes = useStyles();
 
   function getRepo(): void {
-    window.open(GITUHUB_REPO, '_blank');
+    window.open(GITUHUB_REPO, "_blank");
   }
 
   function getVersion(): string {
@@ -57,7 +57,7 @@ export default function Version(props: VersionProps): JSX.Element {
       onClick={() => getRepo()}
       icon={<GitHubIcon />}
       className=""
-      state={drawerStatus ? 'expanded' : 'collapsed'}
+      state={drawerStatus ? "expanded" : "collapsed"}
     >
       <div className={classes.github}>
         <span className="cgp-version">{getVersion()}</span>

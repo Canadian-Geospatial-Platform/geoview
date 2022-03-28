@@ -1,6 +1,6 @@
-import { Fade as MaterialFade } from '@mui/material';
+import { Fade as MaterialFade } from "@mui/material";
 
-import { TypeChild } from '../../core/types/cgpv-types';
+import { TypeChild } from "../../core/types/cgpv-types";
 
 /**
  * Properties for the Fade element

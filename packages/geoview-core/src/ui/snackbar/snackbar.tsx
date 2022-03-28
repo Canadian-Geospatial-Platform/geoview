@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-import { useMap } from 'react-leaflet';
+import { useMap } from "react-leaflet";
 
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
-import { Button } from '@mui/material';
+import { Button } from "@mui/material";
 
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
 
-import { api } from '../../api/api';
-import { EVENT_NAMES } from '../../api/event';
+import { api } from "../../api/api";
+import { EVENT_NAMES } from "../../api/event";
 
 /**
  * Snackbar properties interface
@@ -62,7 +62,7 @@ export function Snackbar(props: SnackBarProps): null {
   function replaceParams(params: string[], message: string) {
     let tmpMess = message;
     params.forEach((item: string) => {
-      tmpMess = tmpMess.replace('__param__', item);
+      tmpMess = tmpMess.replace("__param__", item);
     });
 
     return tmpMess;
@@ -85,7 +85,7 @@ export function Snackbar(props: SnackBarProps): null {
 
         // get message
         const message =
-          payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params, t(payload.message.value));
+          payload.message.type === "string" ? payload.message.value : replaceParams(payload.message.params, t(payload.message.value));
 
         // show the notification
         if (payload && id === payload.handlerName) enqueueSnackbar(message, opts);

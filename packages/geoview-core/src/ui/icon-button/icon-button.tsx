@@ -1,8 +1,8 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties } from "react";
 
-import { IconButton as MaterialIconButton, Tooltip, TooltipProps, Fade } from '@mui/material';
+import { IconButton as MaterialIconButton, Tooltip, TooltipProps, Fade } from "@mui/material";
 
-import { TypeChildren, TypeFunction } from '../../core/types/cgpv-types';
+import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
 
 /**
  * Properties for the icon button
@@ -14,11 +14,11 @@ interface IconButtonProps {
   ariaLabel?: string;
   onClick?: TypeFunction;
   tooltip?: string;
-  tooltipPlacement?: TooltipProps['placement'];
+  tooltipPlacement?: TooltipProps["placement"];
   id?: string | undefined;
   tabIndex?: number | undefined;
   iconRef?: React.RefObject<any> | null | undefined;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 /**
@@ -32,7 +32,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
   const { className, style, children, onClick, ariaLabel, tooltip, tooltipPlacement, id, tabIndex, iconRef, size } = props;
 
   return (
-    <Tooltip title={tooltip || ''} placement={tooltipPlacement || undefined} TransitionComponent={Fade}>
+    <Tooltip title={tooltip || ""} placement={tooltipPlacement || undefined} TransitionComponent={Fade}>
       <MaterialIconButton
         id={id || undefined}
         aria-label={ariaLabel || undefined}

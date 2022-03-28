@@ -1,29 +1,29 @@
-import { CSSProperties, useState } from 'react';
+import { CSSProperties, useState } from "react";
 
-import { FormControl, FormHelperText, InputLabel, ListSubheader, MenuItem, Select as MaterialSelect } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+import { FormControl, FormHelperText, InputLabel, ListSubheader, MenuItem, Select as MaterialSelect } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
-    width: '50%',
-    margin: '15px 0',
-    '& .MuiFormLabel-root.Mui-focused': {
+    width: "50%",
+    margin: "15px 0",
+    "& .MuiFormLabel-root.Mui-focused": {
       color: theme.palette.primary.contrastText,
       background: theme.palette.primary.light,
     },
-    '& .MuiOutlinedInput-root.Mui-focused': {
+    "& .MuiOutlinedInput-root.Mui-focused": {
       border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },
   label: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
-    transform: 'translate(14px, -9px) scale(0.75)',
+    transform: "translate(14px, -9px) scale(0.75)",
     background: theme.palette.primary.light,
   },
   select: {
-    width: '100%',
+    width: "100%",
   },
 }));
 
@@ -76,7 +76,7 @@ interface SelectProps {
  */
 export function Select(props: SelectProps): JSX.Element {
   const classes = useStyles();
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [multipleValue, setMultipleValue] = useState([]);
   const { className, style, id, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
 
@@ -91,12 +91,12 @@ export function Select(props: SelectProps): JSX.Element {
       const {
         target: { value },
       } = event;
-      setMultipleValue(typeof value === 'string' ? value.split(',') : value);
+      setMultipleValue(typeof value === "string" ? value.split(",") : value);
     }
   };
 
-  !multiple && typeof callBack === 'function' && callBack(value);
-  multiple && typeof callBack === 'function' && callBack(multipleValue);
+  !multiple && typeof callBack === "function" && callBack(value);
+  multiple && typeof callBack === "function" && callBack(multipleValue);
 
   const isGrouped = selectItems.some((item: any) => item.category);
 
@@ -137,7 +137,7 @@ export function Select(props: SelectProps): JSX.Element {
         {isGrouped
           ? selectItems.map((item: any) => {
               const options: JSX.Element[] = [];
-              if (item.category) options.push(<ListSubheader>{item.category ? item.category : 'Others'}</ListSubheader>);
+              if (item.category) options.push(<ListSubheader>{item.category ? item.category : "Others"}</ListSubheader>);
               item.items.map((item: any) => {
                 options.push(<MenuItem value={item.value}>{item.value}</MenuItem>);
               });

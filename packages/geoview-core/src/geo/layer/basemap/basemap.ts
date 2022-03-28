@@ -1,8 +1,8 @@
 /* eslint-disable no-multi-assign */
 /* eslint-disable lines-between-class-members */
-import { api } from '../../../api/api';
+import { api } from "../../../api/api";
 
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from "../../../api/event";
 
 import {
   TypeBasemapProps,
@@ -10,9 +10,9 @@ import {
   TypeBasemapLayer,
   TypeBasemapOptions,
   TypeAttribution,
-} from '../../../core/types/cgpv-types';
+} from "../../../core/types/cgpv-types";
 
-import { generateId } from '../../../core/utils/utilities';
+import { generateId } from "../../../core/utils/utilities";
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -61,8 +61,8 @@ export class Basemap {
       const { map } = api.map(this.mapId);
 
       // create new pane to host basemap layers
-      this.basemapsPaneName = 'basemapsPane';
-      map.createPane(this.basemapsPaneName).style.zIndex = '10';
+      this.basemapsPaneName = "basemapsPane";
+      map.createPane(this.basemapsPaneName).style.zIndex = "10";
 
       if (this.basemapOptions) {
         this.loadDefaultBasemaps();
@@ -76,19 +76,19 @@ export class Basemap {
   basemapsList: Record<number, Record<string, string>> = {
     3978: {
       transport:
-        'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg",
       simple:
-        'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg',
+        "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg",
       shaded:
-        'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg",
       label:
-        'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/xxxx_TXT_3978/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg",
     },
     3857: {
       transport:
-        'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_CBCT_GEOM_3857/default/default028mm/{z}/{y}/{x}.jpg',
+        "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_CBCT_GEOM_3857/default/default028mm/{z}/{y}/{x}.jpg",
       label:
-        'https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
+        "https://geoappext.nrcan.gc.ca/arcgis/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg",
     },
   };
 
@@ -106,8 +106,8 @@ export class Basemap {
    * attribution to add the the map
    */
   private attributionVal: TypeAttribution = {
-    'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
-    'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
+    "en-CA": "© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources",
+    "fr-CA": "© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles",
   };
 
   /**
@@ -122,8 +122,8 @@ export class Basemap {
     if (this.basemapOptions) {
       if (this.basemapOptions.shaded !== false) {
         basemapLayers.push({
-          id: 'shaded',
-          type: 'shaded',
+          id: "shaded",
+          type: "shaded",
           url: this.basemapsList[this.projection].shaded,
           options: this.basemapLayerOptions,
           opacity: mainBasemapOpacity,
@@ -133,8 +133,8 @@ export class Basemap {
       }
 
       basemapLayers.push({
-        id: this.basemapOptions.id || 'transport',
-        type: 'transport',
+        id: this.basemapOptions.id || "transport",
+        type: "transport",
         url: this.basemapsList[this.projection][this.basemapOptions.id] || this.basemapsList[this.projection].transport,
         options: this.basemapLayerOptions,
         opacity: mainBasemapOpacity,
@@ -144,9 +144,9 @@ export class Basemap {
       if (this.basemapOptions.labeled !== false) {
         // get proper label url
         basemapLayers.push({
-          id: 'label',
-          type: 'label',
-          url: this.basemapsList[this.projection].label.replaceAll('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT'),
+          id: "label",
+          type: "label",
+          url: this.basemapsList[this.projection].label.replaceAll("xxxx", this.language === "en-CA" ? "CBMT" : "CBCT"),
           options: this.basemapLayerOptions,
           opacity: 1,
           basemapPaneName: this.basemapsPaneName,
@@ -189,31 +189,31 @@ export class Basemap {
         // eslint-disable-next-line no-param-reassign
         layer.basemapPaneName = this.basemapsPaneName;
 
-        if (type === 'transport') {
+        if (type === "transport") {
           thumbnailUrls.push(
             this.basemapsList[this.projection].transport
-              .replace('{z}', '8')
-              .replace('{y}', this.projection === 3978 ? '285' : '91')
-              .replace('{x}', this.projection === 3978 ? '268' : '74')
+              .replace("{z}", "8")
+              .replace("{y}", this.projection === 3978 ? "285" : "91")
+              .replace("{x}", this.projection === 3978 ? "268" : "74")
           );
         }
 
-        if (type === 'shaded') {
+        if (type === "shaded") {
           thumbnailUrls.push(
             this.basemapsList[this.projection].shaded
-              .replace('{z}', '8')
-              .replace('{y}', this.projection === 3978 ? '285' : '91')
-              .replace('{x}', this.projection === 3978 ? '268' : '74')
+              .replace("{z}", "8")
+              .replace("{y}", this.projection === 3978 ? "285" : "91")
+              .replace("{x}", this.projection === 3978 ? "268" : "74")
           );
         }
 
-        if (type === 'label') {
+        if (type === "label") {
           thumbnailUrls.push(
             this.basemapsList[this.projection].label
-              .replace('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT')
-              .replace('{z}', '8')
-              .replace('{y}', this.projection === 3978 ? '285' : '91')
-              .replace('{x}', this.projection === 3978 ? '268' : '74')
+              .replace("xxxx", this.language === "en-CA" ? "CBMT" : "CBCT")
+              .replace("{z}", "8")
+              .replace("{y}", this.projection === 3978 ? "285" : "91")
+              .replace("{x}", this.projection === 3978 ? "268" : "74")
           );
         }
       });

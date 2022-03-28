@@ -1,12 +1,12 @@
-import { Cast } from 'geoview-core';
+import { Cast } from "geoview-core";
 
-import { MINIMAP_SIZE } from './overview-map';
+import { MINIMAP_SIZE } from "./overview-map";
 
 // access window object
 const w = window as any;
 
 // access the cgpv object from the window object
-const cgpv = w['cgpv'];
+const cgpv = w["cgpv"];
 
 // access the api calls
 const { api, react, leaflet, ui, constants, useTranslation } = cgpv;
@@ -28,7 +28,7 @@ const { leafletPositionClasses } = constants;
 
 const useStyles = ui.makeStyles((theme: any) => ({
   toggleBtn: {
-    transform: 'rotate(45deg)',
+    transform: "rotate(45deg)",
     color: theme.palette.primary.contrastText,
     zIndex: theme.zIndex.tooltip,
   },
@@ -36,10 +36,10 @@ const useStyles = ui.makeStyles((theme: any) => ({
     zIndex: theme.zIndex.tooltip,
   },
   minimapOpen: {
-    transform: 'rotate(-45deg)',
+    transform: "rotate(-45deg)",
   },
   minimapClosed: {
-    transform: 'rotate(135deg)',
+    transform: "rotate(135deg)",
   },
 }));
 
@@ -104,10 +104,10 @@ export const MinimapToggle = (props: MinimapToggleProps): JSX.Element => {
         style={{
           margin: `-${theme.spacing(3)}`,
           padding: 0,
-          height: 'initial',
-          minWidth: 'initial',
+          height: "initial",
+          minWidth: "initial",
         }}
-        aria-label={t('mapctrl.overviewmap.toggle')}
+        aria-label={t("mapctrl.overviewmap.toggle")}
         onClick={toggleMinimap}
         size="large"
       >

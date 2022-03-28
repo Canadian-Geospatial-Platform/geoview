@@ -1,12 +1,12 @@
-import { api } from '../../../api/api';
+import { api } from "../../../api/api";
 
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from "../../../api/event";
 
-import { ButtonApi, PanelApi } from '../../../ui';
+import { PanelApi } from "../../../ui";
 
-import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from "../../types/cgpv-types";
 
-import { generateId } from '../../utils/utilities';
+import { generateId } from "../../utils/utilities";
 
 /**
  * Class to manage buttons on the appbar
@@ -86,7 +86,7 @@ export class AppbarButtons {
       };
 
       // if group was not specified then add button panels to the default group
-      const group = groupName || 'default';
+      const group = groupName || "default";
 
       // if group does not exist then create it
       if (!this.buttons[group]) {
@@ -96,7 +96,7 @@ export class AppbarButtons {
       const buttonPanel: TypeButtonPanel = {
         id,
         panel: new PanelApi(panel, id, this.mapId),
-        button: new ButtonApi(button),
+        button,
         groupName: group,
       };
 

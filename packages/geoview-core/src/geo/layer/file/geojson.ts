@@ -1,7 +1,7 @@
-import L, { Layer } from 'leaflet';
+import L, { Layer } from "leaflet";
 
-import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { getXMLHttpRequest, generateId } from "../../../core/utils/utilities";
+import { TypeLayerConfig } from "../../../core/types/cgpv-types";
 
 /**
  * Class used to add geojson layer to the map
@@ -14,7 +14,7 @@ export class GeoJSON {
   id: string;
 
   // layer name with default
-  name?: string = 'GeoJson Layer';
+  name?: string = "GeoJson Layer";
 
   // layer type
   type: string;
@@ -31,8 +31,8 @@ export class GeoJSON {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
+    this.id = layerConfig.id || generateId("");
+    if ("name" in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();
@@ -50,7 +50,7 @@ export class GeoJSON {
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
-        if (value !== '{}') {
+        if (value !== "{}") {
           // parse the json string and convert it to a json object
           const featureCollection = JSON.parse(value);
 
@@ -59,18 +59,18 @@ export class GeoJSON {
             // TODO classes will be created to style the elements, it may get the info from theming
             // add styling
             style: (feature) => {
-              if (feature?.geometry.type === 'Polygon') {
+              if (feature?.geometry.type === "Polygon") {
                 switch (feature.properties.number) {
-                  case 'One':
-                    return { color: '#ff0000' };
-                  case 'Two':
-                    return { color: '#0000ff' };
+                  case "One":
+                    return { color: "#ff0000" };
+                  case "Two":
+                    return { color: "#0000ff" };
                   default:
-                    return { color: '#696969' };
+                    return { color: "#696969" };
                 }
-              } else if (feature?.geometry.type === 'LineString') {
+              } else if (feature?.geometry.type === "LineString") {
                 return {
-                  color: '#000000',
+                  color: "#000000",
                   weight: 5,
                   opacity: 0.65,
                 };

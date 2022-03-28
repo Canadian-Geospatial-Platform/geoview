@@ -1,7 +1,7 @@
-import { useContext } from 'react';
-import { api } from '../../../../api/api';
-import { Button, ZoomOutIcon } from '../../../../ui';
-import { MapContext } from '../../../app-start';
+import { useContext } from "react";
+import { api } from "../../../../api/api";
+import { Button, ZoomOutIcon } from "../../../../ui";
+import { MapContext } from "../../../app-start";
 
 /**
  * Zoom out button properties
@@ -15,8 +15,8 @@ interface ZoomOutProps {
  * default properties values
  */
 const defaultProps = {
-  className: '',
-  iconClassName: '',
+  className: "",
+  iconClassName: "",
 };
 
 /**

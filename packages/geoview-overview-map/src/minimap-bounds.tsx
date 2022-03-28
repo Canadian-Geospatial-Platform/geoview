@@ -2,7 +2,7 @@
 const w = window as any;
 
 // access the cgpv object from the window object
-const cgpv = w['cgpv'];
+const cgpv = w["cgpv"];
 
 // access the api calls
 const { api, react, reactLeaflet, reactLeafletCore } = cgpv;
@@ -45,7 +45,7 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
     },
     [parentMap]
   );
-  useMapEvent('click', onClick);
+  useMapEvent("click", onClick);
 
   // Keep track of bounds in state to trigger renders
   const [bounds, setBounds] = useState({
@@ -118,11 +118,11 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
         top: `${bounds.top}px`,
         width: `${bounds.width}px`,
         height: `${bounds.height}px`,
-        display: 'block',
+        display: "block",
         opacity: 0.5,
-        position: 'absolute',
-        border: '1px solid rgb(0, 0, 0)',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        position: "absolute",
+        border: "1px solid rgb(0, 0, 0)",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         zIndex: 1000,
       }}
     />

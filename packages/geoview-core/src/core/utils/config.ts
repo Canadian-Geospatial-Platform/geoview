@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
-import { LatLngTuple } from 'leaflet';
+import { LatLngTuple } from "leaflet";
 
-import { isJsonString, generateId } from './utilities';
-import { TypeMapConfigProps, TypeBasemapOptions } from '../types/cgpv-types';
+import { isJsonString, generateId } from "./utilities";
+import { TypeMapConfigProps, TypeBasemapOptions } from "../types/cgpv-types";
 /**
  * Class to handle configuration validation. Will validate every item for structure and valid values. If error found, will replace by default values
  * and sent a message in the console for developers to know something went wrong
@@ -15,14 +15,14 @@ export class Config {
   // default config if provided configuration is missing or wrong
   private _config: TypeMapConfigProps = {
     id: generateId(),
-    name: '',
+    name: "",
     center: [60, -100] as LatLngTuple,
     zoom: 4,
     projection: 3978,
-    language: 'en-CA',
+    language: "en-CA",
     selectBox: true,
     boxZoom: true,
-    basemapOptions: { id: 'transport', shaded: true, labeled: true },
+    basemapOptions: { id: "transport", shaded: true, labeled: true },
     layers: [],
     plugins: [],
     extraOptions: {},
@@ -32,8 +32,8 @@ export class Config {
   private _projections: number[] = [3857, 3978];
 
   private _basemapId: Record<number, string[]> = {
-    3857: ['transport'],
-    3978: ['transport', 'simple', 'shaded'],
+    3857: ["transport"],
+    3978: ["transport", "simple", "shaded"],
   };
 
   private _basemapShaded: Record<number, boolean[]> = {
@@ -51,7 +51,7 @@ export class Config {
     3978: { lat: [40, 90], long: [-140, 40] },
   };
 
-  private _languages = ['en-CA', 'fr-CA'];
+  private _languages = ["en-CA", "fr-CA"];
 
   /**
    * Get map configuration object
@@ -83,9 +83,9 @@ export class Config {
     // check if a config is provided and valid JSON object, if so validate, if not set to default
     const mapId = id && id.length ? id : this._config.id;
 
-    this._config = config !== '' && isJsonString(config) ? this.validate(mapId, config) : this._config;
+    this._config = config !== "" && isJsonString(config) ? this.validate(mapId, config) : this._config;
 
-    if (config === '' || !isJsonString(config)) console.log(`- map: ${id} - Invalid or empty JSON configuration object, using default -`);
+    if (config === "" || !isJsonString(config)) console.log(`- map: ${id} - Invalid or empty JSON configuration object, using default -`);
   }
 
   /**
@@ -103,7 +103,7 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
-    const name = this.validateName(tmpConfig.name || '');
+    const name = this.validateName(tmpConfig.name || "");
     const projection = this.validateProjection(Number(tmpConfig.projection));
     const basemapOptions = this.validateBasemap(projection, tmpConfig.basemapOptions);
     const center = this.validateCenter(projection, tmpConfig.center);
@@ -260,7 +260,7 @@ export class Config {
       // loop through the array and check each element if its valid string
       // eslint-disable-next-line no-plusplus
       for (let i = 0; i < plugins.length; i++) {
-        if (typeof plugins[i] === 'string' && plugins[i].length > 0) validPlugins.push(plugins[i]);
+        if (typeof plugins[i] === "string" && plugins[i].length > 0) validPlugins.push(plugins[i]);
       }
 
       return validPlugins;
@@ -275,6 +275,6 @@ export class Config {
    * @returns {string} valid name
    */
   private validateName(name: string): string {
-    return name.length > 0 ? name : generateId('');
+    return name.length > 0 ? name : generateId("");
   }
 }

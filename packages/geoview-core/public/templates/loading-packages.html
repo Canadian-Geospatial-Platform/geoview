@@ -122,81 +122,81 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
-        console.log('api is ready');
+        console.log("api is ready");
 
         createCodeSnippet();
         createConfigSnippet();
 
         // get load details panel button element
-        var loadDetailsPanelBtn = document.getElementById('load-details-panel-btn');
+        var loadDetailsPanelBtn = document.getElementById("load-details-panel-btn");
 
         // add event handler to the load details panel button
-        loadDetailsPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('detailsPanel', 'mapWM', window.plugins['detailsPanel'], {
-            mapId: 'mapWM',
+        loadDetailsPanelBtn.addEventListener("click", function (e) {
+          cgpv.api.addPlugin("detailsPanel", "mapWM", window.plugins["detailsPanel"], {
+            mapId: "mapWM",
           });
         });
 
         // get unload details panel button element
-        var unloadDetailsPanelBtn = document.getElementById('unload-details-panel-btn');
+        var unloadDetailsPanelBtn = document.getElementById("unload-details-panel-btn");
 
         // add event handler to the unload details panel button
-        unloadDetailsPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('detailsPanel');
+        unloadDetailsPanelBtn.addEventListener("click", function (e) {
+          cgpv.api.removePlugin("detailsPanel");
         });
 
         // get load overview map button element
-        var loadOverviewMapBtn = document.getElementById('load-overview-map-btn');
+        var loadOverviewMapBtn = document.getElementById("load-overview-map-btn");
 
         // add event handler to the load overview map button
-        loadOverviewMapBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('overviewMap', 'mapWM', window.plugins['overviewMap'], {
-            mapId: 'mapWM',
+        loadOverviewMapBtn.addEventListener("click", function (e) {
+          cgpv.api.addPlugin("overviewMap", "mapWM", window.plugins["overviewMap"], {
+            mapId: "mapWM",
           });
         });
 
         // get unload overview map button element
-        var unloadOverviewMapBtn = document.getElementById('unload-overview-map-btn');
+        var unloadOverviewMapBtn = document.getElementById("unload-overview-map-btn");
 
         // add event handler to the unload overview map button
-        unloadOverviewMapBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('overviewMap');
+        unloadOverviewMapBtn.addEventListener("click", function (e) {
+          cgpv.api.removePlugin("overviewMap");
         });
 
         // get load basemap switcher button element
-        var loadBasemapSwitcherBtn = document.getElementById('load-basemap-switcher-btn');
+        var loadBasemapSwitcherBtn = document.getElementById("load-basemap-switcher-btn");
 
         // add event handler to the load basemap switcher button
-        loadBasemapSwitcherBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('basemapSwitcher', 'mapWM', window.plugins['basemapSwitcher'], {
-            mapId: 'mapWM',
+        loadBasemapSwitcherBtn.addEventListener("click", function (e) {
+          cgpv.api.addPlugin("basemapSwitcher", "mapWM", window.plugins["basemapSwitcher"], {
+            mapId: "mapWM",
           });
         });
 
         // get unload basemap switcher button element
-        var unloadBasemapSwitcherBtn = document.getElementById('unload-basemap-switcher-btn');
+        var unloadBasemapSwitcherBtn = document.getElementById("unload-basemap-switcher-btn");
 
         // add event handler to the unload basemap switcher button
-        unloadBasemapSwitcherBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('basemapSwitcher', 'mapWM');
+        unloadBasemapSwitcherBtn.addEventListener("click", function (e) {
+          cgpv.api.removePlugin("basemapSwitcher", "mapWM");
         });
 
         // get load basemap switcher button element
-        var loadLayersPanelBtn = document.getElementById('load-layers-panel-btn');
+        var loadLayersPanelBtn = document.getElementById("load-layers-panel-btn");
 
         // add event handler to the load basemap switcher button
-        loadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('layersPanel', 'mapWM', window.plugins['layersPanel'], {
-            mapId: 'mapWM',
+        loadLayersPanelBtn.addEventListener("click", function (e) {
+          cgpv.api.addPlugin("layersPanel", "mapWM", window.plugins["layersPanel"], {
+            mapId: "mapWM",
           });
         });
 
         // get unload basemap switcher button element
-        var unloadLayersPanelBtn = document.getElementById('unload-layers-panel-btn');
+        var unloadLayersPanelBtn = document.getElementById("unload-layers-panel-btn");
 
         // add event handler to the unload basemap switcher button
-        unloadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('layersPanel');
+        unloadLayersPanelBtn.addEventListener("click", function (e) {
+          cgpv.api.removePlugin("layersPanel");
         });
       });
     </script>

@@ -1,5 +1,5 @@
-import { TypeButtonProps, TypeProps, TypeButtonPanel } from 'geoview-core';
-import { BasemapSwitcher } from './basemap-switcher';
+import { TypeButtonProps, TypeProps, TypeButtonPanel } from "geoview-core";
+import { BasemapSwitcher } from "./basemap-switcher";
 
 const w = window as any;
 
@@ -26,49 +26,49 @@ class BasemapSwitcherPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeProps<TypeProps<any>> = {
-    'en-CA': {
-      basemapSwitcher: 'Basemaps',
-      'basemap-transport-label': {
-        name: 'Transport with Labels',
-        desc: '',
+    "en-CA": {
+      basemapSwitcher: "Basemaps",
+      "basemap-transport-label": {
+        name: "Transport with Labels",
+        desc: "",
       },
-      'basemap-transport': {
-        name: 'Transport without labels',
-        desc: '',
+      "basemap-transport": {
+        name: "Transport without labels",
+        desc: "",
       },
-      'basemap-shaded': {
-        name: 'Shaded Relief',
-        desc: '',
+      "basemap-shaded": {
+        name: "Shaded Relief",
+        desc: "",
       },
-      'basemap-shaded-label': {
-        name: 'Shaded Relief with Labels',
-        desc: '',
+      "basemap-shaded-label": {
+        name: "Shaded Relief with Labels",
+        desc: "",
       },
       layer: {
-        type: 'CBMT',
+        type: "CBMT",
       },
     },
-    'fr-CA': {
-      basemapSwitcher: 'Fond de carte',
-      'basemap-transport-label': {
-        name: 'Transport avec des étiquettes',
-        desc: '',
+    "fr-CA": {
+      basemapSwitcher: "Fond de carte",
+      "basemap-transport-label": {
+        name: "Transport avec des étiquettes",
+        desc: "",
       },
-      'basemap-transport': {
-        name: 'Transport sans étiquettes',
-        desc: '',
+      "basemap-transport": {
+        name: "Transport sans étiquettes",
+        desc: "",
       },
-      'basemap-shaded': {
-        name: 'Relief ombré',
-        desc: '',
+      "basemap-shaded": {
+        name: "Relief ombré",
+        desc: "",
       },
-      'basemap-shaded-label': {
-        name: 'Relief ombré avec étiquettes',
-        desc: '',
+      "basemap-shaded-label": {
+        name: "Relief ombré avec étiquettes",
+        desc: "",
       },
 
       layer: {
-        type: 'CBCT',
+        type: "CBCT",
       },
     },
   };
@@ -80,7 +80,7 @@ class BasemapSwitcherPlugin {
     const { mapId } = this.BasemapSwitcherPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w['cgpv'];
+    const cgpv = w["cgpv"];
 
     // access the api calls
     const { api } = cgpv;
@@ -90,9 +90,9 @@ class BasemapSwitcherPlugin {
     // button props
     const button: TypeButtonProps = {
       tooltip: this.translations[language].basemapSwitcher,
-      tooltipPlacement: 'right',
+      tooltipPlacement: "right",
       icon: '<i class="material-icons">map</i>',
-      type: 'textWithIcon',
+      type: "textWithIcon",
     };
 
     // panel props
@@ -116,7 +116,7 @@ class BasemapSwitcherPlugin {
     const { mapId } = this.BasemapSwitcherPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w['cgpv'];
+    const cgpv = w["cgpv"];
 
     // access the api calls
     const { api } = cgpv;
@@ -129,5 +129,5 @@ class BasemapSwitcherPlugin {
 
 export default BasemapSwitcherPlugin;
 
-w['plugins'] = w['plugins'] || {};
-w['plugins']['basemapSwitcher'] = BasemapSwitcherPlugin;
+w["plugins"] = w["plugins"] || {};
+w["plugins"]["basemapSwitcher"] = BasemapSwitcherPlugin;

@@ -1,10 +1,10 @@
 /* eslint-disable no-plusplus */
-import L, { LatLngExpression } from 'leaflet';
+import L, { LatLngExpression } from "leaflet";
 
-import { api } from '../../../api/api';
-import { EVENT_NAMES } from '../../../api/event';
-import { CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
-import { generateId } from '../../../core/utils/utilities';
+import { api } from "../../../api/api";
+import { EVENT_NAMES } from "../../../api/event";
+import { CONST_VECTOR_TYPES } from "../../../core/types/cgpv-types";
+import { generateId } from "../../../core/utils/utilities";
 
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
@@ -23,7 +23,7 @@ export class Vector {
   geometries: L.Layer[] = [];
 
   // default geometry group name
-  defaultGeometryGroupId = 'defaultGeomGroup';
+  defaultGeometryGroupId = "defaultGeomGroup";
 
   // index of the active geometry group used to add new geometries in the map
   activeGeometryGroupIndex = 0;

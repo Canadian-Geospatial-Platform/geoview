@@ -1,3 +1,3 @@
-export * from './default-panels';
-export * from './panel-api';
-export * from './panel';
+export * from "./default-panels";
+export * from "./panel-api";
+export * from "./panel";

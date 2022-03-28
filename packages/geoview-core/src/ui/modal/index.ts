@@ -1,2 +1,2 @@
-export * from './modal-api';
-export * from './modal';
+export * from "./modal-api";
+export * from "./modal";

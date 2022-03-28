@@ -1,9 +1,9 @@
-import { createElement } from 'react';
+import { createElement } from "react";
 
-import { api } from '../../api/api';
-import { EVENT_NAMES } from '../../api/event';
-import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
-import { TypePanelProps } from '../../core/types/cgpv-types';
+import { api } from "../../api/api";
+import { EVENT_NAMES } from "../../api/event";
+import { CheckboxListAPI } from "../list/checkbox-list/checkbox-list-api";
+import { TypePanelProps } from "../../core/types/cgpv-types";
 
 /**
  * Class used to handle creating a new panel
@@ -49,9 +49,9 @@ export class PanelApi {
     this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
-    this.title = panel.title || '';
+    this.title = panel.title || "";
     this.icon = panel.icon;
-    this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement('div');
+    this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement("div");
     this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;
     this.width = panel.width || 300;
   }
@@ -76,7 +76,7 @@ export class PanelApi {
    * Close all other panels
    */
   closeAll = (): void => {
-    if (this.type === 'appbar') {
+    if (this.type === "appbar") {
       Object.keys(api.map(this.mapId).appBarButtons.buttons).forEach((groupName: string) => {
         // get button panels from group
         const buttonPanels = api.map(this.mapId).appBarButtons.buttons[groupName];
@@ -90,7 +90,7 @@ export class PanelApi {
           }
         });
       });
-    } else if (this.type === 'navbar') {
+    } else if (this.type === "navbar") {
       Object.keys(api.map(this.mapId).navBarButtons.buttons).forEach((groupName: string) => {
         // get button panels from group
         const buttonPanels = api.map(this.mapId).navBarButtons.buttons[groupName];

@@ -1,7 +1,7 @@
-import { CSSProperties } from 'react';
+import { CSSProperties } from "react";
 
-import { List as MaterialList } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+import { List as MaterialList } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = makeStyles((theme) => ({
   list: {
@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
  */
 interface ListProps {
   children?: JSX.Element | (JSX.Element | null)[] | JSX.Element[];
-  type?: 'ul' | 'ol';
+  type?: "ul" | "ol";
   className?: string | undefined;
   style?: CSSProperties | undefined;
 }
@@ -31,7 +31,7 @@ export function List(props: ListProps) {
   const classes = useStyles();
 
   return (
-    <MaterialList className={`${classes.list} ${className || ''}`} style={style || undefined} component={type || 'ul'}>
+    <MaterialList className={`${classes.list} ${className || ""}`} style={style || undefined} component={type || "ul"}>
       {children !== undefined && children}
     </MaterialList>
   );

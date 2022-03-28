@@ -57,15 +57,15 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(() => {
-        console.log('api is ready');
+        console.log("api is ready");
 
         // create snippets
         createCodeSnippet();
 
         const urls = [
-          'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1',
-          'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/2',
-          'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/3',
+          "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1",
+          "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/2",
+          "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/3",
         ];
 
         urls.forEach(async (url) => {
@@ -75,17 +75,17 @@
 
         cgpv.api.geoUtilities.getESRIServiceMetadata(urls[0]).then((data) => {
           console.log(data);
-          document.getElementById('esriMetadata').value = JSON.stringify(data);
+          document.getElementById("esriMetadata").value = JSON.stringify(data);
         });
 
         cgpv.api.geoUtilities
           .getWMSServiceMetadata(
-            'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
-            '0'
+            "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
+            "0"
           )
           .then((data) => {
             console.log(data);
-            document.getElementById('wmsMetadata').value = JSON.stringify(data);
+            document.getElementById("wmsMetadata").value = JSON.stringify(data);
           });
       });
     </script>

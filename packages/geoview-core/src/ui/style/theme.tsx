@@ -1,4 +1,4 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme, ThemeOptions } from "@mui/material/styles";
 
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
@@ -8,18 +8,18 @@ const headingStyles = {
 const themeOptions: ThemeOptions = {
   palette: {
     primary: {
-      light: '#ffffff',
-      main: '#808080',
-      dark: '#000000',
-      contrastText: '#666666',
+      light: "#ffffff",
+      main: "#808080",
+      dark: "#000000",
+      contrastText: "#666666",
     },
     secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
+      light: "#ff7961",
+      main: "#f44336",
+      dark: "#ba000d",
+      contrastText: "#000",
     },
-    backdrop: '#3F3F3F50',
+    backdrop: "#3F3F3F50",
   },
   typography: {
     fontSize: 16,
@@ -34,18 +34,18 @@ const themeOptions: ThemeOptions = {
       fontWeight: 400,
     },
     subtitle1: {
-      fontSize: '0.8rem',
+      fontSize: "0.8rem",
       lineHeight: 1.25,
     },
     subtitle2: {
-      fontSize: '0.7rem',
+      fontSize: "0.7rem",
       lineHeight: 1.25,
     },
     body1: {},
     body2: {},
     caption: {},
     overline: {
-      fontSize: '0.875rem',
+      fontSize: "0.875rem",
       fontWeight: 500,
       letterSpacing: 2,
     },
@@ -96,44 +96,44 @@ const themeOptions: ThemeOptions = {
     },
     easing: {
       // This is the most common easing curve.
-      easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
+      easeInOut: "cubic-bezier(0.4, 0, 0.2, 1)",
       // Objects enter the screen at full velocity from off-screen and
       // slowly decelerate to a resting point.
-      easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
+      easeOut: "cubic-bezier(0.0, 0, 0.2, 1)",
       // Objects leave the screen at full velocity. They do not decelerate when off-screen.
-      easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
+      easeIn: "cubic-bezier(0.4, 0, 1, 1)",
       // The sharp curve is used by objects that may return to the screen at any time.
-      sharp: 'cubic-bezier(0.4, 0, 0.6, 1)',
+      sharp: "cubic-bezier(0.4, 0, 0.6, 1)",
     },
   },
   shape: {
     borderRadius: 6,
-    center: '50%',
-    right: '100%',
-    left: '0%',
+    center: "50%",
+    right: "100%",
+    left: "0%",
   },
   components: {
     MuiFab: {
       styleOverrides: {
-        root: { padding: '0 24px' },
+        root: { padding: "0 24px" },
       },
     },
     MuiDrawer: {
       styleOverrides: {
-        paper: { position: 'relative' },
+        paper: { position: "relative" },
       },
     },
     MuiButtonGroup: {
       styleOverrides: {
         grouped: {
-          minWidth: 'auto',
+          minWidth: "auto",
         },
       },
     },
   },
   overrides: {
     button: {
-      size: { width: '32px', height: '32px' },
+      size: { width: "32px", height: "32px" },
     },
     northArrow: {
       size: { width: 42, height: 42 },

@@ -1,40 +1,40 @@
-import { CSSProperties, useState } from 'react';
+import { CSSProperties, useState } from "react";
 
-import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 
-import { Button } from '../button';
+import { Button } from "../button";
 
 const useStyles = makeStyles((theme) => ({
   stepperContainer: {
     padding: 15,
     width: 500,
     minWidth: 150,
-    border: '0.5px solid grey',
-    flexWrap: 'wrap',
-    '& .MuiSvgIcon-root.Mui-active': {
-      color: '#90caf9',
+    border: "0.5px solid grey",
+    flexWrap: "wrap",
+    "& .MuiSvgIcon-root.Mui-active": {
+      color: "#90caf9",
     },
-    '& .MuiSvgIcon-root.Mui-completed': {
-      color: '#666666',
+    "& .MuiSvgIcon-root.Mui-completed": {
+      color: "#666666",
     },
   },
   actionContainer: {
     marginTop: 20,
-    width: '100%',
-    display: 'flex',
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    '&>*:first-child': {
-      width: '100%',
+    width: "100%",
+    display: "flex",
+    flexWrap: "wrap",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    "&>*:first-child": {
+      width: "100%",
       marginBottom: 8,
     },
-    '& > button': {
-      width: '30%',
+    "& > button": {
+      width: "30%",
     },
-    '& > button > *': {
-      textAlign: 'center',
+    "& > button > *": {
+      textAlign: "center",
     },
   },
   disabledButton: {
@@ -65,7 +65,7 @@ interface StepperProps {
   style?: CSSProperties;
 
   // orientaion of the Stepper component. By default, its horizontal
-  orientation?: 'horizontal' | 'vertical';
+  orientation?: "horizontal" | "vertical";
 
   // alternative label for the steps. Alternative labels appear at the bottom of step icons
   alternativeLabel?: boolean;
@@ -204,7 +204,7 @@ export function Stepper(props: StepperProps): JSX.Element {
     setIsReset(false);
   };
 
-  const stepsOrientation = orientation !== undefined ? orientation : 'horizontal';
+  const stepsOrientation = orientation !== undefined ? orientation : "horizontal";
 
   const disabledStepMovement = steps.findIndex((step: any) => step.disableStepMovement);
 
@@ -215,10 +215,10 @@ export function Stepper(props: StepperProps): JSX.Element {
       <MaterialStepper
         className={`${classes.stepperContainer} ${className && className}`}
         style={style || undefined}
-        id={id || ''}
+        id={id || ""}
         orientation={stepsOrientation}
         activeStep={activeStep}
-        alternativeLabel={stepsOrientation === 'horizontal' ? (alternativeLabel !== undefined ? alternativeLabel : true) : false}
+        alternativeLabel={stepsOrientation === "horizontal" ? (alternativeLabel !== undefined ? alternativeLabel : true) : false}
         nonLinear={nonLinear || buttonedLabels || false}
       >
         {steps?.map((step: any, index: number) => {
@@ -230,9 +230,9 @@ export function Stepper(props: StepperProps): JSX.Element {
                     <Typography variant="caption">{step.label}</Typography>
                   </StepLabel>
                 )}
-                {orientation === 'vertical' && (
+                {orientation === "vertical" && (
                   <StepContent>
-                    {typeof step.description === 'string' ? (
+                    {typeof step.description === "string" ? (
                       <div
                         dangerouslySetInnerHTML={{
                           __html: `${step.description}`,
@@ -250,33 +250,33 @@ export function Stepper(props: StepperProps): JSX.Element {
         })}
         <Box className={classes.actionContainer}>
           <>
-            <Typography>{isReset ? 'Steps Completed' : `Step ${activeStep + 1}`}</Typography>
+            <Typography>{isReset ? "Steps Completed" : `Step ${activeStep + 1}`}</Typography>
             {!isReset && (
               <>
-                <Button type="text" disabled={activeStep < 1} className={activeStep < 1 ? classes.disabledButton : ''} onClick={handleBack}>
-                  {backButtonText || 'Back'}
+                <Button type="text" disabled={activeStep < 1} className={activeStep < 1 ? classes.disabledButton : ""} onClick={handleBack}>
+                  {backButtonText || "Back"}
                 </Button>
 
-                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} className={stepIsDisabled ? classes.disabledButton : ''}>
-                  {nextButtonText || 'Next'}
+                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} className={stepIsDisabled ? classes.disabledButton : ""}>
+                  {nextButtonText || "Next"}
                 </Button>
 
                 {nonLinear &&
                   activeStep !== steps.length &&
                   (completed[activeStep] ? (
-                    <Typography variant="caption" sx={{ display: 'inline-block' }}>
+                    <Typography variant="caption" sx={{ display: "inline-block" }}>
                       Step {activeStep + 1} already completed
                     </Typography>
                   ) : (
                     <Button type="text" onClick={handleComplete}>
-                      {completedSteps() === totalSteps() - 1 ? 'Finish' : 'Complete Step'}
+                      {completedSteps() === totalSteps() - 1 ? "Finish" : "Complete Step"}
                     </Button>
                   ))}
               </>
             )}
             {isReset && (
               <Button type="text" onClick={handleReset}>
-                {resetButtonText || 'Reset'}
+                {resetButtonText || "Reset"}
               </Button>
             )}
           </>
