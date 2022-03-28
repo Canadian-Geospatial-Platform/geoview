@@ -5,6 +5,7 @@ interface Props {
 interface ButtonProps {
   isFirst?: boolean;
   isLast?: boolean;
+  handleNext: Function;
 }
 
 type LayerList = [string, string];
@@ -265,42 +266,47 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
    */
-  const handleNext = async () => {
-    if (activeStep === 0) {
-      if (layerURL.trim() === "") return emitErrorEmpty("URL");
+  const handleStep1 = () => {
+    if (layerURL.trim() === "") return emitErrorEmpty("URL");
+    setActiveStep(1);
+  };
+
+  /**
+   * Handle the behavior of the 'Continue' button in the Stepper UI
+   */
+  const handleStep2 = async () => {
+    let valid = true;
+    if (layerType === "") return emitErrorEmpty("Service Type");
+    if (layerType === "ogcWMS") valid = await wmsValidation();
+    if (layerType === "ogcWFS") valid = await wfsValidation();
+    else if (layerType === "xyzTiles") valid = xyzValidation();
+    else if (layerType === "esriDynamic")
+      valid = await esriValidation("esriDynamic");
+    else if (layerType === "esriFeature")
+      valid = await esriValidation("esriFeature");
+    else if (layerType === "geoJSON") valid = await geoJSONValidation();
+    if (!valid) return;
+    setActiveStep(2);
+  };
+
+  /**
+   * Handle the behavior of the 'Finish' button in the Stepper UI
+   */
+  const handleStep3 = () => {
+    let name = layerName;
+    let url = layerURL;
+    let entries = layerEntry;
+    if (Array.isArray(entries)) entries = entries.join(",");
+    if (layerType === "esriDynamic")
+      url = api.geoUtilities.getMapServerUrl(layerURL);
+    else if (layerType === "esriFeature") {
+      url = api.geoUtilities.getMapServerUrl(layerURL) + "/" + layerEntry;
+      entries = "";
     }
-    if (activeStep === 1) {
-      let valid = true;
-      if (layerType === "") return emitErrorEmpty("Service Type");
-      if (layerType === "ogcWMS") valid = await wmsValidation();
-      if (layerType === "ogcWFS") valid = await wfsValidation();
-      else if (layerType === "xyzTiles") valid = xyzValidation();
-      else if (layerType === "esriDynamic")
-        valid = await esriValidation("esriDynamic");
-      else if (layerType === "esriFeature")
-        valid = await esriValidation("esriFeature");
-      else if (layerType === "geoJSON") valid = await geoJSONValidation();
-      if (!valid) return;
-    }
-    if (activeStep === 2) {
-      let name = layerName;
-      let url = layerURL;
-      let entries = layerEntry;
-      if (Array.isArray(entries)) entries = entries.join(",");
-      if (layerType === "esriDynamic")
-        url = api.geoUtilities.getMapServerUrl(layerURL);
-      else if (layerType === "esriFeature") {
-        url = api.geoUtilities.getMapServerUrl(layerURL) + "/" + layerEntry;
-        entries = "";
-      }
-      if (layerName === "") return emitErrorEmpty("Layer");
-      const layerConfig = { name, type: layerType, url, entries };
-      api.map(mapId).layer.addLayer(layerConfig);
-      setAddLayerVisible(false);
-      handleInput({ target: { value: "" } });
-      setActiveStep(-1);
-    }
-    setActiveStep((prevActiveStep: number) => prevActiveStep + 1);
+    if (layerName === "") return emitErrorEmpty("Layer");
+    const layerConfig = { name, type: layerType, url, entries };
+    api.map(mapId).layer.addLayer(layerConfig);
+    setAddLayerVisible(false);
   };
 
   /**
@@ -369,6 +375,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   const NavButtons = ({
     isFirst = false,
     isLast = false,
+    handleNext,
   }: ButtonProps): JSX.Element => (
     <ButtonGroup
       className={classes.buttonGroup}
@@ -406,7 +413,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
             onChange={handleInput}
           />
           <br />
-          <NavButtons isFirst />
+          <NavButtons isFirst handleNext={handleStep1} />
         </StepContent>
       </Step>
       <Step>
@@ -427,7 +434,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
               ))}
             </Select>
           </FormControl>
-          <NavButtons />
+          <NavButtons handleNext={handleStep2} />
         </StepContent>
       </Step>
       <Step>
@@ -464,7 +471,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
             </FormControl>
           )}
           <br />
-          <NavButtons isLast />
+          <NavButtons isLast handleNext={handleStep3} />
         </StepContent>
       </Step>
     </Stepper>
