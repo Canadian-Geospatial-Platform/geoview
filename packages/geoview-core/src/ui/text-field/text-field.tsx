@@ -1,7 +1,10 @@
-import React, { CSSProperties } from "react";
+/* eslint-disable react/jsx-props-no-spreading */
+import React from "react";
 
-import { BaseTextFieldProps, InputAdornment, TextField as MaterialTextField } from "@mui/material";
+import { InputAdornment, TextField as MaterialTextField } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
+
+import { TypeTextFieldProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   textField: {
@@ -18,39 +21,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Customized Material UI TextField Properties
- */
-interface TextFieldProps extends BaseTextFieldProps {
-  id: string;
-  className?: string;
-  style?: CSSProperties;
-
-  // the helper text (as defined above) but only if there is an error
-  errorHelpertext?: string | undefined;
-
-  // the HTML Element (for example, an icon) that is embedded inside the text field (left side)
-  prefix?: string | JSX.Element | HTMLElement | any;
-
-  // the HTML Element (for example, an icon) that is embedded inside the text field (right side)
-  suffix?: string | JSX.Element | HTMLElement | undefined;
-
-  // Function that handles change in input
-  changeHandler?: Function;
-
-  // Event Listener for value change in input
-  onChange?: EventListener | any;
-
-  // Value to be shown in the TextField
-  value?: string | null | undefined;
-}
-
-/**
  * Create a customizable Material UI TextField
  *
- * @param {TextFieldProps} props the properties passed to the TextField component
+ * @param {TypeTextFieldProps} props the properties passed to the TextField component
  * @returns {JSX.Element} the created TextField element
  */
-export function TextField(props: TextFieldProps): JSX.Element {
+export function TextField(props: TypeTextFieldProps): JSX.Element {
   const classes = useStyles();
 
   const {

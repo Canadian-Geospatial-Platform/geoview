@@ -1,7 +1,22 @@
-import { CSSProperties, useState } from "react";
+/* eslint-disable array-callback-return */
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-expressions */
+import React, { useState } from "react";
 
-import { FormControl, FormHelperText, InputLabel, ListSubheader, MenuItem, Select as MaterialSelect } from "@mui/material";
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  ListSubheader,
+  MenuItem,
+  Select as MaterialSelect,
+  SelectChangeEvent,
+} from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
+
+import { TypeSelectProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -28,53 +43,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Required and optional properties for the item object
- */
-interface TypeItemProps {
-  id: string;
-  value: string;
-  default?: boolean;
-}
-
-/**
- * Required and optional properties for the items (options) of select
- */
-interface TypeSelectItems {
-  category?: string;
-  items: Array<TypeItemProps>;
-}
-
-/**
- * Properties for the Select component
- */
-interface SelectProps {
-  id: string;
-  className?: string;
-  style?: CSSProperties;
-
-  // the label for the select component
-  label: string;
-
-  // the menu items (<option>) for <select>
-  selectItems: Array<Record<string, TypeSelectItems>> | Array<Record<string, TypeItemProps>> | any;
-
-  // callback that is passed for the select component
-  callBack?: Function;
-
-  // helper text for the form
-  helperText?: string;
-
-  // if multiple selection of items is allowed
-  multiple?: boolean;
-}
-
-/**
  * Create a customizable Material UI Select
  *
- * @param {SelectProps} props the properties passed to the Select component
+ * @param {TypeSelectProps} props the properties passed to the Select component
  * @returns {JSX.Element} the created Select element
  */
-export function Select(props: SelectProps): JSX.Element {
+export function Select(props: TypeSelectProps): JSX.Element {
   const classes = useStyles();
   const [value, setValue] = useState("");
   const [multipleValue, setMultipleValue] = useState([]);
@@ -85,18 +59,21 @@ export function Select(props: SelectProps): JSX.Element {
    *
    * @param event the selection event
    */
-  const changeHandler = (event: any) => {
+  const changeHandler = (event: SelectChangeEvent<string>) => {
     if (!multiple) setValue(event.target.value);
     if (multiple) {
       const {
-        target: { value },
+        target: { value: targetValue },
       } = event;
-      setMultipleValue(typeof value === "string" ? value.split(",") : value);
+      setMultipleValue(typeof targetValue === "string" ? targetValue.split(",") : targetValue);
     }
   };
 
-  !multiple && typeof callBack === "function" && callBack(value);
-  multiple && typeof callBack === "function" && callBack(multipleValue);
+  if (!multiple && typeof callBack === "function") {
+    callBack(value);
+  } else if (multiple && typeof callBack === "function") {
+    callBack(multipleValue);
+  }
 
   const isGrouped = selectItems.some((item: any) => item.category);
 

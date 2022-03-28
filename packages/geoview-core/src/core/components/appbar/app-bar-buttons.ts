@@ -78,6 +78,7 @@ export class AppbarButtons {
       const button: TypeButtonProps = {
         ...buttonProps,
         id,
+        visible: !buttonProps.visible ? true : buttonProps.visible,
       };
 
       const panel: TypePanelProps = {

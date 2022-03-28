@@ -182,7 +182,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
               tooltip={actionButton.title}
               tooltipPlacement="right"
               id={actionButton.id}
-              ariaLabel={actionButton.title}
+              aria-label={actionButton.title}
               onClick={actionButton.action}
               size="large"
             >
@@ -228,6 +228,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -278,10 +279,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                   tooltip={t("general.close")}
                   tooltipPlacement="right"
                   className="cgpv-panel-close"
-                  ariaLabel={t("general.close")}
+                  aria-label={t("general.close")}
                   size="large"
                   onClick={panel.close}
-                  iconRef={closeBtnRef}
+                  ref={closeBtnRef}
                 >
                   <CloseIcon />
                 </IconButton>

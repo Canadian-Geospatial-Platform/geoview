@@ -175,7 +175,7 @@ export function Navbar(): JSX.Element {
               <ButtonGroup
                 key={groupName}
                 orientation="vertical"
-                ariaLabel={t("mapnav.arianavbar")}
+                aria-label={t("mapnav.arianavbar")}
                 variant="contained"
                 className={classes.navBtnGroup}
               >
@@ -192,9 +192,7 @@ export function Navbar(): JSX.Element {
                         tooltipPlacement="left"
                         icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
-                        onClick={() => {
-                          if (buttonPanel.button.callback) buttonPanel.button.callback();
-                        }}
+                        onClick={buttonPanel.button.onClick}
                       />
                     ) : (
                       <Button
@@ -220,11 +218,11 @@ export function Navbar(): JSX.Element {
             );
           }
         })}
-        <ButtonGroup orientation="vertical" ariaLabel={t("mapnav.arianavbar")} variant="contained" className={classes.navBtnGroup}>
+        <ButtonGroup orientation="vertical" aria-label={t("mapnav.arianavbar")} variant="contained" className={classes.navBtnGroup}>
           <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
           <ZoomOut className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
         </ButtonGroup>
-        <ButtonGroup orientation="vertical" ariaLabel={t("mapnav.arianavbar", "")} variant="contained" className={classes.navBtnGroup}>
+        <ButtonGroup orientation="vertical" aria-label={t("mapnav.arianavbar", "")} variant="contained" className={classes.navBtnGroup}>
           <Fullscreen className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
           <Home className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
         </ButtonGroup>

@@ -74,9 +74,10 @@ export class NavbarButtons {
         this.buttons[group] = {};
       }
 
-      const button = {
+      const button: TypeButtonProps = {
         ...buttonProps,
         id,
+        visible: !buttonProps.visible ? true : buttonProps.visible,
       };
 
       const buttonPanel: TypeButtonPanel = {

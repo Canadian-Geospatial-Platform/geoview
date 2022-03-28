@@ -148,7 +148,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
         visibility: isCrosshairsActive ? "visible" : "hidden",
       }}
     >
-      <Fade fadeIn={isCrosshairsActive}>
+      <Fade in={isCrosshairsActive}>
         <div className={classes.crosshairIcon}>
           <CrosshairIcon />
         </div>

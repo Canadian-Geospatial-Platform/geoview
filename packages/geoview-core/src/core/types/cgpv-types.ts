@@ -1,8 +1,22 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/ban-types */
+import React, { CSSProperties } from "react";
 
 import L from "leaflet";
 
-import { TooltipProps, ButtonProps } from "@mui/material";
+import {
+  TooltipProps,
+  ButtonProps,
+  ButtonGroupProps,
+  CircularProgressProps,
+  DividerProps,
+  DrawerProps,
+  FadeProps,
+  IconButtonProps,
+  ListItemProps,
+  ListProps,
+  DialogProps,
+  BaseTextFieldProps,
+} from "@mui/material";
 
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
@@ -21,15 +35,15 @@ export interface TypeWindow extends Window {
 export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
-  react: TypeJSONObject;
-  leaflet: TypeJSONObject;
-  reactLeaflet: TypeJSONObject;
-  reactLeafletCore: TypeJSONObject;
-  mui?: TypeJSONObject;
-  ui: TypeJSONObject;
-  useTranslation: TypeJSONObject;
-  types: TypeJSONObject;
-  constants: TypeJSONObject;
+  react: Object;
+  leaflet: Object;
+  reactLeaflet: Object;
+  reactLeafletCore: Object;
+  mui?: Object;
+  ui: Object;
+  useTranslation: Object;
+  types: Object;
+  constants: Object;
 };
 
 export type TypeCallback = (callback: () => void) => void;
@@ -43,7 +57,7 @@ export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
 
-export type TypeChild = React.ReactElement<never, never> | undefined;
+export type TypeChild = React.ReactElement<never, never>;
 
 export type TypeChildren = React.ReactNode;
 
@@ -358,24 +372,6 @@ export type TypeRendererSymbol = {
 };
 
 /**
- * Interface used to initialize a button panel
- */
-export type TypeButtonPanelProps = {
-  panel: TypePanelProps;
-  button: TypeButtonProps;
-};
-
-/**
- * Interface used when creating a new button panel
- */
-export type TypeButtonPanel = {
-  id: string;
-  panel?: PanelApi;
-  button: TypeButtonProps;
-  groupName?: string;
-};
-
-/**
  * interface used when creating a new plugin
  */
 export type TypePlugin = {
@@ -428,7 +424,7 @@ export type TypeProps<T = string & unknown> = Record<string, T>;
  * interface for the layers list properties in details panel
  */
 export type TypeLayersListProps = {
-  clickPos: L.LatLng | undefined;
+  clickPos?: L.LatLng;
   getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
   mapId: string;
@@ -549,6 +545,44 @@ export type TypeAppVersion = {
 };
 
 /**
+ * constant that defines the panel types
+ */
+export const CONST_PANEL_TYPES = {
+  APPBAR: "appbar",
+  NAVBAR: "navbar",
+};
+
+export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
+  selected?: boolean;
+  blinking?: boolean;
+  on?: Record<string, L.LeafletEventHandlerFn>;
+}
+
+/*-----------------------------------------------------------------------------
+ *
+ * UI Types
+ *
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Interface used to initialize a button panel
+ */
+export type TypeButtonPanelProps = {
+  panel: TypePanelProps;
+  button: TypeButtonProps;
+};
+
+/**
+ * Interface used when creating a new button panel
+ */
+export type TypeButtonPanel = {
+  id: string;
+  panel?: PanelApi;
+  button: TypeButtonProps;
+  groupName?: string;
+};
+
+/**
  * Interface for the button properties used when creating a new button
  */
 export interface TypeButtonProps extends Omit<ButtonProps, "type"> {
@@ -573,15 +607,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, "type"> {
 }
 
 /**
- * constant that defines the panel types
- */
-export const CONST_PANEL_TYPES = {
-  APPBAR: "appbar",
-  NAVBAR: "navbar",
-};
-
-/**
- * Interface for the panel properties used when creating a new panel
+ * type for the panel properties used when creating a new panel
  */
 export type TypePanelProps = {
   // panel type (appbar, navbar)
@@ -598,8 +624,198 @@ export type TypePanelProps = {
   content?: React.ReactNode | Element;
 };
 
-export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
-  selected?: boolean;
-  blinking?: boolean;
-  on?: Record<string, L.LeafletEventHandlerFn>;
+/**
+ * Button Group properties
+ */
+export type TypeButtonGroupProps = ButtonGroupProps;
+
+/**
+ * Circular Progress Properties
+ */
+export interface TypeCircularProgressProps extends CircularProgressProps {
+  className?: string;
+  style?: CSSProperties;
+  isLoaded: boolean;
+}
+
+/**
+ * Properties for the Divider
+ */
+export interface TypeDividerProps extends DividerProps {
+  orientation?: "horizontal" | "vertical";
+  grow?: boolean;
+}
+
+/**
+ * Drawer Properties
+ */
+export interface TypeDrawerProps extends DrawerProps {
+  status?: boolean;
+}
+
+/**
+ * Properties for the Fade element
+ */
+export type TypeFadeProps = FadeProps;
+
+/**
+ * Properties for the icon button
+ */
+export interface TypeIconButtonProps extends IconButtonProps {
+  children?: TypeChildren;
+  tooltip?: string;
+  tooltipPlacement?: TooltipProps["placement"];
+  id?: string;
+  tabIndex?: number;
+}
+
+/**
+ * Properties for the List UI
+ */
+export interface TypeListProps extends ListProps {
+  type?: "ul" | "ol";
+}
+
+/**
+ * List item properties
+ */
+export type TypeListItemProps = ListItemProps;
+
+/**
+ * Customized Material UI Dialog Properties
+ */
+export interface TypeDialogProps extends Omit<DialogProps, "title"> {
+  id?: string;
+
+  // custom dialog classes and styles
+  className?: string;
+  style?: CSSProperties;
+
+  // custom title
+  title?: TypeChildren;
+  titleId?: string;
+
+  // dialog content and content styling
+  content?: TypeChildren;
+  contentClassName?: string;
+  contentStyle?: CSSProperties;
+
+  // dialog text content container styling
+  contentTextId?: string;
+  contentTextClassName?: string;
+  contentTextStyle?: CSSProperties;
+
+  // action elements / buttons
+  actions?: TypeChildren;
+
+  // id of the map that is using this modal
+  mapId: string;
+}
+
+/**
+ * Required and optional properties for the item object
+ */
+export interface TypeItemProps {
+  id: string;
+  value: string;
+  default?: boolean;
+}
+
+/**
+ * Required and optional properties for the items (options) of select
+ */
+export interface TypeSelectItems {
+  category?: string;
+  items: Array<TypeItemProps>;
+}
+
+/**
+ * Properties for the Select component
+ */
+export interface TypeSelectProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // the label for the select component
+  label: string;
+
+  // the menu items (<option>) for <select>
+  selectItems: Array<Record<string, TypeSelectItems>> | Array<Record<string, TypeItemProps>>;
+
+  // callback that is passed for the select component
+  callBack?: <T>(params: T) => void;
+
+  // helper text for the form
+  helperText?: string;
+
+  // if multiple selection of items is allowed
+  multiple?: boolean;
+}
+
+/**
+ * Properties for the Steps of Stepper
+ */
+export interface TypeStepperSteps {
+  // the text label for the step
+  label?: string;
+
+  // the body of the step
+  description: JSX.Element | HTMLElement | string;
+
+  // whether the user is allowed to move to the next step or not
+  disableStepMovement?: boolean;
+}
+
+/**
+ * Properties for the Stepper
+ */
+export interface TypeStepperProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // orientaion of the Stepper component. By default, its horizontal
+  orientation?: "horizontal" | "vertical";
+
+  // alternative label for the steps. Alternative labels appear at the bottom of step icons
+  alternativeLabel?: boolean;
+
+  // allows the user to enter a multi-step flow at any point
+  // i.e. previous step needs to be completed to move on to the next one
+  nonLinear?: boolean;
+
+  // to be able to switch to another step by clicking on the step's button label
+  buttonedLabels?: boolean;
+
+  // the steps that will be involved in the component
+  steps?: Array<Record<string, TypeStepperSteps>>;
+
+  // text for the back (previous) button that goes to the previous step
+  backButtonText?: string;
+
+  // text for the next button that goes to the next step
+  nextButtonText?: string;
+
+  // text for the reset button that resets the step count
+  resetButtonText?: string;
+}
+
+/**
+ * Customized Material UI TextField Properties
+ */
+export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, "prefix"> {
+  id: string;
+
+  // the helper text (as defined above) but only if there is an error
+  errorHelpertext?: string | undefined;
+
+  // the HTML Element (for example, an icon) that is embedded inside the text field (left side)
+  prefix?: string | JSX.Element | HTMLElement | TypeChildren;
+
+  // the HTML Element (for example, an icon) that is embedded inside the text field (right side)
+  suffix?: string | JSX.Element | HTMLElement | undefined;
+
+  // Function that handles change in input
+  changeHandler?: <T>(params: T) => void;
 }
