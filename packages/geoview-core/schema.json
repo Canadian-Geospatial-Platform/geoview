@@ -236,7 +236,7 @@
       "type": "object",
       "properties": {
         "index": {
-          "type": "number",
+          "type": "string",
           "description": "The index of the layer in the map service."
         },
         "name": {
@@ -453,6 +453,7 @@
     },
 
     "layerNode": {
+      "type": "object",
       "oneOf": [
         {
           "$ref": "#/definitions/basicLayerNode"

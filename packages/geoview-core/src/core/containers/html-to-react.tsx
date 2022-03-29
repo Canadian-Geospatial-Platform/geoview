@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/no-danger */
-import React, { CSSProperties } from "react";
+import React, { CSSProperties } from 'react';
 
-import { TypeJSONObject } from "../types/cgpv-types";
+import { TypeJSONObject } from '../types/cgpv-types';
 
 /**
  * Interface used for custom html elements

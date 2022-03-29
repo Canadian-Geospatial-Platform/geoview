@@ -1,12 +1,12 @@
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
-import { EVENT_NAMES } from "../../../api/event";
+import { EVENT_NAMES } from '../../../api/event';
 
-import { PanelApi } from "../../../ui";
+import { PanelApi } from '../../../ui';
 
-import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from "../../types/cgpv-types";
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
-import { generateId } from "../../utils/utilities";
+import { generateId } from '../../utils/utilities';
 
 /**
  * Class to manage buttons on the navbar
@@ -67,7 +67,7 @@ export class NavbarButtons {
       const id = generateId(buttonProps.id);
 
       // if group was not specified then add button panels to the default group
-      const group = groupName || "default";
+      const group = groupName || 'default';
 
       // if group does not exist then create it
       if (!this.buttons[group]) {

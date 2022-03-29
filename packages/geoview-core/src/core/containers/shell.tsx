@@ -1,22 +1,22 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import FocusTrap from "focus-trap-react";
+import FocusTrap from 'focus-trap-react';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import { Map } from "../components/map/map";
-import { Appbar } from "../components/appbar/app-bar";
-import { Navbar } from "../components/navbar/nav-bar";
+import { Map } from '../components/map/map';
+import { Appbar } from '../components/appbar/app-bar';
+import { Navbar } from '../components/navbar/nav-bar';
 
-import { FocusTrapDialog } from "./focus-trap";
-import { TypeMapConfigProps } from "../types/cgpv-types";
+import { FocusTrapDialog } from './focus-trap';
+import { TypeMapConfigProps } from '../types/cgpv-types';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { CircularProgress, Modal } from "../../ui";
+import { CircularProgress, Modal } from '../../ui';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -25,25 +25,25 @@ const useStyles = makeStyles((theme) => {
       right: theme.spacing(0),
       left: theme.spacing(0),
       bottom: theme.spacing(0),
-      overflow: "hidden",
+      overflow: 'hidden',
       zIndex: 0,
-      height: "100%",
+      height: '100%',
     },
     skip: {
-      position: "absolute",
+      position: 'absolute',
       left: -1000,
       height: 1,
       width: 1,
-      textAlign: "left",
-      overflow: "hidden",
-      backgroundColor: "#FFFFFF",
+      textAlign: 'left',
+      overflow: 'hidden',
+      backgroundColor: '#FFFFFF',
 
-      "&:active, &:focus, &:hover": {
+      '&:active, &:focus, &:hover': {
         left: theme.spacing(0),
         zIndex: theme.zIndex.tooltip,
-        width: "auto",
-        height: "auto",
-        overflow: "visible",
+        width: 'auto',
+        height: 'auto',
+        overflow: 'visible',
       },
     },
   };
@@ -126,8 +126,8 @@ export function Shell(props: ShellProps): JSX.Element {
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div className={classes.shell}>
         <CircularProgress isLoaded={isLoaded} />
-        <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: "0px" }}>
-          {t("keyboardnav.start")}
+        <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: '0px' }}>
+          {t('keyboardnav.start')}
         </a>
         <Appbar />
         <Navbar />
@@ -148,8 +148,8 @@ export function Shell(props: ShellProps): JSX.Element {
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}
         <FocusTrapDialog id={id} callback={() => handleCallback(true)} />
-        <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: "0px" }}>
-          {t("keyboardnav.end")}
+        <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: '0px' }}>
+          {t('keyboardnav.end')}
         </a>
       </div>
     </FocusTrap>

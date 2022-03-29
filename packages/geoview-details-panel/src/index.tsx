@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from "geoview-core";
+import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from 'geoview-core';
 
-import PanelContent from "./panel-content";
+import PanelContent from './panel-content';
 
 const w = window as TypeWindow;
 
@@ -28,17 +28,17 @@ class DetailsPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {
-      detailsPanel: "Details",
-      nothing_found: "Nothing found",
-      click_map: "Choose a point on the map to start",
-      action_back: "Back",
+    'en-CA': {
+      detailsPanel: 'Details',
+      nothing_found: 'Nothing found',
+      click_map: 'Choose a point on the map to start',
+      action_back: 'Back',
     },
-    "fr-CA": {
-      detailsPanel: "Détails",
-      nothing_found: "Aucun résultat",
-      click_map: "Choisissez un point sur la carte pour commencer",
-      action_back: "Retour",
+    'fr-CA': {
+      detailsPanel: 'Détails',
+      nothing_found: 'Aucun résultat',
+      click_map: 'Choisissez un point sur la carte pour commencer',
+      action_back: 'Retour',
     },
   };
 
@@ -59,12 +59,12 @@ class DetailsPlugin {
     // button props
     const button: TypeButtonProps = {
       // set ID to detailsPanel so that it can be accessed from the core viewer
-      id: "detailsPanelButton",
+      id: 'detailsPanelButton',
       tooltip: this.translations[language].detailsPanel,
-      tooltipPlacement: "right",
+      tooltipPlacement: 'right',
       icon: '<i class="material-icons">details</i>',
       visible: true,
-      type: "icon",
+      type: 'icon',
     };
 
     // panel props
