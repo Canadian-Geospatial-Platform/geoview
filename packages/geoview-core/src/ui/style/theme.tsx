@@ -9,7 +9,7 @@ const themeOptions: ThemeOptions = {
   palette: {
     primary: {
       light: "#ffffff",
-      main: "#ffffff",
+      main: "#808080",
       dark: "#000000",
       contrastText: "#666666",
     },

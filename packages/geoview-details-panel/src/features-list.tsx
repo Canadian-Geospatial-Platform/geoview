@@ -4,14 +4,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
 
-import {
-  TypeJSONObject,
-  TypeJSONValue,
-  TypeLayersEntry,
-  TypeFeaturesListProps,
-} from "geoview-core";
+import { TypeJSONObject, TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow } from "geoview-core";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * A react component to display layer entries
@@ -19,26 +14,18 @@ const w = window as any;
  * @param {TypeFeaturesListProps} props properties of the component
  * @returns A react JSX Element containing the entry list of a layer
  */
-const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
-  const {
-    selectedLayer,
-    selectLayer,
-    selectFeature,
-    setPanel,
-    getSymbol,
-    buttonPanel,
-  } = props;
+function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
+  const { selectedLayer, selectLayer, selectFeature, setPanel, getSymbol, buttonPanel } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   // access the api calls
   const { react, ui, useTranslation } = cgpv;
 
   const { useEffect } = react;
 
-  const { displayField, fieldAliases, layerData, renderer } =
-    selectedLayer as TypeLayersEntry;
+  const { displayField, fieldAliases, layerData, renderer } = selectedLayer as TypeLayersEntry;
 
   // use material ui theming
   const useStyles = ui.makeStyles(() => ({
@@ -72,8 +59,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
       width: "32px",
       minWidth: "32px",
       height: "32px",
-      boxShadow:
-        "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
+      boxShadow: "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
     },
     featureItemIcon: {},
     featureItemText: {
@@ -98,24 +84,16 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
    * @param {Object} attributes attributes object for the layer attributes
    * @param {Object} symbolImage symbology image data
    */
-  const goToFeatureInfo = (
-    attributes: TypeJSONObject,
-    symbolImage: TypeJSONObject
-  ) => {
+  const goToFeatureInfo = (attributes: TypeJSONObject, symbolImage: TypeJSONObject) => {
     // add a back action button on the entry information panel to go back to the entry list
-    buttonPanel.panel?.addActionButton(
-      "back",
-      t("action_back"),
-      '<i class="material-icons">keyboard_backspace</i>',
-      () => {
-        if (layerData.length === 1) {
-          setPanel(true, false, false);
-        } else {
-          // go back to entry list when clicked
-          selectLayer();
-        }
+    buttonPanel.panel?.addActionButton("back", t("action_back"), '<i class="material-icons">keyboard_backspace</i>', () => {
+      if (layerData.length === 1) {
+        setPanel(true, false, false);
+      } else {
+        // go back to entry list when clicked
+        selectLayer();
       }
-    );
+    });
 
     // set panel content to the entry information
     selectFeature({
@@ -129,15 +107,10 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
 
   useEffect(() => {
     // add new action button that goes back to the layers list
-    buttonPanel.panel?.addActionButton(
-      "back",
-      t("action_back"),
-      '<i class="material-icons">keyboard_backspace</i>',
-      () => {
-        // set the panel content back to the map server layer list
-        setPanel(true, false, false);
-      }
-    );
+    buttonPanel.panel?.addActionButton("back", t("action_back"), '<i class="material-icons">keyboard_backspace</i>', () => {
+      // set the panel content back to the map server layer list
+      setPanel(true, false, false);
+    });
   }, []);
 
   return layerData.length > 0 ? (
@@ -145,8 +118,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
       {
         // loop through each entry
         layerData.map((feature: TypeJSONValue, i: number) => {
-          const attributes = (feature as TypeJSONObject)
-            ?.attributes as TypeJSONObject;
+          const attributes = (feature as TypeJSONObject)?.attributes as TypeJSONObject;
 
           // get symbol
           const symbolImage = getSymbol(renderer, attributes);
@@ -154,9 +126,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
           // get the title from the attributes, if no title was defined in the layer then set it to the objectId
           const attributesDisplayField = attributes[displayField] as string;
           const title =
-            attributesDisplayField && attributesDisplayField.length > 0
-              ? `${attributesDisplayField}`
-              : `${attributes.OBJECTID}`;
+            attributesDisplayField && attributesDisplayField.length > 0 ? `${attributesDisplayField}` : `${attributes.OBJECTID}`;
 
           return (
             <div
@@ -186,11 +156,7 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
                         alt=""
                       />
                     ) : renderer.symbol.legendImageUrl ? (
-                      <img
-                        className={classes.featureItemIcon}
-                        src={renderer.symbol.legendImageUrl}
-                        alt=""
-                      />
+                      <img className={classes.featureItemIcon} src={renderer.symbol.legendImageUrl} alt="" />
                     ) : (
                       <div className={classes.featureItemIcon} />
                     )}
@@ -208,6 +174,6 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
   ) : (
     <div className={classes.featureItemText}>{t("nothing_found")}</div>
   );
-};
+}
 
 export default FeaturesList;

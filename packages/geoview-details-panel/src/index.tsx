@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from "geoview-core";
+
 import PanelContent from "./panel-content";
 
-import {
-  TypeButtonPanel,
-  TypeProps,
-  TypeButtonProps,
-  TypePanelProps,
-} from "geoview-core";
-
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
@@ -36,11 +31,13 @@ class DetailsPlugin {
     "en-CA": {
       detailsPanel: "Details",
       nothing_found: "Nothing found",
+      click_map: "Choose a point on the map to start",
       action_back: "Back",
     },
     "fr-CA": {
       detailsPanel: "Détails",
       nothing_found: "Aucun résultat",
+      click_map: "Choisissez un point sur la carte pour commencer",
       action_back: "Retour",
     },
   };
@@ -52,10 +49,10 @@ class DetailsPlugin {
     const { mapId } = this.DetailsPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
-    const { api, eventNames } = cgpv;
+    const { api } = cgpv;
 
     const { language } = api.map(mapId);
 
@@ -66,7 +63,7 @@ class DetailsPlugin {
       tooltip: this.translations[language].detailsPanel,
       tooltipPlacement: "right",
       icon: '<i class="material-icons">details</i>',
-      visible: false,
+      visible: true,
       type: "icon",
     };
 
@@ -78,14 +75,10 @@ class DetailsPlugin {
     };
 
     // create a new button panel on the appbar
-    this.buttonPanel = api
-      .map(mapId)
-      .appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(
-      <PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />
-    );
+    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
   };
 
   /**
@@ -95,7 +88,7 @@ class DetailsPlugin {
     const { mapId } = this.DetailsPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -109,5 +102,5 @@ class DetailsPlugin {
 
 export default DetailsPlugin;
 
-w["plugins"] = w["plugins"] || {};
-w["plugins"]["detailsPanel"] = DetailsPlugin;
+w.plugins = w.plugins || {};
+w.plugins.detailsPanel = DetailsPlugin;

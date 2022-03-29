@@ -1,8 +1,7 @@
 import { TypePanelContentProps, TypeProps } from "geoview-core";
 
-import Stepper from "./stepper";
+import LayerStepper from "./layer-stepper";
 import LayersList from "./layers-list";
-import addLayers from "./add-layers";
 
 const w = window as any;
 
@@ -18,8 +17,8 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const cgpv = w["cgpv"];
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;
-  const [layersData, setLayersData] = useState({});
   const [addLayerVisible, setAddLayerVisible] = useState(false);
+  const [mapLayers, setMapLayers] = useState({});
   const { Button } = ui.elements;
 
   const { language } = api.map(mapId);
@@ -51,23 +50,20 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
   const onClick = () => setAddLayerVisible((state: boolean) => !state);
 
   useEffect(() => {
-    addLayers(setLayersData, api, mapId);
-    api.event.on(
-      "layer/added",
-      (payload: any) => {
-        if (payload && payload.handlerName.includes(mapId))
-          addLayers(setLayersData, api, mapId, payload.layer);
-      },
-      mapId
-    );
+    setMapLayers(() => ({ ...api.map(mapId).layer.layers }));
+
+    api.event.on(api.eventNames.EVENT_LAYER_ADDED, () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })), mapId);
+
+    api.event.on(api.eventNames.EVENT_REMOVE_LAYER, () => setMapLayers(() => ({ ...api.map(mapId).layer.layers })), mapId);
 
     return () => {
-      api.event.off("layer/added", mapId);
+      api.event.off(api.eventNames.EVENT_LAYER_ADDED, mapId);
+      api.event.off(api.eventNames.EVENT_REMOVE_LAYER, mapId);
     };
   }, []);
 
   return (
-    <div>
+    <>
       <div className={classes.mainContainer}>
         <Button
           className={classes.addLayerButton}
@@ -79,13 +75,13 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
           onClick={onClick}
         />
       </div>
-      <br />
-      {addLayerVisible ? (
-        <Stepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
-      ) : (
-        <LayersList layersData={layersData} />
-      )}
-    </div>
+      <div style={{ display: addLayerVisible ? "inherit" : "none" }}>
+        <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
+      </div>
+      <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
+        <LayersList mapId={mapId} layers={mapLayers} language={language} />
+      </div>
+    </>
   );
 };
 

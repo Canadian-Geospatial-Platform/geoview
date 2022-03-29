@@ -24,7 +24,7 @@ import { api } from "./api/api";
 
 import * as UI from "./ui";
 
-import "../node_modules/leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.css";
 import "./ui/style/style.css";
 import "./ui/style/vendor.css";
 
@@ -61,14 +61,16 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
     // get the map container
     const map = document.getElementById(payload.handlerId);
 
-    // remove the dom element (remove rendered map)
-    ReactDOM.unmountComponentAtNode(map!);
+    if (map) {
+      // remove the dom element (remove rendered map)
+      ReactDOM.unmountComponentAtNode(map);
 
-    // delete the map instance from the maps array
-    delete api.maps[payload.handlerId];
+      // delete the map instance from the maps array
+      delete api.maps[payload.handlerId];
 
-    // re-render map with updated config keeping previous values if unchanged
-    ReactDOM.render(<AppStart configObj={payload.config} />, map);
+      // re-render map with updated config keeping previous values if unchanged
+      ReactDOM.render(<AppStart configObj={payload.config} />, map);
+    }
   }
 });
 
@@ -78,16 +80,16 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
  * @param {string} configParams a search string passed from the url "?..."
  * @returns {Object} object containing the parsed params
  */
-function getMapPropsFromUrlParams(configParams: string): Record<string, any> {
+function getMapPropsFromUrlParams(configParams: string): types.TypeJSONObject {
   // get parameters from path. Ex: ?z=4 will get {"z": "123"}
-  var data = configParams.split("?")[1];
-  var obj: Record<string, any> = {};
+  const data = configParams.split("?")[1];
+  const obj: types.TypeJSONObject = {};
 
   if (data !== undefined) {
-    var params = data.split("&");
+    const params = data.split("&");
 
-    for (var i = 0; i < params.length; i++) {
-      var param = params[i].split("=");
+    for (let i = 0; i < params.length; i += 1) {
+      const param = params[i].split("=");
 
       obj[param[0]] = param[1];
     }
@@ -96,8 +98,8 @@ function getMapPropsFromUrlParams(configParams: string): Record<string, any> {
   return obj;
 }
 
-function parseObjectFromUrl(objStr: string): Record<string, any> {
-  let obj: Record<string, any> = {};
+function parseObjectFromUrl(objStr: string): types.TypeJSONObject {
+  const obj: types.TypeJSONObject = {};
 
   if (objStr && objStr.length) {
     // get the text in between { }
@@ -109,11 +111,11 @@ function parseObjectFromUrl(objStr: string): Record<string, any> {
       const objProps = objStrProps[0].split(",");
 
       if (objProps) {
-        for (let i = 0; i < objProps.length; i++) {
-          let prop = objProps[i].split(":");
+        for (let i = 0; i < objProps.length; i += 1) {
+          const prop = objProps[i].split(":");
           if (prop && prop.length) {
-            let key = prop[0] as string;
-            let value: any = prop[1];
+            const key = prop[0] as string;
+            let value: unknown = prop[1];
 
             if (prop[1] === "true") {
               value = true;
@@ -145,77 +147,83 @@ function init(callback: () => void) {
 
   const mapElements = document.getElementsByClassName("llwp-map");
 
-  for (var i = 0; i < mapElements.length; i++) {
+  for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
     const mapId = mapElement.getAttribute("id");
 
-    // check if url contains any params
-    const urlParams = getMapPropsFromUrlParams(location.search);
+    if (mapId) {
+      // eslint-disable-next-line no-restricted-globals
+      const locationSearch = location.search;
 
-    let configObj = {};
+      // check if url contains any params
+      const urlParams = getMapPropsFromUrlParams(locationSearch);
 
-    if (Object.keys(urlParams).length) {
-      // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
+      let configObj = {};
 
-      let center = urlParams["c"]?.split(",");
-      if (!center) center = [0, 0];
+      if (Object.keys(urlParams).length) {
+        // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
 
-      let basemapOptions = parseObjectFromUrl(urlParams["b"]);
+        let center = urlParams.c?.split(",");
+        if (!center) center = [0, 0];
 
-      configObj = {
-        map: {
-          interaction: urlParams["i"],
-          initialView: {
-            zoom: parseInt(urlParams["z"]),
-            center: [parseInt(center[0]), parseInt(center[1])],
+        const basemapOptions = parseObjectFromUrl(urlParams.b);
+
+        configObj = {
+          map: {
+            interaction: urlParams.i,
+            initialView: {
+              zoom: parseInt(urlParams.z, 10),
+              center: [parseInt(center[0], 10), parseInt(center[1], 10)],
+            },
+            projection: parseInt(urlParams.p, 10),
+            basemapOptions,
           },
-          projection: parseInt(urlParams["p"]),
-          basemapOptions,
-        },
-        language: urlParams["l"],
-      };
-    } else {
-      // validate configuration and appply default if problem occurs then setup language
-      configObj = new Config(
-        mapElement.getAttribute("id")!,
-        (mapElement.getAttribute("data-leaflet") || "")?.replace(/'/g, '"')
-      ).configuration;
-    }
-
-    // validate and use defaults for not provided fields
-    const validator = new Ajv({
-      strict: false,
-    });
-
-    const schema = require("../schema.json");
-
-    const validate = validator.compile(schema);
-
-    const valid = validate(configObj);
-    if (!valid && validate.errors && validate.errors.length) {
-      for (var i = 0; i < validate.errors.length; i++) {
-        const error = validate.errors[i];
-        console.log(error);
-        // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
-        //   message: {
-        //     type: "key",
-        //     value: validate.errors["message"],
-        //     params: [, mapId],
-        //   },
-        // });
+          language: urlParams.l,
+        };
+      } else {
+        // validate configuration and appply default if problem occurs then setup language
+        configObj = new Config(
+          mapId,
+          (mapElement.getAttribute("data-leaflet") || "")
+            .replace(/'/g, '"')
+            .replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'")
+        ).configuration;
       }
-    } else {
-      ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+
+      // validate and use defaults for not provided fields
+      const validator = new Ajv({
+        strict: false,
+      });
+
+      const schema = require("../schema.json");
+
+      const validate = validator.compile(schema);
+
+      const valid = validate(configObj);
+      if (!valid && validate.errors && validate.errors.length) {
+        for (let j = 0; j < validate.errors.length; j += 1) {
+          const error = validate.errors[j];
+          api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
+            message: {
+              type: "key",
+              value: error,
+              params: [mapId],
+            },
+          });
+        }
+      } else {
+        ReactDOM.render(<AppStart configObj={valid} />, mapElement);
+      }
+
+      // if (!valid) {
+      //   const errors = validator.getLastErrors();
+
+      //   console.log(errors);
+      // } else {
+      //   ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+      // }
     }
-
-    // if (!valid) {
-    //   const errors = validator.getLastErrors();
-
-    //   console.log(errors);
-    // } else {
-    //   ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
-    // }
   }
 }
 
@@ -225,7 +233,7 @@ export const cgpv: types.TypeCGPV = {
   api: types.Cast<types.TypeApi>({
     ...api,
     ...api.event,
-    //...api.projection,
+    // ...api.projection,
     ...api.plugin,
   }),
   react: React,
@@ -234,13 +242,13 @@ export const cgpv: types.TypeCGPV = {
   reactLeafletCore: ReactLeafletCore,
   mui: MUI,
   ui: {
-    useTheme: useTheme,
-    useMediaQuery: useMediaQuery,
-    makeStyles: makeStyles,
+    useTheme,
+    useMediaQuery,
+    makeStyles,
     elements: UI,
   },
-  useTranslation: useTranslation,
-  types: types,
+  useTranslation,
+  types,
   constants: {
     leafletPositionClasses: LEAFLET_POSITION_CLASSES,
   },

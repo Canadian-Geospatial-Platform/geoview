@@ -30,7 +30,7 @@ export class XYZTiles {
   // layer from leaflet
   layer: Layer | string;
 
-  //layer or layer service url
+  // layer or layer service url
   url: string;
 
   /**
@@ -40,7 +40,7 @@ export class XYZTiles {
    */
   constructor(layerConfig: TypeLayerConfig) {
     this.id = layerConfig.id || generateId("");
-    if (layerConfig.hasOwnProperty("name")) this.name = layerConfig.name;
+    if ("name" in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();
@@ -58,6 +58,25 @@ export class XYZTiles {
 
       resolve(xyzTiles);
     });
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.setOpacity(opacity);
+  };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds =>
+    L.latLngBounds([
+      [-85.05112877980660357, -180],
+      [85.05112877980660357, 180],
+    ]);
 }

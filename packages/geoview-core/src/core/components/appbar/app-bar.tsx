@@ -1,11 +1,4 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  Fragment,
-  useContext,
-} from "react";
+import { useState, useRef, useEffect, useCallback, Fragment, useContext } from "react";
 
 import makeStyles from "@mui/styles/makeStyles";
 
@@ -30,6 +23,20 @@ export const useStyles = makeStyles((theme) => ({
   },
   appBarButtons: {
     overflowY: "auto",
+    overflowX: "hidden",
+    width: 50,
+  },
+  appBarButton: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.light,
+    },
+  },
+  appBarButtonIcon: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
   },
   appBarPanels: {},
 }));
@@ -44,7 +51,7 @@ export function Appbar(): JSX.Element {
 
   const appBar = useRef<HTMLDivElement>(null);
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -105,19 +112,17 @@ export function Appbar(): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
     };
-  }, [updateComponent]);
+  }, [mapId, updateComponent]);
 
   return (
-    <div
-      className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`}
-      ref={appBar}
-    >
-      <div className={classes.appBarButtons}>
-        {Object.keys(api.map(mapId).appBarButtons.buttons).map(
-          (groupName: string) => {
+    <div className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`} ref={appBar}>
+      {Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter((buttonPanel) => {
+        return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel].button?.visible;
+      }).length > 0 && (
+        <div className={classes.appBarButtons}>
+          {Object.keys(api.map(mapId).appBarButtons.buttons).map((groupName: string) => {
             // get button panels from group
-            const buttonPanels =
-              api.map(mapId).appBarButtons.buttons[groupName];
+            const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
 
             // display the button panels in the list
             return (
@@ -125,9 +130,8 @@ export function Appbar(): JSX.Element {
                 {Object.keys(buttonPanels).map((buttonId) => {
                   const buttonPanel = buttonPanels[buttonId];
 
-                  return buttonPanel?.button.visible !== undefined &&
-                    buttonPanel?.button.visible ? (
-                    <Fragment key={buttonPanel.button.id + "-" + refreshCount}>
+                  return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
+                    <Fragment key={`${buttonPanel.button.id}-${refreshCount}`}>
                       <ListItem>
                         <Button
                           id={buttonPanel.button.id}
@@ -135,6 +139,8 @@ export function Appbar(): JSX.Element {
                           tooltip={buttonPanel.button.tooltip}
                           tooltipPlacement="right"
                           type="icon"
+                          className={classes.appBarButton}
+                          iconClassName={classes.appBarButtonIcon}
                           onClick={() => {
                             if (!buttonPanel.panel?.status) {
                               buttonPanel.panel?.open();
@@ -143,8 +149,9 @@ export function Appbar(): JSX.Element {
                             }
                           }}
                           icon={buttonPanel.button.icon}
-                          children={buttonPanel.button.tooltip}
-                        />
+                        >
+                          {buttonPanel.button.tooltip}
+                        </Button>
                       </ListItem>
                       <Divider />
                     </Fragment>
@@ -152,32 +159,26 @@ export function Appbar(): JSX.Element {
                 })}
               </List>
             );
-          }
-        )}
-      </div>
-      {Object.keys(api.map(mapId).appBarButtons.buttons).map(
-        (groupName: string) => {
-          // get button panels from group
-          const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
-
-          // display the panels in the list
-          return (
-            <div key={groupName}>
-              {Object.keys(buttonPanels).map((buttonId) => {
-                const buttonPanel = buttonPanels[buttonId];
-
-                return buttonPanel?.panel ? (
-                  <Panel
-                    key={buttonPanel.button.id}
-                    panel={buttonPanel.panel}
-                    button={buttonPanel.button}
-                  />
-                ) : null;
-              })}
-            </div>
-          );
-        }
+          })}
+        </div>
       )}
+      {Object.keys(api.map(mapId).appBarButtons.buttons).map((groupName: string) => {
+        // get button panels from group
+        const buttonPanels = api.map(mapId).appBarButtons.buttons[groupName];
+
+        // display the panels in the list
+        return (
+          <div key={groupName}>
+            {Object.keys(buttonPanels).map((buttonId) => {
+              const buttonPanel = buttonPanels[buttonId];
+
+              return buttonPanel?.panel ? (
+                <Panel key={buttonPanel.button.id} panel={buttonPanel.panel} button={buttonPanel.button} />
+              ) : null;
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }

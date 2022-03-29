@@ -1,55 +1,61 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema#",
-    "title": "GeoView Layers/Legend Config Schema",
-    "type": "object",
-    "version": 1.0,
-    "comments": "Configuration for GeoView layers package.",
-    "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "GeoView Layers/Legend Config Schema",
+  "type": "object",
+  "version": 1.0,
+  "comments": "Configuration for GeoView layers package.",
+  "additionalProperties": false,
 
-    "properties": {
-        "reorderable": {
-            "type": "boolean",
-            "default": true,
-            "description": "Specifies if the items in the legend can be reordered."
-        },
-        "allowImport": {
-            "type": "boolean",
-            "default": true,
-            "description": "Specifies if the user-added layers are allowed."
-        },
-         "isOpen": {
-            "type": "object",
-            "description": "Specifies whether the legend is opened by default on initial loading of the map for small, medium, and large viewports.",
-            "properties": {
-                "large": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Whether the legend is opened by default on initial loading of the map for large viewports."
-                },
-                "medium": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Whether the legend is opened by default on initial loading of the map for medium viewports."
-                },
-                "small": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Whether the legend is opened by default on initial loading of the map for small viewports."
-                }
-            },
-            "additionalProperties": false
-        },
-
-        "language": {
-            "type": "string",
-            "enum": ["en-CA", "fr-CA"],
-            "description": "ISO 639-1 code indicating the language of strings in the schema file."
-        },
-        "version": {
-            "type": "string",
-            "enum": ["1.0"],
-            "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
-        }
+  "properties": {
+    "reorderable": {
+      "type": "boolean",
+      "default": true,
+      "description": "Specifies if the items in the legend can be reordered."
     },
-    "required": []
+    "allowImport": {
+      "type": "boolean",
+      "default": true,
+      "description": "Specifies if the user-added layers are allowed."
+    },
+    "isOpen": {
+      "type": "object",
+      "description": "Specifies whether the legend is opened by default on initial loading of the map for small, medium, and large viewports.",
+      "properties": {
+        "large": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the legend is opened by default on initial loading of the map for large viewports."
+        },
+        "medium": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the legend is opened by default on initial loading of the map for medium viewports."
+        },
+        "small": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the legend is opened by default on initial loading of the map for small viewports."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "languages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["en-CA", "fr-CA"]
+      },
+      "default": ["en-CA", "fr-CA"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
+      "minItems": 1
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    }
+  },
+  "required": ["languages"]
 }

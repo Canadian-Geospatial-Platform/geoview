@@ -14,7 +14,7 @@ import { TypeMapConfigProps, TypeBasemapOptions } from "../types/cgpv-types";
 export class Config {
   // default config if provided configuration is missing or wrong
   private _config: TypeMapConfigProps = {
-    id: generateId(null),
+    id: generateId(),
     name: "",
     center: [60, -100] as LatLngTuple,
     zoom: 4,
@@ -25,6 +25,7 @@ export class Config {
     basemapOptions: { id: "transport", shaded: true, labeled: true },
     layers: [],
     plugins: [],
+    extraOptions: {},
   };
 
   // validations values
@@ -82,15 +83,9 @@ export class Config {
     // check if a config is provided and valid JSON object, if so validate, if not set to default
     const mapId = id && id.length ? id : this._config.id;
 
-    this._config =
-      config !== "" && isJsonString(config)
-        ? this.validate(mapId!, config)
-        : this._config;
+    this._config = config !== "" && isJsonString(config) ? this.validate(mapId, config) : this._config;
 
-    if (config === "" || !isJsonString(config))
-      console.log(
-        `- map: ${id} - Invalid or empty JSON configuration object, using default -`
-      );
+    if (config === "" || !isJsonString(config)) console.log(`- map: ${id} - Invalid or empty JSON configuration object, using default -`);
   }
 
   /**
@@ -110,10 +105,7 @@ export class Config {
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
     const name = this.validateName(tmpConfig.name || "");
     const projection = this.validateProjection(Number(tmpConfig.projection));
-    const basemapOptions = this.validateBasemap(
-      projection,
-      tmpConfig.basemapOptions
-    );
+    const basemapOptions = this.validateBasemap(projection, tmpConfig.basemapOptions);
     const center = this.validateCenter(projection, tmpConfig.center);
     const zoom = this.validateZoom(Number(tmpConfig.zoom));
     const language = this.validateLanguage(tmpConfig.language);
@@ -122,7 +114,7 @@ export class Config {
     const plugins = this.validatePlugins(tmpConfig.plugins);
 
     // validation is done in layer class
-    const { layers } = tmpConfig;
+    const { layers, extraOptions } = tmpConfig;
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapConfigProps = {
@@ -137,6 +129,7 @@ export class Config {
       boxZoom,
       layers,
       plugins,
+      extraOptions,
     };
     this.logModifs(tmpConfig, validConfig);
 
@@ -148,10 +141,7 @@ export class Config {
    * @param {TypeMapConfigProps} inConfig input config
    * @param {TypeMapConfigProps} validConfig valid config
    */
-  private logModifs(
-    inConfig: TypeMapConfigProps,
-    validConfig: TypeMapConfigProps
-  ): void {
+  private logModifs(inConfig: TypeMapConfigProps, validConfig: TypeMapConfigProps): void {
     // eslint-disable-next-line array-callback-return
     Object.keys(inConfig).map((key) => {
       if (!(key in validConfig)) {
@@ -159,51 +149,34 @@ export class Config {
       }
     });
     if (inConfig.name !== validConfig.name) {
-      console.log(
-        `- map: ${validConfig.id} - Invalid name ${inConfig.name} replaced by ${validConfig.name} -`
-      );
+      console.log(`- map: ${validConfig.id} - Invalid name ${inConfig.name} replaced by ${validConfig.name} -`);
     }
 
     if (inConfig.projection !== validConfig.projection) {
-      console.log(
-        `- map: ${validConfig.id} - Invalid projection ${inConfig.projection} replaced by ${validConfig.projection} -`
-      );
+      console.log(`- map: ${validConfig.id} - Invalid projection ${inConfig.projection} replaced by ${validConfig.projection} -`);
     }
     if (inConfig.zoom !== validConfig.zoom) {
-      console.log(
-        `- map: ${validConfig.id} - Invalid zoom level ${inConfig.zoom} replaced by ${validConfig.zoom} -`
-      );
+      console.log(`- map: ${validConfig.id} - Invalid zoom level ${inConfig.zoom} replaced by ${validConfig.zoom} -`);
     }
-    if (
-      JSON.stringify(inConfig.center) !== JSON.stringify(validConfig.center)
-    ) {
-      console.log(
-        `- map: ${validConfig.id} - Invalid center ${inConfig.center} replaced by ${validConfig.center} -`
-      );
+    if (JSON.stringify(inConfig.center) !== JSON.stringify(validConfig.center)) {
+      console.log(`- map: ${validConfig.id} - Invalid center ${inConfig.center} replaced by ${validConfig.center} -`);
     }
     if (inConfig.language !== validConfig.language) {
+      console.log(`- map: ${validConfig.id} - Invalid language ${inConfig.language} replaced by ${validConfig.language} -`);
+    }
+    if (JSON.stringify(inConfig.basemapOptions) !== JSON.stringify(validConfig.basemapOptions)) {
       console.log(
-        `- map: ${validConfig.id} - Invalid language ${inConfig.language} replaced by ${validConfig.language} -`
+        `- map: ${validConfig.id} - Invalid basemap options ${JSON.stringify(inConfig.basemapOptions)} replaced by ${JSON.stringify(
+          validConfig.basemapOptions
+        )} -`
       );
     }
-    if (
-      JSON.stringify(inConfig.basemapOptions) !==
-      JSON.stringify(validConfig.basemapOptions)
-    ) {
-      console.log(
-        `- map: ${validConfig.id} - Invalid basemap options ${JSON.stringify(
-          inConfig.basemapOptions
-        )} replaced by ${JSON.stringify(validConfig.basemapOptions)} -`
-      );
-    }
-    const pluginsDiff = inConfig.plugins.filter(
-      (plugin) => !validConfig.plugins.includes(plugin)
-    );
+    const pluginsDiff = inConfig.plugins.filter((plugin) => !validConfig.plugins.includes(plugin));
     if (pluginsDiff.length > 0) {
       console.log(
-        `- map: ${validConfig.id} - Invalid plugin options ${JSON.stringify(
-          inConfig.plugins
-        )} replaced by ${JSON.stringify(validConfig.plugins)} -`
+        `- map: ${validConfig.id} - Invalid plugin options ${JSON.stringify(inConfig.plugins)} replaced by ${JSON.stringify(
+          validConfig.plugins
+        )} -`
       );
     }
   }
@@ -223,21 +196,12 @@ export class Config {
    * @param {TypeBasemapOptions} basemapOptions basemap options
    * @returns {TypeBasemapOptions} valid basemap options
    */
-  private validateBasemap(
-    projection: number,
-    basemapOptions: TypeBasemapOptions
-  ): TypeBasemapOptions {
-    const id: string = this._basemapId[projection].includes(basemapOptions.id)
-      ? basemapOptions.id
-      : this._basemapId[projection][0];
-    const shaded = this._basemapShaded[projection].includes(
-      basemapOptions.shaded
-    )
+  private validateBasemap(projection: number, basemapOptions: TypeBasemapOptions): TypeBasemapOptions {
+    const id: string = this._basemapId[projection].includes(basemapOptions.id) ? basemapOptions.id : this._basemapId[projection][0];
+    const shaded = this._basemapShaded[projection].includes(basemapOptions.shaded)
       ? basemapOptions.shaded
       : this._basemapShaded[projection][0];
-    const labeled = this._basemaplabeled[projection].includes(
-      basemapOptions.labeled
-    )
+    const labeled = this._basemaplabeled[projection].includes(basemapOptions.labeled)
       ? basemapOptions.labeled
       : this._basemaplabeled[projection][0];
 
@@ -255,15 +219,11 @@ export class Config {
     const yVal = Number(center[0]);
 
     const x =
-      !Number.isNaN(xVal) &&
-      xVal > this._center[projection].long[0] &&
-      xVal < this._center[projection].long[1]
+      !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
         ? xVal
         : this._config.center[1];
     const y =
-      !Number.isNaN(yVal) &&
-      yVal > this._center[projection].lat[0] &&
-      yVal < this._center[projection].lat[1]
+      !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
         ? yVal
         : this._config.center[0];
 
@@ -300,8 +260,7 @@ export class Config {
       // loop through the array and check each element if its valid string
       // eslint-disable-next-line no-plusplus
       for (let i = 0; i < plugins.length; i++) {
-        if (typeof plugins[i] === "string" && plugins[i].length > 0)
-          validPlugins.push(plugins[i]);
+        if (typeof plugins[i] === "string" && plugins[i].length > 0) validPlugins.push(plugins[i]);
       }
 
       return validPlugins;

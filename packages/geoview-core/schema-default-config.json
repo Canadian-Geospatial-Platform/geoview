@@ -1,0 +1,29 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "controls": {
+      "boxZoom": true,
+      "selectBox": true
+    },
+    "projection": 3978,
+    "initialView": {
+      "zoom": 12,
+      "center": [60, -100]
+    },
+    "basemapOptions": {
+      "id": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "layers": []
+  },
+  "theme": "dark",
+  "components": ["appbar", "navbar", "northArrow"],
+  "corePackages": ["overview-map", "basemap-switcher", "layers-panel", "details-panel"],
+  "externalPackages": [],
+  "serviceUrls": {
+    "keys": "https://geocore.api.geo.ca"
+  },
+  "languages": ["en-CA", "fr-CA"],
+  "version": "1.0"
+}

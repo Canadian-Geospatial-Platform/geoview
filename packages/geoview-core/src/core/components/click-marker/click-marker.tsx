@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import L, { divIcon, LatLng } from "leaflet";
 import { Marker, useMap } from "react-leaflet";
@@ -8,6 +8,8 @@ import { useEventHandlers, LeafletElement } from "@react-leaflet/core";
 import { Theme } from "@mui/material/styles";
 
 import makeStyles from "@mui/styles/makeStyles";
+
+import { MapContext } from "../../app-start";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
@@ -38,15 +40,17 @@ const useStyles = makeStyles((theme: Theme) => ({
  *
  * @returns {JSX.Element} the react element with a marker on click
  */
-export const ClickMarker = (): JSX.Element => {
+export function ClickMarker(): JSX.Element {
   const [showMarker, setShowMarker] = useState(false);
   const [markerPos, setMarkerPos] = useState<LatLng>();
   const [markerIcon, setMarkerIcon] = useState<L.DivIcon>();
 
   const classes = useStyles();
 
+  const mapConfig = useContext(MapContext);
+  const mapId = mapConfig.id;
+
   const map = useMap();
-  const mapId = api.mapInstance(map).id;
   const overlay = document.createElement("div");
 
   /**
@@ -58,10 +62,7 @@ export const ClickMarker = (): JSX.Element => {
   }, []);
 
   // attach zoom and movestart events to the map instance
-  const handlers = useMemo(
-    () => ({ zoom: removeIcon, movestart: removeIcon }),
-    [removeIcon]
-  );
+  const handlers = useMemo(() => ({ zoom: removeIcon, movestart: removeIcon }), [removeIcon]);
   const leafletElement: LeafletElement<L.Map> = {
     instance: map,
     context: { __version: 1, map },
@@ -80,13 +81,10 @@ export const ClickMarker = (): JSX.Element => {
    * Hide features from markerPane (set zIndex to -1) because they are always on top of overlay
    */
   function hideMarker(): void {
-    const featElems = document
-      .getElementsByClassName(`leaflet-map-${mapId}`)[0]
-      .getElementsByClassName("leaflet-marker-pane")[0].children;
+    const featElems = document.getElementsByClassName(`leaflet-map-${mapId}`)[0].getElementsByClassName("leaflet-marker-pane")[0].children;
     [...featElems].forEach((element: Element) => {
       // eslint-disable-next-line no-param-reassign
-      if (element.classList.contains("leaflet-marker-icon"))
-        (element as HTMLElement).style.zIndex = "-1";
+      if (element.classList.contains("leaflet-marker-icon")) (element as HTMLElement).style.zIndex = "-1";
     });
   }
 
@@ -105,15 +103,11 @@ export const ClickMarker = (): JSX.Element => {
           setShowMarker(true);
 
           // set the overlay... get map size and apply mapPane transform to the overlay
-          const test = api.geoUtilities.getTranslateValues(
-            map.getPane("mapPane") as HTMLElement
-          );
+          const test = api.geoUtilities.getTranslateValues(map.getPane("mapPane") as HTMLElement);
           const size = map.getSize();
           overlay.style.height = `${size.y}px`;
           overlay.style.width = `${size.x}px`;
-          overlay.style.transform = `translate3d(${-test.x}px,${-test.y}px,${
-            test.z
-          })`;
+          overlay.style.transform = `translate3d(${-test.x}px,${-test.y}px,${test.z})`;
           overlay.style.visibility = "visible";
 
           // hide marker pane marker (mostly comes from ESRI feature or GeoJSON)
@@ -165,13 +159,9 @@ export const ClickMarker = (): JSX.Element => {
   }, []);
 
   return showMarker ? (
-    <Marker
-      id={generateId("")}
-      zIndexOffset={2000}
-      position={[markerPos?.lat || 0, markerPos?.lng || 0]}
-      icon={markerIcon}
-    />
+    <Marker id={generateId("")} zIndexOffset={2000} position={[markerPos?.lat || 0, markerPos?.lng || 0]} icon={markerIcon} />
   ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
-};
+}

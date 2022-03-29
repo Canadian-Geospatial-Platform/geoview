@@ -81,15 +81,15 @@ export class API {
       if (callback) callback();
 
       // run the map ready function on each map instance
-      for (var i = 0; i < Object.keys(this.maps).length; i++) {
-        var mapId = Object.keys(this.maps)[i];
+      for (let i = 0; i < Object.keys(this.maps).length; i++) {
+        const mapId = Object.keys(this.maps)[i];
 
         this.map(mapId).mapReady();
       }
 
       // Run the callback
       if (this.readyCallback) this.readyCallback();
-    }, 1000);
+    }, 500);
   };
 
   /**

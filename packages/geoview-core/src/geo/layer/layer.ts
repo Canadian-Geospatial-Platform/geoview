@@ -3,22 +3,21 @@ import { Layer as leafletLayer } from "leaflet";
 import { EsriDynamic } from "./esri/esri-dynamic";
 import { EsriFeature } from "./esri/esri-feature";
 import { WMS } from "./ogc/wms";
+import { WFS } from "./ogc/wfs";
+import { OgcFeature } from "./ogc/ogc_feature";
 import { XYZTiles } from "./map-tile/xyz-tiles";
 import { GeoJSON } from "./file/geojson";
 import { Vector } from "./vector/vector";
-import { MarkerCluster } from "./vector/marker-cluster";
+import { MarkerClusterClass } from "./vector/marker-cluster";
 
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
 
-import {
-  CONST_LAYER_TYPES,
-  TypeLayerConfig,
-} from "../../core/types/cgpv-types";
+import { CONST_LAYER_TYPES, TypeLayerConfig } from "../../core/types/cgpv-types";
 import { generateId } from "../../core/utils/utilities";
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
-//import "esri-leaflet-renderers";
+// import "esri-leaflet-renderers";
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -53,7 +52,7 @@ export class Layer {
     this.#map = map;
 
     this.vector = new Vector(map);
-    this.markerCluster = new MarkerCluster(map);
+    this.markerCluster = new MarkerClusterClass(map);
 
     // listen to outside events to add layers
     api.event.on(
@@ -94,6 +93,18 @@ export class Layer {
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
+          } else if (layerConf.type === CONST_LAYER_TYPES.WFS) {
+            const wfsLayer = new WFS(layerConf);
+            wfsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+              wfsLayer.layer = layer;
+              this.addToMap(wfsLayer);
+            });
+          } else if (layerConf.type === CONST_LAYER_TYPES.OGC_FEATURE) {
+            const ogcFeatureLayer = new OgcFeature(layerConf);
+            ogcFeatureLayer.add(layerConf).then((layer: leafletLayer | string) => {
+              ogcFeatureLayer.layer = layer;
+              this.addToMap(ogcFeatureLayer);
+            });
           }
         }
       },
@@ -105,16 +116,14 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.id);
+        this.removeLayerById(payload.layer.id);
       },
       this.#map.id
     );
 
     // Load layers that was passed in with the map config
     if (layers && layers.length > 0) {
-      layers?.forEach((layer: TypeLayerConfig) =>
-        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#map.id, { layer })
-      );
+      layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#map.id, { layer }));
     }
   }
 
@@ -151,9 +160,7 @@ export class Layer {
    * Add the layer to the map if valid. If not (is a string) emit an error
    * @param {any} cgpvLayer the layer config
    */
-  private addToMap(
-    cgpvLayer: WMS | GeoJSON | XYZTiles | EsriDynamic | EsriFeature
-  ): void {
+  private addToMap(cgpvLayer: GeoJSON | WFS | WMS | EsriDynamic | EsriFeature | XYZTiles | OgcFeature): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
     if (typeof cgpvLayer.layer === "string") {
@@ -165,28 +172,14 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== "geoJSON")
-        this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer);
+      if (cgpvLayer.type !== "geoJSON") this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
 
-      try {
-        if (this.#map.getContainer()) {
-          cgpvLayer.layer.addTo(this.#map);
-          //this.layers.push(cgpvLayer);
-          this.layers[cgpvLayer.id] = cgpvLayer;
-          api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
-            layer: cgpvLayer.layer,
-          });
-        }
-      } catch (error) {
-        // TODO Find the cause of it not loading layers, could be that map is not ready yet
-        api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.#map.id, {
-          message: {
-            type: "key",
-            value: "validation.layer.loadfailed",
-            params: [cgpvLayer.name, this.#map.id],
-          },
-        });
-      }
+      cgpvLayer.layer.addTo(this.#map);
+      // this.layers.push(cgpvLayer);
+      this.layers[cgpvLayer.id] = cgpvLayer;
+      api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
+        layer: cgpvLayer.layer,
+      });
     }
   }
 
@@ -197,9 +190,7 @@ export class Layer {
     // Because there is no way to know GeoJSON is loaded (load event never trigger), we use a timeout
     // TODO: timeout is never a good idea, may have to find a workaround...
     setTimeout(() => {
-      const mapContainer = document.getElementsByClassName(
-        `leaflet-map-${this.#map.id}`
-      )[0];
+      const mapContainer = document.getElementsByClassName(`leaflet-map-${this.#map.id}`)[0];
 
       if (mapContainer) {
         const featElems = document
@@ -241,16 +232,26 @@ export class Layer {
   };
 
   /**
+   * Remove a layer from the map
+   *
+   * @param {TypeLayerConfig} layer the layer configuration to remove
+   */
+  removeLayer = (layer: TypeLayerConfig): string => {
+    // eslint-disable-next-line no-param-reassign
+    layer.id = generateId(layer.id);
+    api.event.emit(EVENT_NAMES.EVENT_REMOVE_LAYER, this.#map.id, { layer });
+
+    return layer.id;
+  };
+
+  /**
    * Search for a layer using it's id and return the layer data
    *
    * @param {string} id the layer id to look for
    * @returns the found layer data object
    */
-  getLayerById = (
-    id: string
-  ): WMS | XYZTiles | EsriDynamic | EsriFeature | GeoJSON | null => {
-    //return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
-    return this.layers.hasOwnProperty(id) ? this.layers[id] : null;
+  getLayerById = (id: string): WMS | XYZTiles | EsriDynamic | EsriFeature | GeoJSON | null => {
+    return this.layers[id];
   };
 
   // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS

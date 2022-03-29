@@ -164,8 +164,7 @@ export const EVENT_NAMES = {
   /**
    * Event is triggered when a cluster element selection indicator changes
    */
-  EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED:
-    "cluster_element/selection_has_changed",
+  EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED: "cluster_element/selection_has_changed",
 
   /**
    * Event is triggered when updating the basemap layers
@@ -236,14 +235,8 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (
-    eventName: string,
-    listener: (...args: any[]) => void,
-    handlerName?: string
-  ): void => {
-    eventName =
-      eventName +
-      (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+  on = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
+    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
 
     /**
      * Listen callback, sets the data that will be returned back
@@ -253,11 +246,8 @@ export class Event {
       let data;
 
       // if a handler name was specified, callback will return that data if found
-      if (
-        handlerName &&
-        (args as Record<string, unknown>).handlerName === handlerName
-      ) {
-        data = this.events[eventName][handlerName];
+      if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
+        data = this.events[eName][handlerName];
       } else {
         data = args;
       }
@@ -265,7 +255,7 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.on(eventName, listen);
+    this.eventEmitter.on(eName, listen);
   };
 
   /**
@@ -275,14 +265,8 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  once = (
-    eventName: string,
-    listener: (...args: any[]) => void,
-    handlerName?: string
-  ): void => {
-    eventName =
-      eventName +
-      (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+  once = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
+    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
 
     /**
      * Listen callback, sets the data that will be returned back
@@ -292,11 +276,8 @@ export class Event {
       let data;
 
       // if a handler name was specefieid, callback will return that data if found
-      if (
-        handlerName &&
-        (args as Record<string, unknown>).handlerName === handlerName
-      ) {
-        data = this.events[eventName][handlerName];
+      if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
+        data = this.events[eName][handlerName];
       } else {
         data = args;
       }
@@ -304,7 +285,7 @@ export class Event {
       listener(data);
     };
 
-    this.eventEmitter.once(eventName, listen);
+    this.eventEmitter.once(eName, listen);
   };
 
   /**
@@ -347,13 +328,11 @@ export class Event {
    * @param {string} handlerName the name of the handler an event needs to be removed from
    */
   off = (eventName: string, handlerName?: string): void => {
-    eventName =
-      eventName +
-      (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
 
-    this.eventEmitter.off(eventName);
+    this.eventEmitter.off(eName);
 
-    delete this.events[eventName];
+    delete this.events[eName];
   };
 
   /**
@@ -362,7 +341,7 @@ export class Event {
    * @param {string} handlerName the id of the map to turn unsubscribe the event from
    */
   offAll = (handlerName: string): void => {
-    Object.keys(this.events).map((event) => {
+    Object.keys(this.events).forEach((event) => {
       if (event.includes(handlerName)) {
         this.off(event);
       }
@@ -376,14 +355,9 @@ export class Event {
    * @param {string} handlerName the event handler, used if there are multiple emitters with same event name
    * @param {object} payload a payload (data) to be emitted with the event
    */
-  emit = (
-    event: string,
-    handlerName: string | undefined | null,
-    payload: Record<string, unknown>
-  ): void => {
+  emit = (event: string, handlerName: string | undefined | null, payload: Record<string, unknown>): void => {
     // event name
-    let eventName =
-      event + (handlerName && handlerName.length > 0 ? "/" + handlerName : "");
+    const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
     let hName = handlerName;

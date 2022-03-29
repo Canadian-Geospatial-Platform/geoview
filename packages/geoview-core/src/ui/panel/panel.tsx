@@ -1,12 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-nested-ternary */
-import React, {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  useContext,
-} from "react";
+import React, { useRef, useState, useEffect, useCallback, useContext } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -27,21 +22,17 @@ import { IconButton, CloseIcon, Divider } from "..";
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 300,
-    width: 300,
+    width: 400,
     height: "100%",
-    marginLeft: theme.spacing(2),
     borderRadius: 0,
-    [theme.breakpoints.up("xl")]: {
-      width: "auto !important",
-      minWidth: 100,
-    },
+    flexDirection: "column",
     [theme.breakpoints.down("sm")]: {
       width: "100%",
       minWidth: "100%",
     },
   },
   cardContainer: {
-    height: "100%",
+    flexBasis: "auto",
     overflow: "hidden",
     overflowY: "auto",
     paddingBottom: "10px !important",
@@ -49,7 +40,14 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     color: theme.palette.primary.contrastText,
-    padding: theme.spacing(3, 7),
+    height: 50,
+    padding: 0,
+    paddingLeft: 10,
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  actionButton: {
+    margin: 0,
   },
   buttonIcon: {
     width: "1em",
@@ -70,15 +68,13 @@ const useStyles = makeStyles((theme) => ({
  *
  * @returns {JSX.Element} the created Panel element
  */
-export const Panel = (props: TypePanelAppProps): JSX.Element => {
+export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button } = props;
 
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
 
-  const [actionButtons, setActionButtons] = useState<
-    JSX.Element[] & React.ReactNode[]
-  >([]);
+  const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
 
   const classes = useStyles(props);
@@ -101,7 +97,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
   /**
    * Close the panel
    */
-  function closePanel(): void {
+  const closePanel = (): void => {
     // emit an event to hide the marker when using the details panel
     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
 
@@ -117,16 +113,28 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       // if in focus trap mode, trigger the event
       if (mapCont.closest(".llwp-map")?.classList.contains("map-focus-trap")) {
         mapCont.classList.add("keyboard-focus");
-        api.event.emit(
-          EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
-          `leaflet-map-${mapId}`,
-          {}
-        );
+        api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`, {});
       }
     }
 
     setPanelStatus(false);
-  }
+  };
+
+  // listen to change panel content and rerender right after the panel has been created
+  api.event.on(
+    EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
+    (args) => {
+      // set focus on close button on panel content change
+      setTimeout(() => {
+        if (closeBtnRef && closeBtnRef.current) Cast<HTMLElement>(closeBtnRef.current).focus();
+      }, 100);
+
+      if (args.buttonId === button.id!) {
+        updateComponent();
+      }
+    },
+    mapId
+  );
 
   useEffect(() => {
     // if the panel was still open on reload then close it
@@ -174,7 +182,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
               tooltip={actionButton.title}
               tooltipPlacement="right"
               id={actionButton.id}
-              ariaLabel={actionButton.title}
+              aria-label={actionButton.title}
               onClick={actionButton.action}
               size="large"
             >
@@ -213,23 +221,6 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       mapId
     );
 
-    // listen to change panel content and rerender
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
-      (args) => {
-        // set focus on close button on panel content change
-        setTimeout(() => {
-          if (closeBtnRef && closeBtnRef.current)
-            Cast<HTMLElement>(closeBtnRef.current).focus();
-        }, 100);
-
-        if (args.buttonId === button.id!) {
-          updateComponent();
-        }
-      },
-      mapId
-    );
-
     return () => {
       api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
@@ -237,12 +228,12 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     // set focus on close button on panel open
-    if (closeBtnRef && closeBtnRef.current)
-      if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
+    if (closeBtnRef && closeBtnRef.current) if (button.visible) Cast<HTMLElement>(closeBtnRef.current).focus();
   }, [button, closeBtnRef]);
 
   return (
@@ -257,7 +248,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
         ref={panelRef as React.MutableRefObject<null>}
         className={`${classes.root}`}
         style={{
-          display: panelStatus ? "block" : "none",
+          display: panelStatus ? "flex" : "none",
         }}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
@@ -268,13 +259,11 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       >
         <CardHeader
           className={classes.avatar}
+          classes={{ action: classes.actionButton }}
           ref={panelHeader}
           avatar={
             typeof panel.icon === "string" ? (
-              <HtmlToReact
-                className={classes.buttonIcon}
-                htmlContent={panel.icon}
-              />
+              <HtmlToReact className={classes.buttonIcon} htmlContent={panel.icon} />
             ) : typeof panel.icon === "object" ? (
               <panel.icon />
             ) : (
@@ -290,7 +279,7 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
                   tooltip={t("general.close")}
                   tooltipPlacement="right"
                   className="cgpv-panel-close"
-                  ariaLabel={t("general.close")}
+                  aria-label={t("general.close")}
                   size="large"
                   onClick={panel.close}
                   iconRef={closeBtnRef}
@@ -316,4 +305,4 @@ export const Panel = (props: TypePanelAppProps): JSX.Element => {
       </Card>
     </FocusTrap>
   );
-};
+}

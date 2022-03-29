@@ -1,8 +1,7 @@
 import L, { Layer } from "leaflet";
 
-import { getXMLHttpRequest } from "../../../core/utils/utilities";
+import { getXMLHttpRequest, generateId } from "../../../core/utils/utilities";
 import { TypeLayerConfig } from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
 
 /**
  * Class used to add geojson layer to the map
@@ -23,7 +22,7 @@ export class GeoJSON {
   // layer from leaflet
   layer: Layer | string;
 
-  //layer or layer service url
+  // layer or layer service url
   url: string;
 
   /**
@@ -33,7 +32,7 @@ export class GeoJSON {
    */
   constructor(layerConfig: TypeLayerConfig) {
     this.id = layerConfig.id || generateId("");
-    if (layerConfig.hasOwnProperty("name")) this.name = layerConfig.name;
+    if ("name" in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();
@@ -88,6 +87,24 @@ export class GeoJSON {
       });
     });
 
-    return new Promise((resolve) => resolve(geo));
+    return geo;
   }
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.getLayers().forEach((x) => {
+      if (x.setOpacity) x.setOpacity(opacity);
+      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+    });
+  };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds => this.layer.getBounds();
 }

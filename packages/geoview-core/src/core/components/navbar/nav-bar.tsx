@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable array-callback-return */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -50,8 +52,8 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: theme.spacing(5),
   },
   navBarButton: {
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.light,
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
     borderRadius: theme.spacing(5),
     width: navBtnWidth,
     height: navBtnHeight,
@@ -59,9 +61,15 @@ const useStyles = makeStyles((theme) => ({
     minWidth: navBtnWidth,
     padding: "initial",
     "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      color: theme.palette.primary.light,
-      borderRadius: theme.spacing(5),
+      backgroundColor: theme.palette.primary.light,
+      color: theme.palette.primary.dark,
+    },
+  },
+  navBarButtonIcon: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
+    "&:hover *": {
+      fontSize: "1.8rem",
     },
   },
 }));
@@ -78,7 +86,7 @@ export function Navbar(): JSX.Element {
 
   const navBarRef = useRef<HTMLDivElement>(null);
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -142,10 +150,7 @@ export function Navbar(): JSX.Element {
   }, [updateComponent]);
 
   return (
-    <div
-      ref={navBarRef}
-      className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}
-    >
+    <div ref={navBarRef} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}>
       {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
         const buttons = api.map(mapId).navBarButtons.buttons[groupName];
 
@@ -153,13 +158,7 @@ export function Navbar(): JSX.Element {
         const panels = Object.keys(buttons).map((buttonId) => {
           const buttonPanel = buttons[buttonId];
 
-          return buttonPanel.panel ? (
-            <Panel
-              key={buttonPanel.button.id}
-              button={buttonPanel.button}
-              panel={buttonPanel.panel}
-            />
-          ) : null;
+          return buttonPanel.panel ? <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} /> : null;
         });
 
         if (panels.length > 0) {
@@ -176,7 +175,7 @@ export function Navbar(): JSX.Element {
               <ButtonGroup
                 key={groupName}
                 orientation="vertical"
-                ariaLabel={t("mapnav.arianavbar")}
+                aria-label={t("mapnav.arianavbar")}
                 variant="contained"
                 className={classes.navBtnGroup}
               >
@@ -186,21 +185,18 @@ export function Navbar(): JSX.Element {
                   return buttonPanel.button.visible ? (
                     !buttonPanel.panel ? (
                       <Button
-                        key={buttonPanel.button.id}
+                        key={`${buttonPanel.button.id}-${refreshCount}`}
                         id={buttonPanel.button.id}
                         type="icon"
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="left"
                         icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
-                        onClick={() => {
-                          if (buttonPanel.button.callback)
-                            buttonPanel.button.callback();
-                        }}
+                        onClick={buttonPanel.button.onClick}
                       />
                     ) : (
                       <Button
-                        key={buttonPanel.button.id}
+                        key={`${buttonPanel.button.id}-${refreshCount}`}
                         id={buttonPanel.button.id}
                         type="icon"
                         tooltip={buttonPanel.button.tooltip}
@@ -222,23 +218,13 @@ export function Navbar(): JSX.Element {
             );
           }
         })}
-        <ButtonGroup
-          orientation="vertical"
-          ariaLabel={t("mapnav.arianavbar")}
-          variant="contained"
-          className={classes.navBtnGroup}
-        >
-          <ZoomIn className={classes.navBarButton} />
-          <ZoomOut className={classes.navBarButton} />
+        <ButtonGroup orientation="vertical" aria-label={t("mapnav.arianavbar")} variant="contained" className={classes.navBtnGroup}>
+          <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+          <ZoomOut className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
         </ButtonGroup>
-        <ButtonGroup
-          orientation="vertical"
-          ariaLabel={t("mapnav.arianavbar", "")}
-          variant="contained"
-          className={classes.navBtnGroup}
-        >
-          <Fullscreen className={classes.navBarButton} />
-          <Home className={classes.navBarButton} />
+        <ButtonGroup orientation="vertical" aria-label={t("mapnav.arianavbar", "")} variant="contained" className={classes.navBtnGroup}>
+          <Fullscreen className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+          <Home className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
         </ButtonGroup>
       </div>
     </div>

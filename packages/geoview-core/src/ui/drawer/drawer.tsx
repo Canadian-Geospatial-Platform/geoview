@@ -1,8 +1,6 @@
-import { CSSProperties, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { useTranslation } from "react-i18next";
-
-import { useMap } from "react-leaflet";
 
 import makeStyles from "@mui/styles/makeStyles";
 import { Drawer as MaterialDrawer } from "@mui/material";
@@ -12,6 +10,7 @@ import { EVENT_NAMES } from "../../api/event";
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
 import { MapContext } from "../../core/app-start";
+import { TypeDrawerProps } from "../../core/types/cgpv-types";
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
@@ -50,23 +49,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Drawer Properties
- */
-interface DrawerProps {
-  variant?: "permanent" | "persistent" | "temporary" | undefined;
-  className?: string | undefined;
-  style?: CSSProperties | undefined;
-  status?: boolean;
-  children?: JSX.Element | JSX.Element[];
-}
-
-/**
  * Create a customized Material UI Drawer
  *
- * @param {DrawerProps} props the properties passed to the Drawer element
+ * @param {TypeDrawerProps} props the properties passed to the Drawer element
  * @returns {JSX.Element} the created Drawer element
  */
-export const Drawer = (props: DrawerProps): JSX.Element => {
+export function Drawer(props: TypeDrawerProps): JSX.Element {
   const { variant, status, className, style, children } = props;
 
   const [open, setOpen] = useState(false);
@@ -75,16 +63,16 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
 
   const classes = useStyles();
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
-  const openCloseDrawer = (status: boolean): void => {
-    setOpen(status);
+  const openCloseDrawer = (drawerStatus: boolean): void => {
+    setOpen(drawerStatus);
 
     // if appbar is open then close it
     api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
-      status: status,
+      drawerStatus,
     });
 
     // if panel is open then close it
@@ -112,20 +100,16 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
     return () => {
       api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId);
     };
-  }, []);
+  }, [mapId, status]);
 
   return (
     <MaterialDrawer
-      variant={variant ? variant : "permanent"}
+      variant={variant || "permanent"}
       className={open ? classes.drawerOpen : classes.drawerClose}
       classes={{
-        paper: className
-          ? className
-          : open
-          ? classes.drawerOpen
-          : classes.drawerClose,
+        paper: className || (open ? classes.drawerOpen : classes.drawerClose),
       }}
-      style={style ? style : undefined}
+      style={style || undefined}
     >
       <div className={classes.toolbar}>
         <IconButton
@@ -142,4 +126,4 @@ export const Drawer = (props: DrawerProps): JSX.Element => {
       {children !== undefined && children}
     </MaterialDrawer>
   );
-};
+}

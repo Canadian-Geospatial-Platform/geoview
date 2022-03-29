@@ -1,11 +1,13 @@
 /* eslint-disable react/no-danger */
-import { useEffect, useState, useRef, CSSProperties } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 
 import { useTranslation } from "react-i18next";
 
 import makeStyles from "@mui/styles/makeStyles";
 
 import { useMap } from "react-leaflet";
+
+import { MapContext } from "../../app-start";
 
 import { api } from "../../../api/api";
 import { EVENT_NAMES } from "../../../api/event";
@@ -63,9 +65,10 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext);
+  const mapId = mapConfig.id;
 
-  const mapId = api.mapInstance(map).id;
+  const map = useMap();
 
   const mapContainer = map.getContainer();
 
@@ -145,7 +148,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
         visibility: isCrosshairsActive ? "visible" : "hidden",
       }}
     >
-      <Fade fadeIn={isCrosshairsActive}>
+      <Fade in={isCrosshairsActive}>
         <div className={classes.crosshairIcon}>
           <CrosshairIcon />
         </div>
