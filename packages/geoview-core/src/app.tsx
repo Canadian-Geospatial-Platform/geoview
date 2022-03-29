@@ -36,6 +36,7 @@ import { EVENT_NAMES } from './api/event';
 import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 import { generateId } from './core/utils/utilities';
 
+<<<<<<< HEAD
 import schema from '../schema.json';
 
 export * from './core/types/cgpv-types';
@@ -157,6 +158,9 @@ const defaultConfig = {
   externalPackages: [],
   language: 'en-CA',
 };
+=======
+export * from './core/types/cgpv-types';
+>>>>>>> 904ae369921377cd15ddb6007a2b00aa55c615e5
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
