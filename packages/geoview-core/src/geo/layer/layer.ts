@@ -13,15 +13,11 @@ import { MarkerClusterClass } from "./vector/marker-cluster";
 import { api } from "../../api/api";
 import { EVENT_NAMES } from "../../api/event";
 
-import {
-  CONST_LAYER_TYPES,
-  TypeLayerData,
-  TypeLayerConfig,
-} from "../../core/types/cgpv-types";
+import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from "../../core/types/cgpv-types";
 import { generateId } from "../../core/utils/utilities";
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
-//import "esri-leaflet-renderers";
+// import "esri-leaflet-renderers";
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -103,12 +99,10 @@ export class Layer {
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.OGC_FEATURE) {
             const ogcFeatureLayer = new OgcFeature(layerConf);
-            ogcFeatureLayer
-              .add(layerConf)
-              .then((layer: leafletLayer | string) => {
-                ogcFeatureLayer.layer = layer;
-                this.addToMap(ogcFeatureLayer);
-              });
+            ogcFeatureLayer.add(layerConf).then((layer: leafletLayer | string) => {
+              ogcFeatureLayer.layer = layer;
+              this.addToMap(ogcFeatureLayer);
+            });
           }
         }
       },
@@ -127,9 +121,7 @@ export class Layer {
 
     // Load layers that was passed in with the map config
     if (layers && layers.length > 0) {
-      layers?.forEach((layer: TypeLayerConfig) =>
-        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#map.id, { layer })
-      );
+      layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#map.id, { layer }));
     }
   }
 
@@ -166,7 +158,7 @@ export class Layer {
    * Add the layer to the map if valid. If not (is a string) emit an error
    * @param {any} cgpvLayer the layer config
    */
-  private addToMap(cgpvLayer: TypeLayerData): void {
+  private addToMap(cgpvLayer: GeoJSON | WFS | WMS | EsriDynamic | EsriFeature | XYZTiles | OgcFeature): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
     if (typeof cgpvLayer.layer === "string") {
@@ -178,11 +170,10 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== "geoJSON")
-        this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+      if (cgpvLayer.type !== "geoJSON") this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
 
       cgpvLayer.layer.addTo(this.#map);
-      //this.layers.push(cgpvLayer);
+      // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = cgpvLayer;
       api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
         layer: cgpvLayer.layer,
@@ -197,9 +188,7 @@ export class Layer {
     // Because there is no way to know GeoJSON is loaded (load event never trigger), we use a timeout
     // TODO: timeout is never a good idea, may have to find a workaround...
     setTimeout(() => {
-      const mapContainer = document.getElementsByClassName(
-        `leaflet-map-${this.#map.id}`
-      )[0];
+      const mapContainer = document.getElementsByClassName(`leaflet-map-${this.#map.id}`)[0];
 
       if (mapContainer) {
         const featElems = document
@@ -260,8 +249,8 @@ export class Layer {
    * @returns the found layer data object
    */
   getLayerById = (id: string): TypeLayerData | null => {
-    //return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
-    return this.layers.hasOwnProperty(id) ? this.layers[id] : null;
+    // return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
+    return this.layers[id];
   };
 
   // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS

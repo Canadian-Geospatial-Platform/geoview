@@ -85,13 +85,10 @@ export function Snackbar(props: SnackBarProps): null {
 
         // get message
         const message =
-          payload.message.type === "string"
-            ? payload.message.value
-            : replaceParams(payload.message.params, t(payload.message.value));
+          payload.message.type === "string" ? payload.message.value : replaceParams(payload.message.params, t(payload.message.value));
 
         // show the notification
-        if (payload && id === payload.handlerName)
-          enqueueSnackbar(message, opts);
+        if (payload && id === payload.handlerName) enqueueSnackbar(message, opts);
       },
       mapId
     );

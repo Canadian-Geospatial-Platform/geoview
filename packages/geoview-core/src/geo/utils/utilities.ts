@@ -1,11 +1,7 @@
 import axios from "axios";
 import WMSCapabilities from "wms-capabilities";
 
-import {
-  Cast,
-  TypeCSSStyleDeclaration,
-  TypeJSONObjectLoop,
-} from "../../core/types/cgpv-types";
+import { Cast, TypeCSSStyleDeclaration, TypeJSONObjectLoop } from "../../core/types/cgpv-types";
 import { getXMLHttpRequest, xmlToJson } from "../../core/utils/utilities";
 
 import { api } from "../../api/api";
@@ -18,9 +14,7 @@ export class GeoUtilities {
    * @param {string} url the url of the ESRI map server
    * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
    */
-  getESRIServiceMetadata = async (
-    url: string
-  ): Promise<Record<string, unknown>> => {
+  getESRIServiceMetadata = async (url: string): Promise<Record<string, unknown>> => {
     // fetch the map server returning a json object
     const response = await fetch(`${url}?f=json`);
     const result = await response.json();
@@ -35,14 +29,9 @@ export class GeoUtilities {
    * @param {string} layers the layers to query separate by ,
    * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
    */
-  getWMSServiceMetadata = async (
-    url: string,
-    layers: string
-  ): Promise<Record<string, unknown>> => {
+  getWMSServiceMetadata = async (url: string, layers: string): Promise<Record<string, unknown>> => {
     // query the WMS server
-    const response = await getXMLHttpRequest(
-      `${url}?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0&layer=${layers}`
-    );
+    const response = await getXMLHttpRequest(`${url}?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0&layer=${layers}`);
 
     // parse the xml string and convert to json
     const result = new WMSCapabilities(response).toJSON();
@@ -56,13 +45,11 @@ export class GeoUtilities {
    * @param {string} url the url of the WFS server
    * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
    */
-  getWFSServiceMetadata = async (
-    url: string
-  ): Promise<Record<string, unknown>> => {
+  getWFSServiceMetadata = async (url: string): Promise<Record<string, unknown>> => {
     const res = await axios.get(url, {
       params: { request: "getcapabilities", service: "WFS" },
     });
-    var xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
+    const xmlDOM = new DOMParser().parseFromString(res.data, "text/xml");
     const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
     const capabilities = json["wfs:WFS_Capabilities"];
     return capabilities;
@@ -76,10 +63,8 @@ export class GeoUtilities {
   manageKeyboardFocus = (): void => {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass() {
-      const previouslyFocusedElement =
-        document.getElementsByClassName("keyboard-focused")[0];
-      if (previouslyFocusedElement)
-        previouslyFocusedElement.classList.toggle("keyboard-focused");
+      const previouslyFocusedElement = document.getElementsByClassName("keyboard-focused")[0];
+      if (previouslyFocusedElement) previouslyFocusedElement.classList.toggle("keyboard-focused");
     }
 
     // Add event listener for when tab pressed
@@ -87,9 +72,7 @@ export class GeoUtilities {
       if (e.key !== "Tab") return;
 
       // get array of map elements
-      const elements: Element[] = Array.from(
-        document.getElementsByClassName("llwp-map")
-      );
+      const elements: Element[] = Array.from(document.getElementsByClassName("llwp-map"));
       const activeEl = document.activeElement;
 
       if (elements.some((element) => element.contains(activeEl))) {
@@ -125,26 +108,15 @@ export class GeoUtilities {
   getMapServerUrl = (url: string, rest = false): string => {
     let mapServerUrl = url;
     if (mapServerUrl.includes("MapServer")) {
-      mapServerUrl = mapServerUrl.slice(
-        0,
-        mapServerUrl.indexOf("MapServer") + "MapServer".length
-      );
+      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf("MapServer") + "MapServer".length);
     }
     if (mapServerUrl.includes("FeatureServer")) {
-      mapServerUrl = mapServerUrl.slice(
-        0,
-        mapServerUrl.indexOf("FeatureServer") + "FeatureServer".length
-      );
+      mapServerUrl = mapServerUrl.slice(0, mapServerUrl.indexOf("FeatureServer") + "FeatureServer".length);
     }
 
     if (rest) {
-      const urlRightSide = mapServerUrl.slice(
-        mapServerUrl.indexOf("/services/")
-      );
-      mapServerUrl = `${mapServerUrl.slice(
-        0,
-        url.indexOf("services/")
-      )}rest${urlRightSide}`;
+      const urlRightSide = mapServerUrl.slice(mapServerUrl.indexOf("/services/"));
+      mapServerUrl = `${mapServerUrl.slice(0, url.indexOf("services/"))}rest${urlRightSide}`;
     }
 
     return mapServerUrl;
@@ -163,11 +135,8 @@ export class GeoUtilities {
     y: number;
     z: number;
   } => {
-    const style = Cast<TypeCSSStyleDeclaration>(
-      window.getComputedStyle(element)
-    );
-    const matrix =
-      style.transform || style.webkitTransform || style.mozTransform;
+    const style = Cast<TypeCSSStyleDeclaration>(window.getComputedStyle(element));
+    const matrix = style.transform || style.webkitTransform || style.mozTransform;
     const values = { x: 0, y: 0, z: 0 };
 
     // No transform property. Simply return 0 values.

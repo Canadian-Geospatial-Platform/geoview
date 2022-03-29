@@ -1,8 +1,10 @@
+import { TypeWindow } from "geoview-core";
+
 // get window object
-const w = window as any;
+const w = window as TypeWindow;
 
 // access the cgpv object from the window object
-const cgpv = w["cgpv"];
+const { cgpv } = w;
 
 // access the api calls
 const { api, react, reactLeaflet, reactLeafletCore } = cgpv;
@@ -33,7 +35,7 @@ interface MiniboundProps {
  * Create and update the bound polygon of the parent's map extent
  * @param {MiniboundProps} props bound properties
  */
-export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
+export function MinimapBounds(props: MiniboundProps): JSX.Element {
   const { parentId, parentMap, zoomFactor, minimap } = props;
 
   const [toggle, setToggle] = useState(false);
@@ -57,22 +59,15 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
 
   function updateMap(): void {
     // Update the minimap's view to match the parent map's center and zoom
-    const newZoom =
-      parentMap.getZoom() - zoomFactor > 0
-        ? parentMap.getZoom() - zoomFactor
-        : 0;
+    const newZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
 
     minimap.flyTo(parentMap.getCenter(), newZoom);
 
     // Set in timeout the calculation to create the bound so parentMap getBounds has the updated bounds
     setTimeout(() => {
       minimap.invalidateSize();
-      const pMin = minimap.latLngToContainerPoint(
-        parentMap.getBounds().getSouthWest()
-      );
-      const pMax = minimap.latLngToContainerPoint(
-        parentMap.getBounds().getNorthEast()
-      );
+      const pMin = minimap.latLngToContainerPoint(parentMap.getBounds().getSouthWest());
+      const pMax = minimap.latLngToContainerPoint(parentMap.getBounds().getNorthEast());
       setBounds({
         height: pMin.y - pMax.y,
         width: pMax.x - pMin.x,
@@ -110,10 +105,7 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
   }, [minimap, parentMap, zoomFactor]);
 
   // Listen to events on the parent map
-  const handlers = useMemo(
-    () => ({ moveend: onChange, zoomend: onChange }),
-    [onChange]
-  );
+  const handlers = useMemo(() => ({ moveend: onChange, zoomend: onChange }), [onChange]);
   const context = { __version: 1, map: parentMap };
   const leafletElement = {
     instance: parentMap,
@@ -139,4 +131,4 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
   ) : (
     <></>
   );
-};
+}
