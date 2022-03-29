@@ -1,17 +1,17 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable no-plusplus */
-import L, { Layer } from "leaflet";
-import "leaflet.markercluster/src";
+import L, { Layer } from 'leaflet';
+import 'leaflet.markercluster/src';
 
-import { EVENT_NAMES } from "../../../api/event";
-import { api } from "../../../api/api";
-import { Cast, TypeStampedIconCreationFunction } from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
+import { EVENT_NAMES } from '../../../api/event';
+import { api } from '../../../api/api';
+import { Cast, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+import { generateId } from '../../../core/utils/utilities';
 
-import "../../../core/types/marker-cluster-element";
+import '../../../core/types/marker-cluster-element';
 
-import * as MarkerDefinitions from "../../../core/types/marker-definitions";
+import * as MarkerDefinitions from '../../../core/types/marker-definitions';
 
 let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } = MarkerDefinitions;
 
@@ -41,7 +41,7 @@ const createMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
     icon = getClusterIconPart(Stamp);
   }
 
-  if (blinkingIcon) L.DomUtil.addClass(icon.options as HTMLElement, "blinking-icon-enabled");
+  if (blinkingIcon) L.DomUtil.addClass(icon.options as HTMLElement, 'blinking-icon-enabled');
 
   return icon;
 };
@@ -65,7 +65,7 @@ export const defaultClusterGroupOptions: L.MarkerClusterGroupOptions = {
  */
 const createSpiderfiedMarkerIcon = (cluster: L.MarkerCluster): L.DivIcon => {
   const icon = createMarkerIcon(cluster);
-  icon.options.className = "leaflet-marker-icon cluster-div-icon spiderfied-marker";
+  icon.options.className = 'leaflet-marker-icon cluster-div-icon spiderfied-marker';
 
   return icon;
 };
@@ -113,7 +113,7 @@ export class MarkerClusterClass {
   activeClusterGroupIndex = 0;
 
   // default marker cluster group name
-  defaultClusterGroupID = "defaultClusterGroup";
+  defaultClusterGroupID = 'defaultClusterGroup';
 
   // options used by cluster groups
   clusterGroupOptions = defaultClusterGroupOptions;
@@ -162,7 +162,7 @@ export class MarkerClusterClass {
     // initialize spiderfiedClusterGroupOptions
     this.setSpiderfiedClusterGroupOptions(defaultSpiderfiedClusterGroupOptions);
     // create a spiderfied marker cluster group
-    this.spiderfiedMarkerGroup = this.newClusterGroupInstance("SpiderfiedClusterGroup", this.spiderfiedClusterGroupOptions);
+    this.spiderfiedMarkerGroup = this.newClusterGroupInstance('SpiderfiedClusterGroup', this.spiderfiedClusterGroupOptions);
 
     // listen to marker cluster element start blinking events
     api.event.on(
@@ -238,7 +238,7 @@ export class MarkerClusterClass {
                 masterClusterGroup.refreshClusters();
               });
               // Also, refresh the blinking css of the modified marker
-              this.controlClickOnMarkerElement(originalMarker, "refresh");
+              this.controlClickOnMarkerElement(originalMarker, 'refresh');
             }
           }
           // Set the flag used to restore the last spiderfied marker that was unspiderfy by
@@ -265,7 +265,7 @@ export class MarkerClusterClass {
                     masterClusterGroup.refreshClusters();
                   });
                   // Also, refresh the blinking css of the modified marker
-                  this.controlClickOnMarkerElement(markerClusterElements[j], "refresh");
+                  this.controlClickOnMarkerElement(markerClusterElements[j], 'refresh');
                 }
               }
             }
@@ -355,7 +355,7 @@ export class MarkerClusterClass {
       ...options,
       id: markerId,
     });
-    marker.on("click", this.onMarkerElementClick);
+    marker.on('click', this.onMarkerElementClick);
 
     return marker;
   };
@@ -776,10 +776,10 @@ export class MarkerClusterClass {
    * @param {MarkerClusterMouseEvent} event the event information
    */
   onUnspiderfyCluster = (event: L.MarkerClusterMouseEvent): void => {
-    event.target.off("unspiderfied", this.onUnspiderfyCluster);
+    event.target.off('unspiderfied', this.onUnspiderfyCluster);
     this.spiderfiedMarkerGroup.clearLayers();
-    this.spiderfiedMarkerGroup = this.newClusterGroupInstance("SpiderfiedClusterGroup", this.spiderfiedClusterGroupOptions);
-    event.target.on("unspiderfied", this.onUnspiderfyCluster);
+    this.spiderfiedMarkerGroup = this.newClusterGroupInstance('SpiderfiedClusterGroup', this.spiderfiedClusterGroupOptions);
+    event.target.on('unspiderfied', this.onUnspiderfyCluster);
     // turn on all visible geometry groups
     api.event.emit(api.eventNames.EVENT_VECTOR_ON, this.markerClusterMap.id, {});
     // turn on all visible cluster group
@@ -788,7 +788,7 @@ export class MarkerClusterClass {
     });
 
     if (this.respiderfyTheLastSpiderfiedClusterGroup && this.lastUnspidefiedClusterGroupEvent) {
-      this.lastUnspidefiedClusterGroupEvent.target.fire("click", this.lastUnspidefiedClusterGroupEvent, true);
+      this.lastUnspidefiedClusterGroupEvent.target.fire('click', this.lastUnspidefiedClusterGroupEvent, true);
       this.respiderfyTheLastSpiderfiedClusterGroup = false;
     } else {
       // deactivate spiderfied mode
@@ -804,7 +804,7 @@ export class MarkerClusterClass {
   onMarkerElementClick = (event: L.MarkerClusterElementMouseEvent): void => {
     const clickedMarker = event.target;
     if (!event.originalEvent.shiftKey && event.originalEvent.ctrlKey && !event.originalEvent.altKey) {
-      this.controlClickOnMarkerElement(clickedMarker, "toggle");
+      this.controlClickOnMarkerElement(clickedMarker, 'toggle');
     } else if (event.originalEvent.shiftKey && !event.originalEvent.ctrlKey && !event.originalEvent.altKey) {
       // zoom to the element you shift clicked on
       // get the visible marker, it may be an element or a cluster...
@@ -826,8 +826,8 @@ export class MarkerClusterClass {
    * @param {L.MarkerClusterElement} clickedMarker the marker cluster element that has been clicked on
    * @param {'refresh' | 'toggle'} action type of action to apply to the blinking flag
    */
-  private controlClickOnMarkerElement = (clickedMarker: L.MarkerClusterElement, action: "refresh" | "toggle"): void => {
-    const stopCondition = action === "toggle" ? clickedMarker.blinking : !clickedMarker.blinking;
+  private controlClickOnMarkerElement = (clickedMarker: L.MarkerClusterElement, action: 'refresh' | 'toggle'): void => {
+    const stopCondition = action === 'toggle' ? clickedMarker.blinking : !clickedMarker.blinking;
 
     // Update the clicked marker
     if (stopCondition) clickedMarker.stopBlinking();
@@ -883,6 +883,6 @@ export class MarkerClusterClass {
       }
     }
     // Since the toggleSelection method updates the marker, we must refresh its blinking behaviour.
-    this.controlClickOnMarkerElement(clickedMarker, "refresh");
+    this.controlClickOnMarkerElement(clickedMarker, 'refresh');
   };
 }

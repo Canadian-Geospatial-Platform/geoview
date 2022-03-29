@@ -1,18 +1,18 @@
 /* eslint-disable object-shorthand */
 /* eslint-disable no-underscore-dangle */
-import axios from "axios";
+import axios from 'axios';
 
-import L, { Layer } from "leaflet";
+import L, { Layer } from 'leaflet';
 
-import { mapService as esriMapService, MapService } from "esri-leaflet";
+import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import WMSCapabilities from "wms-capabilities";
+import WMSCapabilities from 'wms-capabilities';
 
-import { getXMLHttpRequest, xmlToJson, generateId } from "../../../core/utils/utilities";
+import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from "../../../core/types/cgpv-types";
+import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -32,7 +32,7 @@ export class WMS {
   id: string;
 
   // layer name with default
-  name = "WMS Layer";
+  name = 'WMS Layer';
 
   // layer type
   type: string;
@@ -61,16 +61,16 @@ export class WMS {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId("");
+    this.id = layerConfig.id || generateId('');
     this.type = layerConfig.type;
     this.#capabilities = {};
-    this.entries = layerConfig.entries?.split(",").map((item: string) => {
+    this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url.indexOf("?") === -1 ? `${layerConfig.url}?` : layerConfig.url;
+    this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
     this.layer = new Layer();
   }
 
@@ -90,7 +90,7 @@ export class WMS {
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
-        if (value !== "{}") {
+        if (value !== '{}') {
           // check if entries exist
           let isValid = true;
 
@@ -100,24 +100,24 @@ export class WMS {
 
           isValid = this.validateEntries(json.Capability.Layer, layer.entries as string);
 
-          const layerName = "name" in layer ? layer.name : json.Service.Name;
+          const layerName = 'name' in layer ? layer.name : json.Service.Name;
           if (layerName) this.name = <string>layerName;
 
           if (isValid) {
             const wms = L.tileLayer.wms(layer.url, {
               layers: layer.entries,
-              format: "image/png",
+              format: 'image/png',
               transparent: true,
-              attribution: "",
+              attribution: '',
             });
             this.#wmsParams = wms.wmsParams;
 
             resolve(wms);
           } else {
-            resolve("{}");
+            resolve('{}');
           }
         } else {
-          resolve("{}");
+          resolve('{}');
         }
       });
     });
@@ -135,8 +135,8 @@ export class WMS {
     // eslint-disable-next-line no-prototype-builtins
 
     // Added support of multiple entries
-    const allNames = this.findAllByKey(layer, "Name");
-    const entryArray = entries.split(",").map((s) => s.trim());
+    const allNames = this.findAllByKey(layer, 'Name');
+    const entryArray = entries.split(',').map((s) => s.trim());
     for (let i = 0; i < entryArray.length; i += 1) {
       isValid = isValid && allNames.includes(entryArray[i]);
     }
@@ -154,7 +154,7 @@ export class WMS {
     if (obj) {
       return Object.entries(obj).reduce(
         // eslint-disable-next-line no-nested-ternary
-        (acc, [key, v]) => (key === keyToFind ? acc.concat(v) : typeof v === "object" ? acc.concat(this.findAllByKey(v, keyToFind)) : acc),
+        (acc, [key, v]) => (key === keyToFind ? acc.concat(v) : typeof v === 'object' ? acc.concat(this.findAllByKey(v, keyToFind)) : acc),
         []
       );
     }
@@ -186,7 +186,7 @@ export class WMS {
       });
 
     const legendUrl = `${this.url}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${this.entries}`;
-    const response = await axios.get(legendUrl, { responseType: "blob" });
+    const response = await axios.get(legendUrl, { responseType: 'blob' });
     return readAsyncFile(response.data);
   };
 
@@ -199,11 +199,11 @@ export class WMS {
    * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
    */
   getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJSONObject | null> => {
-    let inforFormat = "text/xml";
+    let inforFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
       const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format as any;
-      if (formatArray.includes("application/geojson")) inforFormat = "application/geojson";
+      if (formatArray.includes('application/geojson')) inforFormat = 'application/geojson';
     }
 
     const params = this.getFeatureInfoParams(latlng, map);
@@ -212,7 +212,7 @@ export class WMS {
 
     const res = await axios.get(this.url, { params: params });
 
-    if (inforFormat === "application/geojson") {
+    if (inforFormat === 'application/geojson') {
       if (res.data.features.length > 0) {
         const results: any[] = [];
         res.data.features.forEach((element) => {
@@ -236,9 +236,9 @@ export class WMS {
     if (featureInfoResponse && featureInfoResponse.FIELDS) {
       const results: any[] = [];
       // only one feature
-      if (featureInfoResponse.FIELDS["@attributes"]) {
+      if (featureInfoResponse.FIELDS['@attributes']) {
         results.push({
-          attributes: featureInfoResponse.FIELDS["@attributes"],
+          attributes: featureInfoResponse.FIELDS['@attributes'],
           geometry: null,
           layerId: this.id,
           layerName: this.name,
@@ -249,7 +249,7 @@ export class WMS {
       } else {
         featureInfoResponse.FIELDS.forEach((element) => {
           results.push({
-            attributes: element["@attributes"],
+            attributes: element['@attributes'],
             geometry: null,
             layerId: this.id,
             layerName: this.name,
@@ -284,8 +284,8 @@ export class WMS {
     const ne = crs.project(map.getBounds().getNorthEast());
 
     const params: Record<string, unknown> = {
-      request: "GetFeatureInfo",
-      service: "WMS",
+      request: 'GetFeatureInfo',
+      service: 'WMS',
       version: this.#wmsParams.version,
       layers: this.#wmsParams.layers,
       query_layers: this.#wmsParams.layers,
@@ -295,11 +295,11 @@ export class WMS {
 
     // Define version-related request parameters.
     const version = window.parseFloat(this.#wmsParams.version);
-    params[version >= 1.3 ? "crs" : "srs"] = crs.code;
+    params[version >= 1.3 ? 'crs' : 'srs'] = crs.code;
     params.bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    params.bbox = version >= 1.3 && crs.code === "EPSG:4326" ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    params[version >= 1.3 ? "i" : "x"] = point.x;
-    params[version >= 1.3 ? "j" : "y"] = point.y;
+    params.bbox = version >= 1.3 && crs.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    params[version >= 1.3 ? 'i' : 'x'] = point.x;
+    params[version >= 1.3 ? 'j' : 'y'] = point.y;
 
     return params;
   }

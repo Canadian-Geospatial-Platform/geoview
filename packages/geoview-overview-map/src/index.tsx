@@ -1,5 +1,5 @@
-import { TypeProps, TypeWindow } from "geoview-core";
-import { OverviewMap } from "./overview-map";
+import { TypeProps, TypeWindow } from 'geoview-core';
+import { OverviewMap } from './overview-map';
 
 const w = window as TypeWindow;
 
@@ -22,8 +22,8 @@ class OverviewMapPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {},
-    "fr-CA": {},
+    'en-CA': {},
+    'fr-CA': {},
   };
 
   /**
@@ -43,7 +43,7 @@ class OverviewMapPlugin {
     api
       .map(mapId)
       .addComponent(
-        "overviewMap",
+        'overviewMap',
         <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor} />
       );
   };
@@ -60,7 +60,7 @@ class OverviewMapPlugin {
     // access the api calls
     const { api } = cgpv;
 
-    api.map(mapId).removeComponent("overviewMap");
+    api.map(mapId).removeComponent('overviewMap');
   }
 }
 
