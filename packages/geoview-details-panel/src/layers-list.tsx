@@ -1,12 +1,8 @@
 /* eslint-disable react/no-array-index-key */
-import {
-  TypeJSONObject,
-  TypeLayersListProps,
-  TypeLayerData,
-} from "geoview-core";
+import { TypeJSONObject, TypeLayersListProps, TypeLayerData, TypeWindow } from "geoview-core";
 
 // get the window object
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * A react component that will list the map server layers defined in the map config
@@ -14,12 +10,11 @@ const w = window as any;
  * @param {TypeLayersListProps} props properties passed to the component
  * @returns a React JSX Element containing map server layers
  */
-const LayersList = (props: TypeLayersListProps): JSX.Element => {
-  const { layersData, selectFeature, selectLayer, getSymbol, clickPos, mapId } =
-    props;
+function LayersList(props: TypeLayersListProps): JSX.Element {
+  const { layersData, selectFeature, selectLayer, getSymbol, clickPos, mapId } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   // access the api calls
   const { api, ui } = cgpv;
@@ -66,8 +61,7 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       width: "32px",
       minWidth: "32px",
       height: "32px",
-      boxShadow:
-        "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
+      boxShadow: "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
       marginRight: "10px",
       color: "black",
       fontSize: "16px",
@@ -91,8 +85,7 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
    * @param {string} layerKey the layer object to list it's entries
    */
   const goToFeatureList = (data: TypeLayerData, layerKey: string) => {
-    const { layerData, displayField, fieldAliases, renderer } =
-      data.layers[layerKey];
+    const { layerData, displayField, fieldAliases, renderer } = data.layers[layerKey];
 
     // set the layer entry data
     selectLayer(data.layers[layerKey]);
@@ -100,8 +93,7 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
     // check if the layer has only one entry
     if (layerData.length === 1) {
       // go to the entry information skipping entry list
-      const attributes = (layerData[0] as TypeJSONObject)
-        ?.attributes as TypeJSONObject;
+      const attributes = (layerData[0] as TypeJSONObject)?.attributes as TypeJSONObject;
       selectFeature({
         attributes,
         displayField,
@@ -123,80 +115,64 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
             <div key={data.id}>
               {
                 // loop through each layer in the map server
-                Object.keys(data.layers).map(
-                  (layerKey: string, index: number) => {
-                    const { layer, layerData, groupLayer } =
-                      data.layers[layerKey];
+                Object.keys(data.layers).map((layerKey: string, index: number) => {
+                  const { layer, layerData, groupLayer } = data.layers[layerKey];
 
-                    return (
-                      <div
-                        key={index}
-                        tabIndex={layerData.length > 0 && !groupLayer ? 0 : -1}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            if (!groupLayer) {
-                              e.preventDefault();
-                              goToFeatureList(data, layerKey);
-                            }
+                  return (
+                    <div
+                      key={index}
+                      tabIndex={layerData.length > 0 && !groupLayer ? 0 : -1}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          if (!groupLayer) {
+                            e.preventDefault();
+                            goToFeatureList(data, layerKey);
                           }
-                        }}
-                        role="button"
-                      >
-                        {
-                          // if the map server is a group layer then display its title as a header of it's sub layers
-                          groupLayer ? (
-                            <div
-                              className={classes.layerParentText}
-                              title={layer.name}
-                            >
-                              {layer.name}
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              tabIndex={-1}
-                              className={classes.layerItem}
-                              disabled={layerData.length === 0}
-                              onClick={
-                                layerData.length > 0
-                                  ? () => {
-                                      // if a layer is clicked
-                                      goToFeatureList(data, layerKey);
-
-                                      api.event.emit(
-                                        EVENT_NAMES.EVENT_MARKER_ICON_SHOW,
-                                        mapId,
-                                        {
-                                          latlng: clickPos,
-                                          symbology: getSymbol(
-                                            data.layers[layerKey].renderer,
-                                            (layerData[0] as TypeJSONObject)
-                                              .attributes as TypeJSONObject
-                                          ),
-                                        }
-                                      );
-                                    }
-                                  : undefined
-                              }
-                            >
-                              <div className={classes.layerCountTextContainer}>
-                                <span className={classes.layerFeatureCount}>
-                                  {layerData.length}
-                                </span>
-                                <div
-                                  className={classes.layerItemText}
-                                  title={layer.name}
-                                >
-                                  {layer.name}
-                                </div>
-                              </div>
-                            </button>
-                          )
                         }
-                      </div>
-                    );
-                  }
-                )
+                      }}
+                      role="button"
+                    >
+                      {
+                        // if the map server is a group layer then display its title as a header of it's sub layers
+                        groupLayer ? (
+                          <div className={classes.layerParentText} title={layer.name}>
+                            {layer.name}
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            className={classes.layerItem}
+                            disabled={layerData.length === 0}
+                            onClick={
+                              layerData.length > 0
+                                ? () => {
+                                    // if a layer is clicked
+                                    goToFeatureList(data, layerKey);
+
+                                    api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
+                                      latlng: clickPos,
+                                      symbology: getSymbol(
+                                        data.layers[layerKey].renderer,
+                                        (layerData[0] as TypeJSONObject).attributes as TypeJSONObject
+                                      ),
+                                    });
+                                  }
+                                : undefined
+                            }
+                          >
+                            <div className={classes.layerCountTextContainer}>
+                              <span className={classes.layerFeatureCount}>{layerData.length}</span>
+                              <div className={classes.layerItemText} title={layer.name}>
+                                {layer.name}
+                              </div>
+                            </div>
+                          </button>
+                        )
+                      }
+                    </div>
+                  );
+                })
               }
             </div>
           );
@@ -204,6 +180,6 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       }
     </div>
   );
-};
+}
 
 export default LayersList;

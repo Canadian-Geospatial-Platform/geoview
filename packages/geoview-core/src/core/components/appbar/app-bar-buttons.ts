@@ -2,14 +2,9 @@ import { api } from "../../../api/api";
 
 import { EVENT_NAMES } from "../../../api/event";
 
-import { ButtonApi, PanelApi, DefaultPanel } from "../../../ui";
+import { PanelApi } from "../../../ui";
 
-import {
-  TypeButtonPanel,
-  TypeButtonProps,
-  TypePanelProps,
-  CONST_PANEL_TYPES,
-} from "../../types/cgpv-types";
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from "../../types/cgpv-types";
 
 import { generateId } from "../../utils/utilities";
 
@@ -22,8 +17,6 @@ import { generateId } from "../../utils/utilities";
 export class AppbarButtons {
   mapId!: string;
 
-  panel!: PanelApi;
-
   // groups of array of button panels to hold all buttons created on the appbar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
@@ -34,12 +27,6 @@ export class AppbarButtons {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
-
-    this.panel = new PanelApi(
-      DefaultPanel.panel,
-      DefaultPanel.button.id!,
-      this.mapId
-    );
 
     this.createDefaultButtonPanels();
   }
@@ -86,37 +73,42 @@ export class AppbarButtons {
     groupName?: string | null | undefined
   ): TypeButtonPanel | null => {
     if (buttonProps && panelProps) {
-      // generate an id if not provided
-      buttonProps.id = generateId(buttonProps.id);
+      const id = generateId(buttonProps.id);
+
+      const button: TypeButtonProps = {
+        ...buttonProps,
+        id,
+        visible: !buttonProps.visible ? true : buttonProps.visible,
+      };
+
+      const panel: TypePanelProps = {
+        ...panelProps,
+        type: CONST_PANEL_TYPES.APPBAR,
+      };
 
       // if group was not specified then add button panels to the default group
-      if (!groupName) {
-        groupName = "default";
-      }
+      const group = groupName || "default";
 
       // if group does not exist then create it
-      if (!this.buttons[groupName]) {
-        this.buttons[groupName] = {};
+      if (!this.buttons[group]) {
+        this.buttons[group] = {};
       }
 
-      // set panel type
-      panelProps.type = CONST_PANEL_TYPES.APPBAR;
-
       const buttonPanel: TypeButtonPanel = {
-        id: buttonProps.id,
-        panel: new PanelApi(panelProps, buttonProps.id, this.mapId),
-        button: new ButtonApi(buttonProps),
-        groupName,
+        id,
+        panel: new PanelApi(panel, id, this.mapId),
+        button,
+        groupName: group,
       };
 
       // add the new button panel to the correct group
-      this.buttons[groupName][buttonProps.id] = buttonPanel;
+      this.buttons[group][id] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
       api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, this.mapId, {
         handlerId: this.mapId,
-        groupName,
-        id: buttonProps.id,
+        groupName: group,
+        id,
         buttonPanel,
       });
 
@@ -157,9 +149,9 @@ export class AppbarButtons {
    * @returns {Record<string, TypeButtonPanels>} an object with all the button panels
    */
   getAllButtonPanels = (): Record<string, TypeButtonPanel> => {
-    let buttonPanels: Record<string, TypeButtonPanel> = {};
+    const buttonPanels: Record<string, TypeButtonPanel> = {};
 
-    for (let i = 0; i < Object.keys(this.buttons).length; i++) {
+    for (let i = 0; i < Object.keys(this.buttons).length; i += 1) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
 
       // eslint-disable-next-line no-plusplus

@@ -55,18 +55,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
 
   const { useState } = react;
   const { Button, ButtonGroup } = ui.elements;
-  const {
-    Stepper,
-    Step,
-    StepLabel,
-    StepContent,
-    TextField,
-    Typography,
-    InputLabel,
-    FormControl,
-    Select,
-    MenuItem,
-  } = mui;
+  const { Stepper, Step, StepLabel, StepContent, TextField, Typography, InputLabel, FormControl, Select, MenuItem } = mui;
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState("");
@@ -139,10 +128,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, "");
       const supportedProj = wms.Capability.Layer.CRS;
       if (!supportedProj.includes(proj)) throw "proj";
-      const layers = wms.Capability.Layer.Layer.map((x: any) => [
-        x.Name,
-        x.Title,
-      ]);
+      const layers = wms.Capability.Layer.Layer.map((x: any) => [x.Name, x.Title]);
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
@@ -165,10 +151,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   const wfsValidation = async (): Promise<boolean> => {
     try {
       const wfs = await api.geoUtilities.getWFSServiceMetadata(layerURL);
-      const layers = wfs.FeatureTypeList.FeatureType.map((x: any) => [
-        x.Name["#text"].split(":")[1],
-        x.Title["#text"],
-      ]);
+      const layers = wfs.FeatureTypeList.FeatureType.map((x: any) => [x.Name["#text"].split(":")[1], x.Title["#text"]]);
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
@@ -192,10 +175,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const esri = await api.geoUtilities.getESRIServiceMetadata(layerURL);
       if (esri.capabilities.includes(esriOptions(type).capability)) {
         if ("layers" in esri) {
-          const layers = esri.layers.map(({ id, name }: any) => [
-            String(id),
-            name,
-          ]);
+          const layers = esri.layers.map(({ id, name }: any) => [String(id), name]);
           if (layers.length === 1) {
             setLayerName(layers[0][1]);
             setLayerEntry(layers[0][0]);
@@ -265,10 +245,8 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       if (layerType === "ogcWMS") valid = await wmsValidation();
       if (layerType === "ogcWFS") valid = await wfsValidation();
       else if (layerType === "xyzTiles") valid = xyzValidation();
-      else if (layerType === "esriDynamic")
-        valid = await esriValidation("esriDynamic");
-      else if (layerType === "esriFeature")
-        valid = await esriValidation("esriFeature");
+      else if (layerType === "esriDynamic") valid = await esriValidation("esriDynamic");
+      else if (layerType === "esriFeature") valid = await esriValidation("esriFeature");
       else if (layerType === "geoJSON") valid = await geoJSONValidation();
       if (!valid) return;
     }
@@ -276,8 +254,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       let name = layerName;
       let url = layerURL;
       let entries = layerEntry;
-      if (layerType === "esriDynamic")
-        url = api.geoUtilities.getMapServerUrl(layerURL);
+      if (layerType === "esriDynamic") url = api.geoUtilities.getMapServerUrl(layerURL);
       else if (layerType === "esriFeature") {
         url = api.geoUtilities.getMapServerUrl(layerURL) + "/" + layerEntry;
         entries = "";
@@ -350,28 +327,13 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
    * @param param0 specify if button is first or last in the list
    * @returns {JSX.Element} React component
    */
-  const NavButtons = ({
-    isFirst = false,
-    isLast = false,
-  }: ButtonProps): JSX.Element => (
+  const NavButtons = ({ isFirst = false, isLast = false }: ButtonProps): JSX.Element => (
     <ButtonGroup
       className={classes.buttonGroup}
       children={
         <>
-          <Button
-            variant="contained"
-            type="text"
-            onClick={handleNext}
-            children={isLast ? "Finish" : "Continue"}
-          />
-          {!isFirst && (
-            <Button
-              variant="contained"
-              type="text"
-              onClick={handleBack}
-              children="Back"
-            />
-          )}
+          <Button variant="contained" type="text" onClick={handleNext} children={isLast ? "Finish" : "Continue"} />
+          {!isFirst && <Button variant="contained" type="text" onClick={handleBack} children="Back" />}
         </>
       }
     />
@@ -382,12 +344,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       <Step>
         <StepLabel>Enter URL</StepLabel>
         <StepContent>
-          <TextField
-            label="URL"
-            variant="standard"
-            value={layerURL}
-            onChange={handleInput}
-          />
+          <TextField label="URL" variant="standard" value={layerURL} onChange={handleInput} />
           <br />
           <NavButtons isFirst />
         </StepContent>
@@ -397,12 +354,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
         <StepContent>
           <FormControl fullWidth>
             <InputLabel id="service-type-label">Service Type</InputLabel>
-            <Select
-              labelId="service-type-label"
-              value={layerType}
-              onChange={handleSelectType}
-              label="Service Type"
-            >
+            <Select labelId="service-type-label" value={layerType} onChange={handleSelectType} label="Service Type">
               {layerOptions.map(([value, label]) => (
                 <MenuItem key={value} value={value}>
                   {label}
@@ -417,25 +369,13 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
         <StepLabel>Configure layer</StepLabel>
         <StepContent>
           {layerList.length === 0 && layerEntry === "" && (
-            <TextField
-              label="Name"
-              variant="standard"
-              value={layerName}
-              onChange={handleNameLayer}
-            />
+            <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
           )}
-          {layerList.length === 0 && layerEntry !== "" && (
-            <Typography>{layerName}</Typography>
-          )}
+          {layerList.length === 0 && layerEntry !== "" && <Typography>{layerName}</Typography>}
           {layerList.length > 1 && (
             <FormControl fullWidth>
               <InputLabel id="service-layer-label">Select Layer</InputLabel>
-              <Select
-                labelId="service-layer-label"
-                value={layerEntry}
-                onChange={handleSelectLayer}
-                label="Select Layer"
-              >
+              <Select labelId="service-layer-label" value={layerEntry} onChange={handleSelectLayer} label="Select Layer">
                 {layerList.map(([value, label]: LayerList) => (
                   <MenuItem key={value + label} value={value}>
                     {label}

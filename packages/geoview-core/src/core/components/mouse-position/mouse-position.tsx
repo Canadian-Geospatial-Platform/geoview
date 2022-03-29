@@ -41,9 +41,7 @@ function coordFormnat(value: number, card: string): string {
   const d = Math.floor(Math.abs(value)) * (value < 0 ? -1 : 1);
   const m = Math.floor(Math.abs((value - d) * 60));
   const s = Math.round((Math.abs(value) - Math.abs(d) - m / 60) * 3600);
-  return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${
-    s >= 10 ? `${s}` : `0${s}`
-  }" ${card}`;
+  return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${s >= 10 ? `${s}` : `0${s}`}" ${card}`;
 }
 
 /**
@@ -79,18 +77,8 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
    * @param {LatLng} latlng the Lat and Lng value to format
    */
   function formatCoord(latlng: LatLng) {
-    const lat = coordFormnat(
-      latlng.lat,
-      latlng.lat > 0
-        ? t("mapctrl.mouseposition.north")
-        : t("mapctrl.mouseposition.south")
-    );
-    const lng = coordFormnat(
-      latlng.lng,
-      latlng.lng < 0
-        ? t("mapctrl.mouseposition.west")
-        : t("mapctrl.mouseposition.east")
-    );
+    const lat = coordFormnat(latlng.lat, latlng.lat > 0 ? t("mapctrl.mouseposition.north") : t("mapctrl.mouseposition.south"));
+    const lng = coordFormnat(latlng.lng, latlng.lng < 0 ? t("mapctrl.mouseposition.west") : t("mapctrl.mouseposition.east"));
     setPosition({ lat, lng });
   }
 

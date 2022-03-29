@@ -51,14 +51,8 @@ export class PanelApi {
     this.type = panel.type;
     this.title = panel.title || "";
     this.icon = panel.icon;
-    this.content =
-      panel.content !== undefined && panel.content !== null
-        ? panel.content
-        : createElement("div");
-    this.status =
-      panel.status !== undefined && panel.status !== null
-        ? panel.status
-        : false;
+    this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement("div");
+    this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;
     this.width = panel.width || 300;
   }
 
@@ -83,41 +77,33 @@ export class PanelApi {
    */
   closeAll = (): void => {
     if (this.type === "appbar") {
-      Object.keys(api.map(this.mapId).appBarButtons.buttons).map(
-        (groupName: string) => {
-          // get button panels from group
-          const buttonPanels = api.map(this.mapId).appBarButtons.buttons[
-            groupName
-          ];
+      Object.keys(api.map(this.mapId).appBarButtons.buttons).forEach((groupName: string) => {
+        // get button panels from group
+        const buttonPanels = api.map(this.mapId).appBarButtons.buttons[groupName];
 
-          // get all button panels in each group
-          Object.keys(buttonPanels).map((buttonId) => {
-            const buttonPanel = buttonPanels[buttonId];
+        // get all button panels in each group
+        Object.keys(buttonPanels).forEach((buttonId) => {
+          const buttonPanel = buttonPanels[buttonId];
 
-            if (this.buttonId !== buttonPanel.id) {
-              buttonPanel.panel?.close();
-            }
-          });
-        }
-      );
+          if (this.buttonId !== buttonPanel.id) {
+            buttonPanel.panel?.close();
+          }
+        });
+      });
     } else if (this.type === "navbar") {
-      Object.keys(api.map(this.mapId).navBarButtons.buttons).map(
-        (groupName: string) => {
-          // get button panels from group
-          const buttonPanels = api.map(this.mapId).navBarButtons.buttons[
-            groupName
-          ];
+      Object.keys(api.map(this.mapId).navBarButtons.buttons).forEach((groupName: string) => {
+        // get button panels from group
+        const buttonPanels = api.map(this.mapId).navBarButtons.buttons[groupName];
 
-          // get all button panels in each group
-          Object.keys(buttonPanels).map((buttonId) => {
-            const buttonPanel = buttonPanels[buttonId];
+        // get all button panels in each group
+        Object.keys(buttonPanels).forEach((buttonId) => {
+          const buttonPanel = buttonPanels[buttonId];
 
-            if (this.buttonId !== buttonPanel.id) {
-              buttonPanel.panel?.close();
-            }
-          });
-        }
-      );
+          if (this.buttonId !== buttonPanel.id) {
+            buttonPanel.panel?.close();
+          }
+        });
+      });
     }
   };
 
@@ -143,12 +129,7 @@ export class PanelApi {
    * @param {Function} action a function that will be triggered when clicking this action
    * @returns {Panel} the panel
    */
-  addActionButton = (
-    id: string,
-    title: string,
-    icon: string | React.ReactElement | Element,
-    action: () => void
-  ): PanelApi => {
+  addActionButton = (id: string, title: string, icon: string | React.ReactElement | Element, action: () => void): PanelApi => {
     api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
@@ -170,17 +151,9 @@ export class PanelApi {
    *
    * @returns {CheckboxList} the check list
    */
-  attachCheckBoxList = (
-    listItems: string[],
-    multiselectFlag?: boolean,
-    checkedItems?: number[]
-  ): void => {
+  attachCheckBoxList = (listItems: string[], multiselectFlag?: boolean, checkedItems?: number[]): void => {
     if (this.checkboxListAPI) delete this.checkboxListAPI;
-    this.checkboxListAPI = new CheckboxListAPI(
-      listItems,
-      multiselectFlag,
-      checkedItems
-    );
+    this.checkboxListAPI = new CheckboxListAPI(listItems, multiselectFlag, checkedItems);
     this.changeContent(this.checkboxListAPI.CheckboxList);
   };
 

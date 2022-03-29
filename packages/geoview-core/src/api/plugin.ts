@@ -8,7 +8,7 @@ import * as translate from "react-i18next";
 
 import makeStyles from "@mui/styles/makeStyles";
 
-import { MapViewer } from "./../geo/map/map";
+import { MapViewer } from "../geo/map/map";
 
 import { api } from "./api";
 import { Cast, TypeWindow } from "../core/types/cgpv-types";
@@ -30,25 +30,15 @@ export class Plugin {
    * @param {Class} constructor the plugin class (React Component)
    * @param {Object} props the plugin properties
    */
-  addPlugin = async (
-    id: string,
-    mapId: string,
-    constructor?: any,
-    props?: Record<string, unknown>
-  ): Promise<void> => {
-    if (
-      (this.plugins[mapId] && !this.plugins[mapId][id]) ||
-      !(mapId in this.plugins)
-    ) {
+  addPlugin = async (id: string, mapId: string, constructor?: any, props?: Record<string, unknown>): Promise<void> => {
+    if ((this.plugins[mapId] && !this.plugins[mapId][id]) || !(mapId in this.plugins)) {
       let plugin: any;
 
       if (constructor) {
         // create new instance of the plugin
         plugin = new constructor(id, props);
       } else {
-        const InstanceConstructor = (
-          await import(`${"../plugins"}/${id}/index.tsx`)
-        ).default;
+        const InstanceConstructor = (await import(`${"../plugins"}/${id}/index.tsx`)).default;
 
         if (InstanceConstructor) plugin = new InstanceConstructor(id, props);
       }
@@ -61,13 +51,7 @@ export class Plugin {
           Object.keys(translations).forEach((languageKey: string) => {
             const translation = translations[languageKey];
 
-            i18next.addResourceBundle(
-              languageKey,
-              "translation",
-              translation,
-              true,
-              false
-            );
+            i18next.addResourceBundle(languageKey, "translation", translation, true, false);
           });
         }
 
@@ -112,11 +96,7 @@ export class Plugin {
    */
   removePlugin = (id: string, mapId?: string): void => {
     if (mapId) {
-      if (
-        this.plugins[mapId] &&
-        this.plugins[mapId][id] &&
-        this.plugins[mapId][id].plugin
-      ) {
+      if (this.plugins[mapId] && this.plugins[mapId][id] && this.plugins[mapId][id].plugin) {
         const { plugin } = this.plugins[mapId][id];
 
         // call the removed function on the plugin
@@ -126,9 +106,9 @@ export class Plugin {
       delete this.plugins[mapId][id];
     } else {
       // remove the plugin from all maps
-      for (var i = 0; i < Object.keys(this.plugins).length; i++) {
-        const mapId = Object.keys(this.plugins)[i];
-        const value = this.plugins[mapId];
+      for (let i = 0; i < Object.keys(this.plugins).length; i += 1) {
+        const pluginMapId = Object.keys(this.plugins)[i];
+        const value = this.plugins[pluginMapId];
 
         if (value[id] && value[id].plugin) {
           const { plugin } = value[id];
@@ -136,7 +116,7 @@ export class Plugin {
           // call the removed function on the plugin
           if (typeof plugin.removed === "function") plugin.removed();
 
-          delete this.plugins[mapId][id];
+          delete this.plugins[pluginMapId][id];
         }
       }
     }
@@ -153,7 +133,7 @@ export class Plugin {
 
       if (mapPlugins) {
         // remove all plugins by map
-        for (var i = 0; i < Object.keys(mapPlugins).length; i++) {
+        for (let i = 0; i < Object.keys(mapPlugins).length; i += 1) {
           const plugin = Object.keys(mapPlugins)[i];
 
           this.removePlugin(plugin, mapId);
@@ -167,23 +147,20 @@ export class Plugin {
    */
   loadPlugins = (): void => {
     // loop through each map and check if the config contains any plugins to load
-    const maps = api.maps;
-
     Object.keys(api.maps).forEach((mapId: string) => {
       const map = api.maps[mapId] as MapViewer;
-      const plugins = map.mapProps.plugins;
 
       // load plugins if provided in the config
-      if (plugins && plugins.length > 0) {
-        plugins.forEach((plugin) => {
+      if (map.mapProps.plugins && map.mapProps.plugins.length > 0) {
+        map.mapProps.plugins.forEach((plugin) => {
           const { plugins } = Cast<TypeWindow>(window);
           if (plugins && plugins[plugin]) {
             this.addPlugin(plugin, mapId, plugins[plugin], {
-              mapId: mapId,
+              mapId,
             });
           } else {
             this.addPlugin(plugin, mapId, null, {
-              mapId: mapId,
+              mapId,
             });
           }
         });
