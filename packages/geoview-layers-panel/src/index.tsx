@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import PanelContent from "./panel-content";
 
-import {
-  TypeButtonPanel,
-  TypeProps,
-  TypeButtonProps,
-  TypePanelProps,
-} from "geoview-core";
+import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps } from "geoview-core";
 
 const w = window as any;
 
@@ -72,14 +67,10 @@ class LayersPanelPlugin {
     };
 
     // create a new button panel on the appbar
-    this.buttonPanel = api
-      .map(mapId)
-      .appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(
-      <PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />
-    );
+    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
   };
 
   /**

@@ -1,7 +1,7 @@
-import { CSSProperties } from "react";
-
 import makeStyles from "@mui/styles/makeStyles";
 import { CircularProgress as MaterialCircularProgress } from "@mui/material";
+
+import { TypeCircularProgressProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -32,32 +32,21 @@ const useStyles = makeStyles((theme) => {
 });
 
 /**
- * Circular Progress Properties
- */
-interface CircularProgressProps {
-  className?: string | undefined;
-  style?: CSSProperties | undefined;
-  isLoaded: boolean;
-}
-
-/**
  * Create a customized Material UI Circular Progress
  *
- * @param {CircularProgress} props the properties passed to the circular progress element
+ * @param {TypeCircularProgressProps} props the properties passed to the circular progress element
  * @returns {JSX.Element} the created Circular Progress element
  */
-export const CircularProgress = (props: CircularProgressProps): JSX.Element => {
+export function CircularProgress(props: TypeCircularProgressProps): JSX.Element {
   const { className, style, isLoaded } = props;
   const classes = useStyles();
 
   return !isLoaded ? (
-    <div
-      className={`${classes.loading} ${className !== undefined && className}`}
-      style={{ ...style }}
-    >
+    <div className={`${classes.loading} ${className !== undefined && className}`} style={{ ...style }}>
       <MaterialCircularProgress className={classes.progress} />
     </div>
   ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
-};
+}

@@ -1,22 +1,19 @@
-import { TypeBasemapProps } from "geoview-core";
+import { TypeBasemapProps, TypeWindow } from "geoview-core";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 interface BaseMapSwitcherProps {
   mapId: string;
 }
 
-export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
+export function BasemapSwitcher(props: BaseMapSwitcherProps): JSX.Element {
   const { mapId } = props;
 
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   const { api, react, ui, useTranslation } = cgpv;
 
   const { useState, useEffect } = react;
-
-  // get used language
-  const { language } = api.map(mapId);
 
   const useStyles = ui.makeStyles(() => ({
     listContainer: {
@@ -76,9 +73,7 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
     const { basemaps } = api.map(mapId).basemap;
 
     // check if basemap with provided ID exists
-    const exists = basemaps.filter(
-      (basemap: TypeBasemapProps) => basemap.id === id
-    );
+    const exists = basemaps.filter((basemap: TypeBasemapProps) => basemap.id === id);
 
     // if basemap does not exist then create a new one
     if (exists.length === 0) {
@@ -190,8 +185,7 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
     createBasemap("shadedRelief", {
       name: t("basemap-shaded.name"),
       type: "shaded",
-      description:
-        '":"This Canadian base map provides geographic context using shaded relief. From Natural Resources Canada.',
+      description: '":"This Canadian base map provides geographic context using shaded relief. From Natural Resources Canada.',
       descSummary: "",
       altText: t("basemap-shaded.name"),
       thumbnailUrl: "",
@@ -221,8 +215,7 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
     createBasemap("shadedLabel", {
       name: t("basemap-shaded-label.name"),
       type: "shaded_label",
-      description:
-        '":"This Canadian base map provides geographic context using shaded relief with labels. From Natural Resources Canada.',
+      description: '":"This Canadian base map provides geographic context using shaded relief with labels. From Natural Resources Canada.',
       descSummary: "",
       altText: t("basemap-shaded-label.name"),
       thumbnailUrl: "",
@@ -279,22 +272,12 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
             key={basemap.id}
           >
             {typeof basemap.thumbnailUrl === "string" && (
-              <img
-                src={basemap.thumbnailUrl}
-                alt={basemap.altText}
-                className={classes.thumbnail}
-              />
+              <img src={basemap.thumbnailUrl} alt={basemap.altText} className={classes.thumbnail} />
             )}
             {Array.isArray(basemap.thumbnailUrl) &&
               basemap.thumbnailUrl.map((thumbnail, index) => {
-                return (
-                  <img
-                    key={index}
-                    src={thumbnail}
-                    alt={basemap.altText}
-                    className={classes.thumbnail}
-                  />
-                );
+                // eslint-disable-next-line react/no-array-index-key
+                return <img key={index} src={thumbnail} alt={basemap.altText} className={classes.thumbnail} />;
               })}
             <div className={classes.container}>{basemap.name}</div>
           </div>
@@ -302,4 +285,4 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
       })}
     </div>
   );
-};
+}

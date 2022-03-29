@@ -1,0 +1,50 @@
+{
+  "general": {
+    "close": "Close",
+    "open": "Open"
+  },
+  "mapnav": {
+    "arianavbar": "vertical button group for map navigation",
+    "fullscreen": "Full Screen",
+    "home": "Reset to initial view",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  },
+  "mapctrl": {
+    "mouseposition": {
+      "east": "E",
+      "west": "W",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Toggle minimap"
+    },
+    "crosshair": "Use <strong>arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigation the map, and <strong>Enter</strong> to select."
+  },
+  "appbar": {
+    "export": "Export",
+    "fullscreen": "Full Screen",
+    "help": "Help",
+    "layers": "Layers",
+    "share": "Share",
+    "version": "Access GitHub repo"
+  },
+  "keyboardnav": {
+    "start": "Skip after map element",
+    "end": "Skip before map element",
+    "focusdialog": {
+      "title": "Keyboard Navigation",
+      "main": "If enable, we will keep focus locked on the viewer. To exit, press <strong>CTRL + Q</strong>",
+      "button": {
+        "enable": "Enable",
+        "skip": "Skip"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "Layer __param__ failed to load on map __param__"
+    }
+  }
+}

@@ -1,61 +1,97 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import React, { CSSProperties } from "react";
+
+import { useTranslation } from "react-i18next";
+
+import * as ReactLeaflet from "react-leaflet";
+import * as ReactLeafletCore from "@react-leaflet/core";
 
 import L from "leaflet";
 
-import { TooltipProps } from "@mui/material";
+import {
+  TooltipProps,
+  ButtonProps,
+  ButtonGroupProps,
+  CircularProgressProps,
+  DividerProps,
+  DrawerProps,
+  FadeProps,
+  IconButtonProps,
+  ListItemProps,
+  ListProps,
+  DialogProps,
+  BaseTextFieldProps,
+  useMediaQuery,
+} from "@mui/material";
+
+import { useTheme } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
+
+import * as MUI from "@mui/material";
 
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
 
-import { PanelApi, ButtonApi } from "../../ui";
+import { PanelApi } from "../../ui";
+import * as UI from "../../ui";
+
+import { LEAFLET_POSITION_CLASSES } from "../../geo/utils/constant";
+
+declare global {
+  interface Window {
+    cgpv: TypeCGPV;
+    plugins: Record<string, unknown>;
+  }
+}
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
 }
 
 export interface TypeWindow extends Window {
-  cgpv?: TypeCGPV;
-  plugins?: Record<string, Plugin>;
+  cgpv: TypeCGPV;
+  plugins: Record<string, unknown>;
 }
+
+export type TypeCGPVUI = {
+  useTheme: typeof useTheme;
+  useMediaQuery: typeof useMediaQuery;
+  makeStyles: typeof makeStyles;
+  elements: typeof UI;
+};
+
+export type TypeCGPVConstants = {
+  leafletPositionClasses: typeof LEAFLET_POSITION_CLASSES;
+};
 
 export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
-  react: Object;
-  leaflet: Object;
-  reactLeaflet: Object;
-  reactLeafletCore: Object;
-  mui?: Object;
-  ui: Object;
-  useTranslation: Object;
+  react: typeof React;
+  leaflet: typeof L;
+  reactLeaflet: typeof ReactLeaflet;
+  reactLeafletCore: typeof ReactLeafletCore;
+  mui?: typeof MUI;
+  ui: TypeCGPVUI;
+  useTranslation: typeof useTranslation;
   types: Object;
-  constants: Object;
+  constants: TypeCGPVConstants;
 };
 
 export type TypeCallback = (callback: () => void) => void;
 
 export type TypeFunction = () => void;
 
-//export interface TypeApi extends API, Event, Projection, Plugin {} //#427
+// export interface TypeApi extends API, Event, Projection, Plugin {} //#427
 export interface TypeApi extends API, Event, Plugin {}
 
 export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
 
-export type TypeChild = React.ReactElement<any, any> | undefined;
+export type TypeChild = React.ReactElement<never, never>;
 
-export type TypeChildren =
-  | number
-  | boolean
-  | {}
-  | JSX.Element
-  | Element
-  | React.ReactElement<any, any | string | React.JSXElementConstructor<any>>
-  | Iterable<React.ReactNode>
-  | React.ReactPortal
-  | (JSX.Element | null)[]
-  | null;
+export type TypeChildren = React.ReactNode;
 
 /**
  * Map types
@@ -65,19 +101,20 @@ export type TypeMapComponent = {
   component: JSX.Element;
 };
 
+/**
+ * Map context
+ */
+export type TypeMapContext = {
+  id: string;
+};
+
 /*-----------------------------------------------------------------------------
  *
  * General Json type
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONValue =
-  | string
-  | number
-  | boolean
-  | null
-  | TypeJSONValue[]
-  | TypeJSONObject;
+export type TypeJSONValue = string | number | boolean | null | TypeJSONValue[] | TypeJSONObject;
 
 export type TypeJSONObject = {
   [key: string]: TypeJSONValue;
@@ -144,7 +181,17 @@ export type TypeLegendJsonDynamic = {
     url: string;
     width: number;
   }[];
-}[];
+  extent: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+    spatialReference: {
+      wkid: number;
+      latestWkid: number;
+    };
+  };
+};
 
 /**
  * ESRI Json Legend for Feature Layer
@@ -165,7 +212,7 @@ export type TypeLegendJsonFeature = {
     id: number;
     name: string;
   };
-  subLayers: any[];
+  subLayers: unknown[];
   minScale: number;
   maxScale: number;
   drawingInfo: {
@@ -186,7 +233,7 @@ export type TypeLegendJsonFeature = {
       description: string;
     };
     transparency: number;
-    labelingInfo: any;
+    labelingInfo: unknown;
   };
   defaultVisibility: boolean;
   extent: {
@@ -202,15 +249,15 @@ export type TypeLegendJsonFeature = {
   hasAttachments: boolean;
   htmlPopupType: string;
   displayField: string;
-  typeIdField: any;
-  subtypeFieldName: any;
-  subtypeField: any;
-  defaultSubtypeCode: any;
+  typeIdField: unknown;
+  subtypeFieldName: unknown;
+  subtypeField: unknown;
+  defaultSubtypeCode: unknown;
   fields: {
     name: string;
     type: string;
     alias: string;
-    domain: any;
+    domain: unknown;
   }[];
   geometryField: {
     name: string;
@@ -263,29 +310,18 @@ export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
  */
 export type TypeLayerData = {
   id: string;
-  type:
-    | "ogcWMS"
-    | "geoJSON"
-    | "esriDynamic"
-    | "esriFeature"
-    | "xyzTiles"
-    | "ogcWFS"
-    | "ogcFeature";
+  type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles" | "ogcWFS" | "ogcFeature";
   name: string;
   url: string;
   entries: string[];
   layer: {
-    setOpacity?: Function;
-    eachFeature?: Function;
+    setOpacity?: (opacity: number) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    eachFeature?: (x: any) => void;
     options: {
       url: string;
     };
-    metadata: (
-      fn: (
-        error: any,
-        res: { layers: { id: string; subLayerIds: string[] }[] }
-      ) => void
-    ) => void;
+    metadata: (fn: (error: unknown, res: { layers: { id: string; subLayerIds: string[] }[] }) => void) => void;
     _url: string;
     entries: {
       attributes: TypeJSONObject;
@@ -346,19 +382,12 @@ export type TypeFoundLayers = {
  */
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
-  getSymbol: (
-    renderer: TypeRendererSymbol,
-    attributes: TypeJSONObject
-  ) => TypeJSONObject;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject;
   selectFeature: (featureData: TypeJSONObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
-  setPanel: (
-    showLayersList: boolean,
-    showFeaturesList: boolean,
-    showFeaturesInfo: boolean
-  ) => void;
+  setPanel: (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => void;
 };
 
 export type TypeRendererSymbol = {
@@ -375,31 +404,13 @@ export type TypeRendererSymbol = {
 };
 
 /**
- * Interface used to initialize a button panel
- */
-export type TypeButtonPanelProps = {
-  panel: TypePanelProps;
-  button: TypeButtonProps;
-};
-
-/**
- * Interface used when creating a new button panel
- */
-export type TypeButtonPanel = {
-  id: string;
-  panel?: PanelApi;
-  button: ButtonApi;
-  groupName?: string | null;
-};
-
-/**
  * interface used when creating a new plugin
  */
 export type TypePlugin = {
   // id of the plugin
   id: string;
   // plugin class object
-  plugin: any;
+  plugin: unknown;
 };
 
 /**
@@ -419,7 +430,7 @@ export const CONST_VECTOR_TYPES = {
 export type TypePanelAppProps = {
   panel: PanelApi;
   //   panelOpen: boolean;
-  button: ButtonApi;
+  button: TypeButtonProps;
 };
 
 /**
@@ -428,11 +439,7 @@ export type TypePanelAppProps = {
 export type TypeFeatureInfoProps = {
   buttonPanel: TypeButtonPanel;
   selectedFeature: TypeSelectedFeature;
-  setPanel: (
-    showLayersList: boolean,
-    showFeaturesList: boolean,
-    showFeaturesInfo: boolean
-  ) => void;
+  setPanel: (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => void;
 };
 
 export type TypeSelectedFeature = {
@@ -449,11 +456,8 @@ export type TypeProps<T = string & unknown> = Record<string, T>;
  * interface for the layers list properties in details panel
  */
 export type TypeLayersListProps = {
-  clickPos: L.LatLng | undefined;
-  getSymbol: (
-    renderer: TypeRendererSymbol,
-    attributes: TypeJSONObject
-  ) => TypeJSONValue;
+  clickPos?: L.LatLng;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
   mapId: string;
   selectFeature: (featureData: TypeJSONObject) => void;
@@ -573,9 +577,47 @@ export type TypeAppVersion = {
 };
 
 /**
+ * constant that defines the panel types
+ */
+export const CONST_PANEL_TYPES = {
+  APPBAR: "appbar",
+  NAVBAR: "navbar",
+};
+
+export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
+  selected?: boolean;
+  blinking?: boolean;
+  on?: Record<string, L.LeafletEventHandlerFn>;
+}
+
+/*-----------------------------------------------------------------------------
+ *
+ * UI Types
+ *
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Interface used to initialize a button panel
+ */
+export type TypeButtonPanelProps = {
+  panel: TypePanelProps;
+  button: TypeButtonProps;
+};
+
+/**
+ * Interface used when creating a new button panel
+ */
+export type TypeButtonPanel = {
+  id: string;
+  panel?: PanelApi;
+  button: TypeButtonProps;
+  groupName?: string;
+};
+
+/**
  * Interface for the button properties used when creating a new button
  */
-export type TypeButtonProps = {
+export interface TypeButtonProps extends Omit<ButtonProps, "type"> {
   // generated button id
   id?: string;
   // button tooltip
@@ -584,44 +626,20 @@ export type TypeButtonProps = {
   tooltipPlacement?: TooltipProps["placement"];
   // button icon
   icon?: TypeChildren;
-  // optional callback function to run on button click
-  callback?: TypeFunction;
-  // on click function
-  onClick?: TypeFunction;
-  // should the button be displayed in the appbar/navbar?
-  visible?: boolean;
   // optional class names
-  className?: string | undefined;
+  iconClassName?: string;
   // optional class names
-  iconClassName?: string | undefined;
-  // optional class names
-  textClassName?: string | undefined;
-  // optional style properties
-  style?: CSSProperties | undefined;
-  // button type
-  type: "text" | "textWithIcon" | "icon";
+  textClassName?: string;
   // button state
   state?: "expanded" | "collapsed";
-  // button style variant
-  variant?: "text" | "contained" | "outlined";
-  // button children
-  children?: TypeChildren;
-  // focus used for accessibility to enable focus
-  autoFocus?: boolean;
-  // button disabling
-  disabled?: boolean;
-};
+  // button type
+  type: "text" | "textWithIcon" | "icon";
+  // button visibility
+  visible?: boolean;
+}
 
 /**
- * constant that defines the panel types
- */
-export const CONST_PANEL_TYPES = {
-  APPBAR: "appbar",
-  NAVBAR: "navbar",
-};
-
-/**
- * Interface for the panel properties used when creating a new panel
+ * type for the panel properties used when creating a new panel
  */
 export type TypePanelProps = {
   // panel type (appbar, navbar)
@@ -638,8 +656,199 @@ export type TypePanelProps = {
   content?: React.ReactNode | Element;
 };
 
-export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
-  selected?: boolean;
-  blinking?: boolean;
-  on?: Record<string, L.LeafletEventHandlerFn>;
+/**
+ * Button Group properties
+ */
+export type TypeButtonGroupProps = ButtonGroupProps;
+
+/**
+ * Circular Progress Properties
+ */
+export interface TypeCircularProgressProps extends CircularProgressProps {
+  className?: string;
+  style?: CSSProperties;
+  isLoaded: boolean;
+}
+
+/**
+ * Properties for the Divider
+ */
+export interface TypeDividerProps extends DividerProps {
+  orientation?: "horizontal" | "vertical";
+  grow?: boolean;
+}
+
+/**
+ * Drawer Properties
+ */
+export interface TypeDrawerProps extends DrawerProps {
+  status?: boolean;
+}
+
+/**
+ * Properties for the Fade element
+ */
+export type TypeFadeProps = FadeProps;
+
+/**
+ * Properties for the icon button
+ */
+export interface TypeIconButtonProps extends IconButtonProps {
+  children?: TypeChildren;
+  tooltip?: string;
+  tooltipPlacement?: TooltipProps["placement"];
+  id?: string;
+  tabIndex?: number;
+  iconRef?: React.RefObject<HTMLButtonElement>;
+}
+
+/**
+ * Properties for the List UI
+ */
+export interface TypeListProps extends ListProps {
+  type?: "ul" | "ol";
+}
+
+/**
+ * List item properties
+ */
+export type TypeListItemProps = ListItemProps;
+
+/**
+ * Customized Material UI Dialog Properties
+ */
+export interface TypeDialogProps extends Omit<DialogProps, "title"> {
+  id?: string;
+
+  // custom dialog classes and styles
+  className?: string;
+  style?: CSSProperties;
+
+  // custom title
+  title?: TypeChildren;
+  titleId?: string;
+
+  // dialog content and content styling
+  content?: TypeChildren;
+  contentClassName?: string;
+  contentStyle?: CSSProperties;
+
+  // dialog text content container styling
+  contentTextId?: string;
+  contentTextClassName?: string;
+  contentTextStyle?: CSSProperties;
+
+  // action elements / buttons
+  actions?: TypeChildren;
+
+  // id of the map that is using this modal
+  mapId: string;
+}
+
+/**
+ * Required and optional properties for the item object
+ */
+export interface TypeItemProps {
+  id: string;
+  value: string;
+  default?: boolean;
+}
+
+/**
+ * Required and optional properties for the items (options) of select
+ */
+export interface TypeSelectItems {
+  category?: string;
+  items: Array<TypeItemProps>;
+}
+
+/**
+ * Properties for the Select component
+ */
+export interface TypeSelectProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // the label for the select component
+  label: string;
+
+  // the menu items (<option>) for <select>
+  selectItems: Array<Record<string, TypeSelectItems>> | Array<Record<string, TypeItemProps>>;
+
+  // callback that is passed for the select component
+  callBack?: <T>(params: T) => void;
+
+  // helper text for the form
+  helperText?: string;
+
+  // if multiple selection of items is allowed
+  multiple?: boolean;
+}
+
+/**
+ * Properties for the Steps of Stepper
+ */
+export interface TypeStepperSteps {
+  // the text label for the step
+  label?: string;
+
+  // the body of the step
+  description: JSX.Element | HTMLElement | string;
+
+  // whether the user is allowed to move to the next step or not
+  disableStepMovement?: boolean;
+}
+
+/**
+ * Properties for the Stepper
+ */
+export interface TypeStepperProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // orientaion of the Stepper component. By default, its horizontal
+  orientation?: "horizontal" | "vertical";
+
+  // alternative label for the steps. Alternative labels appear at the bottom of step icons
+  alternativeLabel?: boolean;
+
+  // allows the user to enter a multi-step flow at any point
+  // i.e. previous step needs to be completed to move on to the next one
+  nonLinear?: boolean;
+
+  // to be able to switch to another step by clicking on the step's button label
+  buttonedLabels?: boolean;
+
+  // the steps that will be involved in the component
+  steps?: Array<Record<string, TypeStepperSteps>>;
+
+  // text for the back (previous) button that goes to the previous step
+  backButtonText?: string;
+
+  // text for the next button that goes to the next step
+  nextButtonText?: string;
+
+  // text for the reset button that resets the step count
+  resetButtonText?: string;
+}
+
+/**
+ * Customized Material UI TextField Properties
+ */
+export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, "prefix"> {
+  id: string;
+
+  // the helper text (as defined above) but only if there is an error
+  errorHelpertext?: string | undefined;
+
+  // the HTML Element (for example, an icon) that is embedded inside the text field (left side)
+  prefix?: string | JSX.Element | HTMLElement | TypeChildren;
+
+  // the HTML Element (for example, an icon) that is embedded inside the text field (right side)
+  suffix?: string | JSX.Element | HTMLElement | undefined;
+
+  // Function that handles change in input
+  changeHandler?: <T>(params: T) => void;
 }

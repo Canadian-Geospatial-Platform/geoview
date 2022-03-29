@@ -22,7 +22,7 @@ import { api } from "./api/api";
 
 import * as UI from "./ui";
 
-import "../node_modules/leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.css";
 import "./ui/style/style.css";
 import "./ui/style/vendor.css";
 
@@ -58,14 +58,16 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
     // get the map container
     const map = document.getElementById(payload.handlerId);
 
-    // remove the dom element (remove rendered map)
-    ReactDOM.unmountComponentAtNode(map!);
+    if (map) {
+      // remove the dom element (remove rendered map)
+      ReactDOM.unmountComponentAtNode(map);
 
-    // delete the map instance from the maps array
-    delete api.maps[payload.handlerId];
+      // delete the map instance from the maps array
+      delete api.maps[payload.handlerId];
 
-    // re-render map with updated config keeping previous values if unchanged
-    ReactDOM.render(<AppStart configObj={payload.config} />, map);
+      // re-render map with updated config keeping previous values if unchanged
+      ReactDOM.render(<AppStart configObj={payload.config} />, map);
+    }
   }
 });
 
@@ -83,24 +85,22 @@ function init(callback: () => void) {
 
   const mapElements = document.getElementsByClassName("llwp-map");
 
-  for (var i = 0; i < mapElements.length; i++) {
+  for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
-    // validate configuration and appply default if problem occurs then setup language
-    const configObj = new Config(
-      mapElement.getAttribute("id")!,
-      (mapElement.getAttribute("data-leaflet") || "")
-        .replace(/'/g, '"')
-        .replace(
-          /(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g,
-          "\\\\'"
-        )
-    );
+    const mapId = mapElement.getAttribute("id");
 
-    ReactDOM.render(
-      <AppStart configObj={configObj.configuration} />,
-      mapElement
-    );
+    if (mapId) {
+      // validate configuration and appply default if problem occurs then setup language
+      const configObj = new Config(
+        mapId,
+        (mapElement.getAttribute("data-leaflet") || "")
+          .replace(/'/g, '"')
+          .replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'")
+      );
+
+      ReactDOM.render(<AppStart configObj={configObj.configuration} />, mapElement);
+    }
   }
 }
 
@@ -110,7 +110,7 @@ export const cgpv: types.TypeCGPV = {
   api: types.Cast<types.TypeApi>({
     ...api,
     ...api.event,
-    //...api.projection,
+    // ...api.projection,
     ...api.plugin,
   }),
   react: React,
@@ -119,13 +119,13 @@ export const cgpv: types.TypeCGPV = {
   reactLeafletCore: ReactLeafletCore,
   mui: MUI,
   ui: {
-    useTheme: useTheme,
-    useMediaQuery: useMediaQuery,
-    makeStyles: makeStyles,
+    useTheme,
+    useMediaQuery,
+    makeStyles,
     elements: UI,
   },
-  useTranslation: useTranslation,
-  types: types,
+  useTranslation,
+  types,
   constants: {
     leafletPositionClasses: LEAFLET_POSITION_CLASSES,
   },

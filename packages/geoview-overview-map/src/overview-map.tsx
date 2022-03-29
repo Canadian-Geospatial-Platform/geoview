@@ -79,8 +79,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const parentMap = useMap();
-  const mapZoom =
-    parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
+  const mapZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
 
   const basemaps = api.map(id).basemap.getBasemapLayers();
 
@@ -116,8 +115,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
           const cgpMapContainer = cgpMap.getContainer();
           DomEvent.disableClickPropagation(cgpMapContainer);
           DomEvent.disableScrollPropagation(cgpMapContainer);
-          const cgpMapContainerParentElement =
-            cgpMapContainer.parentElement as HTMLElement;
+          const cgpMapContainerParentElement = cgpMapContainer.parentElement as HTMLElement;
           cgpMapContainerParentElement.style.margin = theme.spacing(3);
 
           setMinimap(cgpMap);
@@ -125,20 +123,10 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
       >
         {minimap ? (
           <>
-            {basemaps.map(
-              (base: {
-                id: string | number | null | undefined;
-                url: string;
-              }) => (
-                <TileLayer key={base.id} url={base.url} />
-              )
-            )}
-            <MinimapBounds
-              parentId={id}
-              parentMap={parentMap}
-              minimap={minimap}
-              zoomFactor={zoomFactor}
-            />
+            {basemaps.map((base: { id: string | number | null | undefined; url: string }) => (
+              <TileLayer key={base.id} url={base.url} />
+            ))}
+            <MinimapBounds parentId={id} parentMap={parentMap} minimap={minimap} zoomFactor={zoomFactor} />
             <MinimapToggle parentId={id} minimap={minimap} />
           </>
         ) : (
