@@ -150,10 +150,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, "");
       supportedProj = wms.Capability.Layer.CRS;
       if (!supportedProj.includes(proj)) throw "proj";
-      const layers = wms.Capability.Layer.Layer.map((x: any) => [
-        x.Name,
-        x.Title,
-      ]);
+      const layers = wms.Capability.Layer.Layer.map((x: any) => [x.Name, x.Title]);
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
@@ -176,10 +173,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
   const wfsValidation = async (): Promise<boolean> => {
     try {
       const wfs = await api.geoUtilities.getWFSServiceMetadata(layerURL);
-      const layers = wfs.FeatureTypeList.FeatureType.map((x: any) => [
-        x.Name["#text"].split(":")[1],
-        x.Title["#text"],
-      ]);
+      const layers = wfs.FeatureTypeList.FeatureType.map((x: any) => [x.Name["#text"].split(":")[1], x.Title["#text"]]);
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
@@ -203,10 +197,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       const esri = await api.geoUtilities.getESRIServiceMetadata(layerURL);
       if (esri.capabilities.includes(esriOptions(type).capability)) {
         if ("layers" in esri) {
-          const layers = esri.layers.map(({ id, name }: any) => [
-            String(id),
-            name,
-          ]);
+          const layers = esri.layers.map(({ id, name }: any) => [String(id), name]);
           if (layers.length === 1) {
             setLayerName(layers[0][1]);
             setLayerEntry(layers[0][0]);
@@ -240,7 +231,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       }
     }
     if (proj !== "EPSG:3857") {
-      emitErrorProj("XYZ Tiles", proj);
+      emitErrorProj("XYZ Tiles", proj, ['EPSG:3857']);
       return false;
     }
     return true;
@@ -381,20 +372,8 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
       className={classes.buttonGroup}
       children={
         <>
-          <Button
-            variant="contained"
-            type="text"
-            onClick={handleNext}
-            children={isLast ? "Finish" : "Continue"}
-          />
-          {!isFirst && (
-            <Button
-              variant="contained"
-              type="text"
-              onClick={handleBack}
-              children="Back"
-            />
-          )}
+          <Button variant="contained" type="text" onClick={handleNext} children={isLast ? "Finish" : "Continue"} />
+          {!isFirst && <Button variant="contained" type="text" onClick={handleBack} children="Back" />}
         </>
       }
     />
@@ -421,12 +400,7 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
         <StepContent>
           <FormControl fullWidth>
             <InputLabel id="service-type-label">Service Type</InputLabel>
-            <Select
-              labelId="service-type-label"
-              value={layerType}
-              onChange={handleSelectType}
-              label="Service Type"
-            >
+            <Select labelId="service-type-label" value={layerType} onChange={handleSelectType} label="Service Type">
               {layerOptions.map(([value, label]) => (
                 <MenuItem key={value} value={value}>
                   {label}
@@ -441,16 +415,9 @@ const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
         <StepLabel>Configure layer</StepLabel>
         <StepContent>
           {layerList.length === 0 && layerEntry === "" && (
-            <TextField
-              label="Name"
-              variant="standard"
-              value={layerName}
-              onChange={handleNameLayer}
-            />
+            <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
           )}
-          {layerList.length === 0 && layerEntry !== "" && (
-            <Typography>{layerName}</Typography>
-          )}
+          {layerList.length === 0 && layerEntry !== "" && <Typography>{layerName}</Typography>}
           {layerList.length > 1 && (
             <FormControl fullWidth>
               <Autocomplete

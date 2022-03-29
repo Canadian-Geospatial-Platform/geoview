@@ -1,8 +1,8 @@
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useTheme } from "@mui/material/styles";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 import { Map, LatLng, LatLngExpression, CRS, Point, Icon } from "leaflet";
 import { useMapEvent, Marker, useMap } from "react-leaflet";
@@ -14,13 +14,13 @@ import { PROJECTION_NAMES } from "../../../geo/projection/projection";
 import { NorthArrowIcon, NorthPoleIcon } from "./north-arrow-icon";
 import { generateId } from "../../utils/utilities";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   northArrowContainer: {
     left: "50%", // theme.shape.center,
   },
   northArrow: {
-    width: 42, //(theme.overrides?.northArrow?.size as CSSProperties).width,
-    height: 42, //(theme.overrides?.northArrow?.size as CSSProperties).height,
+    width: 42, // (theme.overrides?.northArrow?.size as CSSProperties).width,
+    height: 42, // (theme.overrides?.northArrow?.size as CSSProperties).height,
   },
 }));
 
@@ -76,9 +76,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
       // calculate bearing
       const y = Math.sin(dLon) * Math.cos(lat2);
-      const x =
-        Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
       const bearing = (Math.atan2(y, x) * 180) / Math.PI;
 
       // return angle (180 is pointiong north)
@@ -116,9 +114,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     const offsetX = mapWidth - arrowWidth / 2;
 
     // hard code north pole so that arrow does not continue pointing past it
-    const screenNorthPoint = map.latLngToContainerPoint(
-      northPolePosition as LatLngExpression
-    );
+    const screenNorthPoint = map.latLngToContainerPoint(northPolePosition as LatLngExpression);
     const screenY = screenNorthPoint.y;
 
     // if the extent is near the north pole be more precise otherwise use the original math
@@ -129,11 +125,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       y: map.latLngToContainerPoint(map.getCenter()).y,
       m: 1,
     }; // original numbers
-    if (
-      screenNorthPoint.x < 2400 &&
-      screenNorthPoint.x > -1300 &&
-      -screenNorthPoint.y < 3000
-    ) {
+    if (screenNorthPoint.x < 2400 && screenNorthPoint.x > -1300 && -screenNorthPoint.y < 3000) {
       // more precise
       triangle.x = screenNorthPoint.x;
       triangle.y = -screenNorthPoint.y;
@@ -146,16 +138,11 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     // this would be the bottom of our triangle, the length from center to where the arrow should be placed
     let screenX =
       screenY < 0
-        ? triangle.x +
-          triangle.m * (Math.sin((90 - angleDegrees) * 0.01745329252) * z) -
-          arrowWidth / 2
+        ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * 0.01745329252) * z) - arrowWidth / 2
         : screenNorthPoint.x - arrowWidth;
 
     // Limit the arrow to the bounds of the inner shell (+/- 25% from center)
-    screenX = Math.max(
-      offsetX - mapWidth * 0.25,
-      Math.min(screenX, offsetX + mapWidth * 0.25)
-    );
+    screenX = Math.max(offsetX - mapWidth * 0.25, Math.min(screenX, offsetX + mapWidth * 0.25));
     setNorthOffset(screenX);
   }
 
@@ -183,8 +170,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
       if (!isPassNorth) {
         // set rotation angle and offset
-        const angleDegrees =
-          270 - parseFloat(getNorthArrowAngle(map.getCenter()));
+        const angleDegrees = 270 - parseFloat(getNorthArrowAngle(map.getCenter()));
         setRotationAngle({ angle: 90 - angleDegrees });
         setOffset(map, angleDegrees);
       }
@@ -250,10 +236,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   map.createPane("NorthPolePane");
 
   // Create the icon
-  const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace(
-    "#",
-    "%23"
-  );
+  const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace("#", "%23");
   const northPoleIcon = new Icon({
     iconUrl,
     iconSize: [24, 24],

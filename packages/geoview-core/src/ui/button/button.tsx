@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 import { useTranslation } from "react-i18next";
 
@@ -7,11 +7,7 @@ import { DomEvent } from "leaflet";
 import makeStyles from "@mui/styles/makeStyles";
 import { Tooltip, Fade, Button as MaterialButton } from "@mui/material";
 
-import {
-  Cast,
-  TypeChildren,
-  TypeButtonProps,
-} from "../../core/types/cgpv-types";
+import { Cast, TypeChildren, TypeButtonProps } from "../../core/types/cgpv-types";
 
 import { HtmlToReact } from "../../core/containers/html-to-react";
 
@@ -63,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {TypeButtonProps} props the properties of the Button UI element
  * @returns {JSX.Element} the new UI element
  */
-export const Button = (props: TypeButtonProps): JSX.Element => {
+export function Button(props: TypeButtonProps): JSX.Element {
   const [content, setContent] = useState<TypeChildren>();
 
   const {
@@ -89,65 +85,95 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
 
   const classes = useStyles();
 
-  const getText = (): TypeChildren => {
-    return typeof children === "undefined" ? (
-      <div></div>
-    ) : typeof children === "string" ? (
-      <HtmlToReact
-        className={`${classes.text} ${textClassName}`}
-        style={type === "text" ? { marginLeft: "initial" } : {}}
-        htmlContent={children}
-      />
-    ) : (
-      <div
-        className={`${classes.text} ${textClassName}`}
-        style={type === "text" ? { marginLeft: "initial" } : {}}
-      >
-        {children}
-      </div>
-    );
-  };
+  /**
+   * Get text container with provided text content
+   *
+   * @returns {TypeChildren} return the text container
+   */
+  const getText = useCallback((): TypeChildren => {
+    let textContent: TypeChildren;
 
-  const getIcon = (): TypeChildren => {
-    return typeof icon === "undefined" ? (
-      <div></div>
-    ) : typeof icon === "string" ? (
-      <HtmlToReact
-        className={`${classes.icon} ${iconClassName}`}
-        htmlContent={icon}
-      />
-    ) : (
-      <div className={`${classes.icon} ${iconClassName}`}>{icon}</div>
-    );
-  };
+    if (typeof children === "undefined") {
+      textContent = <div />;
+    } else if (typeof children === "string") {
+      textContent = (
+        <HtmlToReact
+          className={`${classes.text} ${textClassName}`}
+          style={type === "text" ? { marginLeft: "initial" } : {}}
+          htmlContent={children}
+        />
+      );
+    } else {
+      textContent = (
+        <div className={`${classes.text} ${textClassName}`} style={type === "text" ? { marginLeft: "initial" } : {}}>
+          {children}
+        </div>
+      );
+    }
 
-  const createTextButton = (): TypeChildren => {
+    return textContent;
+  }, [children, classes.text, textClassName, type]);
+
+  /**
+   * Get icon container with provided icon content
+   *
+   * @returns {TypeChildren} returns icon container
+   */
+  const getIcon = useCallback((): TypeChildren => {
+    let iconContent: TypeChildren;
+
+    if (typeof icon === "undefined") {
+      iconContent = <div />;
+    } else if (typeof icon === "string") {
+      iconContent = <HtmlToReact className={`${classes.icon} ${iconClassName}`} htmlContent={icon} />;
+    } else {
+      iconContent = <div className={`${classes.icon} ${iconClassName}`}>{icon}</div>;
+    }
+
+    return iconContent;
+  }, [classes.icon, icon, iconClassName]);
+
+  /**
+   * Create a text only button
+   *
+   * @returns {TypeChildren} return the created text button
+   */
+  const createTextButton = useCallback((): TypeChildren => {
     return getText();
-  };
+  }, [getText]);
 
-  const createIconButton = (): TypeChildren => {
+  /**
+   * Create an icon only button
+   *
+   * @returns {TypeChildren} return the created icon button
+   */
+  const createIconButton = useCallback((): TypeChildren => {
     return getIcon();
-  };
+  }, [getIcon]);
 
-  const createTextIconButton = (): TypeChildren => {
+  /**
+   * Create a button with icon and text
+   *
+   * @returns {TypeChildren} return a button with an icon and text
+   */
+  const createTextIconButton = useCallback((): TypeChildren => {
     return (
       <div className={classes.textIconContainer}>
         {getIcon()}
         {state !== undefined && state === "expanded" && getText()}
       </div>
     );
-  };
+  }, [classes.textIconContainer, getIcon, getText, state]);
 
   useEffect(() => {
     // disable events on container
-    const newButtonChildrenHTMLElements = Cast<HTMLElement[]>(
-      buttonRef.current?.children
-    );
+    const newButtonChildrenHTMLElements = Cast<HTMLElement[]>(buttonRef.current?.children);
     if (newButtonChildrenHTMLElements.length > 0) {
       DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
       DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
     }
 
+    // check button type
     if (type) {
       if (type === "text") {
         setContent(createTextButton());
@@ -157,25 +183,20 @@ export const Button = (props: TypeButtonProps): JSX.Element => {
         setContent(createIconButton());
       }
     }
-  }, [state]);
+  }, [createIconButton, createTextButton, createTextIconButton, state, type]);
 
   return (
-    <Tooltip
-      title={Cast<string>(t(tooltip || ""))}
-      placement={tooltipPlacement}
-      TransitionComponent={Fade}
-      ref={buttonRef}
-    >
+    <Tooltip title={Cast<string>(t(tooltip || ""))} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
       <MaterialButton
-        variant={variant ? variant : "text"}
-        className={`${classes.buttonClass} ${className ? className : ""}`}
-        style={style ? style : undefined}
+        variant={variant || "text"}
+        className={`${classes.buttonClass} ${className || ""}`}
+        style={style}
         onClick={onClick}
-        autoFocus={autoFocus !== undefined && autoFocus ? autoFocus : undefined}
-        disabled={disabled ? disabled : undefined}
+        autoFocus={autoFocus}
+        disabled={disabled}
       >
         {content}
       </MaterialButton>
     </Tooltip>
   );
-};
+}

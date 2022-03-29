@@ -19,13 +19,7 @@ import { EVENT_NAMES } from "../../api/event";
 
 (L.Map as any).BoxZoom.include({
   _onMouseDown: function _onMouseDown(e: MouseEvent): void {
-    if (
-      !e.shiftKey ||
-      e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     // Clear the deferred resetState if it hasn't executed yet, otherwise it
     // will interrupt the interaction and orphan a box element in the container.
@@ -51,13 +45,7 @@ import { EVENT_NAMES } from "../../api/event";
 
   _onMouseUp: function _onMouseUp(e: MouseEvent): void {
     this._finish();
-    if (
-      !e.shiftKey ||
-      e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     if (!this._moved) return;
     // Postpone to next JS tick so internal click event handling
@@ -65,10 +53,7 @@ import { EVENT_NAMES } from "../../api/event";
     this._clearDeferredResetState();
     this._resetStateTimeout = setTimeout(Util.bind(this._resetState, this), 0);
 
-    const bounds = new LatLngBounds(
-      this._map.containerPointToLatLng(this._startPoint),
-      this._map.containerPointToLatLng(this._point)
-    );
+    const bounds = new LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
 
     this._map.fitBounds(bounds).fire("boxzoomend", { boxZoomBounds: bounds });
   },
@@ -97,13 +82,7 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
   },
 
   _onMouseDown: function _onMouseDown(e: MouseEvent): void {
-    if (
-      e.shiftKey ||
-      !e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     // Clear the deferred resetState if it hasn't executed yet, otherwise it
     // will interrupt the interaction and orphan a box element in the container.
@@ -131,13 +110,7 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
   _onMouseUp: function _onMouseUp(e: MouseEvent): void {
     this._finish();
     this._map.dragging.enable();
-    if (
-      e.shiftKey ||
-      !e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     if (!this._moved) return;
     // Postpone to next JS tick so internal click event handling
@@ -145,10 +118,7 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
     this._clearDeferredResetState();
     this._resetStateTimeout = setTimeout(Util.bind(this._resetState, this), 0);
 
-    const bounds = new LatLngBounds(
-      this._map.containerPointToLatLng(this._startPoint),
-      this._map.containerPointToLatLng(this._point)
-    );
+    const bounds = new LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
 
     this._map.fire("boxselectend", { selectBoxBounds: bounds });
   },
@@ -277,25 +247,12 @@ declare module "leaflet" {
     visible: boolean;
   }
 
-  export function featureGroup(
-    layers?: Layer[],
-    options?: FeatureGroupOptions
-  ): FeatureGroup;
+  export function featureGroup(layers?: Layer[], options?: FeatureGroupOptions): FeatureGroup;
 
   export interface Evented extends Class {
-    on(
-        type: "clusterclick" | "unspiderfied" | "spiderfied",
-        fn: MarkerClusterMouseEventHandlerFn
-      ): void;
-      off(
-        type: "clusterclick" | "unspiderfied" | "spiderfied",
-        fn: MarkerClusterMouseEventHandlerFn
-      ): void;
-      fire(
-        type: "click",
-        event: MarkerClusterMouseEvent,
-        propagate: boolean
-      ): void;
+    on(type: "clusterclick" | "unspiderfied" | "spiderfied", fn: MarkerClusterMouseEventHandlerFn): void;
+    off(type: "clusterclick" | "unspiderfied" | "spiderfied", fn: MarkerClusterMouseEventHandlerFn): void;
+    fire(type: "click", event: MarkerClusterMouseEvent, propagate: boolean): void;
   }
 
   export interface MarkerClusterMouseEvent extends LeafletMouseEvent {
@@ -308,9 +265,7 @@ declare module "leaflet" {
     type: string;
   }
 
-  export type MarkerClusterMouseEventHandlerFn = (
-    event: MarkerClusterMouseEvent
-  ) => void;
+  export type MarkerClusterMouseEventHandlerFn = (event: MarkerClusterMouseEvent) => void;
 
   interface MarkerClusterGroupOnOptions {
     clusterclick?: MarkerClusterMouseEventHandlerFn;
@@ -333,9 +288,7 @@ declare module "leaflet" {
   }
 }
 
-L.FeatureGroup.addInitHook(function fn(
-  this: L.FeatureGroup | L.MarkerClusterGroup
-) {
+L.FeatureGroup.addInitHook(function fn(this: L.FeatureGroup | L.MarkerClusterGroup) {
   if ("visible" in this.options) {
     this.visible = this.options.visible as boolean;
   } else {
@@ -373,8 +326,7 @@ L.Map.addInitHook(function fn(this: L.Map) {
   if (this.options && this.options.id) this.id = this.options.id;
   if (this.options.selectBox) {
     this.on("boxselectend", (e: L.LeafletEvent) => {
-      const bounds =
-        Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
+      const bounds = Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
       api.event.emit(EVENT_NAMES.EVENT_BOX_SELECT_END, e.target.id, {
         selectBoxBounds: bounds,
       });
