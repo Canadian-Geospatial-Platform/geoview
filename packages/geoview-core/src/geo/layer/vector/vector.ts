@@ -45,30 +45,15 @@ export class Vector {
       (payload) => {
         const id = payload.id ? payload.id : null;
         if (payload.type === CONST_VECTOR_TYPES.CIRCLE) {
-          this.addCircle(
-            payload.latitude,
-            payload.longitude,
-            payload.options,
-            id
-          );
+          this.addCircle(payload.latitude, payload.longitude, payload.options, id);
         } else if (payload.type === CONST_VECTOR_TYPES.POLYGON) {
           this.addPolygon(payload.points, payload.options, id);
         } else if (payload.type === CONST_VECTOR_TYPES.POLYLINE) {
           this.addPolyline(payload.points, payload.options, id);
         } else if (payload.type === CONST_VECTOR_TYPES.MARKER) {
-          this.addMarker(
-            payload.latitude,
-            payload.longitude,
-            payload.options,
-            id
-          );
+          this.addMarker(payload.latitude, payload.longitude, payload.options, id);
         } else if (payload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
-          this.addCircleMarker(
-            payload.latitude,
-            payload.longitude,
-            payload.options,
-            id
-          );
+          this.addCircleMarker(payload.latitude, payload.longitude, payload.options, id);
         }
       },
       map.id
@@ -112,11 +97,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addPolyline = (
-    points: LatLngExpression[] | LatLngExpression[][],
-    options: L.PolylineOptions,
-    id?: string
-  ): L.Polyline => {
+  addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: L.PolylineOptions, id?: string): L.Polyline => {
     const lId = generateId(id);
 
     const polyline = L.polyline(points, { ...options, id: lId });
@@ -171,12 +152,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addCircle = (
-    latitude: number,
-    longitude: number,
-    options: L.CircleMarkerOptions,
-    id?: string
-  ): L.Circle => {
+  addCircle = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.Circle => {
     const lId = options.id || generateId(id);
 
     const circle = L.circle([latitude, longitude], { ...options, id: lId });
@@ -202,12 +178,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addCircleMarker = (
-    latitude: number,
-    longitude: number,
-    options: L.CircleMarkerOptions,
-    id?: string
-  ): L.CircleMarker => {
+  addCircleMarker = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.CircleMarker => {
     const lId = options.id || generateId(id);
 
     const circleMarker = L.circleMarker([latitude, longitude], {
@@ -237,12 +208,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addMarker = (
-    latitude: number,
-    longitude: number,
-    options: L.MarkerOptions,
-    id?: string
-  ): L.Marker => {
+  addMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.Marker => {
     const idMarker = generateId(id);
 
     const marker = L.marker([latitude, longitude], {
@@ -295,10 +261,7 @@ export class Vector {
    *
    * @param {string} geometryGroupid the id of the group to use when managing this group
    */
-  createGeometryGroup = (
-    geometryGroupid: string,
-    options?: L.FeatureGroupOptions
-  ): L.FeatureGroup => {
+  createGeometryGroup = (geometryGroupid: string, options?: L.FeatureGroupOptions): L.FeatureGroup => {
     let featureGroup = this.getGeometryGroup(geometryGroupid);
     if (!featureGroup) {
       const featureGroupOptions = { ...options, id: geometryGroupid };
@@ -349,9 +312,7 @@ export class Vector {
   getGeometryGroup = (geometryGroupId?: string): L.FeatureGroup => {
     let geometryGroup: L.FeatureGroup;
     if (geometryGroupId) {
-      [geometryGroup] = this.geometryGroups.filter(
-        (theGeometryGroup) => theGeometryGroup.id === geometryGroupId
-      );
+      [geometryGroup] = this.geometryGroups.filter((theGeometryGroup) => theGeometryGroup.id === geometryGroupId);
     } else {
       geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
     }
@@ -413,8 +374,7 @@ export class Vector {
    */
   turnOnGeometryGroups = (): void => {
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].visible)
-        this.geometryGroups[i].addTo(this.map);
+      if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(this.map);
     }
   };
 
@@ -425,8 +385,7 @@ export class Vector {
    */
   turnOffGeometryGroups = (): void => {
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].visible)
-        this.geometryGroups[i].removeFrom(this.map);
+      if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(this.map);
     }
   };
 
@@ -473,10 +432,7 @@ export class Vector {
    * @param {string} geometryId the geometry id to be deleted
    * @param {string} geometryGroupid optional group id
    */
-  deleteGeometryFromGroup = (
-    geometryId: string,
-    geometryGroupid?: string
-  ): void => {
+  deleteGeometryFromGroup = (geometryId: string, geometryGroupid?: string): void => {
     const geometry = this.getGeometry(geometryId);
     const geometryGroup = this.getGeometryGroup(geometryGroupid);
     geometryGroup.getLayers().forEach((layer) => {

@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/require-default-props */
 import { Fragment, useEffect, useState } from "react";
 
@@ -25,11 +26,7 @@ import { EVENT_NAMES } from "../../../api/event";
 
 import { MapViewer } from "../../../geo/map/map";
 
-import {
-  TypeMapConfigProps,
-  TypeBasemapLayer,
-  TypeJSONObjectMapComponent,
-} from "../../types/cgpv-types";
+import { TypeMapConfigProps, TypeBasemapLayer, TypeJSONObjectMapComponent } from "../../types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   snackBar: {
@@ -42,15 +39,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const id = props.id ? props.id : generateId("");
 
-  const {
-    center,
-    zoom,
-    projection,
-    language,
-    selectBox,
-    boxZoom,
-    extraOptions,
-  } = props;
+  const { center, zoom, projection, language, selectBox, boxZoom, extraOptions } = props;
 
   const [basemapLayers, setBasemapLayers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -68,7 +57,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const classes = useStyles();
 
   // create a new map viewer instance
-  let viewer: MapViewer = api.map(id);
+  const viewer: MapViewer = api.map(id);
 
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up("md"));
@@ -91,7 +80,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
     // emit the moveend event to the api
     api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id, {
-      position: position,
+      position,
     });
   }
 
@@ -104,13 +93,13 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // get a map reference from the zoomend event
     const map: L.Map = event.target;
 
-    const zoom = map.getZoom();
+    const currentZoom = map.getZoom();
 
-    api.map(id).currentZoom = zoom;
+    api.map(id).currentZoom = currentZoom;
 
     // emit the moveend event to the api
     api.event.emit(EVENT_NAMES.EVENT_MAP_ZOOM_END, id, {
-      zoom: zoom,
+      currentZoom,
     });
   }
 
@@ -133,10 +122,10 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
         if (payload && payload.handlerName === id) {
-          let tempComponents = { ...components };
+          const tempComponents = { ...components };
           delete tempComponents[payload.id];
 
-          setComponents((components) => ({
+          setComponents(() => ({
             ...tempComponents,
           }));
         }
@@ -148,8 +137,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
-        if (payload && payload.handlerName === id)
-          setBasemapLayers(payload.layers);
+        if (payload && payload.handlerName === id) setBasemapLayers(payload.layers);
       },
       id
     );
@@ -159,7 +147,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, id);
       api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
-  }, []);
+  }, [components, id]);
 
   return (
     <MapContainer
@@ -204,11 +192,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setCRS(viewer.projection.getCRS());
 
         // get attribution
-        setAttribution(
-          language === "en-CA"
-            ? viewer.basemap.attribution["en-CA"]
-            : viewer.basemap.attribution["fr-CA"]
-        );
+        setAttribution(language === "en-CA" ? viewer.basemap.attribution["en-CA"] : viewer.basemap.attribution["fr-CA"]);
 
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
@@ -220,7 +204,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setIsLoaded(true);
       }}
     >
-      {isLoaded && (
+      {isLoaded && crs && (
         <>
           {basemapLayers.map((basemapLayer: TypeBasemapLayer) => {
             return (
@@ -236,8 +220,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           {deviceSizeMedUp && <MousePosition id={id} />}
           <ScaleControl position="bottomright" imperial={false} />
           {deviceSizeMedUp && <Attribution attribution={attribution} />}
-          <NorthArrow projection={crs!} />
-          <NorthPoleFlag projection={crs!} />
+          <NorthArrow projection={crs} />
+          <NorthPoleFlag projection={crs} />
           <Crosshair id={id} />
           <ClickMarker />
           <SnackbarProvider

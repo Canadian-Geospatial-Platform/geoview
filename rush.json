@@ -16,10 +16,6 @@
   "telemetryEnabled": false,
   "projects": [
     {
-      "packageName": "geoview-loader",
-      "projectFolder": "packages/geoview-loader"
-    },
-    {
       "packageName": "geoview-core",
       "projectFolder": "packages/geoview-core"
     },

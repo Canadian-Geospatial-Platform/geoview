@@ -1,9 +1,7 @@
-import { CSSProperties } from "react";
-
 import { ListItem as MaterialListItem } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
-import { TypeChildren } from "../../core/types/cgpv-types";
+import { TypeListItemProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
@@ -18,28 +16,19 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * List item properties
- */
-interface ListItemProps {
-  className?: string | undefined;
-  style?: CSSProperties | undefined;
-  children?: TypeChildren;
-}
-
-/**
  * Create a customized Material UI List Item
  *
- * @param {ListItemProps} props the properties passed to the List Item element
+ * @param {TypeListItemProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
-export const ListItem = (props: ListItemProps) => {
+export function ListItem(props: TypeListItemProps): JSX.Element {
   const { children, className, style } = props;
 
   const classes = useStyles();
 
   return (
-    <MaterialListItem className={`${classes.listItem} ${className ? className : ''}`} style={style ? style : undefined}>
+    <MaterialListItem className={`${classes.listItem} ${className || ""}`} style={style || undefined}>
       {children !== undefined && children}
     </MaterialListItem>
   );
-};
+}

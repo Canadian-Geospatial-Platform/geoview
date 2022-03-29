@@ -48,12 +48,7 @@ export class Basemap {
    * @param {string} language language to be used either en-CA or fr-CA
    * @param {number} projection projection number
    */
-  constructor(
-    basemapOptions: TypeBasemapOptions | null | undefined,
-    language: string,
-    projection: number,
-    mapId?: string
-  ) {
+  constructor(basemapOptions: TypeBasemapOptions | null | undefined, language: string, projection: number, mapId?: string) {
     this.basemapOptions = basemapOptions;
 
     this.language = language;
@@ -111,10 +106,8 @@ export class Basemap {
    * attribution to add the the map
    */
   private attributionVal: TypeAttribution = {
-    "en-CA":
-      "© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources",
-    "fr-CA":
-      "© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles",
+    "en-CA": "© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources",
+    "fr-CA": "© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles",
   };
 
   /**
@@ -142,9 +135,7 @@ export class Basemap {
       basemapLayers.push({
         id: this.basemapOptions.id || "transport",
         type: "transport",
-        url:
-          this.basemapsList[this.projection][this.basemapOptions.id] ||
-          this.basemapsList[this.projection].transport,
+        url: this.basemapsList[this.projection][this.basemapOptions.id] || this.basemapsList[this.projection].transport,
         options: this.basemapLayerOptions,
         opacity: mainBasemapOpacity,
         basemapPaneName: this.basemapsPaneName,
@@ -155,10 +146,7 @@ export class Basemap {
         basemapLayers.push({
           id: "label",
           type: "label",
-          url: this.basemapsList[this.projection].label.replaceAll(
-            "xxxx",
-            this.language === "en-CA" ? "CBMT" : "CBCT"
-          ),
+          url: this.basemapsList[this.projection].label.replaceAll("xxxx", this.language === "en-CA" ? "CBMT" : "CBCT"),
           options: this.basemapLayerOptions,
           opacity: 1,
           basemapPaneName: this.basemapsPaneName,
@@ -247,9 +235,7 @@ export class Basemap {
    */
   setBasemap = (id: string): void => {
     // get basemap by id
-    const basemap = this.basemaps.filter(
-      (basemapType: TypeBasemapProps) => basemapType.id === id
-    )[0];
+    const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.id === id)[0];
 
     // emit an event to update the basemap layers on the map
     api.event.emit(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, {

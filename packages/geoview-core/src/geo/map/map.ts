@@ -15,10 +15,7 @@ import { MapProjection } from "../projection/map-projection";
 import "../../core/types/cgp-leaflet-config";
 
 import { api } from "../../api/api";
-import {
-  TypeMapConfigProps,
-  TypeLayerConfig,
-} from "../../core/types/cgpv-types";
+import { TypeMapConfigProps, TypeLayerConfig } from "../../core/types/cgpv-types";
 
 import { generateId } from "../../core/utils/utilities";
 
@@ -41,10 +38,7 @@ const wmMapOptionsParam: L.MapOptions = {
   zoomFactor: 5,
   minZoom: 2,
   maxZoom: 19,
-  maxBounds: new LatLngBounds(
-    { lat: -89.999, lng: -180 },
-    { lat: 89.999, lng: 180 }
-  ),
+  maxBounds: new LatLngBounds({ lat: -89.999, lng: -180 }, { lat: 89.999, lng: 180 }),
   maxBoundsViscosity: 0.0,
 };
 
@@ -101,9 +95,10 @@ export class MapViewer {
    * Add the map instance to the maps array in the api
    *
    * @param {TypeMapConfigProps} mapProps map properties
+   * @param {i18n} i18instance language instance
    */
-  constructor(mapProps: TypeMapConfigProps, i18n: i18n) {
-    this.id = mapProps.id!;
+  constructor(mapProps: TypeMapConfigProps, i18instance: i18n) {
+    this.id = mapProps.id;
 
     // add map viewer instance to api
     api.maps[this.id] = this;
@@ -112,7 +107,7 @@ export class MapViewer {
 
     this.language = mapProps.language;
     this.currentProjection = mapProps.projection;
-    this.i18nInstance = i18n;
+    this.i18nInstance = i18instance;
     this.currentZoom = mapProps.zoom;
     this.currentPosition = new LatLng(mapProps.center[0], mapProps.center[1]);
 
@@ -141,12 +136,7 @@ export class MapViewer {
     this.loadGeometries();
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(
-      this.mapProps.basemapOptions,
-      this.mapProps.language,
-      this.mapProps.projection,
-      this.id
-    );
+    this.basemap = new Basemap(this.mapProps.basemapOptions, this.mapProps.language, this.mapProps.projection, this.id);
   }
 
   /**
@@ -154,11 +144,7 @@ export class MapViewer {
    */
   loadGeometries(): void {
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint =
-      this.map
-        .getContainer()
-        ?.closest(".llwp-map")
-        ?.getAttribute("data-geometry-endpoint") || "";
+    const servEndpoint = this.map.getContainer()?.closest(".llwp-map")?.getAttribute("data-geometry-endpoint") || "";
     // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
 
@@ -174,9 +160,7 @@ export class MapViewer {
               if (typeof data.geometry !== "undefined") {
                 // reverse the array because they are x, y instead of default lat long couple y, x
                 // TODO: check if we can know and set this info from outside
-                data.geometry.coordinates.forEach((r: Array<Array<number>>) =>
-                  r.forEach((c: Array<number>) => c.reverse())
-                );
+                data.geometry.coordinates.forEach((r: Array<Array<number>>) => r.forEach((c: Array<number>) => c.reverse()));
 
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
@@ -201,8 +185,8 @@ export class MapViewer {
     if (id && component) {
       // emit an event to add the component
       api.event.emit(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, this.id, {
-        id: id,
-        component: component,
+        id,
+        component,
       });
     }
   };
@@ -216,7 +200,7 @@ export class MapViewer {
     if (id) {
       // emit an event to add the component
       api.event.emit(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, this.id, {
-        id: id,
+        id,
       });
     }
   };
@@ -260,12 +244,12 @@ export class MapViewer {
    * @param {TypeLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
    */
   changeLanguage = (language: string, layers?: TypeLayerConfig[]): void => {
-    let updatedConfig = { ...this.mapProps };
+    const updatedConfig = { ...this.mapProps };
 
-    updatedConfig["language"] = language;
+    updatedConfig.language = language;
 
     if (layers && layers.length > 0) {
-      updatedConfig["layers"] = updatedConfig["layers"]?.concat(layers);
+      updatedConfig.layers = updatedConfig.layers?.concat(layers);
     }
 
     // emit an event to reload the map to change the language

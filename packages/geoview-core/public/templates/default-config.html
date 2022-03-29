@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Default Configuration</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HLCONF1">1. Load from no config object</a><br />
+              <a href="#HLCONF2">2. Load with wrong JSON object</a><br />
+              <a href="#HLCONF3">3. Load with bad config values</a><br />
+              <a href="#HLCONF4">4. Load layers with bad config values</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase how we validate map configuration object before creating the map.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3 id="HLCONF1">1. Load from no config object</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div id="CONF1" class="llwp-map"></div>
+      <p>This map will will load with default configuration because none is provided.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="CONF1CS" class="panel"></div>
+    </div>
+    <hr />
+    <div>
+      <h3 id="HLCONF2">2. Load with wrong JSON object</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div
+        id="CONF2"
+        class="llwp-map"
+        data-leaflet="{'name': 'LCCFR', 'projection': 1111, 'zoom': '4', 'center': [x,-100], 'language': 'sp-CA', 'basemapOptions': { 'id': 'get', 'shaded': 'nottrue', 'labeled': nottrue },
+            'layers':[]}"
+      ></div>
+      <p>This map will load with bad configuration replaced with default.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="CONF2CS" class="panel"></div>
+    </div>
+    <hr />
+    <div>
+      <h3 id="HLCONF3">3. Load with bad config values</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div
+        id="CONF3"
+        class="llwp-map"
+        data-leaflet="{'name': 'LCCFR', 'projection': 3857, 'zoom': '40', 'center': ['Last',-1000], 'language': { 'test': 'sp-CA' }, 'basemapOptions': { 'id': 'notdefine', 'shaded': true, 'labeledWhat': true },
+            'layers':[
+                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
+                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 37' },
+                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' },
+                { 'name': 'GeoJSON', 'url': './geojson/polygons.json', 'type': 'geoJSON' }
+            ]}"
+      ></div>
+      <p>This map will load with bad configuration replaced with default.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="CONF3CS" class="panel"></div>
+    </div>
+    <div>
+      <h3 id="HLCONF4">4. Load layers with bad config values</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div
+        id="CONF4"
+        class="llwp-map"
+        data-leaflet="{'name': 'LCCFR', 'projection': 3857, 'zoom': '40', 'center': ['Last',-1000], 'language': 'en-CA', 'basemapOptions': { 'id': 'notdefine', 'shaded': true, 'labeledWhat': true },
+            'layers':[
+                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': 'BADENTRIES' },
+                { 'name': 'Energy Dyna Bad End', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServerBAADEND', 'type': 'esriDynamic', 'entries': '38' },
+                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': 'BADENTRIES-4, 37' },
+                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_enNOT/MapServer/1TOOMUCH', 'type': 'esriFeature' },
+                { 'name': 'GeoJSON', 'url': './geojson/polygonsBAD.json', 'type': 'geoJSON' }
+            ]}"
+      ></div>
+      <p>This map will not load layers with bad configuration and inform the user.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="CONF4CS" class="panel"></div>
+    </div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log("api is ready");
+
+        //create snippets
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

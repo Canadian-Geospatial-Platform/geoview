@@ -1,17 +1,15 @@
-import { CSSProperties, useState } from "react";
+/* eslint-disable no-nested-ternary */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-expressions */
+import { useState } from "react";
 
-import {
-  Box,
-  Stepper as MaterialStepper,
-  Step,
-  StepButton,
-  StepContent,
-  StepLabel,
-  Typography,
-} from "@mui/material";
+import { Box, Stepper as MaterialStepper, Step, StepButton, StepContent, StepLabel, Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 
 import { Button } from "../button";
+
+import { HtmlToReact } from "../../core/containers/html-to-react";
+import { TypeStepperProps } from "../../core/types/cgpv-types";
 
 const useStyles = makeStyles((theme) => ({
   stepperContainer: {
@@ -46,65 +44,17 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   disabledButton: {
-    color: theme.palette.primary.contrastText + "!important",
+    color: `${theme.palette.primary.contrastText}!important`,
   },
 }));
 
 /**
- * Properties for the Steps of Stepper
- */
-interface TypeStepperSteps {
-  // the text label for the step
-  label?: string;
-
-  // the body of the step
-  description: JSX.Element | HTMLElement | string;
-
-  // whether the user is allowed to move to the next step or not
-  disableStepMovement?: boolean;
-}
-
-/**
- * Properties for the Stepper
- */
-interface StepperProps {
-  id: string;
-  className?: string;
-  style?: CSSProperties;
-
-  // orientaion of the Stepper component. By default, its horizontal
-  orientation?: "horizontal" | "vertical";
-
-  // alternative label for the steps. Alternative labels appear at the bottom of step icons
-  alternativeLabel?: boolean;
-
-  // allows the user to enter a multi-step flow at any point
-  // i.e. previous step needs to be completed to move on to the next one
-  nonLinear?: boolean;
-
-  // to be able to switch to another step by clicking on the step's button label
-  buttonedLabels?: boolean;
-
-  // the steps that will be involved in the component
-  steps?: Array<Record<string, TypeStepperSteps>> | any;
-
-  // text for the back (previous) button that goes to the previous step
-  backButtonText?: string;
-
-  // text for the next button that goes to the next step
-  nextButtonText?: string;
-
-  // text for the reset button that resets the step count
-  resetButtonText?: string;
-}
-
-/**
  * Create a customizable Material UI Stepper
  *
- * @param {StepperProps} props the properties passed to the Stepper element
+ * @param {TypeStepperProps} props the properties passed to the Stepper element
  * @returns {JSX.Element} the created Stepper element
  */
-export const Stepper = (props: StepperProps): JSX.Element => {
+export function Stepper(props: TypeStepperProps): JSX.Element {
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<any>({});
   const [isReset, setIsReset] = useState<any>(false);
@@ -127,7 +77,7 @@ export const Stepper = (props: StepperProps): JSX.Element => {
    * Gets the total number of steps in the stepper
    */
   const totalSteps = () => {
-    return steps.length;
+    return steps && steps.length;
   };
 
   /**
@@ -212,12 +162,9 @@ export const Stepper = (props: StepperProps): JSX.Element => {
     setIsReset(false);
   };
 
-  const stepsOrientation =
-    orientation !== undefined ? orientation : "horizontal";
+  const stepsOrientation = orientation !== undefined ? orientation : "horizontal";
 
-  const disabledStepMovement = steps.findIndex(
-    (step: any) => step.disableStepMovement
-  );
+  const disabledStepMovement = steps.findIndex((step: any) => step.disableStepMovement);
 
   const stepIsDisabled = activeStep === disabledStepMovement;
 
@@ -229,21 +176,12 @@ export const Stepper = (props: StepperProps): JSX.Element => {
         id={id || ""}
         orientation={stepsOrientation}
         activeStep={activeStep}
-        alternativeLabel={
-          stepsOrientation === "horizontal"
-            ? alternativeLabel !== undefined
-              ? alternativeLabel
-              : true
-            : false
-        }
+        alternativeLabel={stepsOrientation === "horizontal" ? (alternativeLabel !== undefined ? alternativeLabel : true) : false}
         nonLinear={nonLinear || buttonedLabels || false}
       >
         {steps?.map((step: any, index: number) => {
           return (
-            <Step
-              key={step.label}
-              completed={nonLinear ? completed[index] : undefined}
-            >
+            <Step key={step.label} completed={nonLinear ? completed[index] : undefined}>
               <>
                 {buttonedLabels || (
                   <StepLabel>
@@ -252,72 +190,43 @@ export const Stepper = (props: StepperProps): JSX.Element => {
                 )}
                 {orientation === "vertical" && (
                   <StepContent>
-                    {typeof step.description === "string" ? (
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: `${step.description}`,
-                        }}
-                      ></div>
-                    ) : (
-                      step.description
-                    )}
+                    {typeof step.description === "string" ? <HtmlToReact htmlContent={step.description} /> : step.description}
                   </StepContent>
                 )}
-                {buttonedLabels && (
-                  <StepButton onClick={handleStep(index)}>
-                    {step.label}
-                  </StepButton>
-                )}
+                {buttonedLabels && <StepButton onClick={handleStep(index)}>{step.label}</StepButton>}
               </>
             </Step>
           );
         })}
         <Box className={classes.actionContainer}>
           <>
-            <Typography>
-              {isReset ? "Steps Completed" : `Step ${activeStep + 1}`}
-            </Typography>
+            <Typography>{isReset ? "Steps Completed" : `Step ${activeStep + 1}`}</Typography>
             {!isReset && (
               <>
-                <Button
-                  type="text"
-                  disabled={activeStep < 1}
-                  className={activeStep < 1 ? classes.disabledButton : ""}
-                  onClick={handleBack}
-                >
-                  {backButtonText ? backButtonText : "Back"}
+                <Button type="text" disabled={activeStep < 1} className={activeStep < 1 ? classes.disabledButton : ""} onClick={handleBack}>
+                  {backButtonText || "Back"}
                 </Button>
 
-                <Button
-                  type="text"
-                  onClick={handleNext}
-                  disabled={stepIsDisabled}
-                  className={stepIsDisabled ? classes.disabledButton : ""}
-                >
-                  {nextButtonText ? nextButtonText : "Next"}
+                <Button type="text" onClick={handleNext} disabled={stepIsDisabled} className={stepIsDisabled ? classes.disabledButton : ""}>
+                  {nextButtonText || "Next"}
                 </Button>
 
                 {nonLinear &&
                   activeStep !== steps.length &&
                   (completed[activeStep] ? (
-                    <Typography
-                      variant="caption"
-                      sx={{ display: "inline-block" }}
-                    >
+                    <Typography variant="caption" sx={{ display: "inline-block" }}>
                       Step {activeStep + 1} already completed
                     </Typography>
                   ) : (
                     <Button type="text" onClick={handleComplete}>
-                      {completedSteps() === totalSteps() - 1
-                        ? "Finish"
-                        : "Complete Step"}
+                      {completedSteps() === totalSteps() - 1 ? "Finish" : "Complete Step"}
                     </Button>
                   ))}
               </>
             )}
             {isReset && (
               <Button type="text" onClick={handleReset}>
-                {resetButtonText ? resetButtonText : "Reset"}
+                {resetButtonText || "Reset"}
               </Button>
             )}
           </>
@@ -325,4 +234,4 @@ export const Stepper = (props: StepperProps): JSX.Element => {
       </MaterialStepper>
     </Box>
   );
-};
+}

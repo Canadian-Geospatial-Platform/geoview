@@ -1,9 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import {
-  TypeLayersPanelListProps,
-  TypeLayerData,
-  TypeProps,
-} from "geoview-core";
+import { TypeLayersPanelListProps, TypeLayerData, TypeProps } from "geoview-core";
 
 const w = window as any;
 
@@ -143,36 +139,21 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   };
 
   useEffect(() => {
-    const defaultLegends = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: [] }),
-      {}
-    );
+    const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
     setLayerLegend((state) => ({ ...defaultLegends, ...state }));
     setLayerLegendAll();
 
-    const defaultBounds = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: L.latLngBounds([]) }),
-      {}
-    );
+    const defaultBounds = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: L.latLngBounds([]) }), {});
     setLayerBounds((state) => ({ ...defaultBounds, ...state }));
     setLayerBoundsAll();
 
-    const defaultSliders = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: 100 }),
-      {}
-    );
+    const defaultSliders = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: 100 }), {});
     setLayerOpacity((state) => ({ ...defaultSliders, ...state }));
 
-    const defaultVisibility = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: true }),
-      {}
-    );
+    const defaultVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: true }), {});
     setLayerVisibility((state) => ({ ...defaultVisibility, ...state }));
 
-    const defaultSubVisibility = Object.values(layers).reduce(
-      (prev, curr) => ({ ...prev, [curr.id]: curr.entries }),
-      {}
-    );
+    const defaultSubVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: curr.entries }), {});
     setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
   }, [layers]);
 
@@ -194,8 +175,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    *
    * @param layer layer config
    */
-  const onZoom = (layer: TypeLayerData) =>
-    api.map(mapId).fitBounds(layerBounds[layer.id]);
+  const onZoom = (layer: TypeLayerData) => api.map(mapId).fitBounds(layerBounds[layer.id]);
 
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
@@ -204,10 +184,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param segment layer bounds
    * @returns {L.Polygon} Polygon from bounds
    */
-  const polygonFromBounds = (
-    bounds: L.LatLngBounds,
-    segments = 100
-  ): L.Polygon => {
+  const polygonFromBounds = (bounds: L.LatLngBounds, segments = 100): L.Polygon => {
     const width = bounds.getEast() - bounds.getWest();
     const latlngs = [];
     latlngs.push(bounds.getSouthWest());
@@ -301,15 +278,9 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param data Layer data
    * @param id sublayer ID
    */
-  const onSubVisibilityChange = (
-    value: number,
-    data: TypeLayerData,
-    id: number
-  ) => {
+  const onSubVisibilityChange = (value: number, data: TypeLayerData, id: number) => {
     const oldEntries = subLayerVisibility[data.id];
-    const entries = value
-      ? [...new Set([...oldEntries, id])]
-      : oldEntries.filter((x) => x !== id);
+    const entries = value ? [...new Set([...oldEntries, id])] : oldEntries.filter((x) => x !== id);
     if (oldEntries.length === 0) {
       setLayerVisibility((state) => ({ ...state, [data.id]: true }));
       data.setOpacity(layerOpacity[data.id] / 100);
@@ -326,11 +297,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     <div className={classes.layersContainer}>
       {Object.values(layers).map((layer) => (
         <div key={layer.id}>
-          <button
-            type="button"
-            className={classes.layerItem}
-            onClick={() => onClick(layer.id)}
-          >
+          <button type="button" className={classes.layerItem} onClick={() => onClick(layer.id)}>
             <div className={classes.layerCountTextContainer}>
               <div className={classes.layerItemText} title={layer.name}>
                 {layer.name}
@@ -381,68 +348,44 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                   />
                 </div>
                 <Tooltip title={translations[language].visibility}>
-                  <Checkbox
-                    checked={layerVisibility[layer.id]}
-                    onChange={(e) =>
-                      onVisibilityChange(e.target.checked, layer)
-                    }
-                  />
+                  <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
               {layerLegend[layer.id].map((subLayer, index: number) => (
                 <div key={index}>
                   {subLayer.legend && (
                     <div className={classes.legendSubLayerGroup}>
-                      <div
-                        className={classes.layerItemText}
-                        title={subLayer.layerName}
-                      >
+                      <div className={classes.layerItemText} title={subLayer.layerName}>
                         {subLayer.layerName}
                       </div>
                       <Tooltip title={translations[language].visibility}>
                         <Checkbox
-                          checked={subLayerVisibility[layer.id].includes(
-                            subLayer.layerId
-                          )}
-                          onChange={(e) =>
-                            onSubVisibilityChange(
-                              e.target.checked,
-                              layer,
-                              subLayer.layerId
-                            )
-                          }
+                          checked={subLayerVisibility[layer.id].includes(subLayer.layerId)}
+                          onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId)}
                         />
                       </Tooltip>
                     </div>
                   )}
-                  {subLayer.drawingInfo?.renderer.type === "simple" &&
-                    subLayer.drawingInfo?.renderer.symbol.imageData && (
-                      <div className={classes.layerItemText}>
-                        <img
-                          src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
-                        />
-                        {subLayer.drawingInfo?.renderer.label || subLayer.name}
-                      </div>
-                    )}
+                  {subLayer.drawingInfo?.renderer.type === "simple" && subLayer.drawingInfo?.renderer.symbol.imageData && (
+                    <div className={classes.layerItemText}>
+                      <img
+                        src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
+                      />
+                      {subLayer.drawingInfo?.renderer.label || subLayer.name}
+                    </div>
+                  )}
                   {subLayer.drawingInfo?.renderer.type === "uniqueValue" &&
-                    subLayer.drawingInfo?.renderer.uniqueValueInfos[0].symbol
-                      .imageData &&
-                    subLayer.drawingInfo?.renderer.uniqueValueInfos.map(
-                      (uniqueValue, index) => (
-                        <div key={index} className={classes.layerItemText}>
-                          <img
-                            src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`}
-                          />
-                          {uniqueValue.label}
-                        </div>
-                      )
-                    )}
+                    subLayer.drawingInfo?.renderer.uniqueValueInfos[0].symbol.imageData &&
+                    subLayer.drawingInfo?.renderer.uniqueValueInfos.map((uniqueValue, index) => (
+                      <div key={index} className={classes.layerItemText}>
+                        <img src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
+                        {uniqueValue.label}
+                      </div>
+                    ))}
                   {subLayer.legend &&
                     subLayer.legend.map((uniqueValue, index) => (
                       <div key={index} className={classes.layerItemText}>
-                        <img
-                          src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`}
-                        />
+                        <img src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
                         {uniqueValue.label || subLayer.layerName}
                       </div>
                     ))}

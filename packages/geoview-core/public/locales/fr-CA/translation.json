@@ -1,0 +1,50 @@
+{
+  "general": {
+    "close": "Fermer",
+    "open": "Ouvrir"
+  },
+  "mapnav": {
+    "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
+    "fullscreen": "Plein Écran",
+    "home": "Retour à la vue initiale",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière"
+  },
+  "mapctrl": {
+    "mouseposition": {
+      "east": "E",
+      "west": "O",
+      "north": "N",
+      "south": "S"
+    },
+    "overviewmap": {
+      "toggle": "Basculer la mini-carte"
+    },
+    "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte et <strong>Entrée</strong> pour sélectionner."
+  },
+  "appbar": {
+    "export": "Exporter",
+    "fullscreen": "Plein écran",
+    "help": "Aide",
+    "layers": "Couches",
+    "share": "Partager",
+    "version": "Accéder au repo sur GitHub"
+  },
+  "keyboardnav": {
+    "start": "Aller après l'élément carte",
+    "end": "Aller avant l'élément carte",
+    "focusdialog": {
+      "title": "Navigation clavier",
+      "main": "Si activé, le focus sera verrouillé sur le visualiseur. Pour sortir, appuyez sur <strong>CTRL + Q</strong>.",
+      "button": {
+        "enable": "Activer",
+        "skip": "Sauter"
+      }
+    }
+  },
+  "validation": {
+    "layer": {
+      "loadfailed": "La couche __param__ n'est pas chargée sur la carte __param__"
+    }
+  }
+}

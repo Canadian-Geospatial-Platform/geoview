@@ -71,7 +71,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // set the active trap value for FocusTrap and pass the callback to the dialog window
   const [activeTrap, setActivetrap] = useState(false);
 
-  const [update, setUpdate] = useState<number>(0);
+  const [, setUpdate] = useState<number>(0);
 
   // show a splash screen before map is loaded
   const [isLoaded, setIsLoaded] = useState(false);
@@ -89,9 +89,9 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const updateShell = useCallback(() => {
     setUpdate((prevState) => {
-      return ++prevState;
+      return 1 + prevState;
     });
-  }, [update]);
+  }, []);
 
   useEffect(() => {
     api.event.on(
@@ -120,21 +120,13 @@ export function Shell(props: ShellProps): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_MAP_LOADED, id);
       api.event.off(EVENT_NAMES.EVENT_MODAL_CREATE, id);
     };
-  }, []);
+  }, [id, updateShell]);
 
   return (
-    <FocusTrap
-      active={activeTrap}
-      focusTrapOptions={{ escapeDeactivates: false }}
-    >
+    <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div className={classes.shell}>
         <CircularProgress isLoaded={isLoaded} />
-        <a
-          id={`toplink-${id}`}
-          href={`#bottomlink-${id}`}
-          className={classes.skip}
-          style={{ top: "0px" }}
-        >
+        <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: "0px" }}>
           {t("keyboardnav.start")}
         </a>
         <Appbar />
@@ -155,13 +147,8 @@ export function Shell(props: ShellProps): JSX.Element {
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}
-        <FocusTrapDialog id={id} callback={handleCallback} />
-        <a
-          id={`bottomlink-${id}`}
-          href={`#toplink-${id}`}
-          className={classes.skip}
-          style={{ bottom: "0px" }}
-        >
+        <FocusTrapDialog id={id} callback={() => handleCallback(true)} />
+        <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: "0px" }}>
           {t("keyboardnav.end")}
         </a>
       </div>

@@ -1,71 +1,32 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 
-import {
-  IconButton as MaterialIconButton,
-  Tooltip,
-  TooltipProps,
-  Fade,
-} from "@mui/material";
+import { IconButton as MaterialIconButton, Tooltip, Fade } from "@mui/material";
 
-import { TypeChildren, TypeFunction } from "../../core/types/cgpv-types";
-
-/**
- * Properties for the icon button
- */
-interface IconButtonProps {
-  children?: TypeChildren;
-  className?: string | undefined;
-  style?: CSSProperties | undefined;
-  ariaLabel?: string;
-  onClick?: TypeFunction;
-  tooltip?: string;
-  tooltipPlacement?: TooltipProps["placement"];
-  id?: string | undefined;
-  tabIndex?: number | undefined;
-  iconRef?: React.RefObject<any> | null | undefined;
-  size?: "small" | "medium" | "large";
-}
+import { TypeIconButtonProps } from "../../core/types/cgpv-types";
 
 /**
  * Create a customized Material UI Icon Button
  *
- * @param {IconButtonProps} props the properties passed to the Icon Button element
+ * @param {TypeIconButtonProps} props the properties passed to the Icon Button element
  * @returns {JSX.Element} the created Icon Button element
  */
-
-export const IconButton = (props: IconButtonProps): JSX.Element => {
-  const {
-    className,
-    style,
-    children,
-    onClick,
-    ariaLabel,
-    tooltip,
-    tooltipPlacement,
-    id,
-    tabIndex,
-    iconRef,
-    size,
-  } = props;
+export function IconButton(props: TypeIconButtonProps): JSX.Element {
+  const { className, style, children, onClick, "aria-label": ariaLabel, tooltip, tooltipPlacement, id, tabIndex, iconRef, size } = props;
 
   return (
-    <Tooltip
-      title={tooltip ? tooltip : ""}
-      placement={tooltipPlacement ? tooltipPlacement : undefined}
-      TransitionComponent={Fade}
-    >
+    <Tooltip title={tooltip || ""} placement={tooltipPlacement} TransitionComponent={Fade}>
       <MaterialIconButton
-        id={id ? id : undefined}
-        aria-label={ariaLabel ? ariaLabel : undefined}
-        style={style ? style : undefined}
-        className={className ? className : undefined}
-        onClick={onClick ? onClick : undefined}
-        tabIndex={tabIndex ? tabIndex : undefined}
-        size={size ? size : undefined}
-        ref={iconRef ? iconRef : undefined}
+        id={id}
+        aria-label={ariaLabel}
+        style={style}
+        className={className}
+        onClick={onClick}
+        tabIndex={tabIndex}
+        size={size}
+        ref={iconRef}
       >
         {children && children}
       </MaterialIconButton>
     </Tooltip>
   );
-};
+}

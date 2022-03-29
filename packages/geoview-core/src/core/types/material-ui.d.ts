@@ -1,6 +1,6 @@
-import { ComponentsVariants } from "@mui/material/styles/variants";
-import { ComponentsProps } from "@mui/material/styles/props";
-import { ComponentsOverrides } from "@mui/material/styles/overrides";
+import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from "@mui/material";
+
+import { TypeJSONObject } from "./cgpv-types";
 
 /** https://material-ui.com/guides/typescript/ */
 
@@ -16,9 +16,9 @@ declare module "@mui/material/styles" {
   interface ThemeOptions {
     shape?: Shape;
     overrides?: {
-      button: Object;
-      northArrow: Object;
-      crosshairIcon: Object;
+      button: TypeJSONObject;
+      northArrow: TypeJSONObject;
+      crosshairIcon: TypeJSONObject;
     };
   }
 }

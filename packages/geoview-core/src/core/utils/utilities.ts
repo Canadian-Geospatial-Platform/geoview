@@ -5,12 +5,10 @@ import { Cast, TypeJSONObject, TypeJSONValue } from "../types/cgpv-types";
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id
  */
-export function generateId(id: string | undefined | null): string {
+export function generateId(id?: string): string {
   return id !== null && id !== undefined && id.length > 0
     ? id
-    : (
-        Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
-      ).toUpperCase();
+    : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
 }
 
 /**
@@ -37,9 +35,7 @@ export function isJsonString(str: string): boolean {
  * @param {Document | Node | Element} xml the XML document object
  * @returns the converted json object
  */
-export function xmlToJson(
-  xml: Document | Node | Element
-): TypeJSONObject | TypeJSONValue {
+export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | TypeJSONValue {
   // Create the return object
   let obj: TypeJSONObject | TypeJSONValue = {};
 
@@ -53,8 +49,7 @@ export function xmlToJson(
         // eslint-disable-next-line no-plusplus
         for (let j = 0; j < element.attributes.length; j++) {
           const attribute = element.attributes.item(j) as Node;
-          (obj["@attributes"] as TypeJSONObject)[attribute.nodeName] =
-            attribute.nodeValue as string;
+          (obj["@attributes"] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
         }
       }
     }
@@ -73,9 +68,7 @@ export function xmlToJson(
       if (typeof jsonObject[nodeName] === "undefined") {
         jsonObject[nodeName] = xmlToJson(item);
       } else {
-        if (
-          typeof (jsonObject[nodeName] as TypeJSONValue[]).push === "undefined"
-        ) {
+        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === "undefined") {
           jsonObject[nodeName] = [jsonObject[nodeName]];
         }
         (jsonObject[nodeName] as TypeJSONValue[]).push(xmlToJson(item));
