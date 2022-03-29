@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import { TypeJSONObject, TypeFeatureInfoProps } from "geoview-core";
+import { TypeJSONObject, TypeFeatureInfoProps, TypeWindow } from "geoview-core";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * A react component that will return entry / feature information
@@ -11,11 +11,11 @@ const w = window as any;
  * @param {Object} props properties for the component
  * @returns A react JSX Element with the entry / feature information
  */
-const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
+function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
   const { buttonPanel, selectedFeature, setPanel } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   // access the api calls
   const { react, ui, useTranslation } = cgpv;
@@ -129,6 +129,6 @@ const FeatureInfo = (props: TypeFeatureInfoProps): JSX.Element => {
       </div>
     </div>
   );
-};
+}
 
 export default FeatureInfo;

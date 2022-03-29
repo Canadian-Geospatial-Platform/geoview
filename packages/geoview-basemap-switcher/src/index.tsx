@@ -1,7 +1,7 @@
-import { TypeButtonProps, TypeProps, TypeButtonPanel } from "geoview-core";
+import { TypeButtonProps, TypeProps, TypeButtonPanel, TypeWindow } from "geoview-core";
 import { BasemapSwitcher } from "./basemap-switcher";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
@@ -80,33 +80,35 @@ class BasemapSwitcherPlugin {
     const { mapId } = this.BasemapSwitcherPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
-    // access the api calls
-    const { api } = cgpv;
+    if (cgpv) {
+      // access the api calls
+      const { api } = cgpv;
 
-    const { language, projection, getMapOptions, currentProjection } = api.map(mapId);
+      const { language } = api.map(mapId);
 
-    // button props
-    const button: TypeButtonProps = {
-      tooltip: this.translations[language].basemapSwitcher,
-      tooltipPlacement: "right",
-      icon: '<i class="material-icons">map</i>',
-      type: "textWithIcon",
-    };
+      // button props
+      const button: TypeButtonProps = {
+        tooltip: this.translations[language].basemapSwitcher,
+        tooltipPlacement: "right",
+        icon: '<i class="material-icons">map</i>',
+        type: "textWithIcon",
+      };
 
-    // panel props
-    const panel = {
-      title: this.translations[language].basemapSwitcher,
-      icon: '<i class="material-icons">map</i>',
-      width: 200,
-    };
+      // panel props
+      const panel = {
+        title: this.translations[language].basemapSwitcher,
+        icon: '<i class="material-icons">map</i>',
+        width: 200,
+      };
 
-    // create a new button panel on the appbar
-    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
+      // create a new button panel on the appbar
+      this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
-    // set panel content
-    this.buttonPanel?.panel?.changeContent(<BasemapSwitcher mapId={mapId} />);
+      // set panel content
+      this.buttonPanel?.panel?.changeContent(<BasemapSwitcher mapId={mapId} />);
+    }
   };
 
   /**
@@ -116,18 +118,20 @@ class BasemapSwitcherPlugin {
     const { mapId } = this.BasemapSwitcherPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
-    // access the api calls
-    const { api } = cgpv;
+    if (cgpv) {
+      // access the api calls
+      const { api } = cgpv;
 
-    if (this.buttonPanel) {
-      api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      if (this.buttonPanel) {
+        api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      }
     }
   }
 }
 
 export default BasemapSwitcherPlugin;
 
-w["plugins"] = w["plugins"] || {};
-w["plugins"]["basemapSwitcher"] = BasemapSwitcherPlugin;
+w.plugins = w.plugins || {};
+w.plugins.basemapSwitcher = BasemapSwitcherPlugin;

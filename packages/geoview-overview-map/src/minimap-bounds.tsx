@@ -1,8 +1,10 @@
+import { TypeWindow } from "geoview-core";
+
 // get window object
-const w = window as any;
+const w = window as TypeWindow;
 
 // access the cgpv object from the window object
-const cgpv = w["cgpv"];
+const { cgpv } = w;
 
 // access the api calls
 const { api, react, reactLeaflet, reactLeafletCore } = cgpv;
@@ -33,7 +35,7 @@ interface MiniboundProps {
  * Create and update the bound polygon of the parent's map extent
  * @param {MiniboundProps} props bound properties
  */
-export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
+export function MinimapBounds(props: MiniboundProps): JSX.Element {
   const { parentId, parentMap, zoomFactor, minimap } = props;
 
   const [toggle, setToggle] = useState(false);
@@ -129,4 +131,4 @@ export const MinimapBounds = (props: MiniboundProps): JSX.Element => {
   ) : (
     <></>
   );
-};
+}

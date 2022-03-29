@@ -1,8 +1,8 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeJSONObject, TypeLayersListProps, TypeLayerData } from "geoview-core";
+import { TypeJSONObject, TypeLayersListProps, TypeLayerData, TypeWindow } from "geoview-core";
 
 // get the window object
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * A react component that will list the map server layers defined in the map config
@@ -10,11 +10,11 @@ const w = window as any;
  * @param {TypeLayersListProps} props properties passed to the component
  * @returns a React JSX Element containing map server layers
  */
-const LayersList = (props: TypeLayersListProps): JSX.Element => {
+function LayersList(props: TypeLayersListProps): JSX.Element {
   const { layersData, selectFeature, selectLayer, getSymbol, clickPos, mapId } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   // access the api calls
   const { api, ui } = cgpv;
@@ -180,6 +180,6 @@ const LayersList = (props: TypeLayersListProps): JSX.Element => {
       }
     </div>
   );
-};
+}
 
 export default LayersList;

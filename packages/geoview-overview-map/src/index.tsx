@@ -1,7 +1,7 @@
-import { TypeProps } from "geoview-core";
+import { TypeProps, TypeWindow } from "geoview-core";
 import { OverviewMap } from "./overview-map";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
@@ -33,7 +33,7 @@ class OverviewMapPlugin {
     const { mapId } = this.OverviewMapPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -55,7 +55,7 @@ class OverviewMapPlugin {
     const { mapId } = this.OverviewMapPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -66,5 +66,5 @@ class OverviewMapPlugin {
 
 export default OverviewMapPlugin;
 
-w["plugins"] = w["plugins"] || {};
-w["plugins"]["overviewMap"] = OverviewMapPlugin;
+w.plugins = w.plugins || {};
+w.plugins.overviewMap = OverviewMapPlugin;

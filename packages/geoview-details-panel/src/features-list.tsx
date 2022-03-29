@@ -4,9 +4,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
 
-import { TypeJSONObject, TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps } from "geoview-core";
+import { TypeJSONObject, TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow } from "geoview-core";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * A react component to display layer entries
@@ -14,11 +14,11 @@ const w = window as any;
  * @param {TypeFeaturesListProps} props properties of the component
  * @returns A react JSX Element containing the entry list of a layer
  */
-const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
+function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
   const { selectedLayer, selectLayer, selectFeature, setPanel, getSymbol, buttonPanel } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   // access the api calls
   const { react, ui, useTranslation } = cgpv;
@@ -174,6 +174,6 @@ const FeaturesList = (props: TypeFeaturesListProps): JSX.Element => {
   ) : (
     <div className={classes.featureItemText}>{t("nothing_found")}</div>
   );
-};
+}
 
 export default FeaturesList;

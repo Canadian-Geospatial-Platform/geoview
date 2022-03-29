@@ -1,10 +1,3 @@
-import LayersList from "./layers-list";
-import FeaturesList from "./features-list";
-import FeatureInfo from "./feature-info";
-
-// get the window object
-const w = window as any;
-
 import {
   Cast,
   TypeJSONObject,
@@ -18,7 +11,15 @@ import {
   TypeLayersEntry,
   TypeEntry,
   TypePanelContentProps,
+  TypeWindow,
 } from "geoview-core";
+
+import LayersList from "./layers-list";
+import FeaturesList from "./features-list";
+import FeatureInfo from "./feature-info";
+
+// get the window object
+const w = window as TypeWindow;
 
 /**
  * A react component that displays the details panel content
@@ -26,11 +27,11 @@ import {
  * @param {TypePanelContentProps} props the properties of the pane content
  * @returns A React JSX Element with the details panel
  */
-const PanelContent = (props: TypePanelContentProps): JSX.Element => {
+function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { buttonPanel, mapId } = props;
 
   // access the cgpv object from the window object
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   // access the api calls
   const { api, react, ui, useTranslation } = cgpv;
@@ -295,7 +296,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
               },
             };
 
-            //check layer type if WMS then use getFeatureInfo to query the data
+            // check layer type if WMS then use getFeatureInfo to query the data
             let res = null;
 
             if (layer.type == "ogcWMS") {
@@ -427,7 +428,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
     const layerIds = Object.keys(mapLayers);
 
     layerIds.forEach(async (id: string) => {
-      let mapLayer = mapLayers[id];
+      const mapLayer = mapLayers[id];
       data[mapLayer.id] = {
         // the map server layer id
         id: mapLayer.id,
@@ -453,7 +454,7 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
             const layerInfo = await queryServer(mapLayer.mapService.options.url + layerId);
 
             // try to add the legend image url for the WMS layer
-            //const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
+            // const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
             const legendImageUrl = mapLayer.getLegendGraphic(layerId);
 
             // assign the url to the renderer
@@ -577,6 +578,6 @@ const PanelContent = (props: TypePanelContentProps): JSX.Element => {
       )}
     </div>
   );
-};
+}
 
 export default PanelContent;

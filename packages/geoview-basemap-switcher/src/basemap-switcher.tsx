@@ -1,22 +1,19 @@
-import { TypeBasemapProps } from "geoview-core";
+import { TypeBasemapProps, TypeWindow } from "geoview-core";
 
-const w = window as any;
+const w = window as TypeWindow;
 
 interface BaseMapSwitcherProps {
   mapId: string;
 }
 
-export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
+export function BasemapSwitcher(props: BaseMapSwitcherProps): JSX.Element {
   const { mapId } = props;
 
-  const cgpv = w["cgpv"];
+  const { cgpv } = w;
 
   const { api, react, ui, useTranslation } = cgpv;
 
   const { useState, useEffect } = react;
-
-  // get used language
-  const { language } = api.map(mapId);
 
   const useStyles = ui.makeStyles(() => ({
     listContainer: {
@@ -279,6 +276,7 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
             )}
             {Array.isArray(basemap.thumbnailUrl) &&
               basemap.thumbnailUrl.map((thumbnail, index) => {
+                // eslint-disable-next-line react/no-array-index-key
                 return <img key={index} src={thumbnail} alt={basemap.altText} className={classes.thumbnail} />;
               })}
             <div className={classes.container}>{basemap.name}</div>
@@ -287,4 +285,4 @@ export const BasemapSwitcher = (props: BaseMapSwitcherProps): JSX.Element => {
       })}
     </div>
   );
-};
+}

@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import React, { CSSProperties } from "react";
 
+import { useTranslation } from "react-i18next";
+
+import * as ReactLeaflet from "react-leaflet";
+import * as ReactLeafletCore from "@react-leaflet/core";
+
 import L from "leaflet";
 
 import {
@@ -16,34 +21,61 @@ import {
   ListProps,
   DialogProps,
   BaseTextFieldProps,
+  useMediaQuery,
 } from "@mui/material";
+
+import { useTheme } from "@mui/material/styles";
+import makeStyles from "@mui/styles/makeStyles";
+
+import * as MUI from "@mui/material";
 
 import { Plugin } from "../../api/plugin";
 import { API } from "../../api/api";
 
 import { PanelApi } from "../../ui";
+import * as UI from "../../ui";
+
+import { LEAFLET_POSITION_CLASSES } from "../../geo/utils/constant";
+
+declare global {
+  interface Window {
+    cgpv: TypeCGPV;
+    plugins: Record<string, unknown>;
+  }
+}
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
 }
 
 export interface TypeWindow extends Window {
-  cgpv?: TypeCGPV;
-  plugins?: Record<string, Plugin>;
+  cgpv: TypeCGPV;
+  plugins: Record<string, unknown>;
 }
+
+export type TypeCGPVUI = {
+  useTheme: typeof useTheme;
+  useMediaQuery: typeof useMediaQuery;
+  makeStyles: typeof makeStyles;
+  elements: typeof UI;
+};
+
+export type TypeCGPVConstants = {
+  leafletPositionClasses: typeof LEAFLET_POSITION_CLASSES;
+};
 
 export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
-  react: Object;
-  leaflet: Object;
-  reactLeaflet: Object;
-  reactLeafletCore: Object;
-  mui?: Object;
-  ui: Object;
-  useTranslation: Object;
+  react: typeof React;
+  leaflet: typeof L;
+  reactLeaflet: typeof ReactLeaflet;
+  reactLeafletCore: typeof ReactLeafletCore;
+  mui?: typeof MUI;
+  ui: TypeCGPVUI;
+  useTranslation: typeof useTranslation;
   types: Object;
-  constants: Object;
+  constants: TypeCGPVConstants;
 };
 
 export type TypeCallback = (callback: () => void) => void;
