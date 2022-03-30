@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersPanelListProps, TypeLayerData, TypeProps, TypeWindow } from "geoview-core";
+import { TypeLayersPanelListProps, TypeLayerData, TypeProps, TypeWindow } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -14,7 +14,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { cgpv } = w;
   const { mui, ui, react, api, leaflet: L } = cgpv;
   const { useState, useEffect } = react;
-  const [selectedLayer, setSelectedLayer] = useState("");
+  const [selectedLayer, setSelectedLayer] = useState('');
   const [layerLegend, setLayerLegend] = useState({});
   const [layerBounds, setLayerBounds] = useState({});
   const [layerBbox, setLayerBbox] = useState(L.polygon([]));
@@ -26,67 +26,67 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { Button } = ui.elements;
 
   const translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {
-      bounds: "Toggle Bounds",
-      zoom: "Zoom to Layer",
-      remove: "Remove Layer",
-      opacity: "Adjust Opacity",
-      visibility: "Toggle Visibility",
+    'en-CA': {
+      bounds: 'Toggle Bounds',
+      zoom: 'Zoom to Layer',
+      remove: 'Remove Layer',
+      opacity: 'Adjust Opacity',
+      visibility: 'Toggle Visibility',
     },
-    "fr-CA": {
-      bounds: "Basculer la limite",
-      zoom: "Zoom sur la Couche",
-      remove: "Supprimer la Couche",
+    'fr-CA': {
+      bounds: 'Basculer la limite',
+      zoom: 'Zoom sur la Couche',
+      remove: 'Supprimer la Couche',
       opacity: "Ajuster l'opacité",
-      visibility: "Basculer la Visibilité",
+      visibility: 'Basculer la Visibilité',
     },
   };
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
-      overflow: "hidden",
-      overflowY: "auto",
-      width: "100%",
+      overflow: 'hidden',
+      overflowY: 'auto',
+      width: '100%',
     },
     layerItem: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      margin: "5px 0",
-      padding: "10px 5px",
-      boxSizing: "content-box",
-      "&:hover": {
-        cursor: "pointer",
-        backgroundColor: "#c9c9c9",
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      margin: '5px 0',
+      padding: '10px 5px',
+      boxSizing: 'content-box',
+      '&:hover': {
+        cursor: 'pointer',
+        backgroundColor: '#c9c9c9',
       },
       zIndex: 1000,
-      border: "none",
-      width: "100%",
+      border: 'none',
+      width: '100%',
     },
     layerParentText: {
-      fontSize: "16px",
-      fontWeight: "bold",
+      fontSize: '16px',
+      fontWeight: 'bold',
     },
     layerCountTextContainer: {
-      display: "flex",
-      alignItems: "center",
-      width: "100%",
-      height: "32px",
+      display: 'flex',
+      alignItems: 'center',
+      width: '100%',
+      height: '32px',
     },
     layerItemText: {
-      fontSize: "14px",
-      whiteSpace: "nowrap",
-      textOverflow: "ellipsis",
-      overflow: "hidden",
-      marginLeft: "10px",
-      display: "flex",
-      alignItems: "center",
+      fontSize: '14px',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      marginLeft: '10px',
+      display: 'flex',
+      alignItems: 'center',
       gap: 6,
     },
     flexGroup: {
-      display: "flex",
-      justifyContent: "flex-end",
-      alignItems: "baseline",
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'baseline',
       gap: 12,
     },
     flexGroupButton: {
@@ -94,18 +94,18 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
       minHeight: 38,
       width: 25,
       minWidth: 25,
-      "& > div": {
-        textAlign: "center",
+      '& > div': {
+        textAlign: 'center',
       },
     },
     slider: {
-      width: "100%",
+      width: '100%',
       paddingLeft: 20,
       paddingRight: 20,
     },
     legendSubLayerGroup: {
-      display: "flex",
-      justifyContent: "space-between",
+      display: 'flex',
+      justifyContent: 'space-between',
     },
   }));
 
@@ -116,7 +116,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     Object.values(layers).forEach(async (layer) => {
       if (layer.getLegendGraphic) {
         const dataUrl = await layer.getLegendGraphic();
-        const name = layer.url.includes("/MapServer") ? layer.name : "";
+        const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
       } else if (layer.getLegendJson) {
@@ -163,7 +163,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param value layer button value
    */
   const onClick = (value: string) => {
-    const selected = value !== selectedLayer ? value : "";
+    const selected = value !== selectedLayer ? value : '';
     setSelectedLayer(selected);
   };
 
@@ -198,7 +198,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
       latlngs.push({ lat: bounds.getNorth(), lng });
     }
     latlngs.push(bounds.getNorthWest());
-    return L.polygon(latlngs, { color: "red" });
+    return L.polygon(latlngs, { color: 'red' });
   };
 
   /**
@@ -363,7 +363,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       </Tooltip>
                     </div>
                   )}
-                  {subLayer.drawingInfo?.renderer.type === "simple" && subLayer.drawingInfo?.renderer.symbol.imageData && (
+                  {subLayer.drawingInfo?.renderer.type === 'simple' && subLayer.drawingInfo?.renderer.symbol.imageData && (
                     <div className={classes.layerItemText}>
                       <img
                         alt="Layer Legend"
@@ -372,7 +372,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       {subLayer.drawingInfo?.renderer.label || subLayer.name}
                     </div>
                   )}
-                  {subLayer.drawingInfo?.renderer.type === "uniqueValue" &&
+                  {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
                     subLayer.drawingInfo?.renderer.uniqueValueInfos[0].symbol.imageData &&
                     subLayer.drawingInfo?.renderer.uniqueValueInfos.map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>

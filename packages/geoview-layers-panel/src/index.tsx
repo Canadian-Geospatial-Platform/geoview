@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from "geoview-core";
-import PanelContent from "./panel-content";
+import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from 'geoview-core';
+import PanelContent from './panel-content';
 
 const w = window as TypeWindow;
 
@@ -27,11 +27,11 @@ class LayersPanelPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {
-      layersPanel: "Layers",
+    'en-CA': {
+      layersPanel: 'Layers',
     },
-    "fr-CA": {
-      layersPanel: "Couches",
+    'fr-CA': {
+      layersPanel: 'Couches',
     },
   };
 
@@ -51,11 +51,11 @@ class LayersPanelPlugin {
 
     // button props
     const button: TypeButtonProps = {
-      id: "layersPanelButton",
+      id: 'layersPanelButton',
       tooltip: this.translations[language].layersPanel,
-      tooltipPlacement: "right",
+      tooltipPlacement: 'right',
       icon: '<i class="material-icons">layers</i>',
-      type: "textWithIcon",
+      type: 'textWithIcon',
     };
 
     // panel props

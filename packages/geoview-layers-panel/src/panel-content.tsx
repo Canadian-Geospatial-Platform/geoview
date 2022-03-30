@@ -1,7 +1,7 @@
-import { TypePanelContentProps, TypeProps, TypeWindow } from "geoview-core";
+import { TypePanelContentProps, TypeProps, TypeWindow } from 'geoview-core';
 
-import LayerStepper from "./layer-stepper";
-import LayersList from "./layers-list";
+import LayerStepper from './layer-stepper';
+import LayersList from './layers-list';
 
 const w = window as TypeWindow;
 
@@ -24,24 +24,24 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { language } = api.map(mapId);
 
   const translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {
-      addLayer: "Add Layer",
+    'en-CA': {
+      addLayer: 'Add Layer',
     },
-    "fr-CA": {
-      addLayer: "Ajouter Couche",
+    'fr-CA': {
+      addLayer: 'Ajouter Couche',
     },
   };
 
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
-      display: "flex",
-      flexDirection: "row",
+      display: 'flex',
+      flexDirection: 'row',
     },
     addLayerButton: {
       width: 50,
       minWidth: 50,
-      "& > div": {
-        textAlign: "center",
+      '& > div': {
+        textAlign: 'center',
       },
     },
   }));
@@ -97,7 +97,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         />
       </div>
       {addLayerVisible && <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />}
-      <div style={{ display: addLayerVisible ? "none" : "inherit" }}>
+      <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
         <LayersList mapId={mapId} layers={mapLayers} language={language} />
       </div>
     </>
