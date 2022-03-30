@@ -273,6 +273,18 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const handleStep3 = () => {
     let valid = true;
+    if (layerEntry.length === 0) {
+      valid = false;
+      emitErrorEmpty('Layer');
+    }
+    if (valid) setActiveStep(3);
+  };
+
+  /**
+   * Handle the behavior of the 'Finish' button in the Stepper UI
+   */
+  const handleStepLast = () => {
+    let valid = true;
     const name = layerName;
     let url = layerURL;
     let entries = layerEntry;
@@ -284,7 +296,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     }
     if (layerName === '') {
       valid = false;
-      emitErrorEmpty('Layer');
+      emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
     const layerConfig = { name, type: layerType, url, entries };
     if (valid) {
@@ -326,15 +338,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   /**
-   * Set the layer name from form input
-   *
-   * @param e TextField event
-   */
-  const handleNameLayer = (e) => {
-    setLayerName(e.target.value);
-  };
-
-  /**
    * Set the currently selected layer from a list
    *
    * @param _ Select event
@@ -348,6 +351,15 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       setLayerEntry(newValue[0]);
       setLayerName(newValue[1]);
     }
+  };
+
+  /**
+   * Set the layer name from form input
+   *
+   * @param e TextField event
+   */
+  const handleNameLayer = (e) => {
+    setLayerName(e.target.value);
   };
 
   /**
@@ -423,9 +435,19 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
             </FormControl>
           )}
           <br />
-          <NavButtons isLast handleNext={handleStep3} />
+          <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
         </StepContent>
       </Step>
+      {isMultiple() && (
+        <Step>
+          <StepLabel>Enter Name</StepLabel>
+          <StepContent>
+            <TextField sx={{ width: '100%' }} label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
+            <br />
+            <NavButtons isLast handleNext={handleStepLast} />
+          </StepContent>
+        </Step>
+      )}
     </Stepper>
   );
 }
