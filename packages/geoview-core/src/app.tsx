@@ -1,39 +1,39 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 // Leaflet icons import to solve issues 4968
-import L, { Icon, Marker } from "leaflet";
-import * as ReactLeaflet from "react-leaflet";
-import * as ReactLeafletCore from "@react-leaflet/core";
+import L, { Icon, Marker } from 'leaflet';
+import * as ReactLeaflet from 'react-leaflet';
+import * as ReactLeafletCore from '@react-leaflet/core';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 // TODO: remove as soon as element UI components are created
-import * as MUI from "@mui/material";
+import * as MUI from '@mui/material';
 
-import { useMediaQuery } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import makeStyles from "@mui/styles/makeStyles";
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
-import icon from "leaflet/dist/images/marker-icon.png";
-import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-import { api } from "./api/api";
+import { api } from './api/api';
 
-import * as UI from "./ui";
+import * as UI from './ui';
 
-import "leaflet/dist/leaflet.css";
-import "./ui/style/style.css";
-import "./ui/style/vendor.css";
+import 'leaflet/dist/leaflet.css';
+import './ui/style/style.css';
+import './ui/style/vendor.css';
 
-import AppStart from "./core/app-start";
+import AppStart from './core/app-start';
 
-import * as types from "./core/types/cgpv-types";
-import { Config } from "./core/utils/config";
-import { EVENT_NAMES } from "./api/event";
-import { LEAFLET_POSITION_CLASSES } from "./geo/utils/constant";
+import * as types from './core/types/cgpv-types';
+import { Config } from './core/utils/config';
+import { EVENT_NAMES } from './api/event';
+import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 
-export * from "./core/types/cgpv-types";
+export * from './core/types/cgpv-types';
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
@@ -83,18 +83,18 @@ function init(callback: () => void) {
   // set the API callback if a callback is provided
   if (callback) api.readyCallback = callback;
 
-  const mapElements = document.getElementsByClassName("llwp-map");
+  const mapElements = document.getElementsByClassName('llwp-map');
 
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
-    const mapId = mapElement.getAttribute("id");
+    const mapId = mapElement.getAttribute('id');
 
     if (mapId) {
       // validate configuration and appply default if problem occurs then setup language
       const configObj = new Config(
         mapId,
-        (mapElement.getAttribute("data-leaflet") || "")
+        (mapElement.getAttribute('data-leaflet') || '')
           .replace(/'/g, '"')
           .replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'")
       );

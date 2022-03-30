@@ -1,52 +1,52 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import { DomEvent } from "leaflet";
+import { DomEvent } from 'leaflet';
 
-import makeStyles from "@mui/styles/makeStyles";
-import { Tooltip, Fade, Button as MaterialButton } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
+import { Tooltip, Fade, Button as MaterialButton } from '@mui/material';
 
-import { Cast, TypeChildren, TypeButtonProps } from "../../core/types/cgpv-types";
+import { Cast, TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
 
-import { HtmlToReact } from "../../core/containers/html-to-react";
+import { HtmlToReact } from '../../core/containers/html-to-react';
 
 const useStyles = makeStyles((theme) => ({
   textIconContainer: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
   },
   icon: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     color: theme.palette.primary.dark,
-    "&:hover *": {
-      fontSize: "1.6rem",
+    '&:hover *': {
+      fontSize: '1.6rem',
     },
   },
   text: {
-    width: "100%",
-    textAlign: "center",
-    textTransform: "none",
+    width: '100%',
+    textAlign: 'center',
+    textTransform: 'none',
     marginLeft: 20,
-    "& $buttonClass": {
-      justifyContent: "flex-start",
+    '& $buttonClass': {
+      justifyContent: 'flex-start',
     },
   },
   buttonClass: {
-    display: "flex",
+    display: 'flex',
     fontSize: theme.typography.fontSize,
     paddingLeft: 18,
     paddingRight: 20,
-    justifyContent: "center",
-    width: "100%",
+    justifyContent: 'center',
+    width: '100%',
     height: 50,
     backgroundColor: theme.palette.primary.light,
     color: theme.palette.primary.dark,
-    "&:hover": {
+    '&:hover': {
       backgroundColor: theme.palette.primary.light,
       color: theme.palette.primary.dark,
     },
@@ -93,19 +93,19 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const getText = useCallback((): TypeChildren => {
     let textContent: TypeChildren;
 
-    if (typeof children === "undefined") {
+    if (typeof children === 'undefined') {
       textContent = <div />;
-    } else if (typeof children === "string") {
+    } else if (typeof children === 'string') {
       textContent = (
         <HtmlToReact
           className={`${classes.text} ${textClassName}`}
-          style={type === "text" ? { marginLeft: "initial" } : {}}
+          style={type === 'text' ? { marginLeft: 'initial' } : {}}
           htmlContent={children}
         />
       );
     } else {
       textContent = (
-        <div className={`${classes.text} ${textClassName}`} style={type === "text" ? { marginLeft: "initial" } : {}}>
+        <div className={`${classes.text} ${textClassName}`} style={type === 'text' ? { marginLeft: 'initial' } : {}}>
           {children}
         </div>
       );
@@ -122,9 +122,9 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const getIcon = useCallback((): TypeChildren => {
     let iconContent: TypeChildren;
 
-    if (typeof icon === "undefined") {
+    if (typeof icon === 'undefined') {
       iconContent = <div />;
-    } else if (typeof icon === "string") {
+    } else if (typeof icon === 'string') {
       iconContent = <HtmlToReact className={`${classes.icon} ${iconClassName}`} htmlContent={icon} />;
     } else {
       iconContent = <div className={`${classes.icon} ${iconClassName}`}>{icon}</div>;
@@ -160,7 +160,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
     return (
       <div className={classes.textIconContainer}>
         {getIcon()}
-        {state !== undefined && state === "expanded" && getText()}
+        {state !== undefined && state === 'expanded' && getText()}
       </div>
     );
   }, [classes.textIconContainer, getIcon, getText, state]);
@@ -175,21 +175,21 @@ export function Button(props: TypeButtonProps): JSX.Element {
 
     // check button type
     if (type) {
-      if (type === "text") {
+      if (type === 'text') {
         setContent(createTextButton());
-      } else if (type === "textWithIcon") {
+      } else if (type === 'textWithIcon') {
         setContent(createTextIconButton());
-      } else if (type === "icon") {
+      } else if (type === 'icon') {
         setContent(createIconButton());
       }
     }
   }, [createIconButton, createTextButton, createTextIconButton, state, type]);
 
   return (
-    <Tooltip title={Cast<string>(t(tooltip || ""))} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
+    <Tooltip title={Cast<string>(t(tooltip || ''))} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
       <MaterialButton
-        variant={variant || "text"}
-        className={`${classes.buttonClass} ${className || ""}`}
+        variant={variant || 'text'}
+        className={`${classes.buttonClass} ${className || ''}`}
         style={style}
         onClick={onClick}
         autoFocus={autoFocus}

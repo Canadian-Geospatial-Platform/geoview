@@ -1,6 +1,6 @@
 // Type modification for Leaflet.markercluster 1.0
 
-/// <reference types="leaflet.markercluster" />
+/// <reference types='leaflet.markercluster' />
 
 declare namespace L {
   export interface MarkerClusterElementMouseEvent extends LeafletMouseEvent {

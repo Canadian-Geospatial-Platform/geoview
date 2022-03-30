@@ -1,11 +1,11 @@
-import { Divider as MaterialDivider } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Divider as MaterialDivider } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeDividerProps } from "../../core/types/cgpv-types";
+import { TypeDividerProps } from '../../core/types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   vertical: {
-    alignSelf: "center",
+    alignSelf: 'center',
     height: 40,
     width: 1,
     backgroundColor: theme.palette.primary.contrastText,
@@ -34,12 +34,12 @@ export function Divider(props: TypeDividerProps): JSX.Element {
   let dividerOrientation = classes.horizontal;
 
   if (orientation) {
-    dividerOrientation = orientation === "horizontal" ? classes.horizontal : classes.vertical;
+    dividerOrientation = orientation === 'horizontal' ? classes.horizontal : classes.vertical;
   }
 
   return (
     <MaterialDivider
-      className={`${dividerOrientation} ${grow !== undefined && grow ? classes.grow : ""} ${className !== undefined ? className : ""}`}
+      className={`${dividerOrientation} ${grow !== undefined && grow ? classes.grow : ''} ${className !== undefined ? className : ''}`}
       style={style}
     />
   );

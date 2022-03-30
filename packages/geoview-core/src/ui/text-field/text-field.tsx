@@ -1,20 +1,20 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React from "react";
+import React from 'react';
 
-import { InputAdornment, TextField as MaterialTextField } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { InputAdornment, TextField as MaterialTextField } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeTextFieldProps } from "../../core/types/cgpv-types";
+import { TypeTextFieldProps } from '../../core/types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   textField: {
-    width: "50%",
-    margin: "10px 0",
-    "& .MuiFormLabel-root.Mui-focused": {
+    width: '50%',
+    margin: '10px 0',
+    '& .MuiFormLabel-root.Mui-focused': {
       color: theme.palette.primary.contrastText,
       background: theme.palette.primary.light,
     },
-    "& .MuiOutlinedInput-root.Mui-focused": {
+    '& .MuiOutlinedInput-root.Mui-focused': {
       border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },

@@ -170,7 +170,7 @@
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
-        console.log("api is ready");
+        console.log('api is ready');
 
         //create snippets
         createCodeSnippet();
@@ -180,64 +180,64 @@
       });
 
       // find the button element by ID
-      var addGeoJSONButton = document.getElementById("add-geojson");
+      var addGeoJSONButton = document.getElementById('add-geojson');
 
       // add an event listener when a button is clicked
-      addGeoJSONButton.addEventListener("click", function (e) {
+      addGeoJSONButton.addEventListener('click', function (e) {
         // adding a geojson layer requires a type of geojson and url
-        const layerID = cgpv.api.map("LYR5").layer.addLayer({
-          type: "geoJSON",
-          url: "https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json",
+        const layerID = cgpv.api.map('LYR5').layer.addLayer({
+          type: 'geoJSON',
+          url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
         });
-        document.getElementById("new-layer-id").innerText = layerID;
+        document.getElementById('new-layer-id').innerText = layerID;
       });
 
       // find the button element by ID
-      var removeGeoJSONButton = document.getElementById("remove-geojson");
+      var removeGeoJSONButton = document.getElementById('remove-geojson');
 
       // add an event listener when a button is clicked
-      removeGeoJSONButton.addEventListener("click", function (e) {
+      removeGeoJSONButton.addEventListener('click', function (e) {
         // removing a geojson layer using the ID
         //cgpv.api.map('LYR5').layer.removeLayer(document.getElementById('new-layer-id').innerText);
-        cgpv.api.map("LYR5").layer.removeLayerById(document.getElementById("new-layer-id").innerText);
-        document.getElementById("new-layer-id").innerText = "";
+        cgpv.api.map('LYR5').layer.removeLayerById(document.getElementById('new-layer-id').innerText);
+        document.getElementById('new-layer-id').innerText = '';
       });
 
       //add legend to WMS layer
       function addWMSLegend() {
         cgpv.api
-          .map("LYR1")
-          .layer.layers["wmsLYR1"].getLegendGraphic("TOPO-OSM-WMS")
+          .map('LYR1')
+          .layer.layers['wmsLYR1'].getLegendGraphic('TOPO-OSM-WMS')
           .then((res) => {
-            document.getElementById("wmsLegend").src = res;
+            document.getElementById('wmsLegend').src = res;
           });
       }
 
       //add legend to ESRI Dynamic layer
       function addEsriDynamicLegend() {
         cgpv.api
-          .map("LYR3")
-          .layer.layers["esriDynamicLYR3"].getLegendJson()
+          .map('LYR3')
+          .layer.layers['esriDynamicLYR3'].getLegendJson()
           .then((layers) => {
             //create a Table Object
-            let legendTable = document.createElement("table");
-            legendTable.className = "legendTable";
-            document.getElementById("esriDynamicLayerLegend").appendChild(legendTable);
+            let legendTable = document.createElement('table');
+            legendTable.className = 'legendTable';
+            document.getElementById('esriDynamicLayerLegend').appendChild(legendTable);
             let legendRow = legendTable.insertRow();
             let legendCol = legendRow.insertCell();
             layers.forEach((layer) => {
-              let layerText = document.createElement("b");
+              let layerText = document.createElement('b');
               layerText.innerHTML = layer.layerName;
               legendCol.appendChild(layerText);
-              let table = document.createElement("table");
+              let table = document.createElement('table');
 
               layer.legend.forEach((lgd) => {
                 let row = table.insertRow();
-                row.vAlign = "middle";
+                row.vAlign = 'middle';
                 let col1 = row.insertCell();
-                col1.style.width = "100px";
+                col1.style.width = '100px';
                 let col2 = row.insertCell();
-                let icon = document.createElement("img");
+                let icon = document.createElement('img');
                 icon.src = `data:${lgd.contentType};base64,${lgd.imageData}`;
                 //icon.width = lgd.width;
                 //icon.height = lgd.height;
