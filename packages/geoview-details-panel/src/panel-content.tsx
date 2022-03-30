@@ -12,11 +12,11 @@ import {
   TypeEntry,
   TypePanelContentProps,
   TypeWindow,
-} from "geoview-core";
+} from 'geoview-core';
 
-import LayersList from "./layers-list";
-import FeaturesList from "./features-list";
-import FeatureInfo from "./feature-info";
+import LayersList from './layers-list';
+import FeaturesList from './features-list';
+import FeatureInfo from './feature-info';
 
 // get the window object
 const w = window as TypeWindow;
@@ -54,8 +54,8 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   // use material ui theming
   const useStyles = ui.makeStyles(() => ({
     mainContainer: {
-      display: "flex",
-      flexDirection: "row",
+      display: 'flex',
+      flexDirection: 'row',
     },
   }));
 
@@ -115,7 +115,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const setPanel = useCallback(
     (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => {
       // remove the back button if it exists
-      buttonPanel.panel?.removeActionButton("back");
+      buttonPanel.panel?.removeActionButton('back');
 
       // show the correct panel content
       setLayersList(showLayersList);
@@ -203,7 +203,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     const { layers } = data[mapLayer.id];
 
     // add the layer to the layers object, the layer will have a key generated from the id and name of the layer seperated by dashes
-    layers[`${layerInfo.id}-${layerInfo.name.replace(/\s+/g, "-").toLowerCase()}`] = {
+    layers[`${layerInfo.id}-${layerInfo.name.replace(/\s+/g, '-').toLowerCase()}`] = {
       // the information about this layer
       layer: layerInfo,
       // is it a group layer or not
@@ -211,7 +211,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       // the layer entry / feature data, will be filled / reset when a click / crosshair event is triggered on an element
       layerData: [] as TypeJSONValue[],
       // the default display field or field name defined in the layer
-      displayField: layerInfo.displayField || layerInfo.displayFieldName || "",
+      displayField: layerInfo.displayField || layerInfo.displayFieldName || '',
       // the defined field aliases by the layer
       fieldAliases: getFieldAliases(layerInfo.fields),
       // the renderer object containing the symbology
@@ -299,7 +299,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             // check layer type if WMS then use getFeatureInfo to query the data
             let res = null;
 
-            if (layer.type == "ogcWMS") {
+            if (layer.type == 'ogcWMS') {
               res = await layer.getFeatureInfo(latlng, layerMap);
 
               if (res && res.results && res.results.length > 0) {
@@ -320,7 +320,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   },
                 }));
               }
-            } else if (layer.type == "esriFeature" || layer.type == "esriDynamic") {
+            } else if (layer.type == 'esriFeature' || layer.type == 'esriDynamic') {
               // generate an identify query url
               const identifyUrl =
                 `${layer.mapService.options.url}identify?` +
@@ -410,7 +410,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
       // set focus to the close button of the panel
       if (panelContainer) {
-        const closeBtn = panelContainer.querySelectorAll(".cgpv-panel-close")[0];
+        const closeBtn = panelContainer.querySelectorAll('.cgpv-panel-close')[0];
         if (closeBtn) (closeBtn as HTMLElement).focus();
       }
     },
@@ -442,7 +442,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       };
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (mapLayer.type === "ogcWMS") {
+      if (mapLayer.type === 'ogcWMS') {
         // get layer ids / entries from the loaded WMS layer
         const { entries } = mapLayer;
 
@@ -468,12 +468,12 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             addLayer(mapLayer, data, layerInfo, false);
           }
-      } else if (mapLayer.type === "esriFeature") {
+      } else if (mapLayer.type === 'esriFeature') {
         // query the layer information, feature layer URL will end by a number provided in the map config
         const layerInfo = await queryServer(mapLayer.layer.options.url);
 
         addLayer(mapLayer, data, layerInfo, false);
-      } else if (mapLayer.type === "esriDynamic") {
+      } else if (mapLayer.type === 'esriDynamic') {
         // get active layers
         const entries = mapLayer.layer.getLayers();
 
@@ -524,7 +524,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   useEffect(() => {
     // handle map click
-    mapInstance.on("click", async (e: L.LeafletMouseEvent) => {
+    mapInstance.on('click', async (e: L.LeafletMouseEvent) => {
       if (!e.originalEvent.shiftKey) {
         handleOpenDetailsPanel(e.latlng);
       }
@@ -542,7 +542,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     );
 
     return () => {
-      mapInstance.off("click");
+      mapInstance.off('click');
       api.event.off(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId);
     };
   }, [handleOpenDetailsPanel, mapId, mapInstance]);
@@ -552,7 +552,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   // It takes 3 arguments, the tag element name, the attributes of the element and the content of the element
   return (
     <div className={classes.mainContainer}>
-      {!layersList && !featureList && !featureInfo && <div>{t("click_map")}</div>}
+      {!layersList && !featureList && !featureInfo && <div>{t('click_map')}</div>}
       {layersList && (
         <LayersList
           clickPos={clickPos}

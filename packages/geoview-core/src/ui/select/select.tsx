@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-expressions */
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   FormControl,
@@ -13,32 +13,32 @@ import {
   MenuItem,
   Select as MaterialSelect,
   SelectChangeEvent,
-} from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeSelectProps } from "../../core/types/cgpv-types";
+import { TypeSelectProps } from '../../core/types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
-    width: "50%",
-    margin: "15px 0",
-    "& .MuiFormLabel-root.Mui-focused": {
+    width: '50%',
+    margin: '15px 0',
+    '& .MuiFormLabel-root.Mui-focused': {
       color: theme.palette.primary.contrastText,
       background: theme.palette.primary.light,
     },
-    "& .MuiOutlinedInput-root.Mui-focused": {
+    '& .MuiOutlinedInput-root.Mui-focused': {
       border: `1px solid ${theme.palette.primary.contrastText}`,
     },
   },
   label: {
-    position: "absolute",
+    position: 'absolute',
     left: 0,
     top: 0,
-    transform: "translate(14px, -9px) scale(0.75)",
+    transform: 'translate(14px, -9px) scale(0.75)',
     background: theme.palette.primary.light,
   },
   select: {
-    width: "100%",
+    width: '100%',
   },
 }));
 
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Select(props: TypeSelectProps): JSX.Element {
   const classes = useStyles();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [multipleValue, setMultipleValue] = useState([]);
   const { className, style, id, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
 
@@ -65,13 +65,13 @@ export function Select(props: TypeSelectProps): JSX.Element {
       const {
         target: { value: targetValue },
       } = event;
-      setMultipleValue(typeof targetValue === "string" ? targetValue.split(",") : targetValue);
+      setMultipleValue(typeof targetValue === 'string' ? targetValue.split(',') : targetValue);
     }
   };
 
-  if (!multiple && typeof callBack === "function") {
+  if (!multiple && typeof callBack === 'function') {
     callBack(value);
-  } else if (multiple && typeof callBack === "function") {
+  } else if (multiple && typeof callBack === 'function') {
     callBack(multipleValue);
   }
 
@@ -114,7 +114,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
         {isGrouped
           ? selectItems.map((item: any) => {
               const options: JSX.Element[] = [];
-              if (item.category) options.push(<ListSubheader>{item.category ? item.category : "Others"}</ListSubheader>);
+              if (item.category) options.push(<ListSubheader>{item.category ? item.category : 'Others'}</ListSubheader>);
               item.items.map((item: any) => {
                 options.push(<MenuItem value={item.value}>{item.value}</MenuItem>);
               });

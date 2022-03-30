@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import React, { CSSProperties } from "react";
+import React, { CSSProperties } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import * as ReactLeaflet from "react-leaflet";
-import * as ReactLeafletCore from "@react-leaflet/core";
+import * as ReactLeaflet from 'react-leaflet';
+import * as ReactLeafletCore from '@react-leaflet/core';
 
-import L from "leaflet";
+import L from 'leaflet';
 
 import {
   TooltipProps,
@@ -22,20 +22,20 @@ import {
   DialogProps,
   BaseTextFieldProps,
   useMediaQuery,
-} from "@mui/material";
+} from '@mui/material';
 
-import { useTheme } from "@mui/material/styles";
-import makeStyles from "@mui/styles/makeStyles";
+import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
-import * as MUI from "@mui/material";
+import * as MUI from '@mui/material';
 
-import { Plugin } from "../../api/plugin";
-import { API } from "../../api/api";
+import { Plugin } from '../../api/plugin';
+import { API } from '../../api/api';
 
-import { PanelApi } from "../../ui";
-import * as UI from "../../ui";
+import { PanelApi } from '../../ui';
+import * as UI from '../../ui';
 
-import { LEAFLET_POSITION_CLASSES } from "../../geo/utils/constant";
+import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
 
 declare global {
   interface Window {
@@ -144,13 +144,13 @@ export type TypeIconCreationFunction = () => L.DivIcon;
  * constant contains layer types
  */
 export const CONST_LAYER_TYPES = {
-  WMS: "ogcWMS",
-  GEOJSON: "geoJSON",
-  ESRI_DYNAMIC: "esriDynamic",
-  ESRI_FEATURE: "esriFeature",
-  XYZ_TILES: "xyzTiles",
-  WFS: "ogcWFS",
-  OGC_FEATURE: "ogcFeature",
+  WMS: 'ogcWMS',
+  GEOJSON: 'geoJSON',
+  ESRI_DYNAMIC: 'esriDynamic',
+  ESRI_FEATURE: 'esriFeature',
+  XYZ_TILES: 'xyzTiles',
+  WFS: 'ogcWFS',
+  OGC_FEATURE: 'ogcFeature',
 };
 
 /**
@@ -310,7 +310,7 @@ export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
  */
 export type TypeLayerData = {
   id: string;
-  type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles" | "ogcWFS" | "ogcFeature";
+  type: 'ogcWMS' | 'geoJSON' | 'esriDynamic' | 'esriFeature' | 'xyzTiles' | 'ogcWFS' | 'ogcFeature';
   name: string;
   url: string;
   entries: string[];
@@ -396,7 +396,7 @@ export type TypeRendererSymbol = {
     contentType: string;
     label: string;
     legendImageUrl: string;
-    type: "simple" | "uniqueValue";
+    type: 'simple' | 'uniqueValue';
   };
   uniqueValueInfos: TypeJSONObject[];
   field1: string;
@@ -418,11 +418,11 @@ export type TypePlugin = {
  * constant used to specify available vectors to draw
  */
 export const CONST_VECTOR_TYPES = {
-  POLYLINE: "polyline",
-  POLYGON: "polygon",
-  CIRCLE: "circle",
-  CIRCLE_MARKER: "circle_marker",
-  MARKER: "marker",
+  POLYLINE: 'polyline',
+  POLYGON: 'polygon',
+  CIRCLE: 'circle',
+  CIRCLE_MARKER: 'circle_marker',
+  MARKER: 'marker',
 };
 
 /**
@@ -543,8 +543,8 @@ export type TypeZoomLevels = {
  * interface for attribution value
  */
 export type TypeAttribution = {
-  "en-CA": string;
-  "fr-CA": string;
+  'en-CA': string;
+  'fr-CA': string;
 };
 
 /**
@@ -581,8 +581,8 @@ export type TypeAppVersion = {
  * constant that defines the panel types
  */
 export const CONST_PANEL_TYPES = {
-  APPBAR: "appbar",
-  NAVBAR: "navbar",
+  APPBAR: 'appbar',
+  NAVBAR: 'navbar',
 };
 
 export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
@@ -618,13 +618,13 @@ export type TypeButtonPanel = {
 /**
  * Interface for the button properties used when creating a new button
  */
-export interface TypeButtonProps extends Omit<ButtonProps, "type"> {
+export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
   tooltip?: string;
   // location for tooltip
-  tooltipPlacement?: TooltipProps["placement"];
+  tooltipPlacement?: TooltipProps['placement'];
   // button icon
   icon?: TypeChildren;
   // optional class names
@@ -632,9 +632,9 @@ export interface TypeButtonProps extends Omit<ButtonProps, "type"> {
   // optional class names
   textClassName?: string;
   // button state
-  state?: "expanded" | "collapsed";
+  state?: 'expanded' | 'collapsed';
   // button type
-  type: "text" | "textWithIcon" | "icon";
+  type: 'text' | 'textWithIcon' | 'icon';
   // button visibility
   visible?: boolean;
 }
@@ -675,7 +675,7 @@ export interface TypeCircularProgressProps extends CircularProgressProps {
  * Properties for the Divider
  */
 export interface TypeDividerProps extends DividerProps {
-  orientation?: "horizontal" | "vertical";
+  orientation?: 'horizontal' | 'vertical';
   grow?: boolean;
 }
 
@@ -697,7 +697,7 @@ export type TypeFadeProps = FadeProps;
 export interface TypeIconButtonProps extends IconButtonProps {
   children?: TypeChildren;
   tooltip?: string;
-  tooltipPlacement?: TooltipProps["placement"];
+  tooltipPlacement?: TooltipProps['placement'];
   id?: string;
   tabIndex?: number;
   iconRef?: React.RefObject<HTMLButtonElement>;
@@ -707,7 +707,7 @@ export interface TypeIconButtonProps extends IconButtonProps {
  * Properties for the List UI
  */
 export interface TypeListProps extends ListProps {
-  type?: "ul" | "ol";
+  type?: 'ul' | 'ol';
 }
 
 /**
@@ -718,7 +718,7 @@ export type TypeListItemProps = ListItemProps;
 /**
  * Customized Material UI Dialog Properties
  */
-export interface TypeDialogProps extends Omit<DialogProps, "title"> {
+export interface TypeDialogProps extends Omit<DialogProps, 'title'> {
   id?: string;
 
   // custom dialog classes and styles
@@ -810,7 +810,7 @@ export interface TypeStepperProps {
   style?: CSSProperties;
 
   // orientaion of the Stepper component. By default, its horizontal
-  orientation?: "horizontal" | "vertical";
+  orientation?: 'horizontal' | 'vertical';
 
   // alternative label for the steps. Alternative labels appear at the bottom of step icons
   alternativeLabel?: boolean;
@@ -838,7 +838,7 @@ export interface TypeStepperProps {
 /**
  * Customized Material UI TextField Properties
  */
-export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, "prefix"> {
+export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   id: string;
 
   // the helper text (as defined above) but only if there is an error

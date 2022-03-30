@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
-import { IconButton as MaterialIconButton, Tooltip, Fade } from "@mui/material";
+import { IconButton as MaterialIconButton, Tooltip, Fade } from '@mui/material';
 
-import { TypeIconButtonProps } from "../../core/types/cgpv-types";
+import { TypeIconButtonProps } from '../../core/types/cgpv-types';
 
 /**
  * Create a customized Material UI Icon Button
@@ -11,10 +11,10 @@ import { TypeIconButtonProps } from "../../core/types/cgpv-types";
  * @returns {JSX.Element} the created Icon Button element
  */
 export function IconButton(props: TypeIconButtonProps): JSX.Element {
-  const { className, style, children, onClick, "aria-label": ariaLabel, tooltip, tooltipPlacement, id, tabIndex, iconRef, size } = props;
+  const { className, style, children, onClick, 'aria-label': ariaLabel, tooltip, tooltipPlacement, id, tabIndex, iconRef, size } = props;
 
   return (
-    <Tooltip title={tooltip || ""} placement={tooltipPlacement} TransitionComponent={Fade}>
+    <Tooltip title={tooltip || ''} placement={tooltipPlacement} TransitionComponent={Fade}>
       <MaterialIconButton
         id={id}
         aria-label={ariaLabel}

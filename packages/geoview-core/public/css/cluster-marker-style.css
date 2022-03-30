@@ -2,7 +2,7 @@
  * This section is use to hold styles relative to marker cluster
  */
 .marker-cluster-full.hole {
-  content: "";
+  content: '';
   position: absolute;
   width: 30px;
   height: 30px;
@@ -31,7 +31,7 @@
 }
 
 .marker-cluster-empty.hole {
-  content: "";
+  content: '';
   position: absolute;
   width: 30px;
   height: 30px;
@@ -60,7 +60,7 @@
 }
 
 .marker-cluster-part.hole {
-  content: "";
+  content: '';
   position: absolute;
   width: 30px;
   height: 30px;
@@ -89,7 +89,7 @@
 }
 
 .marker-green.hole {
-  content: "";
+  content: '';
   position: absolute;
   width: 10px;
   height: 10px;
@@ -117,7 +117,7 @@
 }
 
 .marker-blue.hole {
-  content: "";
+  content: '';
   position: absolute;
   width: 10px;
   height: 10px;
