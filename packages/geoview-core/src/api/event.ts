@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
-import EventEmitter from "eventemitter3";
+import EventEmitter from 'eventemitter3';
 
-import { generateId } from "../core/utils/utilities";
+import { generateId } from '../core/utils/utilities';
+import { TypeJSONObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -11,201 +10,201 @@ export const EVENT_NAMES = {
   /**
    * Event triggered when map is loaded and api ready
    */
-  EVENT_MAP_LOADED: "map/loaded",
+  EVENT_MAP_LOADED: 'map/loaded',
 
   /**
    * Event triggered to reload the map
    */
-  EVENT_MAP_RELOAD: "map/reload",
+  EVENT_MAP_RELOAD: 'map/reload',
 
   /**
    * Event triggered when a user stops moving the map
    */
-  EVENT_MAP_MOVE_END: "map/moveend",
+  EVENT_MAP_MOVE_END: 'map/moveend',
 
   /**
    * Event triggered when a user stops zooming the map
    */
-  EVENT_MAP_ZOOM_END: "map/zoomend",
+  EVENT_MAP_ZOOM_END: 'map/zoomend',
 
   /**
    * Event triggered when a user wants to add a component
    */
-  EVENT_MAP_ADD_COMPONENT: "map/add_component",
+  EVENT_MAP_ADD_COMPONENT: 'map/add_component',
 
   /**
    * Event triggered when a user wants to remove a component
    */
-  EVENT_MAP_REMOVE_COMPONENT: "map/remove_component",
+  EVENT_MAP_REMOVE_COMPONENT: 'map/remove_component',
 
   /**
    * Event triggered when a user end a select box
    */
-  EVENT_BOX_SELECT_END: "box/zoom_or_select_end",
+  EVENT_BOX_SELECT_END: 'box/zoom_or_select_end',
 
   /**
    * Event triggered when a user focus the map with keyboard (WCAG)
    */
-  EVENT_MAP_IN_KEYFOCUS: "map/inkeyfocus",
+  EVENT_MAP_IN_KEYFOCUS: 'map/inkeyfocus',
 
   /**
    * Event triggered to enable / disable crosshair
    */
-  EVENT_MAP_CROSSHAIR_ENABLE_DISABLE: "map/crosshair_enable_disable",
+  EVENT_MAP_CROSSHAIR_ENABLE_DISABLE: 'map/crosshair_enable_disable',
 
   /**
    * Event triggered when the overview map is toggled
    */
-  EVENT_OVERVIEW_MAP_TOGGLE: "overview_map/toggle",
+  EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',
 
   /**
    * Event triggered when a drawer opens/closes
    */
-  EVENT_DRAWER_OPEN_CLOSE: "drawer/open_close",
+  EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
 
   /**
    * Event triggered when a new appbar panel has been created
    */
-  EVENT_APPBAR_PANEL_CREATE: "appbar/panel_create",
+  EVENT_APPBAR_PANEL_CREATE: 'appbar/panel_create',
 
   /**
    * Event triggered when an appbar button panel has been removed
    */
-  EVENT_APPBAR_PANEL_REMOVE: "appbar/panel_remove",
+  EVENT_APPBAR_PANEL_REMOVE: 'appbar/panel_remove',
 
   /**
    * Event triggered when a new navbar button or panel has been created
    */
-  EVENT_NAVBAR_BUTTON_PANEL_CREATE: "navbar/button_panel_create",
+  EVENT_NAVBAR_BUTTON_PANEL_CREATE: 'navbar/button_panel_create',
   /**
    * Event triggered when a navbar button or button panel has been removed
    */
-  EVENT_NAVBAR_BUTTON_PANEL_REMOVE: "navbar/button_panel_remove",
+  EVENT_NAVBAR_BUTTON_PANEL_REMOVE: 'navbar/button_panel_remove',
 
   /**
    * Event triggered when a request is made to open a panel
    */
-  EVENT_PANEL_OPEN: "panel/open",
+  EVENT_PANEL_OPEN: 'panel/open',
   /**
    * Event triggered when a request is made to close a panel
    */
-  EVENT_PANEL_CLOSE: "panel/close",
+  EVENT_PANEL_CLOSE: 'panel/close',
   /**
    * Event triggered when a request is made to add an action button
    */
-  EVENT_PANEL_ADD_ACTION: "panel/add_action",
+  EVENT_PANEL_ADD_ACTION: 'panel/add_action',
   /**
    * Event triggered when a request is made to remove an action button
    */
-  EVENT_PANEL_REMOVE_ACTION: "panel/remove_action",
+  EVENT_PANEL_REMOVE_ACTION: 'panel/remove_action',
   /**
    * Event triggered when a request is made to change panel content
    */
-  EVENT_PANEL_CHANGE_CONTENT: "panel/change_content",
+  EVENT_PANEL_CHANGE_CONTENT: 'panel/change_content',
 
   /**
    * Event triggered when adding a new layer
    */
-  EVENT_LAYER_ADD: "layer/add",
+  EVENT_LAYER_ADD: 'layer/add',
   /**
    * Event triggered when adding a new layer
    */
-  EVENT_LAYER_ADDED: "layer/added",
+  EVENT_LAYER_ADDED: 'layer/added',
   /**
    * Event triggered when removing a layer
    */
-  EVENT_REMOVE_LAYER: "layer/remove",
+  EVENT_REMOVE_LAYER: 'layer/remove',
   /**
    * Event triggered when getting all layers
    */
-  EVENT_GET_LAYERS: "layer/get_layers",
+  EVENT_GET_LAYERS: 'layer/get_layers',
 
   /**
    * Event triggered when a request is made to add a vector
    */
-  EVENT_VECTOR_ADD: "vector/add",
+  EVENT_VECTOR_ADD: 'vector/add',
   /**
    * Event triggered when a request is made to remove a vector
    */
-  EVENT_VECTOR_REMOVE: "vector/remove",
+  EVENT_VECTOR_REMOVE: 'vector/remove',
   /**
    * Event is triggered when a vector has been added
    */
-  EVENT_VECTOR_ADDED: "vector/added",
+  EVENT_VECTOR_ADDED: 'vector/added',
   /**
    * Event is triggered when you want to turn off all visible vectors
    */
-  EVENT_VECTOR_OFF: "vector/off",
+  EVENT_VECTOR_OFF: 'vector/off',
   /**
    * Event is triggered when you want to turn on all visible vectors
    */
-  EVENT_VECTOR_ON: "vector/on",
+  EVENT_VECTOR_ON: 'vector/on',
 
   /**
    * Event triggered when a request is made to add a cluster element
    */
-  EVENT_CLUSTER_ELEMENT_ADD: "cluster_element/add",
+  EVENT_CLUSTER_ELEMENT_ADD: 'cluster_element/add',
   /**
    * Event triggered when a request is made to remove a cluster element
    */
-  EVENT_CLUSTER_ELEMENT_REMOVE: "cluster_element/remove",
+  EVENT_CLUSTER_ELEMENT_REMOVE: 'cluster_element/remove',
   /**
    * Event is triggered when a cluster element has been added
    */
-  EVENT_CLUSTER_ELEMENT_ADDED: "cluster_element/added",
+  EVENT_CLUSTER_ELEMENT_ADDED: 'cluster_element/added',
   /**
    * Event is triggered when a cluster element start blinking
    */
-  EVENT_CLUSTER_ELEMENT_START_BLINKING: "cluster_element/start_blinking",
+  EVENT_CLUSTER_ELEMENT_START_BLINKING: 'cluster_element/start_blinking',
   /**
    * Event is triggered when a cluster element stop blinking
    */
-  EVENT_CLUSTER_ELEMENT_STOP_BLINKING: "cluster_element/stop_blinking",
+  EVENT_CLUSTER_ELEMENT_STOP_BLINKING: 'cluster_element/stop_blinking',
   /**
    * Event is triggered when a cluster element selection indicator changes
    */
-  EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED: "cluster_element/selection_has_changed",
+  EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED: 'cluster_element/selection_has_changed',
 
   /**
    * Event is triggered when updating the basemap layers
    */
-  EVENT_BASEMAP_LAYERS_UPDATE: "basemap/layers_update",
+  EVENT_BASEMAP_LAYERS_UPDATE: 'basemap/layers_update',
 
   /**
    * Event is triggered when a snackbar notification opens
    */
-  EVENT_SNACKBAR_OPEN: "snackbar/open",
+  EVENT_SNACKBAR_OPEN: 'snackbar/open',
 
   /**
    * Event is triggered when a user press enter on a crosshair to open details panel
    */
-  EVENT_DETAILS_PANEL_CROSSHAIR_ENTER: "details_panel/crosshair_enter",
+  EVENT_DETAILS_PANEL_CROSSHAIR_ENTER: 'details_panel/crosshair_enter',
 
   /**
    * Event is triggered when a call is made to show a marker on map click in details panel
    */
-  EVENT_MARKER_ICON_SHOW: "marker_icon/show",
+  EVENT_MARKER_ICON_SHOW: 'marker_icon/show',
   /**
    * Event is triggered when a call is made to hide the marker
    */
-  EVENT_MARKER_ICON_HIDE: "marker_icon/hide",
+  EVENT_MARKER_ICON_HIDE: 'marker_icon/hide',
 
   /**
    * Event is triggered when a new modal is created
    */
-  EVENT_MODAL_CREATE: "modal/create",
+  EVENT_MODAL_CREATE: 'modal/create',
   /**
    * Event is triggered when a modal opens
    */
-  EVENT_MODAL_OPEN: "modal/open",
+  EVENT_MODAL_OPEN: 'modal/open',
   /**
    * Event is triggered when a modal is closed
    */
-  EVENT_MODAL_CLOSE: "modal/close",
+  EVENT_MODAL_CLOSE: 'modal/close',
   /**
    * Event is triggered when a modal is updated
    */
-  EVENT_MODAL_UPDATE: "modal/update",
+  EVENT_MODAL_UPDATE: 'modal/update',
 };
 
 /**
@@ -215,11 +214,11 @@ export const EVENT_NAMES = {
  * @class Event
  */
 export class Event {
-  // eventemitter3 object, used to handle emitting/subscribing to events
+  // eventemitter object, used to handle emitting/subscribing to events
   eventEmitter: EventEmitter;
 
   // events object containing all registered events
-  events: Record<string, Record<string, unknown>> = {};
+  events: Record<string, TypeJSONObject> = {};
 
   /**
    * Initiate the event emitter
@@ -235,24 +234,24 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
-    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+  on = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
+    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
-     * @param args payload being passed when emitted
+     * @param payload payload being passed when emitted
      */
-    const listen = (args: unknown) => {
-      let data;
+    const listen = (payload: TypeJSONObject) => {
+      let listenerPayload: TypeJSONObject;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
-        data = this.events[eName][handlerName];
+      if (handlerName && payload.handlerName === handlerName) {
+        listenerPayload = this.events[eName][handlerName] as TypeJSONObject;
       } else {
-        data = args;
+        listenerPayload = payload;
       }
 
-      listener(data);
+      listener(listenerPayload);
     };
 
     this.eventEmitter.on(eName, listen);
@@ -265,24 +264,24 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  once = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
-    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+  once = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
+    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
-     * @param args payload being passed when emitted
+     * @param payload payload being passed when emitted
      */
-    const listen = (args: unknown) => {
-      let data;
+    const listen = (payload: TypeJSONObject) => {
+      let listenerPayload: TypeJSONObject;
 
       // if a handler name was specefieid, callback will return that data if found
-      if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
-        data = this.events[eName][handlerName];
+      if (handlerName && (payload as Record<string, unknown>).handlerName === handlerName) {
+        listenerPayload = this.events[eName][handlerName] as TypeJSONObject;
       } else {
-        data = args;
+        listenerPayload = payload;
       }
 
-      listener(data);
+      listener(listenerPayload);
     };
 
     this.eventEmitter.once(eName, listen);
@@ -297,20 +296,19 @@ export class Event {
    *
    * @returns An array containing the data from single / multiple handlers
    */
-  all = (eventName: string, listener: (...args: any[]) => void): void => {
+  all = (eventName: string, listener: (payload: TypeJSONObject[]) => void): void => {
     /**
      * callback function to handle adding the data for multiple handlers
      */
     const listen = () => {
       // array containing the data
-      const data = [];
+      const data: TypeJSONObject[] = [];
 
       // loop through events with same event name and get their data
-      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < Object.keys(this.events[eventName]).length; i++) {
         const handlerName = Object.keys(this.events[eventName])[i];
 
-        data.push(this.events[eventName][handlerName]);
+        data.push(this.events[eventName][handlerName] as TypeJSONObject);
       }
 
       // call the callback function
@@ -328,7 +326,7 @@ export class Event {
    * @param {string} handlerName the name of the handler an event needs to be removed from
    */
   off = (eventName: string, handlerName?: string): void => {
-    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     this.eventEmitter.off(eName);
 
@@ -357,17 +355,13 @@ export class Event {
    */
   emit = (event: string, handlerName: string | undefined | null, payload: Record<string, unknown>): void => {
     // event name
-    const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : "");
+    const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
-    let hName = handlerName;
+    const hName = generateId(handlerName as string | undefined);
 
     if (!this.events[event]) {
       this.events[eventName] = {};
-    }
-
-    if (!hName) {
-      hName = generateId("");
     }
 
     if (!this.events[eventName][hName]) {
@@ -378,7 +372,7 @@ export class Event {
     this.events[eventName][hName] = {
       handlerName,
       ...payload,
-    };
+    } as TypeJSONObject;
 
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };

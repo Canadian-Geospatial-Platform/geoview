@@ -1,7 +1,7 @@
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from "./modal-api";
+import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './modal-api';
 
 /**
  * Class used to create a template (model) of a modal
@@ -85,7 +85,7 @@ export class ModalModel {
    */
   addHeaderActions = (action: ModalActionsType): void => {
     // if header.content has already been defined by the user
-    if (typeof this.header?.actions === "object") {
+    if (typeof this.header?.actions === 'object') {
       this.header?.actions?.push(action);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -101,7 +101,7 @@ export class ModalModel {
    * @param { ModalActionsType } action must be an object with id and content
    */
   addFooterActions = (action: ModalActionsType): void => {
-    if (typeof this.header?.actions === "object") {
+    if (typeof this.header?.actions === 'object') {
       this.footer?.actions?.push(action);
     } else {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -116,7 +116,7 @@ export class ModalModel {
    * @param { string } id of the action to be deleted
    */
   removeHeaderActions = (id: string): void => {
-    if (!this.header?.actions || typeof this.header?.actions !== "object") {
+    if (!this.header?.actions || typeof this.header?.actions !== 'object') {
       return;
     }
     const actionIndex = this.header?.actions?.findIndex((action) => action.id === id);
@@ -131,7 +131,7 @@ export class ModalModel {
    * @param { string } id of the action to be deleted
    */
   removeFooterActions = (id: string): void => {
-    if (!this.footer?.actions || typeof this.header?.actions !== "object") return;
+    if (!this.footer?.actions || typeof this.header?.actions !== 'object') return;
     const actionIndex = this.footer?.actions?.findIndex((action) => action.id === id);
     if (actionIndex === -1) return;
     this.footer?.actions?.splice(actionIndex, 1);

@@ -1,35 +1,35 @@
-import { useState, useRef, useEffect, useCallback, Fragment, useContext } from "react";
+import { useState, useRef, useEffect, useCallback, Fragment, useContext } from 'react';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import { Divider, List, ListItem, Panel, Button } from "../../../ui";
+import { Divider, List, ListItem, Panel, Button } from '../../../ui';
 
-import { api } from "../../../api/api";
-import { EVENT_NAMES } from "../../../api/event";
+import { api } from '../../../api/api';
+import { EVENT_NAMES } from '../../../api/event';
 
-import { MapContext } from "../../app-start";
+import { MapContext } from '../../app-start';
 
-import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
+import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
 export const useStyles = makeStyles((theme) => ({
   appBar: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    height: "100%",
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: '100%',
     zIndex: theme.zIndex.appBar,
-    pointerEvents: "all",
+    pointerEvents: 'all',
     backgroundColor: theme.palette.primary.dark,
   },
   appBarButtons: {
-    overflowY: "auto",
-    overflowX: "hidden",
+    overflowY: 'auto',
+    overflowX: 'hidden',
     width: 50,
   },
   appBarButton: {
     backgroundColor: theme.palette.primary.dark,
     color: theme.palette.primary.light,
-    "&:hover": {
+    '&:hover': {
       backgroundColor: theme.palette.primary.dark,
       color: theme.palette.primary.light,
     },
@@ -89,7 +89,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if (args.handlerName === mapId && args.type === "appbar") {
+        if (args.handlerName === mapId && args.type === 'appbar') {
           updateComponent();
         }
       },
@@ -99,7 +99,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if (args.handlerName === mapId && args.type === "appbar") {
+        if (args.handlerName === mapId && args.type === 'appbar') {
           updateComponent();
         }
       },

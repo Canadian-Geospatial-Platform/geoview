@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-underscore-dangle */
-import L, { LeafletEventHandlerFn } from "leaflet";
-import "./marker-cluster-element.d";
-import "leaflet.markercluster/src";
+/* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
+import L, { LeafletEventHandlerFn } from 'leaflet';
+import './marker-cluster-element.d';
+import 'leaflet.markercluster/src';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
-import { TypeIconCreationFunction } from "./cgpv-types";
-import * as MarkerDefinitions from "./marker-definitions";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
+import { TypeIconCreationFunction } from './cgpv-types';
+import * as MarkerDefinitions from './marker-definitions';
 
 let { unselectedMarkerIconCreator, selectedMarkerIconCreator } = MarkerDefinitions;
 
@@ -39,7 +38,7 @@ export const MarkerClusterElement = L.Marker.extend({
       onHandlerDefinitions.forEach((handlerDefinition: [string, LeafletEventHandlerFn]) => {
         this.on(handlerDefinition[0], handlerDefinition[1]);
       });
-      this.type = "marker_cluster_element";
+      this.type = 'marker_cluster_element';
     }
   },
 
@@ -97,16 +96,16 @@ export const MarkerClusterElement = L.Marker.extend({
   startBlinking() {
     this.blinking = true;
     this.options.blinking = true;
-    L.DomUtil.addClass(this.options.icon.options, "blinking-icon-enabled");
-    if (this._icon) L.DomUtil.addClass(this._icon, "blinking-icon-enabled");
+    L.DomUtil.addClass(this.options.icon.options, 'blinking-icon-enabled');
+    if (this._icon) L.DomUtil.addClass(this._icon, 'blinking-icon-enabled');
     api.event.emit(EVENT_NAMES.EVENT_CLUSTER_ELEMENT_START_BLINKING, this.options.mapId, this);
   },
 
   stopBlinking() {
     this.blinking = false;
     this.options.blinking = false;
-    L.DomUtil.removeClass(this.options.icon.options, "blinking-icon-enabled");
-    if (this._icon) L.DomUtil.removeClass(this._icon, "blinking-icon-enabled");
+    L.DomUtil.removeClass(this.options.icon.options, 'blinking-icon-enabled');
+    if (this._icon) L.DomUtil.removeClass(this._icon, 'blinking-icon-enabled');
     api.event.emit(EVENT_NAMES.EVENT_CLUSTER_ELEMENT_STOP_BLINKING, this.options.mapId, this);
   },
 });
@@ -116,7 +115,7 @@ export const MarkerClusterElement = L.Marker.extend({
  * it sets the type attribute of the marker cluster element
  */
 MarkerClusterElement.addInitHook(function fn(this: L.MarkerClusterElement) {
-  this.type = "marker_cluster_element";
+  this.type = 'marker_cluster_element';
 });
 
 // any is used here because attribute L.MarkerClusterElement doesn't exist

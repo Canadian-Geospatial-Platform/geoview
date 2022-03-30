@@ -1,14 +1,14 @@
-import axios from "axios";
+import axios from 'axios';
 
-import L, { Layer } from "leaflet";
+import L, { Layer } from 'leaflet';
 
-import { featureLayer, mapService as esriMapService, MapService } from "esri-leaflet";
+import { featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { TypeLayerConfig, TypeJSONObject } from "../../../core/types/cgpv-types";
-import { generateId, getXMLHttpRequest } from "../../../core/utils/utilities";
-import { blueCircleIcon } from "../../../core/types/marker-definitions";
+import { TypeLayerConfig, TypeJSONObject } from '../../../core/types/cgpv-types';
+import { generateId, getXMLHttpRequest } from '../../../core/utils/utilities';
+import { blueCircleIcon } from '../../../core/types/marker-definitions';
 
-import { api } from "../../../api/api";
+import { api } from '../../../api/api';
 
 /**
  * a class to add esri feature layer
@@ -21,7 +21,7 @@ export class EsriFeature {
   id: string;
 
   // layer name with default
-  name?: string = "Esri Feature Layer";
+  name?: string = 'Esri Feature Layer';
 
   // layer type
   type: string;
@@ -41,8 +41,8 @@ export class EsriFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId("");
-    if ("name" in layerConfig) this.name = layerConfig.name;
+    this.id = layerConfig.id || generateId('');
+    if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
     this.layer = new Layer();
@@ -58,8 +58,8 @@ export class EsriFeature {
    * @return {Promise<Layer | string>} layers to add to the map
    */
   async add(layer: TypeLayerConfig): Promise<Layer | string> {
-    let queryUrl = this.url.substr(-1) === "/" ? this.url : `${this.url}/`;
-    queryUrl += "legend?f=pjson";
+    let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
+    queryUrl += 'legend?f=pjson';
     // define a default blue icon
     let iconSymbol = blueCircleIcon;
 
@@ -82,7 +82,7 @@ export class EsriFeature {
 
         // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
         // if the path is bad, return will be {}
-        if (value !== "{}" && typeof type !== "undefined" && type === "Feature Layer") {
+        if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
           const feat = featureLayer({
             url: layer.url,
             pointToLayer: (feature, latlng) => {
@@ -92,7 +92,7 @@ export class EsriFeature {
 
           resolve(feat);
         } else {
-          resolve("{}");
+          resolve('{}');
         }
       });
     });
@@ -118,8 +118,8 @@ export class EsriFeature {
    * @returns {TypeJSONObject} legend configuration in json format
    */
   getLegendJson = (): Promise<TypeJSONObject> => {
-    let queryUrl = this.url.substr(-1) === "/" ? this.url : `${this.url}/`;
-    queryUrl += "legend?f=pjson";
+    let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
+    queryUrl += 'legend?f=pjson';
     return axios.get(queryUrl).then((res) => {
       return res.data;
     });

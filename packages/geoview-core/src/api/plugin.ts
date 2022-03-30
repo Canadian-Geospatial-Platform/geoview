@@ -1,17 +1,14 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable max-classes-per-file */
-import React from "react";
+import React from 'react';
 
-import i18next from "i18next";
-import * as translate from "react-i18next";
+import i18next from 'i18next';
+import * as translate from 'react-i18next';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import { MapViewer } from "../geo/map/map";
+import { MapViewer } from '../geo/map/map';
 
-import { api } from "./api";
-import { Cast, TypeWindow } from "../core/types/cgpv-types";
+import { api } from './api';
+import { Cast, TypeWindow, TypeJSONObject, TypeActualPlugin, TypePluginEntry, TypeRecordOfPlugin } from '../core/types/cgpv-types';
 
 /**
  * Class to manage plugins
@@ -20,44 +17,51 @@ import { Cast, TypeWindow } from "../core/types/cgpv-types";
  * @class
  */
 export class Plugin {
-  plugins: Record<string, any> = {};
+  plugins: TypeRecordOfPlugin = {};
 
   /**
    * Add new plugin
    *
-   * @param {string} id the plugin id
-   * @param {string} id of map to add this plugin to
+   * @param {string} pluginId the plugin id
+   * @param {string} mapId id of map to add this plugin to
    * @param {Class} constructor the plugin class (React Component)
    * @param {Object} props the plugin properties
    */
-  addPlugin = async (id: string, mapId: string, constructor?: any, props?: Record<string, unknown>): Promise<void> => {
-    if ((this.plugins[mapId] && !this.plugins[mapId][id]) || !(mapId in this.plugins)) {
-      let plugin: any;
+  addPlugin = async (
+    pluginId: string,
+    mapId: string,
+    constructor?: (pluginId: string, props: TypeJSONObject) => TypeJSONObject,
+    props?: TypeJSONObject
+  ): Promise<void> => {
+    if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
+      let plugin: TypeActualPlugin | null = null;
 
       if (constructor) {
-        // create new instance of the plugin
-        plugin = new constructor(id, props);
+        // create new instance of the plugin. Here we must type the constructor variable to any
+        // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        plugin = new (constructor as any)(pluginId, props);
       } else {
-        const InstanceConstructor = (await import(`${"../plugins"}/${id}/index.tsx`)).default;
+        const InstanceConstructor = (await import(`${'../plugins'}/${pluginId}/index.tsx`)).default;
 
-        if (InstanceConstructor) plugin = new InstanceConstructor(id, props);
+        if (InstanceConstructor) plugin = new InstanceConstructor(pluginId, props);
       }
 
       if (plugin) {
         // add translations if provided
-        if (typeof plugin.translations === "object") {
+        if (typeof plugin.translations === 'object') {
           const { translations } = plugin;
 
           Object.keys(translations).forEach((languageKey: string) => {
-            const translation = translations[languageKey];
+            const translation = (translations as TypeJSONObject)[languageKey];
 
-            i18next.addResourceBundle(languageKey, "translation", translation, true, false);
+            i18next.addResourceBundle(languageKey, 'translation', translation, true, false);
           });
         }
 
         // assign the plugin default values to be accessible from the plugin
         Object.defineProperties(plugin, {
-          id: { value: id },
+          id: { value: pluginId },
           api: { value: api },
           createElement: { value: React.createElement },
           react: { value: React },
@@ -68,20 +72,20 @@ export class Plugin {
 
         if (!this.plugins[mapId]) {
           this.plugins[mapId] = {
-            [id]: {
-              id,
+            [pluginId]: {
+              id: pluginId,
               plugin,
             },
           };
         } else {
-          this.plugins[mapId][id] = {
-            id,
+          this.plugins[mapId][pluginId] = Cast<TypePluginEntry>({
+            pluginId,
             plugin,
-          };
+          });
         }
 
         // call plugin added method if available
-        if (typeof plugin.added === "function") {
+        if (typeof plugin.added === 'function') {
           plugin.added();
         }
       }
@@ -91,32 +95,32 @@ export class Plugin {
   /**
    * Delete a plugin
    *
-   * @param {string} id the id of the plugin to delete
+   * @param {string} pluginId the id of the plugin to delete
    * @param {string} mapId the map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
-  removePlugin = (id: string, mapId?: string): void => {
+  removePlugin = (pluginId: string, mapId?: string): void => {
     if (mapId) {
-      if (this.plugins[mapId] && this.plugins[mapId][id] && this.plugins[mapId][id].plugin) {
-        const { plugin } = this.plugins[mapId][id];
+      if (this.plugins[mapId] && this.plugins[mapId][pluginId] && this.plugins[mapId][pluginId].plugin) {
+        const { plugin } = this.plugins[mapId][pluginId];
 
         // call the removed function on the plugin
-        if (typeof plugin.removed === "function") plugin.removed();
+        if (typeof plugin.removed === 'function') plugin.removed();
       }
 
-      delete this.plugins[mapId][id];
+      delete this.plugins[mapId][pluginId];
     } else {
       // remove the plugin from all maps
       for (let i = 0; i < Object.keys(this.plugins).length; i += 1) {
         const pluginMapId = Object.keys(this.plugins)[i];
         const value = this.plugins[pluginMapId];
 
-        if (value[id] && value[id].plugin) {
-          const { plugin } = value[id];
+        if (value[pluginId] && value[pluginId].plugin) {
+          const { plugin } = value[pluginId];
 
           // call the removed function on the plugin
-          if (typeof plugin.removed === "function") plugin.removed();
+          if (typeof plugin.removed === 'function') plugin.removed();
 
-          delete this.plugins[pluginMapId][id];
+          delete this.plugins[pluginMapId][pluginId];
         }
       }
     }
@@ -134,9 +138,9 @@ export class Plugin {
       if (mapPlugins) {
         // remove all plugins by map
         for (let i = 0; i < Object.keys(mapPlugins).length; i += 1) {
-          const plugin = Object.keys(mapPlugins)[i];
+          const pluginId = Object.keys(mapPlugins)[i];
 
-          this.removePlugin(plugin, mapId);
+          this.removePlugin(pluginId, mapId);
         }
       }
     }
@@ -152,14 +156,14 @@ export class Plugin {
 
       // load plugins if provided in the config
       if (map.mapProps.plugins && map.mapProps.plugins.length > 0) {
-        map.mapProps.plugins.forEach((plugin) => {
+        map.mapProps.plugins.forEach((pluginId) => {
           const { plugins } = Cast<TypeWindow>(window);
-          if (plugins && plugins[plugin]) {
-            this.addPlugin(plugin, mapId, plugins[plugin], {
+          if (plugins && plugins[pluginId]) {
+            this.addPlugin(pluginId, mapId, plugins[pluginId], {
               mapId,
             });
           } else {
-            this.addPlugin(plugin, mapId, null, {
+            this.addPlugin(pluginId, mapId, undefined, {
               mapId,
             });
           }

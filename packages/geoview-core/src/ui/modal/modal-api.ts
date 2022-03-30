@@ -1,9 +1,9 @@
-import { ModalModel } from "./modal-model";
-import { TypeFunction, TypeChildren } from "../../core/types/cgpv-types";
-import { generateId } from "../../core/utils/utilities";
+import { ModalModel } from './modal-model';
+import { TypeFunction, TypeChildren } from '../../core/types/cgpv-types';
+import { generateId } from '../../core/utils/utilities';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
 /**
  * Both header and footer actions' properties interface
@@ -97,7 +97,7 @@ export class ModalApi {
    */
   createModal = (modal: TypeModalProps): void => {
     if (!modal.content) return;
-    const id = modal.id ? modal.id : generateId("");
+    const id = modal.id ? modal.id : generateId('');
     this.modals[id] = new ModalModel(modal.content);
     this.modals[id].id = id;
     this.modals[id].mapId = this.mapId;

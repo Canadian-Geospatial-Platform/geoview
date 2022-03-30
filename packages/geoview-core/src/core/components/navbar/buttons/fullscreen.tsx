@@ -1,10 +1,10 @@
-import { useContext, useState } from "react";
+import { useContext, useState } from 'react';
 
-import { MapContext } from "../../../app-start";
+import { MapContext } from '../../../app-start';
 
-import { api } from "../../../../api/api";
+import { api } from '../../../../api/api';
 
-import { Button, FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
+import { Button, FullscreenIcon, FullscreenExitIcon } from '../../../../ui';
 
 /**
  * Interface used for fullscreen button properties
@@ -18,8 +18,8 @@ interface FullscreenProps {
  * default properties values
  */
 const defaultProps = {
-  className: "",
-  iconClassName: "",
+  className: '',
+  iconClassName: '',
 };
 
 /**

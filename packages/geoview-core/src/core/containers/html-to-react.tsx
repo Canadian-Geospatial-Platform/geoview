@@ -1,9 +1,7 @@
-/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/require-default-props */
-/* eslint-disable react/no-danger */
-import React, { CSSProperties } from "react";
+import React, { CSSProperties } from 'react';
 
-import { TypeJSONObject } from "../types/cgpv-types";
+import { TypeJSONObject } from '../types/cgpv-types';
 
 /**
  * Interface used for custom html elements
@@ -24,5 +22,6 @@ interface HtmlToReactProps {
 export function HtmlToReact(props: HtmlToReactProps): JSX.Element {
   const { htmlContent, className, style, extraOptions } = props;
 
+  // eslint-disable-next-line react/jsx-props-no-spreading, react/no-danger
   return <div {...extraOptions} className={className} style={style} dangerouslySetInnerHTML={{ __html: htmlContent }} />;
 }

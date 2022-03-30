@@ -1,4 +1,4 @@
-import { Cast, TypeJSONObject, TypeJSONValue } from "../types/cgpv-types";
+import { Cast, TypeJSONObject, TypeJSONValue } from '../types/cgpv-types';
 
 /**
  * Generate a unique id if an id was not provided
@@ -18,7 +18,7 @@ export function generateId(id?: string): string {
  */
 export function isJsonString(str: string): boolean {
   try {
-    if (str !== "") {
+    if (str !== '') {
       JSON.parse(str);
     } else {
       return false;
@@ -45,11 +45,10 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | Type
     const element = Cast<Element>(xml);
     if (element.attributes) {
       if (element.attributes.length > 0) {
-        obj["@attributes"] = {};
-        // eslint-disable-next-line no-plusplus
+        obj['@attributes'] = {};
         for (let j = 0; j < element.attributes.length; j++) {
           const attribute = element.attributes.item(j) as Node;
-          (obj["@attributes"] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
+          (obj['@attributes'] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
         }
       }
     }
@@ -60,15 +59,14 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | Type
 
   // do children
   if (xml.hasChildNodes()) {
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < xml.childNodes.length; i++) {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
       const jsonObject = obj as TypeJSONObject;
-      if (typeof jsonObject[nodeName] === "undefined") {
+      if (typeof jsonObject[nodeName] === 'undefined') {
         jsonObject[nodeName] = xmlToJson(item);
       } else {
-        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === "undefined") {
+        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === 'undefined') {
           jsonObject[nodeName] = [jsonObject[nodeName]];
         }
         (jsonObject[nodeName] as TypeJSONValue[]).push(xmlToJson(item));
@@ -88,20 +86,20 @@ export function getXMLHttpRequest(url: string): Promise<string> {
   const request = new Promise<string>((resolve) => {
     try {
       const jsonObj = new XMLHttpRequest();
-      jsonObj.open("GET", url, true);
+      jsonObj.open('GET', url, true);
       jsonObj.onreadystatechange = () => {
         if (jsonObj.readyState === 4 && jsonObj.status === 200) {
           resolve(jsonObj.responseText);
         } else if (jsonObj.readyState === 4 && jsonObj.status >= 400) {
-          resolve("{}");
+          resolve('{}');
         }
       };
       jsonObj.onerror = () => {
-        resolve("{}");
+        resolve('{}');
       };
       jsonObj.send(null);
     } catch (error) {
-      resolve("{}");
+      resolve('{}');
     }
   });
 

@@ -1,10 +1,10 @@
-import { useContext } from "react";
+import { useContext } from 'react';
 
-import { MapContext } from "../../../app-start";
+import { MapContext } from '../../../app-start';
 
-import { api } from "../../../../api/api";
+import { api } from '../../../../api/api';
 
-import { Button, ZoomInIcon } from "../../../../ui";
+import { Button, ZoomInIcon } from '../../../../ui';
 
 /**
  * Zoom in button properties
@@ -18,8 +18,8 @@ interface ZoomInProps {
  * default properties values
  */
 const defaultProps = {
-  className: "",
-  iconClassName: "",
+  className: '',
+  iconClassName: '',
 };
 
 /**

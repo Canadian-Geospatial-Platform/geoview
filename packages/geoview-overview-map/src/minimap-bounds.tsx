@@ -1,4 +1,4 @@
-import { TypeWindow } from "geoview-core";
+import { TypeWindow } from 'geoview-core';
 
 // get window object
 const w = window as TypeWindow;
@@ -47,7 +47,7 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
     },
     [parentMap]
   );
-  useMapEvent("click", onClick);
+  useMapEvent('click', onClick);
 
   // Keep track of bounds in state to trigger renders
   const [bounds, setBounds] = useState({
@@ -120,11 +120,11 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
         top: `${bounds.top}px`,
         width: `${bounds.width}px`,
         height: `${bounds.height}px`,
-        display: "block",
+        display: 'block',
         opacity: 0.5,
-        position: "absolute",
-        border: "1px solid rgb(0, 0, 0)",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        position: 'absolute',
+        border: '1px solid rgb(0, 0, 0)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         zIndex: 1000,
       }}
     />
