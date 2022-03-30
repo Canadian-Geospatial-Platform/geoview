@@ -10,7 +10,7 @@ import WMSCapabilities from 'wms-capabilities';
 
 import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -109,6 +109,7 @@ export class WMS {
               format: 'image/png',
               transparent: true,
               attribution: '',
+              version: Cast<string>(json.version),
             });
             this.#wmsParams = wms.wmsParams;
 

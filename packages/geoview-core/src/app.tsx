@@ -57,6 +57,8 @@ const defaultConfig: types.TypeMapConfigProps = {
   theme: 'dark',
   components: ['appbar', 'navbar', 'northArrow'],
   languages: ['en-CA', 'fr-CA'],
+  language: 'en-CA',
+  extraOptions: {},
 };
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
@@ -208,7 +210,7 @@ function init(callback: () => void) {
             basemapOptions,
           },
           languages: ['en-CA', 'fr-CA'],
-          langauge: urlParams.l as 'en-CA' | 'fr-CA',
+          language: urlParams.l as 'en-CA' | 'fr-CA',
         };
       } else {
         let configObjStr = mapElement.getAttribute('data-config');

@@ -12,7 +12,7 @@ export const MINIMAP_SIZE = {
 const w = window as any;
 
 // access the cgpv object from the window object
-const cgpv = w['cgpv'];
+const { cgpv } = w;
 
 // access the api calls
 const { api, react, leaflet, reactLeaflet, ui, constants } = cgpv;
