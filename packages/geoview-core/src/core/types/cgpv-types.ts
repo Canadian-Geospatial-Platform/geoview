@@ -336,6 +336,7 @@ export type TypeLayerData = {
   layers: TypeLayersInLayerData;
   getLegendGraphic?: () => Promise<string>;
   getLegendJson?: () => Promise<TypeLegendJson>;
+  setEntries: (enrties: string[]) => void;
   setOpacity: (opacity: number) => void;
   getBounds: () => L.LatLngBounds | Promise<L.LatLngBounds>;
 };
