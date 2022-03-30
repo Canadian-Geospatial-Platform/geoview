@@ -106,10 +106,10 @@ export class MapViewer {
     this.mapProps = mapProps;
 
     this.language = mapProps.language;
-    this.currentProjection = mapProps.projection;
+    this.currentProjection = mapProps.map.projection;
     this.i18nInstance = i18instance;
-    this.currentZoom = mapProps.zoom;
-    this.currentPosition = new LatLng(mapProps.center[0], mapProps.center[1]);
+    this.currentZoom = mapProps.map.initialView.zoom;
+    this.currentPosition = new LatLng(mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]);
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
@@ -127,16 +127,16 @@ export class MapViewer {
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(cgpMap, this.mapProps.layers);
+    this.layer = new Layer(cgpMap, this.mapProps.map.layers);
 
     // initialize the projection
-    this.projection = new MapProjection(this.mapProps.projection);
+    this.projection = new MapProjection(this.mapProps.map.projection);
 
     // check if geometries are provided from url
     this.loadGeometries();
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(this.mapProps.basemapOptions, this.mapProps.language, this.mapProps.projection, this.id);
+    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
   }
 
   /**
@@ -243,13 +243,13 @@ export class MapViewer {
    * @param {string} language the language to use (en-CA, fr-CA)
    * @param {TypeLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (language: string, layers?: TypeLayerConfig[]): void => {
+  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeLayerConfig[]): void => {
     const updatedConfig = { ...this.mapProps };
 
     updatedConfig.language = language;
 
     if (layers && layers.length > 0) {
-      updatedConfig.layers = updatedConfig.layers?.concat(layers);
+      updatedConfig.map.layers = updatedConfig.map.layers?.concat(layers);
     }
 
     // emit an event to reload the map to change the language

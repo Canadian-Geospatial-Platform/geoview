@@ -35,11 +35,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
+  const { map: mapProps, extraOptions, language } = props;
+
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const id = props.id ? props.id : generateId('');
-
-  const { center, zoom, projection, language, selectBox, boxZoom, extraOptions } = props;
 
   const [basemapLayers, setBasemapLayers] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -63,7 +63,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   // get map option from selected basemap projection
-  const mapOptions: L.MapOptions = viewer.getMapOptions(projection);
+  const mapOptions: L.MapOptions = viewer.getMapOptions(mapProps.projection);
 
   /**
    * Get the center position of the map when move / drag has ended
@@ -152,12 +152,12 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   return (
     <MapContainer
       id={id}
-      center={center}
-      zoom={zoom}
-      crs={api.projection.getProjection(projection)}
+      center={mapProps.initialView.center}
+      zoom={mapProps.initialView.zoom}
+      crs={api.projection.getProjection(mapProps.projection)}
       zoomControl={false}
-      selectBox={selectBox}
-      boxZoom={boxZoom}
+      selectBox={mapProps.controls?.selectBox}
+      boxZoom={mapProps.controls?.boxZoom}
       attributionControl={false}
       minZoom={mapOptions.minZoom}
       maxZoom={mapOptions.maxZoom}
@@ -172,7 +172,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
 
         // reset the view when created so overview map is moved at the right place
-        cgpMap.setView(center, zoom);
+        cgpMap.setView(mapProps.initialView.center, mapProps.initialView.zoom);
 
         // emit the initial map position
         api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {

@@ -678,6 +678,10 @@
       "type": "string",
       "enum": ["1.0"],
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    },
+    "extraOptions": {
+      "type": "object",
+      "description": "Additional options used for leaflet map options"
     }
   },
   "required": ["map", "languages"]

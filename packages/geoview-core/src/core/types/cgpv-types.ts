@@ -154,17 +154,6 @@ export const CONST_LAYER_TYPES = {
 };
 
 /**
- * interface used when adding a new layer
- */
-export type TypeLayerConfig = {
-  id?: string;
-  name?: string;
-  url: string;
-  type: string;
-  entries?: string;
-};
-
-/**
  * ESRI Json Legend for Dynamic Layer
  */
 export type TypeLegendJsonDynamic = {
@@ -481,31 +470,169 @@ export type TypePanelContentProps = {
   mapId: string;
 };
 
-/**
- * Interface used when creating a map to validate configuration object
- */
-export type TypeMapConfigProps = {
-  id: string;
-  name?: string;
-  center: L.LatLngTuple;
-  zoom: number;
-  projection: number;
-  language: string;
-  selectBox: boolean;
+export type TypeMapControls = {
   boxZoom: boolean;
-  basemapOptions: TypeBasemapOptions;
-  layers?: TypeLayerConfig[];
-  plugins: string[];
-  extraOptions: TypeJSONObject;
+  selectBox: boolean;
 };
+
+export type TypeMapInitialView = {
+  zoom: number;
+  center: L.LatLngTuple;
+};
+
+export type TypeProjections = 3978 | 3857;
 
 /**
  * interface for basemap options
  */
 export type TypeBasemapOptions = {
-  id: string;
+  id: 'transport' | 'shaded' | 'label' | 'simple';
   shaded: boolean;
   labeled: boolean;
+};
+
+/**
+ * interface used when adding a new layer
+ */
+export type TypeLayerConfig = {
+  id: string;
+  url: TypeLangString;
+  layerType: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export type TypeLayerSettings = {
+  opacity: number;
+  visibility: boolean;
+  boundingBox: boolean;
+  query: boolean;
+};
+
+export type TypeDetailsLayerSettings = {
+  parser?: string;
+  template: TypeLangString;
+};
+
+export interface TypeBasicLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeFeatureLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+  nameField?: string;
+  tooltipField?: string;
+  outfields?: string;
+}
+
+export type TypeDynamicLayerEntry = {
+  index: string;
+  name?: TypeLangString;
+  nameField?: string;
+  outfields?: string;
+};
+
+export interface TypeDynamicLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+  layerEntries: TypeDynamicLayerEntry[];
+}
+
+export interface TypeGeoJSONLayer extends TypeLayerConfig {
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJSONObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeWFSLayer extends TypeLayerConfig {
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJSONObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export type TypeWMSLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export interface TypeWMSLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  layerEntries: TypeWMSLayerEntry[];
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeGeometryEndpointLayer extends TypeLayerConfig {
+  name: TypeLangString;
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJSONObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeGeoCoreLayer extends Omit<TypeLayerConfig, 'url'> {
+  url?: TypeLangString;
+}
+
+export type TypeMapConfig = {
+  interaction: 'static' | 'dynamic';
+  controls?: TypeMapControls;
+  initialView: TypeMapInitialView;
+  projection: number;
+  basemapOptions: TypeBasemapOptions;
+  layers?: TypeLayerConfig[];
+};
+
+export type TypeLangString = {
+  en: string;
+  fr: string;
+};
+
+export type TypeAppBarProps = {
+  about: TypeLangString;
+};
+
+export type TypeNavBarProps = {};
+
+export type TypeNorthArrowProps = {};
+
+export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';
+
+export type TypeMapCorePackages = 'overview-map' | 'basemap-switcher' | 'layers-panel' | 'details-panel' | 'geolocator';
+
+export type TypeExternalPackages = {
+  name: string;
+  configUrl?: string;
+};
+
+export type TypeServiceUrls = {
+  keys: string;
+};
+
+export type TypeLanguages = 'en-CA' | 'fr-CA';
+
+/**
+ * Interface used when creating a map to validate configuration object
+ */
+export type TypeMapConfigProps = {
+  id: string;
+  map: TypeMapConfig;
+  theme?: 'dark' | 'light';
+  appBar?: TypeAppBarProps;
+  navBar?: TypeNavBarProps;
+  northArrow?: TypeNorthArrowProps;
+  components?: TypeMapComponents[];
+  corePackages?: TypeMapCorePackages[];
+  externalPackages?: TypeExternalPackages[];
+  serviceUrls?: TypeServiceUrls;
+  languages: TypeLanguages[];
+  language: 'en-CA' | 'fr-CA';
+  version?: string;
+  extraOptions: TypeJSONObject;
 };
 
 /**

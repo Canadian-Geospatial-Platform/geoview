@@ -20,28 +20,26 @@ import Ajv from 'ajv';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-import { api } from './api/api';
-
-import * as UI from './ui';
-
 import 'leaflet/dist/leaflet.css';
 import './ui/style/style.css';
 import './ui/style/vendor.css';
+import * as UI from './ui';
 
 import AppStart from './core/app-start';
-
 import * as types from './core/types/cgpv-types';
-import { Config } from './core/utils/config';
-import { EVENT_NAMES } from './api/event';
-import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 import { generateId } from './core/utils/utilities';
 
-<<<<<<< HEAD
+import { EVENT_NAMES } from './api/event';
+import { api } from './api/api';
+
+import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
+
 import schema from '../schema.json';
 
 export * from './core/types/cgpv-types';
 
-const defaultConfig = {
+const defaultConfig: types.TypeMapConfigProps = {
+  id: generateId(),
   map: {
     interaction: 'dynamic',
     initialView: {
@@ -54,113 +52,12 @@ const defaultConfig = {
       shaded: true,
       labeled: true,
     },
-    layers: [
-      {
-        id: 'wmsLYR1',
-        name: {
-          en: 'Topographic OSM WMS',
-          fr: 'WMS OSM Topographique',
-        },
-        url: {
-          en: 'https://ows.mundialis.de/services/service?',
-          fr: 'https://ows.mundialis.de/services/service?',
-        },
-        layerType: 'ogcWMS',
-        layerEntries: [
-          {
-            id: 'TOPO-OSM-WMS',
-          },
-        ],
-      },
-      {
-        id: 'esriDynamicLYR3',
-        name: {
-          en: 'Energy Infrastructure of North America',
-          fr: "Infrastructure énergétique d'Amérique du Nord",
-        },
-        url: {
-          en: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
-          fr: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer',
-        },
-        layerType: 'esriDynamic',
-        layerEntries: [
-          {
-            id: '4',
-            name: {
-              en: 'Natural Gas Processing Plants - config',
-              fr: 'Usines de traitement du gaz naturel - config',
-            },
-          },
-          {
-            id: '5',
-          },
-          {
-            id: '6',
-          },
-        ],
-      },
-      {
-        id: 'esriFeatureLYR4',
-        name: {
-          en: 'Geothermal',
-          fr: 'Géothermie',
-        },
-        url: {
-          en: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19',
-          fr: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21',
-        },
-        layerType: 'esriFeature',
-      },
-      {
-        id: 'esriFeatureLYR5',
-        url: {
-          en: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10',
-          fr: 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10',
-        },
-        layerType: 'esriFeature',
-      },
-      {
-        name: {
-          en: 'GeoJSON Sample',
-          fr: 'Exemple GeoJSON',
-        },
-        url: {
-          en: './geojson/polygons.json',
-          fr: './geojson/polygons.json',
-        },
-        layerType: 'geojson',
-      },
-      {
-        id: 'geojsonEnPointLYR6',
-        name: {
-          en: 'GeoJSON Service End Point Sample',
-          fr: 'Exemple Service GeoJSON',
-        },
-        url: {
-          en: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/',
-          fr: 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/',
-        },
-        layerType: 'geojsonEndpoint',
-      },
-      {
-        id: '9e1507cd-f25c-4c64-995b-6563bf9d65bd',
-        url: 'https://maps.canada.ca/geonetwork/srv/api/v2/docs/en/',
-        layerType: 'geoCore',
-      },
-    ],
+    layers: [],
   },
   theme: 'dark',
-  appBar: {
-    about: '# An example of a markdown',
-  },
   components: ['appbar', 'navbar', 'northArrow'],
-  corePackages: ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
-  externalPackages: [],
-  language: 'en-CA',
+  languages: ['en-CA', 'fr-CA'],
 };
-=======
-export * from './core/types/cgpv-types';
->>>>>>> 904ae369921377cd15ddb6007a2b00aa55c615e5
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
@@ -274,7 +171,13 @@ function init(callback: () => void) {
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
-    const mapId = mapElement.getAttribute('id');
+    let mapId = mapElement.getAttribute('id');
+
+    if (!mapId) mapId = generateId();
+
+    let langauge = mapElement.getAttribute('data-lang');
+
+    if (!langauge) langauge = 'en-CA';
 
     if (mapId) {
       // eslint-disable-next-line no-restricted-globals
@@ -283,27 +186,29 @@ function init(callback: () => void) {
       // check if url contains any params
       const urlParams = getMapPropsFromUrlParams(locationSearch);
 
-      let configObj = {};
+      let configObj: types.TypeMapConfigProps = { ...defaultConfig, id: mapId, langauge: langauge as 'en-CA' | 'fr-CA' };
 
       if (Object.keys(urlParams).length) {
         // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
 
-        let center = urlParams.c?.split(',');
-        if (!center) center = [0, 0];
+        let center = (urlParams.c as string).split(',');
+        if (!center) center = ['0', '0'];
 
-        const basemapOptions = parseObjectFromUrl(urlParams.b);
+        const basemapOptions = parseObjectFromUrl(urlParams.b as string) as types.TypeBasemapOptions;
 
         configObj = {
+          id: mapId,
           map: {
-            interaction: urlParams.i,
+            interaction: urlParams.i as 'static' | 'dynamic',
             initialView: {
-              zoom: parseInt(urlParams.z, 10),
+              zoom: parseInt(urlParams.z as string, 10),
               center: [parseInt(center[0], 10), parseInt(center[1], 10)],
             },
-            projection: parseInt(urlParams.p, 10),
+            projection: parseInt(urlParams.p as '3978' | '3857', 10),
             basemapOptions,
           },
-          language: urlParams.l,
+          languages: ['en-CA', 'fr-CA'],
+          langauge: urlParams.l as 'en-CA' | 'fr-CA',
         };
       } else {
         let configObjStr = mapElement.getAttribute('data-config');
@@ -317,8 +222,6 @@ function init(callback: () => void) {
         }
       }
 
-      console.log(configObj);
-
       // validate and use defaults for not provided fields
       const validator = new Ajv({
         strict: false,
@@ -328,8 +231,6 @@ function init(callback: () => void) {
       const validate = validator.compile(schema);
 
       const valid = validate(configObj);
-
-      console.log(validate.errors);
 
       if (!valid && validate.errors && validate.errors.length) {
         for (let j = 0; j < validate.errors.length; j += 1) {
@@ -344,7 +245,10 @@ function init(callback: () => void) {
           //   });
         }
       } else {
-        ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+        configObj.id = mapId;
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ReactDOM.render(<AppStart configObj={configObj!} />, mapElement);
       }
 
       // if (!valid) {

@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -131,19 +132,7 @@ export function Shell(props: ShellProps): JSX.Element {
         </a>
         <Appbar />
         <Navbar />
-        <Map
-          id={id}
-          center={config.center}
-          zoom={config.zoom}
-          projection={config.projection}
-          language={config.language}
-          selectBox={config.selectBox}
-          boxZoom={config.boxZoom}
-          layers={config.layers}
-          basemapOptions={config.basemapOptions}
-          plugins={config.plugins}
-          extraOptions={config.extraOptions}
-        />
+        <Map {...config} />
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}
