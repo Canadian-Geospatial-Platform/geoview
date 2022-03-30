@@ -1,49 +1,49 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import makeStyles from "@mui/styles/makeStyles";
-import { Drawer as MaterialDrawer } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
+import { Drawer as MaterialDrawer } from '@mui/material';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { IconButton, ChevronLeftIcon, ChevronRightIcon } from "..";
-import { MapContext } from "../../core/app-start";
-import { TypeDrawerProps } from "../../core/types/cgpv-types";
+import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
+import { MapContext } from '../../core/app-start';
+import { TypeDrawerProps } from '../../core/types/cgpv-types';
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
-    whiteSpace: "nowrap",
+    whiteSpace: 'nowrap',
   },
   drawerOpen: {
     width: drawerWidth,
-    transition: theme.transitions.create("width", {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    "& $toolbar": {
-      justifyContent: "flex-end",
+    '& $toolbar': {
+      justifyContent: 'flex-end',
     },
   },
   drawerClose: {
-    transition: theme.transitions.create("width", {
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    overflowX: "hidden",
-    width: "61px",
-    "& $toolbar": {
-      justifyContent: "center",
+    overflowX: 'hidden',
+    width: '61px',
+    '& $toolbar': {
+      justifyContent: 'center',
     },
   },
   toolbar: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: theme.spacing(0, 1),
   },
 }));
@@ -104,7 +104,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
 
   return (
     <MaterialDrawer
-      variant={variant || "permanent"}
+      variant={variant || 'permanent'}
       className={open ? classes.drawerOpen : classes.drawerClose}
       classes={{
         paper: className || (open ? classes.drawerOpen : classes.drawerClose),
@@ -113,7 +113,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     >
       <div className={classes.toolbar}>
         <IconButton
-          tooltip={open ? t("general.close") : t("general.open")}
+          tooltip={open ? t('general.close') : t('general.open')}
           tooltipPlacement="right"
           onClick={() => {
             openCloseDrawer(!open);

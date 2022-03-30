@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import { TypeJSONObject, TypeFeatureInfoProps, TypeWindow } from "geoview-core";
+import { TypeJSONObject, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -27,44 +27,44 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
   // use material ui theming
   const useStyles = ui.makeStyles(() => ({
     featureInfoContainer: {
-      width: "100%",
+      width: '100%',
     },
     featureInfoHeader: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
     },
     featureInfoHeaderIconContainer: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      width: "32px",
-      minWidth: "32px",
-      height: "32px",
-      boxShadow: "0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)",
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '32px',
+      minWidth: '32px',
+      height: '32px',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)',
     },
     featureInfoHeaderIcon: {},
     featureInfoHeaderText: {
-      marginLeft: "10px",
-      width: "100%",
+      marginLeft: '10px',
+      width: '100%',
       fontSize: 18,
     },
     featureInfoItemsContainer: {
-      display: "flex",
-      flexDirection: "column",
+      display: 'flex',
+      flexDirection: 'column',
       marginTop: 20,
     },
     featureInfoItem: {
-      display: "flex",
-      flexDirection: "column",
-      margin: "5px 0",
+      display: 'flex',
+      flexDirection: 'column',
+      margin: '5px 0',
     },
     featureInfoItemKey: {
-      fontWeight: "bold",
+      fontWeight: 'bold',
       fontSize: 16,
     },
     featureInfoItemValue: {
       fontSize: 16,
-      backgroundColor: "#ddd",
+      backgroundColor: '#ddd',
     },
   }));
 
@@ -74,7 +74,7 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
 
   useEffect(() => {
     // add new action button that goes back to the entry / features list or layers list
-    buttonPanel.panel?.addActionButton("back", t("action_back"), '<i class="material-icons">keyboard_backspace</i>', () => {
+    buttonPanel.panel?.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
       if (numOfEntries === 1) {
         // set panel back to layers list
         setPanel(true, false, false);
@@ -114,10 +114,10 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
 
             return (
               attributeValue.length > 0 &&
-              attributeAlias !== "OBJECTID" &&
-              attributeAlias !== "SHAPE" &&
-              attributeAlias !== "SHAPE_Length" &&
-              attributeAlias !== "SHAPE_Area" && (
+              attributeAlias !== 'OBJECTID' &&
+              attributeAlias !== 'SHAPE' &&
+              attributeAlias !== 'SHAPE_Length' &&
+              attributeAlias !== 'SHAPE_Area' && (
                 <div className={classes.featureInfoItem} key={attrKey} tabIndex={0}>
                   <span className={classes.featureInfoItemKey}>{attributeAlias}</span>
                   <span className={classes.featureInfoItemValue}>{attributeValue}</span>

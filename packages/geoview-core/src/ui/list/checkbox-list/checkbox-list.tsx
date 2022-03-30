@@ -1,13 +1,13 @@
 /* eslint-disable no-plusplus */
-import { useState } from "react";
+import { useState } from 'react';
 
-import { Typography } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import makeStyles from "@mui/styles/makeStyles";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import Checkbox from "@mui/material/Checkbox";
+import { Typography } from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Checkbox from '@mui/material/Checkbox';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -18,16 +18,16 @@ const useStyles = makeStyles((theme) =>
       padding: 0,
     },
     listItem: {
-      height: "28px",
+      height: '28px',
       padding: 0,
       color: theme.palette.secondary.contrastText,
-      "&:hover": {
-        backgroundColor: "#dddddd",
+      '&:hover': {
+        backgroundColor: '#dddddd',
         color: theme.palette.primary.dark,
       },
     },
     listItemIcon: {
-      minWidth: "0px",
+      minWidth: '0px',
     },
   })
 );
@@ -80,7 +80,7 @@ export function CheckboxList({ listItems, multiselect, checkedItems, setApiCheck
                 checked={checked.indexOf(index) !== -1}
                 tabIndex={-1}
                 disableRipple
-                inputProps={{ "aria-labelledby": labelId }}
+                inputProps={{ 'aria-labelledby': labelId }}
               />
             </ListItemIcon>
             <Typography className={classes.typography} variant="body2" noWrap component="ul">

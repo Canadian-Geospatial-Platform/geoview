@@ -1,64 +1,64 @@
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect, useCallback, Fragment } from "react";
+import React, { useState, useEffect, useCallback, Fragment } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import { ClassNameMap, withStyles } from "@mui/styles";
-import makeStyles from "@mui/styles/makeStyles";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { ClassNameMap, withStyles } from '@mui/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeDialogProps } from "../../core/types/cgpv-types";
-import { HtmlToReact } from "../../core/containers/html-to-react";
+import { TypeDialogProps } from '../../core/types/cgpv-types';
+import { HtmlToReact } from '../../core/containers/html-to-react';
 
-import { EVENT_NAMES } from "../../api/event";
-import { api } from "../../api/api";
+import { EVENT_NAMES } from '../../api/event';
+import { api } from '../../api/api';
 
-import { TypeModalProps } from ".";
-import { CloseIcon, IconButton } from "..";
+import { TypeModalProps } from '.';
+import { CloseIcon, IconButton } from '..';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
-    position: "absolute",
+    position: 'absolute',
     "& ~ & > div[class*='backdrop']": {
-      backgroundColor: "transparent",
+      backgroundColor: 'transparent',
     },
   },
   backdrop: {
-    position: "absolute",
+    position: 'absolute',
     background: theme.palette.backdrop,
   },
   content: {
     padding: theme.spacing(5, 0),
   },
   modalTitleContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "5px 10px",
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '5px 10px',
   },
   modalTitleLabel: {
-    display: "flex",
-    justifyContent: "flex-start",
+    display: 'flex',
+    justifyContent: 'flex-start',
   },
   modalTitleActions: {
-    display: "flex",
-    justifyContent: "flex-end",
+    display: 'flex',
+    justifyContent: 'flex-end',
   },
   headerActionsContainer: {
-    display: "flex",
-    padding: "5px 10px",
-    "& > *:not(:last-child)": {
+    display: 'flex',
+    padding: '5px 10px',
+    '& > *:not(:last-child)': {
       marginRight: theme.spacing(3),
     },
   },
   closedModal: {
-    display: "none",
+    display: 'none',
   },
   createdAction: {
     width: `30%`,
-    alignSelf: "flex-end",
-    "& > * ": {
-      textAlign: "center",
+    alignSelf: 'flex-end',
+    '& > * ': {
+      textAlign: 'center',
     },
   },
 }));
@@ -87,8 +87,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     contentTextClassName,
     contentTextStyle,
     mapId,
-    "aria-labelledby": ariaLabeledBy,
-    "aria-describedby": ariaDescribedBy,
+    'aria-labelledby': ariaLabeledBy,
+    'aria-describedby': ariaDescribedBy,
   } = props;
 
   const [createdModal, setCreatedModal] = useState<JSX.Element>();
@@ -119,7 +119,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       dialogContent: {
         width: modal.width,
         height: modal.height,
-        maxWidth: "none",
+        maxWidth: 'none',
       },
       // eslint-disable-next-line react/no-unused-prop-types
     })(({ classes }: { classes: ClassNameMap }) => (
@@ -142,7 +142,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             {modal.header?.actions !== undefined && modal.header?.actions.length >= 1 ? (
               <div className={dialogClasses.headerActionsContainer}>
                 {modal.header?.actions.map((action) => {
-                  if (typeof action.content === "string") {
+                  if (typeof action.content === 'string') {
                     return (
                       <Fragment key={action.id}>
                         <HtmlToReact
@@ -160,7 +160,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             ) : null}
             <IconButton
               id={`${id}-close-button`}
-              tooltip={t("close")}
+              tooltip={t('close')}
               tooltipPlacement="right"
               onClick={modal.close}
               className={classes.headerActionsContainer}
@@ -175,13 +175,13 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             className={`${dialogClasses.content} ${contentTextClassName && contentTextClassName}`}
             style={contentTextStyle}
           >
-            {typeof modal.content === "string" ? <HtmlToReact htmlContent={modal.content} /> : modal.content}
+            {typeof modal.content === 'string' ? <HtmlToReact htmlContent={modal.content} /> : modal.content}
           </div>
         </DialogContent>
         {modal.footer?.actions && modal.footer?.actions.length >= 1 ? (
           <DialogActions>
             {modal.footer?.actions.map((action) => {
-              if (typeof action.content === "string") {
+              if (typeof action.content === 'string') {
                 return (
                   <Fragment key={action.id}>
                     <HtmlToReact
@@ -256,7 +256,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       <Dialog
         open={open || openEvent}
         className={`${dialogClasses.dialog} ${className && className}`}
-        style={{ ...style, position: "absolute" }}
+        style={{ ...style, position: 'absolute' }}
         aria-labelledby={ariaLabeledBy}
         aria-describedby={ariaDescribedBy}
         fullScreen={fullScreen}

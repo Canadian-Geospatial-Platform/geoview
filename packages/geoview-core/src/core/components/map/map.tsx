@@ -1,43 +1,43 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/require-default-props */
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from 'react';
 
-import { CRS } from "leaflet";
-import { MapContainer, TileLayer, ScaleControl } from "react-leaflet";
+import { CRS } from 'leaflet';
+import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 
-import { useMediaQuery } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import { SnackbarProvider } from "notistack";
+import { SnackbarProvider } from 'notistack';
 
-import { Crosshair } from "../crosshair/crosshair";
-import { MousePosition } from "../mouse-position/mouse-position";
-import { Attribution } from "../attribution/attribution";
-import { Snackbar } from "../../../ui/snackbar/snackbar";
-import { NorthArrow, NorthPoleFlag } from "../north-arrow/north-arrow";
-import { ClickMarker } from "../click-marker/click-marker";
+import { Crosshair } from '../crosshair/crosshair';
+import { MousePosition } from '../mouse-position/mouse-position';
+import { Attribution } from '../attribution/attribution';
+import { Snackbar } from '../../../ui/snackbar/snackbar';
+import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
+import { ClickMarker } from '../click-marker/click-marker';
 
-import { generateId } from "../../utils/utilities";
+import { generateId } from '../../utils/utilities';
 
-import { api } from "../../../api/api";
-import { EVENT_NAMES } from "../../../api/event";
+import { api } from '../../../api/api';
+import { EVENT_NAMES } from '../../../api/event';
 
-import { MapViewer } from "../../../geo/map/map";
+import { MapViewer } from '../../../geo/map/map';
 
-import { TypeMapConfigProps, TypeBasemapLayer, TypeJSONObjectMapComponent } from "../../types/cgpv-types";
+import { TypeMapConfigProps, TypeBasemapLayer, TypeJSONObjectMapComponent } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   snackBar: {
-    "& .MuiButton-text": { color: theme.palette.primary.light },
+    '& .MuiButton-text': { color: theme.palette.primary.light },
   },
 }));
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
-  const id = props.id ? props.id : generateId("");
+  const id = props.id ? props.id : generateId('');
 
   const { center, zoom, projection, language, selectBox, boxZoom, extraOptions } = props;
 
@@ -48,7 +48,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const [crs, setCRS] = useState<CRS>();
 
   // attribution used by the map
-  const [attribution, setAttribution] = useState<string>("");
+  const [attribution, setAttribution] = useState<string>('');
 
   // render additional components if added by api
   const [components, setComponents] = useState<TypeJSONObjectMapComponent>({});
@@ -60,7 +60,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const viewer: MapViewer = api.map(id);
 
   // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up("md"));
+  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   // get map option from selected basemap projection
   const mapOptions: L.MapOptions = viewer.getMapOptions(projection);
@@ -175,15 +175,15 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         cgpMap.setView(center, zoom);
 
         // emit the initial map position
-        api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || "", {
+        api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
           position: cgpMap.getCenter(),
         });
 
         // listen to map move end events
-        cgpMap.on("moveend", mapMoveEnd);
+        cgpMap.on('moveend', mapMoveEnd);
 
         // listen to map zoom end events
-        cgpMap.on("zoomend", mapZoomEnd);
+        cgpMap.on('zoomend', mapZoomEnd);
 
         // initialize the map viewer and load plugins
         viewer.initMap(cgpMap);
@@ -192,7 +192,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setCRS(viewer.projection.getCRS());
 
         // get attribution
-        setAttribution(language === "en-CA" ? viewer.basemap.attribution["en-CA"] : viewer.basemap.attribution["fr-CA"]);
+        setAttribution(language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA']);
 
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
@@ -229,8 +229,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             dense
             autoHideDuration={4000}
             anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
+              vertical: 'bottom',
+              horizontal: 'center',
             }}
             className={`${classes.snackBar}`}
           >

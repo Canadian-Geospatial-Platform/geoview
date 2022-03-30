@@ -1,20 +1,20 @@
-import { Layer as leafletLayer } from "leaflet";
+import { Layer as leafletLayer } from 'leaflet';
 
-import { EsriDynamic } from "./esri/esri-dynamic";
-import { EsriFeature } from "./esri/esri-feature";
-import { WMS } from "./ogc/wms";
-import { WFS } from "./ogc/wfs";
-import { OgcFeature } from "./ogc/ogc_feature";
-import { XYZTiles } from "./map-tile/xyz-tiles";
-import { GeoJSON } from "./file/geojson";
-import { Vector } from "./vector/vector";
-import { MarkerClusterClass } from "./vector/marker-cluster";
+import { EsriDynamic } from './esri/esri-dynamic';
+import { EsriFeature } from './esri/esri-feature';
+import { WMS } from './ogc/wms';
+import { WFS } from './ogc/wfs';
+import { OgcFeature } from './ogc/ogc_feature';
+import { XYZTiles } from './map-tile/xyz-tiles';
+import { GeoJSON } from './file/geojson';
+import { Vector } from './vector/vector';
+import { MarkerClusterClass } from './vector/marker-cluster';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../api/api';
+import { EVENT_NAMES } from '../../api/event';
 
-import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from "../../core/types/cgpv-types";
-import { generateId } from "../../core/utils/utilities";
+import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
+import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 // import "esri-leaflet-renderers";
@@ -134,7 +134,7 @@ export class Layer {
     let isLoaded = false;
     // we trap most of the erros prior tp this. When this load, layer shoud ne ok
     // ! load is not fired for GeoJSON layer
-    layer.once("load", () => {
+    layer.once('load', () => {
       isLoaded = true;
     });
 
@@ -142,8 +142,8 @@ export class Layer {
       if (!isLoaded) {
         api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.#map.id, {
           message: {
-            type: "key",
-            value: "validation.layer.loadfailed",
+            type: 'key',
+            value: 'validation.layer.loadfailed',
             params: [name, this.#map.id],
           },
         });
@@ -161,16 +161,16 @@ export class Layer {
   private addToMap(cgpvLayer: GeoJSON | WFS | WMS | EsriDynamic | EsriFeature | XYZTiles | OgcFeature): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
-    if (typeof cgpvLayer.layer === "string") {
+    if (typeof cgpvLayer.layer === 'string') {
       api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.#map.id, {
         message: {
-          type: "key",
-          value: "validation.layer.loadfailed",
+          type: 'key',
+          value: 'validation.layer.loadfailed',
           params: [cgpvLayer.name, this.#map.id],
         },
       });
     } else {
-      if (cgpvLayer.type !== "geoJSON") this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
 
       cgpvLayer.layer.addTo(this.#map);
       // this.layers.push(cgpvLayer);
@@ -193,9 +193,9 @@ export class Layer {
       if (mapContainer) {
         const featElems = document
           .getElementsByClassName(`leaflet-map-${this.#map.id}`)[0]
-          .getElementsByClassName("leaflet-marker-pane")[0].children;
+          .getElementsByClassName('leaflet-marker-pane')[0].children;
         [...featElems].forEach((element) => {
-          element.setAttribute("tabindex", "-1");
+          element.setAttribute('tabindex', '-1');
         });
       }
     }, 3000);

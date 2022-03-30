@@ -1,21 +1,21 @@
-import { Typography } from "@mui/material";
-import HelpIcon from "@mui/icons-material/Help";
+import { Typography } from '@mui/material';
+import HelpIcon from '@mui/icons-material/Help';
 
-import { TypeButtonPanelProps } from "../../core/types/cgpv-types";
+import { TypeButtonPanelProps } from '../../core/types/cgpv-types';
 
 /**
  * Create a default button panel for the appbar
  */
 export const DefaultPanel: TypeButtonPanelProps = {
   button: {
-    id: "default-panel",
-    tooltip: "Default",
-    tooltipPlacement: "right",
+    id: 'default-panel',
+    tooltip: 'Default',
+    tooltipPlacement: 'right',
     icon: <HelpIcon />,
-    type: "textWithIcon",
+    type: 'textWithIcon',
   },
   panel: {
-    title: "Default",
+    title: 'Default',
     icon: HelpIcon,
     content: (
       <Typography variant="body2" color="textSecondary" component="p">

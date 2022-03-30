@@ -1,7 +1,7 @@
-import { List as MaterialList } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { List as MaterialList } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeListProps } from "../../core/types/cgpv-types";
+import { TypeListProps } from '../../core/types/cgpv-types';
 
 const useStyles = makeStyles(() => ({
   list: {
@@ -21,7 +21,7 @@ export function List(props: TypeListProps): JSX.Element {
   const classes = useStyles();
 
   return (
-    <MaterialList className={`${classes.list} ${className || ""}`} style={style || undefined} component={type || "ul"}>
+    <MaterialList className={`${classes.list} ${className || ''}`} style={style || undefined} component={type || 'ul'}>
       {children !== undefined && children}
     </MaterialList>
   );
