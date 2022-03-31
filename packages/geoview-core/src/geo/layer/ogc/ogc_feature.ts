@@ -153,7 +153,7 @@ export class OgcFeature {
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJSONObject | null} feature type object or null
    */
-  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+  private getFeatureTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -200,4 +200,22 @@ export class OgcFeature {
   getMeta = (): TypeJSONObjectLoop => {
     return this.#capabilities;
   };
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    this.layer.getLayers().forEach((x) => {
+      if (x.setOpacity) x.setOpacity(opacity);
+      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.8 });
+    });
+  };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds => this.layer.getBounds();
 }
