@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable no-plusplus */
+>>>>>>> eb6890d0dbd6317ca78d27d5ff56d50a0fa26e0d
 import L from 'leaflet';
 import proj4 from 'proj4';
 import 'proj4leaflet';

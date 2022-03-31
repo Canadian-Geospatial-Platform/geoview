@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable no-plusplus */
+>>>>>>> eb6890d0dbd6317ca78d27d5ff56d50a0fa26e0d
 import { useState } from 'react';
 
 import { Typography } from '@mui/material';

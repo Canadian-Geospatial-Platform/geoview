@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable no-plusplus */
+>>>>>>> eb6890d0dbd6317ca78d27d5ff56d50a0fa26e0d
 import L, { LatLngExpression } from 'leaflet';
 
 import { api } from '../../../api/api';
