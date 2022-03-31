@@ -72,52 +72,54 @@ export class OgcFeature {
    * Add a OGC API feature layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | string>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | string> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
     const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
 
-    const res = await axios.get(metaUrl);
+    const res = await axios.get<TypeJSONObjectLoop>(metaUrl);
     this.#capabilities = res.data;
 
     const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
     if (layerName) this.name = <string>layerName;
 
-    const featRes = axios.get(featureUrl);
+    const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
 
-    const geo = new Promise<Layer | string>((resolve) => {
-      featRes
+    const geo = new Promise<L.GeoJSON | string>((resolve) => {
+      getResponse
         .then((result) => {
           const geojson = result.data;
 
           if (geojson && geojson !== '{}') {
-            const featureLayer = L.geoJSON(geojson, {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              pointToLayer: (feature, latlng): Layer | undefined => {
-                if (feature.geometry.type === 'Point') {
-                  return L.circleMarker(latlng);
-                }
+            const featureLayer = L.geoJSON(
+              geojson as GeoJSON.GeoJsonObject,
+              {
+                pointToLayer: (feature, latlng): Layer | undefined => {
+                  if (feature.geometry.type === 'Point') {
+                    return L.circleMarker(latlng);
+                  }
 
-                return undefined;
+                  return undefined;
 
-                // if need to use specific style for point
-                // return L.circleMarker(latlng, {
-                //  ...geojsonMarkerOptions,
-                //  id: lId,
-                // });
-              },
-              style: () => {
-                return {
-                  stroke: true,
-                  color: '#333',
-                  fillColor: '#0094FF',
-                  fillOpacity: 0.8,
-                };
-              },
-            });
+                  // if need to use specific style for point
+                  // return L.circleMarker(latlng, {
+                  //  ...geojsonMarkerOptions,
+                  //  id: lId,
+                  // });
+                },
+                style: () => {
+                  return {
+                    stroke: true,
+                    color: '#333',
+                    fillColor: '#0094FF',
+                    fillOpacity: 0.8,
+                  };
+                },
+              } as L.GeoJSONOptions
+            );
 
             resolve(featureLayer);
           } else {
@@ -153,7 +155,7 @@ export class OgcFeature {
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJSONObject | null} feature type object or null
    */
-  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+  private getFeatureTypeInfo(FeatureTypeList: TypeJSONObjectLoop, entries?: string): TypeJSONObjectLoop | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -172,7 +174,7 @@ export class OgcFeature {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name && FeatureTypeList.Name['#text'];
+      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJSONObject as string);
 
       if (fName) {
         const fNameSplit = fName.split(':');
@@ -197,7 +199,7 @@ export class OgcFeature {
    *
    * @returns {TypeJSONObjectLoop} WFS capabilities in json format
    */
-  getMeta = (): TypeJSONObjectLoop => {
+  getMeta = (): TypeJSONObject => {
     return this.#capabilities;
   };
 }

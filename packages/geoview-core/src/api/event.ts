@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { TypeJSONObject } from '../core/types/cgpv-types';
+import { TypeJSONObject, TypeJSONObjectLoop } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -218,7 +218,7 @@ export class Event {
   eventEmitter: EventEmitter;
 
   // events object containing all registered events
-  events: Record<string, TypeJSONObject> = {};
+  events: TypeJSONObjectLoop = {};
 
   /**
    * Initiate the event emitter
@@ -234,19 +234,19 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
+  on = (eventName: string, listener: (payload: TypeJSONObjectLoop) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJSONObject) => {
-      let listenerPayload: TypeJSONObject;
+    const listen = (payload: TypeJSONObjectLoop) => {
+      let listenerPayload: TypeJSONObjectLoop;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && payload.handlerName === handlerName) {
-        listenerPayload = this.events[eName][handlerName] as TypeJSONObject;
+      if (handlerName && (payload.handlerName as TypeJSONObject as string) === handlerName) {
+        listenerPayload = this.events[eName][handlerName];
       } else {
         listenerPayload = payload;
       }
@@ -372,7 +372,7 @@ export class Event {
     this.events[eventName][hName] = {
       handlerName,
       ...payload,
-    } as TypeJSONObject;
+    } as TypeJSONObject as TypeJSONObjectLoop;
 
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };

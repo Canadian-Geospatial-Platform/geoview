@@ -14,7 +14,7 @@ import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { generateId } from '../../utils/utilities';
-import { Cast, TypeJSONObject } from '../../types/cgpv-types';
+import { Cast, TypeJSONObject, TypeJSONObjectLoop } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -99,7 +99,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_SHOW,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(mapId)) {
+        if (payload && (payload.handlerName as TypeJSONObject as string).includes(mapId)) {
           // toggle the marker icon
           setShowMarker(true);
 
@@ -118,7 +118,7 @@ export function ClickMarker(): JSX.Element {
           setMarkerPos(Cast<L.LatLng>(payload.latlng));
 
           if (payload.symbology) {
-            const theSymbology = payload.symbology as TypeJSONObject;
+            const theSymbology = payload.symbology as TypeJSONObjectLoop;
             let iconHtml = '';
 
             // get symbology image
@@ -145,7 +145,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_HIDE,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(mapId)) {
+        if (payload && (payload.handlerName as TypeJSONObject as string).includes(mapId)) {
           setShowMarker(false);
           overlay.style.visibility = 'hidden';
         }

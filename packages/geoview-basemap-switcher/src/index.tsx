@@ -1,4 +1,12 @@
-import { TypeButtonProps, TypeButtonPanel, TypeWindow, TypeJSONObjectLoop, TypePanelProps } from 'geoview-core';
+import {
+  AbstractPluginClass,
+  TypeButtonProps,
+  TypeButtonPanel,
+  TypeWindow,
+  TypeJSONObject,
+  TypeJSONObjectLoop,
+  TypePanelProps,
+} from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
 
 const w = window as TypeWindow;
@@ -6,7 +14,7 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class BasemapSwitcherPlugin {
+class BasemapSwitcherPlugin extends AbstractPluginClass {
   // id of the plugin
   id: string;
 
@@ -17,6 +25,7 @@ class BasemapSwitcherPlugin {
   buttonPanel: TypeButtonPanel | null;
 
   constructor(id: string, props: TypeJSONObjectLoop) {
+    super();
     this.id = id;
     this.BasemapSwitcherPluginProps = props;
     this.buttonPanel = null;
@@ -25,7 +34,7 @@ class BasemapSwitcherPlugin {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJSONObjectLoop = {
+  translations: TypeJSONObject = {
     'en-CA': {
       basemapSwitcher: 'Basemaps',
       'basemap-transport-label': {
@@ -77,7 +86,7 @@ class BasemapSwitcherPlugin {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.BasemapSwitcherPluginProps;
+    const mapId: string = this.BasemapSwitcherPluginProps.mapId as TypeJSONObject as string;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -86,11 +95,11 @@ class BasemapSwitcherPlugin {
       // access the api calls
       const { api } = cgpv;
 
-      const { language } = api.map(mapId as string);
+      const { language } = api.map(mapId);
 
       // button props
       const button: TypeButtonProps = {
-        tooltip: (this.translations[language] as TypeJSONObjectLoop).basemapSwitcher,
+        tooltip: (this.translations as TypeJSONObjectLoop)[language].basemapSwitcher,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',
@@ -98,16 +107,16 @@ class BasemapSwitcherPlugin {
 
       // panel props
       const panel: TypePanelProps = {
-        title: (this.translations[language] as TypeJSONObjectLoop).basemapSwitcher,
+        title: (this.translations as TypeJSONObjectLoop)[language].basemapSwitcher,
         icon: '<i class="material-icons">map</i>',
         width: 200,
       };
 
       // create a new button panel on the appbar
-      this.buttonPanel = api.map(mapId as string).appBarButtons.createAppbarPanel(button, panel, null);
+      this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
       // set panel content
-      this.buttonPanel?.panel?.changeContent(<BasemapSwitcher mapId={mapId as string} />);
+      this.buttonPanel?.panel?.changeContent(<BasemapSwitcher mapId={mapId} />);
     }
   };
 
@@ -115,7 +124,7 @@ class BasemapSwitcherPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.BasemapSwitcherPluginProps;
+    const mapId: string = this.BasemapSwitcherPluginProps.mapId as TypeJSONObject as string;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -125,7 +134,7 @@ class BasemapSwitcherPlugin {
       const { api } = cgpv;
 
       if (this.buttonPanel) {
-        api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+        api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
       }
     }
   }

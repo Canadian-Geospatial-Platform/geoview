@@ -49,7 +49,7 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
 
 export interface TypeWindow extends Window {
   cgpv: TypeCGPV;
-  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJSONObject) => TypeJSONObject) | undefined };
+  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJSONObject) => TypeJSONObject) | AbstractPluginClass | undefined };
 }
 
 export type TypeCGPVUI = {
@@ -114,14 +114,14 @@ export type TypeMapContext = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONValue = string | number | boolean | TypeJSONValue[] | TypeJSONObject;
+export type TypeJSONObject = string | number | boolean | TypeJSONObject[] | { [key: string]: TypeJSONObject };
 
-export type TypeJSONObject = {
+/* export type TypeJSONObject = {
   [key: string]: TypeJSONValue;
-};
+}; */
 
 export type TypeJSONObjectLoop = {
-  [key: string]: TypeJSONObjectLoop | TypeJSONValue;
+  [key: string]: TypeJSONObjectLoop;
 };
 
 /*-----------------------------------------------------------------------------
@@ -339,7 +339,7 @@ export type TypeLayerData = {
 export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJSONValue[];
+  layerData: TypeJSONObject[];
   groupLayer: boolean;
   displayField: string;
   fieldAliases: TypeJSONObject;
@@ -410,7 +410,7 @@ export type TypeActualPlugin = {
   react: typeof React;
   props: TypeJSONObject;
   translate: TypeJSONObject;
-  translations: TypeJSONObject;
+  translations: TypeJSONObjectLoop;
   makeStyles: typeof makeStyles;
   added?: () => void;
   removed?: () => void;
@@ -461,7 +461,7 @@ export type TypeFeatureInfoProps = {
 
 export type TypeSelectedFeature = {
   attributes: TypeJSONObject;
-  displayField: TypeJSONValue;
+  displayField: TypeJSONObject;
   fieldAliases: TypeJSONObject;
   numOfEntries: number;
   symbol: TypeJSONObject;
@@ -472,7 +472,7 @@ export type TypeSelectedFeature = {
  */
 export type TypeLayersListProps = {
   clickPos?: L.LatLng;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONValue;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject;
   layersData: Record<string, TypeLayerData>;
   mapId: string;
   selectFeature: (featureData: TypeJSONObject) => void;
@@ -636,7 +636,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
-  tooltip?: string | TypeJSONValue;
+  tooltip?: string | TypeJSONObject;
   // location for tooltip
   tooltipPlacement?: TooltipProps['placement'];
   // button icon
@@ -666,7 +666,7 @@ export type TypePanelProps = {
   // panel header icon
   icon: React.ReactNode | Element;
   // panel header title
-  title: string | TypeJSONValue;
+  title: string | TypeJSONObject;
   // panel body content
   content?: React.ReactNode | Element;
 };
@@ -867,3 +867,5 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   // Function that handles change in input
   changeHandler?: <T>(params: T) => void;
 }
+
+export abstract class AbstractPluginClass {}

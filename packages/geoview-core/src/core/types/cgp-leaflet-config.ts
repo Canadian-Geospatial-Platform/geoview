@@ -135,6 +135,7 @@ declare module 'leaflet' {
   interface LayerOptions {
     id?: string;
     visible?: boolean;
+    layers?: number[];
   }
 
   interface Layer {

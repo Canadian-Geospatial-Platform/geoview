@@ -14,6 +14,7 @@ import { EVENT_NAMES } from '../../api/event';
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '../../ui';
+import { TypeJSONObject } from '../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   trap: {
@@ -128,7 +129,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(id)) {
+        if (payload && (payload.handlerName as TypeJSONObject as string).includes(id)) {
           // when mnap element get focus and focus is not trap, show dialog window
           const mapElement = document.getElementById(id);
 

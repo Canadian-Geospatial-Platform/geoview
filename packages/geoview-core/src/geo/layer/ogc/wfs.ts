@@ -8,7 +8,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeJSONObjectLoop, TypeJSONObject, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -72,28 +72,28 @@ export class WFS {
    * Add a WFS layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | string>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | string> {
     // const data = getXMLHttpRequest(capUrl);
-    const resCapabilities = await axios.get(this.url, {
+    const resCapabilities = await axios.get<TypeJSONObject>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
 
     // need to pass a xmldom to xmlToJson
-    const xmlDOM = new DOMParser().parseFromString(resCapabilities.data, 'text/xml');
+    const xmlDOM = new DOMParser().parseFromString(resCapabilities.data as string, 'text/xml');
     const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
-    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version;
+    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJSONObject as string;
     const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
 
     if (!featTypeInfo) {
       return '{}';
     }
 
-    const layerName = 'name' in layer ? layer.name : featTypeInfo.Name['#text'].split(':')[1];
-    if (layerName) this.name = <string>layerName;
+    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJSONObject as string).split(':')[1];
+    if (layerName) this.name = layerName;
 
     const params = {
       service: 'WFS',
@@ -104,38 +104,41 @@ export class WFS {
       outputFormat: 'application/json',
     };
 
-    const featRes = axios.get(this.url, { params: params });
+    const getResponse = axios.get<L.GeoJSON | string>(this.url, { params: params });
 
-    const geo = new Promise<Layer | string>((resolve) => {
-      featRes
-        .then((res) => {
-          const geojson = res.data;
+    const geo = new Promise<L.GeoJSON | string>((resolve) => {
+      getResponse
+        .then((response) => {
+          const geojson = response.data;
 
           if (geojson && geojson !== '{}') {
-            const wfs = L.geoJSON(geojson, {
-              pointToLayer: (feature, latlng): Layer | undefined => {
-                if (feature.geometry.type === 'Point') {
-                  return L.circleMarker(latlng);
-                }
+            const wfsLayer = L.geoJSON(
+              geojson as GeoJSON.GeoJsonObject,
+              {
+                pointToLayer: (feature, latlng): Layer | undefined => {
+                  if (feature.geometry.type === 'Point') {
+                    return L.circleMarker(latlng);
+                  }
 
-                return undefined;
-                // if need to use specific style for point
-                // return L.circleMarker(latlng, {
-                //  ...geojsonMarkerOptions,
-                //  id: lId,
-                // });
-              },
-              style: () => {
-                return {
-                  stroke: true,
-                  color: '#333',
-                  fillColor: '#FFB27F',
-                  fillOpacity: 0.8,
-                };
-              },
-            });
+                  return undefined;
+                  // if need to use specific style for point
+                  // return L.circleMarker(latlng, {
+                  //  ...geojsonMarkerOptions,
+                  //  id: lId,
+                  // });
+                },
+                style: () => {
+                  return {
+                    stroke: true,
+                    color: '#333',
+                    fillColor: '#FFB27F',
+                    fillOpacity: 0.8,
+                  };
+                },
+              } as L.GeoJSONOptions
+            );
 
-            resolve(wfs);
+            resolve(wfsLayer);
           } else {
             resolve('{}');
           }
@@ -169,7 +172,7 @@ export class WFS {
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJSONObject | null} feature type object or null
    */
-  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObjectLoop, entries?: string): TypeJSONObjectLoop | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -186,7 +189,7 @@ export class WFS {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name['#text'];
+      let fName = FeatureTypeList.Name['#text'] as TypeJSONObject as string;
 
       const fNameSplit = fName.split(':');
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
@@ -216,9 +219,10 @@ export class WFS {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.getLayers().forEach((x) => {
-      if (x.setOpacity) x.setOpacity(opacity);
-      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.8 });
+    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    (this.layer as L.GeoJSON).getLayers().forEach((layer) => {
+      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };
 
@@ -227,5 +231,5 @@ export class WFS {
    *
    * @returns {L.LatLngBounds} layer bounds
    */
-  getBounds = (): L.LatLngBounds => this.layer.getBounds();
+  getBounds = (): L.LatLngBounds => (this.layer as L.GeoJSON).getBounds();
 }

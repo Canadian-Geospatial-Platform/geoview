@@ -8,7 +8,15 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapViewer } from '../geo/map/map';
 
 import { api } from './api';
-import { Cast, TypeWindow, TypeJSONObject, TypeActualPlugin, TypePluginEntry, TypeRecordOfPlugin } from '../core/types/cgpv-types';
+import {
+  Cast,
+  AbstractPluginClass,
+  TypeWindow,
+  TypeJSONObject,
+  TypeActualPlugin,
+  TypePluginEntry,
+  TypeRecordOfPlugin,
+} from '../core/types/cgpv-types';
 
 /**
  * Class to manage plugins
@@ -30,7 +38,7 @@ export class Plugin {
   addPlugin = async (
     pluginId: string,
     mapId: string,
-    constructor?: (pluginId: string, props: TypeJSONObject) => TypeJSONObject,
+    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJSONObject) => TypeJSONObject),
     props?: TypeJSONObject
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
@@ -53,7 +61,7 @@ export class Plugin {
           const { translations } = plugin;
 
           Object.keys(translations).forEach((languageKey: string) => {
-            const translation = (translations as TypeJSONObject)[languageKey];
+            const translation = translations[languageKey];
 
             i18next.addResourceBundle(languageKey, 'translation', translation, true, false);
           });
