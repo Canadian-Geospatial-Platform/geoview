@@ -1,6 +1,5 @@
 import {
   Cast,
-  TypeJSONObject,
   TypeJSONValue,
   TypeRendererSymbol,
   TypeSelectedFeature,
@@ -70,11 +69,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
    * Get the symbology from the layer
    *
    * @param {TypeRendererSymbol} renderer the display renderer containing the symbol
-   * @param {TypeJSONObject} attributes the attributes of the selected layer features
-   * @returns {TypeJSONObject} the symbology containing the imageData
+   * @param {TypeJSONValue} attributes the attributes of the selected layer features
+   * @returns {TypeJSONValue} the symbology containing the imageData
    */
-  const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJSONObject): TypeJSONObject => {
-    let symbolImage: TypeJSONObject | null = null;
+  const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJSONValue): TypeJSONValue => {
+    let symbolImage: TypeJSONValue | null = null;
 
     // check if a symbol object exists in the renderer
     if (renderer && renderer.symbol) {
@@ -84,10 +83,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       symbolImage = renderer.uniqueValueInfos.filter((info) => {
         // return the correct symbology matching the layer using the layer defined fields
         return info.value === (attributes[renderer.field1] || attributes[renderer.field2] || attributes[renderer.field3]);
-      })[0].symbol as TypeJSONObject;
+      })[0].symbol as TypeJSONValue;
     }
 
-    return symbolImage as TypeJSONObject;
+    return symbolImage as TypeJSONValue;
   }, []);
 
   /**
@@ -157,10 +156,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   /**
    * Set the entry / feature info object
    *
-   * @param {TypeJSONObject} featureData an object containing the entry / feature data
+   * @param {TypeJSONValue} featureData an object containing the entry / feature data
    */
   const selectFeature = useCallback(
-    (featureData: TypeJSONObject) => {
+    (featureData: TypeJSONValue) => {
       // set the entry / feature data
       setSelectedFeature(featureData);
 
@@ -174,10 +173,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
    * Get all aliases from the defined layer list, will be used when displaying entry / feature info
    *
    * @param {TypeFieldNameAlias[]} fields a list of the fields defined in the layer
-   * @returns {TypeJSONObject} an object containing field name and it's alias
+   * @returns {TypeJSONValue} an object containing field name and it's alias
    */
   const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
-    const fieldAliases: TypeJSONObject = {};
+    const fieldAliases: TypeJSONValue = {};
 
     if (fields) {
       fields.forEach((field: { name: string; alias: string }) => {

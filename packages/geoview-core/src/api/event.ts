@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { TypeJSONObject, TypeJSONObjectLoop } from '../core/types/cgpv-types';
+import { TypeJSONValue, TypeJSONObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -218,7 +218,7 @@ export class Event {
   eventEmitter: EventEmitter;
 
   // events object containing all registered events
-  events: TypeJSONObjectLoop = {};
+  events: TypeJSONObject = {};
 
   /**
    * Initiate the event emitter
@@ -234,18 +234,18 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (eventName: string, listener: (payload: TypeJSONObjectLoop) => void, handlerName?: string): void => {
+  on = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJSONObjectLoop) => {
-      let listenerPayload: TypeJSONObjectLoop;
+    const listen = (payload: TypeJSONObject) => {
+      let listenerPayload: TypeJSONObject;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && (payload.handlerName as TypeJSONObject as string) === handlerName) {
+      if (handlerName && (payload.handlerName as TypeJSONValue as string) === handlerName) {
         listenerPayload = this.events[eName][handlerName];
       } else {
         listenerPayload = payload;
@@ -264,19 +264,19 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  once = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
+  once = (eventName: string, listener: (payload: TypeJSONValue) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJSONObject) => {
-      let listenerPayload: TypeJSONObject;
+    const listen = (payload: TypeJSONValue) => {
+      let listenerPayload: TypeJSONValue;
 
       // if a handler name was specefieid, callback will return that data if found
       if (handlerName && (payload as Record<string, unknown>).handlerName === handlerName) {
-        listenerPayload = this.events[eName][handlerName] as TypeJSONObject;
+        listenerPayload = this.events[eName][handlerName] as TypeJSONValue;
       } else {
         listenerPayload = payload;
       }
@@ -296,19 +296,19 @@ export class Event {
    *
    * @returns An array containing the data from single / multiple handlers
    */
-  all = (eventName: string, listener: (payload: TypeJSONObject[]) => void): void => {
+  all = (eventName: string, listener: (payload: TypeJSONValue[]) => void): void => {
     /**
      * callback function to handle adding the data for multiple handlers
      */
     const listen = () => {
       // array containing the data
-      const data: TypeJSONObject[] = [];
+      const data: TypeJSONValue[] = [];
 
       // loop through events with same event name and get their data
       for (let i = 0; i < Object.keys(this.events[eventName]).length; i++) {
         const handlerName = Object.keys(this.events[eventName])[i];
 
-        data.push(this.events[eventName][handlerName] as TypeJSONObject);
+        data.push(this.events[eventName][handlerName] as TypeJSONValue);
       }
 
       // call the callback function
@@ -372,7 +372,7 @@ export class Event {
     this.events[eventName][hName] = {
       handlerName,
       ...payload,
-    } as TypeJSONObject as TypeJSONObjectLoop;
+    } as TypeJSONValue as TypeJSONObject;
 
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };

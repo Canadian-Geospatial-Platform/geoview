@@ -91,7 +91,7 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
    * Checks if it is the last step
    */
   const isLastStep = () => {
-    return activeStep === totalSteps() - 1;
+    return activeStep === totalSteps()! - 1;
   };
 
   /**
@@ -109,14 +109,14 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
       const newActiveStep =
         isLastStep() && !allStepsCompleted()
           ? // find the first step that has been completed
-            steps.findIndex((step: any, i: any) => !(i in completed))
+            steps!.findIndex((step: any, i: any) => !(i in completed))
           : activeStep + 1;
 
       if (allStepsCompleted() && newActiveStep !== totalSteps()) {
         setIsReset(true);
       }
 
-      if (nonLinear && newActiveStep === steps.length) {
+      if (nonLinear && newActiveStep === steps!.length) {
         setIsReset(true);
       }
       setActiveStep(newActiveStep);
@@ -124,7 +124,7 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
 
     !nonLinear && setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
-    if (!nonLinear && activeStep === steps.length - 1) {
+    if (!nonLinear && activeStep === steps!.length - 1) {
       setIsReset(true);
     }
   };
@@ -164,7 +164,7 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
 
   const stepsOrientation = orientation !== undefined ? orientation : 'horizontal';
 
-  const disabledStepMovement = steps.findIndex((step: any) => step.disableStepMovement);
+  const disabledStepMovement = steps!.findIndex((step: any) => step.disableStepMovement);
 
   const stepIsDisabled = activeStep === disabledStepMovement;
 
@@ -212,14 +212,14 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
                 </Button>
 
                 {nonLinear &&
-                  activeStep !== steps.length &&
+                  activeStep !== steps!.length &&
                   (completed[activeStep] ? (
                     <Typography variant="caption" sx={{ display: 'inline-block' }}>
                       Step {activeStep + 1} already completed
                     </Typography>
                   ) : (
                     <Button type="text" onClick={handleComplete}>
-                      {completedSteps() === totalSteps() - 1 ? 'Finish' : 'Complete Step'}
+                      {completedSteps() === totalSteps()! - 1 ? 'Finish' : 'Complete Step'}
                     </Button>
                   ))}
               </>

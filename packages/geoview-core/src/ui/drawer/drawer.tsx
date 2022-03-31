@@ -10,7 +10,7 @@ import { EVENT_NAMES } from '../../api/event';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '../../core/app-start';
-import { TypeDrawerProps } from '../../core/types/cgpv-types';
+import { TypeJSONValue, TypeDrawerProps } from '../../core/types/cgpv-types';
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
@@ -90,8 +90,8 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE,
       (payload) => {
-        if (payload && payload.handlerName === mapId) {
-          setOpen(payload.status);
+        if (payload && (payload.handlerName as TypeJSONValue as string) === mapId) {
+          setOpen(payload.status as TypeJSONValue as boolean);
         }
       },
       mapId

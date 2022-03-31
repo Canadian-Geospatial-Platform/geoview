@@ -5,7 +5,7 @@ import L, { Layer } from 'leaflet';
 import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig, TypeJSONObject, TypeJSONObjectLoop, TypeLegendJsonDynamic } from '../../../core/types/cgpv-types';
+import { TypeLayerConfig, TypeJSONValue, TypeJSONObject, TypeLegendJsonDynamic } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -92,9 +92,9 @@ export class EsriDynamic {
   /**
    * Get metadata of the current service
    *
-   @returns {Promise<TypeJSONObject>} a json promise containing the result of the query
+   @returns {Promise<TypeJSONValue>} a json promise containing the result of the query
    */
-  getMetadata = async (): Promise<TypeJSONObjectLoop> => {
+  getMetadata = async (): Promise<TypeJSONObject> => {
     // const feat = featureLayer({
     //   url: this.url,
     // });
@@ -102,7 +102,7 @@ export class EsriDynamic {
     //   return metadata;
     // });
     const response = await fetch(`${this.url}?f=json`);
-    const result: TypeJSONObjectLoop = await response.json();
+    const result: TypeJSONObject = await response.json();
 
     return result;
   };
@@ -110,9 +110,9 @@ export class EsriDynamic {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {TypeJSONObject} legend configuration in json format
+   * @returns {TypeJSONValue} legend configuration in json format
    */
-  getLegendJson = (): Promise<TypeJSONObjectLoop> => {
+  getLegendJson = (): Promise<TypeJSONObject> => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 
@@ -122,17 +122,17 @@ export class EsriDynamic {
       attribution: '',
     });
 
-    return axios.get<TypeJSONObjectLoop>(queryUrl).then<TypeJSONObjectLoop>((res) => {
+    return axios.get<TypeJSONObject>(queryUrl).then<TypeJSONObject>((res) => {
       const { data } = res;
       const entryArray = feat.getLayers();
 
       if (entryArray.length > 0) {
-        const result = (data.layers as TypeJSONObject as TypeJSONObject[]).filter((item) => {
-          return entryArray.includes((item as TypeJSONObjectLoop).layerId);
+        const result = (data.layers as TypeJSONValue as TypeJSONValue[]).filter((item) => {
+          return entryArray.includes((item as TypeJSONObject).layerId);
         });
-        return result as TypeJSONObject as TypeJSONObjectLoop;
+        return result as TypeJSONValue as TypeJSONObject;
       }
-      return data.layers as TypeJSONObjectLoop;
+      return data.layers as TypeJSONObject;
     });
   };
 
@@ -148,7 +148,7 @@ export class EsriDynamic {
    * Fetch the bounds for an entry
    *
    * @param {number} entry
-   * @returns {TypeJSONObject} the result of the fetch
+   * @returns {TypeJSONValue} the result of the fetch
    */
   private getEntry = async (entry: number): Promise<TypeLegendJsonDynamic> => {
     const response = await fetch(`${this.url}/${entry}?f=json`);

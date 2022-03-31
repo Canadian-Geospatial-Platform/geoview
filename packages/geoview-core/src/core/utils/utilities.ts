@@ -35,9 +35,9 @@ export function isJsonString(str: string): boolean {
  * @param {Document | Node | Element} xml the XML document object
  * @returns the converted json object
  */
-export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | TypeJSONValue {
+export function xmlToJson(xml: Document | Node | Element): TypeJSONValue {
   // Create the return object
-  let obj: TypeJSONObject | TypeJSONValue = {};
+  let obj: TypeJSONObject = {};
 
   // check for node type if it's an element, attribute, text, comment...
   if (xml.nodeType === 1) {
@@ -47,14 +47,14 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | Type
       if (element.attributes.length > 0) {
         obj['@attributes'] = {};
         for (let j = 0; j < element.attributes.length; j++) {
-          const attribute = element.attributes.item(j) as Node;
-          (obj['@attributes'] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
+          const attribute = element.attributes.item(j);
+          obj['@attributes'][attribute!.nodeName] = attribute!.nodeValue as TypeJSONValue as TypeJSONObject;
         }
       }
     }
   } else if (xml.nodeType === 3) {
     // text
-    obj = xml.nodeValue as string;
+    obj = xml.nodeValue as TypeJSONValue as TypeJSONObject;
   }
 
   // do children
@@ -62,14 +62,14 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | Type
     for (let i = 0; i < xml.childNodes.length; i++) {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
-      const jsonObject = obj as TypeJSONObject;
-      if (typeof jsonObject[nodeName] === 'undefined') {
-        jsonObject[nodeName] = xmlToJson(item);
+      const jsonObject = obj;
+      if (typeof (jsonObject[nodeName] as TypeJSONValue as string) === 'undefined') {
+        jsonObject[nodeName] = xmlToJson(item) as TypeJSONValue as TypeJSONObject;
       } else {
-        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === 'undefined') {
-          jsonObject[nodeName] = [jsonObject[nodeName]];
+        if (typeof jsonObject[nodeName].push === 'undefined') {
+          jsonObject[nodeName] = [jsonObject[nodeName]] as TypeJSONValue as TypeJSONObject;
         }
-        (jsonObject[nodeName] as TypeJSONValue[]).push(xmlToJson(item));
+        (jsonObject[nodeName] as TypeJSONValue as TypeJSONValue[]).push(xmlToJson(item));
       }
     }
   }

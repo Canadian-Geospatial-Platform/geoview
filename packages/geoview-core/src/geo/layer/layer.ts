@@ -13,7 +13,7 @@ import { MarkerClusterClass } from './vector/marker-cluster';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
+import { Cast, CONST_LAYER_TYPES, TypeJSONValue, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
@@ -33,7 +33,7 @@ export class Layer {
   vector: Vector;
 
   // used to access marker cluster API to create and manage marker cluster groups
-  markerCluster: MarkerCluster;
+  markerCluster: MarkerClusterClass;
 
   /**
    * used to reference the map and its event
@@ -56,8 +56,8 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.EVENT_LAYER_ADD,
       (payload) => {
-        if (payload && payload.handlerName.includes(this.#map.id)) {
-          const layerConf = payload.layer;
+        if (payload && (payload.handlerName as TypeJSONValue as string).includes(this.#map.id)) {
+          const layerConf = payload.layer as TypeJSONValue as TypeLayerConfig;
           if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
             const geoJSON = new GeoJSON(layerConf);
             geoJSON.add(layerConf).then((layer: leafletLayer | string) => {
@@ -68,8 +68,8 @@ export class Layer {
             this.removeTabindex();
           } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
             const wmsLayer = new WMS(layerConf);
-            wmsLayer.add(layerConf).then((layer: leafletLayer | string) => {
-              wmsLayer.layer = layer;
+            wmsLayer.add(layerConf).then((layer: L.TileLayer.WMS | string) => {
+              wmsLayer.layer = layer as leafletLayer;
               this.addToMap(wmsLayer);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
@@ -114,7 +114,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.layer.id);
+        this.removeLayerById(payload.layer.id as TypeJSONValue as string);
       },
       this.#map.id
     );
@@ -170,11 +170,11 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer);
 
       cgpvLayer.layer.addTo(this.#map);
       // this.layers.push(cgpvLayer);
-      this.layers[cgpvLayer.id] = cgpvLayer;
+      this.layers[cgpvLayer.id] = Cast<TypeLayerData>(cgpvLayer);
       api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
         layer: cgpvLayer.layer,
       });

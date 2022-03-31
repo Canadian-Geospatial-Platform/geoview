@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import { TypeJSONObject, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
+import { TypeJSONValue, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -98,7 +98,7 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
           )}
         </div>
         <span className={classes.featureInfoHeaderText}>
-          {attributes[displayField as string] && (attributes[displayField as string] as TypeJSONObject[]).length > 0
+          {attributes[displayField as string] && (attributes[displayField as string] as TypeJSONValue[]).length > 0
             ? `${attributes[displayField as string]}`
             : `${attributes.OBJECTID}`}
         </span>

@@ -49,7 +49,7 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
 
 export interface TypeWindow extends Window {
   cgpv: TypeCGPV;
-  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJSONObject) => TypeJSONObject) | AbstractPluginClass | undefined };
+  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJSONValue) => TypeJSONValue) | AbstractPluginClass | undefined };
 }
 
 export type TypeCGPVUI = {
@@ -114,14 +114,10 @@ export type TypeMapContext = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONObject = string | number | boolean | TypeJSONObject[] | { [key: string]: TypeJSONObject };
+export type TypeJSONValue = null | string | number | boolean | TypeJSONValue[] | { [key: string]: TypeJSONValue };
 
-/* export type TypeJSONObject = {
-  [key: string]: TypeJSONValue;
-}; */
-
-export type TypeJSONObjectLoop = {
-  [key: string]: TypeJSONObjectLoop;
+export type TypeJSONObject = {
+  [key: string]: TypeJSONObject;
 };
 
 /*-----------------------------------------------------------------------------
@@ -320,7 +316,7 @@ export type TypeLayerData = {
     metadata: (fn: (error: unknown, res: { layers: { id: string; subLayerIds: string[] }[] }) => void) => void;
     _url: string;
     entries: {
-      attributes: TypeJSONObject;
+      attributes: TypeJSONValue;
     }[];
     mapService: {
       options: {
@@ -339,17 +335,17 @@ export type TypeLayerData = {
 export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJSONObject[];
+  layerData: TypeJSONValue[];
   groupLayer: boolean;
   displayField: string;
-  fieldAliases: TypeJSONObject;
+  fieldAliases: TypeJSONValue;
   layer: TypeLayerInfo;
   entries?: TypeEntry[];
   renderer: TypeRendererSymbol;
 };
 
 export type TypeEntry = {
-  attributes: TypeJSONObject;
+  attributes: TypeJSONValue;
 };
 
 export type TypeLayerInfo = {
@@ -378,8 +374,8 @@ export type TypeFoundLayers = {
  */
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject;
-  selectFeature: (featureData: TypeJSONObject) => void;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONValue) => TypeJSONValue;
+  selectFeature: (featureData: TypeJSONValue) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
@@ -393,7 +389,7 @@ export type TypeRendererSymbol = {
     legendImageUrl: string;
     type: 'simple' | 'uniqueValue';
   };
-  uniqueValueInfos: TypeJSONObject[];
+  uniqueValueInfos: TypeJSONValue[];
   field1: string;
   field2: string;
   field3: string;
@@ -408,9 +404,9 @@ export type TypeActualPlugin = {
   api: API;
   createElement: typeof React.createElement;
   react: typeof React;
-  props: TypeJSONObject;
-  translate: TypeJSONObject;
-  translations: TypeJSONObjectLoop;
+  props: TypeJSONValue;
+  translate: TypeJSONValue;
+  translations: TypeJSONObject;
   makeStyles: typeof makeStyles;
   added?: () => void;
   removed?: () => void;
@@ -460,11 +456,11 @@ export type TypeFeatureInfoProps = {
 };
 
 export type TypeSelectedFeature = {
-  attributes: TypeJSONObject;
-  displayField: TypeJSONObject;
-  fieldAliases: TypeJSONObject;
+  attributes: TypeJSONValue;
+  displayField: TypeJSONValue;
+  fieldAliases: TypeJSONValue;
   numOfEntries: number;
-  symbol: TypeJSONObject;
+  symbol: TypeJSONValue;
 };
 
 /**
@@ -472,10 +468,10 @@ export type TypeSelectedFeature = {
  */
 export type TypeLayersListProps = {
   clickPos?: L.LatLng;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONValue) => TypeJSONValue;
   layersData: Record<string, TypeLayerData>;
   mapId: string;
-  selectFeature: (featureData: TypeJSONObject) => void;
+  selectFeature: (featureData: TypeJSONValue) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
 };
 
@@ -511,7 +507,7 @@ export type TypeMapConfigProps = {
   basemapOptions: TypeBasemapOptions;
   layers?: TypeLayerConfig[];
   plugins: string[];
-  extraOptions: TypeJSONObject;
+  extraOptions: TypeJSONValue;
 };
 
 /**
@@ -636,7 +632,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
-  tooltip?: string | TypeJSONObject;
+  tooltip?: string | TypeJSONValue;
   // location for tooltip
   tooltipPlacement?: TooltipProps['placement'];
   // button icon
@@ -666,7 +662,7 @@ export type TypePanelProps = {
   // panel header icon
   icon: React.ReactNode | Element;
   // panel header title
-  title: string | TypeJSONObject;
+  title: string | TypeJSONValue;
   // panel body content
   content?: React.ReactNode | Element;
 };

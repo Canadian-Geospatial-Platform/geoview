@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeJSONObject, TypeLayersListProps, TypeLayerData, TypeWindow } from 'geoview-core';
+import { TypeJSONValue, TypeLayersListProps, TypeLayerData, TypeWindow } from 'geoview-core';
 
 // get the window object
 const w = window as TypeWindow;
@@ -93,7 +93,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
     // check if the layer has only one entry
     if (layerData.length === 1) {
       // go to the entry information skipping entry list
-      const attributes = (layerData[0] as TypeJSONObject)?.attributes as TypeJSONObject;
+      const attributes = (layerData[0] as TypeJSONValue)?.attributes as TypeJSONValue;
       selectFeature({
         attributes,
         displayField,
@@ -154,7 +154,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
                                       latlng: clickPos,
                                       symbology: getSymbol(
                                         data.layers[layerKey].renderer,
-                                        (layerData[0] as TypeJSONObject).attributes as TypeJSONObject
+                                        (layerData[0] as TypeJSONValue).attributes as TypeJSONValue
                                       ),
                                     });
                                   }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import WMSCapabilities from 'wms-capabilities';
 
-import { Cast, TypeCSSStyleDeclaration, TypeJSONObjectLoop } from '../../core/types/cgpv-types';
+import { Cast, TypeCSSStyleDeclaration, TypeJSONObject } from '../../core/types/cgpv-types';
 import { getXMLHttpRequest, xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../api/api';
@@ -50,7 +50,7 @@ export class GeoUtilities {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
     const xmlDOM = new DOMParser().parseFromString(res.data, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
+    const json = xmlToJson(xmlDOM) as TypeJSONObject;
     const capabilities = json['wfs:WFS_Capabilities'];
     return capabilities;
   };

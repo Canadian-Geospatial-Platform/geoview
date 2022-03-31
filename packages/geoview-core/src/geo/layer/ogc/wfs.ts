@@ -1,5 +1,3 @@
-/* eslint-disable object-shorthand */
-/* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 
 import L, { Layer } from 'leaflet';
@@ -8,7 +6,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import { TypeJSONObjectLoop, TypeJSONObject, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeJSONObject, TypeJSONValue, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -43,7 +41,7 @@ export class WFS {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObjectLoop;
+  #capabilities: TypeJSONObject;
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -76,23 +74,23 @@ export class WFS {
    */
   async add(layer: TypeLayerConfig): Promise<L.GeoJSON | string> {
     // const data = getXMLHttpRequest(capUrl);
-    const resCapabilities = await axios.get<TypeJSONObject>(this.url, {
+    const resCapabilities = await axios.get<TypeJSONValue>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
 
     // need to pass a xmldom to xmlToJson
     const xmlDOM = new DOMParser().parseFromString(resCapabilities.data as string, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
+    const json = xmlToJson(xmlDOM) as TypeJSONObject;
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
-    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJSONObject as string;
+    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJSONValue as string;
     const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
 
     if (!featTypeInfo) {
       return '{}';
     }
 
-    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJSONObject as string).split(':')[1];
+    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJSONValue as string).split(':')[1];
     if (layerName) this.name = layerName;
 
     const params = {
@@ -104,7 +102,7 @@ export class WFS {
       outputFormat: 'application/json',
     };
 
-    const getResponse = axios.get<L.GeoJSON | string>(this.url, { params: params });
+    const getResponse = axios.get<L.GeoJSON | string>(this.url, { params });
 
     const geo = new Promise<L.GeoJSON | string>((resolve) => {
       getResponse
@@ -170,9 +168,9 @@ export class WFS {
    * Get feature type info of a given entry
    * @param {object} FeatureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
-   * @returns {TypeJSONObject | null} feature type object or null
+   * @returns {TypeJSONValue | null} feature type object or null
    */
-  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObjectLoop, entries?: string): TypeJSONObjectLoop | null {
+  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -189,7 +187,7 @@ export class WFS {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name['#text'] as TypeJSONObject as string;
+      let fName = FeatureTypeList.Name['#text'] as TypeJSONValue as string;
 
       const fNameSplit = fName.split(':');
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
@@ -208,9 +206,9 @@ export class WFS {
   /**
    * Get capabilities of the current WFS service
    *
-   * @returns {TypeJSONObjectLoop} WFS capabilities in json format
+   * @returns {TypeJSONObject} WFS capabilities in json format
    */
-  getCapabilities = (): TypeJSONObjectLoop => {
+  getCapabilities = (): TypeJSONObject => {
     return this.#capabilities;
   };
 

@@ -12,7 +12,7 @@ import {
   Cast,
   AbstractPluginClass,
   TypeWindow,
-  TypeJSONObject,
+  TypeJSONValue,
   TypeActualPlugin,
   TypePluginEntry,
   TypeRecordOfPlugin,
@@ -38,8 +38,8 @@ export class Plugin {
   addPlugin = async (
     pluginId: string,
     mapId: string,
-    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJSONObject) => TypeJSONObject),
-    props?: TypeJSONObject
+    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJSONValue) => TypeJSONValue),
+    props?: TypeJSONValue
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
       let plugin: TypeActualPlugin | null = null;

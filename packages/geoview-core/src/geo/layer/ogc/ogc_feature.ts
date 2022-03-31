@@ -1,5 +1,3 @@
-/* eslint-disable object-shorthand */
-/* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 
 import L, { Layer } from 'leaflet';
@@ -8,7 +6,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { generateId } from '../../../core/utils/utilities';
 
-import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -43,7 +41,7 @@ export class OgcFeature {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObjectLoop;
+  #capabilities: TypeJSONObject;
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -80,7 +78,7 @@ export class OgcFeature {
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
     const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
 
-    const res = await axios.get<TypeJSONObjectLoop>(metaUrl);
+    const res = await axios.get<TypeJSONObject>(metaUrl);
     this.#capabilities = res.data;
 
     const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
@@ -153,9 +151,9 @@ export class OgcFeature {
    * Get feature type info of a given entry
    * @param {object} FeatureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
-   * @returns {TypeJSONObject | null} feature type object or null
+   * @returns {TypeJSONValue | null} feature type object or null
    */
-  private getFeatureTypeInfo(FeatureTypeList: TypeJSONObjectLoop, entries?: string): TypeJSONObjectLoop | null {
+  private getFeatureTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -174,7 +172,7 @@ export class OgcFeature {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJSONObject as string);
+      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJSONValue as string);
 
       if (fName) {
         const fNameSplit = fName.split(':');
@@ -197,9 +195,9 @@ export class OgcFeature {
   /**
    * Get capabilities of the current WFS service
    *
-   * @returns {TypeJSONObjectLoop} WFS capabilities in json format
+   * @returns {TypeJSONObject} WFS capabilities in json format
    */
-  getMeta = (): TypeJSONObject => {
+  getMeta = (): TypeJSONValue => {
     return this.#capabilities;
   };
 }
