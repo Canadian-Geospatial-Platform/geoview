@@ -19,35 +19,6 @@ type EsriOptions = {
 const w = window as TypeWindow;
 
 /**
- * List of layer types and labels
- */
-const layerOptions = [
-  ['esriDynamic', 'ESRI Dynamic Service'],
-  ['esriFeature', 'ESRI Feature Service'],
-  ['geoJSON', 'GeoJSON'],
-  ['ogcWMS', 'OGC Web Map Service (WMS)'],
-  ['ogcWFS', 'OGC Web Feature Service (WFS)'],
-  ['xyzTiles', 'XYZ Raster Tiles'],
-];
-
-/**
- * Returns the appropriate error config for ESRI layer types
- *
- * @param type one of esriDynamic or esriFeature
- * @returns {EsriOptions} an error configuration object for populating dialogues
- */
-const esriOptions = (type: string): EsriOptions => {
-  switch (type) {
-    case 'esriDynamic':
-      return { err: 'ESRI Map', capability: 'Map' };
-    case 'esriFeature':
-      return { err: 'ESRI Feature', capability: 'Query' };
-    default:
-      return { err: '', capability: '' };
-  }
-};
-
-/**
  * A react component that displays the details panel content
  *
  * @returns {JSX.Element} A React JSX Element with the details panel
@@ -55,7 +26,7 @@ const esriOptions = (type: string): EsriOptions => {
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, react, ui, mui } = cgpv;
-
+  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES } = api.layerTypes;
   const { useState } = react;
   const { Button, ButtonGroup } = ui.elements;
   const { Stepper, Step, StepLabel, StepContent, TextField, Typography, InputLabel, FormControl, Select, MenuItem, Autocomplete } = mui;
@@ -75,7 +46,37 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   }));
   const classes = useStyles();
 
-  const isMultiple = () => layerType === 'esriDynamic';
+  const isMultiple = () => layerType === ESRI_DYNAMIC;
+
+  /**
+   * List of layer types and labels
+   */
+  const layerOptions = [
+    [ESRI_DYNAMIC, 'ESRI Dynamic Service'],
+    [ESRI_FEATURE, 'ESRI Feature Service'],
+    [GEOJSON, 'GeoJSON'],
+    [WMS, 'OGC Web Map Service (WMS)'],
+    [WFS, 'OGC Web Feature Service (WFS)'],
+    [OGC_FEATURE, 'OGC API Features'],
+    [XYZ_TILES, 'XYZ Raster Tiles'],
+  ];
+
+  /**
+   * Returns the appropriate error config for ESRI layer types
+   *
+   * @param type one of esriDynamic or esriFeature
+   * @returns {EsriOptions} an error configuration object for populating dialogues
+   */
+  const esriOptions = (type: string): EsriOptions => {
+    switch (type) {
+      case ESRI_DYNAMIC:
+        return { err: 'ESRI Map', capability: 'Map' };
+      case ESRI_FEATURE:
+        return { err: 'ESRI Feature', capability: 'Query' };
+      default:
+        return { err: '', capability: '' };
+    }
+  };
 
   /**
    * Emits an error dialogue when a text field is empty
@@ -83,7 +84,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorEmpty = (textField: string) => {
-    api.event.emit('snackbar/open', mapId, {
+    api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
       message: {
         type: 'string',
         value: `${textField} cannot be empty`,
@@ -97,7 +98,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param serviceName type of service provided by the URL
    */
   const emitErrorServer = (serviceName: string) => {
-    api.event.emit('snackbar/open', mapId, {
+    api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
       message: {
         type: 'string',
         value: `URL is not a valid ${serviceName} Server`,
@@ -164,6 +165,30 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       } else setLayerList(layers);
     } catch (err) {
       emitErrorServer('WFS');
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Using the layerURL state object, check whether URL is a valid OGC API.
+   *
+   * @returns {Promise<boolean>} True if layer passes validation
+   */
+  const ogcFeatureValidation = async (): Promise<boolean> => {
+    const keys = ['collections', 'links'];
+    try {
+      const response = await fetch(`${layerURL}/collections?f=json`);
+      const json = await response.json();
+      const isValid = keys.every((key) => Object.keys(json).includes(key));
+      if (!isValid) throw new Error('err');
+      const layers = json.collections.map((x) => [x.id, x.title]);
+      if (layers.length === 1) {
+        setLayerName(layers[0][1]);
+        setLayerEntry(layers[0][0]);
+      } else setLayerList(layers);
+    } catch (err) {
+      emitErrorServer('OGC API Feature');
       return false;
     }
     return true;
@@ -259,12 +284,13 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty('Service Type');
     }
-    if (layerType === 'ogcWMS') valid = await wmsValidation();
-    if (layerType === 'ogcWFS') valid = await wfsValidation();
-    else if (layerType === 'xyzTiles') valid = xyzValidation();
-    else if (layerType === 'esriDynamic') valid = await esriValidation('esriDynamic');
-    else if (layerType === 'esriFeature') valid = await esriValidation('esriFeature');
-    else if (layerType === 'geoJSON') valid = await geoJSONValidation();
+    if (layerType === WMS) valid = await wmsValidation();
+    if (layerType === WFS) valid = await wfsValidation();
+    if (layerType === OGC_FEATURE) valid = await ogcFeatureValidation();
+    else if (layerType === XYZ_TILES) valid = xyzValidation();
+    else if (layerType === ESRI_DYNAMIC) valid = await esriValidation(ESRI_DYNAMIC);
+    else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
+    else if (layerType === GEOJSON) valid = await geoJSONValidation();
     if (valid) setActiveStep(2);
   };
 
@@ -289,8 +315,8 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let url = layerURL;
     let entries = layerEntry;
     if (Array.isArray(entries)) entries = entries.join(',');
-    if (layerType === 'esriDynamic') url = api.geoUtilities.getMapServerUrl(layerURL);
-    else if (layerType === 'esriFeature') {
+    if (layerType === ESRI_DYNAMIC) url = api.geoUtilities.getMapServerUrl(layerURL);
+    else if (layerType === ESRI_FEATURE) {
       url = `${api.geoUtilities.getMapServerUrl(layerURL)}/${layerEntry}`;
       entries = '';
     }
