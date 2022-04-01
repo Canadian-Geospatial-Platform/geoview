@@ -103,4 +103,4 @@ class DetailsPlugin {
 export default DetailsPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.detailsPanel = DetailsPlugin;
+w.plugins['details-panel'] = DetailsPlugin;

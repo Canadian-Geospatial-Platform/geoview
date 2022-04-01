@@ -10,7 +10,7 @@ import WMSCapabilities from 'wms-capabilities';
 
 import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
 
-import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeWMSLayer } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -41,7 +41,7 @@ export class WMS {
   layer: Layer | string;
 
   // layer entries
-  entries: string[] | undefined;
+  entries?: string[];
 
   // layer or layer service url
   url: string;
@@ -55,22 +55,29 @@ export class WMS {
   // private varibale holding wms paras
   #wmsParams: any;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
-   *
+   * @param {string} mapId the id of the map
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeWMSLayer) {
+    this.#mapId = mapId;
+
     this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
+    this.type = layerConfig.layerType;
     this.#capabilities = {};
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
+    this.url =
+      layerConfig.url[api.map(this.#mapId).getLanguageCode()].indexOf('?') === -1
+        ? `${layerConfig.url[api.map(this.#mapId).getLanguageCode()]}?`
+        : layerConfig.url[api.map(this.#mapId).getLanguageCode()];
+
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(layerConfig.url[api.map(this.#mapId).getLanguageCode()], true),
     });
-    this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
     this.layer = new Layer();
   }
 
@@ -80,11 +87,13 @@ export class WMS {
    * @param {TypeLayerConfig} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
+  add(layer: TypeWMSLayer): Promise<Layer | string> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
-    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
+    const entries = layer.layerEntries.map((item) => item.id).toString();
+
+    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${entries}`;
 
     const data = getXMLHttpRequest(capUrl);
 
@@ -98,14 +107,15 @@ export class WMS {
           const json = new WMSCapabilities(value).toJSON() as TypeJSONObjectLoop;
           this.#capabilities = json;
 
-          isValid = this.validateEntries(json.Capability.Layer, layer.entries as string);
+          isValid = this.validateEntries(json.Capability.Layer, entries as string);
 
-          const layerName = 'name' in layer ? layer.name : json.Service.Name;
-          if (layerName) this.name = <string>layerName;
+          this.name = (
+            'name' in layer && layer.name !== undefined ? layer.name[api.map(this.#mapId).getLanguageCode()] : json.Service.Name
+          ) as string;
 
           if (isValid) {
-            const wms = L.tileLayer.wms(layer.url, {
-              layers: layer.entries,
+            const wms = L.tileLayer.wms(layer.url[api.map(this.#mapId).getLanguageCode()], {
+              layers: entries,
               format: 'image/png',
               transparent: true,
               attribution: '',
@@ -137,6 +147,7 @@ export class WMS {
 
     // Added support of multiple entries
     const allNames = this.findAllByKey(layer, 'Name');
+
     const entryArray = entries.split(',').map((s) => s.trim());
     for (let i = 0; i < entryArray.length; i += 1) {
       isValid = isValid && allNames.includes(entryArray[i]);

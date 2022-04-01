@@ -1,7 +1,7 @@
-import { TypeButtonProps, TypeProps, TypeButtonPanel, TypeWindow } from 'geoview-core';
+import { TypeButtonProps, TypeProps, TypeButtonPanel, TypeWindow, TypeJSONObject } from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
 
-const w = window as TypeWindow;
+const w: TypeWindow = window;
 
 /**
  * Create a class for the plugin instance
@@ -25,7 +25,7 @@ class BasemapSwitcherPlugin {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<any>> = {
+  translations: TypeProps<TypeProps<string | TypeJSONObject>> = {
     'en-CA': {
       basemapSwitcher: 'Basemaps',
       'basemap-transport-label': {
@@ -90,7 +90,7 @@ class BasemapSwitcherPlugin {
 
       // button props
       const button: TypeButtonProps = {
-        tooltip: this.translations[language].basemapSwitcher,
+        tooltip: this.translations[language].basemapSwitcher as string,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',
@@ -98,7 +98,7 @@ class BasemapSwitcherPlugin {
 
       // panel props
       const panel = {
-        title: this.translations[language].basemapSwitcher,
+        title: this.translations[language].basemapSwitcher as string,
         icon: '<i class="material-icons">map</i>',
         width: 200,
       };
@@ -134,4 +134,4 @@ class BasemapSwitcherPlugin {
 export default BasemapSwitcherPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.basemapSwitcher = BasemapSwitcherPlugin;
+w.plugins['basemap-switcher'] = BasemapSwitcherPlugin;

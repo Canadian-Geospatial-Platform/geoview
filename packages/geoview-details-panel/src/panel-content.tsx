@@ -299,7 +299,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             // check layer type if WMS then use getFeatureInfo to query the data
             let res = null;
 
-            if (layer.type == 'ogcWMS') {
+            if (layer.type == 'ogcWms') {
               res = await layer.getFeatureInfo(latlng, layerMap);
 
               if (res && res.results && res.results.length > 0) {
@@ -442,7 +442,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       };
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (mapLayer.type === 'ogcWMS') {
+      if (mapLayer.type === 'ogcWms') {
         // get layer ids / entries from the loaded WMS layer
         const { entries } = mapLayer;
 
@@ -455,7 +455,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             // try to add the legend image url for the WMS layer
             // const legendImageUrl = `${mapLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
-            const legendImageUrl = mapLayer.getLegendGraphic(layerId);
+            const legendImageUrl = await mapLayer.getLegendGraphic(layerId);
 
             // assign the url to the renderer
             if (layerInfo.drawingInfo && layerInfo.drawingInfo.renderer && layerInfo.drawingInfo.renderer.symbol) {
@@ -533,7 +533,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     // handle crosshair enter
     api.event.on(
       EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER,
-      function (args: { handlerName: string; latlng: L.LatLng }) {
+      (args: { handlerName: string; latlng: L.LatLng }) => {
         if (args.handlerName === mapId) {
           handleOpenDetailsPanel(args.latlng);
         }
@@ -545,7 +545,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       mapInstance.off('click');
       api.event.off(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId);
     };
-  }, [handleOpenDetailsPanel, mapId, mapInstance]);
+  }, [EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, api.event, handleOpenDetailsPanel, mapId, mapInstance]);
 
   // h is a reference to this.createElement
   // createElement is a React function to create React HTML elements

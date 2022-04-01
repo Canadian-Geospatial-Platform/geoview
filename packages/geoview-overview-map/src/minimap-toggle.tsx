@@ -31,6 +31,9 @@ const useStyles = ui.makeStyles((theme: any) => ({
     transform: 'rotate(45deg)',
     color: theme.palette.primary.contrastText,
     zIndex: theme.zIndex.tooltip,
+    '&:hover': {
+      cursor: 'pointer',
+    },
   },
   toggleBtnContainer: {
     zIndex: theme.zIndex.tooltip,

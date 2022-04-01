@@ -144,8 +144,8 @@ export type TypeIconCreationFunction = () => L.DivIcon;
  * constant contains layer types
  */
 export const CONST_LAYER_TYPES = {
-  WMS: 'ogcWMS',
-  GEOJSON: 'geoJSON',
+  WMS: 'ogcWms',
+  GEOJSON: 'geojson',
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   XYZ_TILES: 'xyzTiles',
@@ -614,13 +614,10 @@ export type TypeServiceUrls = {
   keys: string;
 };
 
-export type TypeLanguages = 'en-CA' | 'fr-CA';
+export type TypeLanguages = 'en' | 'fr';
+export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
 
-/**
- * Interface used when creating a map to validate configuration object
- */
-export type TypeMapConfigProps = {
-  id: string;
+export type TypeMapSchemaProps = {
   map: TypeMapConfig;
   theme?: 'dark' | 'light';
   appBar?: TypeAppBarProps;
@@ -630,11 +627,18 @@ export type TypeMapConfigProps = {
   corePackages?: TypeMapCorePackages[];
   externalPackages?: TypeExternalPackages[];
   serviceUrls?: TypeServiceUrls;
-  languages: TypeLanguages[];
-  language: 'en-CA' | 'fr-CA';
+  languages: TypeLocalizedLanguages[];
   version?: string;
   extraOptions: TypeJSONObject;
 };
+
+/**
+ * Interface used when creating a map to validate configuration object
+ */
+export interface TypeMapConfigProps extends TypeMapSchemaProps {
+  id: string;
+  language: TypeLocalizedLanguages;
+}
 
 /**
  * interface for basemap basic properties

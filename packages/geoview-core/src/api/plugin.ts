@@ -23,6 +23,31 @@ export class Plugin {
   plugins: Record<string, any> = {};
 
   /**
+   * Load a package script on runtime
+   *
+   * @param {string} id the package id to load
+   */
+  loadScript = async (id: string): Promise<any> => {
+    return new Promise((resolve) => {
+      const existingScript = document.getElementById(id);
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.src = `./geoview-${id}.js`;
+        script.id = id;
+        document.body.appendChild(script);
+        script.onload = () => {
+          resolve(window.plugins[id]);
+        };
+
+        script.onerror = () => {
+          resolve(null);
+        };
+      }
+      if (existingScript) resolve(window.plugins[id]);
+    });
+  };
+
+  /**
    * Add new plugin
    *
    * @param {string} id the plugin id
@@ -38,7 +63,9 @@ export class Plugin {
         // create new instance of the plugin
         plugin = new constructor(id, props);
       } else {
-        const InstanceConstructor = (await import(`${'../plugins'}/${id}/index.tsx`)).default;
+        const InstanceConstructor = await this.loadScript(id);
+
+        // const InstanceConstructor = (await import(`${'../plugins'}/${id}/index.tsx`)).default;
 
         if (InstanceConstructor) plugin = new InstanceConstructor(id, props);
       }
@@ -151,8 +178,8 @@ export class Plugin {
       const map = api.maps[mapId] as MapViewer;
 
       // load plugins if provided in the config
-      if (map.mapProps.plugins && map.mapProps.plugins.length > 0) {
-        map.mapProps.plugins.forEach((plugin) => {
+      if (map.mapProps.corePackages && map.mapProps.corePackages.length > 0) {
+        map.mapProps.corePackages.forEach((plugin) => {
           const { plugins } = Cast<TypeWindow>(window);
           if (plugins && plugins[plugin]) {
             this.addPlugin(plugin, mapId, plugins[plugin], {

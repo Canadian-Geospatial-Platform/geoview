@@ -67,4 +67,4 @@ class OverviewMapPlugin {
 export default OverviewMapPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.overviewMap = OverviewMapPlugin;
+w.plugins['overview-map'] = OverviewMapPlugin;

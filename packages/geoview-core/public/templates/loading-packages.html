@@ -54,14 +54,6 @@
         text-align: left;
       }
     </style>
-
-    <script src="geoview-details-panel.js"></script>
-
-    <script src="geoview-overview-map.js"></script>
-
-    <script src="geoview-basemap-switcher.js"></script>
-
-    <script src="geoview-layers-panel.js"></script>
   </head>
   <body>
     <div class="header-table">
@@ -120,108 +112,32 @@
         'map': {
           'interaction': 'dynamic',
           'initialView': {
-            'zoom': 12,
-            'center': [45, 75]
+            'zoom': 4,
+            'center': [60, -100]
           },
           'projection': 3978,
           'basemapOptions': {
             'id': 'transport',
-            'shaded': true,
+            'shaded': false,
             'labeled': true
           },
           'layers': [
             {
               'id': 'wmsLYR1',
               'name': {
-                'en': 'Topographic OSM WMS',
-                'fr': 'WMS OSM Topographique'
+                'en': 'Première Nation / First Nation',
+                'fr': 'Première Nation / First Nation'
               },
               'url': {
-                'en': 'https://ows.mundialis.de/services/service?',
-                'fr': 'https://ows.mundialis.de/services/service?'
+                'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
               },
               'layerType': 'ogcWms',
               'layerEntries': [
                 {
-                  'id': 'TOPO-OSM-WMS'
+                  'id': '0'
                 }
               ]
-            },
-            {
-              'id': 'esriDynamicLYR3',
-              'name': {
-                'en': 'Energy Infrastructure of North America',
-                'fr': 'Infrastructure énergétique d'Amérique du Nord'
-              },
-              'url': {
-                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
-                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
-              },
-              'layerType': 'esriDynamic',
-              'layerEntries': [
-                {
-                  'index': '4',
-                  'name': {
-                    'en': 'Natural Gas Processing Plants - config',
-                    'fr': 'Usines de traitement du gaz naturel - config'
-                  }
-                },
-                {
-                  'index': '5'
-                },
-                {
-                  'index': '6'
-                }
-              ]
-            },
-            {
-              'id': 'esriFeatureLYR4',
-              'name': {
-                'en': 'Geothermal',
-                'fr': 'Géothermie'
-              },
-              'url': {
-                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19',
-                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21'
-              },
-              'layerType': 'esriFeature'
-            },
-            {
-              'id': 'esriFeatureLYR5',
-              'url': {
-                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10',
-                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10'
-              },
-              'layerType': 'esriFeature'
-            },
-            {
-              'id': 'geojsonLYR6',
-              'name': {
-                'en': 'GeoJSON Sample',
-                'fr': 'Exemple GeoJSON'
-              },
-              'url': {
-                'en': './geojson/polygons.json',
-                'fr': './geojson/polygons.json'
-              },
-              'layerType': 'geojson'
-            },
-            {
-              'id': 'geojsonEnPointLYR7',
-              'name': {
-                'en': 'GeoJSON Service End Point Sample',
-                'fr': 'Exemple Service GeoJSON'
-              },
-              'url': {
-                'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/',
-                'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/'
-              },
-              'layerType': 'geojsonEndpoint'
-            },
-            {
-              'id': '9e1507cd-f25c-4c64-995b-6563bf9d65bd',
-              'url': 'https://maps.canada.ca/geonetwork/srv/api/v2/docs/en/',
-              'layerType': 'geoCore'
             }
           ]
         },
@@ -259,7 +175,7 @@
 
         // add event handler to the load details panel button
         loadDetailsPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('detailsPanel', 'mapWM', window.plugins['detailsPanel'], {
+          cgpv.api.addPlugin('details-panel', 'mapWM', window.plugins['details-panel'], {
             mapId: 'mapWM',
           });
         });
@@ -269,7 +185,7 @@
 
         // add event handler to the unload details panel button
         unloadDetailsPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('detailsPanel');
+          cgpv.api.removePlugin('details-panel');
         });
 
         // get load overview map button element
@@ -277,7 +193,7 @@
 
         // add event handler to the load overview map button
         loadOverviewMapBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('overviewMap', 'mapWM', window.plugins['overviewMap'], {
+          cgpv.api.addPlugin('overview-map', 'mapWM', window.plugins['overview-map'], {
             mapId: 'mapWM',
           });
         });
@@ -287,7 +203,7 @@
 
         // add event handler to the unload overview map button
         unloadOverviewMapBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('overviewMap');
+          cgpv.api.removePlugin('overview-map');
         });
 
         // get load basemap switcher button element
@@ -295,7 +211,7 @@
 
         // add event handler to the load basemap switcher button
         loadBasemapSwitcherBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('basemapSwitcher', 'mapWM', window.plugins['basemapSwitcher'], {
+          cgpv.api.addPlugin('basemap-switcher', 'mapWM', window.plugins['basemap-switcher'], {
             mapId: 'mapWM',
           });
         });
@@ -305,7 +221,7 @@
 
         // add event handler to the unload basemap switcher button
         unloadBasemapSwitcherBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('basemapSwitcher', 'mapWM');
+          cgpv.api.removePlugin('basemap-switcher', 'mapWM');
         });
 
         // get load basemap switcher button element
@@ -313,7 +229,7 @@
 
         // add event handler to the load basemap switcher button
         loadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.addPlugin('layersPanel', 'mapWM', window.plugins['layersPanel'], {
+          cgpv.api.addPlugin('layers-panel', 'mapWM', window.plugins['layers-panel'], {
             mapId: 'mapWM',
           });
         });
@@ -323,7 +239,7 @@
 
         // add event handler to the unload basemap switcher button
         unloadLayersPanelBtn.addEventListener('click', function (e) {
-          cgpv.api.removePlugin('layersPanel');
+          cgpv.api.removePlugin('layers-panel');
         });
       });
     </script>

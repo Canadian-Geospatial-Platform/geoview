@@ -15,7 +15,7 @@ import { MapProjection } from '../projection/map-projection';
 import '../../core/types/cgp-leaflet-config';
 
 import { api } from '../../api/api';
-import { TypeMapConfigProps, TypeLayerConfig } from '../../core/types/cgpv-types';
+import { TypeMapConfigProps, TypeLayerConfig, TypeLanguages, TypeLocalizedLanguages } from '../../core/types/cgpv-types';
 
 import { generateId } from '../../core/utils/utilities';
 
@@ -71,7 +71,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
-  language: string;
+  language: TypeLocalizedLanguages;
 
   // get used projection
   currentProjection: number;
@@ -127,7 +127,7 @@ export class MapViewer {
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(cgpMap, this.mapProps.map.layers);
+    this.layer = new Layer(this.id, this.mapProps.map.layers);
 
     // initialize the projection
     this.projection = new MapProjection(this.mapProps.map.projection);
@@ -235,6 +235,15 @@ export class MapViewer {
    */
   mapReady = (): void => {
     api.event.emit(EVENT_NAMES.EVENT_MAP_LOADED, this.id, { map: this.map });
+  };
+
+  /**
+   * Return the language code from localized language
+   *
+   * @returns {TypeLanguages} returns the language code from localized language. Ex: en, fr
+   */
+  getLanguageCode = (): TypeLanguages => {
+    return this.language.split('-')[0] as TypeLanguages;
   };
 
   /**

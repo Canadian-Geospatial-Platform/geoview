@@ -38,8 +38,7 @@ import schema from '../schema.json';
 
 export * from './core/types/cgpv-types';
 
-const defaultConfig: types.TypeMapConfigProps = {
-  id: generateId(),
+const defaultConfig: types.TypeMapSchemaProps = {
   map: {
     interaction: 'dynamic',
     initialView: {
@@ -57,7 +56,6 @@ const defaultConfig: types.TypeMapConfigProps = {
   theme: 'dark',
   components: ['appbar', 'navbar', 'northArrow'],
   languages: ['en-CA', 'fr-CA'],
-  language: 'en-CA',
   extraOptions: {},
 };
 
@@ -113,8 +111,10 @@ function getMapPropsFromUrlParams(configParams: string): types.TypeJSONObject {
 
     for (let i = 0; i < params.length; i += 1) {
       const param = params[i].split('=');
+      const key = param[0];
+      const value = param[1];
 
-      obj[param[0]] = param[1];
+      obj[key] = value;
     }
   }
 
@@ -138,15 +138,15 @@ function parseObjectFromUrl(objStr: string): types.TypeJSONObject {
           const prop = objProps[i].split(':');
           if (prop && prop.length) {
             const key = prop[0] as string;
-            let value: unknown = prop[1];
+            const value: string = prop[1];
 
             if (prop[1] === 'true') {
-              value = true;
+              obj[key] = true;
             } else if (prop[1] === 'false') {
-              value = false;
+              obj[key] = false;
+            } else {
+              obj[key] = value;
             }
-
-            obj[key] = value;
           }
         }
       }
@@ -177,9 +177,9 @@ function init(callback: () => void) {
 
     if (!mapId) mapId = generateId();
 
-    let langauge = mapElement.getAttribute('data-lang');
+    let language = mapElement.getAttribute('data-lang');
 
-    if (!langauge) langauge = 'en-CA';
+    if (!language) language = 'en-CA';
 
     if (mapId) {
       // eslint-disable-next-line no-restricted-globals
@@ -188,7 +188,7 @@ function init(callback: () => void) {
       // check if url contains any params
       const urlParams = getMapPropsFromUrlParams(locationSearch);
 
-      let configObj: types.TypeMapConfigProps = { ...defaultConfig, id: mapId, langauge: langauge as 'en-CA' | 'fr-CA' };
+      let configObj: types.TypeMapSchemaProps = { ...defaultConfig };
 
       if (Object.keys(urlParams).length) {
         // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
@@ -199,7 +199,7 @@ function init(callback: () => void) {
         const basemapOptions = parseObjectFromUrl(urlParams.b as string) as types.TypeBasemapOptions;
 
         configObj = {
-          id: mapId,
+          ...configObj,
           map: {
             interaction: urlParams.i as 'static' | 'dynamic',
             initialView: {
@@ -210,8 +210,11 @@ function init(callback: () => void) {
             basemapOptions,
           },
           languages: ['en-CA', 'fr-CA'],
-          language: urlParams.l as 'en-CA' | 'fr-CA',
+          extraOptions: {},
         };
+
+        // set language from params
+        language = urlParams.l as types.TypeLocalizedLanguages;
       } else {
         let configObjStr = mapElement.getAttribute('data-config');
 
@@ -220,7 +223,7 @@ function init(callback: () => void) {
             .replace(/'/g, '"')
             .replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
 
-          configObj = JSON.parse(configObjStr);
+          configObj = { ...configObj, ...JSON.parse(configObjStr) };
         }
       }
 
@@ -232,25 +235,32 @@ function init(callback: () => void) {
       // validate configuration and apply default if problem occurs then setup language
       const validate = validator.compile(schema);
 
-      const valid = validate(configObj);
+      const valid = validate({ ...configObj });
 
       if (!valid && validate.errors && validate.errors.length) {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
-
-          //   api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
-          //     message: {
-          //       type: 'key',
-          //       value: error,
-          //       params: [mapId],
-          //     },
-          //   });
+          console.log(error);
+          // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
+          //   message: {
+          //     type: 'key',
+          //     value: error.message,
+          //     params: [mapId],
+          //   },
+          // });
         }
       } else {
-        configObj.id = mapId;
-
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ReactDOM.render(<AppStart configObj={configObj!} />, mapElement);
+        ReactDOM.render(
+          <AppStart
+            configObj={{
+              ...configObj,
+              id: mapId,
+              language: language as types.TypeLocalizedLanguages,
+            }}
+          />,
+          mapElement
+        );
       }
 
       // if (!valid) {

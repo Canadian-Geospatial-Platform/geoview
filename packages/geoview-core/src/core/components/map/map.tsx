@@ -1,6 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable react/require-default-props */
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
@@ -8,14 +7,9 @@ import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import makeStyles from '@mui/styles/makeStyles';
-
-import { SnackbarProvider } from 'notistack';
-
 import { Crosshair } from '../crosshair/crosshair';
 import { MousePosition } from '../mouse-position/mouse-position';
 import { Attribution } from '../attribution/attribution';
-import { Snackbar } from '../../../ui/snackbar/snackbar';
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { ClickMarker } from '../click-marker/click-marker';
 
@@ -26,13 +20,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { TypeMapConfigProps, TypeBasemapLayer, TypeJSONObjectMapComponent } from '../../types/cgpv-types';
-
-const useStyles = makeStyles((theme) => ({
-  snackBar: {
-    '& .MuiButton-text': { color: theme.palette.primary.light },
-  },
-}));
+import { TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
   const { map: mapProps, extraOptions, language } = props;
@@ -50,11 +38,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // attribution used by the map
   const [attribution, setAttribution] = useState<string>('');
 
-  // render additional components if added by api
-  const [components, setComponents] = useState<TypeJSONObjectMapComponent>({});
-
   const defaultTheme = useTheme();
-  const classes = useStyles();
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
@@ -104,50 +88,21 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   }
 
   useEffect(() => {
-    // listen to adding a new component events
+    // listen to adding a new basemap events
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
-      (payload) => {
-        if (payload && payload.handlerName === id)
-          setComponents((tempComponents) => ({
-            ...tempComponents,
-            [payload.id]: payload.component,
-          }));
-      },
-      id
-    );
-
-    // listen to removing a component events
-    api.event.on(
-      EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
+      EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
         if (payload && payload.handlerName === id) {
-          const tempComponents = { ...components };
-          delete tempComponents[payload.id];
-
-          setComponents(() => ({
-            ...tempComponents,
-          }));
+          setBasemapLayers(payload.layers);
         }
       },
       id
     );
 
-    // listen to adding a new basemap events
-    api.event.on(
-      EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
-      (payload) => {
-        if (payload && payload.handlerName === id) setBasemapLayers(payload.layers);
-      },
-      id
-    );
-
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, id);
-      api.event.off(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, id);
       api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
-  }, [components, id]);
+  }, [id]);
 
   return (
     <MapContainer
@@ -224,21 +179,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           <NorthPoleFlag projection={crs} />
           <Crosshair id={id} />
           <ClickMarker />
-          <SnackbarProvider
-            maxSnack={3}
-            dense
-            autoHideDuration={4000}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            className={`${classes.snackBar}`}
-          >
-            <Snackbar id={id} />
-          </SnackbarProvider>
-          {Object.keys(components).map((key: string) => {
-            return <Fragment key={key}>{components[key]}</Fragment>;
-          })}
         </>
       )}
     </MapContainer>

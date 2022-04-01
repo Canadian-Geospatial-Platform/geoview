@@ -93,4 +93,4 @@ class LayersPanelPlugin {
 export default LayersPanelPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.layersPanel = LayersPanelPlugin;
+w.plugins['layers-panel'] = LayersPanelPlugin;
