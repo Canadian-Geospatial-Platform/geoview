@@ -1,4 +1,4 @@
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
 import { TypeLayerConfig } from '../../../core/types/cgpv-types';
@@ -20,7 +20,7 @@ export class GeoJSON {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.GeoJSON | null;
 
   // layer or layer service url
   url: string;
@@ -35,7 +35,7 @@ export class GeoJSON {
     if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
-    this.layer = new Layer();
+    this.layer = null;
   }
 
   /**
@@ -43,12 +43,12 @@ export class GeoJSON {
    * Add a GeoJSON layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<L.GeoJSON | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<L.GeoJSON | string> {
+  add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
     const data = getXMLHttpRequest(layer.url);
 
-    const geo = new Promise<L.GeoJSON | string>((resolve) => {
+    const geo = new Promise<L.GeoJSON | null>((resolve) => {
       data.then((value: string) => {
         if (value !== '{}') {
           // parse the json string and convert it to a json object
@@ -81,7 +81,7 @@ export class GeoJSON {
 
           resolve(geojson);
         } else {
-          resolve(value);
+          resolve(null);
         }
       });
     });

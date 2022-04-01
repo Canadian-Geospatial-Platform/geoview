@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
@@ -26,7 +26,7 @@ export class EsriDynamic {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: DynamicMapLayer | null;
 
   // layer or layer service url
   url: string;
@@ -47,7 +47,7 @@ export class EsriDynamic {
     if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
-    this.layer = new Layer();
+    this.layer = null;
     const entries = layerConfig.entries?.split(',').map((item: string) => {
       return parseInt(item, 10);
     });
@@ -61,12 +61,12 @@ export class EsriDynamic {
    * Add a ESRI dynamic layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<DynamicMapLayer | string>} layers to add to the map
+   * @return {Promise<DynamicMapLayer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<DynamicMapLayer | string> {
+  add(layer: TypeLayerConfig): Promise<DynamicMapLayer | null> {
     const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
-    const geo = new Promise<DynamicMapLayer | string>((resolve) => {
+    const geo = new Promise<DynamicMapLayer | null>((resolve) => {
       data.then((value: string) => {
         // get layers from service and parse layer entries as number
         const { layers } = JSON.parse(value);
@@ -81,7 +81,7 @@ export class EsriDynamic {
 
           resolve(feature);
         } else {
-          resolve('{}');
+          resolve(null);
         }
       });
     });

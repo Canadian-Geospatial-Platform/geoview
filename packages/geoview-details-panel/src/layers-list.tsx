@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeJSONValue, TypeLayersListProps, TypeLayerData, TypeWindow } from 'geoview-core';
+import { TypeJSONValue, TypeLayersListProps, TypeLayerData, TypeWindow, TypeJSONObject } from 'geoview-core';
 
 // get the window object
 const w = window as TypeWindow;
@@ -93,14 +93,14 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
     // check if the layer has only one entry
     if (layerData.length === 1) {
       // go to the entry information skipping entry list
-      const attributes = (layerData[0] as TypeJSONValue)?.attributes as TypeJSONValue;
+      const attributes = layerData[0]?.attributes;
       selectFeature({
         attributes,
         displayField,
         fieldAliases,
         symbol: getSymbol(renderer, attributes),
         numOfEntries: 1,
-      });
+      } as TypeJSONValue as TypeJSONObject);
     }
   };
 
@@ -152,10 +152,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
 
                                     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
                                       latlng: clickPos,
-                                      symbology: getSymbol(
-                                        data.layers[layerKey].renderer,
-                                        (layerData[0] as TypeJSONValue).attributes as TypeJSONValue
-                                      ),
+                                      symbology: getSymbol(data.layers[layerKey].renderer, layerData[0].attributes),
                                     });
                                   }
                                 : undefined

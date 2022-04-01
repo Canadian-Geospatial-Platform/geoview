@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
@@ -36,7 +36,7 @@ export class WMS {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.TileLayer.WMS | null;
 
   // layer entries
   entries: string[] | undefined;
@@ -68,16 +68,16 @@ export class WMS {
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
     this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
-    this.layer = new Layer();
+    this.layer = null;
   }
 
   /**
    * Add a WMS layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<Layer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<L.TileLayer.WMS | string> {
+  add(layer: TypeLayerConfig): Promise<L.TileLayer.WMS | null> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
@@ -85,8 +85,8 @@ export class WMS {
 
     const data = getXMLHttpRequest(capUrl);
 
-    const geo = new Promise<L.TileLayer.WMS | string>((resolve) => {
-      data.then((value: string) => {
+    const geo = new Promise<L.TileLayer.WMS | null>((resolve) => {
+      data.then((value) => {
         if (value !== '{}') {
           // check if entries exist
           let isValid = true;
@@ -111,10 +111,10 @@ export class WMS {
 
             resolve(wms);
           } else {
-            resolve('{}');
+            resolve(null);
           }
         } else {
-          resolve('{}');
+          resolve(null);
         }
       });
     });

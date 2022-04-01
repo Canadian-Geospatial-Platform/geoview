@@ -26,7 +26,7 @@ const { IconButton, ChevronLeftIcon } = ui.elements;
 // get leaflet positions
 const { leafletPositionClasses } = constants;
 
-const useStyles = ui.makeStyles((theme: any) => ({
+const useStyles = ui.makeStyles((theme) => ({
   toggleBtn: {
     transform: 'rotate(45deg)',
     color: theme.palette.primary.contrastText,
@@ -77,7 +77,7 @@ export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     setStatus(!status);
 
     if (status) {
-      const buttonSize = theme.overrides?.button?.size;
+      const buttonSize = theme.overrides.button?.size;
       // decrease size of overview map to the size of the toggle btn
       minimap.getContainer().style.width = buttonSize.width as string;
       minimap.getContainer().style.height = buttonSize.height as string;

@@ -1,4 +1,4 @@
-import { Cast } from 'geoview-core';
+import { Cast, TypeWindow } from 'geoview-core';
 
 import { MinimapBounds } from './minimap-bounds';
 import { MinimapToggle } from './minimap-toggle';
@@ -9,7 +9,7 @@ export const MINIMAP_SIZE = {
 };
 
 // get the window object
-const w = window as any;
+const w = window as TypeWindow;
 
 // access the cgpv object from the window object
 const { cgpv } = w;
@@ -27,7 +27,7 @@ const { useMediaQuery, useTheme, makeStyles } = ui;
 
 const { leafletPositionClasses } = constants;
 
-const useStyles = makeStyles((theme: any) => ({
+const useStyles = makeStyles((theme) => ({
   minimap: {
     width: MINIMAP_SIZE.width,
     height: MINIMAP_SIZE.height,
@@ -56,8 +56,8 @@ const useStyles = makeStyles((theme: any) => ({
  */
 interface OverviewProps {
   id: string;
-  crs: Object;
-  language: string;
+  crs: L.CRS;
+  // language: string;
   zoomFactor: number;
 }
 
@@ -69,7 +69,7 @@ interface OverviewProps {
 export function OverviewMap(props: OverviewProps): JSX.Element {
   const { id, crs, zoomFactor } = props;
 
-  const [minimap, setMinimap] = useState();
+  const [minimap, setMinimap] = useState<L.Map>();
 
   const classes = useStyles();
 
@@ -130,7 +130,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
             <MinimapToggle parentId={id} minimap={minimap} />
           </>
         ) : (
-          <></>
+          <div />
         )}
       </MapContainer>
     ),
@@ -145,6 +145,6 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
       </div>
     </div>
   ) : (
-    <></>
+    <div />
   );
 }

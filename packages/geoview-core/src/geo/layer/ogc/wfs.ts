@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
@@ -29,7 +29,7 @@ export class WFS {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.GeoJSON | null;
 
   // layer entries
   entries: string[] | undefined;
@@ -63,16 +63,16 @@ export class WFS {
     });
     this.url = layerConfig.url;
 
-    this.layer = new Layer();
+    this.layer = null;
   }
 
   /**
    * Add a WFS layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<L.GeoJSON | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | string> {
+  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
     // const data = getXMLHttpRequest(capUrl);
     const resCapabilities = await axios.get<TypeJSONValue>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
@@ -87,7 +87,7 @@ export class WFS {
     const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
 
     if (!featTypeInfo) {
-      return '{}';
+      return null;
     }
 
     const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJSONValue as string).split(':')[1];
@@ -104,7 +104,7 @@ export class WFS {
 
     const getResponse = axios.get<L.GeoJSON | string>(this.url, { params });
 
-    const geo = new Promise<L.GeoJSON | string>((resolve) => {
+    const geo = new Promise<L.GeoJSON | null>((resolve) => {
       getResponse
         .then((response) => {
           const geojson = response.data;
@@ -113,7 +113,7 @@ export class WFS {
             const wfsLayer = L.geoJSON(
               geojson as GeoJSON.GeoJsonObject,
               {
-                pointToLayer: (feature, latlng): Layer | undefined => {
+                pointToLayer: (feature, latlng): L.Layer | undefined => {
                   if (feature.geometry.type === 'Point') {
                     return L.circleMarker(latlng);
                   }
@@ -138,7 +138,7 @@ export class WFS {
 
             resolve(wfsLayer);
           } else {
-            resolve('{}');
+            resolve(null);
           }
         })
         .catch((error) => {
@@ -158,7 +158,7 @@ export class WFS {
             // console.log("Error", error.message);
           }
           // console.log(error.config);
-          resolve('{}');
+          resolve(null);
         });
     });
     return geo;

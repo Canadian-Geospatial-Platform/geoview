@@ -60,7 +60,7 @@ export class Layer {
           const layerConf = payload.layer as TypeJSONValue as TypeLayerConfig;
           if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
             const geoJSON = new GeoJSON(layerConf);
-            geoJSON.add(layerConf).then((layer: leafletLayer | string) => {
+            geoJSON.add(layerConf).then((layer) => {
               geoJSON.layer = layer;
               this.addToMap(geoJSON);
             });
@@ -68,38 +68,38 @@ export class Layer {
             this.removeTabindex();
           } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
             const wmsLayer = new WMS(layerConf);
-            wmsLayer.add(layerConf).then((layer: L.TileLayer.WMS | string) => {
-              wmsLayer.layer = layer as leafletLayer;
+            wmsLayer.add(layerConf).then((layer) => {
+              wmsLayer.layer = layer;
               this.addToMap(wmsLayer);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
             const xyzTiles = new XYZTiles(layerConf);
-            xyzTiles.add(layerConf).then((layer: leafletLayer | string) => {
+            xyzTiles.add(layerConf).then((layer) => {
               xyzTiles.layer = layer;
               this.addToMap(xyzTiles);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
             const esriDynamic = new EsriDynamic(layerConf);
-            esriDynamic.add(layerConf).then((layer: leafletLayer | string) => {
+            esriDynamic.add(layerConf).then((layer) => {
               esriDynamic.layer = layer;
               this.addToMap(esriDynamic);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
             const esriFeature = new EsriFeature(layerConf);
-            esriFeature.add(layerConf).then((layer: leafletLayer | string) => {
+            esriFeature.add(layerConf).then((layer) => {
               esriFeature.layer = layer;
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
           } else if (layerConf.type === CONST_LAYER_TYPES.WFS) {
             const wfsLayer = new WFS(layerConf);
-            wfsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            wfsLayer.add(layerConf).then((layer) => {
               wfsLayer.layer = layer;
               this.addToMap(wfsLayer);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.OGC_FEATURE) {
             const ogcFeatureLayer = new OgcFeature(layerConf);
-            ogcFeatureLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            ogcFeatureLayer.add(layerConf).then((layer) => {
               ogcFeatureLayer.layer = layer;
               this.addToMap(ogcFeatureLayer);
             });
@@ -170,9 +170,9 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer);
+      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
 
-      cgpvLayer.layer.addTo(this.#map);
+      cgpvLayer.layer!.addTo(this.#map);
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<TypeLayerData>(cgpvLayer);
       api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {

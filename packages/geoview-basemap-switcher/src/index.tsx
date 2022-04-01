@@ -1,10 +1,12 @@
 import {
+  Cast,
   AbstractPluginClass,
+  TypePluginOptions,
   TypeButtonProps,
   TypeButtonPanel,
   TypeWindow,
-  TypeJSONValue,
   TypeJSONObject,
+  TypeJSONValue,
   TypePanelProps,
 } from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
@@ -15,19 +17,11 @@ const w = window as TypeWindow;
  * Create a class for the plugin instance
  */
 class BasemapSwitcherPlugin extends AbstractPluginClass {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  BasemapSwitcherPluginProps: TypeJSONObject;
-
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypeJSONObject) {
-    super();
-    this.id = id;
-    this.BasemapSwitcherPluginProps = props;
+  constructor(id: string, props: TypePluginOptions) {
+    super(id, props);
     this.buttonPanel = null;
   }
 
@@ -86,7 +80,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const mapId: string = this.BasemapSwitcherPluginProps.mapId as TypeJSONValue as string;
+    const mapId: string = this.pluginOptions.mapId as TypeJSONValue as string;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -124,7 +118,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const mapId: string = this.BasemapSwitcherPluginProps.mapId as TypeJSONValue as string;
+    const mapId: string = this.pluginOptions.mapId as TypeJSONValue as string;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -143,4 +137,4 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 export default BasemapSwitcherPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.basemapSwitcher = BasemapSwitcherPlugin;
+w.plugins.basemapSwitcher = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
@@ -27,7 +27,7 @@ export class EsriFeature {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: FeatureLayer | null;
 
   // layer or layer service url
   url: string;
@@ -45,7 +45,7 @@ export class EsriFeature {
     if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
-    this.layer = new Layer();
+    this.layer = null;
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url),
     });
@@ -55,9 +55,9 @@ export class EsriFeature {
    * Add a ESRI feature layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<FeatureLayer | string>} layers to add to the map
+   * @return {Promise<FeatureLayer | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<FeatureLayer | string> {
+  async add(layer: TypeLayerConfig): Promise<FeatureLayer | null> {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     // define a default blue icon
@@ -76,7 +76,7 @@ export class EsriFeature {
 
     const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
-    const geo = new Promise<FeatureLayer | string>((resolve) => {
+    const geo = new Promise<FeatureLayer | null>((resolve) => {
       data.then((value: string) => {
         const { type } = JSON.parse(value);
 
@@ -92,7 +92,7 @@ export class EsriFeature {
 
           resolve(feature);
         } else {
-          resolve('{}');
+          resolve(null);
         }
       });
     });

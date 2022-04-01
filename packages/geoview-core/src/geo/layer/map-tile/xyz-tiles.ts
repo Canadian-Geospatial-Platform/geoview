@@ -1,4 +1,4 @@
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { TypeLayerConfig } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
@@ -28,7 +28,7 @@ export class XYZTiles {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.TileLayer | null;
 
   // layer or layer service url
   url: string;
@@ -43,17 +43,17 @@ export class XYZTiles {
     if ('name' in layerConfig) this.name = layerConfig.name;
     this.type = layerConfig.type;
     this.url = layerConfig.url;
-    this.layer = new Layer();
+    this.layer = null;
   }
 
   /**
    * Add a XYZ Tiles layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<L.TileLayer | string>} layers to add to the map
+   * @return {Promise<L.TileLayer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<L.TileLayer | string> {
-    const tileLayer = new Promise<L.TileLayer | string>((resolve) => {
+  add(layer: TypeLayerConfig): Promise<L.TileLayer | null> {
+    const tileLayer = new Promise<L.TileLayer | null>((resolve) => {
       const xyzTileLayer = L.tileLayer(layer.url);
 
       resolve(xyzTileLayer);

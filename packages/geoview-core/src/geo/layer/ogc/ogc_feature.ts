@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
@@ -29,7 +29,7 @@ export class OgcFeature {
   type: string;
 
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.GeoJSON | null;
 
   // layer entries
   entries: string[] | undefined;
@@ -63,16 +63,16 @@ export class OgcFeature {
     });
     this.url = layerConfig.url.trim();
 
-    this.layer = new Layer();
+    this.layer = null;
   }
 
   /**
    * Add a OGC API feature layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<L.GeoJSON | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | string> {
+  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
@@ -86,7 +86,7 @@ export class OgcFeature {
 
     const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
 
-    const geo = new Promise<L.GeoJSON | string>((resolve) => {
+    const geo = new Promise<L.GeoJSON | null>((resolve) => {
       getResponse
         .then((result) => {
           const geojson = result.data;
@@ -95,7 +95,7 @@ export class OgcFeature {
             const featureLayer = L.geoJSON(
               geojson as GeoJSON.GeoJsonObject,
               {
-                pointToLayer: (feature, latlng): Layer | undefined => {
+                pointToLayer: (feature, latlng): L.Layer | undefined => {
                   if (feature.geometry.type === 'Point') {
                     return L.circleMarker(latlng);
                   }
@@ -121,7 +121,7 @@ export class OgcFeature {
 
             resolve(featureLayer);
           } else {
-            resolve('{}');
+            resolve(null);
           }
         })
         .catch((error) => {
@@ -141,7 +141,7 @@ export class OgcFeature {
             // console.log("Error", error.message);
           }
           // console.log(error.config);
-          resolve('{}');
+          resolve(null);
         });
     });
     return geo;

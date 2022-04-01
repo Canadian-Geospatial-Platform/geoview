@@ -4,7 +4,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
 
-import { TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow } from 'geoview-core';
+import { TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJSONObject } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -117,14 +117,14 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
     <div className={classes.featuresContainer}>
       {
         // loop through each entry
-        layerData.map((feature: TypeJSONValue, i: number) => {
-          const attributes = (feature as TypeJSONValue)?.attributes as TypeJSONValue;
+        layerData.map((feature: TypeJSONObject, i: number) => {
+          const attributes = feature?.attributes;
 
           // get symbol
           const symbolImage = getSymbol(renderer, attributes);
 
           // get the title from the attributes, if no title was defined in the layer then set it to the objectId
-          const attributesDisplayField = attributes[displayField] as string;
+          const attributesDisplayField = attributes[displayField] as TypeJSONValue as string;
           const title =
             attributesDisplayField && attributesDisplayField.length > 0 ? `${attributesDisplayField}` : `${attributes.OBJECTID}`;
 
@@ -149,10 +149,10 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
               >
                 <div className={classes.featureIconTextContainer}>
                   <div className={classes.featureItemIconContainer}>
-                    {symbolImage.imageData ? (
+                    {symbolImage!.imageData ? (
                       <img
                         className={classes.featureItemIcon}
-                        src={`data:${symbolImage.contentType};base64, ${symbolImage.imageData}`}
+                        src={`data:${symbolImage!.contentType};base64, ${symbolImage!.imageData}`}
                         alt=""
                       />
                     ) : renderer.symbol.legendImageUrl ? (

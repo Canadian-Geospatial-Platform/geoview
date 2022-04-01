@@ -1,4 +1,4 @@
-import { TypeProps, TypeWindow } from 'geoview-core';
+import { Cast, AbstractPluginClass, TypeJSONObject, TypeWindow } from 'geoview-core';
 import { OverviewMap } from './overview-map';
 
 const w = window as TypeWindow;
@@ -6,22 +6,11 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class OverviewMapPlugin {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  OverviewMapPluginProps: TypeProps;
-
-  constructor(id: string, props: TypeProps) {
-    this.id = id;
-    this.OverviewMapPluginProps = props;
-  }
-
+class OverviewMapPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<string>> = {
+  translations: TypeJSONObject = {
     'en-CA': {},
     'fr-CA': {},
   };
@@ -30,7 +19,7 @@ class OverviewMapPlugin {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.OverviewMapPluginProps;
+    const { mapId } = this.pluginOptions;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -44,7 +33,7 @@ class OverviewMapPlugin {
       .map(mapId)
       .addComponent(
         'overviewMap',
-        <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor} />
+        <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor!} />
       );
   };
 
@@ -52,7 +41,7 @@ class OverviewMapPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.OverviewMapPluginProps;
+    const { mapId } = this.pluginOptions;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -67,4 +56,4 @@ class OverviewMapPlugin {
 export default OverviewMapPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.overviewMap = OverviewMapPlugin;
+w.plugins.overviewMap = Cast<AbstractPluginClass>(OverviewMapPlugin);

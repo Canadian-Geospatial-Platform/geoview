@@ -36,6 +36,11 @@ import * as UI from '../../ui';
 
 import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
 
+export { WMS } from '../../geo/layer/ogc/wms';
+export { EsriFeature } from '../../geo/layer/esri/esri-feature';
+export { EsriDynamic } from '../../geo/layer/esri/esri-dynamic';
+export * from './material-ui.d';
+
 declare global {
   interface Window {
     cgpv: TypeCGPV;
@@ -114,7 +119,14 @@ export type TypeMapContext = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONValue = null | string | number | boolean | TypeJSONValue[] | { [key: string]: TypeJSONValue };
+export type TypeJSONValue =
+  | null
+  | string
+  | number
+  | boolean
+  | TypeJSONValue[]
+  | { [key: string]: TypeJSONValue }
+  | { [key: string]: TypeJSONObject };
 
 export type TypeJSONObject = {
   [key: string]: TypeJSONObject;
@@ -326,7 +338,7 @@ export type TypeLayerData = {
     getLayers: () => L.Layer[];
   } & L.Layer;
   layers: TypeLayersInLayerData;
-  getLegendGraphic?: () => Promise<string>;
+  getLegendGraphic?: (id: string) => Promise<string>;
   getLegendJson?: () => Promise<TypeLegendJson>;
   setOpacity: (opacity: number) => void;
   getBounds: () => L.LatLngBounds | Promise<L.LatLngBounds>;
@@ -335,7 +347,7 @@ export type TypeLayerData = {
 export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJSONValue[];
+  layerData: TypeJSONObject[];
   groupLayer: boolean;
   displayField: string;
   fieldAliases: TypeJSONValue;
@@ -345,7 +357,7 @@ export type TypeLayersEntry = {
 };
 
 export type TypeEntry = {
-  attributes: TypeJSONValue;
+  attributes: TypeJSONObject;
 };
 
 export type TypeLayerInfo = {
@@ -374,7 +386,7 @@ export type TypeFoundLayers = {
  */
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONValue) => TypeJSONValue;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject | null;
   selectFeature: (featureData: TypeJSONValue) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -389,7 +401,7 @@ export type TypeRendererSymbol = {
     legendImageUrl: string;
     type: 'simple' | 'uniqueValue';
   };
-  uniqueValueInfos: TypeJSONValue[];
+  uniqueValueInfos: TypeJSONObject[];
   field1: string;
   field2: string;
   field3: string;
@@ -468,10 +480,10 @@ export type TypeSelectedFeature = {
  */
 export type TypeLayersListProps = {
   clickPos?: L.LatLng;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONValue) => TypeJSONValue;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject | null;
   layersData: Record<string, TypeLayerData>;
   mapId: string;
-  selectFeature: (featureData: TypeJSONValue) => void;
+  selectFeature: (featureData: TypeJSONObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
 };
 
@@ -864,4 +876,19 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   changeHandler?: <T>(params: T) => void;
 }
 
-export abstract class AbstractPluginClass {}
+export type TypePluginOptions = {
+  mapId: string;
+};
+
+export abstract class AbstractPluginClass {
+  // id of the plugin
+  id: string;
+
+  // plugin properties
+  pluginOptions: TypePluginOptions;
+
+  constructor(id: string, props: TypePluginOptions) {
+    this.id = id;
+    this.pluginOptions = props;
+  }
+}

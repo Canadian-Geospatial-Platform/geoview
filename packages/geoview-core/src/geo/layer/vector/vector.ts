@@ -2,7 +2,7 @@ import L, { LatLngExpression } from 'leaflet';
 
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
-import { CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
+import { Cast, TypeJSONValue, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 /**
@@ -42,17 +42,38 @@ export class Vector {
     api.event.on(
       EVENT_NAMES.EVENT_VECTOR_ADD,
       (payload) => {
-        const id = payload.id ? payload.id : null;
-        if (payload.type === CONST_VECTOR_TYPES.CIRCLE) {
-          this.addCircle(payload.latitude, payload.longitude, payload.options, id);
-        } else if (payload.type === CONST_VECTOR_TYPES.POLYGON) {
-          this.addPolygon(payload.points, payload.options, id);
-        } else if (payload.type === CONST_VECTOR_TYPES.POLYLINE) {
-          this.addPolyline(payload.points, payload.options, id);
-        } else if (payload.type === CONST_VECTOR_TYPES.MARKER) {
-          this.addMarker(payload.latitude, payload.longitude, payload.options, id);
-        } else if (payload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
-          this.addCircleMarker(payload.latitude, payload.longitude, payload.options, id);
+        type TypePayloadPoints = LatLngExpression[] | LatLngExpression[][];
+        const id = payload.id ? (payload.id as TypeJSONValue as string) : undefined;
+        const payloadType = payload.type as TypeJSONValue as string;
+        if (payloadType === CONST_VECTOR_TYPES.CIRCLE) {
+          this.addCircle(
+            payload.latitude as TypeJSONValue as number,
+            payload.longitude as TypeJSONValue as number,
+            Cast<L.CircleMarkerOptions>(payload.options),
+            id as TypeJSONValue as string
+          );
+        } else if (payloadType === CONST_VECTOR_TYPES.POLYGON) {
+          this.addPolygon(
+            Cast<TypePayloadPoints | LatLngExpression[][][]>(payload.points),
+            Cast<L.CircleMarkerOptions>(payload.options),
+            id
+          );
+        } else if (payloadType === CONST_VECTOR_TYPES.POLYLINE) {
+          this.addPolyline(Cast<TypePayloadPoints>(payload.points), Cast<L.CircleMarkerOptions>(payload.options), id);
+        } else if (payloadType === CONST_VECTOR_TYPES.MARKER) {
+          this.addMarker(
+            payload.latitude as TypeJSONValue as number,
+            payload.longitude as TypeJSONValue as number,
+            Cast<L.CircleMarkerOptions>(payload.options),
+            id
+          );
+        } else if (payloadType === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
+          this.addCircleMarker(
+            payload.latitude as TypeJSONValue as number,
+            payload.longitude as TypeJSONValue as number,
+            Cast<L.CircleMarkerOptions>(payload.options),
+            id
+          );
         }
       },
       map.id
@@ -63,7 +84,7 @@ export class Vector {
       EVENT_NAMES.EVENT_VECTOR_REMOVE,
       (payload) => {
         // remove geometry from outside
-        this.deleteGeometry(payload.id);
+        this.deleteGeometry(payload.id as TypeJSONValue as string);
       },
       map.id
     );
