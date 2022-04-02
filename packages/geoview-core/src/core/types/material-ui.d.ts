@@ -1,7 +1,3 @@
-// Type modification for @mui/material/styles
-
-/// <reference types='@mui/material/styles' />
-
 import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
 
 import { TypeJSONValue } from './cgpv-types';

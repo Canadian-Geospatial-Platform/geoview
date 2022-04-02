@@ -1,7 +1,7 @@
 import L from 'leaflet';
 
-import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 /**
  * Class used to add geojson layer to the map
@@ -9,21 +9,9 @@ import { TypeLayerConfig } from '../../../core/types/cgpv-types';
  * @export
  * @class GeoJSON
  */
-export class GeoJSON {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'GeoJson Layer';
-
-  // layer type
-  type: string;
-
+export class GeoJSON extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: L.GeoJSON | null;
-
-  // layer or layer service url
-  url: string;
+  layer: L.GeoJSON | null = null;
 
   /**
    * Initialize layer
@@ -31,15 +19,10 @@ export class GeoJSON {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = null;
+    super('geoJSON', 'GeoJson Layer', layerConfig);
   }
 
   /**
-   *
    * Add a GeoJSON layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration

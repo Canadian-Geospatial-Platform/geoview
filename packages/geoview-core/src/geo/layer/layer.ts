@@ -1,12 +1,12 @@
 import { Layer as leafletLayer } from 'leaflet';
 
-import { EsriDynamic } from './esri/esri-dynamic';
-import { EsriFeature } from './esri/esri-feature';
-import { WMS } from './ogc/wms';
-import { WFS } from './ogc/wfs';
-import { OgcFeature } from './ogc/ogc_feature';
-import { XYZTiles } from './map-tile/xyz-tiles';
-import { GeoJSON } from './file/geojson';
+import { EsriDynamic } from './web-layers/esri/esri-dynamic';
+import { EsriFeature } from './web-layers/esri/esri-feature';
+import { WMS } from './web-layers/ogc/wms';
+import { WFS } from './web-layers/ogc/wfs';
+import { OgcFeature } from './web-layers/ogc/ogc_feature';
+import { XYZTiles } from './web-layers/map-tile/xyz-tiles';
+import { GeoJSON } from './web-layers/file/geojson';
 import { Vector } from './vector/vector';
 import { MarkerClusterClass } from './vector/marker-cluster';
 

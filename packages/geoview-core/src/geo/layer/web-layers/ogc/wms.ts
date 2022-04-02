@@ -6,11 +6,11 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import WMSCapabilities from 'wms-capabilities';
 
-import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
+import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 
-import { TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { Cast, AbstractWebLayersClass, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -20,29 +20,17 @@ import { api } from '../../../api/api';
  * @export
  * @class WMS
  */
-export class WMS {
+export class WMS extends AbstractWebLayersClass {
   // TODO: try to avoid getCapabilities for WMS. Use Web Presence metadata return info to store, legend image link, layer name, and other needed properties.
   // ! This will maybe not happen because geoCore may not everything we need. We may have to use getCap
   // * We may have to do getCapabilites if we want to add layers not in the catalog
   // map config properties
 
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name = 'WMS Layer';
-
-  // layer type
-  type: string;
-
   // layer from leaflet
-  layer: L.TileLayer.WMS | null;
+  layer: L.TileLayer.WMS | null = null;
 
   // layer entries
   entries: string[] | undefined;
-
-  // layer or layer service url
-  url: string;
 
   // mapService property
   mapService: MapService;
@@ -59,16 +47,17 @@ export class WMS {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
+    super('ogcWMS', 'WMS Layer', layerConfig);
+
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
-    this.layer = null;
+
+    this.url = this.url.indexOf('?') === -1 ? `${this.url}?` : this.url;
   }
 
   /**
@@ -326,11 +315,8 @@ export class WMS {
    */
   getBounds = (): L.LatLngBounds => {
     const capabilities = this.getCapabilities();
-    const bbox = capabilities.Capability.Layer.EX_GeographicBoundingBox;
-    const xmin = bbox.extent.xmin as TypeJSONValue as number;
-    const xmax = bbox.extent.xmax as TypeJSONValue as number;
-    const ymin = bbox.extent.ymin as TypeJSONValue as number;
-    const ymax = bbox.extent.ymax as TypeJSONValue as number;
+    const bbox = Cast<[number, number, number, number]>(capabilities.Capability.Layer.EX_GeographicBoundingBox);
+    const [xmin, ymin, xmax, ymax] = bbox;
     return L.latLngBounds([
       [ymin, xmin],
       [ymax, xmax],

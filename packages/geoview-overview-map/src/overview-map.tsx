@@ -57,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
 interface OverviewProps {
   id: string;
   crs: L.CRS;
-  // language: string;
   zoomFactor: number;
 }
 

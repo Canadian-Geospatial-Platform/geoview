@@ -36,9 +36,14 @@ import * as UI from '../../ui';
 
 import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
 
-export { WMS } from '../../geo/layer/ogc/wms';
-export { EsriFeature } from '../../geo/layer/esri/esri-feature';
-export { EsriDynamic } from '../../geo/layer/esri/esri-dynamic';
+export { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
+export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
+export { EsriFeature } from '../../geo/layer/web-layers/esri/esri-feature';
+export { GeoJSON } from '../../geo/layer/web-layers/file/geojson';
+export { XYZTiles } from '../../geo/layer/web-layers/map-tile/xyz-tiles';
+export { OgcFeature } from '../../geo/layer/web-layers/ogc/ogc_feature';
+export { WFS } from '../../geo/layer/web-layers/ogc/wfs';
+export { WMS } from '../../geo/layer/web-layers/ogc/wms';
 export * from './material-ui.d';
 
 declare global {

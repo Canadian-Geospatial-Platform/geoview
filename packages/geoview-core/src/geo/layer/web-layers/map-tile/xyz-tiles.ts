@@ -1,7 +1,6 @@
 import L from 'leaflet';
 
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
-import { generateId } from '../../../core/utils/utilities';
+import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -17,21 +16,9 @@ import { generateId } from '../../../core/utils/utilities';
  * @export
  * @class XYZTiles
  */
-export class XYZTiles {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'XYZ Tiles';
-
-  // layer type
-  type: string;
-
+export class XYZTiles extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: L.TileLayer | null;
-
-  // layer or layer service url
-  url: string;
+  layer: L.TileLayer | null = null;
 
   /**
    * Initialize layer
@@ -39,11 +26,7 @@ export class XYZTiles {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = null;
+    super('xyzTiles', 'XYZ Tiles', layerConfig);
   }
 
   /**

@@ -4,11 +4,11 @@ import L from 'leaflet';
 
 import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { TypeLayerConfig, TypeJSONValue, TypeJSONObject } from '../../../core/types/cgpv-types';
-import { generateId, getXMLHttpRequest } from '../../../core/utils/utilities';
-import { blueCircleIcon } from '../../../core/types/marker-definitions';
+import { AbstractWebLayersClass, TypeLayerConfig, TypeJSONValue, TypeJSONObject } from '../../../../core/types/cgpv-types';
+import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 /**
  * a class to add esri feature layer
@@ -16,21 +16,9 @@ import { api } from '../../../api/api';
  * @export
  * @class EsriFeature
  */
-export class EsriFeature {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'Esri Feature Layer';
-
-  // layer type
-  type: string;
-
+export class EsriFeature extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: FeatureLayer | null;
-
-  // layer or layer service url
-  url: string;
+  layer: FeatureLayer | null = null;
 
   // mapService property
   mapService: MapService;
@@ -41,11 +29,8 @@ export class EsriFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = null;
+    super('esriFeature', 'Esri Feature Layer', layerConfig);
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url),
     });

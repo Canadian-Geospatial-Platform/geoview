@@ -4,11 +4,9 @@ import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { generateId } from '../../../core/utils/utilities';
+import { AbstractWebLayersClass, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
-import { TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../core/types/cgpv-types';
-
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 /**
  * a class to add OGC api feature layer
@@ -16,26 +14,12 @@ import { api } from '../../../api/api';
  * @export
  * @class OgcFeature
  */
-export class OgcFeature {
-  // map config properties
-
-  // layer id
-  id: string;
-
-  // layer name with default
-  name = 'OGC Feature Layer';
-
-  // layer type
-  type: string;
-
+export class OgcFeature extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: L.GeoJSON | null;
+  layer: L.GeoJSON | null = null;
 
   // layer entries
   entries: string[] | undefined;
-
-  // layer or layer service url
-  url: string;
 
   // mapService property
   mapService: MapService;
@@ -52,18 +36,17 @@ export class OgcFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
+    super('ogcFeature', 'OGC Feature Layer', layerConfig);
+
     this.#capabilities = {};
+
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url.trim();
-
-    this.layer = null;
   }
 
   /**

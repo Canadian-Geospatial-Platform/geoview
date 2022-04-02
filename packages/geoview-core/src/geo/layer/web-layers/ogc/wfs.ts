@@ -4,11 +4,11 @@ import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { xmlToJson, generateId } from '../../../core/utils/utilities';
+import { xmlToJson } from '../../../../core/utils/utilities';
 
-import { TypeJSONObject, TypeJSONValue, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeJSONObject, TypeJSONValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 /**
  * a class to add WFS layer
@@ -16,26 +16,12 @@ import { api } from '../../../api/api';
  * @export
  * @class WFS
  */
-export class WFS {
-  // map config properties
-
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name = 'WFS Layer';
-
-  // layer type
-  type: string;
-
+export class WFS extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: L.GeoJSON | null;
+  layer: L.GeoJSON | null = null;
 
   // layer entries
   entries: string[] | undefined;
-
-  // layer or layer service url
-  url: string;
 
   // mapService property
   mapService: MapService;
@@ -52,18 +38,17 @@ export class WFS {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
+    super('ogcWFS', 'WFS Layer', layerConfig);
+
     this.#capabilities = {};
+
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url;
-
-    this.layer = null;
   }
 
   /**
