@@ -8,7 +8,14 @@ import WMSCapabilities from 'wms-capabilities';
 
 import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 
-import { Cast, AbstractWebLayersClass, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import {
+  Cast,
+  AbstractWebLayersClass,
+  TypeJsonString,
+  TypeJSONValue,
+  TypeJSONObject,
+  TypeLayerConfig,
+} from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -94,7 +101,7 @@ export class WMS extends AbstractWebLayersClass {
               format: 'image/png',
               transparent: true,
               attribution: '',
-              version: this.#capabilities.version as TypeJSONValue as string,
+              version: this.#capabilities.version as TypeJsonString,
             });
             this.#wmsParams = wms.wmsParams;
 

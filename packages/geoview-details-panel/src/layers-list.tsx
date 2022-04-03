@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeJSONValue, TypeLayersListProps, TypeLayerData, TypeWindow, TypeJSONObject } from 'geoview-core';
+import { TypeJSONValue, TypeLayersListProps, AbstractWebLayersClass, TypeWindow, TypeJSONObject } from 'geoview-core';
 
 // get the window object
 const w = window as TypeWindow;
@@ -84,7 +84,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
    * @param {Object} data data object of all layers
    * @param {string} layerKey the layer object to list it's entries
    */
-  const goToFeatureList = (data: TypeLayerData, layerKey: string) => {
+  const goToFeatureList = (data: AbstractWebLayersClass, layerKey: string) => {
     const { layerData, displayField, fieldAliases, renderer } = data.layers[layerKey];
 
     // set the layer entry data

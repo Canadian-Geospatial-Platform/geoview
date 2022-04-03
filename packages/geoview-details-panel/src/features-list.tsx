@@ -1,10 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react/no-array-index-key */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-nested-ternary */
-
-import { TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJSONObject } from 'geoview-core';
+import { TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJsonString, TypeJSONObject } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -111,6 +108,7 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
       // set the panel content back to the map server layer list
       setPanel(true, false, false);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return layerData.length > 0 ? (
@@ -124,12 +122,13 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
           const symbolImage = getSymbol(renderer, attributes);
 
           // get the title from the attributes, if no title was defined in the layer then set it to the objectId
-          const attributesDisplayField = attributes[displayField] as TypeJSONValue as string;
+          const attributesDisplayField = attributes[displayField] as TypeJsonString;
           const title =
             attributesDisplayField && attributesDisplayField.length > 0 ? `${attributesDisplayField}` : `${attributes.OBJECTID}`;
 
           return (
             <div
+              // eslint-disable-next-line react/no-array-index-key
               key={i}
               tabIndex={0}
               onKeyDown={(e) => {

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import { TypeJSONValue, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
+import { TypeJsonString, TypeJSONValue, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -92,14 +92,15 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
           {symbol.imageData ? (
             <img className={classes.featureInfoHeaderIcon} src={`data:${symbol.contentType};base64, ${symbol.imageData}`} alt="" />
           ) : symbol.legendImageUrl ? (
-            <img className={classes.featureInfoHeaderIcon} src={symbol.legendImageUrl as string} alt="" />
+            <img className={classes.featureInfoHeaderIcon} src={symbol.legendImageUrl as TypeJsonString} alt="" />
           ) : (
             <div className={classes.featureInfoHeaderIcon} />
           )}
         </div>
         <span className={classes.featureInfoHeaderText}>
-          {attributes[displayField as string] && (attributes[displayField as string] as TypeJSONValue[]).length > 0
-            ? `${attributes[displayField as string]}`
+          {attributes[displayField as TypeJsonString] &&
+          (attributes[displayField as TypeJsonString] as TypeJSONValue as TypeJSONValue[]).length > 0
+            ? `${attributes[displayField as TypeJsonString]}`
             : `${attributes.OBJECTID}`}
         </span>
       </div>
@@ -107,8 +108,8 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
         {
           // loop through each attribute in the selected entry / feature
           Object.keys(attributes).map((attrKey) => {
-            let attributeAlias = fieldAliases[attrKey] as string;
-            const attributeValue = attributes[attrKey] as string;
+            let attributeAlias = fieldAliases[attrKey] as TypeJsonString;
+            const attributeValue = attributes[attrKey] as TypeJsonString;
 
             if (!attributeAlias) attributeAlias = attrKey;
 

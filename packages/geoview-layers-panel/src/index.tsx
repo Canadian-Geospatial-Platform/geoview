@@ -1,24 +1,34 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import {
+  Cast,
+  AbstractPluginClass,
+  TypeJSONObject,
+  TypeWindow,
+  TypePluginOptions,
+  TypeButtonPanel,
+  TypeButtonProps,
+  TypePanelProps,
+} from 'geoview-core';
+
 import PanelContent from './panel-content';
 
-import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps } from 'geoview-core';
-
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
  */
-class LayersPanelPlugin {
+class LayersPanelPlugin extends AbstractPluginClass {
   // id of the plugin
   id: string;
 
   // plugin properties
-  LayersPanelPluginProps: TypeProps;
+  LayersPanelPluginProps: TypePluginOptions;
 
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypeProps) {
+  constructor(id: string, props: TypePluginOptions) {
+    super(id, props);
     this.id = id;
     this.LayersPanelPluginProps = props;
     this.buttonPanel = null;
@@ -27,14 +37,14 @@ class LayersPanelPlugin {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<any>> = {
+  translations: TypeJSONObject = Cast<TypeJSONObject>({
     'en-CA': {
       layersPanel: 'Layers',
     },
     'fr-CA': {
       layersPanel: 'Couches',
     },
-  };
+  });
 
   /**
    * Added function called after the plugin has been initialized
@@ -43,7 +53,7 @@ class LayersPanelPlugin {
     const { mapId } = this.LayersPanelPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w['cgpv'];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -80,7 +90,7 @@ class LayersPanelPlugin {
     const { mapId } = this.LayersPanelPluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w['cgpv'];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -93,5 +103,5 @@ class LayersPanelPlugin {
 
 export default LayersPanelPlugin;
 
-w['plugins'] = w['plugins'] || {};
-w['plugins']['layersPanel'] = LayersPanelPlugin;
+w.plugins = w.plugins || {};
+w.plugins.layersPanel = Cast<AbstractPluginClass>(LayersPanelPlugin);

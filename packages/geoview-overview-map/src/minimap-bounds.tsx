@@ -1,4 +1,4 @@
-import { TypeJSONObject, TypeJSONValue, TypeWindow } from 'geoview-core';
+import { TypeJsonString, TypeJSONObject, TypeJSONValue, TypeWindow } from 'geoview-core';
 
 // get window object
 const w = window as TypeWindow;
@@ -84,7 +84,7 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE,
       (payload: TypeJSONObject) => {
-        if (payload && parentId === (payload.handlerName as TypeJSONValue as string)) {
+        if (payload && parentId === (payload.handlerName as TypeJsonString)) {
           updateMap();
           setToggle(payload.status as TypeJSONValue as boolean);
         }

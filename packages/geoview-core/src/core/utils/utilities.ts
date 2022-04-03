@@ -1,4 +1,4 @@
-import { Cast, TypeJSONObject, TypeJSONValue } from '../types/cgpv-types';
+import { Cast, TypeJSONObject, TypeJsonString, TypeJSONValue } from '../types/cgpv-types';
 
 /**
  * Generate a unique id if an id was not provided
@@ -63,7 +63,7 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONValue {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
       const jsonObject = obj;
-      if (typeof (jsonObject[nodeName] as TypeJSONValue as string) === 'undefined') {
+      if (typeof (jsonObject[nodeName] as TypeJsonString) === 'undefined') {
         jsonObject[nodeName] = xmlToJson(item) as TypeJSONValue as TypeJSONObject;
       } else {
         if (typeof jsonObject[nodeName].push === 'undefined') {

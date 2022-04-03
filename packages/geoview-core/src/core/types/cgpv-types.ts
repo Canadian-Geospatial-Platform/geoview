@@ -35,6 +35,7 @@ import { PanelApi } from '../../ui';
 import * as UI from '../../ui';
 
 import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
+import { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
 
 export { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
 export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
@@ -67,6 +68,23 @@ export type TypeCGPVUI = {
   useMediaQuery: typeof useMediaQuery;
   makeStyles: typeof makeStyles;
   elements: typeof UI;
+};
+
+export type TypeCGPVMUI = {
+  Stepper: typeof MUI.Stepper;
+  Step: typeof MUI.Step;
+  StepLabel: typeof MUI.StepLabel;
+  StepContent: typeof MUI.StepContent;
+  TextField: typeof MUI.TextField;
+  Typography: typeof MUI.Stepper;
+  InputLabel: typeof MUI.InputLabel;
+  FormControl: typeof MUI.FormControl;
+  Select: typeof MUI.Select;
+  MenuItem: typeof MUI.MenuItem;
+  Autocomplete: typeof MUI.Autocomplete;
+  Slider: typeof MUI.Slider;
+  Tooltip: typeof MUI.Tooltip;
+  Checkbox: typeof MUI.Checkbox;
 };
 
 export type TypeCGPVConstants = {
@@ -123,6 +141,9 @@ export type TypeMapContext = {
  * General Json type
  *
  *---------------------------------------------------------------------------*/
+
+export type TypeJsonString = TypeJSONValue & string;
+export type TypeJsonArrayOfString = TypeJSONValue & string[];
 
 export type TypeJSONValue =
   | null
@@ -314,42 +335,7 @@ export type TypeLegendJsonFeature = {
 
 export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
 
-/**
- * interface used when adding a new layer
- */
-export type TypeLayerData = {
-  id: string;
-  type: 'ogcWMS' | 'geoJSON' | 'esriDynamic' | 'esriFeature' | 'xyzTiles' | 'ogcWFS' | 'ogcFeature';
-  name: string;
-  url: string;
-  entries: string[];
-  layer: {
-    setOpacity?: (opacity: number) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eachFeature?: (x: any) => void;
-    options: {
-      url: string;
-    };
-    metadata: (fn: (error: unknown, res: { layers: { id: string; subLayerIds: string[] }[] }) => void) => void;
-    _url: string;
-    entries: {
-      attributes: TypeJSONValue;
-    }[];
-    mapService: {
-      options: {
-        url: string;
-      };
-    };
-    getLayers: () => L.Layer[];
-  } & L.Layer;
-  layers: TypeLayersInLayerData;
-  getLegendGraphic?: (id: string) => Promise<string>;
-  getLegendJson?: () => Promise<TypeLegendJson>;
-  setOpacity: (opacity: number) => void;
-  getBounds: () => L.LatLngBounds | Promise<L.LatLngBounds>;
-};
-
-export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
+export type TypeLayersInWebLayer = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
   layerData: TypeJSONObject[];
@@ -473,11 +459,11 @@ export type TypeFeatureInfoProps = {
 };
 
 export type TypeSelectedFeature = {
-  attributes: TypeJSONValue;
-  displayField: TypeJSONValue;
-  fieldAliases: TypeJSONValue;
+  attributes: TypeJSONObject;
+  displayField: TypeJSONObject;
+  fieldAliases: TypeJSONObject;
   numOfEntries: number;
-  symbol: TypeJSONValue;
+  symbol: TypeJSONObject;
 };
 
 /**
@@ -486,7 +472,7 @@ export type TypeSelectedFeature = {
 export type TypeLayersListProps = {
   clickPos?: L.LatLng;
   getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject | null;
-  layersData: Record<string, TypeLayerData>;
+  layersData: Record<string, AbstractWebLayersClass>;
   mapId: string;
   selectFeature: (featureData: TypeJSONObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
@@ -497,7 +483,7 @@ export type TypeLayersListProps = {
  */
 export type TypeLayersPanelListProps = {
   mapId: string;
-  layers: Record<string, TypeLayerData>;
+  layers: Record<string, AbstractWebLayersClass>;
   language: string;
 };
 

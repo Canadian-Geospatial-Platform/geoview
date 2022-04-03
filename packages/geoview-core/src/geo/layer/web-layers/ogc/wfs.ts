@@ -6,7 +6,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
 
-import { AbstractWebLayersClass, TypeJSONObject, TypeJSONValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeJsonString, TypeJSONObject, TypeJSONValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -27,7 +27,7 @@ export class WFS extends AbstractWebLayersClass {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObject;
+  #capabilities: TypeJSONObject = {};
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -39,8 +39,6 @@ export class WFS extends AbstractWebLayersClass {
    */
   constructor(layerConfig: TypeLayerConfig) {
     super('ogcWFS', 'WFS Layer', layerConfig);
-
-    this.#capabilities = {};
 
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
@@ -68,14 +66,14 @@ export class WFS extends AbstractWebLayersClass {
     const json = xmlToJson(xmlDOM) as TypeJSONObject;
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
-    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJSONValue as string;
+    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJsonString;
     const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
 
     if (!featTypeInfo) {
       return null;
     }
 
-    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJSONValue as string).split(':')[1];
+    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJsonString).split(':')[1];
     if (layerName) this.name = layerName;
 
     const params = {
@@ -172,7 +170,7 @@ export class WFS extends AbstractWebLayersClass {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name['#text'] as TypeJSONValue as string;
+      let fName = FeatureTypeList.Name['#text'] as TypeJsonString;
 
       const fNameSplit = fName.split(':');
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];

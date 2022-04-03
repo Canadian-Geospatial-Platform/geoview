@@ -3,7 +3,7 @@ import { createElement } from 'react';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
-import { TypeJSONValue, TypePanelProps } from '../../core/types/cgpv-types';
+import { TypeJsonString, TypePanelProps } from '../../core/types/cgpv-types';
 
 /**
  * Class used to handle creating a new panel
@@ -49,7 +49,7 @@ export class PanelApi {
     this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
-    this.title = (panel.title as TypeJSONValue as string) || '';
+    this.title = (panel.title as TypeJsonString) || '';
     this.icon = panel.icon;
     this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement('div');
     this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;

@@ -5,7 +5,7 @@ import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
 import { api } from '../../../api/api';
-import { Cast, TypeJSONValue, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeJSONValue, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 import '../../../core/types/marker-cluster-element';
@@ -168,7 +168,7 @@ export class MarkerClusterClass {
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_START_BLINKING,
       (payload) => {
         if (this.disableblinkingEvent) return;
-        if (this.blinkingElement && this.blinkingElement.id !== (payload.id as TypeJSONValue as string)) {
+        if (this.blinkingElement && this.blinkingElement.id !== (payload.id as TypeJsonString)) {
           const blinkingElementId = this.blinkingElement.id;
           if (this.spiderfiedModeOn) {
             const spiderfiedVersion = this.getSpiderfiedMarkerClusterElement(blinkingElementId);
@@ -177,7 +177,7 @@ export class MarkerClusterClass {
           const unspiderfiedVersion = this.getMarkerClusterElement(blinkingElementId);
           if (unspiderfiedVersion) unspiderfiedVersion.stopBlinking();
         }
-        this.blinkingElement = this.getMarkerClusterElement(payload.id as TypeJSONValue as string);
+        this.blinkingElement = this.getMarkerClusterElement(payload.id as TypeJsonString);
         if (!this.blinkingElement) this.blinkingElement = Cast<L.MarkerClusterElement>(payload);
       },
       map.id
@@ -188,7 +188,7 @@ export class MarkerClusterClass {
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_STOP_BLINKING,
       (payload) => {
         if (this.disableblinkingEvent) return;
-        if (this.blinkingElement && this.blinkingElement.id === (payload.id as TypeJSONValue as string)) {
+        if (this.blinkingElement && this.blinkingElement.id === (payload.id as TypeJsonString)) {
           this.blinkingElement = null;
         }
       },
@@ -199,7 +199,7 @@ export class MarkerClusterClass {
     api.event.on(
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADD,
       (payload) => {
-        const id = (payload.id ? payload.id : null) as TypeJSONValue as string;
+        const id = (payload.id ? payload.id : null) as TypeJsonString;
         this.addMarkerElement(
           payload.latitude as TypeJSONValue as number,
           payload.longitude as TypeJSONValue as number,
@@ -215,7 +215,7 @@ export class MarkerClusterClass {
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_REMOVE,
       (payload) => {
         // remove marker cluster from outside
-        this.deleteMarkerClusterElement(payload.id as TypeJSONValue as string);
+        this.deleteMarkerClusterElement(payload.id as TypeJsonString);
       },
       map.id
     );

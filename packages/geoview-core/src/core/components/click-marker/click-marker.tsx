@@ -14,7 +14,7 @@ import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { generateId } from '../../utils/utilities';
-import { Cast, TypeJSONValue, TypeJSONObject } from '../../types/cgpv-types';
+import { Cast, TypeJsonString, TypeJSONObject } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -99,7 +99,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_SHOW,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJSONValue as string).includes(mapId)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(mapId)) {
           // toggle the marker icon
           setShowMarker(true);
 
@@ -145,7 +145,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_HIDE,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJSONValue as string).includes(mapId)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(mapId)) {
           setShowMarker(false);
           overlay.style.visibility = 'hidden';
         }

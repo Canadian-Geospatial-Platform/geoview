@@ -4,8 +4,8 @@ import {
   AbstractPluginClass,
   TypePluginOptions,
   TypeButtonPanel,
+  TypeJsonString,
   TypeJSONObject,
-  TypeJSONValue,
   TypeButtonProps,
   TypePanelProps,
   TypeWindow,
@@ -30,7 +30,7 @@ class DetailsPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJSONObject = {
+  translations: TypeJSONObject = Cast<TypeJSONObject>({
     'en-CA': {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',
@@ -43,7 +43,7 @@ class DetailsPlugin extends AbstractPluginClass {
       click_map: 'Choisissez un point sur la carte pour commencer',
       action_back: 'Retour',
     },
-  } as TypeJSONValue as TypeJSONObject;
+  });
 
   /**
    * Added function called after the plugin has been initialized
@@ -57,7 +57,7 @@ class DetailsPlugin extends AbstractPluginClass {
     // access the api calls
     const { api } = cgpv;
 
-    const { language } = api.map(mapId as TypeJSONValue as string);
+    const { language } = api.map(mapId);
 
     // button props
     const button: TypeButtonProps = {
@@ -78,10 +78,10 @@ class DetailsPlugin extends AbstractPluginClass {
     };
 
     // create a new button panel on the appbar
-    this.buttonPanel = api.map(mapId as TypeJSONValue as string).appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.map(mapId as TypeJsonString).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId as TypeJSONValue as string} />);
+    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId as TypeJsonString} />);
   };
 
   /**
@@ -97,8 +97,8 @@ class DetailsPlugin extends AbstractPluginClass {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId as TypeJSONValue as string).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
-      api.event.emit(api.eventNames.EVENT_MARKER_ICON_HIDE, mapId as TypeJSONValue as string, {});
+      api.map(mapId as TypeJsonString).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      api.event.emit(api.eventNames.EVENT_MARKER_ICON_HIDE, mapId as TypeJsonString, {});
     }
   }
 }

@@ -12,7 +12,7 @@ import { MapContext } from '../../app-start';
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 import { CrosshairIcon } from './crosshair-icon';
-import { TypeJSONValue } from '../../types/cgpv-types';
+import { TypeJsonString } from '../../types/cgpv-types';
 
 import { Fade } from '../../../ui';
 
@@ -117,7 +117,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJSONValue as string).includes(id)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(id)) {
           setCrosshairsActive(true);
           isCrosshairsActiveValue.current = true;
           api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {

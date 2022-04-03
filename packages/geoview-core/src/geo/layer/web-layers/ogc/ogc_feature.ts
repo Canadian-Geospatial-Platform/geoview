@@ -4,7 +4,7 @@ import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeJsonString, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -25,7 +25,7 @@ export class OgcFeature extends AbstractWebLayersClass {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObject;
+  #capabilities: TypeJSONObject = {};
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -37,8 +37,6 @@ export class OgcFeature extends AbstractWebLayersClass {
    */
   constructor(layerConfig: TypeLayerConfig) {
     super('ogcFeature', 'OGC Feature Layer', layerConfig);
-
-    this.#capabilities = {};
 
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
@@ -155,7 +153,7 @@ export class OgcFeature extends AbstractWebLayersClass {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJSONValue as string);
+      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJsonString);
 
       if (fName) {
         const fNameSplit = fName.split(':');
@@ -183,4 +181,23 @@ export class OgcFeature extends AbstractWebLayersClass {
   getMeta = (): TypeJSONValue => {
     return this.#capabilities;
   };
+
+  /**
+   * Set Layer Opacity
+   * @param {number} opacity layer opacity
+   */
+  setOpacity = (opacity: number) => {
+    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    this.layer!.getLayers().forEach((layer) => {
+      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
+    });
+  };
+
+  /**
+   * Get bounds through Leaflet built-in functions
+   *
+   * @returns {L.LatLngBounds} layer bounds
+   */
+  getBounds = (): L.LatLngBounds => this.layer!.getBounds();
 }

@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { TypeJSONValue, TypeJSONObject } from '../core/types/cgpv-types';
+import { TypeJsonString, TypeJSONValue, TypeJSONObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -245,7 +245,7 @@ export class Event {
       let listenerPayload: TypeJSONObject;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && (payload.handlerName as TypeJSONValue as string) === handlerName) {
+      if (handlerName && (payload.handlerName as TypeJsonString) === handlerName) {
         listenerPayload = this.events[eName][handlerName];
       } else {
         listenerPayload = payload;

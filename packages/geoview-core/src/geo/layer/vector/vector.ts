@@ -2,7 +2,7 @@ import L, { LatLngExpression } from 'leaflet';
 
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
-import { Cast, TypeJSONValue, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeJSONValue, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 /**
@@ -43,14 +43,14 @@ export class Vector {
       EVENT_NAMES.EVENT_VECTOR_ADD,
       (payload) => {
         type TypePayloadPoints = LatLngExpression[] | LatLngExpression[][];
-        const id = payload.id ? (payload.id as TypeJSONValue as string) : undefined;
-        const payloadType = payload.type as TypeJSONValue as string;
+        const id = payload.id ? (payload.id as TypeJsonString) : undefined;
+        const payloadType = payload.type as TypeJsonString;
         if (payloadType === CONST_VECTOR_TYPES.CIRCLE) {
           this.addCircle(
             payload.latitude as TypeJSONValue as number,
             payload.longitude as TypeJSONValue as number,
             Cast<L.CircleMarkerOptions>(payload.options),
-            id as TypeJSONValue as string
+            id as TypeJsonString
           );
         } else if (payloadType === CONST_VECTOR_TYPES.POLYGON) {
           this.addPolygon(
@@ -84,7 +84,7 @@ export class Vector {
       EVENT_NAMES.EVENT_VECTOR_REMOVE,
       (payload) => {
         // remove geometry from outside
-        this.deleteGeometry(payload.id as TypeJSONValue as string);
+        this.deleteGeometry(payload.id as TypeJsonString);
       },
       map.id
     );

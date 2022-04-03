@@ -89,5 +89,5 @@ export class GeoJSON extends AbstractWebLayersClass {
    *
    * @returns {L.LatLngBounds} layer bounds
    */
-  getBounds = (): L.LatLngBounds => (this.layer as L.GeoJSON).getBounds();
+  getBounds = (): L.LatLngBounds => this.layer!.getBounds();
 }

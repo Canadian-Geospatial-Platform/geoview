@@ -1,31 +1,57 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersPanelListProps, TypeLayerData, TypeProps } from 'geoview-core';
+import {
+  Cast,
+  TypeLayersPanelListProps,
+  EsriFeature,
+  EsriDynamic,
+  TypeJSONValue,
+  TypeJsonString,
+  WMS,
+  TypeJSONObject,
+  AbstractWebLayersClass,
+  TypeWindow,
+  TypeCGPVMUI,
+} from 'geoview-core';
+import { generateId } from 'geoview-core/src/core/utils/utilities';
 
-const w = window as any;
+type Event = { target: { value: number } };
+
+type TypeLegend =
+  | TypeJSONValue[]
+  | {
+      name: string;
+      dataUrl: string[] | string | ArrayBuffer | null;
+    }[];
+
+type TypeSubLayerVisibility = { [id: string]: number[] };
+
+const w = window as TypeWindow;
 
 /**
  * A react component that will list the map server layers defined in the map config
  * @param {TypeLayersPanelListProps} props properties passed to the component
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
-const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
+function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { mapId, layers, language } = props;
 
-  const cgpv = w['cgpv'];
-  const { mui, ui, react, api, leaflet: L } = cgpv;
+  const { cgpv } = w;
+  const { ui, react, api, leaflet: L } = cgpv;
+  const mui = cgpv.mui as TypeCGPVMUI;
   const { useState, useEffect } = react;
-  const [selectedLayer, setSelectedLayer] = useState('');
-  const [layerLegend, setLayerLegend] = useState({});
-  const [layerBounds, setLayerBounds] = useState({});
+
+  const [selectedLayer, setSelectedLayer] = useState<string>('');
+  const [layerLegend, setLayerLegend] = useState<{ [x: string]: TypeLegend }>({});
+  const [layerBounds, setLayerBounds] = useState<Record<string, L.LatLngBounds>>({});
   const [layerBbox, setLayerBbox] = useState(L.polygon([]));
-  const [layerOpacity, setLayerOpacity] = useState({});
-  const [layerVisibility, setLayerVisibility] = useState({});
-  const [subLayerVisibility, setSubLayerVisibility] = useState({});
+  const [layerOpacity, setLayerOpacity] = useState<Record<string, number>>({});
+  const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({});
+  const [subLayerVisibility, setSubLayerVisibility] = useState<TypeSubLayerVisibility>({});
 
   const { Slider, Tooltip, Checkbox } = mui;
   const { Button } = ui.elements;
 
-  const translations: TypeProps<TypeProps<any>> = {
+  const translations: TypeJSONObject = Cast<TypeJSONObject>({
     'en-CA': {
       bounds: 'Toggle Bounds',
       zoom: 'Zoom to Layer',
@@ -40,7 +66,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       opacity: "Ajuster l'opacité",
       visibility: 'Basculer la Visibilité',
     },
-  };
+  });
 
   const useStyles = ui.makeStyles(() => ({
     layersContainer: {
@@ -112,31 +138,30 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   /**
    * Calls setLayerLegend for all layers
    */
-  const setLayerLegendAll = async () => {
-    for (const layer of Object.values(layers)) {
-      if (layer.getLegendGraphic) {
-        const dataUrl = await layer.getLegendGraphic();
+  const setLayerLegendAll = () =>
+    Object.values(layers).forEach(async (layer) => {
+      if (layer.type === 'ogcWMS') {
+        const wmsLayer = Cast<WMS>(layer);
+        const dataUrl = await wmsLayer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
-      } else if (layer.getLegendJson) {
-        const legend = await layer.getLegendJson();
+      } else if (layer.type === 'esriDynamic' || layer.type === 'esriFeature') {
+        const EsriLayer = Cast<EsriFeature | EsriDynamic>(layer);
+        const legend = await EsriLayer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];
         setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
       }
-    }
-  };
+    });
 
   /**
    * Calls setLayerExtent for all layers
    */
-  const setLayerBoundsAll = async () => {
-    for (const layer of Object.values(layers)) {
+  const setLayerBoundsAll = () =>
+    Object.values(layers).forEach(async (layer) => {
       const bounds = await layer.getBounds();
-      //   console.log(layer, bounds);
       setLayerBounds((state) => ({ ...state, [layer.id]: bounds }));
-    }
-  };
+    });
 
   useEffect(() => {
     const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
@@ -155,7 +180,8 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
 
     const defaultSubVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: curr.entries }), {});
     setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
-  }, [layers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layers, L]);
 
   const classes = useStyles();
 
@@ -175,7 +201,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    *
    * @param layer layer config
    */
-  const onZoom = (layer: TypeLayerData) => api.map(mapId).fitBounds(layerBounds[layer.id]);
+  const onZoom = (layer: AbstractWebLayersClass) => api.map(mapId).fitBounds(layerBounds[layer.id]);
 
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
@@ -188,20 +214,20 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     const width = bounds.getEast() - bounds.getWest();
     const latlngs = [];
     latlngs.push(bounds.getSouthWest());
-    for (let i = 1; i <= segments; i++) {
+    for (let i = 1; i <= segments; i += 1) {
       const segmentWidth = width * (i / (segments + 1));
       const lng = bounds.getWest() + segmentWidth;
       latlngs.push({ lat: bounds.getSouth(), lng });
     }
     latlngs.push(bounds.getSouthEast());
     latlngs.push(bounds.getNorthEast());
-    for (let i = 1; i <= segments; i++) {
+    for (let i = 1; i <= segments; i += 1) {
       const segmentWidth = width * (i / (segments + 1));
       const lng = bounds.getEast() - segmentWidth;
       latlngs.push({ lat: bounds.getNorth(), lng });
     }
     latlngs.push(bounds.getNorthWest());
-    return L.polygon(latlngs, { color: 'red' });
+    return L.polygon(latlngs, { id: generateId(), color: 'red' });
   };
 
   /**
@@ -209,7 +235,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    *
    * @param layer layer config
    */
-  const onBounds = (layer: TypeLayerData) => {
+  const onBounds = (layer: AbstractWebLayersClass) => {
     const bbox = polygonFromBounds(layerBounds[layer.id]);
     const newBbox = JSON.stringify(bbox.toGeoJSON());
     const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
@@ -228,7 +254,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    *
    * @param layer layer config
    */
-  const onRemove = (layer: TypeLayerData) => {
+  const onRemove = (layer: AbstractWebLayersClass) => {
     const bbox = polygonFromBounds(layerBounds[layer.id]);
     const newBbox = JSON.stringify(bbox.toGeoJSON());
     const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
@@ -245,7 +271,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param value slider opacity value (0-100)
    * @param data Layer data
    */
-  const onSliderChange = (value: number, data: TypeLayerData) => {
+  const onSliderChange = (value: number, data: AbstractWebLayersClass) => {
     setLayerOpacity((state) => ({ ...state, [data.id]: value }));
     const opacity = layerVisibility[data.id] ? value / 100 : 0;
     data.setOpacity(opacity);
@@ -257,13 +283,13 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param value checkbox boolean
    * @param data Layer data
    */
-  const onVisibilityChange = (value: number, data: TypeLayerData) => {
+  const onVisibilityChange = (value: boolean, data: AbstractWebLayersClass) => {
     setLayerVisibility((state) => ({ ...state, [data.id]: value }));
     const opacity = value ? layerOpacity[data.id] / 100 : 0;
     data.setOpacity(opacity);
     if (value && data.setEntries) {
-      setSubLayerVisibility((state) => ({ ...state, [data.id]: data.entries }));
-      data.setEntries(data.entries);
+      setSubLayerVisibility((state) => ({ ...state, [data.id]: data.entries as number[] }));
+      data.setEntries(data.entries as number[]);
     }
     if (!value && data.setEntries) {
       setSubLayerVisibility((state) => ({ ...state, [data.id]: [] }));
@@ -278,7 +304,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
    * @param data Layer data
    * @param id sublayer ID
    */
-  const onSubVisibilityChange = (value: number, data: TypeLayerData, id: number) => {
+  const onSubVisibilityChange = (value: boolean, data: AbstractWebLayersClass, id: number) => {
     const oldEntries = subLayerVisibility[data.id];
     const entries = value ? [...new Set([...oldEntries, id])] : oldEntries.filter((x) => x !== id);
     if (oldEntries.length === 0) {
@@ -290,7 +316,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       data.setOpacity(0);
     }
     setSubLayerVisibility((state) => ({ ...state, [data.id]: entries }));
-    data.setEntries(entries);
+    if (data.setEntries) data.setEntries(entries);
   };
 
   return (
@@ -344,54 +370,64 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                     size="small"
                     value={layerOpacity[layer.id]}
                     valueLabelDisplay="auto"
-                    onChange={(e) => onSliderChange(e.target.value, layer)}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onChange={((event: Event) => onSliderChange(event.target.value, layer)) as any}
                   />
                 </div>
                 <Tooltip title={translations[language].visibility}>
                   <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
-              {layerLegend[layer.id].map((subLayer, index: number) => (
+              {(layerLegend[layer.id] as TypeJSONObject[]).map((subLayer, index: number) => (
                 <div key={index}>
-                  {subLayer.legend && (
+                  {subLayer!.legend && (
                     <div className={classes.legendSubLayerGroup}>
-                      <div className={classes.layerItemText} title={subLayer.layerName}>
+                      <div className={classes.layerItemText} title={subLayer.layerName as TypeJsonString}>
                         {subLayer.layerName}
                       </div>
                       <Tooltip title={translations[language].visibility}>
                         <Checkbox
-                          checked={subLayerVisibility[layer.id].includes(subLayer.layerId)}
-                          onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId)}
+                          checked={subLayerVisibility[layer.id].includes(subLayer.layerId as TypeJSONValue as number)}
+                          onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as TypeJSONValue as number)}
                         />
                       </Tooltip>
                     </div>
                   )}
-                  {subLayer.drawingInfo?.renderer.type === 'simple' && subLayer.drawingInfo?.renderer.symbol.imageData && (
+                  {(subLayer.drawingInfo?.renderer.type as TypeJsonString) === 'simple' && subLayer.drawingInfo?.renderer.symbol.imageData && (
                     <div className={classes.layerItemText}>
                       <img
+                        alt="Layer Legend"
                         src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
                       />
                       {subLayer.drawingInfo?.renderer.label || subLayer.name}
                     </div>
                   )}
-                  {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
-                    subLayer.drawingInfo?.renderer.uniqueValueInfos[0].symbol.imageData &&
-                    subLayer.drawingInfo?.renderer.uniqueValueInfos.map((uniqueValue, index) => (
-                      <div key={index} className={classes.layerItemText}>
-                        <img src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
-                        {uniqueValue.label}
+                  {(subLayer.drawingInfo.renderer.type as TypeJsonString) === 'uniqueValue' &&
+                    subLayer.drawingInfo.renderer.uniqueValueInfos[0].symbol.imageData &&
+                    (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJSONValue as TypeJSONValue[]).map((uniqueValue, i: number) => (
+                      <div key={i} className={classes.layerItemText}>
+                        <img
+                          alt="Layer Legend"
+                          src={`data:${(uniqueValue as TypeJSONObject).symbol.contentType};base64,${
+                            (uniqueValue as TypeJSONObject).symbol.imageData as TypeJSONObject
+                          }`}
+                        />
+                        {(uniqueValue as TypeJSONObject).label}
                       </div>
                     ))}
                   {subLayer.legend &&
-                    subLayer.legend.map((uniqueValue, index) => (
-                      <div key={index} className={classes.layerItemText}>
-                        <img src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
-                        {uniqueValue.label || subLayer.layerName}
+                    (subLayer.legend as TypeJSONValue as TypeJSONValue[]).map((uniqueValue, i: number) => (
+                      <div key={i} className={classes.layerItemText}>
+                        <img
+                          alt="Layer Legend"
+                          src={`data:${(uniqueValue as TypeJSONObject).contentType};base64,${(uniqueValue as TypeJSONObject).imageData}`}
+                        />
+                        {(uniqueValue as TypeJSONObject).label || subLayer.layerName}
                       </div>
                     ))}
                   {subLayer.dataUrl && (
                     <div className={classes.layerItemText}>
-                      <img src={subLayer.dataUrl} />
+                      <img alt="Layer Legend" src={subLayer.dataUrl as TypeJsonString} />
                       {subLayer.name}
                     </div>
                   )}
@@ -403,6 +439,6 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       ))}
     </div>
   );
-};
+}
 
 export default LayersList;

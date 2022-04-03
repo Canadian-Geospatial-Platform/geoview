@@ -15,7 +15,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
-import { TypeButtonPanel, TypeJSONValue } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeJsonString } from '../../types/cgpv-types';
 import { MapContext } from '../../app-start';
 
 const navBtnWidth = '32px';
@@ -99,7 +99,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as TypeJSONValue as string) === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
           updateComponent();
         }
       },
@@ -110,7 +110,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as TypeJSONValue as string) === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
           updateComponent();
         }
       },
@@ -121,7 +121,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if ((args.handlerName as TypeJSONValue as string) === mapId && (args.type as TypeJSONValue as string) === 'navbar') {
+        if ((args.handlerName as TypeJsonString) === mapId && (args.type as TypeJsonString) === 'navbar') {
           updateComponent();
         }
       },
@@ -131,7 +131,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if ((args.handlerName as TypeJSONValue as string) === mapId && (args.type as TypeJSONValue as string) === 'navbar') {
+        if ((args.handlerName as TypeJsonString) === mapId && (args.type as TypeJsonString) === 'navbar') {
           updateComponent();
         }
       },

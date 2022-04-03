@@ -13,7 +13,14 @@ import { MarkerClusterClass } from './vector/marker-cluster';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { Cast, CONST_LAYER_TYPES, TypeJSONValue, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
+import {
+  Cast,
+  CONST_LAYER_TYPES,
+  TypeJsonString,
+  TypeJSONValue,
+  AbstractWebLayersClass,
+  TypeLayerConfig,
+} from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
@@ -27,7 +34,7 @@ import { generateId } from '../../core/utils/utilities';
  */
 export class Layer {
   // variable used to store all added layers
-  layers: { [key: string]: TypeLayerData } = {};
+  layers: { [key: string]: AbstractWebLayersClass } = {};
 
   // used to access vector API to create and manage geometries
   vector: Vector;
@@ -56,7 +63,7 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.EVENT_LAYER_ADD,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJSONValue as string).includes(this.#map.id)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(this.#map.id)) {
           const layerConf = payload.layer as TypeJSONValue as TypeLayerConfig;
           if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
             const geoJSON = new GeoJSON(layerConf);
@@ -114,7 +121,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.layer.id as TypeJSONValue as string);
+        this.removeLayerById(payload.layer.id as TypeJsonString);
       },
       this.#map.id
     );
@@ -174,7 +181,7 @@ export class Layer {
 
       cgpvLayer.layer!.addTo(this.#map);
       // this.layers.push(cgpvLayer);
-      this.layers[cgpvLayer.id] = Cast<TypeLayerData>(cgpvLayer);
+      this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
       api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
         layer: cgpvLayer.layer,
       });
@@ -208,11 +215,11 @@ export class Layer {
    */
   removeLayerById = (id: string): void => {
     // return items not matching the id
-    // this.layers = this.layers.filter((item: TypeLayerData) => {
+    // this.layers = this.layers.filter((item: AbstractWebLayersClass) => {
     //   if (item.id === id) item.layer.removeFrom(this.#map);
     //   return item.id !== id;
     // });
-    this.layers[id].layer.removeFrom(this.#map);
+    this.layers[id].layer!.removeFrom(this.#map);
     delete this.layers[id];
   };
 
@@ -234,7 +241,7 @@ export class Layer {
    *
    * @param {TypeLayerConfig} layer the layer configuration to remove
    */
-  removeLayer = (layer: TypeLayerConfig): string => {
+  removeLayer = (layer: AbstractWebLayersClass): string => {
     // eslint-disable-next-line no-param-reassign
     layer.id = generateId(layer.id);
     api.event.emit(EVENT_NAMES.EVENT_REMOVE_LAYER, this.#map.id, { layer });
@@ -248,8 +255,8 @@ export class Layer {
    * @param {string} id the layer id to look for
    * @returns the found layer data object
    */
-  getLayerById = (id: string): TypeLayerData | null => {
-    // return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
+  getLayerById = (id: string): AbstractWebLayersClass | null => {
+    // return this.layers.filter((layer: AbstractWebLayersClass) => layer.id === id)[0];
     return this.layers[id];
   };
 

@@ -3,7 +3,7 @@ import {
   TypeJSONValue,
   TypeRendererSymbol,
   TypeSelectedFeature,
-  TypeLayerData,
+  AbstractWebLayersClass,
   TypeLayerInfo,
   TypeFieldNameAlias,
   TypeFoundLayers,
@@ -44,7 +44,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   const { useState, useCallback, useEffect } = react;
 
-  const [layersData, setLayersData] = useState<Record<string, TypeLayerData>>({});
+  const [layersData, setLayersData] = useState<Record<string, AbstractWebLayersClass>>({});
   const [selectedLayer, setSelectedLayer] = useState({});
   const [selectedFeature, setSelectedFeature] = useState({});
 
@@ -198,12 +198,17 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   /**
    * Add a layer to the panel layer list
    *
-   * @param {TypeLayerData} mapLayer the main object that contains added layers from the api
-   * @param {Record<string, TypeLayerData>} data the data object that contains all layers
+   * @param {AbstractWebLayersClass} mapLayer the main object that contains added layers from the api
+   * @param {Record<string, AbstractWebLayersClass>} data the data object that contains all layers
    * @param {TypeLayerInfo} layerInfo the layer information
    * @param {boolean} isGroupLayer a boolean value to check if this layer is a group layer
    */
-  const addLayer = (mapLayer: TypeLayerData, data: Record<string, TypeLayerData>, layerInfo: TypeLayerInfo, isGroupLayer: boolean) => {
+  const addLayer = (
+    mapLayer: AbstractWebLayersClass,
+    data: Record<string, AbstractWebLayersClass>,
+    layerInfo: TypeLayerInfo,
+    isGroupLayer: boolean
+  ) => {
     // get the layers object from the map, it begins with an empty object then adds each layer
     const { layers } = data[mapLayer.id];
 
@@ -252,7 +257,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         [dataKey]: {
           ...prevState[dataKey],
           layers,
-        },
+        } as AbstractWebLayersClass,
       }));
     },
     [layersData]
@@ -306,7 +311,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             // check layer type if WMS then use getFeatureInfo to query the data
             let res = null;
 
-            if ((layer.type as TypeJSONValue as string) === 'ogcWMS') {
+            if (layer!.type === 'ogcWMS') {
               const ogcWMSLayer = Cast<WMS>(layer);
               // eslint-disable-next-line no-await-in-loop
               res = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
@@ -328,16 +333,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   [dataKey]: {
                     ...prevState[dataKey],
                     layers,
-                  },
+                  } as AbstractWebLayersClass,
                 }));
               }
-            } else if (
-              (layer.type as TypeJSONValue as string) === 'esriFeature' ||
-              (layer.type as TypeJSONValue as string) === 'esriDynamic'
-            ) {
+            } else if (layer!.type === 'esriFeature' || layer!.type === 'esriDynamic') {
+              const ogcEsriLayer = Cast<EsriDynamic | EsriFeature>(layer);
               // generate an identify query url
               const identifyUrl =
-                `${layer.mapService.options.url}identify?` +
+                `${ogcEsriLayer!.mapService.options.url}identify?` +
                 `f=json` +
                 `&tolerance=7` +
                 `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
@@ -371,7 +374,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   [dataKey]: {
                     ...prevState[dataKey],
                     layers,
-                  },
+                  } as AbstractWebLayersClass,
                 }));
               }
             }
@@ -441,14 +444,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     const mapLayers = api.map(mapId).layer.layers;
 
     // will be used to store the added map server layers, layers in the map server etc...
-    const data: Record<string, TypeLayerData> = {};
+    const data: Record<string, AbstractWebLayersClass> = {};
 
     // loop through each map server layer loaded from the map config and created using the API
     const layerIds = Object.keys(mapLayers);
 
     layerIds.forEach(async (id: string) => {
       const mapLayer = mapLayers[id];
-      data[mapLayer.id] = Cast<TypeLayerData>({
+      data[mapLayer.id] = Cast<AbstractWebLayersClass>({
         // the map server layer id
         id: mapLayer.id,
         name: mapLayer.name,
@@ -510,7 +513,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
         // get the metadata of the dynamic layer
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        mapLayer.layer.metadata(async (error: any, res: { layers: { id: string; subLayerIds: string[] }[] }) => {
+        esriDynamicLayer.layer!.metadata(async (error: any, res: { layers: { id: string; subLayerIds: string[] }[] }) => {
           if (error) return;
 
           if (res.layers) {
@@ -522,7 +525,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
               if (layerData.id in activeLayers) {
                 // query the layer information from the map server by appending the index at the end of the URL
                 // eslint-disable-next-line no-await-in-loop
-                const layerInfo = await queryServer(mapLayer.layer.options.url + layerData.id);
+                const layerInfo = await queryServer((mapLayer.layer!.options as L.LayerOptions).url + layerData.id);
 
                 addLayer(mapLayer, data, layerInfo, layerData.subLayerIds !== null && layerData.subLayerIds !== undefined);
 
@@ -532,7 +535,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                     const subLayer = layerData.subLayerIds[j];
 
                     // eslint-disable-next-line no-await-in-loop
-                    const subLayerInfo = await queryServer(mapLayer.layer.options.url + subLayer);
+                    const subLayerInfo = await queryServer((mapLayer.layer!.options as L.LayerOptions).url + subLayer);
 
                     addLayer(mapLayer, data, subLayerInfo, false);
                   }

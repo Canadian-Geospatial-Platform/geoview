@@ -1,4 +1,5 @@
 import { Layer, TileLayer } from 'leaflet';
+import { TypeLayersInWebLayer } from '../../../core/types/cgpv-types';
 
 import { generateId } from '../../../core/utils/utilities';
 
@@ -14,9 +15,6 @@ export type TypeAbstractWebLayersConfig = {
   id?: string;
   name?: string;
   url: string;
-  /*
-  entries?: string;
-  */
 };
 
 export abstract class AbstractWebLayersClass {
@@ -26,14 +24,24 @@ export abstract class AbstractWebLayersClass {
   // layer name with default
   name: string;
 
+  // layer or layer service url
+  url: string;
+
   // type of web layer
   type: TypeWebLayers;
 
   // The actual layer
   abstract layer: Layer | TileLayer | null;
 
-  // layer or layer service url
-  url: string;
+  layers: TypeLayersInWebLayer = {};
+
+  entries?: string[] | number[];
+
+  setEntries?(entries: number[]): void;
+
+  abstract getBounds(): L.LatLngBounds | Promise<L.LatLngBounds>;
+
+  abstract setOpacity(opacity: number): void;
 
   constructor(type: TypeWebLayers, name: string, layerConfig: TypeAbstractWebLayersConfig) {
     this.id = layerConfig.id || generateId('');
