@@ -1,16 +1,32 @@
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
 import axios from 'axios';
 
 import L from 'leaflet';
+=======
+/* eslint-disable object-shorthand */
+/* eslint-disable no-underscore-dangle */
+import axios from 'axios';
+
+import L, { Layer } from 'leaflet';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import WMSCapabilities from 'wms-capabilities';
 
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
 import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 
 import { Cast, AbstractWebLayersClass, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
+=======
+import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
+
+import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+
+import { api } from '../../../api/api';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -26,6 +42,18 @@ export class WMS extends AbstractWebLayersClass {
   // * We may have to do getCapabilites if we want to add layers not in the catalog
   // map config properties
 
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
+=======
+  // layer id with default
+  id: string;
+
+  // layer name with default
+  name = 'WMS Layer';
+
+  // layer type
+  type: string;
+
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
   // layer from leaflet
   layer: L.TileLayer.WMS | null = null;
 
@@ -47,8 +75,14 @@ export class WMS extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     super('ogcWMS', 'WMS Layer', layerConfig);
 
+=======
+    this.id = layerConfig.id || generateId('');
+    this.type = layerConfig.type;
+    this.#capabilities = {};
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
@@ -56,8 +90,13 @@ export class WMS extends AbstractWebLayersClass {
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
 
     this.url = this.url.indexOf('?') === -1 ? `${this.url}?` : this.url;
+=======
+    this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
+    this.layer = new Layer();
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
   }
 
   /**
@@ -74,8 +113,13 @@ export class WMS extends AbstractWebLayersClass {
 
     const data = getXMLHttpRequest(capUrl);
 
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     const geo = new Promise<L.TileLayer.WMS | null>((resolve) => {
       data.then((value) => {
+=======
+    const geo = new Promise<Layer | string>((resolve) => {
+      data.then((value: string) => {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
         if (value !== '{}') {
           // check if entries exist
           let isValid = true;
@@ -85,7 +129,11 @@ export class WMS extends AbstractWebLayersClass {
 
           isValid = this.validateEntries(this.#capabilities.Capability.Layer, layer.entries as string);
 
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
           const layerName = 'name' in layer ? layer.name : this.#capabilities.Service.Name;
+=======
+          const layerName = 'name' in layer ? layer.name : json.Service.Name;
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
           if (layerName) this.name = <string>layerName;
 
           if (isValid) {
@@ -94,16 +142,27 @@ export class WMS extends AbstractWebLayersClass {
               format: 'image/png',
               transparent: true,
               attribution: '',
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
               version: this.#capabilities.version as TypeJSONValue as string,
+=======
+              version: Cast<string>(json.version),
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
             });
             this.#wmsParams = wms.wmsParams;
 
             resolve(wms);
           } else {
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
             resolve(null);
           }
         } else {
           resolve(null);
+=======
+            resolve('{}');
+          }
+        } else {
+          resolve('{}');
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
         }
       });
     });
@@ -123,8 +182,13 @@ export class WMS extends AbstractWebLayersClass {
     // Added support of multiple entries
     const allNames = this.findAllByKey(layer, 'Name');
     const entryArray = entries.split(',').map((s) => s.trim());
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     for (let i = 0; i < entryArray.length; i++) {
       isValid = isValid && allNames.includes(entryArray[i] as TypeJSONValue as TypeJSONObject);
+=======
+    for (let i = 0; i < entryArray.length; i += 1) {
+      isValid = isValid && allNames.includes(entryArray[i]);
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
     }
 
     return isValid;
@@ -148,7 +212,15 @@ export class WMS extends AbstractWebLayersClass {
     };
 
     if (obj) {
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
       return Object.entries(obj).reduce(reduceFunction, []);
+=======
+      return Object.entries(obj).reduce(
+        // eslint-disable-next-line no-nested-ternary
+        (acc, [key, v]) => (key === keyToFind ? acc.concat(v) : typeof v === 'object' ? acc.concat(this.findAllByKey(v, keyToFind)) : acc),
+        []
+      );
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
     }
     return [];
   }
@@ -192,11 +264,19 @@ export class WMS extends AbstractWebLayersClass {
    * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
    */
   getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJSONObject | null> => {
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     let infoFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
       const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format;
       if ((formatArray as TypeJSONValue as TypeJSONValue[]).includes('application/geojson')) infoFormat = 'application/geojson';
+=======
+    let inforFormat = 'text/xml';
+
+    if (this.#capabilities.Capability.Request.GetFeatureInfo) {
+      const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format as any;
+      if (formatArray.includes('application/geojson')) inforFormat = 'application/geojson';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
     }
 
     const params = this.getFeatureInfoParams(latlng, map);
@@ -205,12 +285,19 @@ export class WMS extends AbstractWebLayersClass {
 
     const response = await axios.get<TypeJSONObject>(this.url, { params });
 
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     if (infoFormat === 'application/geojson') {
       const dataFeatures = response.data.features as TypeJSONValue as TypeJSONValue[];
       if (dataFeatures.length > 0) {
         const results: TypeJSONValue[] = [];
         dataFeatures.forEach((jsonValue) => {
           const element = jsonValue as TypeJSONObject;
+=======
+    if (inforFormat === 'application/geojson') {
+      if (res.data.features.length > 0) {
+        const results: any[] = [];
+        res.data.features.forEach((element) => {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
           results.push({
             attributes: element.properties,
             geometry: element.geometry,
@@ -245,7 +332,11 @@ export class WMS extends AbstractWebLayersClass {
         const arrayOfFeature = featureInfoResponse.FIELDS as TypeJSONValue as TypeJSONValue[];
         arrayOfFeature.forEach((element) => {
           results.push({
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
             attributes: (element as TypeJSONObject)['@attributes'],
+=======
+            attributes: element['@attributes'],
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
             geometry: null,
             layerId: this.id,
             layerName: this.name,
@@ -276,6 +367,7 @@ export class WMS extends AbstractWebLayersClass {
 
     // these are the SouthWest and NorthEast points
     // projected from LatLng into used crs
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     const sw = crs!.project(map.getBounds().getSouthWest());
     const ne = crs!.project(map.getBounds().getNorthEast());
 
@@ -285,15 +377,33 @@ export class WMS extends AbstractWebLayersClass {
       version: this.#wmsParams!.version!,
       layers: this.#wmsParams!.layers!,
       query_layers: this.#wmsParams!.layers,
+=======
+    const sw = crs.project(map.getBounds().getSouthWest());
+    const ne = crs.project(map.getBounds().getNorthEast());
+
+    const params: Record<string, unknown> = {
+      request: 'GetFeatureInfo',
+      service: 'WMS',
+      version: this.#wmsParams.version,
+      layers: this.#wmsParams.layers,
+      query_layers: this.#wmsParams.layers,
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
       height: size.y,
       width: size.x,
     };
 
     // Define version-related request parameters.
+<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/ogc/wms.ts
     const version = window.parseFloat(this.#wmsParams!.version!);
     params[version >= 1.3 ? 'crs' : 'srs'] = crs!.code!;
     params.bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
     params.bbox = version >= 1.3 && crs!.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+=======
+    const version = window.parseFloat(this.#wmsParams.version);
+    params[version >= 1.3 ? 'crs' : 'srs'] = crs.code;
+    params.bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    params.bbox = version >= 1.3 && crs.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/ogc/wms.ts
     params[version >= 1.3 ? 'i' : 'x'] = point.x;
     params[version >= 1.3 ? 'j' : 'y'] = point.y;
 

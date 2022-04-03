@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/require-default-props */
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { Fragment, useEffect, useState } from 'react';
 
 import { CRS } from 'leaflet';
@@ -24,7 +29,11 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
+<<<<<<< HEAD
 import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJSONValue, TypeJSONObject } from '../../types/cgpv-types';
+=======
+import { TypeMapConfigProps, TypeBasemapLayer, TypeJSONObjectMapComponent } from '../../types/cgpv-types';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 const useStyles = makeStyles((theme) => ({
   snackBar: {

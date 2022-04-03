@@ -46,9 +46,16 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONValue {
     if (element.attributes) {
       if (element.attributes.length > 0) {
         obj['@attributes'] = {};
+<<<<<<< HEAD
         for (let j = 0; j < element.attributes.length; j++) {
           const attribute = element.attributes.item(j);
           obj['@attributes'][attribute!.nodeName] = attribute!.nodeValue as TypeJSONValue as TypeJSONObject;
+=======
+        // eslint-disable-next-line no-plusplus
+        for (let j = 0; j < element.attributes.length; j++) {
+          const attribute = element.attributes.item(j) as Node;
+          (obj['@attributes'] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         }
       }
     }
@@ -62,12 +69,21 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONValue {
     for (let i = 0; i < xml.childNodes.length; i++) {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
+<<<<<<< HEAD
       const jsonObject = obj;
       if (typeof (jsonObject[nodeName] as TypeJSONValue as string) === 'undefined') {
         jsonObject[nodeName] = xmlToJson(item) as TypeJSONValue as TypeJSONObject;
       } else {
         if (typeof jsonObject[nodeName].push === 'undefined') {
           jsonObject[nodeName] = [jsonObject[nodeName]] as TypeJSONValue as TypeJSONObject;
+=======
+      const jsonObject = obj as TypeJSONObject;
+      if (typeof jsonObject[nodeName] === 'undefined') {
+        jsonObject[nodeName] = xmlToJson(item);
+      } else {
+        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === 'undefined') {
+          jsonObject[nodeName] = [jsonObject[nodeName]];
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         }
         (jsonObject[nodeName] as TypeJSONValue as TypeJSONValue[]).push(xmlToJson(item));
       }

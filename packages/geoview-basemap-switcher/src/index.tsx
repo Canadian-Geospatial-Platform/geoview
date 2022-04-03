@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Cast,
   AbstractPluginClass,
@@ -9,6 +10,9 @@ import {
   TypeJSONValue,
   TypePanelProps,
 } from 'geoview-core';
+=======
+import { TypeButtonProps, TypeProps, TypeButtonPanel, TypeWindow } from 'geoview-core';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { BasemapSwitcher } from './basemap-switcher';
 
 const w = window as TypeWindow;
@@ -28,7 +32,11 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
+<<<<<<< HEAD
   translations: TypeJSONValue = {
+=======
+  translations: TypeProps<TypeProps<any>> = {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     'en-CA': {
       basemapSwitcher: 'Basemaps',
       'basemap-transport-label': {
@@ -93,7 +101,11 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // button props
       const button: TypeButtonProps = {
+<<<<<<< HEAD
         tooltip: (this.translations as TypeJSONObject)[language].basemapSwitcher,
+=======
+        tooltip: this.translations[language].basemapSwitcher,
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',

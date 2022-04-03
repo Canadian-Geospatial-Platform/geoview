@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { Cast, AbstractPluginClass, TypeJSONObject, TypeWindow } from 'geoview-core';
+=======
+import { TypeProps, TypeWindow } from 'geoview-core';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { OverviewMap } from './overview-map';
 
 const w = window as TypeWindow;
@@ -10,7 +14,11 @@ class OverviewMapPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
+<<<<<<< HEAD
   translations: TypeJSONObject = {
+=======
+  translations: TypeProps<TypeProps<string>> = {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     'en-CA': {},
     'fr-CA': {},
   };
@@ -33,7 +41,11 @@ class OverviewMapPlugin extends AbstractPluginClass {
       .map(mapId)
       .addComponent(
         'overviewMap',
+<<<<<<< HEAD
         <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor!} />
+=======
+        <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor} />
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       );
   };
 

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable @typescript-eslint/no-unused-vars */
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import React, { Suspense, useMemo } from 'react';
 
 import './translation/i18n';
@@ -8,7 +12,11 @@ import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from './containers/shell';
+<<<<<<< HEAD
 import { cgpvTheme } from '../ui/style/theme';
+=======
+import { theme } from '../ui/style/theme';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { MapViewer } from '../geo/map/map';
 
 import { TypeMapConfigProps, TypeMapContext } from './types/cgpv-types';

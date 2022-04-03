@@ -10,7 +10,11 @@ import FocusTrap from 'focus-trap-react';
 import makeStyles from '@mui/styles/makeStyles';
 import { Card, CardHeader, CardContent } from '@mui/material';
 
+<<<<<<< HEAD
 import { Cast, TypeJSONValue, TypePanelAppProps } from '../../core/types/cgpv-types';
+=======
+import { Cast, TypePanelAppProps } from '../../core/types/cgpv-types';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { HtmlToReact } from '../../core/containers/html-to-react';
 import { MapContext } from '../../core/app-start';
 
@@ -265,7 +269,11 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             typeof panel.icon === 'string' ? (
               <HtmlToReact className={classes.buttonIcon} htmlContent={panel.icon} />
             ) : typeof panel.icon === 'object' ? (
+<<<<<<< HEAD
               panel.icon
+=======
+              <panel.icon />
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
             ) : (
               <panel.icon />
             )

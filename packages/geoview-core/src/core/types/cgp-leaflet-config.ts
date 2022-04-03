@@ -1,11 +1,19 @@
+<<<<<<< HEAD
 /* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
+=======
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-underscore-dangle */
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import L, { Util, LatLngBounds } from 'leaflet';
 import 'leaflet.markercluster/src';
 import 'react-leaflet';
 
 import * as DomUtil from 'leaflet/src/dom/DomUtil';
 import * as DomEvent from 'leaflet/src/dom/DomEvent';
+<<<<<<< HEAD
 import { MapServiceOptions } from 'esri-leaflet';
+=======
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
 
 import { api } from '../../api/api';

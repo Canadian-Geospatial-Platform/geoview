@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable react-hooks/exhaustive-deps */
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import L, { divIcon, LatLng } from 'leaflet';
@@ -14,7 +18,10 @@ import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { generateId } from '../../utils/utilities';
+<<<<<<< HEAD
 import { Cast, TypeJSONValue, TypeJSONObject } from '../../types/cgpv-types';
+=======
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -59,7 +66,10 @@ export function ClickMarker(): JSX.Element {
   const removeIcon = useCallback(() => {
     setShowMarker(false);
     overlay.style.visibility = 'hidden';
+<<<<<<< HEAD
     // eslint-disable-next-line react-hooks/exhaustive-deps
+=======
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
   }, []);
 
   // attach zoom and movestart events to the map instance
@@ -118,7 +128,11 @@ export function ClickMarker(): JSX.Element {
           setMarkerPos(Cast<L.LatLng>(payload.latlng));
 
           if (payload.symbology) {
+<<<<<<< HEAD
             const theSymbology = payload.symbology as TypeJSONObject;
+=======
+            const { symbology } = payload;
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
             let iconHtml = '';
 
             // get symbology image

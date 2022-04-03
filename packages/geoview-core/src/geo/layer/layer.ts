@@ -1,5 +1,6 @@
 import { Layer as leafletLayer } from 'leaflet';
 
+<<<<<<< HEAD
 import { EsriDynamic } from './web-layers/esri/esri-dynamic';
 import { EsriFeature } from './web-layers/esri/esri-feature';
 import { WMS } from './web-layers/ogc/wms';
@@ -7,13 +8,26 @@ import { WFS } from './web-layers/ogc/wfs';
 import { OgcFeature } from './web-layers/ogc/ogc_feature';
 import { XYZTiles } from './web-layers/map-tile/xyz-tiles';
 import { GeoJSON } from './web-layers/file/geojson';
+=======
+import { EsriDynamic } from './esri/esri-dynamic';
+import { EsriFeature } from './esri/esri-feature';
+import { WMS } from './ogc/wms';
+import { WFS } from './ogc/wfs';
+import { OgcFeature } from './ogc/ogc_feature';
+import { XYZTiles } from './map-tile/xyz-tiles';
+import { GeoJSON } from './file/geojson';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { Vector } from './vector/vector';
 import { MarkerClusterClass } from './vector/marker-cluster';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
+<<<<<<< HEAD
 import { Cast, CONST_LAYER_TYPES, TypeJSONValue, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
+=======
+import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
@@ -170,7 +184,11 @@ export class Layer {
         },
       });
     } else {
+<<<<<<< HEAD
       if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
+=======
+      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
       cgpvLayer.layer!.addTo(this.#map);
       // this.layers.push(cgpvLayer);

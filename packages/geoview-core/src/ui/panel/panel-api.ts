@@ -3,7 +3,11 @@ import { createElement } from 'react';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
+<<<<<<< HEAD
 import { TypeJSONValue, TypePanelProps } from '../../core/types/cgpv-types';
+=======
+import { TypePanelProps } from '../../core/types/cgpv-types';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * Class used to handle creating a new panel
@@ -49,7 +53,11 @@ export class PanelApi {
     this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
+<<<<<<< HEAD
     this.title = (panel.title as TypeJSONValue as string) || '';
+=======
+    this.title = panel.title || '';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     this.icon = panel.icon;
     this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement('div');
     this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;

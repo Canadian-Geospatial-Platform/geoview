@@ -1,5 +1,9 @@
 import { Map } from 'leaflet';
 
+<<<<<<< HEAD
+=======
+/* eslint-disable no-plusplus */
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { Event, EVENT_NAMES } from './event';
 
 import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';

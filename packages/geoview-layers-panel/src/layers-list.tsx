@@ -1,17 +1,25 @@
 /* eslint-disable react/no-array-index-key */
+<<<<<<< HEAD
 import { TypeLayersPanelListProps, TypeLayerData, TypeProps } from 'geoview-core';
+=======
+import { TypeLayersPanelListProps, TypeLayerData, TypeProps, TypeWindow } from 'geoview-core';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * A react component that will list the map server layers defined in the map config
  * @param {TypeLayersPanelListProps} props properties passed to the component
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
-const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
+function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { mapId, layers, language } = props;
 
+<<<<<<< HEAD
   const cgpv = w['cgpv'];
+=======
+  const { cgpv } = w;
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
   const { mui, ui, react, api, leaflet: L } = cgpv;
   const { useState, useEffect } = react;
   const [selectedLayer, setSelectedLayer] = useState('');
@@ -25,7 +33,11 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   const { Slider, Tooltip, Checkbox } = mui;
   const { Button } = ui.elements;
 
+<<<<<<< HEAD
   const translations: TypeProps<TypeProps<any>> = {
+=======
+  const translations: TypeProps<TypeProps<string>> = {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     'en-CA': {
       bounds: 'Toggle Bounds',
       zoom: 'Zoom to Layer',
@@ -112,8 +124,8 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
   /**
    * Calls setLayerLegend for all layers
    */
-  const setLayerLegendAll = async () => {
-    for (const layer of Object.values(layers)) {
+  const setLayerLegendAll = () =>
+    Object.values(layers).forEach(async (layer) => {
       if (layer.getLegendGraphic) {
         const dataUrl = await layer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
@@ -124,19 +136,16 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
         const legendArray = Array.isArray(legend) ? legend : [legend];
         setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
       }
-    }
-  };
+    });
 
   /**
    * Calls setLayerExtent for all layers
    */
-  const setLayerBoundsAll = async () => {
-    for (const layer of Object.values(layers)) {
+  const setLayerBoundsAll = () =>
+    Object.values(layers).forEach(async (layer) => {
       const bounds = await layer.getBounds();
-      //   console.log(layer, bounds);
       setLayerBounds((state) => ({ ...state, [layer.id]: bounds }));
-    }
-  };
+    });
 
   useEffect(() => {
     const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
@@ -155,7 +164,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
 
     const defaultSubVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: curr.entries }), {});
     setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
-  }, [layers]);
+  }, [layers, L]);
 
   const classes = useStyles();
 
@@ -188,14 +197,14 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
     const width = bounds.getEast() - bounds.getWest();
     const latlngs = [];
     latlngs.push(bounds.getSouthWest());
-    for (let i = 1; i <= segments; i++) {
+    for (let i = 1; i <= segments; i += 1) {
       const segmentWidth = width * (i / (segments + 1));
       const lng = bounds.getWest() + segmentWidth;
       latlngs.push({ lat: bounds.getSouth(), lng });
     }
     latlngs.push(bounds.getSouthEast());
     latlngs.push(bounds.getNorthEast());
-    for (let i = 1; i <= segments; i++) {
+    for (let i = 1; i <= segments; i += 1) {
       const segmentWidth = width * (i / (segments + 1));
       const lng = bounds.getEast() - segmentWidth;
       latlngs.push({ lat: bounds.getNorth(), lng });
@@ -369,6 +378,7 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                   {subLayer.drawingInfo?.renderer.type === 'simple' && subLayer.drawingInfo?.renderer.symbol.imageData && (
                     <div className={classes.layerItemText}>
                       <img
+                        alt="Layer Legend"
                         src={`data:${subLayer.drawingInfo?.renderer.symbol.contentType};base64,${subLayer.drawingInfo?.renderer.symbol.imageData}`}
                       />
                       {subLayer.drawingInfo?.renderer.label || subLayer.name}
@@ -376,22 +386,22 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
                   )}
                   {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
                     subLayer.drawingInfo?.renderer.uniqueValueInfos[0].symbol.imageData &&
-                    subLayer.drawingInfo?.renderer.uniqueValueInfos.map((uniqueValue, index) => (
-                      <div key={index} className={classes.layerItemText}>
-                        <img src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
+                    subLayer.drawingInfo?.renderer.uniqueValueInfos.map((uniqueValue, i: number) => (
+                      <div key={i} className={classes.layerItemText}>
+                        <img alt="Layer Legend" src={`data:${uniqueValue.symbol.contentType};base64,${uniqueValue.symbol.imageData}`} />
                         {uniqueValue.label}
                       </div>
                     ))}
                   {subLayer.legend &&
-                    subLayer.legend.map((uniqueValue, index) => (
-                      <div key={index} className={classes.layerItemText}>
-                        <img src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
+                    subLayer.legend.map((uniqueValue, i: number) => (
+                      <div key={i} className={classes.layerItemText}>
+                        <img alt="Layer Legend" src={`data:${uniqueValue.contentType};base64,${uniqueValue.imageData}`} />
                         {uniqueValue.label || subLayer.layerName}
                       </div>
                     ))}
                   {subLayer.dataUrl && (
                     <div className={classes.layerItemText}>
-                      <img src={subLayer.dataUrl} />
+                      <img alt="Layer Legend" src={subLayer.dataUrl} />
                       {subLayer.name}
                     </div>
                   )}
@@ -403,6 +413,6 @@ const LayersList = (props: TypeLayersPanelListProps): JSX.Element => {
       ))}
     </div>
   );
-};
+}
 
 export default LayersList;

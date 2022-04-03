@@ -1,11 +1,19 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+<<<<<<< HEAD
+=======
+/* eslint-disable no-plusplus */
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import L, { Layer } from 'leaflet';
 import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
 import { api } from '../../../api/api';
+<<<<<<< HEAD
 import { Cast, TypeJSONValue, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+=======
+import { Cast, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { generateId } from '../../../core/utils/utilities';
 
 import '../../../core/types/marker-cluster-element';

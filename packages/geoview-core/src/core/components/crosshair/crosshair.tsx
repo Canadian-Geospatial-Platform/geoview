@@ -12,7 +12,10 @@ import { MapContext } from '../../app-start';
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 import { CrosshairIcon } from './crosshair-icon';
+<<<<<<< HEAD
 import { TypeJSONValue } from '../../types/cgpv-types';
+=======
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 import { Fade } from '../../../ui';
 

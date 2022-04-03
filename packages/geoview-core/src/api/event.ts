@@ -1,7 +1,15 @@
+<<<<<<< HEAD
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
 import { TypeJSONValue, TypeJSONObject } from '../core/types/cgpv-types';
+=======
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/ban-types */
+import EventEmitter from 'eventemitter3';
+
+import { generateId } from '../core/utils/utilities';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * constant contains event names
@@ -234,7 +242,11 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
+<<<<<<< HEAD
   on = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
+=======
+  on = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
@@ -264,7 +276,11 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
+<<<<<<< HEAD
   once = (eventName: string, listener: (payload: TypeJSONValue) => void, handlerName?: string): void => {
+=======
+  once = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
@@ -364,6 +380,13 @@ export class Event {
       this.events[eventName] = {};
     }
 
+<<<<<<< HEAD
+=======
+    if (!hName) {
+      hName = generateId('');
+    }
+
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     if (!this.events[eventName][hName]) {
       this.events[eventName][hName] = {};
     }

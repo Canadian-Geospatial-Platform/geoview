@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+<<<<<<< HEAD
 import {
   Cast,
   AbstractPluginClass,
@@ -10,6 +11,9 @@ import {
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core';
+=======
+import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from 'geoview-core';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 import PanelContent from './panel-content';
 
@@ -30,7 +34,11 @@ class DetailsPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
+<<<<<<< HEAD
   translations: TypeJSONObject = {
+=======
+  translations: TypeProps<TypeProps<string>> = {
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     'en-CA': {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',

@@ -10,7 +10,11 @@ import { EVENT_NAMES } from '../../api/event';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '../../core/app-start';
+<<<<<<< HEAD
 import { TypeJSONValue, TypeDrawerProps } from '../../core/types/cgpv-types';
+=======
+import { TypeDrawerProps } from '../../core/types/cgpv-types';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({

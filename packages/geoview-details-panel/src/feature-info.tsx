@@ -1,7 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
+<<<<<<< HEAD
 import { TypeJSONValue, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
+=======
+import { TypeJSONObject, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
+>>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 const w = window as TypeWindow;
 
