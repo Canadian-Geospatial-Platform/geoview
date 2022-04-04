@@ -1,21 +1,7 @@
 import { Layer, TileLayer } from 'leaflet';
-import { TypeLayersInWebLayer } from '../../../core/types/cgpv-types';
+import { TypeWebLayers, TypeAbstractWebLayersConfig, TypeLayersInWebLayer } from '../cgpv-types';
 
-import { generateId } from '../../../core/utils/utilities';
-
-/**
- * interface used to define the web-layers
- */
-export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geoJSON' | 'xyzTiles' | 'ogcFeature' | 'ogcWFS' | 'ogcWMS';
-
-/**
- * interface used by all web layers
- */
-export type TypeAbstractWebLayersConfig = {
-  id?: string;
-  name?: string;
-  url: string;
-};
+import { generateId } from '../../utils/utilities';
 
 export abstract class AbstractWebLayersClass {
   // layer id with default

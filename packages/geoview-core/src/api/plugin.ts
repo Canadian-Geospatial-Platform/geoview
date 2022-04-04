@@ -13,7 +13,7 @@ import {
   AbstractPluginClass,
   TypeWindow,
   TypeJsonValue,
-  TypeActualPlugin,
+  TypePluginStructure,
   TypePluginEntry,
   TypeRecordOfPlugin,
 } from '../core/types/cgpv-types';
@@ -42,7 +42,7 @@ export class Plugin {
     props?: TypeJsonValue
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
-      let plugin: TypeActualPlugin | null = null;
+      let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
         // create new instance of the plugin. Here we must type the constructor variable to any
