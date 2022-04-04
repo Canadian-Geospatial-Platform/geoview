@@ -56,6 +56,8 @@ const useStyles = makeStyles((theme) => ({
  */
 interface OverviewProps {
   id: string;
+  // eslint-disable-next-line react/no-unused-prop-types
+  language: string;
   crs: L.CRS;
   zoomFactor: number;
 }
