@@ -115,7 +115,7 @@
             'zoom': 4,
             'center': [60, -100]
           },
-          'projection': 3978,
+          'projection': 3857,
           'basemapOptions': {
             'id': 'transport',
             'shaded': false,
@@ -138,6 +138,111 @@
                   'id': '0'
                 }
               ]
+            },
+            {
+              'id': 'esriDynamicLYR2',
+              'name': {
+                'en': 'Energy Infrastructure of North America',
+                'fr': 'Infrastructure énergétique d'Amérique du Nord'
+              },
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
+              },
+              'layerType': 'esriDynamic',
+              'layerEntries': [
+                {
+                  'index': '4',
+                  'name': {
+                    'en': 'Natural Gas Processing Plants - config',
+                    'fr': 'Usines de traitement du gaz naturel - config'
+                  }
+                },
+                {
+                  'index': '5'
+                },
+                {
+                  'index': '6'
+                }
+              ]
+            },
+            {
+              'id': 'esriFeatureLYR3',
+              'name': {
+                'en': 'Geothermal',
+                'fr': 'Géothermie'
+              },
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21'
+              },
+              'layerType': 'esriFeature'
+            },
+            {
+              'id': 'esriFeatureLYR4',
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10'
+              },
+              'layerType': 'esriFeature'
+            },
+            {
+              'id': 'geojsonLYR5',
+              'name': {
+                'en': 'GeoJSON Sample',
+                'fr': 'Exemple GeoJSON'
+              },
+              'url': {
+                'en': './geojson/polygons.json',
+                'fr': './geojson/polygons.json'
+              },
+              'layerType': 'geojson'
+            },
+            {
+              'id': 'wfsLYR6',
+              'name': {
+                'en': 'Airport data',
+                'fr': 'Airport data'
+              },
+              'url': {
+                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
+                'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+              },
+              'layerType': 'ogcWfs',
+              'layerEntries': [
+                {
+                  'id': 'GISDATA.AIRPORTS_PT'
+                }
+              ]
+            },
+            {
+              'id': 'ogcFeatureLYR7',
+              'name': {
+                'en': 'Large Lakes',
+                'fr': 'Large Lakes'
+              },
+              'url': {
+                'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+                'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
+              },
+              'layerType': 'ogcFeature',
+              'layerEntries': [
+                {
+                  'id': 'lakes'
+                }
+              ]
+            },
+            {
+              'id': 'xyzTilesLYR8',
+              'name': {
+                'en': 'CARTO Raster Basemap',
+                'fr': 'CARTO Raster Basemap'
+              },
+              'url': {
+                'en': 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+                'fr': 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png'
+              },
+              'layerType': 'xyzTiles'
             }
           ]
         },
@@ -149,7 +254,7 @@
           }
         },
         'components': ['appbar', 'navbar', 'northArrow'],
-        'corePackages': ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
+        'corePackages': ['overview-map', 'basemap-switcher', 'details-panel'],
         'externalPackages': [],
         'languages': ['en-CA']
       }"

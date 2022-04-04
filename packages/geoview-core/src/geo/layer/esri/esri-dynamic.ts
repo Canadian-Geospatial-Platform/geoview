@@ -5,7 +5,7 @@ import L, { Layer } from 'leaflet';
 import { dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig, TypeJSONObject, TypeLegendJsonDynamic } from '../../../core/types/cgpv-types';
+import { TypeJSONObject, TypeDynamicLayer, TypeLegendJsonDynamic } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -37,34 +37,37 @@ export class EsriDynamic {
   // service entries
   entries?: number[];
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
-   *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeDynamicLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeDynamicLayer) {
+    this.#mapId = mapId;
+
     this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
+    if (layerConfig.name) this.name = layerConfig.name[api.map(this.#mapId).getLanguageCode()];
+    this.type = layerConfig.layerType;
+    this.url = layerConfig.url[api.map(this.#mapId).getLanguageCode()];
     this.layer = new Layer();
-    const entries = layerConfig.entries?.split(',').map((item: string) => {
-      return parseInt(item, 10);
-    });
+    const entries = layerConfig.layerEntries.map((item) => parseInt(item.index, 10));
     this.entries = entries?.filter((item) => !Number.isNaN(item));
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url),
+      url: api.geoUtilities.getMapServerUrl(this.url),
     });
   }
 
   /**
    * Add a ESRI dynamic layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeDynamicLayer} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
-    const data = getXMLHttpRequest(`${layer.url}?f=json`);
+  add(layer: TypeDynamicLayer): Promise<Layer | string> {
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.#mapId).getLanguageCode()]}?f=json`);
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
@@ -74,7 +77,7 @@ export class EsriDynamic {
         // check if the entries are part of the service
         if (value !== '{}' && layers && layers.find((item: Record<string, number>) => this.entries?.includes(item.id))) {
           const feat = dynamicMapLayer({
-            url: layer.url,
+            url: layer.url[api.map(this.#mapId).getLanguageCode()],
             layers: this.entries,
             attribution: '',
           });

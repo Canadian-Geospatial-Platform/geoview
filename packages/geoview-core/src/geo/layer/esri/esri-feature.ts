@@ -4,7 +4,7 @@ import L, { Layer } from 'leaflet';
 
 import { featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { TypeLayerConfig, TypeJSONObject } from '../../../core/types/cgpv-types';
+import { TypeFeatureLayer, TypeJSONObject } from '../../../core/types/cgpv-types';
 import { generateId, getXMLHttpRequest } from '../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../core/types/marker-definitions';
 
@@ -35,29 +35,35 @@ export class EsriFeature {
   // mapService property
   mapService: MapService;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeFeatureLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeFeatureLayer) {
+    this.#mapId = mapId;
+
     this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
+    if (layerConfig.name) this.name = layerConfig.name[api.map(this.#mapId).getLanguageCode()];
+    this.type = layerConfig.layerType;
+    this.url = layerConfig.url[api.map(this.#mapId).getLanguageCode()];
     this.layer = new Layer();
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url),
+      url: api.geoUtilities.getMapServerUrl(this.url),
     });
   }
 
   /**
    * Add a ESRI feature layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeFeatureLayer} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeFeatureLayer): Promise<Layer | string> {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     // define a default blue icon
@@ -74,7 +80,7 @@ export class EsriFeature {
       });
     }
 
-    const data = getXMLHttpRequest(`${layer.url}?f=json`);
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.#mapId).getLanguageCode()]}?f=json`);
 
     const geo = new Promise<Layer | string>((resolve) => {
       data.then((value: string) => {
@@ -84,7 +90,7 @@ export class EsriFeature {
         // if the path is bad, return will be {}
         if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
           const feat = featureLayer({
-            url: layer.url,
+            url: layer.url[api.map(this.#mapId).getLanguageCode()],
             pointToLayer: (feature, latlng) => {
               return L.marker(latlng, { icon: iconSymbol, id: generateId() });
             },

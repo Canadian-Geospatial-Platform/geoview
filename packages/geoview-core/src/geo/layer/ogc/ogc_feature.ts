@@ -8,7 +8,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { generateId } from '../../../core/utils/utilities';
 
-import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeJSONObject, TypeJSONObjectLoop, TypeOgcFeatureLayer } from '../../../core/types/cgpv-types';
 
 import { api } from '../../../api/api';
 
@@ -45,25 +45,29 @@ export class OgcFeature {
   // private varibale holding wms capabilities
   #capabilities: TypeJSONObjectLoop;
 
+  // map id
+  #mapId: string;
+
   // private varibale holding wms paras
   #version = '2.0.0';
 
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeOgcFeatureLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeOgcFeatureLayer) {
+    this.#mapId = mapId;
+
     this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
+    this.type = layerConfig.layerType;
     this.#capabilities = {};
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
+    this.url = layerConfig.url[api.map(this.#mapId).getLanguageCode()];
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(this.url, true),
     });
-    this.url = layerConfig.url.trim();
 
     this.layer = new Layer();
   }
@@ -71,10 +75,10 @@ export class OgcFeature {
   /**
    * Add a OGC API feature layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeOgcFeatureLayer} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeOgcFeatureLayer): Promise<Layer | string> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
@@ -83,8 +87,8 @@ export class OgcFeature {
     const res = await axios.get(metaUrl);
     this.#capabilities = res.data;
 
-    const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
-    if (layerName) this.name = <string>layerName;
+    const layerName = (layer.name ? layer.name[api.map(this.#mapId).getLanguageCode()] : this.#capabilities.title) as string;
+    if (layerName) this.name = layerName;
 
     const featRes = axios.get(featureUrl);
 

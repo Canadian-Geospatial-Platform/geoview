@@ -199,12 +199,14 @@ export class Basemap {
         }
 
         if (type === 'shaded') {
-          thumbnailUrls.push(
-            this.basemapsList[this.projection].shaded
-              .replace('{z}', '8')
-              .replace('{y}', this.projection === 3978 ? '285' : '91')
-              .replace('{x}', this.projection === 3978 ? '268' : '74')
-          );
+          if (this.basemapsList[this.projection].shaded) {
+            thumbnailUrls.push(
+              this.basemapsList[this.projection].shaded
+                .replace('{z}', '8')
+                .replace('{y}', this.projection === 3978 ? '285' : '91')
+                .replace('{x}', this.projection === 3978 ? '268' : '74')
+            );
+          }
         }
 
         if (type === 'label') {

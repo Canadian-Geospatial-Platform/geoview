@@ -149,7 +149,7 @@ export const CONST_LAYER_TYPES = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   XYZ_TILES: 'xyzTiles',
-  WFS: 'ogcWFS',
+  WFS: 'ogcWfs',
   OGC_FEATURE: 'ogcFeature',
 };
 
@@ -548,8 +548,15 @@ export interface TypeGeoJSONLayer extends TypeLayerConfig {
   details?: TypeDetailsLayerSettings;
 }
 
+export type TypeWFSLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
 export interface TypeWFSLayer extends TypeLayerConfig {
   nameField?: string;
+  layerEntries: TypeWFSLayerEntry[];
   tooltipField?: string;
   renderer?: TypeJSONObject;
   details?: TypeDetailsLayerSettings;
@@ -577,6 +584,20 @@ export interface TypeGeometryEndpointLayer extends TypeLayerConfig {
 
 export interface TypeGeoCoreLayer extends Omit<TypeLayerConfig, 'url'> {
   url?: TypeLangString;
+}
+
+export type TypeXYZTiles = TypeLayerConfig;
+
+export type TypeOgcFeatureLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export interface TypeOgcFeatureLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  layerEntries: TypeWMSLayerEntry[];
+  details?: TypeDetailsLayerSettings;
 }
 
 export type TypeMapConfig = {

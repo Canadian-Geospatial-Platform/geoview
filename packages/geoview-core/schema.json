@@ -311,6 +311,13 @@
         "url": {
           "$ref": "#/definitions/layerUrlNode"
         },
+        "layerEntries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/wfsLayerEntryNode"
+          },
+          "minItems": 1
+        },
         "layerType": {
           "type": "string",
           "enum": ["ogcWfs"]
@@ -335,7 +342,24 @@
           "$ref": "#/definitions/detailsLayerSettings"
         }
       },
-      "required": ["id", "layerType", "url"],
+      "required": ["id", "layerType", "layerEntries", "url"],
+      "additionalProperties": false
+    },
+    "wfsLayerEntryNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer entry in the WFS."
+        },
+        "name": {
+          "$ref": "#/definitions/layerNameNode"
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        }
+      },
+      "required": ["id"],
       "additionalProperties": false
     },
     "wmsLayerNode": {
@@ -451,7 +475,103 @@
       "required": ["id", "layerType"],
       "additionalProperties": false
     },
-
+    "xyzTilesLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        },
+        "name": {
+          "$ref": "#/definitions/layerNameNode"
+        },
+        "url": {
+          "$ref": "#/definitions/layerUrlNode"
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["xyzTiles"]
+        },
+        "metadataUrl": {
+          "$ref": "#/definitions/layerMetadataUrlNode"
+        },
+        "nameField": {
+          "type": "string",
+          "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "tooltipField": {
+          "type": "string",
+          "description": "The field to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
+        },
+        "outfields": {
+          "type": "string",
+          "default": "*",
+          "description": "A comma separated list of attribute names that should be requested on query."
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "url"],
+      "additionalProperties": false
+    },
+    "ogcFeatureLayerNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        },
+        "name": {
+          "$ref": "#/definitions/layerNameNode"
+        },
+        "url": {
+          "$ref": "#/definitions/layerUrlNode"
+        },
+        "layerEntries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ogcFeatureLayerEntryNode"
+          },
+          "minItems": 1
+        },
+        "layerType": {
+          "type": "string",
+          "enum": ["ogcFeature"]
+        },
+        "metadataUrl": {
+          "$ref": "#/definitions/layerMetadataUrlNode"
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        },
+        "details": {
+          "$ref": "#/definitions/detailsLayerSettings"
+        }
+      },
+      "required": ["id", "layerType", "layerEntries", "url"],
+      "additionalProperties": false
+    },
+    "ogcFeatureLayerEntryNode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer entry in the WMS."
+        },
+        "name": {
+          "$ref": "#/definitions/layerNameNode"
+        },
+        "state": {
+          "$ref": "#/definitions/initialLayerSettings"
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
     "layerNode": {
       "type": "object",
       "oneOf": [
@@ -472,6 +592,12 @@
         },
         {
           "$ref": "#/definitions/wmsLayerNode"
+        },
+        {
+          "$ref": "#/definitions/xyzTilesLayerNode"
+        },
+        {
+          "$ref": "#/definitions/ogcFeatureLayerNode"
         },
         {
           "$ref": "#/definitions/geometryEndpointLayerNode"

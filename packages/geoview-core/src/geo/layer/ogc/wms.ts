@@ -109,9 +109,7 @@ export class WMS {
 
           isValid = this.validateEntries(json.Capability.Layer, entries as string);
 
-          this.name = (
-            'name' in layer && layer.name !== undefined ? layer.name[api.map(this.#mapId).getLanguageCode()] : json.Service.Name
-          ) as string;
+          this.name = (layer.name ? layer.name[api.map(this.#mapId).getLanguageCode()] : json.Service.Name) as string;
 
           if (isValid) {
             const wms = L.tileLayer.wms(layer.url[api.map(this.#mapId).getLanguageCode()], {

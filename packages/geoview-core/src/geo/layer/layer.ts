@@ -13,7 +13,17 @@ import { MarkerClusterClass } from './vector/marker-cluster';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { CONST_LAYER_TYPES, TypeLayerConfig, TypeWMSLayer } from '../../core/types/cgpv-types';
+import {
+  CONST_LAYER_TYPES,
+  TypeLayerConfig,
+  TypeWMSLayer,
+  TypeDynamicLayer,
+  TypeFeatureLayer,
+  TypeGeoJSONLayer,
+  TypeWFSLayer,
+  TypeOgcFeatureLayer,
+  TypeXYZTiles,
+} from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
@@ -62,8 +72,8 @@ export class Layer {
           const layerConf: TypeLayerConfig = payload.layer;
 
           if (layerConf.layerType === CONST_LAYER_TYPES.GEOJSON) {
-            const geoJSON = new GeoJSON(layerConf);
-            geoJSON.add(layerConf).then((layer: leafletLayer | string) => {
+            const geoJSON = new GeoJSON(this.#mapId, layerConf as TypeGeoJSONLayer);
+            geoJSON.add(layerConf as TypeGeoJSONLayer).then((layer: leafletLayer | string) => {
               geoJSON.layer = layer;
               this.addToMap(geoJSON);
             });
@@ -77,33 +87,33 @@ export class Layer {
               this.addToMap(wmsLayer);
             });
           } else if (layerConf.layerType === CONST_LAYER_TYPES.XYZ_TILES) {
-            const xyzTiles = new XYZTiles(layerConf);
-            xyzTiles.add(layerConf).then((layer: leafletLayer | string) => {
+            const xyzTiles = new XYZTiles(this.#mapId, layerConf as TypeXYZTiles);
+            xyzTiles.add(layerConf as TypeXYZTiles).then((layer: leafletLayer | string) => {
               xyzTiles.layer = layer;
               this.addToMap(xyzTiles);
             });
           } else if (layerConf.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-            const esriDynamic = new EsriDynamic(layerConf);
-            esriDynamic.add(layerConf).then((layer: leafletLayer | string) => {
+            const esriDynamic = new EsriDynamic(this.#mapId, layerConf as TypeDynamicLayer);
+            esriDynamic.add(layerConf as TypeDynamicLayer).then((layer: leafletLayer | string) => {
               esriDynamic.layer = layer;
               this.addToMap(esriDynamic);
             });
           } else if (layerConf.layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
-            const esriFeature = new EsriFeature(layerConf);
-            esriFeature.add(layerConf).then((layer: leafletLayer | string) => {
+            const esriFeature = new EsriFeature(this.#mapId, layerConf as TypeFeatureLayer);
+            esriFeature.add(layerConf as TypeFeatureLayer).then((layer: leafletLayer | string) => {
               esriFeature.layer = layer;
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
           } else if (layerConf.layerType === CONST_LAYER_TYPES.WFS) {
-            const wfsLayer = new WFS(layerConf);
-            wfsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            const wfsLayer = new WFS(this.#mapId, layerConf as TypeWFSLayer);
+            wfsLayer.add(layerConf as TypeWFSLayer).then((layer: leafletLayer | string) => {
               wfsLayer.layer = layer;
               this.addToMap(wfsLayer);
             });
           } else if (layerConf.layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-            const ogcFeatureLayer = new OgcFeature(layerConf);
-            ogcFeatureLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConf as TypeOgcFeatureLayer);
+            ogcFeatureLayer.add(layerConf as TypeOgcFeatureLayer).then((layer: leafletLayer | string) => {
               ogcFeatureLayer.layer = layer;
               this.addToMap(ogcFeatureLayer);
             });
@@ -174,7 +184,12 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+      if (
+        cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON &&
+        cgpvLayer.type !== CONST_LAYER_TYPES.WFS &&
+        cgpvLayer.type !== CONST_LAYER_TYPES.OGC_FEATURE
+      )
+        this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
 
       cgpvLayer.layer.addTo(api.map(this.#mapId).map);
       // this.layers.push(cgpvLayer);

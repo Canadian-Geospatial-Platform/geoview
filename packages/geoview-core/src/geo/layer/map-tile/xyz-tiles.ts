@@ -1,6 +1,7 @@
 import L, { Layer } from 'leaflet';
+import { api } from '../../../api/api';
 
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { TypeXYZTiles } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 // TODO: Implement method to validate XYZ tile service
@@ -33,28 +34,36 @@ export class XYZTiles {
   // layer or layer service url
   url: string;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeXYZTiles} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeXYZTiles) {
+    this.#mapId = mapId;
+
     this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
+    if (layerConfig.name) this.name = layerConfig.name[api.map(this.#mapId).getLanguageCode()];
+    this.type = layerConfig.layerType;
+    this.url = layerConfig.url[api.map(this.#mapId).getLanguageCode()];
     this.layer = new Layer();
   }
 
   /**
    * Add a XYZ Tiles layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeXYZTiles} layer the layer configuration
    * @return {Promise<Layer | string>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
+  add(layer: TypeXYZTiles): Promise<Layer | string> {
     const geo = new Promise<Layer | string>((resolve) => {
-      const xyzTiles = L.tileLayer(layer.url);
+      console.log(layer.url[api.map(this.#mapId).getLanguageCode()]);
+
+      const xyzTiles = L.tileLayer(layer.url[api.map(this.#mapId).getLanguageCode()]);
 
       resolve(xyzTiles);
     });
