@@ -5,7 +5,7 @@ import {
   TypePluginOptions,
   TypeButtonPanel,
   TypeJsonString,
-  TypeJSONObject,
+  TypeJsonObject,
   TypeButtonProps,
   TypePanelProps,
   TypeWindow,
@@ -30,7 +30,7 @@ class DetailsPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations = Cast<TypeJSONObject>({
+  translations = Cast<TypeJsonObject>({
     'en-CA': {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',

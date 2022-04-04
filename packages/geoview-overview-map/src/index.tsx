@@ -1,4 +1,4 @@
-import { Cast, AbstractPluginClass, TypeJSONObject, TypeWindow } from 'geoview-core';
+import { Cast, AbstractPluginClass, TypeJsonObject, TypeWindow } from 'geoview-core';
 import { OverviewMap } from './overview-map';
 
 const w = window as TypeWindow;
@@ -10,7 +10,7 @@ class OverviewMapPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJSONObject = {
+  translations: TypeJsonObject = {
     'en-CA': {},
     'fr-CA': {},
   };

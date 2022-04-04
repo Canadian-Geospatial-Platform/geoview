@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { TypeJsonString, TypeJSONValue, TypeJSONObject } from '../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -218,7 +218,7 @@ export class Event {
   eventEmitter: EventEmitter;
 
   // events object containing all registered events
-  events: TypeJSONObject = {};
+  events: TypeJsonObject = {};
 
   /**
    * Initiate the event emitter
@@ -234,15 +234,15 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (eventName: string, listener: (payload: TypeJSONObject) => void, handlerName?: string): void => {
+  on = (eventName: string, listener: (payload: TypeJsonObject) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJSONObject) => {
-      let listenerPayload: TypeJSONObject;
+    const listen = (payload: TypeJsonObject) => {
+      let listenerPayload: TypeJsonObject;
 
       // if a handler name was specified, callback will return that data if found
       if (handlerName && (payload.handlerName as TypeJsonString) === handlerName) {
@@ -264,19 +264,19 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  once = (eventName: string, listener: (payload: TypeJSONValue) => void, handlerName?: string): void => {
+  once = (eventName: string, listener: (payload: TypeJsonValue) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJSONValue) => {
-      let listenerPayload: TypeJSONValue;
+    const listen = (payload: TypeJsonValue) => {
+      let listenerPayload: TypeJsonValue;
 
       // if a handler name was specefieid, callback will return that data if found
       if (handlerName && (payload as Record<string, unknown>).handlerName === handlerName) {
-        listenerPayload = this.events[eName][handlerName] as TypeJSONValue;
+        listenerPayload = this.events[eName][handlerName] as TypeJsonValue;
       } else {
         listenerPayload = payload;
       }
@@ -296,19 +296,19 @@ export class Event {
    *
    * @returns An array containing the data from single / multiple handlers
    */
-  all = (eventName: string, listener: (payload: TypeJSONValue[]) => void): void => {
+  all = (eventName: string, listener: (payload: TypeJsonValue[]) => void): void => {
     /**
      * callback function to handle adding the data for multiple handlers
      */
     const listen = () => {
       // array containing the data
-      const data: TypeJSONValue[] = [];
+      const data: TypeJsonValue[] = [];
 
       // loop through events with same event name and get their data
       for (let i = 0; i < Object.keys(this.events[eventName]).length; i++) {
         const handlerName = Object.keys(this.events[eventName])[i];
 
-        data.push(this.events[eventName][handlerName] as TypeJSONValue);
+        data.push(this.events[eventName][handlerName] as TypeJsonValue);
       }
 
       // call the callback function
@@ -369,10 +369,10 @@ export class Event {
     }
 
     // store the emitted event to the events array
-    this.events[eventName][hName] = {
+    this.events[eventName][hName] = Cast<TypeJsonObject>({
       handlerName,
       ...payload,
-    } as TypeJSONValue as TypeJSONObject;
+    });
 
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };

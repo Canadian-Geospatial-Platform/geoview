@@ -2,7 +2,7 @@
 import {
   Cast,
   AbstractPluginClass,
-  TypeJSONObject,
+  TypeJsonObject,
   TypeWindow,
   TypePluginOptions,
   TypeButtonPanel,
@@ -37,7 +37,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJSONObject = Cast<TypeJSONObject>({
+  translations: TypeJsonObject = Cast<TypeJsonObject>({
     'en-CA': {
       layersPanel: 'Layers',
     },

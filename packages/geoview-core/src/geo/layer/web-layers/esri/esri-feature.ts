@@ -4,7 +4,7 @@ import L from 'leaflet';
 
 import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeLayerConfig, TypeJSONValue, TypeJSONObject } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeLayerConfig, TypeJsonNumber, TypeJsonValue, TypeJsonObject } from '../../../../core/types/cgpv-types';
 import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
@@ -88,11 +88,11 @@ export class EsriFeature extends AbstractWebLayersClass {
   /**
    * Get metadata of the current service
    *
-   @returns {Promise<TypeJSONValue>} a json promise containing the result of the query
+   @returns {Promise<TypeJsonValue>} a json promise containing the result of the query
    */
-  getMetadata = async (): Promise<TypeJSONObject> => {
+  getMetadata = async (): Promise<TypeJsonObject> => {
     const response = await fetch(`${this.url}?f=json`);
-    const result: TypeJSONObject = await response.json();
+    const result: TypeJsonObject = await response.json();
 
     return result;
   };
@@ -100,9 +100,9 @@ export class EsriFeature extends AbstractWebLayersClass {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {Promise<TypeJSONValue> } legend configuration in json format
+   * @returns {Promise<TypeJsonValue> } legend configuration in json format
    */
-  getLegendJson = (): Promise<TypeJSONValue> => {
+  getLegendJson = (): Promise<TypeJsonValue> => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     return axios.get(queryUrl).then((res) => {
@@ -128,10 +128,10 @@ export class EsriFeature extends AbstractWebLayersClass {
    */
   getBounds = async (): Promise<L.LatLngBounds> => {
     const meta = await this.getMetadata();
-    const xmin = meta.extent.xmin as TypeJSONValue as number;
-    const xmax = meta.extent.xmax as TypeJSONValue as number;
-    const ymin = meta.extent.ymin as TypeJSONValue as number;
-    const ymax = meta.extent.ymax as TypeJSONValue as number;
+    const xmin = meta.extent.xmin as TypeJsonNumber;
+    const xmax = meta.extent.xmax as TypeJsonNumber;
+    const ymin = meta.extent.ymin as TypeJsonNumber;
+    const ymax = meta.extent.ymax as TypeJsonNumber;
     return L.latLngBounds([
       [ymin, xmin],
       [ymax, xmax],

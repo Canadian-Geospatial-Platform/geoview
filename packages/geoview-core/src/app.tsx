@@ -49,7 +49,7 @@ Marker.prototype.options.icon = DefaultIcon;
 // listen to map reload event
 api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
   if (payload && payload.handlerId) {
-    const payloadHandlerId = payload.handlerId as types.TypeJSONValue as string;
+    const payloadHandlerId = payload.handlerId as types.TypeJsonValue as string;
     // unsubscribe from all events registered on this map
     api.event.offAll(payloadHandlerId);
 
@@ -67,7 +67,7 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
       delete api.maps[payloadHandlerId];
 
       // re-render map with updated config keeping previous values if unchanged
-      ReactDOM.render(<AppStart configObj={payload.config as types.TypeJSONValue as types.TypeMapConfigProps} />, map);
+      ReactDOM.render(<AppStart configObj={payload.config as types.TypeJsonValue as types.TypeMapConfigProps} />, map);
     }
   }
 });

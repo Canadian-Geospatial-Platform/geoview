@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJsonString, TypeJSONObject } from 'geoview-core';
+import { TypeJsonValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJsonString, TypeJsonObject } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -81,7 +81,7 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
    * @param {Object} attributes attributes object for the layer attributes
    * @param {Object} symbolImage symbology image data
    */
-  const goToFeatureInfo = (attributes: TypeJSONValue, symbolImage: TypeJSONValue) => {
+  const goToFeatureInfo = (attributes: TypeJsonValue, symbolImage: TypeJsonValue) => {
     // add a back action button on the entry information panel to go back to the entry list
     buttonPanel.panel?.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
       if (layerData.length === 1) {
@@ -115,7 +115,7 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
     <div className={classes.featuresContainer}>
       {
         // loop through each entry
-        layerData.map((feature: TypeJSONObject, i: number) => {
+        layerData.map((feature: TypeJsonObject, i: number) => {
           const attributes = feature?.attributes;
 
           // get symbol

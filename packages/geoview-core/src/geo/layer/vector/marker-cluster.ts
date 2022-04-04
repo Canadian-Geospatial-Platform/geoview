@@ -5,7 +5,7 @@ import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
 import { api } from '../../../api/api';
-import { Cast, TypeJsonString, TypeJSONValue, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeJsonNumber, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 import '../../../core/types/marker-cluster-element';
@@ -201,8 +201,8 @@ export class MarkerClusterClass {
       (payload) => {
         const id = (payload.id ? payload.id : null) as TypeJsonString;
         this.addMarkerElement(
-          payload.latitude as TypeJSONValue as number,
-          payload.longitude as TypeJSONValue as number,
+          payload.latitude as TypeJsonNumber,
+          payload.longitude as TypeJsonNumber,
           Cast<L.MarkerClusterElementOptions>(payload.options),
           id
         );

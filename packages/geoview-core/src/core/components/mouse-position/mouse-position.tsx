@@ -11,7 +11,7 @@ import { debounce } from 'lodash';
 
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
-import { TypeJsonString, TypeJSONValue } from '../../types/cgpv-types';
+import { TypeJsonString, TypeJsonBoolean } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   mouseposition: {
@@ -109,7 +109,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
       EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
       (payload) => {
         if (payload && (payload.handlerName as TypeJsonString).includes(id)) {
-          isCrosshairsActive.current = payload.active as TypeJSONValue as boolean;
+          isCrosshairsActive.current = payload.active as TypeJsonBoolean;
         }
       },
       mapId

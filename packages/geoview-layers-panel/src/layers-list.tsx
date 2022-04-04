@@ -4,10 +4,12 @@ import {
   TypeLayersPanelListProps,
   EsriFeature,
   EsriDynamic,
-  TypeJSONValue,
+  TypeJsonValue,
   TypeJsonString,
+  TypeJsonNumber,
+  TypeJsonArray,
   WMS,
-  TypeJSONObject,
+  TypeJsonObject,
   AbstractWebLayersClass,
   TypeWindow,
   TypeCGPVMUI,
@@ -17,7 +19,7 @@ import { generateId } from 'geoview-core/src/core/utils/utilities';
 type Event = { target: { value: number } };
 
 type TypeLegend =
-  | TypeJSONValue[]
+  | TypeJsonValue[]
   | {
       name: string;
       dataUrl: string[] | string | ArrayBuffer | null;
@@ -51,7 +53,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { Slider, Tooltip, Checkbox } = mui;
   const { Button } = ui.elements;
 
-  const translations: TypeJSONObject = Cast<TypeJSONObject>({
+  const translations: TypeJsonObject = Cast<TypeJsonObject>({
     'en-CA': {
       bounds: 'Toggle Bounds',
       zoom: 'Zoom to Layer',
@@ -378,7 +380,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
-              {(layerLegend[layer.id] as TypeJSONObject[]).map((subLayer, index: number) => (
+              {(layerLegend[layer.id] as TypeJsonObject[]).map((subLayer, index: number) => (
                 <div key={index}>
                   {subLayer!.legend && (
                     <div className={classes.legendSubLayerGroup}>
@@ -387,8 +389,8 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       </div>
                       <Tooltip title={translations[language].visibility}>
                         <Checkbox
-                          checked={subLayerVisibility[layer.id].includes(subLayer.layerId as TypeJSONValue as number)}
-                          onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as TypeJSONValue as number)}
+                          checked={subLayerVisibility[layer.id].includes(subLayer.layerId as TypeJsonNumber)}
+                          onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as TypeJsonNumber)}
                         />
                       </Tooltip>
                     </div>
@@ -404,25 +406,25 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                   )}
                   {(subLayer.drawingInfo.renderer.type as TypeJsonString) === 'uniqueValue' &&
                     subLayer.drawingInfo.renderer.uniqueValueInfos[0].symbol.imageData &&
-                    (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJSONValue as TypeJSONValue[]).map((uniqueValue, i: number) => (
+                    (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJsonArray).map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>
                         <img
                           alt="Layer Legend"
-                          src={`data:${(uniqueValue as TypeJSONObject).symbol.contentType};base64,${
-                            (uniqueValue as TypeJSONObject).symbol.imageData as TypeJSONObject
+                          src={`data:${(uniqueValue as TypeJsonObject).symbol.contentType};base64,${
+                            (uniqueValue as TypeJsonObject).symbol.imageData as TypeJsonObject
                           }`}
                         />
-                        {(uniqueValue as TypeJSONObject).label}
+                        {(uniqueValue as TypeJsonObject).label}
                       </div>
                     ))}
                   {subLayer.legend &&
-                    (subLayer.legend as TypeJSONValue as TypeJSONValue[]).map((uniqueValue, i: number) => (
+                    (subLayer.legend as TypeJsonArray).map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>
                         <img
                           alt="Layer Legend"
-                          src={`data:${(uniqueValue as TypeJSONObject).contentType};base64,${(uniqueValue as TypeJSONObject).imageData}`}
+                          src={`data:${(uniqueValue as TypeJsonObject).contentType};base64,${(uniqueValue as TypeJsonObject).imageData}`}
                         />
-                        {(uniqueValue as TypeJSONObject).label || subLayer.layerName}
+                        {(uniqueValue as TypeJsonObject).label || subLayer.layerName}
                       </div>
                     ))}
                   {subLayer.dataUrl && (

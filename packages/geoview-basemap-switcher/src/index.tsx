@@ -5,8 +5,8 @@ import {
   TypeButtonProps,
   TypeButtonPanel,
   TypeWindow,
-  TypeJSONObject,
-  TypeJSONValue,
+  TypeJsonObject,
+  TypeJsonValue,
   TypeJsonString,
   TypePanelProps,
 } from 'geoview-core';
@@ -29,7 +29,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJSONValue = {
+  translations: TypeJsonValue = {
     'en-CA': {
       basemapSwitcher: 'Basemaps',
       'basemap-transport-label': {
@@ -94,7 +94,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // button props
       const button: TypeButtonProps = {
-        tooltip: (this.translations as TypeJSONObject)[language].basemapSwitcher,
+        tooltip: (this.translations as TypeJsonObject)[language].basemapSwitcher,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',
@@ -102,7 +102,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // panel props
       const panel: TypePanelProps = {
-        title: (this.translations as TypeJSONObject)[language].basemapSwitcher,
+        title: (this.translations as TypeJsonObject)[language].basemapSwitcher,
         icon: '<i class="material-icons">map</i>',
         width: 200,
       };

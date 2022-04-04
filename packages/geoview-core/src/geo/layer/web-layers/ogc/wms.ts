@@ -12,8 +12,10 @@ import {
   Cast,
   AbstractWebLayersClass,
   TypeJsonString,
-  TypeJSONValue,
-  TypeJSONObject,
+  TypeJsonArray,
+  TypeJsonObjectArray,
+  TypeJsonValue,
+  TypeJsonObject,
   TypeLayerConfig,
 } from '../../../../core/types/cgpv-types';
 
@@ -43,7 +45,7 @@ export class WMS extends AbstractWebLayersClass {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObject = {};
+  #capabilities: TypeJsonObject = {};
 
   // private varibale holding wms paras
   #wmsParams?: L.WMSParams;
@@ -88,7 +90,7 @@ export class WMS extends AbstractWebLayersClass {
           let isValid = true;
 
           // parse the xml string and convert to json
-          this.#capabilities = new WMSCapabilities(value).toJSON() as TypeJSONObject;
+          this.#capabilities = new WMSCapabilities(value).toJSON() as TypeJsonObject;
 
           isValid = this.validateEntries(this.#capabilities.Capability.Layer, layer.entries as string);
 
@@ -123,7 +125,7 @@ export class WMS extends AbstractWebLayersClass {
    * @param {string} entries names(comma delimited) to check
    * @returns {boolean} entry is valid
    */
-  private validateEntries(layer: TypeJSONObject, entries: string): boolean {
+  private validateEntries(layer: TypeJsonObject, entries: string): boolean {
     let isValid = true;
     // eslint-disable-next-line no-prototype-builtins
 
@@ -131,7 +133,7 @@ export class WMS extends AbstractWebLayersClass {
     const allNames = this.findAllByKey(layer, 'Name');
     const entryArray = entries.split(',').map((s) => s.trim());
     for (let i = 0; i < entryArray.length; i++) {
-      isValid = isValid && allNames.includes(entryArray[i] as TypeJSONValue as TypeJSONObject);
+      isValid = isValid && allNames.includes(Cast<TypeJsonObject>(entryArray[i]));
     }
 
     return isValid;
@@ -143,8 +145,8 @@ export class WMS extends AbstractWebLayersClass {
    * @param {string} keyToFind key to check
    * @returns {any} all values found
    */
-  private findAllByKey(obj: TypeJSONObject, keyToFind: string): TypeJSONObject[] {
-    const reduceFunction = (accumulator: TypeJSONObject[], [key, value]: [string, TypeJSONObject]): TypeJSONObject[] => {
+  private findAllByKey(obj: TypeJsonObject, keyToFind: string): TypeJsonObject[] {
+    const reduceFunction = (accumulator: TypeJsonObject[], [key, value]: [string, TypeJsonObject]): TypeJsonObject[] => {
       if (key === keyToFind) {
         return accumulator.concat(value);
       }
@@ -163,9 +165,9 @@ export class WMS extends AbstractWebLayersClass {
   /**
    * Get capabilities of the current WMS service
    *
-   * @returns {TypeJSONObject} WMS capabilities in json format
+   * @returns {TypeJsonObject} WMS capabilities in json format
    */
-  getCapabilities = (): TypeJSONObject => {
+  getCapabilities = (): TypeJsonObject => {
     return this.#capabilities;
   };
 
@@ -196,28 +198,28 @@ export class WMS extends AbstractWebLayersClass {
    * @param {L.Map} map the map odject
    * @param {number} featureCount the map odject
    *
-   * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
+   * @returns {Promise<TypeJsonObject | null>} a promise that returns the feature info in a json format
    */
-  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJSONObject | null> => {
+  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJsonObjectArray | null> => {
     let infoFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
       const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format;
-      if ((formatArray as TypeJSONValue as TypeJSONValue[]).includes('application/geojson')) infoFormat = 'application/geojson';
+      if ((formatArray as TypeJsonArray).includes('application/geojson')) infoFormat = 'application/geojson';
     }
 
     const params = this.getFeatureInfoParams(latlng, map);
-    params.info_format = infoFormat as TypeJSONValue as TypeJSONObject;
-    params.feature_count = featureCount as TypeJSONValue as TypeJSONObject;
+    params.info_format = Cast<TypeJsonObject>(infoFormat);
+    params.feature_count = Cast<TypeJsonObject>(featureCount);
 
-    const response = await axios.get<TypeJSONObject>(this.url, { params });
+    const response = await axios.get<TypeJsonObject>(this.url, { params });
 
     if (infoFormat === 'application/geojson') {
-      const dataFeatures = response.data.features as TypeJSONValue as TypeJSONValue[];
+      const dataFeatures = response.data.features as TypeJsonObjectArray;
       if (dataFeatures.length > 0) {
-        const results: TypeJSONValue[] = [];
+        const results: TypeJsonObjectArray = [];
         dataFeatures.forEach((jsonValue) => {
-          const element = jsonValue as TypeJSONObject;
+          const element = jsonValue as TypeJsonObject;
           results.push({
             attributes: element.properties,
             geometry: element.geometry,
@@ -226,17 +228,17 @@ export class WMS extends AbstractWebLayersClass {
             // displayFieldName: "OBJECTID",
             // value: element.properties.OBJECTID,
             geometryType: element.type,
-          } as TypeJSONValue);
+          } as TypeJsonValue);
         });
 
-        return { results } as TypeJSONValue as TypeJSONObject;
+        return Cast<TypeJsonObjectArray>({ results });
       }
       return null;
     }
-    const featureInfoResponse = (xmlToJson(response.request.responseXML) as TypeJSONObject).FeatureInfoResponse;
+    const featureInfoResponse = (xmlToJson(response.request.responseXML) as TypeJsonObject).FeatureInfoResponse;
 
     if (featureInfoResponse && featureInfoResponse.FIELDS) {
-      const results: TypeJSONValue[] = [];
+      const results: TypeJsonObjectArray = [];
       // only one feature
       if (featureInfoResponse.FIELDS['@attributes']) {
         results.push({
@@ -247,22 +249,22 @@ export class WMS extends AbstractWebLayersClass {
           // displayFieldName: "OBJECTID",
           // value: element.properties.OBJECTID,
           geometryType: null,
-        } as TypeJSONValue);
+        } as TypeJsonValue);
       } else {
-        const arrayOfFeature = featureInfoResponse.FIELDS as TypeJSONValue as TypeJSONValue[];
+        const arrayOfFeature = featureInfoResponse.FIELDS as TypeJsonObjectArray;
         arrayOfFeature.forEach((element) => {
           results.push({
-            attributes: (element as TypeJSONObject)['@attributes'],
+            attributes: (element as TypeJsonObject)['@attributes'],
             geometry: null,
             layerId: this.id,
             layerName: this.name,
             // displayFieldName: "OBJECTID",
             // value: element.properties.OBJECTID,
             geometryType: null,
-          } as TypeJSONValue);
+          } as TypeJsonValue);
         });
       }
-      return { results } as TypeJSONValue as TypeJSONObject;
+      return Cast<TypeJsonObjectArray>({ results });
     }
     return null;
   };
@@ -274,7 +276,7 @@ export class WMS extends AbstractWebLayersClass {
    * @param {L.Map} map the map odject
    * @returns the map service url including the feature query
    */
-  private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): TypeJSONObject {
+  private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): TypeJsonObject {
     const point = map.latLngToContainerPoint(latlng);
 
     const size = map.getSize();
@@ -286,7 +288,7 @@ export class WMS extends AbstractWebLayersClass {
     const sw = crs!.project(map.getBounds().getSouthWest());
     const ne = crs!.project(map.getBounds().getNorthEast());
 
-    const params: TypeJSONValue = {
+    const params: TypeJsonValue = {
       request: 'GetFeatureInfo',
       service: 'WMS',
       version: this.#wmsParams!.version!,
@@ -304,7 +306,7 @@ export class WMS extends AbstractWebLayersClass {
     params[version >= 1.3 ? 'i' : 'x'] = point.x;
     params[version >= 1.3 ? 'j' : 'y'] = point.y;
 
-    return params as TypeJSONObject;
+    return params as TypeJsonObject;
   }
 
   /**

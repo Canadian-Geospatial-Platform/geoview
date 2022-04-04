@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { CSSProperties } from 'react';
 
-import { TypeJSONValue } from '../types/cgpv-types';
+import { TypeJsonValue } from '../types/cgpv-types';
 
 /**
  * Interface used for custom html elements
@@ -10,7 +10,7 @@ interface HtmlToReactProps {
   htmlContent: string;
   className?: string;
   style?: CSSProperties;
-  extraOptions?: TypeJSONValue;
+  extraOptions?: TypeJsonValue;
 }
 
 /**

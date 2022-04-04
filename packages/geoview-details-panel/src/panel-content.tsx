@@ -1,6 +1,6 @@
 import {
   Cast,
-  TypeJSONValue,
+  TypeJsonValue,
   TypeRendererSymbol,
   TypeSelectedFeature,
   AbstractWebLayersClass,
@@ -11,7 +11,8 @@ import {
   TypeEntry,
   TypePanelContentProps,
   TypeWindow,
-  TypeJSONObject,
+  TypeJsonObject,
+  TypeJsonArray,
   WMS,
   EsriFeature,
   EsriDynamic,
@@ -73,16 +74,16 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
    * Get the symbology from the layer
    *
    * @param {TypeRendererSymbol} renderer the display renderer containing the symbol
-   * @param {TypeJSONObject} attributes the attributes of the selected layer features
+   * @param {TypeJsonObject} attributes the attributes of the selected layer features
    *
-   * @returns {TypeJSONObject} the symbology containing the imageData
+   * @returns {TypeJsonObject} the symbology containing the imageData
    */
-  const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJSONObject): TypeJSONObject | null => {
-    let symbolImage: TypeJSONObject | null = null;
+  const getSymbol = useCallback((renderer: TypeRendererSymbol, attributes: TypeJsonObject): TypeJsonObject | null => {
+    let symbolImage: TypeJsonObject | null = null;
 
     // check if a symbol object exists in the renderer
     if (renderer && renderer.symbol) {
-      symbolImage = renderer.symbol as TypeJSONValue as TypeJSONObject;
+      symbolImage = Cast<TypeJsonObject>(renderer.symbol);
     } else if (renderer && renderer.uniqueValueInfos && renderer.uniqueValueInfos.length > 0) {
       // if symbol not found then check if there are multiple symbologies
       symbolImage = renderer.uniqueValueInfos.filter((info) => {
@@ -162,12 +163,12 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   /**
    * Set the entry / feature info object
    *
-   * @param {TypeJSONValue} featureData an object containing the entry / feature data
+   * @param {TypeJsonValue} featureData an object containing the entry / feature data
    */
   const selectFeature = useCallback(
-    (featureData: TypeJSONValue) => {
+    (featureData: TypeJsonValue) => {
       // set the entry / feature data
-      setSelectedFeature(Cast<React.SetStateAction<TypeJSONObject>>(featureData));
+      setSelectedFeature(Cast<React.SetStateAction<TypeJsonObject>>(featureData));
 
       // set the panel to show the entry / feature info content
       setPanel(false, false, true);
@@ -179,10 +180,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
    * Get all aliases from the defined layer list, will be used when displaying entry / feature info
    *
    * @param {TypeFieldNameAlias[]} fields a list of the fields defined in the layer
-   * @returns {TypeJSONValue} an object containing field name and it's alias
+   * @returns {TypeJsonValue} an object containing field name and it's alias
    */
   const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
-    const fieldAliases: TypeJSONValue = {};
+    const fieldAliases: TypeJsonValue = {};
 
     if (fields) {
       fields.forEach((field: { name: string; alias: string }) => {
@@ -291,7 +292,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             clearResults(dataKey, layerKey);
 
             // eslint-disable-next-line no-underscore-dangle
-            const layerMap = Cast<{ _map: L.Map }>(Cast<TypeJSONObject>(layer).layer)._map;
+            const layerMap = Cast<{ _map: L.Map }>(Cast<TypeJsonObject>(layer).layer)._map;
             // get map size
             const size = layerMap.getSize();
 
@@ -316,7 +317,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
               // eslint-disable-next-line no-await-in-loop
               res = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
 
-              if (res && res.results && (res.results as TypeJSONValue as TypeJSONValue[]).length > 0) {
+              if (res && res.results && (res.results as TypeJsonArray).length > 0) {
                 layersFound.push(
                   Cast<TypeFoundLayers>({
                     layer: layers[layerKey],
@@ -325,7 +326,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                 );
 
                 // add the found entries to the array
-                (layers[layerKey].layerData as TypeJSONValue as TypeJSONValue[]).push(...(res.results as TypeJSONValue as TypeJSONValue[]));
+                (layers[layerKey].layerData as TypeJsonArray).push(...(res.results as TypeJsonArray));
 
                 // save the data
                 setLayersData((prevState) => ({
@@ -366,7 +367,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                 );
 
                 // add the found entries to the array
-                (layers[layerKey].layerData as TypeJSONValue as TypeJSONValue[]).push(...res.results);
+                (layers[layerKey].layerData as TypeJsonArray).push(...res.results);
 
                 // save the data
                 setLayersData((prevState) => ({

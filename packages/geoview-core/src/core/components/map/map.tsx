@@ -24,7 +24,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString, TypeJSONObject } from '../../types/cgpv-types';
+import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   snackBar: {
@@ -49,7 +49,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const [attribution, setAttribution] = useState<string>('');
 
   // render additional components if added by api
-  const [components, setComponents] = useState<TypeJSONObject>({});
+  const [components, setComponents] = useState<TypeJsonObject>({});
 
   const defaultTheme = useTheme();
   const classes = useStyles();

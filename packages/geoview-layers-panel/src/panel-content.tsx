@@ -1,4 +1,4 @@
-import { Cast, TypePanelContentProps, TypeJSONObject, TypeWindow } from 'geoview-core';
+import { Cast, TypePanelContentProps, TypeJsonObject, TypeWindow } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import LayersList from './layers-list';
@@ -23,7 +23,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   const { language } = api.map(mapId);
 
-  const translations: TypeJSONObject = Cast<TypeJSONObject>({
+  const translations: TypeJsonObject = Cast<TypeJsonObject>({
     'en-CA': {
       addLayer: 'Add Layer',
     },

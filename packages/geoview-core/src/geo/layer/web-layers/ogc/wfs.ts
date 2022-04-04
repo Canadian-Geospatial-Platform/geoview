@@ -6,7 +6,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
 
-import { AbstractWebLayersClass, TypeJsonString, TypeJSONObject, TypeJSONValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeJsonString, TypeJsonObject, TypeJsonValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -27,7 +27,7 @@ export class WFS extends AbstractWebLayersClass {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObject = {};
+  #capabilities: TypeJsonObject = {};
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -57,13 +57,13 @@ export class WFS extends AbstractWebLayersClass {
    */
   async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
     // const data = getXMLHttpRequest(capUrl);
-    const resCapabilities = await axios.get<TypeJSONValue>(this.url, {
+    const resCapabilities = await axios.get<TypeJsonValue>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
 
     // need to pass a xmldom to xmlToJson
     const xmlDOM = new DOMParser().parseFromString(resCapabilities.data as string, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJSONObject;
+    const json = xmlToJson(xmlDOM) as TypeJsonObject;
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
     this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJsonString;
@@ -151,9 +151,9 @@ export class WFS extends AbstractWebLayersClass {
    * Get feature type info of a given entry
    * @param {object} FeatureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
-   * @returns {TypeJSONValue | null} feature type object or null
+   * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatyreTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+  private getFeatyreTypeInfo(FeatureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -189,9 +189,9 @@ export class WFS extends AbstractWebLayersClass {
   /**
    * Get capabilities of the current WFS service
    *
-   * @returns {TypeJSONObject} WFS capabilities in json format
+   * @returns {TypeJsonObject} WFS capabilities in json format
    */
-  getCapabilities = (): TypeJSONObject => {
+  getCapabilities = (): TypeJsonObject => {
     return this.#capabilities;
   };
 

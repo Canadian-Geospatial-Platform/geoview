@@ -4,7 +4,7 @@ import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeJsonString, TypeJSONValue, TypeJSONObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeJsonString, TypeJsonValue, TypeJsonObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -25,7 +25,7 @@ export class OgcFeature extends AbstractWebLayersClass {
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObject = {};
+  #capabilities: TypeJsonObject = {};
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -59,7 +59,7 @@ export class OgcFeature extends AbstractWebLayersClass {
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
     const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
 
-    const res = await axios.get<TypeJSONObject>(metaUrl);
+    const res = await axios.get<TypeJsonObject>(metaUrl);
     this.#capabilities = res.data;
 
     const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
@@ -132,9 +132,9 @@ export class OgcFeature extends AbstractWebLayersClass {
    * Get feature type info of a given entry
    * @param {object} FeatureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
-   * @returns {TypeJSONValue | null} feature type object or null
+   * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatureTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+  private getFeatureTypeInfo(FeatureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -176,9 +176,9 @@ export class OgcFeature extends AbstractWebLayersClass {
   /**
    * Get capabilities of the current WFS service
    *
-   * @returns {TypeJSONObject} WFS capabilities in json format
+   * @returns {TypeJsonObject} WFS capabilities in json format
    */
-  getMeta = (): TypeJSONValue => {
+  getMeta = (): TypeJsonValue => {
     return this.#capabilities;
   };
 

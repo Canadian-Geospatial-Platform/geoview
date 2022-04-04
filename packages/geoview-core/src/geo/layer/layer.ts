@@ -17,7 +17,7 @@ import {
   Cast,
   CONST_LAYER_TYPES,
   TypeJsonString,
-  TypeJSONValue,
+  TypeJsonValue,
   AbstractWebLayersClass,
   TypeLayerConfig,
 } from '../../core/types/cgpv-types';
@@ -64,7 +64,7 @@ export class Layer {
       EVENT_NAMES.EVENT_LAYER_ADD,
       (payload) => {
         if (payload && (payload.handlerName as TypeJsonString).includes(this.#map.id)) {
-          const layerConf = payload.layer as TypeJSONValue as TypeLayerConfig;
+          const layerConf = payload.layer as TypeJsonValue as TypeLayerConfig;
           if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
             const geoJSON = new GeoJSON(layerConf);
             geoJSON.add(layerConf).then((layer) => {

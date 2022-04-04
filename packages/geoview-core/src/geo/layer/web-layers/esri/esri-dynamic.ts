@@ -9,8 +9,9 @@ import {
   Cast,
   AbstractWebLayersClass,
   TypeLayerConfig,
-  TypeJSONValue,
-  TypeJSONObject,
+  TypeJsonValue,
+  TypeJsonObject,
+  TypeJsonArray,
   TypeLegendJsonDynamic,
 } from '../../../../core/types/cgpv-types';
 
@@ -63,13 +64,13 @@ export class EsriDynamic extends AbstractWebLayersClass {
     const geo = new Promise<DynamicMapLayer | null>((resolve) => {
       data.then((value: string) => {
         // get layers from service and parse layer entries as number
-        const { layers } = JSON.parse(value) as TypeJSONObject;
+        const { layers } = JSON.parse(value) as TypeJsonObject;
 
         // check if the entries are part of the service
         if (
           value !== '{}' &&
           layers &&
-          Cast<TypeJSONValue[]>(layers).find((item) => {
+          Cast<TypeJsonValue[]>(layers).find((item) => {
             const searchedItem = (item as { [key: string]: { id: string } }).id;
             return this.entries?.includes(Cast<number>(searchedItem));
           })
@@ -93,9 +94,9 @@ export class EsriDynamic extends AbstractWebLayersClass {
   /**
    * Get metadata of the current service
    *
-   @returns {Promise<TypeJSONValue>} a json promise containing the result of the query
+   @returns {Promise<TypeJsonValue>} a json promise containing the result of the query
    */
-  getMetadata = async (): Promise<TypeJSONObject> => {
+  getMetadata = async (): Promise<TypeJsonObject> => {
     // const feat = featureLayer({
     //   url: this.url,
     // });
@@ -103,7 +104,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
     //   return metadata;
     // });
     const response = await fetch(`${this.url}?f=json`);
-    const result: TypeJSONObject = await response.json();
+    const result: TypeJsonObject = await response.json();
 
     return result;
   };
@@ -111,9 +112,9 @@ export class EsriDynamic extends AbstractWebLayersClass {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {TypeJSONValue} legend configuration in json format
+   * @returns {TypeJsonValue} legend configuration in json format
    */
-  getLegendJson = (): Promise<TypeJSONObject> => {
+  getLegendJson = (): Promise<TypeJsonArray> => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 
@@ -123,17 +124,17 @@ export class EsriDynamic extends AbstractWebLayersClass {
       attribution: '',
     });
 
-    return axios.get<TypeJSONObject>(queryUrl).then<TypeJSONObject>((res) => {
+    return axios.get<TypeJsonObject>(queryUrl).then<TypeJsonArray>((res) => {
       const { data } = res;
       const entryArray = feat.getLayers();
 
       if (entryArray.length > 0) {
-        const result = (data.layers as TypeJSONValue as TypeJSONValue[]).filter((item) => {
-          return entryArray.includes((item as TypeJSONObject).layerId);
+        const result = (data.layers as TypeJsonArray).filter((item) => {
+          return entryArray.includes((item as TypeJsonObject).layerId) as TypeJsonArray;
         });
-        return result as TypeJSONValue as TypeJSONObject;
+        return result as TypeJsonArray;
       }
-      return data.layers as TypeJSONObject;
+      return data.layers as TypeJsonArray;
     });
   };
 
@@ -149,7 +150,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * Fetch the bounds for an entry
    *
    * @param {number} entry
-   * @returns {TypeJSONValue} the result of the fetch
+   * @returns {TypeJsonValue} the result of the fetch
    */
   private getEntry = async (entry: number): Promise<TypeLegendJsonDynamic> => {
     const response = await fetch(`${this.url}/${entry}?f=json`);

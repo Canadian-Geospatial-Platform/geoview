@@ -14,7 +14,7 @@ import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { generateId } from '../../utils/utilities';
-import { Cast, TypeJsonString, TypeJSONObject } from '../../types/cgpv-types';
+import { Cast, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -118,7 +118,7 @@ export function ClickMarker(): JSX.Element {
           setMarkerPos(Cast<L.LatLng>(payload.latlng));
 
           if (payload.symbology) {
-            const theSymbology = payload.symbology as TypeJSONObject;
+            const theSymbology = payload.symbology as TypeJsonObject;
             let iconHtml = '';
 
             // get symbology image

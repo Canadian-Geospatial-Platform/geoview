@@ -2,7 +2,7 @@ import L, { LatLngExpression } from 'leaflet';
 
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
-import { Cast, TypeJsonString, TypeJSONValue, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeJsonNumber, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 /**
@@ -47,8 +47,8 @@ export class Vector {
         const payloadType = payload.type as TypeJsonString;
         if (payloadType === CONST_VECTOR_TYPES.CIRCLE) {
           this.addCircle(
-            payload.latitude as TypeJSONValue as number,
-            payload.longitude as TypeJSONValue as number,
+            payload.latitude as TypeJsonNumber,
+            payload.longitude as TypeJsonNumber,
             Cast<L.CircleMarkerOptions>(payload.options),
             id as TypeJsonString
           );
@@ -62,15 +62,15 @@ export class Vector {
           this.addPolyline(Cast<TypePayloadPoints>(payload.points), Cast<L.CircleMarkerOptions>(payload.options), id);
         } else if (payloadType === CONST_VECTOR_TYPES.MARKER) {
           this.addMarker(
-            payload.latitude as TypeJSONValue as number,
-            payload.longitude as TypeJSONValue as number,
+            payload.latitude as TypeJsonNumber,
+            payload.longitude as TypeJsonNumber,
             Cast<L.CircleMarkerOptions>(payload.options),
             id
           );
         } else if (payloadType === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
           this.addCircleMarker(
-            payload.latitude as TypeJSONValue as number,
-            payload.longitude as TypeJSONValue as number,
+            payload.latitude as TypeJsonNumber,
+            payload.longitude as TypeJsonNumber,
             Cast<L.CircleMarkerOptions>(payload.options),
             id
           );
