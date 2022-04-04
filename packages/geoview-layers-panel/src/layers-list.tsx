@@ -1,4 +1,5 @@
 /* eslint-disable react/no-array-index-key */
+<<<<<<< HEAD
 import {
   Cast,
   TypeLayersPanelListProps,
@@ -24,6 +25,9 @@ type TypeLegend =
     }[];
 
 type TypeSubLayerVisibility = { [id: string]: number[] };
+=======
+import { TypeLayersPanelListProps, TypeLayerData, TypeProps, TypeWindow } from 'geoview-core';
+>>>>>>> c1b98d1c92d673063d4d29a9a92f1507c712c59b
 
 const w = window as TypeWindow;
 
@@ -36,8 +40,12 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { mapId, layers, language } = props;
 
   const { cgpv } = w;
+<<<<<<< HEAD
   const { ui, react, api, leaflet: L } = cgpv;
   const mui = cgpv.mui as TypeCGPVMUI;
+=======
+  const { mui, ui, react, api, leaflet: L } = cgpv;
+>>>>>>> c1b98d1c92d673063d4d29a9a92f1507c712c59b
   const { useState, useEffect } = react;
 
   const [selectedLayer, setSelectedLayer] = useState<string>('');
@@ -51,7 +59,11 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { Slider, Tooltip, Checkbox } = mui;
   const { Button } = ui.elements;
 
+<<<<<<< HEAD
   const translations: TypeJSONObject = Cast<TypeJSONObject>({
+=======
+  const translations: TypeProps<TypeProps<string>> = {
+>>>>>>> c1b98d1c92d673063d4d29a9a92f1507c712c59b
     'en-CA': {
       bounds: 'Toggle Bounds',
       zoom: 'Zoom to Layer',

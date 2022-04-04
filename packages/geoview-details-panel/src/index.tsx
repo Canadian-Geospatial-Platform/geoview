@@ -30,7 +30,7 @@ class DetailsPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJSONObject = Cast<TypeJSONObject>({
+  translations = Cast<TypeJSONObject>({
     'en-CA': {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',
