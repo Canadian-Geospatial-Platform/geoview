@@ -126,7 +126,7 @@ export type TypeChildren = React.ReactNode;
 /**
  * Map context
  */
- export type TypeMapContext = {
+export type TypeMapContext = {
   id: string;
 };
 

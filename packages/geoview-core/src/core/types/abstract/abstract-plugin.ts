@@ -5,10 +5,10 @@ export abstract class AbstractPluginClass {
   id: string;
 
   // plugin properties
-  pluginOptions: TypePluginOptions;
+  pluginProps: TypePluginOptions;
 
   constructor(id: string, props: TypePluginOptions) {
     this.id = id;
-    this.pluginOptions = props;
+    this.pluginProps = props;
   }
 }
