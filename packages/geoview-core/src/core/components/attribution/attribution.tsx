@@ -2,10 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-<<<<<<< HEAD
 import { TypeJSONValue } from '../../types/cgpv-types';
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
 import { api } from '../../../api/api';

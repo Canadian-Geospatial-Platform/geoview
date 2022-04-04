@@ -65,11 +65,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
       const {
         target: { value: targetValue },
       } = event;
-<<<<<<< HEAD
       setMultipleValue((typeof targetValue === 'string' ? targetValue.split(',') : targetValue) as React.SetStateAction<never[]>);
-=======
-      setMultipleValue(typeof targetValue === 'string' ? targetValue.split(',') : targetValue);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     }
   };
 

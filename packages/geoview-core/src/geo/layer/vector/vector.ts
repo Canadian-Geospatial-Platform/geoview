@@ -1,16 +1,8 @@
-<<<<<<< HEAD
-=======
-/* eslint-disable no-plusplus */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import L, { LatLngExpression } from 'leaflet';
 
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
-<<<<<<< HEAD
 import { Cast, TypeJSONValue, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
-=======
-import { CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { generateId } from '../../../core/utils/utilities';
 
 /**

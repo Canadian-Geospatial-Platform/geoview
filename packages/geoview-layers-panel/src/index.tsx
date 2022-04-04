@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-<<<<<<< HEAD
-import PanelContent from './panel-content';
-
-import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps } from 'geoview-core';
-
-const w = window as any;
-=======
 import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from 'geoview-core';
 import PanelContent from './panel-content';
 
 const w = window as TypeWindow;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * Create a class for the plugin instance
@@ -34,11 +26,7 @@ class LayersPanelPlugin {
   /**
    * translations object to inject to the viewer translations
    */
-<<<<<<< HEAD
-  translations: TypeProps<TypeProps<any>> = {
-=======
   translations: TypeProps<TypeProps<string>> = {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     'en-CA': {
       layersPanel: 'Layers',
     },
@@ -54,11 +42,7 @@ class LayersPanelPlugin {
     const { mapId } = this.LayersPanelPluginProps;
 
     // access the cgpv object from the window object
-<<<<<<< HEAD
-    const cgpv = w['cgpv'];
-=======
     const { cgpv } = w;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
     // access the api calls
     const { api } = cgpv;
@@ -95,11 +79,7 @@ class LayersPanelPlugin {
     const { mapId } = this.LayersPanelPluginProps;
 
     // access the cgpv object from the window object
-<<<<<<< HEAD
-    const cgpv = w['cgpv'];
-=======
     const { cgpv } = w;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
     // access the api calls
     const { api } = cgpv;
@@ -112,10 +92,5 @@ class LayersPanelPlugin {
 
 export default LayersPanelPlugin;
 
-<<<<<<< HEAD
-w['plugins'] = w['plugins'] || {};
-w['plugins']['layersPanel'] = LayersPanelPlugin;
-=======
 w.plugins = w.plugins || {};
 w.plugins.layersPanel = LayersPanelPlugin;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d

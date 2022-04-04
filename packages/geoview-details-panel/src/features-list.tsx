@@ -4,11 +4,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
 
-<<<<<<< HEAD
 import { TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJSONObject } from 'geoview-core';
-=======
-import { TypeJSONObject, TypeJSONValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow } from 'geoview-core';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 const w = window as TypeWindow;
 

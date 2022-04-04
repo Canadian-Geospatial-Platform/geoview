@@ -1,10 +1,6 @@
 import { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
 
-<<<<<<< HEAD
 import { TypeJSONValue } from './cgpv-types';
-=======
-import { TypeJSONObject } from './cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /** https://material-ui.com/guides/typescript/ */
 

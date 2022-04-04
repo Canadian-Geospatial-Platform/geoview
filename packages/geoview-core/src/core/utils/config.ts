@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 /* eslint-disable no-console, no-underscore-dangle */
-=======
-/* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { LatLngTuple } from 'leaflet';
 
 import { isJsonString, generateId } from './utilities';

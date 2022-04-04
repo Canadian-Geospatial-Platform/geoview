@@ -1,9 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-<<<<<<< HEAD
 import { TypeJSONValue, TypeLayersListProps, TypeLayerData, TypeWindow, TypeJSONObject } from 'geoview-core';
-=======
-import { TypeJSONObject, TypeLayersListProps, TypeLayerData, TypeWindow } from 'geoview-core';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 // get the window object
 const w = window as TypeWindow;

@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-/* eslint-disable react/no-danger */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -18,10 +14,7 @@ import { EVENT_NAMES } from '../../api/event';
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '../../ui';
-<<<<<<< HEAD
 import { TypeJSONValue } from '../types/cgpv-types';
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 const useStyles = makeStyles((theme) => ({
   trap: {
@@ -182,11 +175,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         <>
           <Button
             id="enable-focus"
-<<<<<<< HEAD
             tooltip={t('keyboardnav.focusdialog.button.enable') as string}
-=======
-            tooltip={t('keyboardnav.focusdialog.button.enable')}
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
             tooltipPlacement="top-end"
             autoFocus
             onClick={handleEnable}
@@ -199,11 +188,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           </Button>
           <Button
             id="skip-focus"
-<<<<<<< HEAD
             tooltip={t('keyboardnav.focusdialog.button.skip') as string}
-=======
-            tooltip={t('keyboardnav.focusdialog.button.skip')}
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
             tooltipPlacement="top-end"
             onClick={handleSkip}
             type="text"

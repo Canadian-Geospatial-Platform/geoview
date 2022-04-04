@@ -49,11 +49,8 @@
         "tsx": "never"
       }
     ],
-<<<<<<< HEAD
     "no-plusplus": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
     "no-shadow": "off",

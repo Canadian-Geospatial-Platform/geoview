@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-/* eslint-disable consistent-return */
-/* eslint-disable array-callback-return */
-/* eslint-disable react-hooks/exhaustive-deps */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -21,11 +15,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
-<<<<<<< HEAD
 import { TypeButtonPanel, TypeJSONValue } from '../../types/cgpv-types';
-=======
-import { TypeButtonPanel } from '../../types/cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { MapContext } from '../../app-start';
 
 const navBtnWidth = '32px';
@@ -131,11 +121,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-<<<<<<< HEAD
         if ((args.handlerName as TypeJSONValue as string) === mapId && (args.type as TypeJSONValue as string) === 'navbar') {
-=======
-        if (args.handlerName === mapId && args.type === 'navbar') {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
           updateComponent();
         }
       },
@@ -145,11 +131,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-<<<<<<< HEAD
         if ((args.handlerName as TypeJSONValue as string) === mapId && (args.type as TypeJSONValue as string) === 'navbar') {
-=======
-        if (args.handlerName === mapId && args.type === 'navbar') {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
           updateComponent();
         }
       },

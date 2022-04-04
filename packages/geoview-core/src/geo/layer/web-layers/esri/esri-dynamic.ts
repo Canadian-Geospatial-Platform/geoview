@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/esri/esri-dynamic.ts
 import L from 'leaflet';
 
 import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
@@ -16,16 +15,6 @@ import {
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
-=======
-import L, { Layer } from 'leaflet';
-
-import { dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
-
-import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig, TypeJSONObject, TypeLegendJsonDynamic } from '../../../core/types/cgpv-types';
-
-import { api } from '../../../api/api';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/esri/esri-dynamic.ts
 
 /**
  * a class to add esri dynamic layer
@@ -33,20 +22,7 @@ import { api } from '../../../api/api';
  * @export
  * @class EsriDynamic
  */
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/esri/esri-dynamic.ts
 export class EsriDynamic extends AbstractWebLayersClass {
-=======
-export class EsriDynamic {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'Esri Dynamic Layer';
-
-  // layer type
-  type: string;
-
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/esri/esri-dynamic.ts
   // layer from leaflet
   layer: DynamicMapLayer | null = null;
 
@@ -62,16 +38,8 @@ export class EsriDynamic {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/esri/esri-dynamic.ts
     super('esriDynamic', 'Esri Dynamic Layer', layerConfig);
 
-=======
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = new Layer();
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/esri/esri-dynamic.ts
     const entries = layerConfig.entries?.split(',').map((item: string) => {
       return parseInt(item, 10);
     });
@@ -98,7 +66,6 @@ export class EsriDynamic {
         const { layers } = JSON.parse(value) as TypeJSONObject;
 
         // check if the entries are part of the service
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/esri/esri-dynamic.ts
         if (
           value !== '{}' &&
           layers &&
@@ -112,22 +79,10 @@ export class EsriDynamic {
             layers: this.entries,
             attribution: '',
           } as DynamicMapLayerOptions);
-=======
-        if (value !== '{}' && layers && layers.find((item: Record<string, number>) => this.entries?.includes(item.id))) {
-          const feat = dynamicMapLayer({
-            url: layer.url,
-            layers: this.entries,
-            attribution: '',
-          });
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/esri/esri-dynamic.ts
 
           resolve(feature);
         } else {
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/esri/esri-dynamic.ts
           resolve(null);
-=======
-          resolve('{}');
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/esri/esri-dynamic.ts
         }
       });
     });
@@ -158,11 +113,7 @@ export class EsriDynamic {
    *
    * @returns {TypeJSONValue} legend configuration in json format
    */
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/esri/esri-dynamic.ts
   getLegendJson = (): Promise<TypeJSONObject> => {
-=======
-  getLegendJson = (): TypeJSONObject => {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/esri/esri-dynamic.ts
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 

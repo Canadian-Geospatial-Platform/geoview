@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { Cast, TypeWindow } from 'geoview-core';
-=======
-import { Cast } from 'geoview-core';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 import { MinimapBounds } from './minimap-bounds';
 import { MinimapToggle } from './minimap-toggle';

@@ -219,11 +219,7 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
                     </Typography>
                   ) : (
                     <Button type="text" onClick={handleComplete}>
-<<<<<<< HEAD
                       {completedSteps() === totalSteps()! - 1 ? 'Finish' : 'Complete Step'}
-=======
-                      {completedSteps() === totalSteps() - 1 ? 'Finish' : 'Complete Step'}
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
                     </Button>
                   ))}
               </>

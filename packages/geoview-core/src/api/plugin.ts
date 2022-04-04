@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable max-classes-per-file */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import React from 'react';
 
 import i18next from 'i18next';
@@ -14,7 +8,6 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapViewer } from '../geo/map/map';
 
 import { api } from './api';
-<<<<<<< HEAD
 import {
   Cast,
   AbstractPluginClass,
@@ -24,9 +17,6 @@ import {
   TypePluginEntry,
   TypeRecordOfPlugin,
 } from '../core/types/cgpv-types';
-=======
-import { Cast, TypeWindow } from '../core/types/cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * Class to manage plugins
@@ -60,11 +50,7 @@ export class Plugin {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         plugin = new (constructor as any)(pluginId, props);
       } else {
-<<<<<<< HEAD
         const InstanceConstructor = (await import(`${'../plugins'}/${pluginId}/index.tsx`)).default;
-=======
-        const InstanceConstructor = (await import(`${'../plugins'}/${id}/index.tsx`)).default;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
         if (InstanceConstructor) plugin = new InstanceConstructor(pluginId, props);
       }

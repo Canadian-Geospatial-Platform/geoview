@@ -9,10 +9,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapContext } from '../../app-start';
 
-<<<<<<< HEAD
 import { TypeJSONValue } from '../../types/cgpv-types';
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
 export const useStyles = makeStyles((theme) => ({
@@ -93,11 +90,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-<<<<<<< HEAD
         if ((args.handlerName as TypeJSONValue as string) === mapId && (args.type as TypeJSONValue as string) === 'appbar') {
-=======
-        if (args.handlerName === mapId && args.type === 'appbar') {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
           updateComponent();
         }
       },
@@ -107,11 +100,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-<<<<<<< HEAD
         if ((args.handlerName as TypeJSONValue as string) === mapId && (args.type as TypeJSONValue as string) === 'appbar') {
-=======
-        if (args.handlerName === mapId && args.type === 'appbar') {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
           updateComponent();
         }
       },

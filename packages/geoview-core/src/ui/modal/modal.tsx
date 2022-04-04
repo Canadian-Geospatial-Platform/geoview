@@ -7,11 +7,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material
 import { ClassNameMap, withStyles } from '@mui/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-<<<<<<< HEAD
 import { TypeJSONValue, TypeDialogProps } from '../../core/types/cgpv-types';
-=======
-import { TypeDialogProps } from '../../core/types/cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { EVENT_NAMES } from '../../api/event';

@@ -16,53 +16,15 @@ type EsriOptions = {
   capability: string;
 };
 
-<<<<<<< HEAD
-const w = window as any;
-
-/**
- * List of layer types and labels
- */
-const layerOptions = [
-  ['esriDynamic', 'ESRI Dynamic Service'],
-  ['esriFeature', 'ESRI Feature Service'],
-  ['geoJSON', 'GeoJSON'],
-  ['ogcWMS', 'OGC Web Map Service (WMS)'],
-  ['ogcWFS', 'OGC Web Feature Service (WFS)'],
-  ['xyzTiles', 'XYZ Raster Tiles'],
-];
-
-/**
- * Returns the appropriate error config for ESRI layer types
- *
- * @param type one of esriDynamic or esriFeature
- * @returns {EsriOptions} an error configuration object for populating dialogues
- */
-const esriOptions = (type: string): EsriOptions => {
-  switch (type) {
-    case 'esriDynamic':
-      return { err: 'ESRI Map', capability: 'Map' };
-    case 'esriFeature':
-      return { err: 'ESRI Feature', capability: 'Query' };
-    default:
-      return { err: '', capability: '' };
-  }
-};
-=======
 const w = window as TypeWindow;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * A react component that displays the details panel content
  *
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
-<<<<<<< HEAD
-const LayerStepper = ({ mapId, setAddLayerVisible }: Props): JSX.Element => {
-  const cgpv = w['cgpv'];
-=======
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
   const { api, react, ui, mui } = cgpv;
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES } = api.layerTypes;
   const { useState } = react;
@@ -122,11 +84,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorEmpty = (textField: string) => {
-<<<<<<< HEAD
-    api.event.emit('snackbar/open', mapId, {
-=======
     api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       message: {
         type: 'string',
         value: `${textField} cannot be empty`,
@@ -140,11 +98,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param serviceName type of service provided by the URL
    */
   const emitErrorServer = (serviceName: string) => {
-<<<<<<< HEAD
-    api.event.emit('snackbar/open', mapId, {
-=======
     api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       message: {
         type: 'string',
         value: `URL is not a valid ${serviceName} Server`,
@@ -158,19 +112,11 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param serviceName type of service provided by the URL
    * @param proj current map projection
    */
-<<<<<<< HEAD
-  const emitErrorProj = (serviceName: string, proj: string) => {
-    api.event.emit('snackbar/open', mapId, {
-      message: {
-        type: 'string',
-        value: `${serviceName} does not support current map projection ${proj}`,
-=======
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: string[]) => {
     api.event.emit('snackbar/open', mapId, {
       message: {
         type: 'string',
         value: `${serviceName} does not support current map projection ${proj}, only ${supportedProj.join(', ')}`,
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       },
     });
   };
@@ -187,25 +133,15 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let supportedProj = [];
     try {
       const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, '');
-<<<<<<< HEAD
-      const supportedProj = wms.Capability.Layer.CRS;
-      if (!supportedProj.includes(proj)) throw 'proj';
-      const layers = wms.Capability.Layer.Layer.map((x: any) => [x.Name, x.Title]);
-=======
       supportedProj = wms.Capability.Layer.CRS;
       if (!supportedProj.includes(proj)) throw new Error('proj');
       const layers = wms.Capability.Layer.Layer.map((x) => [x.Name, x.Title]);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
       } else setLayerList(layers);
     } catch (err) {
-<<<<<<< HEAD
-      if (err == 'proj') emitErrorProj('WMS', proj);
-=======
       if (err === 'proj') emitErrorProj('WMS', proj, supportedProj);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       else emitErrorServer('WMS');
       return false;
     }
@@ -222,19 +158,13 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const wfsValidation = async (): Promise<boolean> => {
     try {
       const wfs = await api.geoUtilities.getWFSServiceMetadata(layerURL);
-<<<<<<< HEAD
-      const layers = wfs.FeatureTypeList.FeatureType.map((x: any) => [x.Name['#text'].split(':')[1], x.Title['#text']]);
-=======
       const layers = wfs.FeatureTypeList.FeatureType.map((x) => [x.Name['#text'].split(':')[1], x.Title['#text']]);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       if (layers.length === 1) {
         setLayerName(layers[0][1]);
         setLayerEntry(layers[0][0]);
       } else setLayerList(layers);
     } catch (err) {
       emitErrorServer('WFS');
-<<<<<<< HEAD
-=======
       return false;
     }
     return true;
@@ -259,7 +189,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       } else setLayerList(layers);
     } catch (err) {
       emitErrorServer('OGC API Feature');
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       return false;
     }
     return true;
@@ -277,11 +206,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       const esri = await api.geoUtilities.getESRIServiceMetadata(layerURL);
       if (esri.capabilities.includes(esriOptions(type).capability)) {
         if ('layers' in esri) {
-<<<<<<< HEAD
-          const layers = esri.layers.map(({ id, name }: any) => [String(id), name]);
-=======
           const layers = esri.layers.map(({ id, name }) => [String(id), name]);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
           if (layers.length === 1) {
             setLayerName(layers[0][1]);
             setLayerEntry(layers[0][0]);
@@ -291,11 +216,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           setLayerEntry(String(esri.id));
         }
       } else {
-<<<<<<< HEAD
-        throw 'err';
-=======
         throw new Error('err');
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       }
     } catch (err) {
       emitErrorServer(esriOptions(type).err);
@@ -312,23 +233,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const xyzValidation = (): boolean => {
     const proj = api.map(mapId).projection.getCRS().code;
     const tiles = ['{x}', '{y}', '{z}'];
-<<<<<<< HEAD
-    for (const tile of tiles) {
-      if (!layerURL.includes(tile)) {
-=======
     for (let i = 0; i < tiles.length; i += 1) {
       if (!layerURL.includes(tiles[i])) {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         emitErrorServer('XYZ Tile');
         return false;
       }
     }
     if (proj !== 'EPSG:3857') {
-<<<<<<< HEAD
-      emitErrorProj('XYZ Tiles', proj);
-=======
       emitErrorProj('XYZ Tiles', proj, ['EPSG:3857']);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       return false;
     }
     return true;
@@ -343,11 +255,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     try {
       const response = await fetch(layerURL);
       const json = await response.json();
-<<<<<<< HEAD
-      if (!['FeatureCollection', 'Feature'].includes(json.type)) throw 'err';
-=======
       if (!['FeatureCollection', 'Feature'].includes(json.type)) throw new Error('err');
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     } catch (err) {
       emitErrorServer('GeoJSON');
       return false;
@@ -358,38 +266,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
    */
-<<<<<<< HEAD
-  const handleNext = async () => {
-    if (activeStep === 0) {
-      if (layerURL.trim() === '') return emitErrorEmpty('URL');
-    }
-    if (activeStep === 1) {
-      let valid = true;
-      if (layerType === '') return emitErrorEmpty('Service Type');
-      if (layerType === 'ogcWMS') valid = await wmsValidation();
-      if (layerType === 'ogcWFS') valid = await wfsValidation();
-      else if (layerType === 'xyzTiles') valid = xyzValidation();
-      else if (layerType === 'esriDynamic') valid = await esriValidation('esriDynamic');
-      else if (layerType === 'esriFeature') valid = await esriValidation('esriFeature');
-      else if (layerType === 'geoJSON') valid = await geoJSONValidation();
-      if (!valid) return;
-    }
-    if (activeStep === 2) {
-      let name = layerName;
-      let url = layerURL;
-      let entries = layerEntry;
-      if (layerType === 'esriDynamic') url = api.geoUtilities.getMapServerUrl(layerURL);
-      else if (layerType === 'esriFeature') {
-        url = api.geoUtilities.getMapServerUrl(layerURL) + '/' + layerEntry;
-        entries = '';
-      }
-      if (layerName === '') return emitErrorEmpty('Layer');
-      const layerConfig = { name, type: layerType, url, entries };
-      api.map(mapId).layer.addLayer(layerConfig);
-      setAddLayerVisible(false);
-      handleInput({ target: { value: '' } });
-      setActiveStep(-1);
-=======
   const handleStep1 = () => {
     let valid = true;
     if (layerURL.trim() === '') {
@@ -452,7 +328,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     if (valid) {
       api.map(mapId).layer.addLayer(layerConfig);
       setAddLayerVisible(false);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     }
   };
 
@@ -519,19 +394,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param param0 specify if button is first or last in the list
    * @returns {JSX.Element} React component
    */
-<<<<<<< HEAD
-  const NavButtons = ({ isFirst = false, isLast = false }: ButtonProps): JSX.Element => (
-    <ButtonGroup
-      className={classes.buttonGroup}
-      children={
-        <>
-          <Button variant="contained" type="text" onClick={handleNext} children={isLast ? 'Finish' : 'Continue'} />
-          {!isFirst && <Button variant="contained" type="text" onClick={handleBack} children="Back" />}
-        </>
-      }
-    />
-  );
-=======
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonProps): JSX.Element {
     return (
@@ -547,7 +409,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       </ButtonGroup>
     );
   }
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
   return (
     <Stepper activeStep={activeStep} orientation="vertical">

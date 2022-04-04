@@ -11,13 +11,10 @@ import {
   TypeEntry,
   TypePanelContentProps,
   TypeWindow,
-<<<<<<< HEAD
   TypeJSONObject,
   WMS,
   EsriFeature,
   EsriDynamic,
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 } from 'geoview-core';
 
 import LayersList from './layers-list';
@@ -309,15 +306,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             // check layer type if WMS then use getFeatureInfo to query the data
             let res = null;
 
-<<<<<<< HEAD
             if ((layer.type as TypeJSONValue as string) === 'ogcWMS') {
               const ogcWMSLayer = Cast<WMS>(layer);
               // eslint-disable-next-line no-await-in-loop
               res = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
-=======
-            if (layer.type == 'ogcWMS') {
-              res = await layer.getFeatureInfo(latlng, layerMap);
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
               if (res && res.results && (res.results as TypeJSONValue as TypeJSONValue[]).length > 0) {
                 layersFound.push(
@@ -339,14 +331,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   },
                 }));
               }
-<<<<<<< HEAD
             } else if (
               (layer.type as TypeJSONValue as string) === 'esriFeature' ||
               (layer.type as TypeJSONValue as string) === 'esriDynamic'
             ) {
-=======
-            } else if (layer.type == 'esriFeature' || layer.type == 'esriDynamic') {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
               // generate an identify query url
               const identifyUrl =
                 `${layer.mapService.options.url}identify?` +
@@ -474,10 +462,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
       // check each map server layer type and add it to the layers object of the map server in the data array
       if (mapLayer.type === 'ogcWMS') {
-<<<<<<< HEAD
         const ogcWMSLayer = Cast<WMS>(mapLayer);
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         // get layer ids / entries from the loaded WMS layer
         const { entries } = ogcWMSLayer;
 
@@ -505,20 +490,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             addLayer(mapLayer, data, layerInfo, false);
           }
       } else if (mapLayer.type === 'esriFeature') {
-<<<<<<< HEAD
         const esriFeatureLayer = Cast<EsriFeature>(mapLayer);
 
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         // query the layer information, feature layer URL will end by a number provided in the map config
         const layerInfo = await queryServer(esriFeatureLayer.url);
 
         addLayer(mapLayer, data, layerInfo, false);
       } else if (mapLayer.type === 'esriDynamic') {
-<<<<<<< HEAD
         const esriDynamicLayer = Cast<EsriDynamic>(mapLayer);
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
         // get active layers
         const entries = esriDynamicLayer.layer!.getLayers();
 

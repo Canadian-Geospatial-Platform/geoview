@@ -1,14 +1,7 @@
 /* eslint-disable react/require-default-props */
-<<<<<<< HEAD
 import React, { CSSProperties } from 'react';
 
 import { TypeJSONValue } from '../types/cgpv-types';
-=======
-/* eslint-disable react/no-danger */
-import React, { CSSProperties } from 'react';
-
-import { TypeJSONObject } from '../types/cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * Interface used for custom html elements

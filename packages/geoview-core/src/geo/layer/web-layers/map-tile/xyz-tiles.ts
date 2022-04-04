@@ -1,13 +1,6 @@
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/map-tile/xyz-tiles.ts
 import L from 'leaflet';
 
 import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
-=======
-import L, { Layer } from 'leaflet';
-
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
-import { generateId } from '../../../core/utils/utilities';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/map-tile/xyz-tiles.ts
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -23,20 +16,7 @@ import { generateId } from '../../../core/utils/utilities';
  * @export
  * @class XYZTiles
  */
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/map-tile/xyz-tiles.ts
 export class XYZTiles extends AbstractWebLayersClass {
-=======
-export class XYZTiles {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'XYZ Tiles';
-
-  // layer type
-  type: string;
-
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/map-tile/xyz-tiles.ts
   // layer from leaflet
   layer: L.TileLayer | null = null;
 
@@ -46,15 +26,7 @@ export class XYZTiles {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-<<<<<<< HEAD:packages/geoview-core/src/geo/layer/web-layers/map-tile/xyz-tiles.ts
     super('xyzTiles', 'XYZ Tiles', layerConfig);
-=======
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = new Layer();
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d:packages/geoview-core/src/geo/layer/map-tile/xyz-tiles.ts
   }
 
   /**

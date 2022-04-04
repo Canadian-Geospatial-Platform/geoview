@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-/* eslint-disable @typescript-eslint/ban-types */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import React, { CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -39,7 +35,6 @@ import { PanelApi } from '../../ui';
 import * as UI from '../../ui';
 
 import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
-<<<<<<< HEAD
 
 export { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
 export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
@@ -50,8 +45,6 @@ export { OgcFeature } from '../../geo/layer/web-layers/ogc/ogc_feature';
 export { WFS } from '../../geo/layer/web-layers/ogc/wfs';
 export { WMS } from '../../geo/layer/web-layers/ogc/wms';
 export * from './material-ui.d';
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 declare global {
   interface Window {

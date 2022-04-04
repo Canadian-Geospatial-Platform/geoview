@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 /* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
-=======
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-underscore-dangle */
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 import L, { LeafletEventHandlerFn } from 'leaflet';
 import './marker-cluster-element.d';
 import 'leaflet.markercluster/src';

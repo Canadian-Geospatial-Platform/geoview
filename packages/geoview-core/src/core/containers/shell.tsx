@@ -11,11 +11,7 @@ import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
 
 import { FocusTrapDialog } from './focus-trap';
-<<<<<<< HEAD
 import { TypeMapConfigProps, TypeJSONValue } from '../types/cgpv-types';
-=======
-import { TypeMapConfigProps } from '../types/cgpv-types';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';

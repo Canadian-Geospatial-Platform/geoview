@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { TypePanelContentProps, TypeProps } from 'geoview-core';
-=======
 import { TypePanelContentProps, TypeProps, TypeWindow } from 'geoview-core';
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 import LayerStepper from './layer-stepper';
 import LayersList from './layers-list';
@@ -18,11 +14,7 @@ const w = window as TypeWindow;
 function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { mapId } = props;
 
-<<<<<<< HEAD
-  const cgpv = w['cgpv'];
-=======
   const { cgpv } = w;
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;
   const [addLayerVisible, setAddLayerVisible] = useState(false);
@@ -31,11 +23,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   const { language } = api.map(mapId);
 
-<<<<<<< HEAD
-  const translations: TypeProps<TypeProps<any>> = {
-=======
   const translations: TypeProps<TypeProps<string>> = {
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
     'en-CA': {
       addLayer: 'Add Layer',
     },
@@ -108,13 +96,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
           onClick={onClick}
         />
       </div>
-<<<<<<< HEAD
-      <div style={{ display: addLayerVisible ? 'inherit' : 'none' }}>
-        <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />
-      </div>
-=======
       {addLayerVisible && <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />}
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
       <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
         <LayersList mapId={mapId} layers={mapLayers} language={language} />
       </div>

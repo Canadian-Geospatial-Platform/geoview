@@ -10,11 +10,8 @@ import { useSnackbar } from 'notistack';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-<<<<<<< HEAD
 import { TypeJSONValue } from '../../app';
 import { Cast, TypeJSONObject } from '../../core/types/cgpv-types';
-=======
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
 /**
  * Snackbar properties interface
@@ -92,13 +89,9 @@ export function Snackbar(props: SnackBarProps): null {
 
         // get message
         const message =
-<<<<<<< HEAD
           (payload.message.type as TypeJSONValue) === 'string'
             ? payload.message.value
             : replaceParams(payload.message.params as TypeJSONValue as string[], t(payload.message.value as TypeJSONValue as string));
-=======
-          payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params, t(payload.message.value));
->>>>>>> 2494732ad4a7a2c68e059d9d1877b2d59d665d4d
 
         // show the notification
         if (payload && id === (payload.handlerName as TypeJSONValue)) enqueueSnackbar(message, opts);
