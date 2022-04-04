@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { TypeJsonString } from '../../types/cgpv-types';
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
 import { api } from '../../../api/api';
@@ -54,7 +55,7 @@ export function Attribution(props: AttributionProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
           updateComponent();
         }
       },
@@ -65,7 +66,7 @@ export function Attribution(props: AttributionProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
           updateComponent();
         }
       },

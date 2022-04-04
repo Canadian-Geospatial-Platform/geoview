@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeJSONObject, TypeLayersListProps, TypeLayerData, TypeWindow } from 'geoview-core';
+import { Cast, TypeLayersListProps, AbstractWebLayersClass, TypeWindow, TypeJsonObject } from 'geoview-core';
 
 // get the window object
 const w = window as TypeWindow;
@@ -84,7 +84,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
    * @param {Object} data data object of all layers
    * @param {string} layerKey the layer object to list it's entries
    */
-  const goToFeatureList = (data: TypeLayerData, layerKey: string) => {
+  const goToFeatureList = (data: AbstractWebLayersClass, layerKey: string) => {
     const { layerData, displayField, fieldAliases, renderer } = data.layers[layerKey];
 
     // set the layer entry data
@@ -93,14 +93,16 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
     // check if the layer has only one entry
     if (layerData.length === 1) {
       // go to the entry information skipping entry list
-      const attributes = (layerData[0] as TypeJSONObject)?.attributes as TypeJSONObject;
-      selectFeature({
-        attributes,
-        displayField,
-        fieldAliases,
-        symbol: getSymbol(renderer, attributes),
-        numOfEntries: 1,
-      });
+      const attributes = layerData[0]?.attributes;
+      selectFeature(
+        Cast<TypeJsonObject>({
+          attributes,
+          displayField,
+          fieldAliases,
+          symbol: getSymbol(renderer, attributes),
+          numOfEntries: 1,
+        })
+      );
     }
   };
 
@@ -152,10 +154,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
 
                                     api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
                                       latlng: clickPos,
-                                      symbology: getSymbol(
-                                        data.layers[layerKey].renderer,
-                                        (layerData[0] as TypeJSONObject).attributes as TypeJSONObject
-                                      ),
+                                      symbology: getSymbol(data.layers[layerKey].renderer, layerData[0].attributes),
                                     });
                                   }
                                 : undefined

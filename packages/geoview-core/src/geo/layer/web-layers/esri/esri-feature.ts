@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
-import { featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
+import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { TypeLayerConfig, TypeJSONObject } from '../../../core/types/cgpv-types';
-import { generateId, getXMLHttpRequest } from '../../../core/utils/utilities';
-import { blueCircleIcon } from '../../../core/types/marker-definitions';
+import { AbstractWebLayersClass, TypeLayerConfig, TypeJsonNumber, TypeJsonValue, TypeJsonObject } from '../../../../core/types/cgpv-types';
+import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 /**
  * a class to add esri feature layer
@@ -16,21 +16,9 @@ import { api } from '../../../api/api';
  * @export
  * @class EsriFeature
  */
-export class EsriFeature {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'Esri Feature Layer';
-
-  // layer type
-  type: string;
-
+export class EsriFeature extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: Layer | string;
-
-  // layer or layer service url
-  url: string;
+  layer: FeatureLayer | null = null;
 
   // mapService property
   mapService: MapService;
@@ -41,11 +29,8 @@ export class EsriFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = new Layer();
+    super('esriFeature', 'Esri Feature Layer', layerConfig);
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url),
     });
@@ -55,9 +40,9 @@ export class EsriFeature {
    * Add a ESRI feature layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<FeatureLayer | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeLayerConfig): Promise<FeatureLayer | null> {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     // define a default blue icon
@@ -76,23 +61,23 @@ export class EsriFeature {
 
     const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
-    const geo = new Promise<Layer | string>((resolve) => {
+    const geo = new Promise<FeatureLayer | null>((resolve) => {
       data.then((value: string) => {
         const { type } = JSON.parse(value);
 
         // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
         // if the path is bad, return will be {}
         if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
-          const feat = featureLayer({
+          const feature = featureLayer({
             url: layer.url,
-            pointToLayer: (feature, latlng) => {
+            pointToLayer: (aFeature, latlng) => {
               return L.marker(latlng, { icon: iconSymbol, id: generateId() });
             },
-          });
+          } as FeatureLayerOptions);
 
-          resolve(feat);
+          resolve(feature);
         } else {
-          resolve('{}');
+          resolve(null);
         }
       });
     });
@@ -103,11 +88,11 @@ export class EsriFeature {
   /**
    * Get metadata of the current service
    *
-   @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   @returns {Promise<TypeJsonValue>} a json promise containing the result of the query
    */
-  getMetadata = async (): Promise<Record<string, unknown>> => {
+  getMetadata = async (): Promise<TypeJsonObject> => {
     const response = await fetch(`${this.url}?f=json`);
-    const result = await response.json();
+    const result: TypeJsonObject = await response.json();
 
     return result;
   };
@@ -115,9 +100,9 @@ export class EsriFeature {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {TypeJSONObject} legend configuration in json format
+   * @returns {Promise<TypeJsonValue> } legend configuration in json format
    */
-  getLegendJson = (): Promise<TypeJSONObject> => {
+  getLegendJson = (): Promise<TypeJsonValue> => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     return axios.get(queryUrl).then((res) => {
@@ -130,9 +115,9 @@ export class EsriFeature {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.eachFeature((x: any) => {
-      if (x.setOpacity) x.setOpacity(opacity);
-      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+    (this.layer as FeatureLayer).eachFeature((feature) => {
+      if (feature.setOpacity) feature.setOpacity(opacity);
+      else if (feature.setStyle) feature.setStyle({ opacity, fillOpacity: opacity * 0.2 });
     });
   };
 
@@ -143,7 +128,10 @@ export class EsriFeature {
    */
   getBounds = async (): Promise<L.LatLngBounds> => {
     const meta = await this.getMetadata();
-    const { xmin, xmax, ymin, ymax } = meta.extent;
+    const xmin = meta.extent.xmin as TypeJsonNumber;
+    const xmax = meta.extent.xmax as TypeJsonNumber;
+    const ymin = meta.extent.ymin as TypeJsonNumber;
+    const ymax = meta.extent.ymax as TypeJsonNumber;
     return L.latLngBounds([
       [ymin, xmin],
       [ymax, xmax],

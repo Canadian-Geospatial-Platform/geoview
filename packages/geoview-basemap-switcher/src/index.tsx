@@ -1,4 +1,15 @@
-import { TypeButtonProps, TypeProps, TypeButtonPanel, TypeWindow } from 'geoview-core';
+import {
+  Cast,
+  AbstractPluginClass,
+  TypePluginOptions,
+  TypeButtonProps,
+  TypeButtonPanel,
+  TypeWindow,
+  TypeJsonObject,
+  TypeJsonValue,
+  TypeJsonString,
+  TypePanelProps,
+} from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
 
 const w = window as TypeWindow;
@@ -6,26 +17,19 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class BasemapSwitcherPlugin {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  BasemapSwitcherPluginProps: TypeProps;
-
+class BasemapSwitcherPlugin extends AbstractPluginClass {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypeProps) {
-    this.id = id;
-    this.BasemapSwitcherPluginProps = props;
+  constructor(id: string, props: TypePluginOptions) {
+    super(id, props);
     this.buttonPanel = null;
   }
 
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<any>> = {
+  translations: TypeJsonValue = {
     'en-CA': {
       basemapSwitcher: 'Basemaps',
       'basemap-transport-label': {
@@ -77,7 +81,7 @@ class BasemapSwitcherPlugin {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.BasemapSwitcherPluginProps;
+    const mapId: string = this.pluginOptions.mapId as TypeJsonString;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -90,15 +94,15 @@ class BasemapSwitcherPlugin {
 
       // button props
       const button: TypeButtonProps = {
-        tooltip: this.translations[language].basemapSwitcher,
+        tooltip: (this.translations as TypeJsonObject)[language].basemapSwitcher,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',
       };
 
       // panel props
-      const panel = {
-        title: this.translations[language].basemapSwitcher,
+      const panel: TypePanelProps = {
+        title: (this.translations as TypeJsonObject)[language].basemapSwitcher,
         icon: '<i class="material-icons">map</i>',
         width: 200,
       };
@@ -115,7 +119,7 @@ class BasemapSwitcherPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.BasemapSwitcherPluginProps;
+    const mapId: string = this.pluginOptions.mapId as TypeJsonString;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -134,4 +138,4 @@ class BasemapSwitcherPlugin {
 export default BasemapSwitcherPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.basemapSwitcher = BasemapSwitcherPlugin;
+w.plugins.basemapSwitcher = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);

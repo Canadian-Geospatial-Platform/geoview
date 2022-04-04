@@ -1,4 +1,4 @@
-import { Cast, TypeJSONObject, TypeJSONValue } from '../types/cgpv-types';
+import { Cast, TypeJsonObject, TypeJsonString, TypeJsonValue, TypeJsonArray } from '../types/cgpv-types';
 
 /**
  * Generate a unique id if an id was not provided
@@ -28,16 +28,16 @@ export function isJsonString(str: string): boolean {
   }
   return true;
 }
-
+export type TypeJsonOb = TypeJsonValue & TypeJsonObject;
 /**
  * Convert an XML document object into a json object
  *
  * @param {Document | Node | Element} xml the XML document object
  * @returns the converted json object
  */
-export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | TypeJSONValue {
+export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
   // Create the return object
-  let obj: TypeJSONObject | TypeJSONValue = {};
+  let obj: TypeJsonObject = {};
 
   // check for node type if it's an element, attribute, text, comment...
   if (xml.nodeType === 1) {
@@ -46,32 +46,30 @@ export function xmlToJson(xml: Document | Node | Element): TypeJSONObject | Type
     if (element.attributes) {
       if (element.attributes.length > 0) {
         obj['@attributes'] = {};
-        // eslint-disable-next-line no-plusplus
         for (let j = 0; j < element.attributes.length; j++) {
-          const attribute = element.attributes.item(j) as Node;
-          (obj['@attributes'] as TypeJSONObject)[attribute.nodeName] = attribute.nodeValue as string;
+          const attribute = element.attributes.item(j);
+          obj['@attributes'][attribute!.nodeName] = attribute!.nodeValue as TypeJsonOb;
         }
       }
     }
   } else if (xml.nodeType === 3) {
     // text
-    obj = xml.nodeValue as string;
+    obj = Cast<TypeJsonObject>(xml.nodeValue);
   }
 
   // do children
   if (xml.hasChildNodes()) {
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < xml.childNodes.length; i++) {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
-      const jsonObject = obj as TypeJSONObject;
-      if (typeof jsonObject[nodeName] === 'undefined') {
-        jsonObject[nodeName] = xmlToJson(item);
+      const jsonObject = obj;
+      if (typeof (jsonObject[nodeName] as TypeJsonString) === 'undefined') {
+        jsonObject[nodeName] = Cast<TypeJsonObject>(xmlToJson(item));
       } else {
-        if (typeof (jsonObject[nodeName] as TypeJSONValue[]).push === 'undefined') {
-          jsonObject[nodeName] = [jsonObject[nodeName]];
+        if (typeof jsonObject[nodeName].push === 'undefined') {
+          jsonObject[nodeName] = Cast<TypeJsonObject>([jsonObject[nodeName]]);
         }
-        (jsonObject[nodeName] as TypeJSONValue[]).push(xmlToJson(item));
+        (jsonObject[nodeName] as TypeJsonArray).push(xmlToJson(item));
       }
     }
   }

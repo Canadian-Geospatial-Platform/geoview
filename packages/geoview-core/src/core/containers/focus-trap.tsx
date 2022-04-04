@@ -1,4 +1,3 @@
-/* eslint-disable react/no-danger */
 import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,7 @@ import { EVENT_NAMES } from '../../api/event';
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '../../ui';
+import { TypeJsonString } from '../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   trap: {
@@ -129,7 +129,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && payload.handlerName.includes(id)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(id)) {
           // when mnap element get focus and focus is not trap, show dialog window
           const mapElement = document.getElementById(id);
 
@@ -175,7 +175,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         <>
           <Button
             id="enable-focus"
-            tooltip={t('keyboardnav.focusdialog.button.enable')}
+            tooltip={t('keyboardnav.focusdialog.button.enable') as string}
             tooltipPlacement="top-end"
             autoFocus
             onClick={handleEnable}
@@ -188,7 +188,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           </Button>
           <Button
             id="skip-focus"
-            tooltip={t('keyboardnav.focusdialog.button.skip')}
+            tooltip={t('keyboardnav.focusdialog.button.skip') as string}
             tooltipPlacement="top-end"
             onClick={handleSkip}
             type="text"

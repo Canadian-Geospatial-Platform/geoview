@@ -1,5 +1,3 @@
-/* eslint-disable no-multi-assign */
-/* eslint-disable lines-between-class-members */
 import { api } from '../../../api/api';
 
 import { EVENT_NAMES } from '../../../api/event';

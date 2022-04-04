@@ -1,12 +1,11 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable no-plusplus */
 import L, { Layer } from 'leaflet';
 import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
 import { api } from '../../../api/api';
-import { Cast, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeJsonNumber, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 import '../../../core/types/marker-cluster-element';
@@ -167,9 +166,9 @@ export class MarkerClusterClass {
     // listen to marker cluster element start blinking events
     api.event.on(
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_START_BLINKING,
-      (payload: L.MarkerClusterElement) => {
+      (payload) => {
         if (this.disableblinkingEvent) return;
-        if (this.blinkingElement && this.blinkingElement.id !== payload.id) {
+        if (this.blinkingElement && this.blinkingElement.id !== (payload.id as TypeJsonString)) {
           const blinkingElementId = this.blinkingElement.id;
           if (this.spiderfiedModeOn) {
             const spiderfiedVersion = this.getSpiderfiedMarkerClusterElement(blinkingElementId);
@@ -178,8 +177,8 @@ export class MarkerClusterClass {
           const unspiderfiedVersion = this.getMarkerClusterElement(blinkingElementId);
           if (unspiderfiedVersion) unspiderfiedVersion.stopBlinking();
         }
-        this.blinkingElement = this.getMarkerClusterElement(payload.id);
-        if (!this.blinkingElement) this.blinkingElement = payload;
+        this.blinkingElement = this.getMarkerClusterElement(payload.id as TypeJsonString);
+        if (!this.blinkingElement) this.blinkingElement = Cast<L.MarkerClusterElement>(payload);
       },
       map.id
     );
@@ -187,9 +186,9 @@ export class MarkerClusterClass {
     // listen to marker cluster element stop blinking events
     api.event.on(
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_STOP_BLINKING,
-      (payload: L.MarkerClusterElement) => {
+      (payload) => {
         if (this.disableblinkingEvent) return;
-        if (this.blinkingElement && this.blinkingElement.id === payload.id) {
+        if (this.blinkingElement && this.blinkingElement.id === (payload.id as TypeJsonString)) {
           this.blinkingElement = null;
         }
       },
@@ -200,8 +199,13 @@ export class MarkerClusterClass {
     api.event.on(
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADD,
       (payload) => {
-        const id = payload.id ? payload.id : null;
-        this.addMarkerElement(payload.latitude, payload.longitude, payload.options, id);
+        const id = (payload.id ? payload.id : null) as TypeJsonString;
+        this.addMarkerElement(
+          payload.latitude as TypeJsonNumber,
+          payload.longitude as TypeJsonNumber,
+          Cast<L.MarkerClusterElementOptions>(payload.options),
+          id
+        );
       },
       map.id
     );
@@ -211,7 +215,7 @@ export class MarkerClusterClass {
       EVENT_NAMES.EVENT_CLUSTER_ELEMENT_REMOVE,
       (payload) => {
         // remove marker cluster from outside
-        this.deleteMarkerClusterElement(payload.id);
+        this.deleteMarkerClusterElement(payload.id as TypeJsonString);
       },
       map.id
     );
@@ -219,9 +223,9 @@ export class MarkerClusterClass {
     // listen to outside events to process select by bounding polygone
     api.event.on(
       EVENT_NAMES.EVENT_BOX_SELECT_END,
-      (payload: { selectBoxBounds: L.LatLngBounds }) => {
+      (payload) => {
         // Get the select bounding box.
-        const bbox: L.LatLngBounds = payload.selectBoxBounds;
+        const bbox = Cast<L.LatLngBounds>(payload.selectBoxBounds);
         if (this.spiderfiedModeOn) {
           // In spiderfied mode, only one marker cluster is displayed and it is spiderfied.
           // Get the spiderfied maker cluster elements.

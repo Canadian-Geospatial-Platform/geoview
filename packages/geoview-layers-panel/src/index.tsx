@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { TypeButtonPanel, TypeProps, TypeButtonProps, TypePanelProps, TypeWindow } from 'geoview-core';
+import {
+  Cast,
+  AbstractPluginClass,
+  TypeJsonObject,
+  TypeWindow,
+  TypePluginOptions,
+  TypeButtonPanel,
+  TypeButtonProps,
+  TypePanelProps,
+} from 'geoview-core';
+
 import PanelContent from './panel-content';
 
 const w = window as TypeWindow;
@@ -7,17 +17,18 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class LayersPanelPlugin {
+class LayersPanelPlugin extends AbstractPluginClass {
   // id of the plugin
   id: string;
 
   // plugin properties
-  LayersPanelPluginProps: TypeProps;
+  LayersPanelPluginProps: TypePluginOptions;
 
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypeProps) {
+  constructor(id: string, props: TypePluginOptions) {
+    super(id, props);
     this.id = id;
     this.LayersPanelPluginProps = props;
     this.buttonPanel = null;
@@ -26,14 +37,14 @@ class LayersPanelPlugin {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<string>> = {
+  translations: TypeJsonObject = Cast<TypeJsonObject>({
     'en-CA': {
       layersPanel: 'Layers',
     },
     'fr-CA': {
       layersPanel: 'Couches',
     },
-  };
+  });
 
   /**
    * Added function called after the plugin has been initialized
@@ -93,4 +104,4 @@ class LayersPanelPlugin {
 export default LayersPanelPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.layersPanel = LayersPanelPlugin;
+w.plugins.layersPanel = Cast<AbstractPluginClass>(LayersPanelPlugin);

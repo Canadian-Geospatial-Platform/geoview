@@ -10,6 +10,8 @@ import { useSnackbar } from 'notistack';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
+import { TypeJsonValue } from '../../app';
+import { Cast, TypeJsonString, TypeJsonArrayOfString, TypeJsonObject } from '../../core/types/cgpv-types';
 
 /**
  * Snackbar properties interface
@@ -76,19 +78,23 @@ export function Snackbar(props: SnackBarProps): null {
         const opts = payload.options ? payload.options : {};
 
         // apply function if provided
-        opts.action = payload.button
-          ? SnackButton({
-              label: payload.button.label,
-              action: payload.button.action,
-            })
-          : null;
+        opts.action = Cast<TypeJsonObject>(
+          payload.button
+            ? SnackButton({
+                label: payload.button.label as TypeJsonString,
+                action: Cast<() => void>(payload.button.action),
+              })
+            : null
+        );
 
         // get message
         const message =
-          payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params, t(payload.message.value));
+          (payload.message.type as TypeJsonValue) === 'string'
+            ? payload.message.value
+            : replaceParams(payload.message.params as TypeJsonArrayOfString, t(payload.message.value as TypeJsonString));
 
         // show the notification
-        if (payload && id === payload.handlerName) enqueueSnackbar(message, opts);
+        if (payload && id === (payload.handlerName as TypeJsonValue)) enqueueSnackbar(message, opts);
       },
       mapId
     );

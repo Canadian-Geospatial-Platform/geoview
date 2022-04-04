@@ -65,7 +65,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
       const {
         target: { value: targetValue },
       } = event;
-      setMultipleValue(typeof targetValue === 'string' ? targetValue.split(',') : targetValue);
+      setMultipleValue((typeof targetValue === 'string' ? targetValue.split(',') : targetValue) as React.SetStateAction<never[]>);
     }
   };
 
@@ -97,7 +97,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
 
   return (
     <FormControl className={classes.formControl} {...otherProps}>
-      <InputLabel className={isDefault && classes.label} id={id}>
+      <InputLabel className={(isDefault && classes.label) as string} id={id}>
         {label}
       </InputLabel>
       <MaterialSelect
@@ -106,7 +106,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
         labelId={id}
         id={`select-${id}`}
         label={label || undefined}
-        value={!multiple ? value : multipleValue}
+        value={(!multiple ? value : multipleValue) as string}
         onChange={changeHandler}
         multiple={multiple || false}
         displayEmpty

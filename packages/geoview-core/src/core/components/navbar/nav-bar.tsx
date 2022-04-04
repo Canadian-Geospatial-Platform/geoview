@@ -1,6 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable array-callback-return */
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -18,7 +15,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
-import { TypeButtonPanel } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeJsonString } from '../../types/cgpv-types';
 import { MapContext } from '../../app-start';
 
 const navBtnWidth = '32px';
@@ -102,7 +99,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
           updateComponent();
         }
       },
@@ -113,7 +110,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
           updateComponent();
         }
       },
@@ -124,7 +121,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if (args.handlerName === mapId && args.type === 'navbar') {
+        if ((args.handlerName as TypeJsonString) === mapId && (args.type as TypeJsonString) === 'navbar') {
           updateComponent();
         }
       },
@@ -134,7 +131,7 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if (args.handlerName === mapId && args.type === 'navbar') {
+        if ((args.handlerName as TypeJsonString) === mapId && (args.type as TypeJsonString) === 'navbar') {
           updateComponent();
         }
       },
@@ -147,6 +144,7 @@ export function Navbar(): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
       api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateComponent]);
 
   return (
@@ -164,6 +162,7 @@ export function Navbar(): JSX.Element {
         if (panels.length > 0) {
           return <div key={groupName}>{panels}</div>;
         }
+        return null;
       })}
       <div className={classes.navBtnGroupContainer}>
         {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
@@ -217,6 +216,7 @@ export function Navbar(): JSX.Element {
               </ButtonGroup>
             );
           }
+          return null;
         })}
         <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" className={classes.navBtnGroup}>
           <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />

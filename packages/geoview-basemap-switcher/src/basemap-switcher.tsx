@@ -57,7 +57,7 @@ export function BasemapSwitcher(props: BaseMapSwitcherProps): JSX.Element {
     },
   }));
 
-  const [basemapList, setBasemapList] = useState([]);
+  const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
 
   const classes = useStyles();
 
@@ -267,8 +267,8 @@ export function BasemapSwitcher(props: BaseMapSwitcherProps): JSX.Element {
             role="button"
             tabIndex={0}
             className={classes.card}
-            onClick={() => setBasemap(basemap.id!)}
-            onKeyPress={() => setBasemap(basemap.id!)}
+            onClick={() => setBasemap(basemap.id as string)}
+            onKeyPress={() => setBasemap(basemap.id as string)}
             key={basemap.id}
           >
             {typeof basemap.thumbnailUrl === 'string' && (

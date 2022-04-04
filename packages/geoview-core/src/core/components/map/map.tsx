@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable react/require-default-props */
 import { Fragment, useEffect, useState } from 'react';
 
 import { CRS } from 'leaflet';
@@ -26,7 +24,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { TypeMapConfigProps, TypeBasemapLayer, TypeJSONObjectMapComponent } from '../../types/cgpv-types';
+import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   snackBar: {
@@ -41,7 +39,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   const { center, zoom, projection, language, selectBox, boxZoom, extraOptions } = props;
 
-  const [basemapLayers, setBasemapLayers] = useState([]);
+  const [basemapLayers, setBasemapLayers] = useState<TypeBasemapLayer[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // projection crs
@@ -51,7 +49,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const [attribution, setAttribution] = useState<string>('');
 
   // render additional components if added by api
-  const [components, setComponents] = useState<TypeJSONObjectMapComponent>({});
+  const [components, setComponents] = useState<TypeJsonObject>({});
 
   const defaultTheme = useTheme();
   const classes = useStyles();
@@ -108,10 +106,10 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
-        if (payload && payload.handlerName === id)
+        if (payload && (payload.handlerName as TypeJsonString) === id)
           setComponents((tempComponents) => ({
             ...tempComponents,
-            [payload.id]: payload.component,
+            [payload.id as TypeJsonString]: payload.component,
           }));
       },
       id
@@ -121,9 +119,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
-        if (payload && payload.handlerName === id) {
+        if (payload && (payload.handlerName as TypeJsonString) === id) {
           const tempComponents = { ...components };
-          delete tempComponents[payload.id];
+          delete tempComponents[payload.id as TypeJsonString];
 
           setComponents(() => ({
             ...tempComponents,
@@ -137,7 +135,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
-        if (payload && payload.handlerName === id) setBasemapLayers(payload.layers);
+        if (payload && (payload.handlerName as TypeJsonString) === id) setBasemapLayers(Cast<TypeBasemapLayer[]>(payload.layers));
       },
       id
     );
@@ -163,6 +161,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       maxZoom={mapOptions.maxZoom}
       maxBounds={mapOptions.maxBounds}
       keyboardPanDelta={20}
+      // eslint-disable-next-line react/jsx-props-no-spreading
       {...extraOptions}
       whenCreated={(cgpMap: L.Map) => {
         // eslint-disable-next-line no-param-reassign

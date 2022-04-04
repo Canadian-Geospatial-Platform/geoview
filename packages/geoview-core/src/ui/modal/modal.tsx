@@ -7,7 +7,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material
 import { ClassNameMap, withStyles } from '@mui/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeDialogProps } from '../../core/types/cgpv-types';
+import { TypeJsonString, TypeDialogProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { EVENT_NAMES } from '../../api/event';
@@ -208,8 +208,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_OPEN,
       (args) => {
-        if (id === args.id && args.handlerName === mapId) {
-          const modal = api.map(mapId).modal.modals[args.id] as TypeModalProps;
+        if (id === (args.id as TypeJsonString) && (args.handlerName as TypeJsonString) === mapId) {
+          const modal = api.map(mapId).modal.modals[args.id as TypeJsonString] as TypeModalProps;
           // eslint-disable-next-line react-hooks/exhaustive-deps
           openEvent = true;
 
@@ -223,8 +223,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_UPDATE,
       (args) => {
-        if (id === args.id && args.handlerName === mapId) {
-          const modal = api.map(mapId).modal.modals[args.id] as TypeModalProps;
+        if (id === (args.id as TypeJsonString) && (args.handlerName as TypeJsonString) === mapId) {
+          const modal = api.map(mapId).modal.modals[args.id as TypeJsonString] as TypeModalProps;
 
           setCreatedModal(ceatedModalJSXReturner(modal));
         }
@@ -236,7 +236,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_CLOSE,
       (args) => {
-        if (id === args.id && args.handlerName === mapId) {
+        if (id === (args.id as TypeJsonString) && (args.handlerName as TypeJsonString) === mapId) {
           if (!args.open) openEvent = false;
           setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
         }

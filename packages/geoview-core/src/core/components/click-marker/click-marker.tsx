@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import L, { divIcon, LatLng } from 'leaflet';
@@ -15,6 +14,7 @@ import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { generateId } from '../../utils/utilities';
+import { Cast, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -59,6 +59,7 @@ export function ClickMarker(): JSX.Element {
   const removeIcon = useCallback(() => {
     setShowMarker(false);
     overlay.style.visibility = 'hidden';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // attach zoom and movestart events to the map instance
@@ -98,7 +99,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_SHOW,
       (payload) => {
-        if (payload && payload.handlerName.includes(mapId)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(mapId)) {
           // toggle the marker icon
           setShowMarker(true);
 
@@ -114,17 +115,17 @@ export function ClickMarker(): JSX.Element {
           hideMarker();
 
           // update the click location
-          setMarkerPos(payload.latlng);
+          setMarkerPos(Cast<L.LatLng>(payload.latlng));
 
           if (payload.symbology) {
-            const { symbology } = payload;
+            const theSymbology = payload.symbology as TypeJsonObject;
             let iconHtml = '';
 
             // get symbology image
-            if (symbology.imageData) {
-              iconHtml = `<img class='${classes.symbologyIcon}' src='data:${symbology.contentType};base64,${symbology.imageData}' alt="" />`;
-            } else if (symbology.legendImageUrl) {
-              iconHtml = `<img class='${classes.symbologyIcon}' src='${symbology.legendImageUrl}' alt='' />`;
+            if (theSymbology.imageData) {
+              iconHtml = `<img class='${classes.symbologyIcon}' src='data:${theSymbology.contentType};base64,${theSymbology.imageData}' alt="" />`;
+            } else if (theSymbology.legendImageUrl) {
+              iconHtml = `<img class='${classes.symbologyIcon}' src='${theSymbology.legendImageUrl}' alt='' />`;
             }
 
             setMarkerIcon(
@@ -144,7 +145,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_HIDE,
       (payload) => {
-        if (payload && payload.handlerName.includes(mapId)) {
+        if (payload && (payload.handlerName as TypeJsonString).includes(mapId)) {
           setShowMarker(false);
           overlay.style.visibility = 'hidden';
         }
@@ -156,6 +157,7 @@ export function ClickMarker(): JSX.Element {
       api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId);
       api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return showMarker ? (

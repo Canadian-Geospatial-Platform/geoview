@@ -1,16 +1,12 @@
-/* eslint-disable object-shorthand */
-/* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { generateId } from '../../../core/utils/utilities';
+import { AbstractWebLayersClass, TypeJsonString, TypeJsonValue, TypeJsonObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
-import { TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
-
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 /**
  * a class to add OGC api feature layer
@@ -18,32 +14,18 @@ import { api } from '../../../api/api';
  * @export
  * @class OgcFeature
  */
-export class OgcFeature {
-  // map config properties
-
-  // layer id
-  id: string;
-
-  // layer name with default
-  name = 'OGC Feature Layer';
-
-  // layer type
-  type: string;
-
+export class OgcFeature extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.GeoJSON | null = null;
 
   // layer entries
   entries: string[] | undefined;
-
-  // layer or layer service url
-  url: string;
 
   // mapService property
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObjectLoop;
+  #capabilities: TypeJsonObject = {};
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -54,74 +36,73 @@ export class OgcFeature {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
-    this.#capabilities = {};
+    super('ogcFeature', 'OGC Feature Layer', layerConfig);
+
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url.trim();
-
-    this.layer = new Layer();
   }
 
   /**
    * Add a OGC API feature layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<Layer | string> {
+  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
     const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
 
-    const res = await axios.get(metaUrl);
+    const res = await axios.get<TypeJsonObject>(metaUrl);
     this.#capabilities = res.data;
 
     const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
     if (layerName) this.name = <string>layerName;
 
-    const featRes = axios.get(featureUrl);
+    const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
 
-    const geo = new Promise<Layer | string>((resolve) => {
-      featRes
+    const geo = new Promise<L.GeoJSON | null>((resolve) => {
+      getResponse
         .then((result) => {
           const geojson = result.data;
 
           if (geojson && geojson !== '{}') {
-            const featureLayer = L.geoJSON(geojson, {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              pointToLayer: (feature, latlng): Layer | undefined => {
-                if (feature.geometry.type === 'Point') {
-                  return L.circleMarker(latlng);
-                }
+            const featureLayer = L.geoJSON(
+              geojson as GeoJSON.GeoJsonObject,
+              {
+                pointToLayer: (feature, latlng): L.Layer | undefined => {
+                  if (feature.geometry.type === 'Point') {
+                    return L.circleMarker(latlng);
+                  }
 
-                return undefined;
+                  return undefined;
 
-                // if need to use specific style for point
-                // return L.circleMarker(latlng, {
-                //  ...geojsonMarkerOptions,
-                //  id: lId,
-                // });
-              },
-              style: () => {
-                return {
-                  stroke: true,
-                  color: '#333',
-                  fillColor: '#0094FF',
-                  fillOpacity: 0.8,
-                };
-              },
-            });
+                  // if need to use specific style for point
+                  // return L.circleMarker(latlng, {
+                  //  ...geojsonMarkerOptions,
+                  //  id: lId,
+                  // });
+                },
+                style: () => {
+                  return {
+                    stroke: true,
+                    color: '#333',
+                    fillColor: '#0094FF',
+                    fillOpacity: 0.8,
+                  };
+                },
+              } as L.GeoJSONOptions
+            );
 
             resolve(featureLayer);
           } else {
-            resolve('{}');
+            resolve(null);
           }
         })
         .catch((error) => {
@@ -141,7 +122,7 @@ export class OgcFeature {
             // console.log("Error", error.message);
           }
           // console.log(error.config);
-          resolve('{}');
+          resolve(null);
         });
     });
     return geo;
@@ -151,9 +132,9 @@ export class OgcFeature {
    * Get feature type info of a given entry
    * @param {object} FeatureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
-   * @returns {TypeJSONObject | null} feature type object or null
+   * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatureTypeInfo(FeatureTypeList: TypeJSONObject, entries?: string): TypeJSONObject | null {
+  private getFeatureTypeInfo(FeatureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
     if (Array.isArray(FeatureTypeList)) {
@@ -172,7 +153,7 @@ export class OgcFeature {
         }
       }
     } else {
-      let fName = FeatureTypeList.Name && FeatureTypeList.Name['#text'];
+      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJsonString);
 
       if (fName) {
         const fNameSplit = fName.split(':');
@@ -195,9 +176,9 @@ export class OgcFeature {
   /**
    * Get capabilities of the current WFS service
    *
-   * @returns {TypeJSONObjectLoop} WFS capabilities in json format
+   * @returns {TypeJsonObject} WFS capabilities in json format
    */
-  getMeta = (): TypeJSONObjectLoop => {
+  getMeta = (): TypeJsonValue => {
     return this.#capabilities;
   };
 
@@ -206,9 +187,10 @@ export class OgcFeature {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.getLayers().forEach((x) => {
-      if (x.setOpacity) x.setOpacity(opacity);
-      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.8 });
+    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    this.layer!.getLayers().forEach((layer) => {
+      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };
 
@@ -217,5 +199,5 @@ export class OgcFeature {
    *
    * @returns {L.LatLngBounds} layer bounds
    */
-  getBounds = (): L.LatLngBounds => this.layer.getBounds();
+  getBounds = (): L.LatLngBounds => this.layer!.getBounds();
 }

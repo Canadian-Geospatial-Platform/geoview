@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { Suspense, useMemo } from 'react';
 
 import './translation/i18n';
@@ -9,7 +8,7 @@ import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from './containers/shell';
-import { theme } from '../ui/style/theme';
+import { cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
 
 import { TypeMapConfigProps, TypeMapContext } from './types/cgpv-types';
@@ -65,7 +64,7 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={cgpvTheme}>
         <Suspense fallback="">
           <CssBaseline />
           {getInlineMaps()}

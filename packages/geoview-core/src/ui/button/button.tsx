@@ -7,7 +7,7 @@ import { DomEvent } from 'leaflet';
 import makeStyles from '@mui/styles/makeStyles';
 import { Tooltip, Fade, Button as MaterialButton } from '@mui/material';
 
-import { Cast, TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonString, TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
@@ -186,7 +186,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   }, [createIconButton, createTextButton, createTextIconButton, state, type]);
 
   return (
-    <Tooltip title={Cast<string>(t(tooltip || ''))} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
+    <Tooltip title={t((tooltip as TypeJsonString) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
       <MaterialButton
         variant={variant || 'text'}
         className={`${classes.buttonClass} ${className || ''}`}

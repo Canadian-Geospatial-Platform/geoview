@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import React, { CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
@@ -36,6 +35,17 @@ import { PanelApi } from '../../ui';
 import * as UI from '../../ui';
 
 import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
+import { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
+
+export { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
+export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
+export { EsriFeature } from '../../geo/layer/web-layers/esri/esri-feature';
+export { GeoJSON } from '../../geo/layer/web-layers/file/geojson';
+export { XYZTiles } from '../../geo/layer/web-layers/map-tile/xyz-tiles';
+export { OgcFeature } from '../../geo/layer/web-layers/ogc/ogc_feature';
+export { WFS } from '../../geo/layer/web-layers/ogc/wfs';
+export { WMS } from '../../geo/layer/web-layers/ogc/wms';
+export * from './material-ui.d';
 
 declare global {
   interface Window {
@@ -50,7 +60,7 @@ export function Cast<TargetType = never>(p: unknown): TargetType {
 
 export interface TypeWindow extends Window {
   cgpv: TypeCGPV;
-  plugins: Record<string, unknown>;
+  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPluginClass | undefined };
 }
 
 export type TypeCGPVUI = {
@@ -58,6 +68,23 @@ export type TypeCGPVUI = {
   useMediaQuery: typeof useMediaQuery;
   makeStyles: typeof makeStyles;
   elements: typeof UI;
+};
+
+export type TypeCGPVMUI = {
+  Stepper: typeof MUI.Stepper;
+  Step: typeof MUI.Step;
+  StepLabel: typeof MUI.StepLabel;
+  StepContent: typeof MUI.StepContent;
+  TextField: typeof MUI.TextField;
+  Typography: typeof MUI.Stepper;
+  InputLabel: typeof MUI.InputLabel;
+  FormControl: typeof MUI.FormControl;
+  Select: typeof MUI.Select;
+  MenuItem: typeof MUI.MenuItem;
+  Autocomplete: typeof MUI.Autocomplete;
+  Slider: typeof MUI.Slider;
+  Tooltip: typeof MUI.Tooltip;
+  Checkbox: typeof MUI.Checkbox;
 };
 
 export type TypeCGPVConstants = {
@@ -74,6 +101,7 @@ export type TypeCGPV = {
   mui?: typeof MUI;
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   types: Object;
   constants: TypeCGPVConstants;
 };
@@ -114,18 +142,24 @@ export type TypeMapContext = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONValue = string | number | boolean | null | TypeJSONValue[] | TypeJSONObject;
+export type TypeJsonString = TypeJsonValue & string;
+export type TypeJsonNumber = TypeJsonValue & number;
+export type TypeJsonBoolean = TypeJsonValue & boolean;
+export type TypeJsonArrayOfString = TypeJsonValue & string[];
+export type TypeJsonArray = TypeJsonValue & TypeJsonValue[];
+export type TypeJsonObjectArray = TypeJsonValue & (TypeJsonObject[] | TypeJsonObject[]);
 
-export type TypeJSONObject = {
-  [key: string]: TypeJSONValue;
-};
+export type TypeJsonValue =
+  | null
+  | string
+  | number
+  | boolean
+  | TypeJsonValue[]
+  | { [key: string]: TypeJsonValue }
+  | { [key: string]: TypeJsonObject };
 
-export type TypeJSONObjectLoop = {
-  [key: string]: TypeJSONObjectLoop;
-};
-
-export type TypeJSONObjectMapComponent = {
-  [key: string]: TypeMapComponent;
+export type TypeJsonObject = {
+  [key: string]: TypeJsonObject;
 };
 
 /*-----------------------------------------------------------------------------
@@ -305,56 +339,20 @@ export type TypeLegendJsonFeature = {
 
 export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
 
-/**
- * interface used when adding a new layer
- */
-export type TypeLayerData = {
-  id: string;
-  type: 'ogcWMS' | 'geoJSON' | 'esriDynamic' | 'esriFeature' | 'xyzTiles' | 'ogcWFS' | 'ogcFeature';
-  name: string;
-  url: string;
-  entries: string[];
-  layer: {
-    setOpacity?: (opacity: number) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eachFeature?: (x: any) => void;
-    options: {
-      url: string;
-    };
-    metadata: (fn: (error: unknown, res: { layers: { id: string; subLayerIds: string[] }[] }) => void) => void;
-    _url: string;
-    entries: {
-      attributes: TypeJSONObject;
-    }[];
-    mapService: {
-      options: {
-        url: string;
-      };
-    };
-    getLayers: () => L.Layer[];
-  } & L.Layer;
-  layers: TypeLayersInLayerData;
-  getLegendGraphic?: () => Promise<string>;
-  getLegendJson?: () => Promise<TypeLegendJson>;
-  setEntries: (enrties: string[]) => void;
-  setOpacity: (opacity: number) => void;
-  getBounds: () => L.LatLngBounds | Promise<L.LatLngBounds>;
-};
-
-export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
+export type TypeLayersInWebLayer = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJSONValue[];
+  layerData: TypeJsonObject[];
   groupLayer: boolean;
   displayField: string;
-  fieldAliases: TypeJSONObject;
+  fieldAliases: TypeJsonValue;
   layer: TypeLayerInfo;
   entries?: TypeEntry[];
   renderer: TypeRendererSymbol;
 };
 
 export type TypeEntry = {
-  attributes: TypeJSONObject;
+  attributes: TypeJsonObject;
 };
 
 export type TypeLayerInfo = {
@@ -383,8 +381,8 @@ export type TypeFoundLayers = {
  */
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONObject;
-  selectFeature: (featureData: TypeJSONObject) => void;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
+  selectFeature: (featureData: TypeJsonValue) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
@@ -398,20 +396,41 @@ export type TypeRendererSymbol = {
     legendImageUrl: string;
     type: 'simple' | 'uniqueValue';
   };
-  uniqueValueInfos: TypeJSONObject[];
+  uniqueValueInfos: TypeJsonObject[];
   field1: string;
   field2: string;
   field3: string;
 };
 
 /**
+ * interface used when creating the actual plugin
+ */
+export type TypeActualPlugin = {
+  // id of the plugin
+  id: string;
+  api: API;
+  createElement: typeof React.createElement;
+  react: typeof React;
+  props: TypeJsonValue;
+  translate: TypeJsonValue;
+  translations: TypeJsonObject;
+  makeStyles: typeof makeStyles;
+  added?: () => void;
+  removed?: () => void;
+};
+
+/**
  * interface used when creating a new plugin
  */
-export type TypePlugin = {
+export type TypePluginEntry = {
   // id of the plugin
   id: string;
   // plugin class object
-  plugin: unknown;
+  plugin: TypeActualPlugin;
+};
+
+export type TypeRecordOfPlugin = {
+  [MapId: string]: { [pluginId: string]: TypePluginEntry };
 };
 
 /**
@@ -444,24 +463,22 @@ export type TypeFeatureInfoProps = {
 };
 
 export type TypeSelectedFeature = {
-  attributes: TypeJSONObject;
-  displayField: TypeJSONValue;
-  fieldAliases: TypeJSONObject;
+  attributes: TypeJsonObject;
+  displayField: TypeJsonObject;
+  fieldAliases: TypeJsonObject;
   numOfEntries: number;
-  symbol: TypeJSONObject;
+  symbol: TypeJsonObject;
 };
-
-export type TypeProps<T = string & unknown> = Record<string, T>;
 
 /**
  * interface for the layers list properties in details panel
  */
 export type TypeLayersListProps = {
   clickPos?: L.LatLng;
-  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJSONObject) => TypeJSONValue;
-  layersData: Record<string, TypeLayerData>;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
+  layersData: Record<string, AbstractWebLayersClass>;
   mapId: string;
-  selectFeature: (featureData: TypeJSONObject) => void;
+  selectFeature: (featureData: TypeJsonObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
 };
 
@@ -470,7 +487,7 @@ export type TypeLayersListProps = {
  */
 export type TypeLayersPanelListProps = {
   mapId: string;
-  layers: Record<string, TypeLayerData>;
+  layers: Record<string, AbstractWebLayersClass>;
   language: string;
 };
 
@@ -497,7 +514,7 @@ export type TypeMapConfigProps = {
   basemapOptions: TypeBasemapOptions;
   layers?: TypeLayerConfig[];
   plugins: string[];
-  extraOptions: TypeJSONObject;
+  extraOptions: TypeJsonValue;
 };
 
 /**
@@ -622,7 +639,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
-  tooltip?: string;
+  tooltip?: string | TypeJsonValue;
   // location for tooltip
   tooltipPlacement?: TooltipProps['placement'];
   // button icon
@@ -652,7 +669,7 @@ export type TypePanelProps = {
   // panel header icon
   icon: React.ReactNode | Element;
   // panel header title
-  title: string;
+  title: string | TypeJsonValue;
   // panel body content
   content?: React.ReactNode | Element;
 };
@@ -852,4 +869,21 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
 
   // Function that handles change in input
   changeHandler?: <T>(params: T) => void;
+}
+
+export type TypePluginOptions = {
+  mapId: string;
+};
+
+export abstract class AbstractPluginClass {
+  // id of the plugin
+  id: string;
+
+  // plugin properties
+  pluginOptions: TypePluginOptions;
+
+  constructor(id: string, props: TypePluginOptions) {
+    this.id = id;
+    this.pluginOptions = props;
+  }
 }

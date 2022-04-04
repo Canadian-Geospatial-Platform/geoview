@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-console, no-underscore-dangle */
 import { LatLngTuple } from 'leaflet';
 
 import { isJsonString, generateId } from './utilities';
@@ -258,7 +257,6 @@ export class Config {
 
     if (Array.isArray(plugins)) {
       // loop through the array and check each element if its valid string
-      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < plugins.length; i++) {
         if (typeof plugins[i] === 'string' && plugins[i].length > 0) validPlugins.push(plugins[i]);
       }

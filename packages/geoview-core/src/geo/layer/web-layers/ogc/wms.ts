@@ -1,18 +1,25 @@
-/* eslint-disable object-shorthand */
-/* eslint-disable no-underscore-dangle */
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import WMSCapabilities from 'wms-capabilities';
 
-import { getXMLHttpRequest, xmlToJson, generateId } from '../../../core/utils/utilities';
+import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 
-import { Cast, TypeJSONObject, TypeJSONObjectLoop, TypeLayerConfig } from '../../../core/types/cgpv-types';
+import {
+  Cast,
+  AbstractWebLayersClass,
+  TypeJsonString,
+  TypeJsonArray,
+  TypeJsonObjectArray,
+  TypeJsonValue,
+  TypeJsonObject,
+  TypeLayerConfig,
+} from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
 
@@ -22,38 +29,26 @@ import { api } from '../../../api/api';
  * @export
  * @class WMS
  */
-export class WMS {
+export class WMS extends AbstractWebLayersClass {
   // TODO: try to avoid getCapabilities for WMS. Use Web Presence metadata return info to store, legend image link, layer name, and other needed properties.
   // ! This will maybe not happen because geoCore may not everything we need. We may have to use getCap
   // * We may have to do getCapabilites if we want to add layers not in the catalog
   // map config properties
 
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name = 'WMS Layer';
-
-  // layer type
-  type: string;
-
   // layer from leaflet
-  layer: Layer | string;
+  layer: L.TileLayer.WMS | null = null;
 
   // layer entries
   entries: string[] | undefined;
-
-  // layer or layer service url
-  url: string;
 
   // mapService property
   mapService: MapService;
 
   // private varibale holding wms capabilities
-  #capabilities: TypeJSONObjectLoop;
+  #capabilities: TypeJsonObject = {};
 
   // private varibale holding wms paras
-  #wmsParams: any;
+  #wmsParams?: L.WMSParams;
 
   /**
    * Initialize layer
@@ -61,26 +56,26 @@ export class WMS {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    this.type = layerConfig.type;
-    this.#capabilities = {};
+    super('ogcWMS', 'WMS Layer', layerConfig);
+
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();
     });
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
     });
-    this.url = layerConfig.url.indexOf('?') === -1 ? `${layerConfig.url}?` : layerConfig.url;
-    this.layer = new Layer();
+
+    this.url = this.url.indexOf('?') === -1 ? `${this.url}?` : this.url;
   }
 
   /**
    * Add a WMS layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<Layer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
+  add(layer: TypeLayerConfig): Promise<L.TileLayer.WMS | null> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
@@ -88,19 +83,18 @@ export class WMS {
 
     const data = getXMLHttpRequest(capUrl);
 
-    const geo = new Promise<Layer | string>((resolve) => {
-      data.then((value: string) => {
+    const geo = new Promise<L.TileLayer.WMS | null>((resolve) => {
+      data.then((value) => {
         if (value !== '{}') {
           // check if entries exist
           let isValid = true;
 
           // parse the xml string and convert to json
-          const json = new WMSCapabilities(value).toJSON() as TypeJSONObjectLoop;
-          this.#capabilities = json;
+          this.#capabilities = new WMSCapabilities(value).toJSON() as TypeJsonObject;
 
-          isValid = this.validateEntries(json.Capability.Layer, layer.entries as string);
+          isValid = this.validateEntries(this.#capabilities.Capability.Layer, layer.entries as string);
 
-          const layerName = 'name' in layer ? layer.name : json.Service.Name;
+          const layerName = 'name' in layer ? layer.name : this.#capabilities.Service.Name;
           if (layerName) this.name = <string>layerName;
 
           if (isValid) {
@@ -109,16 +103,16 @@ export class WMS {
               format: 'image/png',
               transparent: true,
               attribution: '',
-              version: Cast<string>(json.version),
+              version: this.#capabilities.version as TypeJsonString,
             });
             this.#wmsParams = wms.wmsParams;
 
             resolve(wms);
           } else {
-            resolve('{}');
+            resolve(null);
           }
         } else {
-          resolve('{}');
+          resolve(null);
         }
       });
     });
@@ -131,15 +125,15 @@ export class WMS {
    * @param {string} entries names(comma delimited) to check
    * @returns {boolean} entry is valid
    */
-  private validateEntries(layer: TypeJSONObjectLoop, entries: string): boolean {
+  private validateEntries(layer: TypeJsonObject, entries: string): boolean {
     let isValid = true;
     // eslint-disable-next-line no-prototype-builtins
 
     // Added support of multiple entries
     const allNames = this.findAllByKey(layer, 'Name');
     const entryArray = entries.split(',').map((s) => s.trim());
-    for (let i = 0; i < entryArray.length; i += 1) {
-      isValid = isValid && allNames.includes(entryArray[i]);
+    for (let i = 0; i < entryArray.length; i++) {
+      isValid = isValid && allNames.includes(Cast<TypeJsonObject>(entryArray[i]));
     }
 
     return isValid;
@@ -151,13 +145,19 @@ export class WMS {
    * @param {string} keyToFind key to check
    * @returns {any} all values found
    */
-  private findAllByKey(obj: object, keyToFind: string): any {
+  private findAllByKey(obj: TypeJsonObject, keyToFind: string): TypeJsonObject[] {
+    const reduceFunction = (accumulator: TypeJsonObject[], [key, value]: [string, TypeJsonObject]): TypeJsonObject[] => {
+      if (key === keyToFind) {
+        return accumulator.concat(value);
+      }
+      if (typeof value === 'object') {
+        return accumulator.concat(this.findAllByKey(value, keyToFind));
+      }
+      return accumulator;
+    };
+
     if (obj) {
-      return Object.entries(obj).reduce(
-        // eslint-disable-next-line no-nested-ternary
-        (acc, [key, v]) => (key === keyToFind ? acc.concat(v) : typeof v === 'object' ? acc.concat(this.findAllByKey(v, keyToFind)) : acc),
-        []
-      );
+      return Object.entries(obj).reduce(reduceFunction, []);
     }
     return [];
   }
@@ -165,9 +165,9 @@ export class WMS {
   /**
    * Get capabilities of the current WMS service
    *
-   * @returns {TypeJSONObjectLoop} WMS capabilities in json format
+   * @returns {TypeJsonObject} WMS capabilities in json format
    */
-  getCapabilities = (): TypeJSONObjectLoop => {
+  getCapabilities = (): TypeJsonObject => {
     return this.#capabilities;
   };
 
@@ -197,26 +197,29 @@ export class WMS {
    * @param {L.LatLng} latlng lat/lng coordinates received on any interaction with the map
    * @param {L.Map} map the map odject
    * @param {number} featureCount the map odject
-   * @returns {Promise<TypeJSONObject | null>} a promise that returns the feature info in a json format
+   *
+   * @returns {Promise<TypeJsonObject | null>} a promise that returns the feature info in a json format
    */
-  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJSONObject | null> => {
-    let inforFormat = 'text/xml';
+  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJsonObjectArray | null> => {
+    let infoFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
-      const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format as any;
-      if (formatArray.includes('application/geojson')) inforFormat = 'application/geojson';
+      const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format;
+      if ((formatArray as TypeJsonArray).includes('application/geojson')) infoFormat = 'application/geojson';
     }
 
     const params = this.getFeatureInfoParams(latlng, map);
-    params.info_format = inforFormat;
-    params.feature_count = featureCount;
+    params.info_format = Cast<TypeJsonObject>(infoFormat);
+    params.feature_count = Cast<TypeJsonObject>(featureCount);
 
-    const res = await axios.get(this.url, { params: params });
+    const response = await axios.get<TypeJsonObject>(this.url, { params });
 
-    if (inforFormat === 'application/geojson') {
-      if (res.data.features.length > 0) {
-        const results: any[] = [];
-        res.data.features.forEach((element) => {
+    if (infoFormat === 'application/geojson') {
+      const dataFeatures = response.data.features as TypeJsonObjectArray;
+      if (dataFeatures.length > 0) {
+        const results: TypeJsonObjectArray = [];
+        dataFeatures.forEach((jsonValue) => {
+          const element = jsonValue as TypeJsonObject;
           results.push({
             attributes: element.properties,
             geometry: element.geometry,
@@ -225,17 +228,17 @@ export class WMS {
             // displayFieldName: "OBJECTID",
             // value: element.properties.OBJECTID,
             geometryType: element.type,
-          });
+          } as TypeJsonValue);
         });
 
-        return { results: results };
+        return Cast<TypeJsonObjectArray>({ results });
       }
       return null;
     }
-    const featureInfoResponse = (xmlToJson(res.request.responseXML) as TypeJSONObjectLoop).FeatureInfoResponse;
+    const featureInfoResponse = (xmlToJson(response.request.responseXML) as TypeJsonObject).FeatureInfoResponse;
 
     if (featureInfoResponse && featureInfoResponse.FIELDS) {
-      const results: any[] = [];
+      const results: TypeJsonObjectArray = [];
       // only one feature
       if (featureInfoResponse.FIELDS['@attributes']) {
         results.push({
@@ -246,33 +249,34 @@ export class WMS {
           // displayFieldName: "OBJECTID",
           // value: element.properties.OBJECTID,
           geometryType: null,
-        });
+        } as TypeJsonValue);
       } else {
-        featureInfoResponse.FIELDS.forEach((element) => {
+        const arrayOfFeature = featureInfoResponse.FIELDS as TypeJsonObjectArray;
+        arrayOfFeature.forEach((element) => {
           results.push({
-            attributes: element['@attributes'],
+            attributes: (element as TypeJsonObject)['@attributes'],
             geometry: null,
             layerId: this.id,
             layerName: this.name,
             // displayFieldName: "OBJECTID",
             // value: element.properties.OBJECTID,
             geometryType: null,
-          });
+          } as TypeJsonValue);
         });
       }
-      return { results: results };
+      return Cast<TypeJsonObjectArray>({ results });
     }
     return null;
   };
 
   /**
-   * Get the parameters used ro query feature info url from a lat lng point
+   * Get the parameters used to query feature info url from a lat lng point
    *
    * @param {LatLng} latlng a latlng point to generate the feature url from
    * @param {L.Map} map the map odject
    * @returns the map service url including the feature query
    */
-  private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): any {
+  private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): TypeJsonObject {
     const point = map.latLngToContainerPoint(latlng);
 
     const size = map.getSize();
@@ -281,28 +285,28 @@ export class WMS {
 
     // these are the SouthWest and NorthEast points
     // projected from LatLng into used crs
-    const sw = crs.project(map.getBounds().getSouthWest());
-    const ne = crs.project(map.getBounds().getNorthEast());
+    const sw = crs!.project(map.getBounds().getSouthWest());
+    const ne = crs!.project(map.getBounds().getNorthEast());
 
-    const params: Record<string, unknown> = {
+    const params: TypeJsonValue = {
       request: 'GetFeatureInfo',
       service: 'WMS',
-      version: this.#wmsParams.version,
-      layers: this.#wmsParams.layers,
-      query_layers: this.#wmsParams.layers,
+      version: this.#wmsParams!.version!,
+      layers: this.#wmsParams!.layers!,
+      query_layers: this.#wmsParams!.layers,
       height: size.y,
       width: size.x,
     };
 
     // Define version-related request parameters.
-    const version = window.parseFloat(this.#wmsParams.version);
-    params[version >= 1.3 ? 'crs' : 'srs'] = crs.code;
+    const version = window.parseFloat(this.#wmsParams!.version!);
+    params[version >= 1.3 ? 'crs' : 'srs'] = crs!.code!;
     params.bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    params.bbox = version >= 1.3 && crs.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    params.bbox = version >= 1.3 && crs!.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
     params[version >= 1.3 ? 'i' : 'x'] = point.x;
     params[version >= 1.3 ? 'j' : 'y'] = point.y;
 
-    return params;
+    return params as TypeJsonObject;
   }
 
   /**
@@ -310,7 +314,7 @@ export class WMS {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.setOpacity(opacity);
+    (this.layer as L.TileLayer.WMS).setOpacity(opacity);
   };
 
   /**
@@ -320,7 +324,7 @@ export class WMS {
    */
   getBounds = (): L.LatLngBounds => {
     const capabilities = this.getCapabilities();
-    const bbox = capabilities.Capability.Layer.EX_GeographicBoundingBox;
+    const bbox = Cast<[number, number, number, number]>(capabilities.Capability.Layer.EX_GeographicBoundingBox);
     const [xmin, ymin, xmax, ymax] = bbox;
     return L.latLngBounds([
       [ymin, xmin],

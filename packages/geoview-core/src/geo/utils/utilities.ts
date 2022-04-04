@@ -1,7 +1,7 @@
 import axios from 'axios';
 import WMSCapabilities from 'wms-capabilities';
 
-import { Cast, TypeCSSStyleDeclaration, TypeJSONObjectLoop } from '../../core/types/cgpv-types';
+import { Cast, TypeCSSStyleDeclaration, TypeJsonObject } from '../../core/types/cgpv-types';
 import { getXMLHttpRequest, xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../api/api';
@@ -12,9 +12,9 @@ export class GeoUtilities {
    * Fetch the json response from the ESRI map server to get REST endpoint metadata
    * @function getESRIServiceMetadata
    * @param {string} url the url of the ESRI map server
-   * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
    */
-  getESRIServiceMetadata = async (url: string): Promise<Record<string, unknown>> => {
+  getESRIServiceMetadata = async (url: string): Promise<TypeJsonObject> => {
     // fetch the map server returning a json object
     const response = await fetch(`${url}?f=json`);
     const result = await response.json();
@@ -27,9 +27,9 @@ export class GeoUtilities {
    * @function getWMSServiceMetadata
    * @param {string} url the url the url of the WMS server
    * @param {string} layers the layers to query separate by ,
-   * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
    */
-  getWMSServiceMetadata = async (url: string, layers: string): Promise<Record<string, unknown>> => {
+  getWMSServiceMetadata = async (url: string, layers: string): Promise<TypeJsonObject> => {
     // query the WMS server
     const response = await getXMLHttpRequest(`${url}?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0&layer=${layers}`);
 
@@ -43,14 +43,14 @@ export class GeoUtilities {
    * Fetch the json response from the XML response of a WFS getCapabilities request
    * @function getWFSServiceMetadata
    * @param {string} url the url of the WFS server
-   * @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
    */
-  getWFSServiceMetadata = async (url: string): Promise<Record<string, unknown>> => {
+  getWFSServiceMetadata = async (url: string): Promise<TypeJsonObject> => {
     const res = await axios.get(url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
     const xmlDOM = new DOMParser().parseFromString(res.data, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJSONObjectLoop;
+    const json = xmlToJson(xmlDOM) as TypeJsonObject;
     const capabilities = json['wfs:WFS_Capabilities'];
     return capabilities;
   };

@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
+import { Cast, TypeJsonString, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -215,11 +214,11 @@ export const EVENT_NAMES = {
  * @class Event
  */
 export class Event {
-  // eventemitter3 object, used to handle emitting/subscribing to events
+  // eventemitter object, used to handle emitting/subscribing to events
   eventEmitter: EventEmitter;
 
   // events object containing all registered events
-  events: Record<string, Record<string, unknown>> = {};
+  events: TypeJsonObject = {};
 
   /**
    * Initiate the event emitter
@@ -235,24 +234,24 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
+  on = (eventName: string, listener: (payload: TypeJsonObject) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
-     * @param args payload being passed when emitted
+     * @param payload payload being passed when emitted
      */
-    const listen = (args: unknown) => {
-      let data;
+    const listen = (payload: TypeJsonObject) => {
+      let listenerPayload: TypeJsonObject;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
-        data = this.events[eName][handlerName];
+      if (handlerName && (payload.handlerName as TypeJsonString) === handlerName) {
+        listenerPayload = this.events[eName][handlerName];
       } else {
-        data = args;
+        listenerPayload = payload;
       }
 
-      listener(data);
+      listener(listenerPayload);
     };
 
     this.eventEmitter.on(eName, listen);
@@ -265,24 +264,24 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  once = (eventName: string, listener: (...args: any[]) => void, handlerName?: string): void => {
+  once = (eventName: string, listener: (payload: TypeJsonValue) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
-     * @param args payload being passed when emitted
+     * @param payload payload being passed when emitted
      */
-    const listen = (args: unknown) => {
-      let data;
+    const listen = (payload: TypeJsonValue) => {
+      let listenerPayload: TypeJsonValue;
 
       // if a handler name was specefieid, callback will return that data if found
-      if (handlerName && (args as Record<string, unknown>).handlerName === handlerName) {
-        data = this.events[eName][handlerName];
+      if (handlerName && (payload as Record<string, unknown>).handlerName === handlerName) {
+        listenerPayload = this.events[eName][handlerName] as TypeJsonValue;
       } else {
-        data = args;
+        listenerPayload = payload;
       }
 
-      listener(data);
+      listener(listenerPayload);
     };
 
     this.eventEmitter.once(eName, listen);
@@ -297,20 +296,19 @@ export class Event {
    *
    * @returns An array containing the data from single / multiple handlers
    */
-  all = (eventName: string, listener: (...args: any[]) => void): void => {
+  all = (eventName: string, listener: (payload: TypeJsonValue[]) => void): void => {
     /**
      * callback function to handle adding the data for multiple handlers
      */
     const listen = () => {
       // array containing the data
-      const data = [];
+      const data: TypeJsonValue[] = [];
 
       // loop through events with same event name and get their data
-      // eslint-disable-next-line no-plusplus
       for (let i = 0; i < Object.keys(this.events[eventName]).length; i++) {
         const handlerName = Object.keys(this.events[eventName])[i];
 
-        data.push(this.events[eventName][handlerName]);
+        data.push(this.events[eventName][handlerName] as TypeJsonValue);
       }
 
       // call the callback function
@@ -360,14 +358,10 @@ export class Event {
     const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
-    let hName = handlerName;
+    const hName = generateId(handlerName as string | undefined);
 
     if (!this.events[event]) {
       this.events[eventName] = {};
-    }
-
-    if (!hName) {
-      hName = generateId('');
     }
 
     if (!this.events[eventName][hName]) {
@@ -375,10 +369,10 @@ export class Event {
     }
 
     // store the emitted event to the events array
-    this.events[eventName][hName] = {
+    this.events[eventName][hName] = Cast<TypeJsonObject>({
       handlerName,
       ...payload,
-    };
+    });
 
     this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
   };

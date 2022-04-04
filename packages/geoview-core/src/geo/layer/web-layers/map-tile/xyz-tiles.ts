@@ -1,7 +1,6 @@
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
-import { generateId } from '../../../core/utils/utilities';
+import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -17,21 +16,9 @@ import { generateId } from '../../../core/utils/utilities';
  * @export
  * @class XYZTiles
  */
-export class XYZTiles {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'XYZ Tiles';
-
-  // layer type
-  type: string;
-
+export class XYZTiles extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: Layer | string;
-
-  // layer or layer service url
-  url: string;
+  layer: L.TileLayer | null = null;
 
   /**
    * Initialize layer
@@ -39,26 +26,22 @@ export class XYZTiles {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = new Layer();
+    super('xyzTiles', 'XYZ Tiles', layerConfig);
   }
 
   /**
    * Add a XYZ Tiles layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<L.TileLayer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
-    const geo = new Promise<Layer | string>((resolve) => {
-      const xyzTiles = L.tileLayer(layer.url);
+  add(layer: TypeLayerConfig): Promise<L.TileLayer | null> {
+    const tileLayer = new Promise<L.TileLayer | null>((resolve) => {
+      const xyzTileLayer = L.tileLayer(layer.url);
 
-      resolve(xyzTiles);
+      resolve(xyzTileLayer);
     });
-    return geo;
+    return tileLayer;
   }
 
   /**
@@ -66,7 +49,7 @@ export class XYZTiles {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.setOpacity(opacity);
+    (this.layer as L.TileLayer).setOpacity(opacity);
   };
 
   /**

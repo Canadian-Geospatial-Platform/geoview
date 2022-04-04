@@ -49,24 +49,25 @@ Marker.prototype.options.icon = DefaultIcon;
 // listen to map reload event
 api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
   if (payload && payload.handlerId) {
+    const payloadHandlerId = payload.handlerId as types.TypeJsonValue as string;
     // unsubscribe from all events registered on this map
-    api.event.offAll(payload.handlerId);
+    api.event.offAll(payloadHandlerId);
 
     // unload all loaded plugins on the map
-    api.plugin.removePlugins(payload.handlerId);
+    api.plugin.removePlugins(payloadHandlerId);
 
     // get the map container
-    const map = document.getElementById(payload.handlerId);
+    const map = document.getElementById(payloadHandlerId);
 
     if (map) {
       // remove the dom element (remove rendered map)
       ReactDOM.unmountComponentAtNode(map);
 
       // delete the map instance from the maps array
-      delete api.maps[payload.handlerId];
+      delete api.maps[payloadHandlerId];
 
       // re-render map with updated config keeping previous values if unchanged
-      ReactDOM.render(<AppStart configObj={payload.config} />, map);
+      ReactDOM.render(<AppStart configObj={payload.config as types.TypeJsonValue as types.TypeMapConfigProps} />, map);
     }
   }
 });

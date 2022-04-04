@@ -1,13 +1,21 @@
 import axios from 'axios';
 
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
-import { dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
+import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig, TypeJSONObject, TypeLegendJsonDynamic } from '../../../core/types/cgpv-types';
+import { getXMLHttpRequest } from '../../../../core/utils/utilities';
+import {
+  Cast,
+  AbstractWebLayersClass,
+  TypeLayerConfig,
+  TypeJsonValue,
+  TypeJsonObject,
+  TypeJsonArray,
+  TypeLegendJsonDynamic,
+} from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../api/api';
+import { api } from '../../../../api/api';
 
 /**
  * a class to add esri dynamic layer
@@ -15,21 +23,9 @@ import { api } from '../../../api/api';
  * @export
  * @class EsriDynamic
  */
-export class EsriDynamic {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'Esri Dynamic Layer';
-
-  // layer type
-  type: string;
-
+export class EsriDynamic extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: Layer | string;
-
-  // layer or layer service url
-  url: string;
+  layer: DynamicMapLayer | null = null;
 
   // mapService property
   mapService: MapService;
@@ -43,15 +39,14 @@ export class EsriDynamic {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = new Layer();
+    super('esriDynamic', 'Esri Dynamic Layer', layerConfig);
+
     const entries = layerConfig.entries?.split(',').map((item: string) => {
       return parseInt(item, 10);
     });
+
     this.entries = entries?.filter((item) => !Number.isNaN(item));
+
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url),
     });
@@ -61,27 +56,34 @@ export class EsriDynamic {
    * Add a ESRI dynamic layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<DynamicMapLayer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
+  add(layer: TypeLayerConfig): Promise<DynamicMapLayer | null> {
     const data = getXMLHttpRequest(`${layer.url}?f=json`);
 
-    const geo = new Promise<Layer | string>((resolve) => {
+    const geo = new Promise<DynamicMapLayer | null>((resolve) => {
       data.then((value: string) => {
         // get layers from service and parse layer entries as number
-        const { layers } = JSON.parse(value);
+        const { layers } = JSON.parse(value) as TypeJsonObject;
 
         // check if the entries are part of the service
-        if (value !== '{}' && layers && layers.find((item: Record<string, number>) => this.entries?.includes(item.id))) {
-          const feat = dynamicMapLayer({
+        if (
+          value !== '{}' &&
+          layers &&
+          Cast<TypeJsonValue[]>(layers).find((item) => {
+            const searchedItem = (item as { [key: string]: { id: string } }).id;
+            return this.entries?.includes(Cast<number>(searchedItem));
+          })
+        ) {
+          const feature = dynamicMapLayer({
             url: layer.url,
             layers: this.entries,
             attribution: '',
-          });
+          } as DynamicMapLayerOptions);
 
-          resolve(feat);
+          resolve(feature);
         } else {
-          resolve('{}');
+          resolve(null);
         }
       });
     });
@@ -92,9 +94,9 @@ export class EsriDynamic {
   /**
    * Get metadata of the current service
    *
-   @returns {Promise<Record<string, unknown>>} a json promise containing the result of the query
+   @returns {Promise<TypeJsonValue>} a json promise containing the result of the query
    */
-  getMetadata = async (): Promise<Record<string, unknown>> => {
+  getMetadata = async (): Promise<TypeJsonObject> => {
     // const feat = featureLayer({
     //   url: this.url,
     // });
@@ -102,7 +104,7 @@ export class EsriDynamic {
     //   return metadata;
     // });
     const response = await fetch(`${this.url}?f=json`);
-    const result = await response.json();
+    const result: TypeJsonObject = await response.json();
 
     return result;
   };
@@ -110,9 +112,9 @@ export class EsriDynamic {
   /**
    * Get legend configuration of the current layer
    *
-   * @returns {TypeJSONObject} legend configuration in json format
+   * @returns {TypeJsonValue} legend configuration in json format
    */
-  getLegendJson = (): TypeJSONObject => {
+  getLegendJson = (): Promise<TypeJsonArray> => {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 
@@ -122,17 +124,17 @@ export class EsriDynamic {
       attribution: '',
     });
 
-    return axios.get(queryUrl).then((res) => {
+    return axios.get<TypeJsonObject>(queryUrl).then<TypeJsonArray>((res) => {
       const { data } = res;
       const entryArray = feat.getLayers();
 
       if (entryArray.length > 0) {
-        const result = data.layers.filter((item: TypeJSONObject) => {
-          return entryArray.includes(item.layerId);
+        const result = (data.layers as TypeJsonArray).filter((item) => {
+          return entryArray.includes((item as TypeJsonObject).layerId) as TypeJsonArray;
         });
-        return result;
+        return result as TypeJsonArray;
       }
-      return data.layers;
+      return data.layers as TypeJsonArray;
     });
   };
 
@@ -141,14 +143,14 @@ export class EsriDynamic {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.setOpacity(opacity);
+    (this.layer as DynamicMapLayer).setOpacity(opacity);
   };
 
   /**
    * Fetch the bounds for an entry
    *
    * @param {number} entry
-   * @returns {TypeJSONObject} the result of the fetch
+   * @returns {TypeJsonValue} the result of the fetch
    */
   private getEntry = async (entry: number): Promise<TypeLegendJsonDynamic> => {
     const response = await fetch(`${this.url}/${entry}?f=json`);
@@ -185,7 +187,7 @@ export class EsriDynamic {
    * @param entries MapServer layer IDs
    */
   setEntries = (entries: number[]) => {
-    this.layer.options.layers = entries;
-    this.layer.redraw();
+    (this.layer as DynamicMapLayer).options.layers = entries;
+    (this.layer as DynamicMapLayer).redraw();
   };
 }

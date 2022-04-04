@@ -1,7 +1,7 @@
-import L, { Layer } from 'leaflet';
+import L from 'leaflet';
 
-import { getXMLHttpRequest, generateId } from '../../../core/utils/utilities';
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
 
 /**
  * Class used to add geojson layer to the map
@@ -9,21 +9,9 @@ import { TypeLayerConfig } from '../../../core/types/cgpv-types';
  * @export
  * @class GeoJSON
  */
-export class GeoJSON {
-  // layer id with default
-  id: string;
-
-  // layer name with default
-  name?: string = 'GeoJson Layer';
-
-  // layer type
-  type: string;
-
+export class GeoJSON extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: Layer | string;
-
-  // layer or layer service url
-  url: string;
+  layer: L.GeoJSON | null = null;
 
   /**
    * Initialize layer
@@ -31,24 +19,19 @@ export class GeoJSON {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    this.id = layerConfig.id || generateId('');
-    if ('name' in layerConfig) this.name = layerConfig.name;
-    this.type = layerConfig.type;
-    this.url = layerConfig.url;
-    this.layer = new Layer();
+    super('geoJSON', 'GeoJson Layer', layerConfig);
   }
 
   /**
-   *
    * Add a GeoJSON layer to the map.
    *
    * @param {TypeLayerConfig} layer the layer configuration
-   * @return {Promise<Layer | string>} layers to add to the map
+   * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<Layer | string> {
+  add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
     const data = getXMLHttpRequest(layer.url);
 
-    const geo = new Promise<Layer | string>((resolve) => {
+    const geo = new Promise<L.GeoJSON | null>((resolve) => {
       data.then((value: string) => {
         if (value !== '{}') {
           // parse the json string and convert it to a json object
@@ -75,14 +58,13 @@ export class GeoJSON {
                   opacity: 0.65,
                 };
               }
-
               return {};
             },
-          });
+          } as L.GeoJSONOptions);
 
           resolve(geojson);
         } else {
-          resolve(value);
+          resolve(null);
         }
       });
     });
@@ -95,9 +77,10 @@ export class GeoJSON {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer.getLayers().forEach((x) => {
-      if (x.setOpacity) x.setOpacity(opacity);
-      else if (x.setStyle) x.setStyle({ opacity, fillOpacity: opacity * 0.2 });
+    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    (this.layer as L.GeoJSON).getLayers().forEach((layer) => {
+      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.2 });
     });
   };
 
@@ -106,5 +89,5 @@ export class GeoJSON {
    *
    * @returns {L.LatLngBounds} layer bounds
    */
-  getBounds = (): L.LatLngBounds => this.layer.getBounds();
+  getBounds = (): L.LatLngBounds => this.layer!.getBounds();
 }

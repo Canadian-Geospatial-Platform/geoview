@@ -1,19 +1,26 @@
 import { Layer as leafletLayer } from 'leaflet';
 
-import { EsriDynamic } from './esri/esri-dynamic';
-import { EsriFeature } from './esri/esri-feature';
-import { WMS } from './ogc/wms';
-import { WFS } from './ogc/wfs';
-import { OgcFeature } from './ogc/ogc_feature';
-import { XYZTiles } from './map-tile/xyz-tiles';
-import { GeoJSON } from './file/geojson';
+import { EsriDynamic } from './web-layers/esri/esri-dynamic';
+import { EsriFeature } from './web-layers/esri/esri-feature';
+import { WMS } from './web-layers/ogc/wms';
+import { WFS } from './web-layers/ogc/wfs';
+import { OgcFeature } from './web-layers/ogc/ogc_feature';
+import { XYZTiles } from './web-layers/map-tile/xyz-tiles';
+import { GeoJSON } from './web-layers/file/geojson';
 import { Vector } from './vector/vector';
 import { MarkerClusterClass } from './vector/marker-cluster';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { CONST_LAYER_TYPES, TypeLayerData, TypeLayerConfig } from '../../core/types/cgpv-types';
+import {
+  Cast,
+  CONST_LAYER_TYPES,
+  TypeJsonString,
+  TypeJsonValue,
+  AbstractWebLayersClass,
+  TypeLayerConfig,
+} from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
@@ -27,13 +34,13 @@ import { generateId } from '../../core/utils/utilities';
  */
 export class Layer {
   // variable used to store all added layers
-  layers: { [key: string]: TypeLayerData } = {};
+  layers: { [key: string]: AbstractWebLayersClass } = {};
 
   // used to access vector API to create and manage geometries
   vector: Vector;
 
   // used to access marker cluster API to create and manage marker cluster groups
-  markerCluster: MarkerCluster;
+  markerCluster: MarkerClusterClass;
 
   /**
    * used to reference the map and its event
@@ -56,11 +63,11 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.EVENT_LAYER_ADD,
       (payload) => {
-        if (payload && payload.handlerName.includes(this.#map.id)) {
-          const layerConf = payload.layer;
+        if (payload && (payload.handlerName as TypeJsonString).includes(this.#map.id)) {
+          const layerConf = payload.layer as TypeJsonValue as TypeLayerConfig;
           if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
             const geoJSON = new GeoJSON(layerConf);
-            geoJSON.add(layerConf).then((layer: leafletLayer | string) => {
+            geoJSON.add(layerConf).then((layer) => {
               geoJSON.layer = layer;
               this.addToMap(geoJSON);
             });
@@ -68,38 +75,38 @@ export class Layer {
             this.removeTabindex();
           } else if (layerConf.type === CONST_LAYER_TYPES.WMS) {
             const wmsLayer = new WMS(layerConf);
-            wmsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            wmsLayer.add(layerConf).then((layer) => {
               wmsLayer.layer = layer;
               this.addToMap(wmsLayer);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.XYZ_TILES) {
             const xyzTiles = new XYZTiles(layerConf);
-            xyzTiles.add(layerConf).then((layer: leafletLayer | string) => {
+            xyzTiles.add(layerConf).then((layer) => {
               xyzTiles.layer = layer;
               this.addToMap(xyzTiles);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
             const esriDynamic = new EsriDynamic(layerConf);
-            esriDynamic.add(layerConf).then((layer: leafletLayer | string) => {
+            esriDynamic.add(layerConf).then((layer) => {
               esriDynamic.layer = layer;
               this.addToMap(esriDynamic);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
             const esriFeature = new EsriFeature(layerConf);
-            esriFeature.add(layerConf).then((layer: leafletLayer | string) => {
+            esriFeature.add(layerConf).then((layer) => {
               esriFeature.layer = layer;
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
           } else if (layerConf.type === CONST_LAYER_TYPES.WFS) {
             const wfsLayer = new WFS(layerConf);
-            wfsLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            wfsLayer.add(layerConf).then((layer) => {
               wfsLayer.layer = layer;
               this.addToMap(wfsLayer);
             });
           } else if (layerConf.type === CONST_LAYER_TYPES.OGC_FEATURE) {
             const ogcFeatureLayer = new OgcFeature(layerConf);
-            ogcFeatureLayer.add(layerConf).then((layer: leafletLayer | string) => {
+            ogcFeatureLayer.add(layerConf).then((layer) => {
               ogcFeatureLayer.layer = layer;
               this.addToMap(ogcFeatureLayer);
             });
@@ -114,7 +121,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.layer.id);
+        this.removeLayerById(payload.layer.id as TypeJsonString);
       },
       this.#map.id
     );
@@ -170,11 +177,11 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name, cgpvLayer.layer);
+      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
 
-      cgpvLayer.layer.addTo(this.#map);
+      cgpvLayer.layer!.addTo(this.#map);
       // this.layers.push(cgpvLayer);
-      this.layers[cgpvLayer.id] = cgpvLayer;
+      this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
       api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
         layer: cgpvLayer.layer,
       });
@@ -208,11 +215,11 @@ export class Layer {
    */
   removeLayerById = (id: string): void => {
     // return items not matching the id
-    // this.layers = this.layers.filter((item: TypeLayerData) => {
+    // this.layers = this.layers.filter((item: AbstractWebLayersClass) => {
     //   if (item.id === id) item.layer.removeFrom(this.#map);
     //   return item.id !== id;
     // });
-    this.layers[id].layer.removeFrom(this.#map);
+    this.layers[id].layer!.removeFrom(this.#map);
     delete this.layers[id];
   };
 
@@ -234,7 +241,7 @@ export class Layer {
    *
    * @param {TypeLayerConfig} layer the layer configuration to remove
    */
-  removeLayer = (layer: TypeLayerConfig): string => {
+  removeLayer = (layer: AbstractWebLayersClass): string => {
     // eslint-disable-next-line no-param-reassign
     layer.id = generateId(layer.id);
     api.event.emit(EVENT_NAMES.EVENT_REMOVE_LAYER, this.#map.id, { layer });
@@ -248,8 +255,8 @@ export class Layer {
    * @param {string} id the layer id to look for
    * @returns the found layer data object
    */
-  getLayerById = (id: string): TypeLayerData | null => {
-    // return this.layers.filter((layer: TypeLayerData) => layer.id === id)[0];
+  getLayerById = (id: string): AbstractWebLayersClass | null => {
+    // return this.layers.filter((layer: AbstractWebLayersClass) => layer.id === id)[0];
     return this.layers[id];
   };
 

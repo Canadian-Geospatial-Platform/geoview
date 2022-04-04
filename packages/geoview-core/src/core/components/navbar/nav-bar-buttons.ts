@@ -146,11 +146,9 @@ export class NavbarButtons {
    */
   getNavBarButtonPanelById = (id: string): TypeButtonPanel | null => {
     // loop through groups of appbar button panels
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
 
-      // eslint-disable-next-line no-plusplus
       for (let j = 0; j < Object.keys(group).length; j++) {
         const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 

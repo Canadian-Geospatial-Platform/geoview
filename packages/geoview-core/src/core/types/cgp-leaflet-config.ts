@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
 import L, { Util, LatLngBounds } from 'leaflet';
 import 'leaflet.markercluster/src';
 import 'react-leaflet';
 
 import * as DomUtil from 'leaflet/src/dom/DomUtil';
 import * as DomEvent from 'leaflet/src/dom/DomEvent';
+import { MapServiceOptions } from 'esri-leaflet';
 import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
 
 import { api } from '../../api/api';
@@ -136,6 +136,8 @@ declare module 'leaflet' {
   interface LayerOptions {
     id?: string;
     visible?: boolean;
+    layers?: number[];
+    url?: string;
   }
 
   interface Layer {
@@ -144,7 +146,6 @@ declare module 'leaflet' {
     type: string;
   }
 }
-
 L.Layer.addInitHook(function fn(this: L.Layer) {
   if (this.options && this.options.id) this.id = this.options.id;
 });
@@ -345,5 +346,17 @@ declare module 'react-leaflet' {
     id?: string;
     boxZoom?: boolean;
     selectBox?: boolean;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.esri.MapService configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'esri-leaflet' {
+  interface MapService {
+    options: MapServiceOptions;
   }
 }
