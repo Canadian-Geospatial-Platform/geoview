@@ -10,16 +10,15 @@ import screenfull from 'screenfull';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
+
 import { MapProjection } from '../projection/map-projection';
 
-import '../../core/types/cgp-leaflet-config';
-
 import { api } from '../../api/api';
-import { TypeMapConfigProps, TypeLayerConfig, TypeLanguages, TypeLocalizedLanguages } from '../../core/types/cgpv-types';
-
-import { generateId } from '../../core/utils/utilities';
-
 import { EVENT_NAMES } from '../../api/event';
+
+import '../../core/types/cgp-leaflet-config';
+import { generateId } from '../../core/utils/utilities';
+import { TypeMapConfigProps, TypeLayerConfig, TypeLanguages, TypeLocalizedLanguages } from '../../core/types/cgpv-types';
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
 

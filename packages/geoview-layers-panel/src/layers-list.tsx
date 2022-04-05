@@ -142,7 +142,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const setLayerLegendAll = () =>
     Object.values(layers).forEach(async (layer) => {
-      if (layer.type === 'ogcWMS') {
+      if (layer.type === 'ogcWms') {
         const wmsLayer = Cast<WMS>(layer);
         const dataUrl = await wmsLayer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';

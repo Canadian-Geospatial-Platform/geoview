@@ -12,7 +12,7 @@ import {
 } from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
 
-const w: TypeWindow = window;
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance

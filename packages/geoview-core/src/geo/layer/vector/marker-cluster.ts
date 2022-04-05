@@ -5,6 +5,7 @@ import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
 import { api } from '../../../api/api';
+
 import { Cast, TypeJsonString, TypeJsonNumber, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 

@@ -2,6 +2,7 @@ import L, { LatLngExpression } from 'leaflet';
 
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
+
 import { Cast, TypeJsonString, TypeJsonNumber, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 

@@ -91,7 +91,7 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
       delete api.maps[payloadHandlerId];
 
       // re-render map with updated config keeping previous values if unchanged
-      ReactDOM.render(<AppStart configObj={payload.config as types.TypeJsonValue as types.TypeMapConfigProps} />, map);
+      ReactDOM.render(<AppStart configObj={types.Cast<types.TypeMapConfigProps>(payload.config)} />, map);
     }
   }
 });
@@ -102,10 +102,10 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
  * @param {string} configParams a search string passed from the url "?..."
  * @returns {Object} object containing the parsed params
  */
-function getMapPropsFromUrlParams(configParams: string): types.TypeJSONObject {
+function getMapPropsFromUrlParams(configParams: string): types.TypeJsonObject {
   // get parameters from path. Ex: ?z=4 will get {"z": "123"}
   const data = configParams.split('?')[1];
-  const obj: types.TypeJSONObject = {};
+  const obj: types.TypeJsonObject = {};
 
   if (data !== undefined) {
     const params = data.split('&');
@@ -113,17 +113,17 @@ function getMapPropsFromUrlParams(configParams: string): types.TypeJSONObject {
     for (let i = 0; i < params.length; i += 1) {
       const param = params[i].split('=');
       const key = param[0];
-      const value = param[1];
+      const value = param[1] as types.TypeJsonValue;
 
-      obj[key] = value;
+      obj[key] = types.Cast<types.TypeJsonObject>(value);
     }
   }
 
   return obj;
 }
 
-function parseObjectFromUrl(objStr: string): types.TypeJSONObject {
-  const obj: types.TypeJSONObject = {};
+function parseObjectFromUrl(objStr: string): types.TypeJsonObject {
+  const obj: types.TypeJsonObject = {};
 
   if (objStr && objStr.length) {
     // get the text in between { }
@@ -142,11 +142,11 @@ function parseObjectFromUrl(objStr: string): types.TypeJSONObject {
             const value: string = prop[1];
 
             if (prop[1] === 'true') {
-              obj[key] = true;
+              obj[key] = types.Cast<types.TypeJsonObject>(true);
             } else if (prop[1] === 'false') {
-              obj[key] = false;
+              obj[key] = types.Cast<types.TypeJsonObject>(false);
             } else {
-              obj[key] = value;
+              obj[key] = types.Cast<types.TypeJsonObject>(value);
             }
           }
         }
@@ -194,20 +194,22 @@ function init(callback: () => void) {
       if (Object.keys(urlParams).length) {
         // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
 
-        let center = (urlParams.c as string).split(',');
+        let center = (urlParams.c as types.TypeJsonValue as string).split(',');
         if (!center) center = ['0', '0'];
 
-        const basemapOptions = parseObjectFromUrl(urlParams.b as string) as types.TypeBasemapOptions;
+        const basemapOptions = parseObjectFromUrl(
+          urlParams.b as types.TypeJsonValue as string
+        ) as types.TypeJsonValue as types.TypeBasemapOptions;
 
         configObj = {
           ...configObj,
           map: {
-            interaction: urlParams.i as 'static' | 'dynamic',
+            interaction: urlParams.i as types.TypeJsonValue as 'static' | 'dynamic',
             initialView: {
-              zoom: parseInt(urlParams.z as string, 10),
+              zoom: parseInt(urlParams.z as types.TypeJsonValue as string, 10),
               center: [parseInt(center[0], 10), parseInt(center[1], 10)],
             },
-            projection: parseInt(urlParams.p as '3978' | '3857', 10),
+            projection: parseInt(urlParams.p as types.TypeJsonValue as '3978' | '3857', 10),
             basemapOptions,
           },
           languages: ['en-CA', 'fr-CA'],
@@ -215,7 +217,7 @@ function init(callback: () => void) {
         };
 
         // set language from params
-        language = urlParams.l as types.TypeLocalizedLanguages;
+        language = urlParams.l as types.TypeJsonValue as types.TypeLocalizedLanguages;
       } else {
         let configObjStr = mapElement.getAttribute('data-config');
 
@@ -240,8 +242,8 @@ function init(callback: () => void) {
 
       if (!valid && validate.errors && validate.errors.length) {
         for (let j = 0; j < validate.errors.length; j += 1) {
-          const error = validate.errors[j];
-          console.log(error);
+          // const error = validate.errors[j];
+          // console.log(error);
           // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
           //   message: {
           //     type: 'key',

@@ -1,7 +1,5 @@
 import { useEffect, useContext } from 'react';
 
-import { useMap } from 'react-leaflet';
-
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@mui/material';
@@ -12,8 +10,8 @@ import { MapContext } from '../../core/app-start';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { TypeJsonValue } from '../../app';
-import { Cast, TypeJsonString, TypeJsonArrayOfString, TypeJsonObject } from '../../core/types/cgpv-types';
+
+import { Cast, TypeJsonString, TypeJsonArrayOfString, TypeJsonObject, TypeJsonValue } from '../../core/types/cgpv-types';
 
 /**
  * Snackbar properties interface

@@ -5,7 +5,6 @@ import L from 'leaflet';
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
-
 import {
   AbstractWebLayersClass,
   CONST_LAYER_TYPES,

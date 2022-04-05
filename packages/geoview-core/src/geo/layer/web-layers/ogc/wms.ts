@@ -7,7 +7,6 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 import WMSCapabilities from 'wms-capabilities';
 
 import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
-
 import {
   Cast,
   CONST_LAYER_TYPES,
