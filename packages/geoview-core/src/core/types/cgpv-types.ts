@@ -295,7 +295,7 @@ export type TypeRecordOfPlugin = {
 };
 
 /**
- * interface used to define the web-layers
+ * interface used to define the vector types
  */
 export type TypeOfVector = 'polyline' | 'polygon' | 'circle' | 'circle_marker' | 'marker';
 
