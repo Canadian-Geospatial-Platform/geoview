@@ -295,14 +295,19 @@ export type TypeRecordOfPlugin = {
 };
 
 /**
+ * interface used to define the web-layers
+ */
+ export type TypeOfVector = 'polyline' | 'polygon' | 'circle' | 'circle_marker' | 'marker';
+
+ /**
  * constant used to specify available vectors to draw
  */
 export const CONST_VECTOR_TYPES = {
-  POLYLINE: 'polyline',
-  POLYGON: 'polygon',
-  CIRCLE: 'circle',
-  CIRCLE_MARKER: 'circle_marker',
-  MARKER: 'marker',
+  POLYLINE: 'polyline' as TypeOfVector,
+  POLYGON: 'polygon' as TypeOfVector,
+  CIRCLE: 'circle' as TypeOfVector,
+  CIRCLE_MARKER: 'circle_marker' as TypeOfVector,
+  MARKER: 'marker' as TypeOfVector,
 };
 
 /**
