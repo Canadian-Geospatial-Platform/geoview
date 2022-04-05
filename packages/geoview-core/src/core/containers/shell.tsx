@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+/* eslint-disable react/jsx-props-no-spreading */
+import { useEffect, useState, useCallback, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,17 +7,19 @@ import FocusTrap from 'focus-trap-react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
+import { SnackbarProvider } from 'notistack';
+
 import { Map } from '../components/map/map';
 import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
 
 import { FocusTrapDialog } from './focus-trap';
-import { TypeMapConfigProps, TypeJsonString } from '../types/cgpv-types';
+import { TypeMapConfigProps, TypeJsonString, TypeJsonObject } from '../types/cgpv-types';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { CircularProgress, Modal } from '../../ui';
+import { CircularProgress, Modal, Snackbar } from '../../ui';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -46,6 +49,9 @@ const useStyles = makeStyles((theme) => {
         overflow: 'visible',
       },
     },
+    snackBar: {
+      '& .MuiButton-text': { color: theme.palette.primary.light },
+    },
   };
 });
 
@@ -71,6 +77,9 @@ export function Shell(props: ShellProps): JSX.Element {
   // set the active trap value for FocusTrap and pass the callback to the dialog window
   const [activeTrap, setActivetrap] = useState(false);
 
+  // render additional components if added by api
+  const [components, setComponents] = useState<TypeJsonObject>({});
+
   const [, setUpdate] = useState<number>(0);
 
   // show a splash screen before map is loaded
@@ -94,6 +103,35 @@ export function Shell(props: ShellProps): JSX.Element {
   }, []);
 
   useEffect(() => {
+    // listen to adding a new component events
+    api.event.on(
+      EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
+      (payload) => {
+        if (payload && (payload.handlerName as TypeJsonString) === id)
+          setComponents((tempComponents) => ({
+            ...tempComponents,
+            [payload.id as TypeJsonString]: payload.component,
+          }));
+      },
+      id
+    );
+
+    // listen to removing a component events
+    api.event.on(
+      EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
+      (payload) => {
+        if (payload && (payload.handlerName as TypeJsonString) === id) {
+          const tempComponents = { ...components };
+          delete tempComponents[payload.id as TypeJsonString];
+
+          setComponents(() => ({
+            ...tempComponents,
+          }));
+        }
+      },
+      id
+    );
+
     api.event.on(
       EVENT_NAMES.EVENT_MAP_LOADED,
       (payload) => {
@@ -117,10 +155,12 @@ export function Shell(props: ShellProps): JSX.Element {
     );
 
     return () => {
+      api.event.off(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, id);
+      api.event.off(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, id);
       api.event.off(EVENT_NAMES.EVENT_MAP_LOADED, id);
       api.event.off(EVENT_NAMES.EVENT_MODAL_CREATE, id);
     };
-  }, [id, updateShell]);
+  }, [components, id, updateShell]);
 
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
@@ -131,19 +171,7 @@ export function Shell(props: ShellProps): JSX.Element {
         </a>
         <Appbar />
         <Navbar />
-        <Map
-          id={id}
-          center={config.center}
-          zoom={config.zoom}
-          projection={config.projection}
-          language={config.language}
-          selectBox={config.selectBox}
-          boxZoom={config.boxZoom}
-          layers={config.layers}
-          basemapOptions={config.basemapOptions}
-          plugins={config.plugins}
-          extraOptions={config.extraOptions}
-        />
+        <Map {...config} />
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}
@@ -151,6 +179,21 @@ export function Shell(props: ShellProps): JSX.Element {
         <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: '0px' }}>
           {t('keyboardnav.end')}
         </a>
+        {Object.keys(components).map((key: string) => {
+          return <Fragment key={key}>{components[key]}</Fragment>;
+        })}
+        <SnackbarProvider
+          maxSnack={3}
+          dense
+          autoHideDuration={4000}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          className={`${classes.snackBar}`}
+        >
+          <Snackbar id={id} />
+        </SnackbarProvider>
       </div>
     </FocusTrap>
   );

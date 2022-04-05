@@ -312,7 +312,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             };
 
             // check layer type if WMS then use getFeatureInfo to query the data
-            if (layer!.type === 'ogcWMS') {
+            if (layer!.type === 'ogcWms') {
               const ogcWMSLayer = Cast<WMS>(layer);
               let getFeatureInfoResponse: TypeJsonObjectArray | null = null;
               // eslint-disable-next-line no-await-in-loop
@@ -468,7 +468,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       });
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (mapLayer.type === 'ogcWMS') {
+      if (mapLayer.type === 'ogcWms') {
         const ogcWMSLayer = Cast<WMS>(mapLayer);
         // get layer ids / entries from the loaded WMS layer
         const { entries } = ogcWMSLayer;

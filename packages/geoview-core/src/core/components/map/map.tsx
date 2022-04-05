@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useState } from 'react';
+/* eslint-disable react/jsx-props-no-spreading */
+import { useEffect, useState } from 'react';
 
 import { CRS } from 'leaflet';
 import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
@@ -6,14 +7,9 @@ import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import makeStyles from '@mui/styles/makeStyles';
-
-import { SnackbarProvider } from 'notistack';
-
 import { Crosshair } from '../crosshair/crosshair';
 import { MousePosition } from '../mouse-position/mouse-position';
 import { Attribution } from '../attribution/attribution';
-import { Snackbar } from '../../../ui/snackbar/snackbar';
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { ClickMarker } from '../click-marker/click-marker';
 
@@ -24,20 +20,14 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
-
-const useStyles = makeStyles((theme) => ({
-  snackBar: {
-    '& .MuiButton-text': { color: theme.palette.primary.light },
-  },
-}));
+import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString } from '../../types/cgpv-types';
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
+  const { map: mapProps, extraOptions, language } = props;
+
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const id = props.id ? props.id : generateId('');
-
-  const { center, zoom, projection, language, selectBox, boxZoom, extraOptions } = props;
 
   const [basemapLayers, setBasemapLayers] = useState<TypeBasemapLayer[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -48,11 +38,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // attribution used by the map
   const [attribution, setAttribution] = useState<string>('');
 
-  // render additional components if added by api
-  const [components, setComponents] = useState<TypeJsonObject>({});
-
   const defaultTheme = useTheme();
-  const classes = useStyles();
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
@@ -61,7 +47,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   // get map option from selected basemap projection
-  const mapOptions: L.MapOptions = viewer.getMapOptions(projection);
+  const mapOptions: L.MapOptions = viewer.getMapOptions(mapProps.projection);
 
   /**
    * Get the center position of the map when move / drag has ended
@@ -102,35 +88,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   }
 
   useEffect(() => {
-    // listen to adding a new component events
-    api.event.on(
-      EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
-      (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id)
-          setComponents((tempComponents) => ({
-            ...tempComponents,
-            [payload.id as TypeJsonString]: payload.component,
-          }));
-      },
-      id
-    );
-
-    // listen to removing a component events
-    api.event.on(
-      EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
-      (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id) {
-          const tempComponents = { ...components };
-          delete tempComponents[payload.id as TypeJsonString];
-
-          setComponents(() => ({
-            ...tempComponents,
-          }));
-        }
-      },
-      id
-    );
-
     // listen to adding a new basemap events
     api.event.on(
       EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
@@ -141,21 +98,19 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, id);
-      api.event.off(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, id);
       api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
-  }, [components, id]);
+  }, [id]);
 
   return (
     <MapContainer
       id={id}
-      center={center}
-      zoom={zoom}
-      crs={api.projection.getProjection(projection)}
+      center={mapProps.initialView.center}
+      zoom={mapProps.initialView.zoom}
+      crs={api.projection.getProjection(mapProps.projection)}
       zoomControl={false}
-      selectBox={selectBox}
-      boxZoom={boxZoom}
+      selectBox={mapProps.controls?.selectBox}
+      boxZoom={mapProps.controls?.boxZoom}
       attributionControl={false}
       minZoom={mapOptions.minZoom}
       maxZoom={mapOptions.maxZoom}
@@ -171,7 +126,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
 
         // reset the view when created so overview map is moved at the right place
-        cgpMap.setView(center, zoom);
+        cgpMap.setView(mapProps.initialView.center, mapProps.initialView.zoom);
 
         // emit the initial map position
         api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
@@ -223,21 +178,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           <NorthPoleFlag projection={crs} />
           <Crosshair id={id} />
           <ClickMarker />
-          <SnackbarProvider
-            maxSnack={3}
-            dense
-            autoHideDuration={4000}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
-            }}
-            className={`${classes.snackBar}`}
-          >
-            <Snackbar id={id} />
-          </SnackbarProvider>
-          {Object.keys(components).map((key: string) => {
-            return <Fragment key={key}>{components[key]}</Fragment>;
-          })}
         </>
       )}
     </MapContainer>

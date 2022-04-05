@@ -12,7 +12,7 @@ import {
 } from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
 
-const w = window as TypeWindow;
+const w: TypeWindow = window;
 
 /**
  * Create a class for the plugin instance
@@ -138,4 +138,4 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 export default BasemapSwitcherPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.basemapSwitcher = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);
+w.plugins['basemap-switcher'] = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);

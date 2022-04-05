@@ -10,13 +10,15 @@ import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 
 import {
   Cast,
+  CONST_LAYER_TYPES,
   AbstractWebLayersClass,
   TypeJsonString,
   TypeJsonArray,
   TypeJsonObjectArray,
   TypeJsonValue,
   TypeJsonObject,
-  TypeLayerConfig,
+  TypeWebLayers,
+  TypeWMSLayer,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -39,7 +41,7 @@ export class WMS extends AbstractWebLayersClass {
   layer: L.TileLayer.WMS | null = null;
 
   // layer entries
-  entries: string[] | undefined;
+  entries?: string[];
 
   // mapService property
   mapService: MapService;
@@ -50,20 +52,33 @@ export class WMS extends AbstractWebLayersClass {
   // private varibale holding wms paras
   #wmsParams?: L.WMSParams;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
-   *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeWMSLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super('ogcWMS', 'WMS Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeWMSLayer) {
+    super(
+      CONST_LAYER_TYPES.WMS as TypeWebLayers,
+      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'WMS Layer',
+      layerConfig,
+      mapId
+    );
 
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.#mapId = mapId;
+
+    this.url =
+      layerConfig.url[api.map(this.#mapId).getLanguageCode()].indexOf('?') === -1
+        ? `${layerConfig.url[api.map(this.#mapId).getLanguageCode()]}?`
+        : layerConfig.url[api.map(this.#mapId).getLanguageCode()];
+
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
 
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(layerConfig.url[api.map(this.#mapId).getLanguageCode()], true),
     });
 
     this.url = this.url.indexOf('?') === -1 ? `${this.url}?` : this.url;
@@ -72,14 +87,16 @@ export class WMS extends AbstractWebLayersClass {
   /**
    * Add a WMS layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeWMSLayer} layer the layer configuration
    * @return {Promise<Layer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<L.TileLayer.WMS | null> {
+  add(layer: TypeWMSLayer): Promise<L.TileLayer.WMS | null> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
-    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${layer.entries}`;
+    const entries = layer.layerEntries.map((item) => item.id).toString();
+
+    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${entries}`;
 
     const data = getXMLHttpRequest(capUrl);
 
@@ -92,14 +109,13 @@ export class WMS extends AbstractWebLayersClass {
           // parse the xml string and convert to json
           this.#capabilities = new WMSCapabilities(value).toJSON() as TypeJsonObject;
 
-          isValid = this.validateEntries(this.#capabilities.Capability.Layer, layer.entries as string);
+          isValid = this.validateEntries(this.#capabilities.Capability.Layer, entries as string);
 
-          const layerName = 'name' in layer ? layer.name : this.#capabilities.Service.Name;
-          if (layerName) this.name = <string>layerName;
+          this.name = (layer.name ? layer.name[api.map(this.#mapId).getLanguageCode()] : this.#capabilities.Service.Name) as string;
 
           if (isValid) {
-            const wms = L.tileLayer.wms(layer.url, {
-              layers: layer.entries,
+            const wms = L.tileLayer.wms(layer.url[api.map(this.#mapId).getLanguageCode()], {
+              layers: entries,
               format: 'image/png',
               transparent: true,
               attribution: '',
@@ -131,6 +147,7 @@ export class WMS extends AbstractWebLayersClass {
 
     // Added support of multiple entries
     const allNames = this.findAllByKey(layer, 'Name');
+
     const entryArray = entries.split(',').map((s) => s.trim());
     for (let i = 0; i < entryArray.length; i++) {
       isValid = isValid && allNames.includes(Cast<TypeJsonObject>(entryArray[i]));

@@ -1,6 +1,7 @@
 import L from 'leaflet';
+import { api } from '../../../../api/api';
 
-import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeWebLayers, TypeXYZTiles } from '../../../../core/types/cgpv-types';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -20,24 +21,35 @@ export class XYZTiles extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.TileLayer | null = null;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeXYZTiles} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super('xyzTiles', 'XYZ Tiles', layerConfig);
+  constructor(mapId: string, layerConfig: TypeXYZTiles) {
+    super(
+      CONST_LAYER_TYPES.XYZ_TILES as TypeWebLayers,
+      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'XYZ Tiles',
+      layerConfig,
+      mapId
+    );
+
+    this.#mapId = mapId;
   }
 
   /**
    * Add a XYZ Tiles layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeXYZTiles} layer the layer configuration
    * @return {Promise<L.TileLayer | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<L.TileLayer | null> {
+  add(layer: TypeXYZTiles): Promise<L.TileLayer | null> {
     const tileLayer = new Promise<L.TileLayer | null>((resolve) => {
-      const xyzTileLayer = L.tileLayer(layer.url);
+      const xyzTileLayer = L.tileLayer(layer.url[api.map(this.#mapId).getLanguageCode()]);
 
       resolve(xyzTileLayer);
     });

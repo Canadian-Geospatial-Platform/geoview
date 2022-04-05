@@ -1,6 +1,6 @@
 import { TypeBasemapProps, TypeWindow } from 'geoview-core';
 
-const w = window as TypeWindow;
+const w: TypeWindow = window;
 
 interface BaseMapSwitcherProps {
   mapId: string;
