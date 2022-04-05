@@ -28,6 +28,7 @@ import './ui/style/vendor.css';
 
 import AppStart from './core/app-start';
 
+import { Cast, TypeJsonValue, TypeWindow, TypeCGPV, TypeApi, TypeMapConfigProps } from './core/types/cgpv-types';
 import * as types from './core/types/cgpv-types';
 import { Config } from './core/utils/config';
 import { EVENT_NAMES } from './api/event';
@@ -49,7 +50,7 @@ Marker.prototype.options.icon = DefaultIcon;
 // listen to map reload event
 api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
   if (payload && payload.handlerId) {
-    const payloadHandlerId = payload.handlerId as types.TypeJsonValue as string;
+    const payloadHandlerId = payload.handlerId as TypeJsonValue as string;
     // unsubscribe from all events registered on this map
     api.event.offAll(payloadHandlerId);
 
@@ -67,7 +68,7 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
       delete api.maps[payloadHandlerId];
 
       // re-render map with updated config keeping previous values if unchanged
-      ReactDOM.render(<AppStart configObj={payload.config as types.TypeJsonValue as types.TypeMapConfigProps} />, map);
+      ReactDOM.render(<AppStart configObj={payload.config as TypeJsonValue as TypeMapConfigProps} />, map);
     }
   }
 });
@@ -106,9 +107,9 @@ function init(callback: () => void) {
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: types.TypeCGPV = {
+export const cgpv: TypeCGPV = {
   init,
-  api: types.Cast<types.TypeApi>({
+  api: Cast<TypeApi>({
     ...api,
     ...api.event,
     // ...api.projection,
@@ -136,4 +137,4 @@ export const cgpv: types.TypeCGPV = {
 Object.freeze(cgpv);
 
 // export the cgpv globally
-types.Cast<types.TypeWindow>(window).cgpv = cgpv;
+Cast<TypeWindow>(window).cgpv = cgpv;
