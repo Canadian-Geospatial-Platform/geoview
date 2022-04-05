@@ -303,18 +303,8 @@ export type TypePluginStructure = {
   removed?: () => void;
 };
 
-/**
- * interface used when creating a new plugin
- */
-export type TypePluginEntry = {
-  // id of the plugin
-  id: string;
-  // plugin class object
-  plugin: TypePluginStructure;
-};
-
 export type TypeRecordOfPlugin = {
-  [MapId: string]: { [pluginId: string]: TypePluginEntry };
+  [MapId: string]: { [pluginId: string]: TypePluginStructure };
 };
 
 /**
