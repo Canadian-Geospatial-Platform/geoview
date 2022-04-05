@@ -15,11 +15,11 @@ import { EVENT_NAMES } from '../../api/event';
 
 import {
   Cast,
-  CONST_LAYER_TYPES,
   TypeJsonString,
   TypeJsonValue,
   AbstractWebLayersClass,
   TypeLayerConfig,
+  CONST_LAYER_TYPES,
 } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
@@ -177,7 +177,7 @@ export class Layer {
         },
       });
     } else {
-      if (cgpvLayer.type !== 'geoJSON') this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
+      if (cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON) this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
 
       cgpvLayer.layer!.addTo(this.#map);
       // this.layers.push(cgpvLayer);

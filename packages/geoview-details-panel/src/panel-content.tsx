@@ -18,6 +18,7 @@ import {
   WMS,
   EsriFeature,
   EsriDynamic,
+  CONST_LAYER_TYPES,
 } from 'geoview-core';
 
 import LayersList from './layers-list';
@@ -312,7 +313,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             };
 
             // check layer type if WMS then use getFeatureInfo to query the data
-            if (layer!.type === 'ogcWMS') {
+            if (layer!.type === CONST_LAYER_TYPES.WMS) {
               const ogcWMSLayer = Cast<WMS>(layer);
               let getFeatureInfoResponse: TypeJsonObjectArray | null = null;
               // eslint-disable-next-line no-await-in-loop
@@ -338,7 +339,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   } as AbstractWebLayersClass,
                 }));
               }
-            } else if (layer!.type === 'esriFeature' || layer!.type === 'esriDynamic') {
+            } else if (layer!.type === CONST_LAYER_TYPES.ESRI_FEATURE || layer!.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
               const ogcEsriLayer = Cast<EsriDynamic | EsriFeature>(layer);
               // generate an identify query url
               const identifyUrl =
@@ -468,7 +469,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       });
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (mapLayer.type === 'ogcWMS') {
+      if (mapLayer.type === CONST_LAYER_TYPES.WMS) {
         const ogcWMSLayer = Cast<WMS>(mapLayer);
         // get layer ids / entries from the loaded WMS layer
         const { entries } = ogcWMSLayer;
@@ -496,14 +497,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             addLayer(mapLayer, data, layerInfo, false);
           }
-      } else if (mapLayer.type === 'esriFeature') {
+      } else if (mapLayer.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
         const esriFeatureLayer = Cast<EsriFeature>(mapLayer);
 
         // query the layer information, feature layer URL will end by a number provided in the map config
         const layerInfo = await queryServer(esriFeatureLayer.url);
 
         addLayer(mapLayer, data, layerInfo, false);
-      } else if (mapLayer.type === 'esriDynamic') {
+      } else if (mapLayer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
         const esriDynamicLayer = Cast<EsriDynamic>(mapLayer);
         // get active layers
         const entries = esriDynamicLayer.layer!.getLayers();

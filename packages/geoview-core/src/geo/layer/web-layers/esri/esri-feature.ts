@@ -4,7 +4,14 @@ import L from 'leaflet';
 
 import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeLayerConfig, TypeJsonNumber, TypeJsonValue, TypeJsonObject } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  TypeLayerConfig,
+  TypeJsonNumber,
+  TypeJsonValue,
+  TypeJsonObject,
+  CONST_LAYER_TYPES,
+} from '../../../../core/types/cgpv-types';
 import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
@@ -29,7 +36,7 @@ export class EsriFeature extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('esriFeature', 'Esri Feature Layer', layerConfig);
+    super(CONST_LAYER_TYPES.ESRI_FEATURE, 'Esri Feature Layer', layerConfig);
 
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(layerConfig.url),

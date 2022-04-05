@@ -13,6 +13,7 @@ import {
   AbstractWebLayersClass,
   TypeWindow,
   TypeCGPVMUI,
+  CONST_LAYER_TYPES,
 } from 'geoview-core';
 import { generateId } from 'geoview-core/src/core/utils/utilities';
 
@@ -142,13 +143,13 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const setLayerLegendAll = () =>
     Object.values(layers).forEach(async (layer) => {
-      if (layer.type === 'ogcWMS') {
+      if (layer.type === CONST_LAYER_TYPES.WMS) {
         const wmsLayer = Cast<WMS>(layer);
         const dataUrl = await wmsLayer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
-      } else if (layer.type === 'esriDynamic' || layer.type === 'esriFeature') {
+      } else if (layer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC || layer.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
         const EsriLayer = Cast<EsriFeature | EsriDynamic>(layer);
         const legend = await EsriLayer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];

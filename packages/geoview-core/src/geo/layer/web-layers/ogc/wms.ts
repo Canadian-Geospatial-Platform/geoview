@@ -17,6 +17,7 @@ import {
   TypeJsonValue,
   TypeJsonObject,
   TypeLayerConfig,
+  CONST_LAYER_TYPES,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -56,7 +57,7 @@ export class WMS extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('ogcWMS', 'WMS Layer', layerConfig);
+    super(CONST_LAYER_TYPES.WMS, 'WMS Layer', layerConfig);
 
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();

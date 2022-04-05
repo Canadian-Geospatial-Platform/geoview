@@ -4,7 +4,14 @@ import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeJsonString, TypeJsonValue, TypeJsonObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  TypeJsonString,
+  TypeJsonValue,
+  TypeJsonObject,
+  TypeLayerConfig,
+  CONST_LAYER_TYPES,
+} from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -36,7 +43,7 @@ export class OgcFeature extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('ogcFeature', 'OGC Feature Layer', layerConfig);
+    super(CONST_LAYER_TYPES.OGC_FEATURE, 'OGC Feature Layer', layerConfig);
 
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();

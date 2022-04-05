@@ -1,7 +1,7 @@
 import L from 'leaflet';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
-import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeLayerConfig, CONST_LAYER_TYPES } from '../../../../core/types/cgpv-types';
 
 /**
  * Class used to add geojson layer to the map
@@ -19,7 +19,7 @@ export class GeoJSON extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('geoJSON', 'GeoJson Layer', layerConfig);
+    super(CONST_LAYER_TYPES.GEOJSON, 'GeoJson Layer', layerConfig);
   }
 
   /**

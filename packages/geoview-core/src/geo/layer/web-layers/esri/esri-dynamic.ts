@@ -13,6 +13,7 @@ import {
   TypeJsonObject,
   TypeJsonArray,
   TypeLegendJsonDynamic,
+  CONST_LAYER_TYPES,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -39,7 +40,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('esriDynamic', 'Esri Dynamic Layer', layerConfig);
+    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, 'Esri Dynamic Layer', layerConfig);
 
     const entries = layerConfig.entries?.split(',').map((item: string) => {
       return parseInt(item, 10);

@@ -1,6 +1,6 @@
 import L from 'leaflet';
 
-import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, TypeLayerConfig, CONST_LAYER_TYPES } from '../../../../core/types/cgpv-types';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -26,7 +26,7 @@ export class XYZTiles extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('xyzTiles', 'XYZ Tiles', layerConfig);
+    super(CONST_LAYER_TYPES.XYZ_TILES, 'XYZ Tiles', layerConfig);
   }
 
   /**

@@ -6,7 +6,14 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
 
-import { AbstractWebLayersClass, TypeJsonString, TypeJsonObject, TypeJsonValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  TypeJsonString,
+  TypeJsonObject,
+  TypeJsonValue,
+  TypeLayerConfig,
+  CONST_LAYER_TYPES,
+} from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -38,7 +45,7 @@ export class WFS extends AbstractWebLayersClass {
    * @param {TypeLayerConfig} layerConfig the layer configuration
    */
   constructor(layerConfig: TypeLayerConfig) {
-    super('ogcWFS', 'WFS Layer', layerConfig);
+    super(CONST_LAYER_TYPES.WFS, 'WFS Layer', layerConfig);
 
     this.entries = layerConfig.entries?.split(',').map((item: string) => {
       return item.trim();

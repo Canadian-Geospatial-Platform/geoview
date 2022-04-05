@@ -169,19 +169,6 @@ export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
 export type TypeIconCreationFunction = () => L.DivIcon;
 
 /**
- * constant contains layer types
- */
-export const CONST_LAYER_TYPES = {
-  WMS: 'ogcWMS',
-  GEOJSON: 'geoJSON',
-  ESRI_DYNAMIC: 'esriDynamic',
-  ESRI_FEATURE: 'esriFeature',
-  XYZ_TILES: 'xyzTiles',
-  WFS: 'ogcWFS',
-  OGC_FEATURE: 'ogcFeature',
-};
-
-/**
  * interface used when adding a new layer
  */
 export type TypeLayerConfig = {
@@ -303,18 +290,8 @@ export type TypePluginStructure = {
   removed?: () => void;
 };
 
-/**
- * interface used when creating a new plugin
- */
-export type TypePluginEntry = {
-  // id of the plugin
-  id: string;
-  // plugin class object
-  plugin: TypePluginStructure;
-};
-
 export type TypeRecordOfPlugin = {
-  [MapId: string]: { [pluginId: string]: TypePluginEntry };
+  [MapId: string]: { [pluginId: string]: TypePluginStructure };
 };
 
 /**
@@ -761,6 +738,19 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
  * interface used to define the web-layers
  */
 export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geoJSON' | 'xyzTiles' | 'ogcFeature' | 'ogcWFS' | 'ogcWMS';
+
+/**
+ * constant contains layer types
+ */
+export const CONST_LAYER_TYPES = {
+  WMS: 'ogcWMS' as TypeWebLayers,
+  GEOJSON: 'geoJSON' as TypeWebLayers,
+  ESRI_DYNAMIC: 'esriDynamic' as TypeWebLayers,
+  ESRI_FEATURE: 'esriFeature' as TypeWebLayers,
+  XYZ_TILES: 'xyzTiles' as TypeWebLayers,
+  WFS: 'ogcWFS' as TypeWebLayers,
+  OGC_FEATURE: 'ogcFeature' as TypeWebLayers,
+};
 
 /**
  * interface used by all web layers
