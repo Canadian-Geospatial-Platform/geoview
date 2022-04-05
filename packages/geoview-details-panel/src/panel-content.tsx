@@ -5,7 +5,8 @@ import {
   TypeSelectedFeature,
   AbstractWebLayersClass,
   TypeLayerInfo,
-  TypeFieldNameAlias,
+  TypeFieldNameAliasArray,
+  TypeFieldAlias,
   TypeFoundLayers,
   TypeLayersEntry,
   TypeEntry,
@@ -13,6 +14,7 @@ import {
   TypeWindow,
   TypeJsonObject,
   TypeJsonArray,
+  TypeJsonObjectArray,
   WMS,
   EsriFeature,
   EsriDynamic,
@@ -179,11 +181,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   /**
    * Get all aliases from the defined layer list, will be used when displaying entry / feature info
    *
-   * @param {TypeFieldNameAlias[]} fields a list of the fields defined in the layer
+   * @param {TypeFieldNameAliasArray} fields a list of the fields defined in the layer
    * @returns {TypeJsonValue} an object containing field name and it's alias
    */
-  const getFieldAliases = (fields: TypeFieldNameAlias[]) => {
-    const fieldAliases: TypeJsonValue = {};
+  const getFieldAliases = (fields: TypeFieldNameAliasArray): TypeFieldAlias => {
+    const fieldAliases: TypeFieldAlias = {};
 
     if (fields) {
       fields.forEach((field: { name: string; alias: string }) => {
@@ -310,23 +312,22 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             };
 
             // check layer type if WMS then use getFeatureInfo to query the data
-            let res = null;
-
             if (layer!.type === 'ogcWMS') {
               const ogcWMSLayer = Cast<WMS>(layer);
+              let getFeatureInfoResponse: TypeJsonObjectArray | null = null;
               // eslint-disable-next-line no-await-in-loop
-              res = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
+              getFeatureInfoResponse = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
 
-              if (res && res.results && (res.results as TypeJsonArray).length > 0) {
+              if (getFeatureInfoResponse && getFeatureInfoResponse!.length > 0) {
                 layersFound.push(
                   Cast<TypeFoundLayers>({
                     layer: layers[layerKey],
-                    entries: res.results,
+                    entries: getFeatureInfoResponse,
                   })
                 );
 
                 // add the found entries to the array
-                (layers[layerKey].layerData as TypeJsonArray).push(...(res.results as TypeJsonArray));
+                layers[layerKey].layerData.push(...getFeatureInfoResponse);
 
                 // save the data
                 setLayersData((prevState) => ({
@@ -355,19 +356,21 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
               // fetch the result from the map server
               // eslint-disable-next-line no-await-in-loop
               const response = await fetch(identifyUrl);
-              // eslint-disable-next-line no-await-in-loop
-              res = (await response.json()) as { results: TypeEntry[] };
 
-              if (res && res.results && res.results.length > 0) {
+              type TypeJsonResponse = { results: TypeEntry[] };
+              // eslint-disable-next-line no-await-in-loop
+              const jsonResponse = (await response.json()) as TypeJsonResponse;
+
+              if (jsonResponse && jsonResponse.results && jsonResponse.results.length > 0) {
                 layersFound.push(
                   Cast<TypeFoundLayers>({
                     layer: layers[layerKey],
-                    entries: res.results,
+                    entries: jsonResponse.results,
                   })
                 );
 
                 // add the found entries to the array
-                (layers[layerKey].layerData as TypeJsonArray).push(...res.results);
+                (layers[layerKey].layerData as TypeJsonArray).push(...jsonResponse.results);
 
                 // save the data
                 setLayersData((prevState) => ({

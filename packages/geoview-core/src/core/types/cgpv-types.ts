@@ -35,9 +35,13 @@ import { PanelApi } from '../../ui';
 import * as UI from '../../ui';
 
 import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
-import { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
 
-export { AbstractWebLayersClass } from '../../geo/layer/web-layers/abstract-web-layers';
+import { AbstractWebLayersClass } from './abstract/abstract-web-layers';
+import { AbstractPluginClass } from './abstract/abstract-plugin';
+
+export { AbstractWebLayersClass } from './abstract/abstract-web-layers';
+export { AbstractPluginClass } from './abstract/abstract-plugin';
+
 export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
 export { EsriFeature } from '../../geo/layer/web-layers/esri/esri-feature';
 export { GeoJSON } from '../../geo/layer/web-layers/file/geojson';
@@ -117,17 +121,7 @@ export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
 
-export type TypeChild = React.ReactElement<never, never>;
-
 export type TypeChildren = React.ReactNode;
-
-/**
- * Map types
- */
-export type TypeMapComponent = {
-  id: string;
-  component: JSX.Element;
-};
 
 /**
  * Map context
@@ -227,118 +221,6 @@ export type TypeLegendJsonDynamic = {
   };
 };
 
-/**
- * ESRI Json Legend for Feature Layer
- */
-export type TypeLegendJsonFeature = {
-  currentVersion: number;
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  geometryType: string;
-  sourceSpatialReference: {
-    wkid: number;
-    latestWkid: number;
-  };
-  copyrightText: string;
-  parentLayer: {
-    id: number;
-    name: string;
-  };
-  subLayers: unknown[];
-  minScale: number;
-  maxScale: number;
-  drawingInfo: {
-    renderer: {
-      type: string;
-      symbol: {
-        type: string;
-        url: string;
-        imageData: string;
-        contentType: string;
-        width: number;
-        height: number;
-        angle: number;
-        xoffset: number;
-        yoffset: number;
-      };
-      label: string;
-      description: string;
-    };
-    transparency: number;
-    labelingInfo: unknown;
-  };
-  defaultVisibility: boolean;
-  extent: {
-    xmin: number;
-    ymin: number;
-    xmax: number;
-    ymax: number;
-    spatialReference: {
-      wkid: number;
-      latestWkid: number;
-    };
-  };
-  hasAttachments: boolean;
-  htmlPopupType: string;
-  displayField: string;
-  typeIdField: unknown;
-  subtypeFieldName: unknown;
-  subtypeField: unknown;
-  defaultSubtypeCode: unknown;
-  fields: {
-    name: string;
-    type: string;
-    alias: string;
-    domain: unknown;
-  }[];
-  geometryField: {
-    name: string;
-    type: string;
-    alias: string;
-  };
-  indexes: {
-    name: string;
-    fields: string;
-    isAscending: boolean;
-    isUnique: boolean;
-    description: string;
-  }[];
-  subtypes: [];
-  relationships: [];
-  canModifyLayer: boolean;
-  canScaleSymbols: boolean;
-  hasLabels: boolean;
-  capabilities: string;
-  maxRecordCount: number;
-  supportsStatistics: boolean;
-  supportsAdvancedQueries: boolean;
-  supportedQueryFormats: string;
-  isDataVersioned: boolean;
-  ownershipBasedAccessControlForFeatures: {
-    allowOthersToQuery: boolean;
-  };
-  useStandardizedQueries: boolean;
-  advancedQueryCapabilities: {
-    useStandardizedQueries: boolean;
-    supportsStatistics: boolean;
-    supportsHavingClause: boolean;
-    supportsCountDistinct: boolean;
-    supportsOrderBy: boolean;
-    supportsDistinct: boolean;
-    supportsPagination: boolean;
-    supportsbooleanCurve: boolean;
-    supportsReturningQueryExtent: boolean;
-    supportsQueryWithDistance: boolean;
-    supportsSqlExpression: boolean;
-  };
-  supportsDatumTransformation: boolean;
-  supportsCoordinatesQuantization: boolean;
-};
-
-export type TypeLegendJson = TypeLegendJsonDynamic | TypeLegendJsonDynamic;
-
 export type TypeLayersInWebLayer = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
@@ -363,13 +245,15 @@ export type TypeLayerInfo = {
   drawingInfo: {
     renderer: TypeRendererSymbol;
   };
-  fields: TypeFieldNameAlias[];
+  fields: TypeFieldNameAliasArray;
 };
 
-export type TypeFieldNameAlias = {
+export type TypeFieldNameAliasArray = {
   name: string;
   alias: string;
-};
+}[];
+
+export type TypeFieldAlias = { [name: string]: string };
 
 export type TypeFoundLayers = {
   layer: TypeLayersEntry;
@@ -405,7 +289,7 @@ export type TypeRendererSymbol = {
 /**
  * interface used when creating the actual plugin
  */
-export type TypeActualPlugin = {
+export type TypePluginStructure = {
   // id of the plugin
   id: string;
   api: API;
@@ -419,18 +303,8 @@ export type TypeActualPlugin = {
   removed?: () => void;
 };
 
-/**
- * interface used when creating a new plugin
- */
-export type TypePluginEntry = {
-  // id of the plugin
-  id: string;
-  // plugin class object
-  plugin: TypeActualPlugin;
-};
-
 export type TypeRecordOfPlugin = {
-  [MapId: string]: { [pluginId: string]: TypePluginEntry };
+  [MapId: string]: { [pluginId: string]: TypePluginStructure };
 };
 
 /**
@@ -601,12 +475,6 @@ export const CONST_PANEL_TYPES = {
   APPBAR: 'appbar',
   NAVBAR: 'navbar',
 };
-
-export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
-  selected?: boolean;
-  blinking?: boolean;
-  on?: Record<string, L.LeafletEventHandlerFn>;
-}
 
 /*-----------------------------------------------------------------------------
  *
@@ -871,19 +739,33 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   changeHandler?: <T>(params: T) => void;
 }
 
+/*-----------------------------------------------------------------------------
+ *
+ * Types related to abstract class
+ *
+ *---------------------------------------------------------------------------*/
+
+// AbstractWebLayersClass types
+
+/**
+ * interface used to define the web-layers
+ */
+export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geoJSON' | 'xyzTiles' | 'ogcFeature' | 'ogcWFS' | 'ogcWMS';
+
+/**
+ * interface used by all web layers
+ */
+export type TypeAbstractWebLayersConfig = {
+  id?: string;
+  name?: string;
+  url: string;
+};
+
+// AbstractWebLayersClass types
+
+/**
+ * interface used by all plugins to define their options
+ */
 export type TypePluginOptions = {
   mapId: string;
 };
-
-export abstract class AbstractPluginClass {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  pluginOptions: TypePluginOptions;
-
-  constructor(id: string, props: TypePluginOptions) {
-    this.id = id;
-    this.pluginOptions = props;
-  }
-}

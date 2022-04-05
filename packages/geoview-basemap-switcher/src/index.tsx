@@ -81,7 +81,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const mapId: string = this.pluginOptions.mapId as TypeJsonString;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -119,7 +119,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const mapId: string = this.pluginOptions.mapId as TypeJsonString;
+    const mapId: string = this.pluginProps.mapId as TypeJsonString;
 
     // access the cgpv object from the window object
     const { cgpv } = w;

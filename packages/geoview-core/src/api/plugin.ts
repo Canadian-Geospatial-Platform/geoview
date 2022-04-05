@@ -8,15 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapViewer } from '../geo/map/map';
 
 import { api } from './api';
-import {
-  Cast,
-  AbstractPluginClass,
-  TypeWindow,
-  TypeJsonValue,
-  TypeActualPlugin,
-  TypePluginEntry,
-  TypeRecordOfPlugin,
-} from '../core/types/cgpv-types';
+import { Cast, AbstractPluginClass, TypeWindow, TypeJsonValue, TypePluginStructure, TypeRecordOfPlugin } from '../core/types/cgpv-types';
 
 /**
  * Class to manage plugins
@@ -42,7 +34,7 @@ export class Plugin {
     props?: TypeJsonValue
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
-      let plugin: TypeActualPlugin | null = null;
+      let plugin: TypePluginStructure | null = null;
 
       if (constructor) {
         // create new instance of the plugin. Here we must type the constructor variable to any
@@ -80,16 +72,10 @@ export class Plugin {
 
         if (!this.plugins[mapId]) {
           this.plugins[mapId] = {
-            [pluginId]: {
-              id: pluginId,
-              plugin,
-            },
+            [pluginId]: plugin,
           };
         } else {
-          this.plugins[mapId][pluginId] = Cast<TypePluginEntry>({
-            pluginId,
-            plugin,
-          });
+          this.plugins[mapId][pluginId] = plugin;
         }
 
         // call plugin added method if available
@@ -108,8 +94,8 @@ export class Plugin {
    */
   removePlugin = (pluginId: string, mapId?: string): void => {
     if (mapId) {
-      if (this.plugins[mapId] && this.plugins[mapId][pluginId] && this.plugins[mapId][pluginId].plugin) {
-        const { plugin } = this.plugins[mapId][pluginId];
+      if (this.plugins[mapId] && this.plugins[mapId][pluginId]) {
+        const plugin = this.plugins[mapId][pluginId];
 
         // call the removed function on the plugin
         if (typeof plugin.removed === 'function') plugin.removed();
@@ -119,17 +105,15 @@ export class Plugin {
     } else {
       // remove the plugin from all maps
       for (let i = 0; i < Object.keys(this.plugins).length; i += 1) {
-        const pluginMapId = Object.keys(this.plugins)[i];
-        const value = this.plugins[pluginMapId];
+        const aMapId = Object.keys(this.plugins)[i];
+        const recordOfPlugins = this.plugins[aMapId];
 
-        if (value[pluginId] && value[pluginId].plugin) {
-          const { plugin } = value[pluginId];
+        const plugin = recordOfPlugins[pluginId];
 
-          // call the removed function on the plugin
-          if (typeof plugin.removed === 'function') plugin.removed();
+        // call the removed function on the plugin
+        if (typeof plugin.removed === 'function') plugin.removed();
 
-          delete this.plugins[pluginMapId][pluginId];
-        }
+        delete this.plugins[aMapId][pluginId];
       }
     }
   };
@@ -141,12 +125,12 @@ export class Plugin {
    */
   removePlugins = (mapId: string): void => {
     if (mapId) {
-      const mapPlugins = this.plugins[mapId];
+      const recordOfPlugins = this.plugins[mapId];
 
-      if (mapPlugins) {
+      if (recordOfPlugins) {
         // remove all plugins by map
-        for (let i = 0; i < Object.keys(mapPlugins).length; i += 1) {
-          const pluginId = Object.keys(mapPlugins)[i];
+        for (let i = 0; i < Object.keys(recordOfPlugins).length; i += 1) {
+          const pluginId = Object.keys(recordOfPlugins)[i];
 
           this.removePlugin(pluginId, mapId);
         }
