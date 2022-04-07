@@ -5,8 +5,15 @@ import L from 'leaflet';
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
-
-import { AbstractWebLayersClass, TypeJsonString, TypeJsonObject, TypeJsonValue, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  CONST_LAYER_TYPES,
+  TypeJsonString,
+  TypeJsonObject,
+  TypeJsonValue,
+  TypeWFSLayer,
+  TypeWebLayers,
+} from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -32,30 +39,38 @@ export class WFS extends AbstractWebLayersClass {
   // private varibale holding wms paras
   #version = '2.0.0';
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
-   *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeWFSLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super('ogcWFS', 'WFS Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeWFSLayer) {
+    super(
+      CONST_LAYER_TYPES.WFS as TypeWebLayers,
+      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'WFS Layer',
+      layerConfig,
+      mapId
+    );
 
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.#mapId = mapId;
+
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
 
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(this.url, true),
     });
   }
 
   /**
    * Add a WFS layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeWFSLayer} layer the layer configuration
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
+  async add(layer: TypeWFSLayer): Promise<L.GeoJSON | null> {
     // const data = getXMLHttpRequest(capUrl);
     const resCapabilities = await axios.get<TypeJsonValue>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
@@ -67,20 +82,26 @@ export class WFS extends AbstractWebLayersClass {
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
     this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJsonString;
-    const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
+    const featTypeInfo = this.getFeatyreTypeInfo(
+      json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
+      layer.layerEntries.map((item) => item.id).toString()
+    );
 
     if (!featTypeInfo) {
       return null;
     }
 
-    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as TypeJsonString).split(':')[1];
-    if (layerName) this.name = layerName;
+    const layerName = layer.name
+      ? layer.name[api.map(this.#mapId).getLanguageCode()]
+      : (featTypeInfo.Name['#text'] as TypeJsonString).split(':')[1];
+
+    if (layerName) this.name = <string>layerName;
 
     const params = {
       service: 'WFS',
       version: this.#version,
       request: 'GetFeature',
-      typename: layer.entries,
+      typename: layer.layerEntries.map((item) => item.id).toString(),
       srsname: 'EPSG:4326',
       outputFormat: 'application/json',
     };

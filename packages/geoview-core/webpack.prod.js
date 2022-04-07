@@ -4,7 +4,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const { merge } = require('webpack-merge');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { WebpackBundleSizeAnalyzerPlugin } = require('webpack-bundle-size-analyzer');
-const common = require('./webpack.common.js');
+const common = require('./webpack.common');
 
 const config = {
   mode: 'production',

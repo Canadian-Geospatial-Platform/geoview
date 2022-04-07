@@ -172,24 +172,13 @@ export type TypeIconCreationFunction = () => L.DivIcon;
  * constant contains layer types
  */
 export const CONST_LAYER_TYPES = {
-  WMS: 'ogcWMS',
-  GEOJSON: 'geoJSON',
+  WMS: 'ogcWms',
+  GEOJSON: 'geojson',
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   XYZ_TILES: 'xyzTiles',
-  WFS: 'ogcWFS',
+  WFS: 'ogcWfs',
   OGC_FEATURE: 'ogcFeature',
-};
-
-/**
- * interface used when adding a new layer
- */
-export type TypeLayerConfig = {
-  id?: string;
-  name?: string;
-  url: string;
-  type: string;
-  entries?: string;
 };
 
 /**
@@ -373,32 +362,195 @@ export type TypePanelContentProps = {
   mapId: string;
 };
 
-/**
- * Interface used when creating a map to validate configuration object
- */
-export type TypeMapConfigProps = {
-  id: string;
-  name?: string;
-  center: L.LatLngTuple;
-  zoom: number;
-  projection: number;
-  language: string;
-  selectBox: boolean;
+export type TypeMapControls = {
   boxZoom: boolean;
-  basemapOptions: TypeBasemapOptions;
-  layers?: TypeLayerConfig[];
-  plugins: string[];
-  extraOptions: TypeJsonValue;
+  selectBox: boolean;
 };
+
+export type TypeMapInitialView = {
+  zoom: number;
+  center: L.LatLngTuple;
+};
+
+export type TypeProjections = 3978 | 3857;
 
 /**
  * interface for basemap options
  */
 export type TypeBasemapOptions = {
-  id: string;
+  id: 'transport' | 'shaded' | 'label' | 'simple';
   shaded: boolean;
   labeled: boolean;
 };
+
+/**
+ * interface used when adding a new layer
+ */
+export type TypeLayerConfig = {
+  id: string;
+  url: TypeLangString;
+  layerType: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export type TypeLayerSettings = {
+  opacity: number;
+  visibility: boolean;
+  boundingBox: boolean;
+  query: boolean;
+};
+
+export type TypeDetailsLayerSettings = {
+  parser?: string;
+  template: TypeLangString;
+};
+
+export interface TypeBasicLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeFeatureLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+  nameField?: string;
+  tooltipField?: string;
+  outfields?: string;
+}
+
+export type TypeDynamicLayerEntry = {
+  index: string;
+  name?: TypeLangString;
+  nameField?: string;
+  outfields?: string;
+};
+
+export interface TypeDynamicLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+  layerEntries: TypeDynamicLayerEntry[];
+}
+
+export interface TypeGeoJSONLayer extends TypeLayerConfig {
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJsonObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export type TypeWFSLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export interface TypeWFSLayer extends TypeLayerConfig {
+  nameField?: string;
+  layerEntries: TypeWFSLayerEntry[];
+  tooltipField?: string;
+  renderer?: TypeJsonObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export type TypeWMSLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export interface TypeWMSLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  layerEntries: TypeWMSLayerEntry[];
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeGeometryEndpointLayer extends TypeLayerConfig {
+  name: TypeLangString;
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJsonObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeGeoCoreLayer extends Omit<TypeLayerConfig, 'url'> {
+  url?: TypeLangString;
+}
+
+export type TypeXYZTiles = TypeLayerConfig;
+
+export type TypeOgcFeatureLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export interface TypeOgcFeatureLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  layerEntries: TypeWMSLayerEntry[];
+  details?: TypeDetailsLayerSettings;
+}
+
+export type TypeMapConfig = {
+  interaction: 'static' | 'dynamic';
+  controls?: TypeMapControls;
+  initialView: TypeMapInitialView;
+  projection: number;
+  basemapOptions: TypeBasemapOptions;
+  layers?: TypeLayerConfig[];
+};
+
+export type TypeLangString = {
+  en: string;
+  fr: string;
+};
+
+export type TypeAppBarProps = {
+  about: TypeLangString;
+};
+
+export type TypeNavBarProps = TypeJsonObject;
+
+export type TypeNorthArrowProps = TypeJsonObject;
+
+export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';
+
+export type TypeMapCorePackages = 'overview-map' | 'basemap-switcher' | 'layers-panel' | 'details-panel' | 'geolocator';
+
+export type TypeExternalPackages = {
+  name: string;
+  configUrl?: string;
+};
+
+export type TypeServiceUrls = {
+  keys: string;
+};
+
+export type TypeLanguages = 'en' | 'fr';
+export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
+
+export type TypeMapSchemaProps = {
+  map: TypeMapConfig;
+  theme?: 'dark' | 'light';
+  appBar?: TypeAppBarProps;
+  navBar?: TypeNavBarProps;
+  northArrow?: TypeNorthArrowProps;
+  components?: TypeMapComponents[];
+  corePackages?: TypeMapCorePackages[];
+  externalPackages?: TypeExternalPackages[];
+  serviceUrls?: TypeServiceUrls;
+  languages: TypeLocalizedLanguages[];
+  version?: string;
+  extraOptions: TypeJsonObject;
+};
+
+/**
+ * Interface used when creating a map to validate configuration object
+ */
+export interface TypeMapConfigProps extends TypeMapSchemaProps {
+  id: string;
+  language: TypeLocalizedLanguages;
+}
 
 /**
  * interface for basemap basic properties
@@ -750,16 +902,12 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
 /**
  * interface used to define the web-layers
  */
-export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geoJSON' | 'xyzTiles' | 'ogcFeature' | 'ogcWFS' | 'ogcWMS';
+export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 
 /**
  * interface used by all web layers
  */
-export type TypeAbstractWebLayersConfig = {
-  id?: string;
-  name?: string;
-  url: string;
-};
+export type TypeAbstractWebLayersConfig = TypeLayerConfig;
 
 // AbstractWebLayersClass types
 

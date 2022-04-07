@@ -5,7 +5,6 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LodashWebpackPlugin = require('lodash-webpack-plugin');
-const childProcess = require('child_process');
 const glob = require('glob');
 const package = require('./package.json');
 

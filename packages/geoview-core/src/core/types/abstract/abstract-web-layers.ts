@@ -1,7 +1,10 @@
 import { Layer, TileLayer } from 'leaflet';
+
 import { TypeWebLayers, TypeAbstractWebLayersConfig, TypeLayersInWebLayer } from '../cgpv-types';
 
 import { generateId } from '../../utils/utilities';
+
+import { api } from '../../../api/api';
 
 export abstract class AbstractWebLayersClass {
   // layer id with default
@@ -29,10 +32,10 @@ export abstract class AbstractWebLayersClass {
 
   abstract setOpacity(opacity: number): void;
 
-  constructor(type: TypeWebLayers, name: string, layerConfig: TypeAbstractWebLayersConfig) {
+  constructor(type: TypeWebLayers, name: string, layerConfig: TypeAbstractWebLayersConfig, mapId: string) {
     this.id = layerConfig.id || generateId('');
     this.name = name;
     this.type = type;
-    this.url = layerConfig.url.trim();
+    this.url = layerConfig.url[api.map(mapId).getLanguageCode()].trim();
   }
 }

@@ -619,8 +619,9 @@
 
           for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
             cgpv.api.map('mapWM').layer.addLayer({
-              type: type,
-              entries: document.getElementById('entries').value,
+              id: new Date().getTime().toString(),
+              layerType: type,
+              layerEntries: document.getElementById('entries').value,
               url: document.getElementById('url').value,
             });
           }

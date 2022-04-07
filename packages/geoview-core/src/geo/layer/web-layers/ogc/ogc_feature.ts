@@ -4,7 +4,15 @@ import L from 'leaflet';
 
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeJsonString, TypeJsonValue, TypeJsonObject, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  CONST_LAYER_TYPES,
+  TypeJsonString,
+  TypeJsonValue,
+  TypeJsonObject,
+  TypeOgcFeatureLayer,
+  TypeWebLayers,
+} from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -27,33 +35,42 @@ export class OgcFeature extends AbstractWebLayersClass {
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
 
+  // map id
+  #mapId: string;
+
   // private varibale holding wms paras
   #version = '2.0.0';
 
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeOgcFeatureLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super('ogcFeature', 'OGC Feature Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeOgcFeatureLayer) {
+    super(
+      CONST_LAYER_TYPES.OGC_FEATURE as TypeWebLayers,
+      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'OGC Feature Layer',
+      layerConfig,
+      mapId
+    );
 
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.#mapId = mapId;
+
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
 
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(this.url, true),
     });
   }
 
   /**
    * Add a OGC API feature layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeOgcFeatureLayer} layer the layer configuration
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
+  async add(layer: TypeOgcFeatureLayer): Promise<L.GeoJSON | null> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
@@ -62,8 +79,8 @@ export class OgcFeature extends AbstractWebLayersClass {
     const res = await axios.get<TypeJsonObject>(metaUrl);
     this.#capabilities = res.data;
 
-    const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
-    if (layerName) this.name = <string>layerName;
+    const layerName = (layer.name ? layer.name[api.map(this.#mapId).getLanguageCode()] : this.#capabilities.title) as string;
+    if (layerName) this.name = layerName;
 
     const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
 

@@ -5,6 +5,7 @@ import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
 import { api } from '../../../api/api';
+
 import { Cast, TypeJsonString, TypeJsonNumber, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
@@ -148,10 +149,10 @@ export class MarkerClusterClass {
     /**
      * Initialize map, MarkerCluster, and listen to add marker cluster events
      *
-     * @param {Map} map leaflet map object
+     * @param {string} mapId leaflet map id
      */
-  constructor(map: L.Map) {
-    this.markerClusterMap = map;
+  constructor(mapId: string) {
+    this.markerClusterMap = api.map(mapId).map;
 
     // initialize clusterGroupOptions
     this.setClusterGroupOptions(defaultClusterGroupOptions);
@@ -180,7 +181,7 @@ export class MarkerClusterClass {
         this.blinkingElement = this.getMarkerClusterElement(payload.id as TypeJsonString);
         if (!this.blinkingElement) this.blinkingElement = Cast<L.MarkerClusterElement>(payload);
       },
-      map.id
+      mapId
     );
 
     // listen to marker cluster element stop blinking events
@@ -192,7 +193,7 @@ export class MarkerClusterClass {
           this.blinkingElement = null;
         }
       },
-      map.id
+      mapId
     );
 
     // listen to add marker cluster events
@@ -207,7 +208,7 @@ export class MarkerClusterClass {
           id
         );
       },
-      map.id
+      mapId
     );
 
     // listen to outside events to remove a marker cluster element
@@ -217,7 +218,7 @@ export class MarkerClusterClass {
         // remove marker cluster from outside
         this.deleteMarkerClusterElement(payload.id as TypeJsonString);
       },
-      map.id
+      mapId
     );
 
     // listen to outside events to process select by bounding polygone
@@ -276,7 +277,7 @@ export class MarkerClusterClass {
           }
         }
       },
-      map.id
+      mapId
     );
   }
 
@@ -284,7 +285,7 @@ export class MarkerClusterClass {
    * set the getClusterIconEmpty function to be used when creating marker cluster groups
    * that contain no selected marker
    *
-   * @param {TypeStampedIconCreationFunction} a function that returns a L.DivIcon for empty selection
+   * @param {TypeStampedIconCreationFunction} f function that returns a L.DivIcon for empty selection
    */
   setGetClusterIconEmpty = (f: TypeStampedIconCreationFunction): void => {
     getClusterIconEmpty = f;
@@ -294,7 +295,7 @@ export class MarkerClusterClass {
    * set the getClusterIconPart function to be used when creating marker cluster groups
    * that contain some selected markers
    *
-   * @param {TypeStampedIconCreationFunction} a function that returns a L.DivIcon for partial selection
+   * @param {TypeStampedIconCreationFunction} f function that returns a L.DivIcon for partial selection
    */
   setGetClusterIconPart = (f: TypeStampedIconCreationFunction): void => {
     getClusterIconPart = f;
@@ -304,7 +305,7 @@ export class MarkerClusterClass {
    * set the getClusterIconFull function to be used when creating marker cluster groups
    * that contain only selected markers
    *
-   * @param {TypeStampedIconCreationFunction} a function that returns a L.DivIcon for full selection
+   * @param {TypeStampedIconCreationFunction} f function that returns a L.DivIcon for full selection
    */
   setGetClusterIconFull = (f: TypeStampedIconCreationFunction): void => {
     getClusterIconFull = f;
@@ -604,7 +605,7 @@ export class MarkerClusterClass {
    * if clusterGroupId is not provided, use the active cluster group. If the
    * cluster group doesn't exist, create it.
    *
-   * @param {L.MarkerClusterElement} the marker cluster element to be added to the group
+   * @param {L.MarkerClusterElement} markerClusterElement marker cluster element to be added to the group
    * @param {string} geometryGroupId optional id of the group to add the geometry to
    */
   addElementToMarkerClusterGroup = (markerClusterElement: L.MarkerClusterElement, clusterGroupId?: string): void => {

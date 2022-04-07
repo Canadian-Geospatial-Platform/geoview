@@ -1,4 +1,5 @@
 import { ModalModel } from './modal-model';
+
 import { TypeFunction, TypeChildren } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 

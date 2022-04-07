@@ -142,7 +142,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const setLayerLegendAll = () =>
     Object.values(layers).forEach(async (layer) => {
-      if (layer.type === 'ogcWMS') {
+      if (layer.type === 'ogcWms') {
         const wmsLayer = Cast<WMS>(layer);
         const dataUrl = await wmsLayer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
@@ -404,7 +404,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       {subLayer.drawingInfo?.renderer.label || subLayer.name}
                     </div>
                   )}
-                  {(subLayer.drawingInfo.renderer.type as TypeJsonString) === 'uniqueValue' &&
+                  {(subLayer.drawingInfo?.renderer.type as TypeJsonString) === 'uniqueValue' &&
                     subLayer.drawingInfo.renderer.uniqueValueInfos[0].symbol.imageData &&
                     (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJsonArray).map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>

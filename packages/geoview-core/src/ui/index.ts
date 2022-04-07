@@ -10,5 +10,6 @@ export * from './list';
 export * from './modal';
 export * from './panel';
 export * from './select/select';
+export * from './snackbar/snackbar';
 export * from './stepper/stepper';
 export * from './text-field/text-field';

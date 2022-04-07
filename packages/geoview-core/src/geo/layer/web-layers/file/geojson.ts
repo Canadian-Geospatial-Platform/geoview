@@ -1,7 +1,9 @@
 import L from 'leaflet';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
-import { AbstractWebLayersClass, TypeLayerConfig } from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeWebLayers, TypeGeoJSONLayer } from '../../../../core/types/cgpv-types';
+
+import { api } from '../../../../api/api';
 
 /**
  * Class used to add geojson layer to the map
@@ -13,23 +15,34 @@ export class GeoJSON extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeGeoJSONLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super('geoJSON', 'GeoJson Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeGeoJSONLayer) {
+    super(
+      CONST_LAYER_TYPES.GEOJSON as TypeWebLayers,
+      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'GeoJson Layer',
+      layerConfig,
+      mapId
+    );
+
+    this.#mapId = mapId;
   }
 
   /**
    * Add a GeoJSON layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeGeoJSONLayer} layer the layer configuration
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
-    const data = getXMLHttpRequest(layer.url);
+  add(layer: TypeGeoJSONLayer): Promise<L.GeoJSON | null> {
+    const data = getXMLHttpRequest(layer.url[api.map(this.#mapId).getLanguageCode()]);
 
     const geo = new Promise<L.GeoJSON | null>((resolve) => {
       data.then((value: string) => {

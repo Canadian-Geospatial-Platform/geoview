@@ -4,7 +4,15 @@ import L from 'leaflet';
 
 import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
-import { AbstractWebLayersClass, TypeLayerConfig, TypeJsonNumber, TypeJsonValue, TypeJsonObject } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  CONST_LAYER_TYPES,
+  TypeFeatureLayer,
+  TypeJsonNumber,
+  TypeJsonValue,
+  TypeJsonObject,
+  TypeWebLayers,
+} from '../../../../core/types/cgpv-types';
 import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
@@ -23,26 +31,37 @@ export class EsriFeature extends AbstractWebLayersClass {
   // mapService property
   mapService: MapService;
 
+  // map id
+  #mapId: string;
+
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeFeatureLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super('esriFeature', 'Esri Feature Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeFeatureLayer) {
+    super(
+      CONST_LAYER_TYPES.ESRI_FEATURE as TypeWebLayers,
+      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'Esri Feature Layer',
+      layerConfig,
+      mapId
+    );
+
+    this.#mapId = mapId;
 
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url),
+      url: api.geoUtilities.getMapServerUrl(this.url),
     });
   }
 
   /**
    * Add a ESRI feature layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeFeatureLayer} layer the layer configuration
    * @return {Promise<FeatureLayer | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<FeatureLayer | null> {
+  async add(layer: TypeFeatureLayer): Promise<FeatureLayer | null> {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     // define a default blue icon
@@ -59,7 +78,7 @@ export class EsriFeature extends AbstractWebLayersClass {
       });
     }
 
-    const data = getXMLHttpRequest(`${layer.url}?f=json`);
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.#mapId).getLanguageCode()]}?f=json`);
 
     const geo = new Promise<FeatureLayer | null>((resolve) => {
       data.then((value: string) => {
@@ -69,7 +88,7 @@ export class EsriFeature extends AbstractWebLayersClass {
         // if the path is bad, return will be {}
         if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
           const feature = featureLayer({
-            url: layer.url,
+            url: layer.url[api.map(this.#mapId).getLanguageCode()],
             pointToLayer: (aFeature, latlng) => {
               return L.marker(latlng, { icon: iconSymbol, id: generateId() });
             },
