@@ -15,8 +15,6 @@ import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import Ajv from 'ajv';
-
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
@@ -27,37 +25,15 @@ import * as UI from './ui';
 
 import AppStart from './core/app-start';
 import * as types from './core/types/cgpv-types';
-import { generateId } from './core/utils/utilities';
 
 import { EVENT_NAMES } from './api/event';
 import { api } from './api/api';
 
 import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 
-import schema from '../schema.json';
+import { Config } from './core/utils/config';
 
 export * from './core/types/cgpv-types';
-
-const defaultConfig: types.TypeMapSchemaProps = {
-  map: {
-    interaction: 'dynamic',
-    initialView: {
-      zoom: 12,
-      center: [45, 75],
-    },
-    projection: 3978,
-    basemapOptions: {
-      id: 'transport',
-      shaded: true,
-      labeled: true,
-    },
-    layers: [],
-  },
-  theme: 'dark',
-  components: ['appbar', 'navbar', 'northArrow'],
-  languages: ['en-CA', 'fr-CA'],
-  extraOptions: {},
-};
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else
@@ -97,67 +73,6 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
 });
 
 /**
- * Parse the search parameters passed from a url
- *
- * @param {string} configParams a search string passed from the url "?..."
- * @returns {Object} object containing the parsed params
- */
-function getMapPropsFromUrlParams(configParams: string): types.TypeJsonObject {
-  // get parameters from path. Ex: ?z=4 will get {"z": "123"}
-  const data = configParams.split('?')[1];
-  const obj: types.TypeJsonObject = {};
-
-  if (data !== undefined) {
-    const params = data.split('&');
-
-    for (let i = 0; i < params.length; i += 1) {
-      const param = params[i].split('=');
-      const key = param[0];
-      const value = param[1] as types.TypeJsonValue;
-
-      obj[key] = types.Cast<types.TypeJsonObject>(value);
-    }
-  }
-
-  return obj;
-}
-
-function parseObjectFromUrl(objStr: string): types.TypeJsonObject {
-  const obj: types.TypeJsonObject = {};
-
-  if (objStr && objStr.length) {
-    // get the text in between { }
-    const objStrPropRegex = /(?<=[{_.])(.*?)(?=[}_.])/g;
-
-    const objStrProps = objStr.match(objStrPropRegex);
-
-    if (objStrProps && objStrProps.length) {
-      const objProps = objStrProps[0].split(',');
-
-      if (objProps) {
-        for (let i = 0; i < objProps.length; i += 1) {
-          const prop = objProps[i].split(':');
-          if (prop && prop.length) {
-            const key = prop[0] as string;
-            const value: string = prop[1];
-
-            if (prop[1] === 'true') {
-              obj[key] = types.Cast<types.TypeJsonObject>(true);
-            } else if (prop[1] === 'false') {
-              obj[key] = types.Cast<types.TypeJsonObject>(false);
-            } else {
-              obj[key] = types.Cast<types.TypeJsonObject>(value);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return obj;
-}
-
-/**
  * Initialize the cgpv and render it to root element
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
@@ -171,108 +86,22 @@ function init(callback: () => void) {
 
   const mapElements = document.getElementsByClassName('llwp-map');
 
+  // loop through map elements on the page
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
-    let mapId = mapElement.getAttribute('id');
+    // create a new config for this map element
+    const config = new Config(mapElement);
 
-    if (!mapId) mapId = generateId();
+    // initialize config
+    // if config provided (either by inline, url params) validate it with schema
+    // otherwise return the default config
+    const configObj = config.initializeMapConfig();
 
-    let language = mapElement.getAttribute('data-lang');
-
-    if (!language) language = 'en-CA';
-
-    if (mapId) {
-      // eslint-disable-next-line no-restricted-globals
-      const locationSearch = location.search;
-
-      // check if url contains any params
-      const urlParams = getMapPropsFromUrlParams(locationSearch);
-
-      let configObj: types.TypeMapSchemaProps = { ...defaultConfig };
-
-      if (Object.keys(urlParams).length) {
-        // Ex: ?p=3978&z=12&c=45,75&l=en-CA&t=dark&b={id:transport,shaded:true,labeled:true}&i=dynamic&keys=111,222,333,123
-
-        let center = (urlParams.c as types.TypeJsonValue as string).split(',');
-        if (!center) center = ['0', '0'];
-
-        const basemapOptions = parseObjectFromUrl(
-          urlParams.b as types.TypeJsonValue as string
-        ) as types.TypeJsonValue as types.TypeBasemapOptions;
-
-        configObj = {
-          ...configObj,
-          map: {
-            interaction: urlParams.i as types.TypeJsonValue as 'static' | 'dynamic',
-            initialView: {
-              zoom: parseInt(urlParams.z as types.TypeJsonValue as string, 10),
-              center: [parseInt(center[0], 10), parseInt(center[1], 10)],
-            },
-            projection: parseInt(urlParams.p as types.TypeJsonValue as '3978' | '3857', 10),
-            basemapOptions,
-          },
-          languages: ['en-CA', 'fr-CA'],
-          extraOptions: {},
-        };
-
-        // set language from params
-        language = urlParams.l as types.TypeJsonValue as types.TypeLocalizedLanguages;
-      } else {
-        let configObjStr = mapElement.getAttribute('data-config');
-
-        if (configObjStr) {
-          configObjStr = configObjStr
-            .replace(/'/g, '"')
-            .replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
-
-          configObj = { ...configObj, ...JSON.parse(configObjStr) };
-        }
-      }
-
-      // validate and use defaults for not provided fields
-      const validator = new Ajv({
-        strict: false,
-      });
-
-      // validate configuration and apply default if problem occurs then setup language
-      const validate = validator.compile(schema);
-
-      const valid = validate({ ...configObj });
-
-      if (!valid && validate.errors && validate.errors.length) {
-        for (let j = 0; j < validate.errors.length; j += 1) {
-          // const error = validate.errors[j];
-          // console.log(error);
-          // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
-          //   message: {
-          //     type: 'key',
-          //     value: error.message,
-          //     params: [mapId],
-          //   },
-          // });
-        }
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ReactDOM.render(
-          <AppStart
-            configObj={{
-              ...configObj,
-              id: mapId,
-              language: language as types.TypeLocalizedLanguages,
-            }}
-          />,
-          mapElement
-        );
-      }
-
-      // if (!valid) {
-      //   const errors = validator.getLastErrors();
-
-      //   console.log(errors);
-      // } else {
-      //   ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
-      // }
+    // if valid config was provided
+    if (configObj) {
+      // render the map with the config
+      ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
     }
   }
 }

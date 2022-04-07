@@ -46,9 +46,27 @@
       <div
         id="LNG1"
         class="llwp-map"
+        data-lang="en-CA"
         data-geometry-endpoint="https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/"
-        data-leaflet="{ 'name': 'LCCEN', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true }, 'layers': [] } "
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [60, -100]
+            },
+            'projection': 3857,
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            }
+          },
+          'theme': 'dark',
+          'languages': ['en-CA']
+        }"
       ></div>
+
       <p>
         This map will call pygeoapi.geocat.live/collections/nrcan-geocore API to gather the geometry from id provided by URL geoms parameter
         and load them on the map.

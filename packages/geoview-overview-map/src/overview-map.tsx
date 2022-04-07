@@ -21,7 +21,7 @@ const { useState, useEffect, useRef, useMemo } = react;
 
 const { DomEvent } = leaflet;
 
-const { MapContainer, TileLayer, useMap } = reactLeaflet;
+const { MapContainer, TileLayer } = reactLeaflet;
 
 const { useMediaQuery, useTheme, makeStyles } = ui;
 

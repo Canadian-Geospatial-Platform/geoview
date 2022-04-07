@@ -232,6 +232,7 @@ export class WMS extends AbstractWebLayersClass {
 
     if (infoFormat === 'application/geojson') {
       const dataFeatures = response.data.features as TypeJsonObjectArray;
+
       if (dataFeatures.length > 0) {
         const results: TypeJsonObjectArray = [];
         dataFeatures.forEach((jsonValue) => {
@@ -247,7 +248,7 @@ export class WMS extends AbstractWebLayersClass {
           } as TypeJsonValue);
         });
 
-        return Cast<TypeJsonObjectArray>({ results });
+        return Cast<TypeJsonObjectArray>(results);
       }
       return null;
     }
@@ -280,7 +281,8 @@ export class WMS extends AbstractWebLayersClass {
           } as TypeJsonValue);
         });
       }
-      return Cast<TypeJsonObjectArray>({ results });
+
+      return Cast<TypeJsonObjectArray>(results);
     }
     return null;
   };

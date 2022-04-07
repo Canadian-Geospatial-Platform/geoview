@@ -144,6 +144,7 @@ export class MapViewer {
   loadGeometries(): void {
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
     const servEndpoint = this.map.getContainer()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
+
     // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
 
