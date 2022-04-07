@@ -5,9 +5,7 @@ import {
   TypeButtonProps,
   TypeButtonPanel,
   TypeWindow,
-  TypeJsonObject,
-  TypeJsonValue,
-  TypeJsonString,
+  toJsonObject,
   TypePanelProps,
 } from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
@@ -29,7 +27,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJsonValue = {
+  translations = toJsonObject({
     'en-CA': {
       basemapSwitcher: 'Basemaps',
       'basemap-transport-label': {
@@ -75,7 +73,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
         type: 'CBCT',
       },
     },
-  };
+  });
 
   /**
    * Added function called after the plugin has been initialized
@@ -94,7 +92,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // button props
       const button: TypeButtonProps = {
-        tooltip: (this.translations as TypeJsonObject)[language].basemapSwitcher,
+        tooltip: this.translations[language].basemapSwitcher as string,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',
@@ -102,7 +100,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // panel props
       const panel: TypePanelProps = {
-        title: (this.translations as TypeJsonObject)[language].basemapSwitcher,
+        title: this.translations[language].basemapSwitcher,
         icon: '<i class="material-icons">map</i>',
         width: 200,
       };
@@ -119,7 +117,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const mapId: string = this.pluginProps.mapId as TypeJsonString;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;

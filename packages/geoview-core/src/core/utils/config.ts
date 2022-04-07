@@ -15,7 +15,7 @@ export class Config {
   private _config: TypeMapConfigProps = {
     id: generateId(),
     name: '',
-    center: [60, -100] as LatLngTuple,
+    center: [60, -100],
     zoom: 4,
     projection: 3978,
     language: 'en-CA',
@@ -63,7 +63,7 @@ export class Config {
    * Get map id
    */
   get id(): string {
-    return this._config.id as string;
+    return this._config.id;
   }
 
   /**

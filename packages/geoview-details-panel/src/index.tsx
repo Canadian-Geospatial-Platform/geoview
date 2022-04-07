@@ -4,8 +4,7 @@ import {
   AbstractPluginClass,
   TypePluginOptions,
   TypeButtonPanel,
-  TypeJsonString,
-  TypeJsonObject,
+  toJsonObject,
   TypeButtonProps,
   TypePanelProps,
   TypeWindow,
@@ -30,7 +29,7 @@ class DetailsPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations = Cast<TypeJsonObject>({
+  translations = toJsonObject({
     'en-CA': {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',
@@ -63,7 +62,7 @@ class DetailsPlugin extends AbstractPluginClass {
     const button: TypeButtonProps = {
       // set ID to detailsPanel so that it can be accessed from the core viewer
       id: 'detailsPanelButton',
-      tooltip: this.translations[language].detailsPanel,
+      tooltip: this.translations[language].detailsPanel as string,
       tooltipPlacement: 'right',
       icon: '<i class="material-icons">details</i>',
       visible: true,
@@ -78,10 +77,10 @@ class DetailsPlugin extends AbstractPluginClass {
     };
 
     // create a new button panel on the appbar
-    this.buttonPanel = api.map(mapId as TypeJsonString).appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.map(mapId as string).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId as TypeJsonString} />);
+    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId as string} />);
   };
 
   /**
@@ -97,8 +96,8 @@ class DetailsPlugin extends AbstractPluginClass {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId as TypeJsonString).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
-      api.event.emit(api.eventNames.EVENT_MARKER_ICON_HIDE, mapId as TypeJsonString, {});
+      api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      api.event.emit(api.eventNames.EVENT_MARKER_ICON_HIDE, mapId as string, {});
     }
   }
 }

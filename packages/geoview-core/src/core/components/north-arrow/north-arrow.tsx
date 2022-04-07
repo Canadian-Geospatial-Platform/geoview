@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { Map, LatLng, LatLngExpression, CRS, Point, Icon } from 'leaflet';
+import { Map, LatLng, CRS, Point, Icon } from 'leaflet';
 import { useMapEvent, Marker, useMap } from 'react-leaflet';
 
 import { debounce } from 'lodash';
@@ -14,18 +14,18 @@ import { PROJECTION_NAMES } from '../../../geo/projection/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { generateId } from '../../utils/utilities';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
     left: '50%', // theme.shape.center,
   },
   northArrow: {
-    width: 42, // (theme.overrides?.northArrow?.size as CSSProperties).width,
-    height: 42, // (theme.overrides?.northArrow?.size as CSSProperties).height,
+    width: theme.overrides?.northArrow?.size.width,
+    height: theme.overrides?.northArrow?.size.height,
   },
 }));
 
 // The north pole position use for north arrow marker and get north arrow rotation angle
-const northPolePosition: number[] = [90, -95];
+const northPolePosition: [number, number] = [90, -95];
 
 /**
  * north arrow passed in properties
@@ -114,7 +114,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     const offsetX = mapWidth - arrowWidth / 2;
 
     // hard code north pole so that arrow does not continue pointing past it
-    const screenNorthPoint = map.latLngToContainerPoint(northPolePosition as LatLngExpression);
+    const screenNorthPoint = map.latLngToContainerPoint(northPolePosition);
     const screenY = screenNorthPoint.y;
 
     // if the extent is near the north pole be more precise otherwise use the original math
@@ -218,7 +218,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       <NorthArrowIcon classes={classes} />
     </div>
   ) : (
-    ((<div />) as JSX.Element)
+    <div />
   );
 }
 
@@ -244,14 +244,8 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   });
 
   return projection.code === PROJECTION_NAMES.LCC ? (
-    <Marker
-      id={generateId('')}
-      position={northPolePosition as LatLngExpression}
-      icon={northPoleIcon}
-      keyboard={false}
-      pane="NorthPolePane"
-    />
+    <Marker id={generateId('')} position={northPolePosition} icon={northPoleIcon} keyboard={false} pane="NorthPolePane" />
   ) : (
-    ((<div />) as JSX.Element)
+    <div />
   );
 }

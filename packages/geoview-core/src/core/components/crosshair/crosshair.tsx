@@ -12,7 +12,6 @@ import { MapContext } from '../../app-start';
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 import { CrosshairIcon } from './crosshair-icon';
-import { TypeJsonString } from '../../types/cgpv-types';
 
 import { Fade } from '../../../ui';
 
@@ -43,8 +42,8 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   crosshairIcon: {
-    width: 275, // (theme.overrides?.crosshairIcon?.size as CSSProperties).width,
-    height: 275, // (theme.overrides?.crosshairIcon?.size as CSSProperties).height,
+    width: theme.overrides.crosshairIcon.size.width,
+    height: theme.overrides.crosshairIcon?.size.height,
   },
 }));
 
@@ -117,7 +116,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString).includes(id)) {
+        if (payload && (payload.handlerName as string).includes(id)) {
           setCrosshairsActive(true);
           isCrosshairsActiveValue.current = true;
           api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {

@@ -13,14 +13,7 @@ import { MarkerClusterClass } from './vector/marker-cluster';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import {
-  Cast,
-  TypeJsonString,
-  TypeJsonValue,
-  AbstractWebLayersClass,
-  TypeLayerConfig,
-  CONST_LAYER_TYPES,
-} from '../../core/types/cgpv-types';
+import { Cast, AbstractWebLayersClass, TypeLayerConfig, CONST_LAYER_TYPES } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
@@ -63,8 +56,8 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.EVENT_LAYER_ADD,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString).includes(this.#map.id)) {
-          const layerConf = payload.layer as TypeJsonValue as TypeLayerConfig;
+        if (payload && (payload.handlerName as string).includes(this.#map.id)) {
+          const layerConf = Cast<TypeLayerConfig>(payload.layer);
           if (layerConf.type === CONST_LAYER_TYPES.GEOJSON) {
             const geoJSON = new GeoJSON(layerConf);
             geoJSON.add(layerConf).then((layer) => {
@@ -121,7 +114,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.layer.id as TypeJsonString);
+        this.removeLayerById(payload.layer.id as string);
       },
       this.#map.id
     );
@@ -139,11 +132,13 @@ export class Layer {
    */
   private layerIsLoaded(name: string, layer: leafletLayer): void {
     let isLoaded = false;
-    // we trap most of the erros prior tp this. When this load, layer shoud ne ok
+    // we trap most of the erros prior to this. When this load, layer shoud be ok
     // ! load is not fired for GeoJSON layer
-    layer.once('load', () => {
-      isLoaded = true;
-    });
+    if (layer) {
+      layer.once('load', () => {
+        isLoaded = true;
+      });
+    }
 
     setTimeout(() => {
       if (!isLoaded) {
@@ -179,12 +174,14 @@ export class Layer {
     } else {
       if (cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON) this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
 
-      cgpvLayer.layer!.addTo(this.#map);
-      // this.layers.push(cgpvLayer);
-      this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
-      api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
-        layer: cgpvLayer.layer,
-      });
+      if (cgpvLayer.layer) {
+        cgpvLayer.layer!.addTo(this.#map);
+        // this.layers.push(cgpvLayer);
+        this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
+        api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#map.id, {
+          layer: cgpvLayer.layer,
+        });
+      }
     }
   }
 

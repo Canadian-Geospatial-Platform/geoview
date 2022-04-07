@@ -19,7 +19,7 @@ class OverviewMapPlugin extends AbstractPluginClass {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.pluginOptions;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -41,7 +41,7 @@ class OverviewMapPlugin extends AbstractPluginClass {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginOptions;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;

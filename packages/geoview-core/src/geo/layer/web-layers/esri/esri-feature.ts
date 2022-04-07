@@ -7,7 +7,6 @@ import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapS
 import {
   AbstractWebLayersClass,
   TypeLayerConfig,
-  TypeJsonNumber,
   TypeJsonValue,
   TypeJsonObject,
   CONST_LAYER_TYPES,
@@ -57,7 +56,7 @@ export class EsriFeature extends AbstractWebLayersClass {
 
     const res = await axios.get(queryUrl);
 
-    if (res.data.drawingInfo.renderer && res.data.drawingInfo.renderer.symbol) {
+    if (res.data.drawingInfo && res.data.drawingInfo.renderer && res.data.drawingInfo.renderer.symbol) {
       const symbolInfo = res.data.drawingInfo.renderer.symbol;
       iconSymbol = new L.Icon({
         iconUrl: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
@@ -135,10 +134,10 @@ export class EsriFeature extends AbstractWebLayersClass {
    */
   getBounds = async (): Promise<L.LatLngBounds> => {
     const meta = await this.getMetadata();
-    const xmin = meta.extent.xmin as TypeJsonNumber;
-    const xmax = meta.extent.xmax as TypeJsonNumber;
-    const ymin = meta.extent.ymin as TypeJsonNumber;
-    const ymax = meta.extent.ymax as TypeJsonNumber;
+    const xmin = meta.extent.xmin as number;
+    const xmax = meta.extent.xmax as number;
+    const ymin = meta.extent.ymin as number;
+    const ymax = meta.extent.ymax as number;
     return L.latLngBounds([
       [ymin, xmin],
       [ymax, xmax],

@@ -136,25 +136,21 @@ export type TypeMapContext = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJsonString = TypeJsonValue & string;
-export type TypeJsonNumber = TypeJsonValue & number;
-export type TypeJsonBoolean = TypeJsonValue & boolean;
-export type TypeJsonArrayOfString = TypeJsonValue & string[];
-export type TypeJsonArray = TypeJsonValue & TypeJsonValue[];
-export type TypeJsonObjectArray = TypeJsonValue & (TypeJsonObject[] | TypeJsonObject[]);
+export type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject };
 
-export type TypeJsonValue =
-  | null
-  | string
-  | number
-  | boolean
-  | TypeJsonValue[]
-  | { [key: string]: TypeJsonValue }
-  | { [key: string]: TypeJsonObject };
+export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
 
-export type TypeJsonObject = {
-  [key: string]: TypeJsonObject;
-};
+export type TypeJsonObject = TypeJsonValue & { [key: string]: TypeJsonObject };
+
+export function toJsonObject(p: unknown): TypeJsonObject {
+  if (!(p instanceof Object) || p instanceof Array) {
+    // eslint-disable-next-line no-console
+    console.log(p);
+    throw new Error(`Can't convert parameter to TypeJsonObject! typeof = ${typeof p}`);
+  }
+
+  return p as TypeJsonObject;
+}
 
 /*-----------------------------------------------------------------------------
  *
@@ -211,7 +207,7 @@ export type TypeLegendJsonDynamic = {
 export type TypeLayersInWebLayer = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJsonObject[];
+  layerData: TypeJsonArray;
   groupLayer: boolean;
   displayField: string;
   fieldAliases: TypeJsonValue;
@@ -253,7 +249,7 @@ export type TypeFoundLayers = {
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
   getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
-  selectFeature: (featureData: TypeJsonValue) => void;
+  selectFeature: (featureData: TypeJsonObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
@@ -267,7 +263,7 @@ export type TypeRendererSymbol = {
     legendImageUrl: string;
     type: 'simple' | 'uniqueValue';
   };
-  uniqueValueInfos: TypeJsonObject[];
+  uniqueValueInfos: TypeJsonArray;
   field1: string;
   field2: string;
   field3: string;
@@ -499,7 +495,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
-  tooltip?: string | TypeJsonValue;
+  tooltip?: string;
   // location for tooltip
   tooltipPlacement?: TooltipProps['placement'];
   // button icon

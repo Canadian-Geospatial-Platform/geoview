@@ -11,13 +11,11 @@ import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 import {
   Cast,
   AbstractWebLayersClass,
-  TypeJsonString,
-  TypeJsonArray,
-  TypeJsonObjectArray,
-  TypeJsonValue,
   TypeJsonObject,
+  toJsonObject,
   TypeLayerConfig,
   CONST_LAYER_TYPES,
+  TypeJsonArray,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -91,7 +89,7 @@ export class WMS extends AbstractWebLayersClass {
           let isValid = true;
 
           // parse the xml string and convert to json
-          this.#capabilities = new WMSCapabilities(value).toJSON() as TypeJsonObject;
+          this.#capabilities = new WMSCapabilities(value).toJSON();
 
           isValid = this.validateEntries(this.#capabilities.Capability.Layer, layer.entries as string);
 
@@ -104,7 +102,7 @@ export class WMS extends AbstractWebLayersClass {
               format: 'image/png',
               transparent: true,
               attribution: '',
-              version: this.#capabilities.version as TypeJsonString,
+              version: this.#capabilities.version as string,
             });
             this.#wmsParams = wms.wmsParams;
 
@@ -131,10 +129,10 @@ export class WMS extends AbstractWebLayersClass {
     // eslint-disable-next-line no-prototype-builtins
 
     // Added support of multiple entries
-    const allNames = this.findAllByKey(layer, 'Name');
+    const allNames = this.findAllByKey(layer, 'Name') as string[];
     const entryArray = entries.split(',').map((s) => s.trim());
     for (let i = 0; i < entryArray.length; i++) {
-      isValid = isValid && allNames.includes(Cast<TypeJsonObject>(entryArray[i]));
+      isValid = isValid && allNames.includes(entryArray[i]);
     }
 
     return isValid;
@@ -146,8 +144,8 @@ export class WMS extends AbstractWebLayersClass {
    * @param {string} keyToFind key to check
    * @returns {any} all values found
    */
-  private findAllByKey(obj: TypeJsonObject, keyToFind: string): TypeJsonObject[] {
-    const reduceFunction = (accumulator: TypeJsonObject[], [key, value]: [string, TypeJsonObject]): TypeJsonObject[] => {
+  private findAllByKey(obj: { [key: string]: TypeJsonObject }, keyToFind: string): TypeJsonArray {
+    const reduceFunction = (accumulator: TypeJsonArray, [key, value]: [string, TypeJsonObject]): TypeJsonArray => {
       if (key === keyToFind) {
         return accumulator.concat(value);
       }
@@ -199,73 +197,79 @@ export class WMS extends AbstractWebLayersClass {
    * @param {L.Map} map the map odject
    * @param {number} featureCount the map odject
    *
-   * @returns {Promise<TypeJsonObject | null>} a promise that returns the feature info in a json format
+   * @returns {Promise<TypeJsonArray | null>} a promise that returns the feature info in a json format
    */
-  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJsonObjectArray | null> => {
+  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJsonArray | null> => {
     let infoFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
       const formatArray = this.#capabilities.Capability.Request.GetFeatureInfo.Format;
-      if ((formatArray as TypeJsonArray).includes('application/geojson')) infoFormat = 'application/geojson';
+      if ((formatArray as string[]).includes('application/geojson')) infoFormat = 'application/geojson';
     }
 
     const params = this.getFeatureInfoParams(latlng, map);
-    params.info_format = Cast<TypeJsonObject>(infoFormat);
-    params.feature_count = Cast<TypeJsonObject>(featureCount);
+    (params.info_format as string) = infoFormat;
+    (params.feature_count as number) = featureCount;
 
     const response = await axios.get<TypeJsonObject>(this.url, { params });
 
     if (infoFormat === 'application/geojson') {
-      const dataFeatures = response.data.features as TypeJsonObjectArray;
+      const dataFeatures = response.data.features as TypeJsonArray;
       if (dataFeatures.length > 0) {
-        const results: TypeJsonObjectArray = [];
+        const results: TypeJsonArray = [];
         dataFeatures.forEach((jsonValue) => {
-          const element = jsonValue as TypeJsonObject;
-          results.push({
-            attributes: element.properties,
-            geometry: element.geometry,
-            layerId: this.id,
-            layerName: element.layerName,
-            // displayFieldName: "OBJECTID",
-            // value: element.properties.OBJECTID,
-            geometryType: element.type,
-          } as TypeJsonValue);
+          const element = jsonValue;
+          results.push(
+            toJsonObject({
+              attributes: element.properties,
+              geometry: element.geometry,
+              layerId: this.id,
+              layerName: element.layerName,
+              // displayFieldName: "OBJECTID",
+              // value: element.properties.OBJECTID,
+              geometryType: element.type,
+            })
+          );
         });
 
-        return Cast<TypeJsonObjectArray>({ results });
+        return results;
       }
       return null;
     }
-    const featureInfoResponse = (xmlToJson(response.request.responseXML) as TypeJsonObject).FeatureInfoResponse;
+    const featureInfoResponse = xmlToJson(response.request.responseXML).FeatureInfoResponse;
 
     if (featureInfoResponse && featureInfoResponse.FIELDS) {
-      const results: TypeJsonObjectArray = [];
+      const results: TypeJsonArray = [];
       // only one feature
       if (featureInfoResponse.FIELDS['@attributes']) {
-        results.push({
-          attributes: featureInfoResponse.FIELDS['@attributes'],
-          geometry: null,
-          layerId: this.id,
-          layerName: this.name,
-          // displayFieldName: "OBJECTID",
-          // value: element.properties.OBJECTID,
-          geometryType: null,
-        } as TypeJsonValue);
-      } else {
-        const arrayOfFeature = featureInfoResponse.FIELDS as TypeJsonObjectArray;
-        arrayOfFeature.forEach((element) => {
-          results.push({
-            attributes: (element as TypeJsonObject)['@attributes'],
+        results.push(
+          toJsonObject({
+            attributes: featureInfoResponse.FIELDS['@attributes'],
             geometry: null,
             layerId: this.id,
             layerName: this.name,
             // displayFieldName: "OBJECTID",
             // value: element.properties.OBJECTID,
             geometryType: null,
-          } as TypeJsonValue);
+          })
+        );
+      } else {
+        const arrayOfFeature = featureInfoResponse.FIELDS as TypeJsonArray;
+        arrayOfFeature.forEach((element) => {
+          results.push(
+            toJsonObject({
+              attributes: element['@attributes'],
+              geometry: null,
+              layerId: this.id,
+              layerName: this.name,
+              // displayFieldName: "OBJECTID",
+              // value: element.properties.OBJECTID,
+              geometryType: null,
+            })
+          );
         });
       }
-      return Cast<TypeJsonObjectArray>({ results });
+      return results;
     }
     return null;
   };
@@ -289,7 +293,7 @@ export class WMS extends AbstractWebLayersClass {
     const sw = crs!.project(map.getBounds().getSouthWest());
     const ne = crs!.project(map.getBounds().getNorthEast());
 
-    const params: TypeJsonValue = {
+    const params = toJsonObject({
       request: 'GetFeatureInfo',
       service: 'WMS',
       version: this.#wmsParams!.version!,
@@ -297,17 +301,18 @@ export class WMS extends AbstractWebLayersClass {
       query_layers: this.#wmsParams!.layers,
       height: size.y,
       width: size.x,
-    };
+    });
 
     // Define version-related request parameters.
     const version = window.parseFloat(this.#wmsParams!.version!);
-    params[version >= 1.3 ? 'crs' : 'srs'] = crs!.code!;
-    params.bbox = `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    params.bbox = version >= 1.3 && crs!.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    params[version >= 1.3 ? 'i' : 'x'] = point.x;
-    params[version >= 1.3 ? 'j' : 'y'] = point.y;
+    (params[version >= 1.3 ? 'crs' : 'srs'] as string) = crs!.code!;
+    (params.bbox as string) = `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    (params.bbox as string) =
+      version >= 1.3 && crs!.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+    (params[version >= 1.3 ? 'i' : 'x'] as number) = point.x;
+    (params[version >= 1.3 ? 'j' : 'y'] as number) = point.y;
 
-    return params as TypeJsonObject;
+    return params;
   }
 
   /**

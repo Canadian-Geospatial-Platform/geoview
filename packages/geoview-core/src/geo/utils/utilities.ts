@@ -50,7 +50,7 @@ export class GeoUtilities {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
     const xmlDOM = new DOMParser().parseFromString(res.data, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJsonObject;
+    const json = xmlToJson(xmlDOM);
     const capabilities = json['wfs:WFS_Capabilities'];
     return capabilities;
   };

@@ -6,11 +6,11 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import {
   AbstractWebLayersClass,
-  TypeJsonString,
   TypeJsonValue,
   TypeJsonObject,
   TypeLayerConfig,
   CONST_LAYER_TYPES,
+  TypeJsonArray,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -137,16 +137,17 @@ export class OgcFeature extends AbstractWebLayersClass {
 
   /**
    * Get feature type info of a given entry
-   * @param {object} FeatureTypeList feature type list
+   * @param {object} featureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatureTypeInfo(FeatureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
+  private getFeatureTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
-    if (Array.isArray(FeatureTypeList)) {
-      for (let i = 0; i < FeatureTypeList.length; i += 1) {
-        let fName = FeatureTypeList[i].Name['#text'];
+    if (Array.isArray(featureTypeList)) {
+      const featureTypeArray = featureTypeList as TypeJsonArray;
+      for (let i = 0; i < featureTypeArray.length; i += 1) {
+        let fName = featureTypeArray[i].Name['#text'] as string;
         const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
@@ -155,12 +156,12 @@ export class OgcFeature extends AbstractWebLayersClass {
           const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
           if (entryName === fName) {
-            return FeatureTypeList[i];
+            return featureTypeArray[i];
           }
         }
       }
     } else {
-      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJsonString);
+      let fName = featureTypeList.Name && (featureTypeList.Name['#text'] as string);
 
       if (fName) {
         const fNameSplit = fName.split(':');
@@ -171,7 +172,7 @@ export class OgcFeature extends AbstractWebLayersClass {
           const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
           if (entryName === fName) {
-            return FeatureTypeList;
+            return featureTypeList;
           }
         }
       }

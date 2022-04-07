@@ -9,7 +9,6 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapContext } from '../../app-start';
 
-import { TypeJsonString } from '../../types/cgpv-types';
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
 export const useStyles = makeStyles((theme) => ({
@@ -68,7 +67,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
           updateComponent();
         }
       },
@@ -79,7 +78,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as TypeJsonString) === mapId) {
+        if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
           updateComponent();
         }
       },
@@ -90,7 +89,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if ((args.handlerName as TypeJsonString) === mapId && (args.type as TypeJsonString) === 'appbar') {
+        if ((args.handlerName as string) === mapId && (args.type as string) === 'appbar') {
           updateComponent();
         }
       },
@@ -100,7 +99,7 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if ((args.handlerName as TypeJsonString) === mapId && (args.type as TypeJsonString) === 'appbar') {
+        if ((args.handlerName as string) === mapId && (args.type as string) === 'appbar') {
           updateComponent();
         }
       },

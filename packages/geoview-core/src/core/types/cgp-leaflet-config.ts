@@ -178,7 +178,7 @@ L.CircleMarker.addInitHook(function fn(this: L.CircleMarker) {
 L.Circle.addInitHook(function fn(this: L.Circle) {
   this.type = CONST_VECTOR_TYPES.CIRCLE;
   // Radius of the circle is in meters, we convert it to km
-  this._mRadius = (this.options.radius as number) * 1000;
+  this._mRadius = this.options.radius! * 1000;
 });
 
 /*-----------------------------------------------------------------------------

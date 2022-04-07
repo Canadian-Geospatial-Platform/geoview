@@ -12,9 +12,9 @@ import {
   TypeEntry,
   TypePanelContentProps,
   TypeWindow,
+  toJsonObject,
   TypeJsonObject,
   TypeJsonArray,
-  TypeJsonObjectArray,
   WMS,
   EsriFeature,
   EsriDynamic,
@@ -86,7 +86,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
     // check if a symbol object exists in the renderer
     if (renderer && renderer.symbol) {
-      symbolImage = Cast<TypeJsonObject>(renderer.symbol);
+      symbolImage = toJsonObject(renderer.symbol);
     } else if (renderer && renderer.uniqueValueInfos && renderer.uniqueValueInfos.length > 0) {
       // if symbol not found then check if there are multiple symbologies
       symbolImage = renderer.uniqueValueInfos.filter((info) => {
@@ -217,7 +217,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     const { layers } = data[mapLayer.id];
 
     // add the layer to the layers object, the layer will have a key generated from the id and name of the layer seperated by dashes
-    layers[`${layerInfo.id}-${layerInfo.name.replace(/\s+/g, '-').toLowerCase()}`] = {
+    layers[`${layerInfo.id}-${layerInfo.name.replace(/\s+/g, '-').toLowerCase()}`] = Cast<TypeLayersEntry>({
       // the information about this layer
       layer: layerInfo,
       // is it a group layer or not
@@ -230,7 +230,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       fieldAliases: getFieldAliases(layerInfo.fields),
       // the renderer object containing the symbology
       renderer: layerInfo.drawingInfo && layerInfo.drawingInfo.renderer,
-    } as TypeLayersEntry;
+    });
 
     // save the layers back to the data object on the specified map server layer
     // eslint-disable-next-line no-param-reassign
@@ -295,7 +295,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             clearResults(dataKey, layerKey);
 
             // eslint-disable-next-line no-underscore-dangle
-            const layerMap = Cast<{ _map: L.Map }>(Cast<TypeJsonObject>(layer).layer)._map;
+            const layerMap = Cast<{ _map: L.Map }>(toJsonObject(layer).layer)._map;
             // get map size
             const size = layerMap.getSize();
 
@@ -315,7 +315,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             // check layer type if WMS then use getFeatureInfo to query the data
             if (layer!.type === CONST_LAYER_TYPES.WMS) {
               const ogcWMSLayer = Cast<WMS>(layer);
-              let getFeatureInfoResponse: TypeJsonObjectArray | null = null;
+              let getFeatureInfoResponse: TypeJsonArray | null = null;
               // eslint-disable-next-line no-await-in-loop
               getFeatureInfoResponse = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
 
@@ -398,13 +398,15 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
         // if there are only one entry found in this layer then go directly to the entry / feature info
         if (layersFound[0].entries.length === 1) {
-          selectFeature({
-            attributes: layersFound[0].entries[0].attributes,
-            displayField: layersFound[0].layer.displayField,
-            fieldAliases: layersFound[0].layer.fieldAliases,
-            symbol: getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes),
-            numOfEntries: 1,
-          });
+          selectFeature(
+            toJsonObject({
+              attributes: layersFound[0].entries[0].attributes,
+              displayField: layersFound[0].layer.displayField,
+              fieldAliases: layersFound[0].layer.fieldAliases,
+              symbol: getSymbol(layersFound[0].layer.renderer, layersFound[0].entries[0].attributes),
+              numOfEntries: 1,
+            })
+          );
         }
       } else {
         // if multiple layers contains entries then use the symbology of first layer

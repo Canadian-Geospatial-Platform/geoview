@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { Cast, TypeJsonString, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
+import { toJsonObject, TypeJsonValue, TypeJsonObject, TypeJsonArray } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -245,7 +245,7 @@ export class Event {
       let listenerPayload: TypeJsonObject;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && (payload.handlerName as TypeJsonString) === handlerName) {
+      if (handlerName && (payload.handlerName as string) === handlerName) {
         listenerPayload = this.events[eName][handlerName];
       } else {
         listenerPayload = payload;
@@ -271,12 +271,12 @@ export class Event {
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJsonValue) => {
-      let listenerPayload: TypeJsonValue;
+    const listen = (payload: TypeJsonObject) => {
+      let listenerPayload: TypeJsonObject;
 
       // if a handler name was specefieid, callback will return that data if found
-      if (handlerName && (payload as Record<string, unknown>).handlerName === handlerName) {
-        listenerPayload = this.events[eName][handlerName] as TypeJsonValue;
+      if (handlerName && payload.handlerName === handlerName) {
+        listenerPayload = this.events[eName][handlerName];
       } else {
         listenerPayload = payload;
       }
@@ -296,19 +296,19 @@ export class Event {
    *
    * @returns An array containing the data from single / multiple handlers
    */
-  all = (eventName: string, listener: (payload: TypeJsonValue[]) => void): void => {
+  all = (eventName: string, listener: (payload: TypeJsonArray) => void): void => {
     /**
      * callback function to handle adding the data for multiple handlers
      */
     const listen = () => {
       // array containing the data
-      const data: TypeJsonValue[] = [];
+      const data: TypeJsonArray = [];
 
       // loop through events with same event name and get their data
       for (let i = 0; i < Object.keys(this.events[eventName]).length; i++) {
         const handlerName = Object.keys(this.events[eventName])[i];
 
-        data.push(this.events[eventName][handlerName] as TypeJsonValue);
+        data.push(this.events[eventName][handlerName]);
       }
 
       // call the callback function
@@ -358,7 +358,7 @@ export class Event {
     const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
-    const hName = generateId(handlerName as string | undefined);
+    const hName = generateId(handlerName);
 
     if (!this.events[event]) {
       this.events[eventName] = {};
@@ -369,7 +369,7 @@ export class Event {
     }
 
     // store the emitted event to the events array
-    this.events[eventName][hName] = Cast<TypeJsonObject>({
+    this.events[eventName][hName] = toJsonObject({
       handlerName,
       ...payload,
     });

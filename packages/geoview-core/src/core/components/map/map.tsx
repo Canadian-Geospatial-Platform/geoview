@@ -24,7 +24,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
+import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonObject } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme) => ({
   snackBar: {
@@ -106,10 +106,10 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id)
+        if (payload && payload.handlerName === id)
           setComponents((tempComponents) => ({
-            ...tempComponents,
-            [payload.id as TypeJsonString]: payload.component,
+            ...(tempComponents as object),
+            [payload.id as string]: payload.component,
           }));
       },
       id
@@ -119,9 +119,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id) {
-          const tempComponents = { ...components };
-          delete tempComponents[payload.id as TypeJsonString];
+        if (payload && payload.handlerName === id) {
+          const tempComponents: TypeJsonObject = { ...(components as object) };
+          delete tempComponents[payload.id as string];
 
           setComponents(() => ({
             ...tempComponents,
@@ -135,7 +135,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id) setBasemapLayers(Cast<TypeBasemapLayer[]>(payload.layers));
+        if (payload && (payload.handlerName as string) === id) setBasemapLayers(Cast<TypeBasemapLayer[]>(payload.layers));
       },
       id
     );
