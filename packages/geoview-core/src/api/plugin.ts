@@ -8,7 +8,16 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapViewer } from '../geo/map/map';
 
 import { api } from './api';
-import { Cast, AbstractPluginClass, TypeWindow, TypeJsonValue, TypePluginStructure, TypeRecordOfPlugin } from '../core/types/cgpv-types';
+import {
+  Cast,
+  AbstractPluginClass,
+  TypeWindow,
+  toJsonObject,
+  TypeJsonObject,
+  TypeJsonValue,
+  TypePluginStructure,
+  TypeRecordOfPlugin,
+} from '../core/types/cgpv-types';
 
 /**
  * Class to manage plugins
@@ -56,8 +65,8 @@ export class Plugin {
   addPlugin = async (
     pluginId: string,
     mapId: string,
-    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJsonValue) => TypeJsonValue),
-    props?: TypeJsonValue
+    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
+    props?: TypeJsonObject
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
       let plugin: TypePluginStructure | null = null;
@@ -179,13 +188,23 @@ export class Plugin {
         map.mapProps.corePackages.forEach((pluginId) => {
           const { plugins } = Cast<TypeWindow>(window);
           if (plugins && plugins[pluginId]) {
-            this.addPlugin(pluginId, mapId, plugins[pluginId], {
+            this.addPlugin(
+              pluginId,
               mapId,
-            });
+              plugins[pluginId],
+              toJsonObject({
+                mapId,
+              })
+            );
           } else {
-            this.addPlugin(pluginId, mapId, undefined, {
+            this.addPlugin(
+              pluginId,
               mapId,
-            });
+              undefined,
+              toJsonObject({
+                mapId,
+              })
+            );
           }
         });
       }

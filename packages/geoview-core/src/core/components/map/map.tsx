@@ -20,7 +20,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { Cast, TypeMapConfigProps, TypeBasemapLayer, TypeJsonString } from '../../types/cgpv-types';
+import { Cast, TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
   const { map: mapProps, extraOptions, language } = props;
@@ -92,7 +92,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id) setBasemapLayers(Cast<TypeBasemapLayer[]>(payload.layers));
+        if (payload && payload.handlerName === id) setBasemapLayers(Cast<TypeBasemapLayer[]>(payload.layers));
       },
       id
     );

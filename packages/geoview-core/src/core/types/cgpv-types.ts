@@ -136,25 +136,21 @@ export type TypeMapContext = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJsonString = TypeJsonValue & string;
-export type TypeJsonNumber = TypeJsonValue & number;
-export type TypeJsonBoolean = TypeJsonValue & boolean;
-export type TypeJsonArrayOfString = TypeJsonValue & string[];
-export type TypeJsonArray = TypeJsonValue & TypeJsonValue[];
-export type TypeJsonObjectArray = TypeJsonValue & (TypeJsonObject[] | TypeJsonObject[]);
+export type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject };
 
-export type TypeJsonValue =
-  | null
-  | string
-  | number
-  | boolean
-  | TypeJsonValue[]
-  | { [key: string]: TypeJsonValue }
-  | { [key: string]: TypeJsonObject };
+export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
 
-export type TypeJsonObject = {
-  [key: string]: TypeJsonObject;
-};
+export type TypeJsonObject = TypeJsonValue & { [key: string]: TypeJsonObject };
+
+export function toJsonObject(p: unknown): TypeJsonObject {
+  if (!(p instanceof Object) || p instanceof Array) {
+    // eslint-disable-next-line no-console
+    console.log(p);
+    throw new Error(`Can't convert parameter to TypeJsonObject! typeof = ${typeof p}`);
+  }
+
+  return p as TypeJsonObject;
+}
 
 /*-----------------------------------------------------------------------------
  *
@@ -167,19 +163,6 @@ export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
 
 // icon creation function prototype for empty markers
 export type TypeIconCreationFunction = () => L.DivIcon;
-
-/**
- * constant contains layer types
- */
-export const CONST_LAYER_TYPES = {
-  WMS: 'ogcWms',
-  GEOJSON: 'geojson',
-  ESRI_DYNAMIC: 'esriDynamic',
-  ESRI_FEATURE: 'esriFeature',
-  XYZ_TILES: 'xyzTiles',
-  WFS: 'ogcWfs',
-  OGC_FEATURE: 'ogcFeature',
-};
 
 /**
  * ESRI Json Legend for Dynamic Layer
@@ -213,7 +196,7 @@ export type TypeLegendJsonDynamic = {
 export type TypeLayersInWebLayer = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJsonObject[];
+  layerData: TypeJsonArray;
   groupLayer: boolean;
   displayField: string;
   fieldAliases: TypeJsonValue;
@@ -255,7 +238,7 @@ export type TypeFoundLayers = {
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
   getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
-  selectFeature: (featureData: TypeJsonValue) => void;
+  selectFeature: (featureData: TypeJsonObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
@@ -269,7 +252,7 @@ export type TypeRendererSymbol = {
     legendImageUrl: string;
     type: 'simple' | 'uniqueValue';
   };
-  uniqueValueInfos: TypeJsonObject[];
+  uniqueValueInfos: TypeJsonArray;
   field1: string;
   field2: string;
   field3: string;
@@ -297,14 +280,19 @@ export type TypeRecordOfPlugin = {
 };
 
 /**
+ * interface used to define the vector types
+ */
+export type TypeOfVector = 'polyline' | 'polygon' | 'circle' | 'circle_marker' | 'marker';
+
+/**
  * constant used to specify available vectors to draw
  */
 export const CONST_VECTOR_TYPES = {
-  POLYLINE: 'polyline',
-  POLYGON: 'polygon',
-  CIRCLE: 'circle',
-  CIRCLE_MARKER: 'circle_marker',
-  MARKER: 'marker',
+  POLYLINE: 'polyline' as TypeOfVector,
+  POLYGON: 'polygon' as TypeOfVector,
+  CIRCLE: 'circle' as TypeOfVector,
+  CIRCLE_MARKER: 'circle_marker' as TypeOfVector,
+  MARKER: 'marker' as TypeOfVector,
 };
 
 /**
@@ -386,13 +374,9 @@ export type TypeBasemapOptions = {
 /**
  * interface used when adding a new layer
  */
-export type TypeLayerConfig = {
-  id: string;
-  url: TypeLangString;
-  layerType: string;
-  name?: TypeLangString;
+export interface TypeLayerConfig extends TypeAbstractWebLayersConfig {
   state?: TypeLayerSettings;
-};
+}
 
 export type TypeLayerSettings = {
   opacity: number;
@@ -491,8 +475,10 @@ export interface TypeOgcFeatureLayer extends TypeLayerConfig {
   details?: TypeDetailsLayerSettings;
 }
 
+export type TypeInteraction = 'static' | 'dynamic';
+
 export type TypeMapConfig = {
-  interaction: 'static' | 'dynamic';
+  interaction: TypeInteraction;
   controls?: TypeMapControls;
   initialView: TypeMapInitialView;
   projection: number;
@@ -659,7 +645,7 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
-  tooltip?: string | TypeJsonValue;
+  tooltip?: string;
   // location for tooltip
   tooltipPlacement?: TooltipProps['placement'];
   // button icon
@@ -905,9 +891,39 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
 export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 
 /**
+ * constant contains layer types
+ */
+export const CONST_LAYER_TYPES: { [key: string]: TypeWebLayers } = {
+  ESRI_DYNAMIC: 'esriDynamic',
+  ESRI_FEATURE: 'esriFeature',
+  GEOJSON: 'geojson',
+  XYZ_TILES: 'xyzTiles',
+  OGC_FEATURE: 'ogcFeature',
+  WFS: 'ogcWfs',
+  WMS: 'ogcWms',
+};
+
+/**
+ * constant contains default layer names
+ */
+export const DEFAULT_LAYER_NAMES: { [key: string]: string } = {
+  esriDynamic: 'Esri Dynamic Layer',
+  esriFeature: 'Esri Feature Layer',
+  geojson: 'GeoJson Layer',
+  xyzTiles: 'XYZ Tiles',
+  ogcFeature: 'OGC Feature Layer',
+  ogcWfs: 'WFS Layer',
+  ogcWms: 'WMS Layer',
+};
+
+/**
  * interface used by all web layers
  */
-export type TypeAbstractWebLayersConfig = TypeLayerConfig;
+export type TypeAbstractWebLayersConfig = {
+  id?: string;
+  name?: TypeLangString;
+  url: TypeLangString;
+};
 
 // AbstractWebLayersClass types
 

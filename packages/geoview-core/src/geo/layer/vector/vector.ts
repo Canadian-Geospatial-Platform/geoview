@@ -3,7 +3,7 @@ import L, { LatLngExpression } from 'leaflet';
 import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
-import { Cast, TypeJsonString, TypeJsonNumber, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
+import { Cast, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';
 
 /**
@@ -44,14 +44,14 @@ export class Vector {
       EVENT_NAMES.EVENT_VECTOR_ADD,
       (payload) => {
         type TypePayloadPoints = LatLngExpression[] | LatLngExpression[][];
-        const id = payload.id ? (payload.id as TypeJsonString) : undefined;
-        const payloadType = payload.type as TypeJsonString;
+        const id = payload.id ? (payload.id as string) : undefined;
+        const payloadType = payload.type as string;
         if (payloadType === CONST_VECTOR_TYPES.CIRCLE) {
           this.addCircle(
-            payload.latitude as TypeJsonNumber,
-            payload.longitude as TypeJsonNumber,
+            payload.latitude as number,
+            payload.longitude as number,
             Cast<L.CircleMarkerOptions>(payload.options),
-            id as TypeJsonString
+            id as string
           );
         } else if (payloadType === CONST_VECTOR_TYPES.POLYGON) {
           this.addPolygon(
@@ -62,19 +62,9 @@ export class Vector {
         } else if (payloadType === CONST_VECTOR_TYPES.POLYLINE) {
           this.addPolyline(Cast<TypePayloadPoints>(payload.points), Cast<L.CircleMarkerOptions>(payload.options), id);
         } else if (payloadType === CONST_VECTOR_TYPES.MARKER) {
-          this.addMarker(
-            payload.latitude as TypeJsonNumber,
-            payload.longitude as TypeJsonNumber,
-            Cast<L.CircleMarkerOptions>(payload.options),
-            id
-          );
+          this.addMarker(payload.latitude as number, payload.longitude as number, Cast<L.CircleMarkerOptions>(payload.options), id);
         } else if (payloadType === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
-          this.addCircleMarker(
-            payload.latitude as TypeJsonNumber,
-            payload.longitude as TypeJsonNumber,
-            Cast<L.CircleMarkerOptions>(payload.options),
-            id
-          );
+          this.addCircleMarker(payload.latitude as number, payload.longitude as number, Cast<L.CircleMarkerOptions>(payload.options), id);
         }
       },
       this.#mapId
@@ -85,7 +75,7 @@ export class Vector {
       EVENT_NAMES.EVENT_VECTOR_REMOVE,
       (payload) => {
         // remove geometry from outside
-        this.deleteGeometry(payload.id as TypeJsonString);
+        this.deleteGeometry(payload.id as string);
       },
       this.#mapId
     );

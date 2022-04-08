@@ -16,8 +16,6 @@ import { EVENT_NAMES } from '../../api/event';
 import {
   Cast,
   CONST_LAYER_TYPES,
-  TypeJsonString,
-  TypeJsonValue,
   AbstractWebLayersClass,
   TypeLayerConfig,
   TypeWMSLayer,
@@ -70,49 +68,55 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.EVENT_LAYER_ADD,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString).includes(this.#mapId)) {
-          const layerConf = payload.layer as TypeJsonValue as TypeLayerConfig;
-          if (layerConf.layerType === CONST_LAYER_TYPES.GEOJSON) {
-            const geoJSON = new GeoJSON(this.#mapId, layerConf as TypeGeoJSONLayer);
+        if (payload && (payload.handlerName as string).includes(this.#mapId)) {
+          if (payload.layer.layerType === CONST_LAYER_TYPES.GEOJSON) {
+            const layerConf = Cast<TypeGeoJSONLayer>(payload.layer);
+            const geoJSON = new GeoJSON(this.#mapId, layerConf);
             geoJSON.add(layerConf as TypeGeoJSONLayer).then((layer) => {
               geoJSON.layer = layer;
               this.addToMap(geoJSON);
             });
 
             this.removeTabindex();
-          } else if (layerConf.layerType === CONST_LAYER_TYPES.WMS) {
-            const wmsLayer = new WMS(this.#mapId, layerConf as TypeWMSLayer);
+          } else if (payload.layer.layerType === CONST_LAYER_TYPES.WMS) {
+            const layerConf = Cast<TypeWMSLayer>(payload.layer);
+            const wmsLayer = new WMS(this.#mapId, layerConf);
             wmsLayer.add(layerConf as TypeWMSLayer).then((layer) => {
               wmsLayer.layer = layer;
               this.addToMap(wmsLayer);
             });
-          } else if (layerConf.layerType === CONST_LAYER_TYPES.XYZ_TILES) {
-            const xyzTiles = new XYZTiles(this.#mapId, layerConf as TypeXYZTiles);
+          } else if (payload.layer.layerType === CONST_LAYER_TYPES.XYZ_TILES) {
+            const layerConf = Cast<TypeXYZTiles>(payload.layer);
+            const xyzTiles = new XYZTiles(this.#mapId, layerConf);
             xyzTiles.add(layerConf as TypeXYZTiles).then((layer) => {
               xyzTiles.layer = layer;
               this.addToMap(xyzTiles);
             });
-          } else if (layerConf.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-            const esriDynamic = new EsriDynamic(this.#mapId, layerConf as TypeDynamicLayer);
+          } else if (payload.layer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
+            const layerConf = Cast<TypeDynamicLayer>(payload.layer);
+            const esriDynamic = new EsriDynamic(this.#mapId, layerConf);
             esriDynamic.add(layerConf as TypeDynamicLayer).then((layer) => {
               esriDynamic.layer = layer;
               this.addToMap(esriDynamic);
             });
-          } else if (layerConf.layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
-            const esriFeature = new EsriFeature(this.#mapId, layerConf as TypeFeatureLayer);
+          } else if (payload.layer.layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            const layerConf = Cast<TypeFeatureLayer>(payload.layer);
+            const esriFeature = new EsriFeature(this.#mapId, layerConf);
             esriFeature.add(layerConf as TypeFeatureLayer).then((layer) => {
               esriFeature.layer = layer;
               this.addToMap(esriFeature);
             });
             this.removeTabindex();
-          } else if (layerConf.layerType === CONST_LAYER_TYPES.WFS) {
-            const wfsLayer = new WFS(this.#mapId, layerConf as TypeWFSLayer);
+          } else if (payload.layer.layerType === CONST_LAYER_TYPES.WFS) {
+            const layerConf = Cast<TypeWFSLayer>(payload.layer);
+            const wfsLayer = new WFS(this.#mapId, layerConf);
             wfsLayer.add(layerConf as TypeWFSLayer).then((layer) => {
               wfsLayer.layer = layer;
               this.addToMap(wfsLayer);
             });
-          } else if (layerConf.layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-            const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConf as TypeOgcFeatureLayer);
+          } else if (payload.layer.layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
+            const layerConf = Cast<TypeOgcFeatureLayer>(payload.layer);
+            const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConf);
             ogcFeatureLayer.add(layerConf as TypeOgcFeatureLayer).then((layer) => {
               ogcFeatureLayer.layer = layer;
               this.addToMap(ogcFeatureLayer);
@@ -128,7 +132,7 @@ export class Layer {
       EVENT_NAMES.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
-        this.removeLayerById(payload.layer.id as TypeJsonString);
+        this.removeLayerById(payload.layer.id as string);
       },
       this.#mapId
     );
@@ -146,11 +150,13 @@ export class Layer {
    */
   private layerIsLoaded(name: string, layer: leafletLayer): void {
     let isLoaded = false;
-    // we trap most of the erros prior tp this. When this load, layer shoud ne ok
+    // we trap most of the erros prior to this. When this load, layer shoud be ok
     // ! load is not fired for GeoJSON layer
-    layer.once('load', () => {
-      isLoaded = true;
-    });
+    if (layer) {
+      layer.once('load', () => {
+        isLoaded = true;
+      });
+    }
 
     setTimeout(() => {
       if (!isLoaded) {

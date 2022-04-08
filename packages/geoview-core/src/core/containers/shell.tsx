@@ -14,7 +14,7 @@ import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
 
 import { FocusTrapDialog } from './focus-trap';
-import { TypeMapConfigProps, TypeJsonString, TypeJsonObject } from '../types/cgpv-types';
+import { TypeMapConfigProps, TypeJsonObject } from '../types/cgpv-types';
 
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
@@ -107,10 +107,10 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id)
+        if (payload && payload.handlerName === id)
           setComponents((tempComponents) => ({
-            ...tempComponents,
-            [payload.id as TypeJsonString]: payload.component,
+            ...(tempComponents as object),
+            [payload.id as string]: payload.component,
           }));
       },
       id
@@ -120,9 +120,9 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString) === id) {
-          const tempComponents = { ...components };
-          delete tempComponents[payload.id as TypeJsonString];
+        if (payload && payload.handlerName === id) {
+          const tempComponents: TypeJsonObject = { ...(components as object) };
+          delete tempComponents[payload.id as string];
 
           setComponents(() => ({
             ...tempComponents,
@@ -135,7 +135,7 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MAP_LOADED,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString).includes(id)) {
+        if (payload && (payload.handlerName as string).includes(id)) {
           // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
           setIsLoaded(true);
         }
@@ -147,7 +147,7 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_CREATE,
       (payload) => {
-        if ((payload.handlerName as TypeJsonString) === id) {
+        if (payload.handlerName === id) {
           updateShell();
         }
       },

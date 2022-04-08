@@ -2,6 +2,7 @@
 import {
   Cast,
   AbstractPluginClass,
+  toJsonObject,
   TypeJsonObject,
   TypeWindow,
   TypePluginOptions,
@@ -18,26 +19,18 @@ const w = window as TypeWindow;
  * Create a class for the plugin instance
  */
 class LayersPanelPlugin extends AbstractPluginClass {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  LayersPanelPluginProps: TypePluginOptions;
-
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
   constructor(id: string, props: TypePluginOptions) {
     super(id, props);
-    this.id = id;
-    this.LayersPanelPluginProps = props;
     this.buttonPanel = null;
   }
 
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeJsonObject = Cast<TypeJsonObject>({
+  translations: TypeJsonObject = toJsonObject({
     'en-CA': {
       layersPanel: 'Layers',
     },
@@ -50,7 +43,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.LayersPanelPluginProps;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -63,7 +56,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
     // button props
     const button: TypeButtonProps = {
       id: 'layersPanelButton',
-      tooltip: this.translations[language].layersPanel,
+      tooltip: this.translations[language].layersPanel as string,
       tooltipPlacement: 'right',
       icon: '<i class="material-icons">layers</i>',
       type: 'textWithIcon',
@@ -87,7 +80,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.LayersPanelPluginProps;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;

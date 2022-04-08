@@ -46,11 +46,11 @@ export class GeoUtilities {
    * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
    */
   getWFSServiceMetadata = async (url: string): Promise<TypeJsonObject> => {
-    const res = await axios.get(url, {
+    const res = await axios.get<TypeJsonObject>(url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
-    const xmlDOM = new DOMParser().parseFromString(res.data, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJsonObject;
+    const xmlDOM = new DOMParser().parseFromString(res.data as string, 'text/xml');
+    const json = xmlToJson(xmlDOM);
     const capabilities = json['wfs:WFS_Capabilities'];
     return capabilities;
   };

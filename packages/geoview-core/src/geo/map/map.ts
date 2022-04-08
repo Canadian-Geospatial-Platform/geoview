@@ -122,7 +122,7 @@ export class MapViewer {
    * @param cgpMap
    */
   initMap(cgpMap: L.Map): void {
-    this.id = cgpMap.id as string;
+    this.id = cgpMap.id;
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any

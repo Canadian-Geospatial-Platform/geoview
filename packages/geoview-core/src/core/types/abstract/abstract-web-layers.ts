@@ -1,12 +1,15 @@
 import { Layer, TileLayer } from 'leaflet';
 
-import { TypeWebLayers, TypeAbstractWebLayersConfig, TypeLayersInWebLayer } from '../cgpv-types';
+import { TypeWebLayers, TypeAbstractWebLayersConfig, TypeLayersInWebLayer, DEFAULT_LAYER_NAMES } from '../cgpv-types';
 
 import { generateId } from '../../utils/utilities';
 
 import { api } from '../../../api/api';
 
 export abstract class AbstractWebLayersClass {
+  // type of web layer
+  type: TypeWebLayers;
+
   // layer id with default
   id: string;
 
@@ -16,14 +19,15 @@ export abstract class AbstractWebLayersClass {
   // layer or layer service url
   url: string;
 
-  // type of web layer
-  type: TypeWebLayers;
+  // map id
+  protected mapId: string;
 
   // The actual layer
   abstract layer: Layer | TileLayer | null;
 
   layers: TypeLayersInWebLayer = {};
 
+  // service entries
   entries?: string[] | number[];
 
   setEntries?(entries: number[]): void;
@@ -32,10 +36,11 @@ export abstract class AbstractWebLayersClass {
 
   abstract setOpacity(opacity: number): void;
 
-  constructor(type: TypeWebLayers, name: string, layerConfig: TypeAbstractWebLayersConfig, mapId: string) {
-    this.id = layerConfig.id || generateId('');
-    this.name = name;
+  constructor(type: TypeWebLayers, layerConfig: TypeAbstractWebLayersConfig, mapId: string) {
     this.type = type;
+    this.id = layerConfig.id || generateId('');
+    this.name = layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : DEFAULT_LAYER_NAMES.type;
     this.url = layerConfig.url[api.map(mapId).getLanguageCode()].trim();
+    this.mapId = mapId;
   }
 }

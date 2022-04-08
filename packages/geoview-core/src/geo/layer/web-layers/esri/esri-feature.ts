@@ -8,10 +8,9 @@ import {
   AbstractWebLayersClass,
   CONST_LAYER_TYPES,
   TypeFeatureLayer,
-  TypeJsonNumber,
   TypeJsonValue,
   TypeJsonObject,
-  TypeWebLayers,
+  toJsonObject,
 } from '../../../../core/types/cgpv-types';
 import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
@@ -31,9 +30,6 @@ export class EsriFeature extends AbstractWebLayersClass {
   // mapService property
   mapService: MapService;
 
-  // map id
-  #mapId: string;
-
   /**
    * Initialize layer
    *
@@ -41,14 +37,7 @@ export class EsriFeature extends AbstractWebLayersClass {
    * @param {TypeFeatureLayer} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeFeatureLayer) {
-    super(
-      CONST_LAYER_TYPES.ESRI_FEATURE as TypeWebLayers,
-      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'Esri Feature Layer',
-      layerConfig,
-      mapId
-    );
-
-    this.#mapId = mapId;
+    super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig, mapId);
 
     this.mapService = esriMapService({
       url: api.geoUtilities.getMapServerUrl(this.url),
@@ -67,34 +56,38 @@ export class EsriFeature extends AbstractWebLayersClass {
     // define a default blue icon
     let iconSymbol = blueCircleIcon;
 
-    const res = await axios.get(queryUrl);
+    const res = await axios.get<TypeJsonObject>(queryUrl);
 
-    if (res.data.drawingInfo.renderer && res.data.drawingInfo.renderer.symbol) {
-      const symbolInfo = res.data.drawingInfo.renderer.symbol;
+    if (res.data.drawingInfo && res.data.drawingInfo.renderer && res.data.drawingInfo.renderer.symbol) {
+      const symbolInfo: TypeJsonObject = res.data.drawingInfo.renderer.symbol;
       iconSymbol = new L.Icon({
         iconUrl: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
-        iconSize: [symbolInfo.width, symbolInfo.height],
-        iconAnchor: [Math.round(symbolInfo.width / 2), Math.round(symbolInfo.height / 2)],
+        iconSize: [symbolInfo.width as number, symbolInfo.height as number],
+        iconAnchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
       });
     }
 
-    const data = getXMLHttpRequest(`${layer.url[api.map(this.#mapId).getLanguageCode()]}?f=json`);
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
     const geo = new Promise<FeatureLayer | null>((resolve) => {
-      data.then((value: string) => {
-        const { type } = JSON.parse(value);
+      data.then((value) => {
+        if (value !== '{}') {
+          const { type } = toJsonObject(JSON.parse(value));
 
-        // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
-        // if the path is bad, return will be {}
-        if (value !== '{}' && typeof type !== 'undefined' && type === 'Feature Layer') {
-          const feature = featureLayer({
-            url: layer.url[api.map(this.#mapId).getLanguageCode()],
-            pointToLayer: (aFeature, latlng) => {
-              return L.marker(latlng, { icon: iconSymbol, id: generateId() });
-            },
-          } as FeatureLayerOptions);
+          // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
+          // if the path is bad, return will be {}
+          if (typeof type !== 'undefined' && type === 'Feature Layer') {
+            const feature = featureLayer({
+              url: layer.url[api.map(this.mapId).getLanguageCode()],
+              pointToLayer: (aFeature, latlng) => {
+                return L.marker(latlng, { icon: iconSymbol, id: generateId() });
+              },
+            } as FeatureLayerOptions);
 
-          resolve(feature);
+            resolve(feature);
+          } else {
+            resolve(null);
+          }
         } else {
           resolve(null);
         }
@@ -147,10 +140,10 @@ export class EsriFeature extends AbstractWebLayersClass {
    */
   getBounds = async (): Promise<L.LatLngBounds> => {
     const meta = await this.getMetadata();
-    const xmin = meta.extent.xmin as TypeJsonNumber;
-    const xmax = meta.extent.xmax as TypeJsonNumber;
-    const ymin = meta.extent.ymin as TypeJsonNumber;
-    const ymax = meta.extent.ymax as TypeJsonNumber;
+    const xmin = meta.extent.xmin as number;
+    const xmax = meta.extent.xmax as number;
+    const ymin = meta.extent.ymin as number;
+    const ymax = meta.extent.ymax as number;
     return L.latLngBounds([
       [ymin, xmin],
       [ymax, xmax],

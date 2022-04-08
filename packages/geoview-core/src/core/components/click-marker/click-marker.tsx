@@ -14,7 +14,7 @@ import { api } from '../../../api/api';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { generateId } from '../../utils/utilities';
-import { Cast, TypeJsonString, TypeJsonObject } from '../../types/cgpv-types';
+import { Cast } from '../../types/cgpv-types';
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -99,12 +99,12 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_SHOW,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString).includes(mapId)) {
+        if (payload && (payload.handlerName as string).includes(mapId)) {
           // toggle the marker icon
           setShowMarker(true);
 
           // set the overlay... get map size and apply mapPane transform to the overlay
-          const test = api.geoUtilities.getTranslateValues(map.getPane('mapPane') as HTMLElement);
+          const test = api.geoUtilities.getTranslateValues(map.getPane('mapPane')!);
           const size = map.getSize();
           overlay.style.height = `${size.y}px`;
           overlay.style.width = `${size.x}px`;
@@ -118,7 +118,7 @@ export function ClickMarker(): JSX.Element {
           setMarkerPos(Cast<L.LatLng>(payload.latlng));
 
           if (payload.symbology) {
-            const theSymbology = payload.symbology as TypeJsonObject;
+            const theSymbology = payload.symbology;
             let iconHtml = '';
 
             // get symbology image
@@ -145,7 +145,7 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MARKER_ICON_HIDE,
       (payload) => {
-        if (payload && (payload.handlerName as TypeJsonString).includes(mapId)) {
+        if (payload && (payload.handlerName as string).includes(mapId)) {
           setShowMarker(false);
           overlay.style.visibility = 'hidden';
         }

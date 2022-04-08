@@ -11,7 +11,7 @@ import { MapContext } from '../../core/app-start';
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
 
-import { Cast, TypeJsonString, TypeJsonArrayOfString, TypeJsonObject, TypeJsonValue } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
 
 /**
  * Snackbar properties interface
@@ -61,9 +61,9 @@ export function Snackbar(props: SnackBarProps): null {
    * @param {string} message original message
    * @returns {string} message with values replaced
    */
-  function replaceParams(params: string[], message: string) {
+  function replaceParams(params: TypeJsonArray | string[], message: string) {
     let tmpMess = message;
-    params.forEach((item: string) => {
+    (params as string[]).forEach((item: string) => {
       tmpMess = tmpMess.replace('__param__', item);
     });
 
@@ -78,20 +78,20 @@ export function Snackbar(props: SnackBarProps): null {
         const opts = payload.options ? payload.options : {};
 
         // apply function if provided
-        opts.action = Cast<TypeJsonObject>(
-          payload.button
-            ? SnackButton({
-                label: payload.button.label as TypeJsonString,
+        (opts.action as TypeJsonValue) = payload.button
+          ? Cast<TypeJsonValue>(
+              SnackButton({
+                label: payload.button.label as string,
                 action: Cast<() => void>(payload.button.action),
               })
-            : null
-        );
+            )
+          : null;
 
         // get message
         const message =
           (payload.message.type as TypeJsonValue) === 'string'
             ? payload.message.value
-            : replaceParams(payload.message.params as TypeJsonArrayOfString, t(payload.message.value as TypeJsonString));
+            : replaceParams(payload.message.params as TypeJsonArray, t(payload.message.value as string));
 
         // show the notification
         if (payload && id === (payload.handlerName as TypeJsonValue)) enqueueSnackbar(message, opts);

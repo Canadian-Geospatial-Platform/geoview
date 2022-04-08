@@ -7,14 +7,12 @@ import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import {
   AbstractWebLayersClass,
-  Cast,
   CONST_LAYER_TYPES,
   TypeDynamicLayer,
-  TypeJsonValue,
   TypeJsonObject,
   TypeJsonArray,
   TypeLegendJsonDynamic,
-  TypeWebLayers,
+  toJsonObject,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -32,29 +30,15 @@ export class EsriDynamic extends AbstractWebLayersClass {
   // mapService property
   mapService: MapService;
 
-  // service entries
-  entries?: number[];
-
-  // map id
-  #mapId: string;
-
   /**
    * Initialize layer
    * @param {string} mapId the id of the map
    * @param {TypeDynamicLayer} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeDynamicLayer) {
-    super(
-      CONST_LAYER_TYPES.ESRI_DYNAMIC as TypeWebLayers,
-      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'Esri Dynamic Layer',
-      layerConfig,
-      mapId
-    );
-
-    this.#mapId = mapId;
+    super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
 
     const entries = layerConfig.layerEntries.map((item) => parseInt(item.index, 10));
-
     this.entries = entries?.filter((item) => !Number.isNaN(item));
 
     this.mapService = esriMapService({
@@ -69,29 +53,31 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @return {Promise<DynamicMapLayer | null>} layers to add to the map
    */
   add(layer: TypeDynamicLayer): Promise<DynamicMapLayer | null> {
-    const data = getXMLHttpRequest(`${layer.url[api.map(this.#mapId).getLanguageCode()]}?f=json`);
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
     const geo = new Promise<DynamicMapLayer | null>((resolve) => {
-      data.then((value: string) => {
-        // get layers from service and parse layer entries as number
-        const { layers } = JSON.parse(value) as TypeJsonObject;
+      data.then((value) => {
+        if (value !== '{}') {
+          // get layers from service and parse layer entries as number
+          const { layers } = toJsonObject(JSON.parse(value));
 
-        // check if the entries are part of the service
-        if (
-          value !== '{}' &&
-          layers &&
-          Cast<TypeJsonValue[]>(layers).find((item) => {
-            const searchedItem = (item as { [key: string]: { id: string } }).id;
-            return this.entries?.includes(Cast<number>(searchedItem));
-          })
-        ) {
-          const feature = dynamicMapLayer({
-            url: layer.url[api.map(this.#mapId).getLanguageCode()],
-            layers: this.entries,
-            attribution: '',
-          } as DynamicMapLayerOptions);
-
-          resolve(feature);
+          // check if the entries are part of the service
+          if (
+            layers &&
+            (layers as TypeJsonArray).find((item) => {
+              const searchedItem = item.id as number;
+              return (this.entries as number[])?.includes(searchedItem);
+            })
+          ) {
+            const feature = dynamicMapLayer({
+              url: layer.url[api.map(this.mapId).getLanguageCode()],
+              layers: this.entries,
+              attribution: '',
+            } as DynamicMapLayerOptions);
+            resolve(feature);
+          } else {
+            resolve(null);
+          }
         } else {
           resolve(null);
         }
@@ -136,11 +122,11 @@ export class EsriDynamic extends AbstractWebLayersClass {
 
     return axios.get<TypeJsonObject>(queryUrl).then<TypeJsonArray>((res) => {
       const { data } = res;
-      const entryArray = feat.getLayers();
+      const entryArray: TypeJsonArray = feat.getLayers();
 
       if (entryArray.length > 0) {
         const result = (data.layers as TypeJsonArray).filter((item) => {
-          return entryArray.includes((item as TypeJsonObject).layerId) as TypeJsonArray;
+          return entryArray.includes(item.layerId) as TypeJsonArray;
         });
         return result as TypeJsonArray;
       }
@@ -177,7 +163,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
   getBounds = async (): Promise<L.LatLngBounds> => {
     const bounds = L.latLngBounds([]);
     if (this.entries) {
-      this.entries.forEach(async (entry: number) => {
+      (this.entries as number[]).forEach(async (entry: number) => {
         const meta = await this.getEntry(entry);
 
         const { xmin, xmax, ymin, ymax } = meta.extent;

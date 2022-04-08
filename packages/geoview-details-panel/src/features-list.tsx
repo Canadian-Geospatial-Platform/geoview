@@ -1,7 +1,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { TypeJsonValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, TypeJsonString, TypeJsonObject } from 'geoview-core';
+import { TypeJsonValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, toJsonObject, TypeJsonObject } from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -93,13 +93,15 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
     });
 
     // set panel content to the entry information
-    selectFeature({
-      attributes,
-      displayField,
-      fieldAliases,
-      symbol: symbolImage,
-      numOfEntries: layerData.length,
-    });
+    selectFeature(
+      toJsonObject({
+        attributes,
+        displayField,
+        fieldAliases,
+        symbol: symbolImage,
+        numOfEntries: layerData.length,
+      })
+    );
   };
 
   useEffect(() => {
@@ -122,7 +124,7 @@ function FeaturesList(props: TypeFeaturesListProps): JSX.Element {
           const symbolImage = getSymbol(renderer, attributes);
 
           // get the title from the attributes, if no title was defined in the layer then set it to the objectId
-          const attributesDisplayField = attributes[displayField] as TypeJsonString;
+          const attributesDisplayField = attributes[displayField] as string;
           const title =
             attributesDisplayField && attributesDisplayField.length > 0 ? `${attributesDisplayField}` : `${attributes.OBJECTID}`;
 

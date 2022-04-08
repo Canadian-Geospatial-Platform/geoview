@@ -11,6 +11,7 @@ import {
   TypeJsonValue,
   TypeLocalizedLanguages,
   Cast,
+  TypeInteraction,
 } from '../types/cgpv-types';
 import { generateId } from './utilities';
 
@@ -130,11 +131,11 @@ export class Config {
       let center = (urlParams.c as TypeJsonValue as string).split(',');
       if (!center) center = ['0', '0'];
 
-      const basemapOptions = this.parseObjectFromUrl(urlParams.b as TypeJsonValue as string) as TypeJsonValue as TypeBasemapOptions;
+      const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
       configObj = {
         map: {
-          interaction: urlParams.i as TypeJsonValue as 'static' | 'dynamic',
+          interaction: urlParams.i as TypeInteraction,
           initialView: {
             zoom: parseInt(urlParams.z as TypeJsonValue as string, 10),
             center: [parseInt(center[0], 10), parseInt(center[1], 10)],

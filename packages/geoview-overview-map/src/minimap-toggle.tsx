@@ -82,8 +82,8 @@ export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     if (status) {
       const buttonSize = theme.overrides.button?.size;
       // decrease size of overview map to the size of the toggle btn
-      minimap.getContainer().style.width = buttonSize.width as string;
-      minimap.getContainer().style.height = buttonSize.height as string;
+      minimap.getContainer().style.width = buttonSize.width;
+      minimap.getContainer().style.height = buttonSize.height;
     } else {
       // restore the size of the overview map
       minimap.getContainer().style.width = MINIMAP_SIZE.width;

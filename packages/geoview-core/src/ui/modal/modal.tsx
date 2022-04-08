@@ -7,7 +7,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material
 import { ClassNameMap, withStyles } from '@mui/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeJsonString, TypeDialogProps } from '../../core/types/cgpv-types';
+import { toJsonObject, TypeDialogProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { EVENT_NAMES } from '../../api/event';
@@ -146,9 +146,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
                     return (
                       <Fragment key={action.id}>
                         <HtmlToReact
-                          extraOptions={{
+                          extraOptions={toJsonObject({
                             id: action.id,
-                          }}
+                          })}
                           htmlContent={action.content}
                         />
                       </Fragment>
@@ -185,9 +185,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
                 return (
                   <Fragment key={action.id}>
                     <HtmlToReact
-                      extraOptions={{
+                      extraOptions={toJsonObject({
                         id: action.id,
-                      }}
+                      })}
                       htmlContent={action.content}
                     />
                   </Fragment>
@@ -208,8 +208,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_OPEN,
       (args) => {
-        if (id === (args.id as TypeJsonString) && (args.handlerName as TypeJsonString) === mapId) {
-          const modal = api.map(mapId).modal.modals[args.id as TypeJsonString] as TypeModalProps;
+        if (id === (args.id as string) && (args.handlerName as string) === mapId) {
+          const modal = api.map(mapId).modal.modals[args.id as string] as TypeModalProps;
           // eslint-disable-next-line react-hooks/exhaustive-deps
           openEvent = true;
 
@@ -223,8 +223,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_UPDATE,
       (args) => {
-        if (id === (args.id as TypeJsonString) && (args.handlerName as TypeJsonString) === mapId) {
-          const modal = api.map(mapId).modal.modals[args.id as TypeJsonString] as TypeModalProps;
+        if (id === (args.id as string) && (args.handlerName as string) === mapId) {
+          const modal = api.map(mapId).modal.modals[args.id as string] as TypeModalProps;
 
           setCreatedModal(ceatedModalJSXReturner(modal));
         }
@@ -236,7 +236,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_MODAL_CLOSE,
       (args) => {
-        if (id === (args.id as TypeJsonString) && (args.handlerName as TypeJsonString) === mapId) {
+        if (id === (args.id as string) && (args.handlerName as string) === mapId) {
           if (!args.open) openEvent = false;
           setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
         }

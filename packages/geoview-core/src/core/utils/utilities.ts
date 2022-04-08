@@ -1,11 +1,11 @@
-import { Cast, TypeJsonObject, TypeJsonString, TypeJsonValue, TypeJsonArray } from '../types/cgpv-types';
+import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
 
 /**
  * Generate a unique id if an id was not provided
  * @param {string} id an id to return if it was already passed
  * @returns {string} the generated id
  */
-export function generateId(id?: string): string {
+export function generateId(id?: string | null): string {
   return id !== null && id !== undefined && id.length > 0
     ? id
     : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
@@ -28,7 +28,7 @@ export function isJsonString(str: string): boolean {
   }
   return true;
 }
-export type TypeJsonOb = TypeJsonValue & TypeJsonObject;
+
 /**
  * Convert an XML document object into a json object
  *
@@ -37,7 +37,7 @@ export type TypeJsonOb = TypeJsonValue & TypeJsonObject;
  */
 export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
   // Create the return object
-  let obj: TypeJsonObject = {};
+  let obj: TypeJsonObject | TypeJsonValue = {};
 
   // check for node type if it's an element, attribute, text, comment...
   if (xml.nodeType === 1) {
@@ -48,13 +48,13 @@ export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
         obj['@attributes'] = {};
         for (let j = 0; j < element.attributes.length; j++) {
           const attribute = element.attributes.item(j);
-          obj['@attributes'][attribute!.nodeName] = attribute!.nodeValue as TypeJsonOb;
+          (obj['@attributes'][attribute!.nodeName] as string | null) = attribute!.nodeValue;
         }
       }
     }
   } else if (xml.nodeType === 3) {
     // text
-    obj = Cast<TypeJsonObject>(xml.nodeValue);
+    (obj as TypeJsonValue) = xml.nodeValue;
   }
 
   // do children
@@ -63,11 +63,11 @@ export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
       const jsonObject = obj;
-      if (typeof (jsonObject[nodeName] as TypeJsonString) === 'undefined') {
-        jsonObject[nodeName] = Cast<TypeJsonObject>(xmlToJson(item));
+      if (typeof jsonObject[nodeName] === 'undefined') {
+        jsonObject[nodeName] = xmlToJson(item);
       } else {
         if (typeof jsonObject[nodeName].push === 'undefined') {
-          jsonObject[nodeName] = Cast<TypeJsonObject>([jsonObject[nodeName]]);
+          (jsonObject[nodeName] as TypeJsonArray) = [jsonObject[nodeName]];
         }
         (jsonObject[nodeName] as TypeJsonArray).push(xmlToJson(item));
       }

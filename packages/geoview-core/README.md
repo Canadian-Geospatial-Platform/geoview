@@ -16,26 +16,62 @@ GeoView mapping capabilites are based on [Leafet](https://github.com/Leaflet/Lea
 
 Developement is made with [Visual Studio Code](https://code.visualstudio.com/) and uses few extentions to help linting and formating
 
-- Prettier
+- Prettier - Code formatter
 - ESLint
 - Better Comments
 
 ## Building the project
 
-To install the project, just run
-`npm install`
+### First clone this repo
 
-To serve the project, just run
-`npm run serve` and GeoView will be serve from http://localhost:8080/
+```
+$ git clone https://github.com/Canadian-Geospatial-Platform/GeoView.git
+```
+
+### Go to the directory of the cloned repo
+
+```
+cd GeoView
+```
+
+### Install rush globally
+
+```
+$ npm install -g @microsoft/rush
+```
+
+### Install dependencies
+
+```
+$ rush update
+```
+
+### Build the project:
+
+```
+$ rush build
+```
+
+### Serve the project
+
+```
+$ rush serve
+```
+GeoView will be serve from http://localhost:8080/
 
 ## Deploy to gh-pages
 
-To deploy the project, just run
-`npm run build`
+### Build the project:
 
-Then push the dist folder to your gh-pages
-`npm run deploy`
+```
+$ rush build
+```
 
+### Push the dist folder to your gh-pages
+
+```
+$ rush host .
+```
 The project is now serve inside your GitHub gh-pages at
 `https://[GITHUB-USERNAME].github.io/GeoView/index.html
 

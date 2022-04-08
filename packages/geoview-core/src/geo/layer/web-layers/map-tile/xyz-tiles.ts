@@ -22,9 +22,6 @@ export class XYZTiles extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.TileLayer | null = null;
 
-  // map id
-  #mapId: string;
-
   /**
    * Initialize layer
    *
@@ -32,14 +29,7 @@ export class XYZTiles extends AbstractWebLayersClass {
    * @param {TypeXYZTiles} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeXYZTiles) {
-    super(
-      CONST_LAYER_TYPES.XYZ_TILES as TypeWebLayers,
-      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'XYZ Tiles',
-      layerConfig,
-      mapId
-    );
-
-    this.#mapId = mapId;
+    super(CONST_LAYER_TYPES.XYZ_TILES as TypeWebLayers, layerConfig, mapId);
   }
 
   /**
@@ -50,9 +40,9 @@ export class XYZTiles extends AbstractWebLayersClass {
    */
   add(layer: TypeXYZTiles): Promise<L.TileLayer | null> {
     const tileLayer = new Promise<L.TileLayer | null>((resolve) => {
-      const xyzTileLayer = L.tileLayer(layer.url[api.map(this.#mapId).getLanguageCode()]);
+      const xyzTileLayer = L.tileLayer(layer.url[api.map(this.mapId).getLanguageCode()]);
 
-      resolve(xyzTileLayer);
+      resolve(xyzTileLayer || null);
     });
     return tileLayer;
   }

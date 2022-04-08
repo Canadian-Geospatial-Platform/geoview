@@ -10,7 +10,7 @@ import FocusTrap from 'focus-trap-react';
 import makeStyles from '@mui/styles/makeStyles';
 import { Card, CardHeader, CardContent } from '@mui/material';
 
-import { Cast, TypeJsonString, TypePanelAppProps } from '../../core/types/cgpv-types';
+import { Cast, TypePanelAppProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 import { MapContext } from '../../core/app-start';
 
@@ -129,7 +129,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         if (closeBtnRef && closeBtnRef.current) (closeBtnRef.current as HTMLElement).focus();
       }, 100);
 
-      if ((args.buttonId as TypeJsonString) === button.id!) {
+      if ((args.buttonId as string) === button.id!) {
         updateComponent();
       }
     },
@@ -146,7 +146,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_OPEN,
       (args) => {
-        if ((args.buttonId as TypeJsonString) === button.id! && (args.handlerId as TypeJsonString) === mapId) {
+        if ((args.buttonId as string) === button.id! && (args.handlerId as string) === mapId) {
           // set focus on close button on panel open
           setPanelStatus(true);
 
@@ -161,7 +161,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_CLOSE,
       (args) => {
-        if ((args.buttonId as TypeJsonString) === button.id! && (args.handlerId as TypeJsonString) === mapId) {
+        if ((args.buttonId as string) === button.id! && (args.handlerId as string) === mapId) {
           closePanel();
         }
       },
@@ -172,17 +172,17 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_ADD_ACTION,
       (args) => {
-        if ((args.buttonId as TypeJsonString) === button.id!) {
+        if ((args.buttonId as string) === button.id!) {
           const { actionButton } = args;
 
           setActionButtons((prev) => [
             ...prev,
             <IconButton
-              key={actionButton.id as TypeJsonString}
-              tooltip={actionButton.title as TypeJsonString}
+              key={actionButton.id as string}
+              tooltip={actionButton.title as string}
               tooltipPlacement="right"
-              id={actionButton.id as TypeJsonString}
-              aria-label={actionButton.title as TypeJsonString}
+              id={actionButton.id as string}
+              aria-label={actionButton.title as string}
               onClick={Cast<React.MouseEventHandler>(actionButton.action)}
               size="large"
             >
@@ -209,7 +209,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION,
       (args) => {
-        if ((args.buttonId as TypeJsonString) === button.id!) {
+        if ((args.buttonId as string) === button.id!) {
           const { actionButtonId } = args;
           setActionButtons((list) =>
             list.filter((item) => {

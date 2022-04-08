@@ -5,15 +5,7 @@ import L from 'leaflet';
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
-import {
-  AbstractWebLayersClass,
-  CONST_LAYER_TYPES,
-  TypeJsonString,
-  TypeJsonObject,
-  TypeJsonValue,
-  TypeWFSLayer,
-  TypeWebLayers,
-} from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeJsonObject, TypeWFSLayer, TypeJsonArray } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -27,9 +19,6 @@ export class WFS extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
 
-  // layer entries
-  entries: string[] | undefined;
-
   // mapService property
   mapService: MapService;
 
@@ -39,23 +28,13 @@ export class WFS extends AbstractWebLayersClass {
   // private varibale holding wms paras
   #version = '2.0.0';
 
-  // map id
-  #mapId: string;
-
   /**
    * Initialize layer
    * @param {string} mapId the id of the map
    * @param {TypeWFSLayer} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeWFSLayer) {
-    super(
-      CONST_LAYER_TYPES.WFS as TypeWebLayers,
-      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'WFS Layer',
-      layerConfig,
-      mapId
-    );
-
-    this.#mapId = mapId;
+    super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
 
     this.entries = layerConfig.layerEntries.map((item) => item.id);
 
@@ -72,16 +51,16 @@ export class WFS extends AbstractWebLayersClass {
    */
   async add(layer: TypeWFSLayer): Promise<L.GeoJSON | null> {
     // const data = getXMLHttpRequest(capUrl);
-    const resCapabilities = await axios.get<TypeJsonValue>(this.url, {
+    const resCapabilities = await axios.get<TypeJsonObject>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
 
     // need to pass a xmldom to xmlToJson
     const xmlDOM = new DOMParser().parseFromString(resCapabilities.data as string, 'text/xml');
-    const json = xmlToJson(xmlDOM) as TypeJsonObject;
+    const json = xmlToJson(xmlDOM);
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
-    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as TypeJsonString;
+    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as string;
     const featTypeInfo = this.getFeatyreTypeInfo(
       json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
       layer.layerEntries.map((item) => item.id).toString()
@@ -91,11 +70,9 @@ export class WFS extends AbstractWebLayersClass {
       return null;
     }
 
-    const layerName = layer.name
-      ? layer.name[api.map(this.#mapId).getLanguageCode()]
-      : (featTypeInfo.Name['#text'] as TypeJsonString).split(':')[1];
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (featTypeInfo.Name['#text'] as string).split(':')[1];
 
-    if (layerName) this.name = <string>layerName;
+    if (layerName) this.name = layerName;
 
     const params = {
       service: 'WFS',
@@ -170,16 +147,17 @@ export class WFS extends AbstractWebLayersClass {
 
   /**
    * Get feature type info of a given entry
-   * @param {object} FeatureTypeList feature type list
+   * @param {object} featureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatyreTypeInfo(FeatureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
+  private getFeatyreTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
-    if (Array.isArray(FeatureTypeList)) {
-      for (let i = 0; i < FeatureTypeList.length; i += 1) {
-        let fName = FeatureTypeList[i].Name['#text'];
+    if (Array.isArray(featureTypeList)) {
+      const featureTypeArray: TypeJsonArray = featureTypeList;
+      for (let i = 0; i < featureTypeArray.length; i += 1) {
+        let fName = featureTypeArray[i].Name['#text'] as string;
         const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
@@ -187,11 +165,11 @@ export class WFS extends AbstractWebLayersClass {
         const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
         if (entryName === fName) {
-          return FeatureTypeList[i];
+          return featureTypeArray[i];
         }
       }
     } else {
-      let fName = FeatureTypeList.Name['#text'] as TypeJsonString;
+      let fName = featureTypeList.Name['#text'] as string;
 
       const fNameSplit = fName.split(':');
       fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
@@ -200,7 +178,7 @@ export class WFS extends AbstractWebLayersClass {
       const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
       if (entryName === fName) {
-        return FeatureTypeList;
+        return featureTypeList;
       }
     }
 
@@ -221,9 +199,9 @@ export class WFS extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
-    (this.layer as L.GeoJSON).getLayers().forEach((layer) => {
-      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    this.layer!.getLayers().forEach((layer) => {
+      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
       else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };

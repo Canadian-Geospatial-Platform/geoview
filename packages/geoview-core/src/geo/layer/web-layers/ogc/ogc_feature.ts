@@ -7,11 +7,10 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 import {
   AbstractWebLayersClass,
   CONST_LAYER_TYPES,
-  TypeJsonString,
   TypeJsonValue,
   TypeJsonObject,
   TypeOgcFeatureLayer,
-  TypeWebLayers,
+  TypeJsonArray,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
@@ -26,17 +25,11 @@ export class OgcFeature extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
 
-  // layer entries
-  entries: string[] | undefined;
-
   // mapService property
   mapService: MapService;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
-
-  // map id
-  #mapId: string;
 
   // private varibale holding wms paras
   #version = '2.0.0';
@@ -48,14 +41,7 @@ export class OgcFeature extends AbstractWebLayersClass {
    * @param {TypeOgcFeatureLayer} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeOgcFeatureLayer) {
-    super(
-      CONST_LAYER_TYPES.OGC_FEATURE as TypeWebLayers,
-      layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : 'OGC Feature Layer',
-      layerConfig,
-      mapId
-    );
-
-    this.#mapId = mapId;
+    super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
 
     this.entries = layerConfig.layerEntries.map((item) => item.id);
 
@@ -68,6 +54,7 @@ export class OgcFeature extends AbstractWebLayersClass {
    * Add a OGC API feature layer to the map.
    *
    * @param {TypeOgcFeatureLayer} layer the layer configuration
+   *
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
   async add(layer: TypeOgcFeatureLayer): Promise<L.GeoJSON | null> {
@@ -79,7 +66,7 @@ export class OgcFeature extends AbstractWebLayersClass {
     const res = await axios.get<TypeJsonObject>(metaUrl);
     this.#capabilities = res.data;
 
-    const layerName = (layer.name ? layer.name[api.map(this.#mapId).getLanguageCode()] : this.#capabilities.title) as string;
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.title as string);
     if (layerName) this.name = layerName;
 
     const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
@@ -147,16 +134,17 @@ export class OgcFeature extends AbstractWebLayersClass {
 
   /**
    * Get feature type info of a given entry
-   * @param {object} FeatureTypeList feature type list
+   * @param {object} featureTypeList feature type list
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatureTypeInfo(FeatureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
+  private getFeatureTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
-    if (Array.isArray(FeatureTypeList)) {
-      for (let i = 0; i < FeatureTypeList.length; i += 1) {
-        let fName = FeatureTypeList[i].Name['#text'];
+    if (Array.isArray(featureTypeList)) {
+      const featureTypeArray = featureTypeList as TypeJsonArray;
+      for (let i = 0; i < featureTypeArray.length; i += 1) {
+        let fName = featureTypeArray[i].Name['#text'] as string;
         const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
@@ -165,12 +153,12 @@ export class OgcFeature extends AbstractWebLayersClass {
           const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
           if (entryName === fName) {
-            return FeatureTypeList[i];
+            return featureTypeArray[i];
           }
         }
       }
     } else {
-      let fName = FeatureTypeList.Name && (FeatureTypeList.Name['#text'] as TypeJsonString);
+      let fName = featureTypeList.Name && (featureTypeList.Name['#text'] as string);
 
       if (fName) {
         const fNameSplit = fName.split(':');
@@ -181,7 +169,7 @@ export class OgcFeature extends AbstractWebLayersClass {
           const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
           if (entryName === fName) {
-            return FeatureTypeList;
+            return featureTypeList;
           }
         }
       }
@@ -204,9 +192,9 @@ export class OgcFeature extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
     this.layer!.getLayers().forEach((layer) => {
-      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
       else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };
