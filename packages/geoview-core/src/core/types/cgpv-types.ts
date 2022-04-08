@@ -404,7 +404,7 @@ export interface TypeFeatureLayer extends TypeLayerConfig {
 }
 
 export type TypeDynamicLayerEntry = {
-  index: string;
+  index: number;
   name?: TypeLangString;
   nameField?: string;
   outfields?: string;
