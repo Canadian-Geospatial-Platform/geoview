@@ -404,7 +404,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       {subLayer.drawingInfo?.renderer.label || subLayer.name}
                     </div>
                   )}
-                  {(subLayer.drawingInfo?.renderer.type as string) === 'uniqueValue' &&
+                  {subLayer.drawingInfo?.renderer.type === 'uniqueValue' &&
                     subLayer.drawingInfo.renderer.uniqueValueInfos[0].symbol.imageData &&
                     (subLayer.drawingInfo.renderer.uniqueValueInfos as TypeJsonArray).map((uniqueValue, i: number) => (
                       <div key={i} className={classes.layerItemText}>

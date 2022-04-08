@@ -1,6 +1,4 @@
-import { useEffect } from 'react';
-
-import { useMap } from 'react-leaflet';
+import { useEffect, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,10 +6,12 @@ import { Button } from '@mui/material';
 
 import { useSnackbar } from 'notistack';
 
+import { MapContext } from '../../core/app-start';
+
 import { api } from '../../api/api';
 import { EVENT_NAMES } from '../../api/event';
-import { TypeJsonValue } from '../../app';
-import { Cast, TypeJsonArray, toJsonObject } from '../../core/types/cgpv-types';
+
+import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
 
 /**
  * Snackbar properties interface
@@ -51,9 +51,9 @@ export function Snackbar(props: SnackBarProps): null {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext);
 
-  const mapId = api.mapInstance(map)?.id;
+  const mapId = mapConfig.id;
 
   /**
    * Take string and replace parameters from array of values

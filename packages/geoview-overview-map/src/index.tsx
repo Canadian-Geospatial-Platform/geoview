@@ -56,4 +56,4 @@ class OverviewMapPlugin extends AbstractPluginClass {
 export default OverviewMapPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.overviewMap = Cast<AbstractPluginClass>(OverviewMapPlugin);
+w.plugins['overview-map'] = Cast<AbstractPluginClass>(OverviewMapPlugin);

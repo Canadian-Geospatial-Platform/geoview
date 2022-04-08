@@ -5,15 +5,7 @@ import L from 'leaflet';
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
-
-import {
-  AbstractWebLayersClass,
-  TypeJsonObject,
-  TypeJsonValue,
-  TypeLayerConfig,
-  CONST_LAYER_TYPES,
-  TypeJsonArray,
-} from '../../../../core/types/cgpv-types';
+import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeJsonObject, TypeWFSLayer, TypeJsonArray } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../api/api';
 
@@ -27,9 +19,6 @@ export class WFS extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
 
-  // layer entries
-  entries: string[] | undefined;
-
   // mapService property
   mapService: MapService;
 
@@ -41,30 +30,28 @@ export class WFS extends AbstractWebLayersClass {
 
   /**
    * Initialize layer
-   *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeWFSLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super(CONST_LAYER_TYPES.WFS, 'WFS Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeWFSLayer) {
+    super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
 
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
 
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(this.url, true),
     });
   }
 
   /**
    * Add a WFS layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeWFSLayer} layer the layer configuration
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
+  async add(layer: TypeWFSLayer): Promise<L.GeoJSON | null> {
     // const data = getXMLHttpRequest(capUrl);
-    const resCapabilities = await axios.get<TypeJsonValue>(this.url, {
+    const resCapabilities = await axios.get<TypeJsonObject>(this.url, {
       params: { request: 'getcapabilities', service: 'WFS' },
     });
 
@@ -74,20 +61,24 @@ export class WFS extends AbstractWebLayersClass {
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
     this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as string;
-    const featTypeInfo = this.getFeatyreTypeInfo(json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType, layer.entries);
+    const featTypeInfo = this.getFeatyreTypeInfo(
+      json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
+      layer.layerEntries.map((item) => item.id).toString()
+    );
 
     if (!featTypeInfo) {
       return null;
     }
 
-    const layerName = 'name' in layer ? layer.name : (featTypeInfo.Name['#text'] as string).split(':')[1];
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (featTypeInfo.Name['#text'] as string).split(':')[1];
+
     if (layerName) this.name = layerName;
 
     const params = {
       service: 'WFS',
       version: this.#version,
       request: 'GetFeature',
-      typename: layer.entries,
+      typename: layer.layerEntries.map((item) => item.id).toString(),
       srsname: 'EPSG:4326',
       outputFormat: 'application/json',
     };
@@ -208,9 +199,9 @@ export class WFS extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
-    (this.layer as L.GeoJSON).getLayers().forEach((layer) => {
-      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    this.layer!.getLayers().forEach((layer) => {
+      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
       else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };

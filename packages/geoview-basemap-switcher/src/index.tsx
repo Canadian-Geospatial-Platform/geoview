@@ -136,4 +136,4 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 export default BasemapSwitcherPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.basemapSwitcher = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);
+w.plugins['basemap-switcher'] = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);

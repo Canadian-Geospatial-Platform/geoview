@@ -58,8 +58,24 @@
       <div
         id="CONF2"
         class="llwp-map"
-        data-leaflet="{'name': 'LCCFR', 'projection': 1111, 'zoom': '4', 'center': [x,-100], 'language': 'sp-CA', 'basemapOptions': { 'id': 'get', 'shaded': 'nottrue', 'labeled': nottrue },
-            'layers':[]}"
+        data-lang="en-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [x, -100]
+            },
+            'projection': 1111,
+            'basemapOptions': {
+              'id': 'get',
+              'shaded': nottrue,
+              'labeled': nottrue
+            }
+          },
+          'theme': 'dark',
+          'languages': ['sp-CA']
+          }"
       ></div>
       <p>This map will load with bad configuration replaced with default.</p>
       <p><strong>Configuration Snippet:</strong></p>

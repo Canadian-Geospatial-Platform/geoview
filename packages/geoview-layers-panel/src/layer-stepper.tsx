@@ -332,7 +332,19 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
-    const layerConfig = { name, type: layerType, url, entries };
+    const layerConfig = {
+      id: api.generateId(),
+      name: {
+        en: name,
+        fr: name,
+      },
+      layerType,
+      url: {
+        en: url,
+        fr: url,
+      },
+      layerEntries: entries,
+    };
     if (valid) {
       api.map(mapId).layer.addLayer(layerConfig);
       setAddLayerVisible(false);

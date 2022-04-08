@@ -46,7 +46,24 @@
       <div
         id="LNG1"
         class="llwp-map"
-        data-leaflet="{ 'name': 'LCCEN', 'projection': 3857, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false, 'labeled': true }, 'layers': [] }"
+        data-lang="en-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [60, -100]
+            },
+            'projection': 3857,
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            }
+          },
+          'theme': 'dark',
+          'languages': ['en-CA']
+          }"
       ></div>
       <p>These text areas show the metadata value for a ESRI and a WMS layer.</p>
       <textarea id="esriMetadata" name="esriMetadata" rows="4" cols="500"></textarea>

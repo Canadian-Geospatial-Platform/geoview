@@ -6,10 +6,10 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import {
   AbstractWebLayersClass,
+  CONST_LAYER_TYPES,
   TypeJsonValue,
   TypeJsonObject,
-  TypeLayerConfig,
-  CONST_LAYER_TYPES,
+  TypeOgcFeatureLayer,
   TypeJsonArray,
 } from '../../../../core/types/cgpv-types';
 
@@ -25,9 +25,6 @@ export class OgcFeature extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
 
-  // layer entries
-  entries: string[] | undefined;
-
   // mapService property
   mapService: MapService;
 
@@ -40,27 +37,27 @@ export class OgcFeature extends AbstractWebLayersClass {
   /**
    * Initialize layer
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {string} mapId the id of the map
+   * @param {TypeOgcFeatureLayer} layerConfig the layer configuration
    */
-  constructor(layerConfig: TypeLayerConfig) {
-    super(CONST_LAYER_TYPES.OGC_FEATURE, 'OGC Feature Layer', layerConfig);
+  constructor(mapId: string, layerConfig: TypeOgcFeatureLayer) {
+    super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
 
-    this.entries = layerConfig.entries?.split(',').map((item: string) => {
-      return item.trim();
-    });
+    this.entries = layerConfig.layerEntries.map((item) => item.id);
 
     this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url, true),
+      url: api.geoUtilities.getMapServerUrl(this.url, true),
     });
   }
 
   /**
    * Add a OGC API feature layer to the map.
    *
-   * @param {TypeLayerConfig} layer the layer configuration
+   * @param {TypeOgcFeatureLayer} layer the layer configuration
+   *
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  async add(layer: TypeLayerConfig): Promise<L.GeoJSON | null> {
+  async add(layer: TypeOgcFeatureLayer): Promise<L.GeoJSON | null> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
@@ -69,8 +66,8 @@ export class OgcFeature extends AbstractWebLayersClass {
     const res = await axios.get<TypeJsonObject>(metaUrl);
     this.#capabilities = res.data;
 
-    const layerName = 'name' in layer ? layer.name : this.#capabilities.title;
-    if (layerName) this.name = <string>layerName;
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.title as string);
+    if (layerName) this.name = layerName;
 
     const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
 
@@ -195,9 +192,9 @@ export class OgcFeature extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type HasSetOpacity = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
+    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
     this.layer!.getLayers().forEach((layer) => {
-      if ((layer as HasSetOpacity).setOpacity) (layer as HasSetOpacity).setOpacity(opacity);
+      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
       else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
     });
   };

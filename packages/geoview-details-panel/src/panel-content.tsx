@@ -482,7 +482,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             // query the layer information
             // eslint-disable-next-line no-await-in-loop
-            const layerInfo = await queryServer(ogcWMSLayer.mapService.options.url + layerId);
+            const layerInfo = await queryServer(ogcWMSLayer.mapService.options.url! + layerId);
 
             // try to add the legend image url for the WMS layer
             // const legendImageUrl = `${ogcWMSLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;

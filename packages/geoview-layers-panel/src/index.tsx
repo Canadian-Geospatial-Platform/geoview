@@ -97,4 +97,4 @@ class LayersPanelPlugin extends AbstractPluginClass {
 export default LayersPanelPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.layersPanel = Cast<AbstractPluginClass>(LayersPanelPlugin);
+w.plugins['layers-panel'] = Cast<AbstractPluginClass>(LayersPanelPlugin);

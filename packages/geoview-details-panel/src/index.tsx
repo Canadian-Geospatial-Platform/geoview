@@ -105,4 +105,4 @@ class DetailsPlugin extends AbstractPluginClass {
 export default DetailsPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins.detailsPanel = Cast<AbstractPluginClass>(DetailsPlugin);
+w.plugins['details-panel'] = Cast<AbstractPluginClass>(DetailsPlugin);

@@ -21,7 +21,7 @@ const { useState, useEffect, useRef, useMemo } = react;
 
 const { DomEvent } = leaflet;
 
-const { MapContainer, TileLayer, useMap } = reactLeaflet;
+const { MapContainer, TileLayer } = reactLeaflet;
 
 const { useMediaQuery, useTheme, makeStyles } = ui;
 
@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Interface for overview map properties
  */
-interface OverviewProps {
+interface OverviewMapProps {
   id: string;
   // eslint-disable-next-line react/no-unused-prop-types
   language: string;
@@ -64,10 +64,10 @@ interface OverviewProps {
 
 /**
  * Create the overview map component
- * @param {OverviewProps} props the overview map properties
+ * @param {OverviewMapProps} props the overview map properties
  * @return {JSX.Element} the overview map component
  */
-export function OverviewMap(props: OverviewProps): JSX.Element {
+export function OverviewMap(props: OverviewMapProps): JSX.Element {
   const { id, crs, zoomFactor } = props;
 
   const [minimap, setMinimap] = useState<L.Map>();
@@ -79,7 +79,7 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(theme.breakpoints.up('md'));
 
-  const parentMap = useMap();
+  const parentMap = api.map(id).map;
   const mapZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
 
   const basemaps = api.map(id).basemap.getBasemapLayers();
@@ -140,7 +140,12 @@ export function OverviewMap(props: OverviewProps): JSX.Element {
   );
 
   return deviceSizeMedUp ? (
-    <div className={leafletPositionClasses.topright}>
+    <div
+      style={{
+        zIndex: 1100,
+      }}
+      className={leafletPositionClasses.topright}
+    >
       <div ref={overviewRef} className="leaflet-control leaflet-bar">
         {minimapContainer}
       </div>

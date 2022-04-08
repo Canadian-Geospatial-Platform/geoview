@@ -18,21 +18,20 @@ import makeStyles from '@mui/styles/makeStyles';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-import { api } from './api/api';
-
-import * as UI from './ui';
-
 import 'leaflet/dist/leaflet.css';
 import './ui/style/style.css';
 import './ui/style/vendor.css';
+import * as UI from './ui';
 
 import AppStart from './core/app-start';
-
-import { Cast, TypeWindow, TypeCGPV, TypeApi, TypeMapConfigProps } from './core/types/cgpv-types';
 import * as types from './core/types/cgpv-types';
-import { Config } from './core/utils/config';
+
 import { EVENT_NAMES } from './api/event';
+import { api } from './api/api';
+
 import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
+
+import { Config } from './core/utils/config';
 
 export * from './core/types/cgpv-types';
 
@@ -68,7 +67,7 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
       delete api.maps[payloadHandlerId];
 
       // re-render map with updated config keeping previous values if unchanged
-      ReactDOM.render(<AppStart configObj={Cast<TypeMapConfigProps>(payload.config)} />, map);
+      ReactDOM.render(<AppStart configObj={types.Cast<types.TypeMapConfigProps>(payload.config)} />, map);
     }
   }
 });
@@ -87,29 +86,30 @@ function init(callback: () => void) {
 
   const mapElements = document.getElementsByClassName('llwp-map');
 
+  // loop through map elements on the page
   for (let i = 0; i < mapElements.length; i += 1) {
     const mapElement = mapElements[i] as Element;
 
-    const mapId = mapElement.getAttribute('id');
+    // create a new config for this map element
+    const config = new Config(mapElement);
 
-    if (mapId) {
-      // validate configuration and appply default if problem occurs then setup language
-      const configObj = new Config(
-        mapId,
-        (mapElement.getAttribute('data-leaflet') || '')
-          .replace(/'/g, '"')
-          .replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'")
-      );
+    // initialize config
+    // if config provided (either by inline, url params) validate it with schema
+    // otherwise return the default config
+    const configObj = config.initializeMapConfig();
 
-      ReactDOM.render(<AppStart configObj={configObj.configuration} />, mapElement);
+    // if valid config was provided
+    if (configObj) {
+      // render the map with the config
+      ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
     }
   }
 }
 
 // cgpv object to be exported with the api for outside use
-export const cgpv: TypeCGPV = {
+export const cgpv: types.TypeCGPV = {
   init,
-  api: Cast<TypeApi>({
+  api: types.Cast<types.TypeApi>({
     ...api,
     ...api.event,
     // ...api.projection,
@@ -137,4 +137,4 @@ export const cgpv: TypeCGPV = {
 Object.freeze(cgpv);
 
 // export the cgpv globally
-Cast<TypeWindow>(window).cgpv = cgpv;
+types.Cast<types.TypeWindow>(window).cgpv = cgpv;

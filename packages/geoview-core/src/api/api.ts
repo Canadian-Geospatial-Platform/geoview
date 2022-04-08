@@ -8,8 +8,10 @@ import { MapViewer } from '../geo/map/map';
 
 import { Plugin } from './plugin';
 import { GeoUtilities } from '../geo/utils/utilities';
+
 import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
+import { generateId } from '../core/utils/utilities';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -50,6 +52,9 @@ export class API {
 
   // used to access marker definitions
   markerDefinitions = MarkerDefinitions;
+
+  // generateId function
+  generateId = generateId;
 
   /**
    * Initiate the event and projection objects
