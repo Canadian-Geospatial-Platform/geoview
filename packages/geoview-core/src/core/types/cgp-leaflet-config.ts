@@ -8,7 +8,7 @@ import * as DomEvent from 'leaflet/src/dom/DomEvent';
 import { MapServiceOptions } from 'esri-leaflet';
 import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 /*-----------------------------------------------------------------------------

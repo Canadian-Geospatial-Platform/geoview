@@ -4,7 +4,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { MapContext } from '../../app-start';

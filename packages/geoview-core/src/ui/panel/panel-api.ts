@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';

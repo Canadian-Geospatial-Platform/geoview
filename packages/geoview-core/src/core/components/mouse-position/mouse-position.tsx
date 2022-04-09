@@ -9,7 +9,7 @@ import { LatLng } from 'leaflet';
 
 import { debounce } from 'lodash';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 
 const useStyles = makeStyles((theme) => ({

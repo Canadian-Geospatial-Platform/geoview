@@ -27,13 +27,14 @@ import AppStart from './core/app-start';
 import * as types from './core/types/cgpv-types';
 
 import { EVENT_NAMES } from './api/event';
-import { api } from './api/api';
+import { API } from './api/api';
 
 import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 
 import { Config } from './core/utils/config';
 
 export * from './core/types/cgpv-types';
+export const api = new API();
 
 // hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
 // TODO: put somewhere else

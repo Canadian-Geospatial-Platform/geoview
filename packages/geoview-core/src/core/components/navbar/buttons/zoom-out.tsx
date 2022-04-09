@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 import { Button, ZoomOutIcon } from '../../../../ui';
 import { MapContext } from '../../../app-start';
 

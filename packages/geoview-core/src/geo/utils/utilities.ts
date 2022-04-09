@@ -4,7 +4,7 @@ import WMSCapabilities from 'wms-capabilities';
 import { Cast, TypeCSSStyleDeclaration, TypeJsonObject } from '../../core/types/cgpv-types';
 import { getXMLHttpRequest, xmlToJson } from '../../core/utils/utilities';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 export class GeoUtilities {

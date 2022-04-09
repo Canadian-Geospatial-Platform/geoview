@@ -16,7 +16,7 @@ import { Navbar } from '../components/navbar/nav-bar';
 import { FocusTrapDialog } from './focus-trap';
 import { TypeMapConfigProps, TypeJsonObject } from '../types/cgpv-types';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 import { CircularProgress, Modal, Snackbar } from '../../ui';

@@ -15,7 +15,7 @@ import {
 import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 /**
  * a class to add esri feature layer

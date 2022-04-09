@@ -9,7 +9,7 @@ import { useMap } from 'react-leaflet';
 
 import { MapContext } from '../../app-start';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 import { CrosshairIcon } from './crosshair-icon';
 

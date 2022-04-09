@@ -10,7 +10,7 @@ import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { Panel, ButtonGroup, Button } from '../../../ui';
