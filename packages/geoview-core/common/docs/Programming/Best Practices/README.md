@@ -3,7 +3,15 @@ In the VS Code development environment, many of the coding rules are imposed by 
 configuration of some rules is not easily done for these checkers. We must therefore, for these particular cases, rely on the
 goodwill of our programmers. Here are some additional rules that you must follow.
 
-## 1- Avoid using variable names that are too short. ##
+## 1- Clearly identify the types of data you are using. ##
+
+The decision to use typescript to code the GeoView application implies that we define the type of everything we declare in our
+code. Otherwise, we would not have imposed this constraint on ourselves. Declaring types allows us to detect inconsistencies
+in the code at the time of writing, which saves us from difficult debugging sessions when switching to runtime mode. Avoid using
+TypeJsonObject, TypeJsonValue and TypeJsonArray types when you can define the structure of the type you use. These three types
+should be used as a last resort, when we cannot accurately predict the data from a file or URL.
+
+## 2- Avoid using variable names that are too short. ##
 
 It is difficult to know what a variable with the name `e` refers to. Is it an `element`, an `event` or anything else whose name starts
 with 'e'. In some cases, the name of the referred element does not even begin with 'e'. Don't hesitate to use long names like
@@ -13,7 +21,7 @@ self-documentation of our code. This rule may seem to require more time to write
 faster to understand what the code does. Moreover, with the cut and paste and auto-completion features provided by the editor,
 it doesn't take much longer to enter the code.
 
-## 2- Avoid using existing names in third party libraries to declare elements of the GeoView code. ##
+## 3- Avoid using existing names in third party libraries to declare elements of the GeoView code. ##
 
 The leaflet library has a base class named Layer. If we use the identifier Layer to define a class in our code and at the same
 time we use the Layer class of leaflet (`import { Layer as leafletLayer } from 'leaflet';`), it will be difficult to know at first
@@ -21,7 +29,7 @@ sight the type of a variable named `layer`. On the other hand, if we define our 
 at the same time by associating the `layer` variable with the `Layer` type and `gvLayer` with the `GVlayer` type, the confusion is thus
 cleared up.
 
-## 3- Use inheritance whenever possible. ##
+## 4- Use inheritance whenever possible. ##
 
 Inheritance eliminates the repetitive code required to create disjoint classes that have basically the same characteristics.
 One can use an abstract class as a parent at the root of the inheritance tree to provide a template for child classes.
