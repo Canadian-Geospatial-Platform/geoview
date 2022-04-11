@@ -128,6 +128,7 @@ export type TypeChildren = React.ReactNode;
  */
 export type TypeMapContext = {
   id: string;
+  interaction: string;
 };
 
 /*-----------------------------------------------------------------------------

@@ -81,9 +81,6 @@ async function init(callback: () => void) {
   // apply focus to element when keyboard navigation is use
   api.geoUtilities.manageKeyboardFocus();
 
-  // set the API callback if a callback is provided
-  if (callback) api.readyCallback = callback;
-
   const mapElements = document.getElementsByClassName('llwp-map');
 
   // loop through map elements on the page
@@ -105,6 +102,9 @@ async function init(callback: () => void) {
       ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
     }
   }
+
+  // set the API callback if a callback is provided
+  if (callback) api.readyCallback = callback;
 }
 
 // cgpv object to be exported with the api for outside use

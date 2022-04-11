@@ -7,7 +7,7 @@ import { DomEvent } from 'leaflet';
 import makeStyles from '@mui/styles/makeStyles';
 import { Tooltip, Fade, Button as MaterialButton } from '@mui/material';
 
-import { TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
+import { Cast, TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
@@ -167,10 +167,10 @@ export function Button(props: TypeButtonProps): JSX.Element {
 
   useEffect(() => {
     // disable events on container
-    const newButtonChildrenHTMLElements = buttonRef.current?.children as HTMLCollection;
+    const newButtonChildrenHTMLElements = Cast<HTMLElement[]>(buttonRef.current?.children);
     if (newButtonChildrenHTMLElements.length > 0) {
-      DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0] as HTMLElement);
-      DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0] as HTMLElement);
+      DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
+      DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
     }
 
     // check button type

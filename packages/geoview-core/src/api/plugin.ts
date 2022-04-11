@@ -50,7 +50,9 @@ export class Plugin {
           resolve(null);
         };
       }
-      if (existingScript) resolve(window.plugins[id]);
+      if (existingScript && window.plugins && window.plugins[id]) {
+        resolve(window.plugins[id]);
+      }
     });
   };
 

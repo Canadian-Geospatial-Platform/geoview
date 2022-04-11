@@ -21,6 +21,7 @@ declare module '@mui/styles/defaultTheme' {
 // create a state that will hold map config information
 export const MapContext = React.createContext<TypeMapContext>({
   id: '',
+  interaction: 'dynamic',
 });
 
 /**
@@ -37,8 +38,8 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { configObj } = props;
 
   const mapContextValue = useMemo(() => {
-    return { id: configObj.id };
-  }, [configObj.id]);
+    return { id: configObj.id, interaction: configObj.map.interaction };
+  }, [configObj.id, configObj.map.interaction]);
 
   /**
    * Create maps from inline configs with class name llwp-map in index.html

@@ -104,6 +104,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   return (
     <MapContainer
+      disabled
       id={id}
       center={mapProps.initialView.center}
       zoom={mapProps.initialView.zoom}
@@ -156,6 +157,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // emit the map loaded event
         setIsLoaded(true);
+
+        viewer.toggleMapInteraction(mapProps.interaction);
       }}
     >
       {isLoaded && crs && (

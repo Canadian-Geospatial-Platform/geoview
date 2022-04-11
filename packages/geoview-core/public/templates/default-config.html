@@ -88,14 +88,93 @@
       <div
         id="CONF3"
         class="llwp-map"
-        data-leaflet="{'name': 'LCCFR', 'projection': 3857, 'zoom': '40', 'center': ['Last',-1000], 'language': { 'test': 'sp-CA' }, 'basemapOptions': { 'id': 'notdefine', 'shaded': true, 'labeledWhat': true },
-            'layers':[
-                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
-                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': '4, 37' },
-                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1', 'type': 'esriFeature' },
-                { 'name': 'GeoJSON', 'url': './geojson/polygons.json', 'type': 'geoJSON' }
-            ]}"
+        data-lang="test_sp-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 40,
+              'center': ['Last', -1000]
+            },
+            'projection': 3857,
+            'basemapOptions': {
+              'id': 'notdefined',
+              'shaded': true,
+              'labeledWhat': true
+            },
+            'layers': [
+              {
+                'id': 'wmsLYR1',
+                'name': {
+                  'en': 'Census WMS',
+                  'fr': 'Census WMS'
+                },
+                'url': {
+                  'en': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer',
+                  'fr': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer'
+                },
+                'layerType': 'ogcWms',
+                'layerEntries': [
+                  {
+                    'id': '0'
+                  }
+                ]
+              },
+              {
+                'id': 'esriDynamicLYR2',
+                'name': {
+                  'en': 'Energy Dyna',
+                  'fr': 'Energy Dyna'
+                },
+                'url': {
+                  'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
+                  'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer'
+                },
+                'layerType': 'esriDynamic',
+                'layerEntries': [
+                  {
+                    'index': 4,
+                    'name': {
+                      'en': 'Natural Gas Processing Plants - config',
+                      'fr': 'Usines de traitement du gaz naturel - config'
+                    }
+                  },
+                  {
+                    'index': 37
+                  }
+                ]
+              },
+              {
+                'id': 'esriFeatureLYR3',
+                'name': {
+                  'en': 'Energy Feat',
+                  'fr': 'Energy Feat'
+                },
+                'url': {
+                  'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1',
+                  'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1'
+                },
+                'layerType': 'esriFeature'
+              },
+              {
+                'id': 'geojsonLYR4',
+                'name': {
+                  'en': 'GeoJSON Sample',
+                  'fr': 'Exemple GeoJSON'
+                },
+                'url': {
+                  'en': './geojson/polygons.json',
+                  'fr': './geojson/polygons.json'
+                },
+                'layerType': 'geojson'
+              }
+            ]
+          },
+          'theme': 'dark',
+          'languages': ['en-CA']
+        }"
       ></div>
+
       <p>This map will load with bad configuration replaced with default.</p>
       <p><strong>Configuration Snippet:</strong></p>
       <div id="CONF3CS" class="panel"></div>
@@ -106,15 +185,93 @@
       <div
         id="CONF4"
         class="llwp-map"
-        data-leaflet="{'name': 'LCCFR', 'projection': 3857, 'zoom': '40', 'center': ['Last',-1000], 'language': 'en-CA', 'basemapOptions': { 'id': 'notdefine', 'shaded': true, 'labeledWhat': true },
-            'layers':[
-                { 'name': 'Census WMS', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': 'BADENTRIES' },
-                { 'name': 'Energy Dyna Bad End', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServerBAADEND', 'type': 'esriDynamic', 'entries': '38' },
-                { 'name': 'Energy Dyna', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer', 'type': 'esriDynamic', 'entries': 'BADENTRIES-4, 37' },
-                { 'name': 'Energy Feat', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_enNOT/MapServer/1TOOMUCH', 'type': 'esriFeature' },
-                { 'name': 'GeoJSON', 'url': './geojson/polygonsBAD.json', 'type': 'geoJSON' }
-            ]}"
+        data-lang="test_sp-CA"
+        data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'initialView': {
+            'zoom': 40,
+            'center': ['Last', -1000]
+          },
+          'projection': 3857,
+          'basemapOptions': {
+            'id': 'notdefined',
+            'shaded': true,
+            'labeledWhat': true
+          },
+          'layers': [
+            {
+              'id': 'wmsLYR1',
+              'name': {
+                'en': 'Census WMS',
+                'fr': 'Census WMS'
+              },
+              'url': {
+                'en': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer',
+                'fr': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer'
+              },
+              'layerType': 'ogcWms',
+              'layerEntries': [
+                {
+                  'id': '0'
+                }
+              ]
+            },
+            {
+              'id': 'esriDynamicLYR2',
+              'name': {
+                'en': 'Energy Dyna',
+                'fr': 'Energy Dyna'
+              },
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServerBADEND',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServerBADEND'
+              },
+              'layerType': 'esriDynamic',
+              'layerEntries': [
+                {
+                  'index': 4,
+                  'name': {
+                    'en': 'Natural Gas Processing Plants - config',
+                    'fr': 'Usines de traitement du gaz naturel - config'
+                  }
+                },
+                {
+                  'index': 37
+                }
+              ]
+            },
+            {
+              'id': 'esriFeatureLYR3',
+              'name': {
+                'en': 'Energy Feat',
+                'fr': 'Energy Feat'
+              },
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1TOOMUCH',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1TOOMUCH'
+              },
+              'layerType': 'esriFeature'
+            },
+            {
+              'id': 'geojsonLYR4',
+              'name': {
+                'en': 'GeoJSON Sample',
+                'fr': 'Exemple GeoJSON'
+              },
+              'url': {
+                'en': './geojson/polygons.jsonNOTFOUND',
+                'fr': './geojson/polygons.jsonNOTFOUND'
+              },
+              'layerType': 'geojson'
+            }
+          ]
+        },
+        'theme': 'dark',
+        'languages': ['en-CA']
+      }"
       ></div>
+
       <p>This map will not load layers with bad configuration and inform the user.</p>
       <p><strong>Configuration Snippet:</strong></p>
       <div id="CONF4CS" class="panel"></div>

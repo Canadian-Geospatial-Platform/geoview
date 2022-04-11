@@ -268,5 +268,48 @@ export class MapViewer {
     });
   };
 
+  /**
+   * Set map to either dynamic or static
+   *
+   * @param {string} interaction map interaction
+   */
+  toggleMapInteraction = (interaction: string) => {
+    if (interaction === 'dynamic') {
+      // dynamic map
+      this.map.dragging.enable();
+      this.map.touchZoom.enable();
+      this.map.doubleClickZoom.enable();
+      this.map.scrollWheelZoom.enable();
+      this.map.boxZoom.enable();
+      this.map.keyboard.enable();
+      if (this.map.tap) this.map.tap.enable();
+      this.map.getContainer().style.cursor = 'grab';
+
+      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_TOGGLE_CONTROLS, this.mapProps.id, {
+        status: true,
+      });
+    } else {
+      // static map
+      this.map.dragging.disable();
+      this.map.touchZoom.disable();
+      this.map.doubleClickZoom.disable();
+      this.map.scrollWheelZoom.disable();
+      this.map.boxZoom.disable();
+      this.map.keyboard.disable();
+      if (this.map.tap) this.map.tap.disable();
+      this.map.getContainer().style.cursor = 'default';
+
+      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_TOGGLE_CONTROLS, this.mapProps.id, {
+        status: false,
+      });
+    }
+  };
+
+  /**
+   * Create bounds on map
+   *
+   * @param {LatLng.LatLngBounds} bounds map bounds
+   * @returns the bounds
+   */
   fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
 }

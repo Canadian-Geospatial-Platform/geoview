@@ -12,7 +12,9 @@ import {
   TypeWMSLayer,
   TypeWMSLayerEntry,
   TypeWFSLayer,
+  TypeWFSLayerEntry,
   TypeOgcFeatureLayer,
+  TypeOgcFeatureLayerEntry,
   TypeGeoJSONLayer,
   TypeXYZTiles,
   TypeMapCorePackages,
@@ -27,7 +29,7 @@ import {
   TypeLayerConfig,
   CONST_LAYER_TYPES,
 } from '../types/cgpv-types';
-import { generateId } from './utilities';
+import { generateId, isJsonString } from './utilities';
 
 import schema from '../../../schema.json';
 
@@ -47,6 +49,8 @@ export class Config {
   private mapElement: Element;
 
   private language: string;
+
+  private defaultLanguage = 'en-CA';
 
   // default config if provided configuration is missing or wrong
   private _config: TypeMapSchemaProps = {
@@ -118,11 +122,7 @@ export class Config {
     this.id = generateId();
 
     // set default language
-    this.language = 'en-US';
-
-    // this._config = config !== '' && isJsonString(config) ? this.validate(config) : this._config;
-
-    // if (config === '' || !isJsonString(config)) console.log(`- map: ${id} - Invalid or empty JSON configuration object, using default -`);
+    this.language = this.defaultLanguage;
   }
 
   /**
@@ -243,9 +243,75 @@ export class Config {
                     })
                   );
                 } else if (layerType === CONST_LAYER_TYPES.WFS) {
+                  layers.push(
+                    Cast<TypeWFSLayer>({
+                      id,
+                      name: {
+                        en: name,
+                        fr: name,
+                      },
+                      layerEntries: layerEntries.map((item: TypeWFSLayerEntry) => {
+                        return {
+                          index: item.id,
+                        };
+                      }),
+                      url: {
+                        en: url,
+                        fr: url,
+                      },
+                      layerType,
+                    })
+                  );
                 } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
+                  layers.push(
+                    Cast<TypeOgcFeatureLayer>({
+                      id,
+                      name: {
+                        en: name,
+                        fr: name,
+                      },
+                      layerEntries: layerEntries.map((item: TypeOgcFeatureLayerEntry) => {
+                        return {
+                          index: item.id,
+                        };
+                      }),
+                      url: {
+                        en: url,
+                        fr: url,
+                      },
+                      layerType,
+                    })
+                  );
                 } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
+                  layers.push(
+                    Cast<TypeGeoJSONLayer>({
+                      id,
+                      name: {
+                        en: name,
+                        fr: name,
+                      },
+                      url: {
+                        en: url,
+                        fr: url,
+                      },
+                      layerType,
+                    })
+                  );
                 } else if (layerType === CONST_LAYER_TYPES.XYZTiles) {
+                  layers.push(
+                    Cast<TypeXYZTiles>({
+                      id,
+                      name: {
+                        en: name,
+                        fr: name,
+                      },
+                      url: {
+                        en: url,
+                        fr: url,
+                      },
+                      layerType,
+                    })
+                  );
                 }
               }
             }
@@ -278,7 +344,7 @@ export class Config {
 
       // update language if provided from params
       const language = urlParams.l as TypeJsonValue as TypeLocalizedLanguages;
-      if (language) this.language = language;
+      if (language) this.language = this.validateLanguage(language);
     }
 
     return configObj;
@@ -296,14 +362,20 @@ export class Config {
     const language = this.mapElement.getAttribute('data-lang');
 
     // update language if provided from map element
-    if (language) this.language = language;
+    if (language) this.language = this.validateLanguage(language);
 
     let configObjStr = this.mapElement.getAttribute('data-config');
 
-    if (configObjStr) {
+    if (configObjStr && configObjStr !== '') {
       configObjStr = configObjStr.replace(/'/g, '"').replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
 
-      configObj = { ...JSON.parse(configObjStr) };
+      if (!isJsonString(configObjStr)) {
+        console.log(`- map: ${this.id} - Invalid JSON configuration object, using default -`);
+      } else {
+        configObj = { ...JSON.parse(configObjStr) };
+      }
+    } else {
+      console.log(`- map: ${this.id} - Empty JSON configuration object, using default -`);
     }
 
     return configObj;
@@ -336,8 +408,6 @@ export class Config {
     // use the url params config if provided
     if (urlParamsConfig && shared === 'true') configObj = { ...urlParamsConfig };
 
-    console.log(configObj);
-
     // if config has been provided by user then validate it
     if (configObj) {
       // create a validator object
@@ -363,9 +433,11 @@ export class Config {
           //   },
           // });
         }
+
+        mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
       } else {
         mapConfigProps = {
-          ...configObj,
+          ...this.validate(configObj),
           id: this.id,
           language: this.language as 'en-CA' | 'fr-CA',
         };
@@ -440,14 +512,14 @@ export class Config {
 
   /**
    * Validate the configuration file
-   * @param {JSON} config JSON configuration object
+   * @param {TypeMapSchemaProps} config configuration object to validate
    * @returns {TypeMapSchemaProps} valid JSON configuration object
    */
-  private validate(config: string): TypeMapSchemaProps {
+  private validate(config: TypeMapSchemaProps): TypeMapSchemaProps {
     // merge default and provided configuration
     const tmpConfig: TypeMapSchemaProps = {
       ...this._config,
-      ...JSON.parse(config),
+      ...config,
     };
 
     // do validation for every pieces
@@ -471,9 +543,12 @@ export class Config {
         layers: tmpConfig.map.layers,
       },
       theme: tmpConfig.theme,
+      components: tmpConfig.components,
       corePackages: tmpConfig.corePackages,
       languages: tmpConfig.languages,
       extraOptions: tmpConfig.extraOptions,
+      appBar: tmpConfig.appBar,
+      externalPackages: tmpConfig.externalPackages,
     };
     this.logModifs(tmpConfig, validConfig);
 
@@ -576,7 +651,7 @@ export class Config {
    * @returns {number} valid zoom level
    */
   private validateZoom(zoom: number): number {
-    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : 4;
+    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.initialView.zoom;
   }
 
   /**
@@ -585,6 +660,11 @@ export class Config {
    * @returns {string} valid language
    */
   private validateLanguage(language: string): string {
-    return this._languages.includes(language) ? language : this._languages[0];
+    if (!this._languages.includes(language)) {
+      console.log(`- map: ${this.id} - Invalid language ${language} replaced by ${this.defaultLanguage} -`);
+      return this.defaultLanguage;
+    }
+
+    return language;
   }
 }
