@@ -7,7 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { MapViewer } from '../geo/map/map';
 
-import { api } from './api';
+import { api } from '../app';
 import {
   Cast,
   AbstractPluginClass,

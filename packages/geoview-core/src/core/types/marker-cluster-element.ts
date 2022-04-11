@@ -3,7 +3,7 @@ import L, { LeafletEventHandlerFn } from 'leaflet';
 import './marker-cluster-element.d';
 import 'leaflet.markercluster/src';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 import { TypeIconCreationFunction } from './cgpv-types';
 import * as MarkerDefinitions from './marker-definitions';

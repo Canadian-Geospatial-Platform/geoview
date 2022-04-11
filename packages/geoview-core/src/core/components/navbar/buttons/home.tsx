@@ -4,7 +4,7 @@ import { MapContext } from '../../../app-start';
 
 import { Button, HomeIcon } from '../../../../ui';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 /**
  * Interface used for home button properties

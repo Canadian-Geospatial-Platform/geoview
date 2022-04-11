@@ -13,7 +13,7 @@ import {
   TypeJsonArray,
 } from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 /**
  * a class to add OGC api feature layer

@@ -1,6 +1,6 @@
 import L, { LatLngExpression } from 'leaflet';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { Cast, CONST_VECTOR_TYPES } from '../../../core/types/cgpv-types';

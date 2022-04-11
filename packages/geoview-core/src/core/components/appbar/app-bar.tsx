@@ -4,7 +4,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { Divider, List, ListItem, Panel, Button } from '../../../ui';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { MapContext } from '../../app-start';

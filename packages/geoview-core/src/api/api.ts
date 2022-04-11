@@ -118,5 +118,3 @@ export class API {
     return this.maps[map.id];
   };
 }
-
-export const api = new API();

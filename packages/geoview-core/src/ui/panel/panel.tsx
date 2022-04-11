@@ -14,7 +14,7 @@ import { Cast, TypePanelAppProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 import { MapContext } from '../../core/app-start';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 import { IconButton, CloseIcon, Divider } from '..';

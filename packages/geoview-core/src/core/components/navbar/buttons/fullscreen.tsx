@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 
 import { MapContext } from '../../../app-start';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 import { Button, FullscreenIcon, FullscreenExitIcon } from '../../../../ui';
 

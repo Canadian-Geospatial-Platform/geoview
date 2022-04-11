@@ -3,7 +3,7 @@ import { CRS } from 'leaflet';
 
 import { Projection } from './projection';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 
 /**
  * A class that manages the projection for the loaded map

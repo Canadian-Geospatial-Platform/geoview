@@ -7,7 +7,7 @@ import { mapService as esriMapService, MapService } from 'esri-leaflet';
 import { xmlToJson } from '../../../../core/utils/utilities';
 import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeJsonObject, TypeWFSLayer, TypeJsonArray } from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 /**
  * a class to add WFS layer

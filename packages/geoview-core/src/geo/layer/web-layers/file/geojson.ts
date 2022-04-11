@@ -10,7 +10,7 @@ import {
   Cast,
 } from '../../../../core/types/cgpv-types';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 /**
  * Class used to add geojson layer to the map

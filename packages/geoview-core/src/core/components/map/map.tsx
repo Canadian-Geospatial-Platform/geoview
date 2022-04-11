@@ -15,7 +15,7 @@ import { ClickMarker } from '../click-marker/click-marker';
 
 import { generateId } from '../../utils/utilities';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/event';
 
 import { MapViewer } from '../../../geo/map/map';

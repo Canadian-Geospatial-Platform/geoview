@@ -8,7 +8,7 @@ import { useSnackbar } from 'notistack';
 
 import { MapContext } from '../../core/app-start';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
