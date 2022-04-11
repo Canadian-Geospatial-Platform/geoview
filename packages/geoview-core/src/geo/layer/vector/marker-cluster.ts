@@ -4,7 +4,7 @@ import L, { Layer } from 'leaflet';
 import 'leaflet.markercluster/src';
 
 import { EVENT_NAMES } from '../../../api/event';
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 
 import { Cast, TypeStampedIconCreationFunction } from '../../../core/types/cgpv-types';
 import { generateId } from '../../../core/utils/utilities';

@@ -8,7 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 import { HtmlToReact } from './html-to-react';

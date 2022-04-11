@@ -1,6 +1,6 @@
 import L from 'leaflet';
 
-import { api } from '../../../../api/api';
+import { api } from '../../../../app';
 
 import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeWebLayers, TypeXYZTiles } from '../../../../core/types/cgpv-types';
 

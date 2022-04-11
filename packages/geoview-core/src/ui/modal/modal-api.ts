@@ -3,7 +3,7 @@ import { ModalModel } from './modal-model';
 import { TypeFunction, TypeChildren } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 /**

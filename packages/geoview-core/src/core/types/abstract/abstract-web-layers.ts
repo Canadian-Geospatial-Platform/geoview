@@ -4,7 +4,7 @@ import { TypeWebLayers, TypeAbstractWebLayersConfig, TypeLayersInWebLayer, DEFAU
 
 import { generateId } from '../../utils/utilities';
 
-import { api } from '../../../api/api';
+import { api } from '../../../app';
 
 export abstract class AbstractWebLayersClass {
   // type of web layer

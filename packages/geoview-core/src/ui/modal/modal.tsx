@@ -11,7 +11,7 @@ import { toJsonObject, TypeDialogProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { EVENT_NAMES } from '../../api/event';
-import { api } from '../../api/api';
+import { api } from '../../app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';

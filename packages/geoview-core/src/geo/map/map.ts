@@ -13,7 +13,7 @@ import { Layer } from '../layer/layer';
 
 import { MapProjection } from '../projection/map-projection';
 
-import { api } from '../../api/api';
+import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/event';
 
 import '../../core/types/cgp-leaflet-config';
