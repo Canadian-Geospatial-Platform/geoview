@@ -10,7 +10,7 @@ code. Otherwise, we would not have imposed this constraint on ourselves. Declari
 in the code at the time of writing, which saves us from difficult debugging sessions when switching to runtime mode. Avoid using
 TypeJsonObject, TypeJsonValue and TypeJsonArray types when you can define the structure of the type you use. These three types
 should be used as a last resort, when we cannot accurately predict the structure of the data that usually comes from a file or
-a URL,
+a URL.
 
 ## 2- Avoid using variable names that are too short. ##
 
