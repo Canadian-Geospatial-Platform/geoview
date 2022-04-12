@@ -16,25 +16,16 @@ If a handler name is specified then the data related to the handler name will be
 
 ```js
 var myHandler = function (param) {
-    doStuff(param);
+  doStuff(param);
 };
 cgpv.api.on('map/moveend', myHandler, 'mapWM');
-```
-
-To listen to multiple events fired with the same event name, example in case two maps are rendered on same page and are emitting the mouseend event you can use `all()`, this method requires only the event name and a callback handler.
-
-```js
-var myHandler = function (param) {
-    doStuff(param);
-};
-cgpv.api.all('map/moveend', myHandler);
 ```
 
 Similarly, the `once()` method can be used to set up a one-time event handler. After the handler is triggered by the event, it is unregistered automatically.
 
 ```js
 var myOneTimeHandler = function (param) {
-    doStuff(param);
+  doStuff(param);
 };
 cgpv.api.once('map/moveend', myOneTimeHandler, 'mapWM');
 ```

@@ -46,16 +46,37 @@
       <div
         id="EVNT1"
         class="llwp-map"
-        data-leaflet="{ 'name': 'LCCEN', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true }, 'layers': [] }"
+        data-lang="en-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [60, -100]
+            },
+            'projection': 3978,
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'theme': 'dark',
+          'languages': ['en-CA']
+        }"
       ></div>
+
       <p>This script tag will trigger a basic notification on load and another with a custom function every 20 seconds.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="EVNT1CS" class="panel"></div>
-      <br />
-      <div id="codeSnippet" class="panel">
+
+      <div class="panel">
         <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
         <div class="maps-position"></div>
       </div>
+
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="EVNT1CS" class="panel"></div>
+      <p><strong>Code Snippet:</strong></p>
+      <div id="codeSnippet" class="panel"></div>
     </div>
     <script src="codedoc.js"></script>
     <script>
@@ -63,21 +84,18 @@
       cgpv.init(function () {
         console.log('api is ready');
 
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
-
         //get map posiion panel
         const mapsPosition = document.getElementsByClassName('maps-position');
 
-        // listen to all events emitted with same event name
-        cgpv.api.all('map/moveend', (args) => {
-          mapsPosition[0].innerHTML = mapsPosition[0].innerHTML = args
-            .map((map) => {
-              return `<p>Map ${map.handlerName} with latitude ${map.position.lat} and longitude ${map.position.lng}</p>`;
-            })
-            .join(' ');
-        });
+        // listen to map moveend event
+        cgpv.api.event.on(
+          'map/moveend',
+          (args) => {
+            mapsPosition[0].innerHTML =
+              mapsPosition[0].innerHTML = `<p>Map ${args.handlerName} with latitude ${args.position.lat} and longitude ${args.position.lng}</p>`;
+          },
+          'EVNT1'
+        );
 
         // snackbar notification
         window.cgpv.api.event.emit('snackbar/open', 'EVNT1', {
@@ -101,6 +119,10 @@
             },
           });
         }, 20000);
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

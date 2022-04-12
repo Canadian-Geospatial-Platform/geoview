@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 function createCodeSnippet() {
-  const scripts = document.getElementsByTagName('script')[document.getElementsByTagName('script').length - 1];
-  document.getElementById('codeSnippet').innerHTML = `<pre>${scripts.textContent
+  const scripts = Array.prototype.filter.call(document.getElementsByTagName('script'), (obj) => {
+    return obj.getAttribute('id') === null;
+  });
+
+  const script = scripts[scripts.length - 1];
+
+  document.getElementById('codeSnippet').innerHTML = `<pre>${script.textContent
     .replace('//create snippets\n', '')
     .replace('createConfigSnippet();\n', '')
     .replace('createCodeSnippet();\n', '')}</pre>`;

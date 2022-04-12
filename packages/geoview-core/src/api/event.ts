@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { toJsonObject, TypeJsonValue, TypeJsonObject, TypeJsonArray } from '../core/types/cgpv-types';
+import { toJsonObject, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
@@ -80,6 +80,11 @@ export const EVENT_NAMES = {
    * Event triggered when a navbar button or button panel has been removed
    */
   EVENT_NAVBAR_BUTTON_PANEL_REMOVE: 'navbar/button_panel_remove',
+
+  /**
+   * Enable / Disable controls (zoom,home,fullscreen buttons)
+   */
+  EVENT_NAVBAR_TOGGLE_CONTROLS: 'navbar/toggle_controls',
 
   /**
    * Event triggered when a request is made to open a panel
@@ -285,38 +290,6 @@ export class Event {
     };
 
     this.eventEmitter.once(eName, listen);
-  };
-
-  /**
-   * Listen to an event emitted by multiple handlers
-   * Return the data from multiple emitters with the same event
-   *
-   * @param {string} eventName the event name to listen to
-   * @param {function} listener callback function passing data for multiple handlers
-   *
-   * @returns An array containing the data from single / multiple handlers
-   */
-  all = (eventName: string, listener: (payload: TypeJsonArray) => void): void => {
-    /**
-     * callback function to handle adding the data for multiple handlers
-     */
-    const listen = () => {
-      // array containing the data
-      const data: TypeJsonArray = [];
-
-      // loop through events with same event name and get their data
-      for (let i = 0; i < Object.keys(this.events[eventName]).length; i++) {
-        const handlerName = Object.keys(this.events[eventName])[i];
-
-        data.push(this.events[eventName][handlerName]);
-      }
-
-      // call the callback function
-      listener(data);
-    };
-
-    // listen to the events by event name
-    this.eventEmitter.on(eventName, listen);
   };
 
   /**

@@ -236,7 +236,7 @@
       "type": "object",
       "properties": {
         "index": {
-          "type": "string",
+          "type": "number",
           "description": "The index of the layer in the map service."
         },
         "name": {
