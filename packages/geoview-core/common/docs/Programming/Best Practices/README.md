@@ -20,7 +20,7 @@ When using react hooks, define the data type they use, even if it's trivial. Thi
 type to be associated with the hook so that typescript features can perform code validation. Type definition is done using the
 brackets '<' and '>' as follows:
 
-```
+```ts
 const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
 ```
 
@@ -50,3 +50,21 @@ Inheritance also allows to exploit polymorphism. To do so, you just have to defi
 whether it is abstract or not. You can then assign any object of a derived class to this variable without having to negotiate
 the type with the Cast function or the as operator. To see examples of inheritance, go to the geoview-core/src/core/abstract
 folder.
+
+## 5- Use the spreading operator only when necessary ##
+
+When you spread two objects in the same object, sooner or later you run the risk of a collision. It is better to assign each
+object to an attribute in order to partition their contents rather than cramming everything in the same level.
+
+```ts
+const object1 = { a: 'a', collision: 1 };
+const object2 = { b: 'b', collision: 2 };
+
+// Here, we have a collision and loose value of object1.collision
+const spredingCollision = { ...object1, ...object2 };
+
+// Here, value of attribute collision is preserved for both object
+const noCollision = { object1, object2 };
+
+```
+
