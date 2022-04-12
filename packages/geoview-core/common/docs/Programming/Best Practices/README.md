@@ -7,10 +7,22 @@ goodwill of our programmers. Here are some additional rules that you must follow
 
 The decision to use typescript to code the GeoView application implies that we define the type of everything we declare in our
 code. Otherwise, we would not have imposed this constraint on ourselves. Declaring types allows us to detect inconsistencies
-in the code at the time of writing, which saves us from difficult debugging sessions when switching to runtime mode. Avoid using
-TypeJsonObject, TypeJsonValue and TypeJsonArray types when you can define the structure of the type you use. These three types
-should be used as a last resort, when we cannot accurately predict the structure of the data that usually comes from a file or
-a URL.
+in the code at the time of writing, which saves us from difficult debugging sessions when switching to runtime mode.
+
+Never use `any` if you can define the type of the data used. The use of type `any` is only permitted if it is impossible
+to do otherwise. If you are forced to use it, insert a comment on the previous line to explain why.
+
+Avoid using TypeJsonObject, TypeJsonValue and TypeJsonArray types when you can define the structure of the type you use. These
+three types should be used as a last resort, when we cannot accurately predict the structure of the data that usually comes
+from a file or a URL.
+
+When using react hooks, define the data type they use, even if it's trivial. This way of doing things allows the correct data
+type to be associated with the hook so that typescript features can perform code validation. Type definition is done using the
+brackets '<' and '>' as follows:
+
+```
+const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
+```
 
 ## 2- Avoid using variable names that are too short. ##
 
