@@ -18,7 +18,15 @@ import { EVENT_NAMES } from '../../api/event';
 
 import '../../core/types/cgp-leaflet-config';
 import { generateId } from '../../core/utils/utilities';
-import { TypeMapConfigProps, TypeLayerConfig, TypeLanguages, TypeLocalizedLanguages } from '../../core/types/cgpv-types';
+import { Config } from '../../core/utils/config';
+import {
+  TypeMapConfigProps,
+  TypeLayerConfig,
+  TypeLanguages,
+  TypeLocalizedLanguages,
+  TypeMapSchemaProps,
+} from '../../core/types/cgpv-types';
+
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
 
@@ -269,6 +277,24 @@ export class MapViewer {
   };
 
   /**
+   * Load a new map config from a function call
+   *
+   * @param {TypeMapSchemaProps} mapConfig a new config passed in from the function call
+   */
+  loadMapConfig = (mapConfig: TypeMapSchemaProps) => {
+    // create a new config for this map element
+    const config = new Config(this.map.getContainer());
+
+    const configObj = config.getMapConfigFromFunc(mapConfig);
+
+    // emit an event to reload the map with the new config
+    api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
+      handlerId: this.id,
+      config: configObj,
+    });
+  };
+
+  /**
    * Set map to either dynamic or static
    *
    * @param {string} interaction map interaction
@@ -284,10 +310,6 @@ export class MapViewer {
       this.map.keyboard.enable();
       if (this.map.tap) this.map.tap.enable();
       this.map.getContainer().style.cursor = 'grab';
-
-      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_TOGGLE_CONTROLS, this.mapProps.id, {
-        status: true,
-      });
     } else {
       // static map
       this.map.dragging.disable();
@@ -298,10 +320,6 @@ export class MapViewer {
       this.map.keyboard.disable();
       if (this.map.tap) this.map.tap.disable();
       this.map.getContainer().style.cursor = 'default';
-
-      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_TOGGLE_CONTROLS, this.mapProps.id, {
-        status: false,
-      });
     }
   };
 

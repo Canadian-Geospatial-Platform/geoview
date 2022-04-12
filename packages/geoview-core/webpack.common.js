@@ -86,6 +86,7 @@ const config = {
     new CopyWebpackPlugin({
       patterns: [
         { from: './public/img', to: 'img' },
+        { from: './public/configs', to: 'configs' },
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
         { from: './public/css', to: 'css' },
         { from: './public/markers', to: 'markers' },

@@ -169,8 +169,8 @@ export function Shell(props: ShellProps): JSX.Element {
         <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
-        <Appbar />
-        <Navbar />
+        {config.components !== undefined && config.components.indexOf('appbar') > -1 && <Appbar />}
+        {config.components !== undefined && config.components.indexOf('navbar') > -1 && <Navbar />}
         <Map {...config} />
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />

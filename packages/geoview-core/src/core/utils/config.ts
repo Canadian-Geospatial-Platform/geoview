@@ -82,26 +82,31 @@ export class Config {
   // validations values
   private _projections: number[] = [3857, 3978];
 
+  // valid basemap ids
   private _basemapId: Record<number, string[]> = {
     3857: ['transport'],
     3978: ['transport', 'simple', 'shaded'],
   };
 
+  // valid shaded basemap values for each projection
   private _basemapShaded: Record<number, boolean[]> = {
     3857: [false],
     3978: [true, false],
   };
 
+  // valid labeled basemap values for each projection
   private _basemaplabeled: Record<number, boolean[]> = {
     3857: [true, false],
     3978: [true, false],
   };
 
+  // valid center levels from each projection
   private _center: Record<number, Record<string, number[]>> = {
     3857: { lat: [-90, 90], long: [-180, 180] },
     3978: { lat: [40, 90], long: [-140, 40] },
   };
 
+  // valid languages
   private _languages = ['en-CA', 'fr-CA'];
 
   /**
@@ -381,6 +386,99 @@ export class Config {
     return configObj;
   }
 
+  /**
+   * Get the config object from json file
+   *
+   * @returns {TypeMapSchemaProps | undefined} the generated config object from json file
+   */
+  private async getJsonFileConfig(): Promise<TypeMapSchemaProps | undefined> {
+    // create a new config object
+    let configObj: TypeMapSchemaProps | undefined;
+
+    const language = this.mapElement.getAttribute('data-lang');
+
+    // update language if provided from map element
+    if (language) this.language = this.validateLanguage(language);
+
+    const configUrl = this.mapElement.getAttribute('data-config-url');
+
+    // check config url
+    if (configUrl && configUrl !== '') {
+      try {
+        const res = await fetch(configUrl);
+
+        const configData = await res.json();
+
+        configObj = { ...configData };
+      } catch (error) {
+        console.log(`- map: ${this.id} - Invalid config url provided -`);
+      }
+    } else {
+      console.log(`- map: ${this.id} - Invalid config url provided -`);
+    }
+
+    return configObj;
+  }
+
+  /**
+   * Get map config from a function call
+   *
+   * @param {TypeMapSchemaProps} configObj config object passed in the function
+   * @returns {TypeMapConfigProps} a valid map config
+   */
+  getMapConfigFromFunc(configObj: TypeMapSchemaProps): TypeMapConfigProps | undefined {
+    let mapConfigProps: TypeMapConfigProps | undefined;
+
+    const language = this.mapElement.getAttribute('data-lang');
+
+    // update language if provided from map element
+    if (language) this.language = this.validateLanguage(language);
+
+    if (configObj) {
+      // create a validator object
+      const validator = new Ajv({
+        strict: false,
+      });
+
+      // initialize validator with schema file
+      const validate = validator.compile(schema);
+
+      // validate configuration
+      const valid = validate({ ...configObj });
+
+      if (!valid && validate.errors && validate.errors.length) {
+        for (let j = 0; j < validate.errors.length; j += 1) {
+          const error = validate.errors[j];
+          console.log(error);
+          // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
+          //   message: {
+          //     type: 'key',
+          //     value: error.message,
+          //     params: [mapId],
+          //   },
+          // });
+        }
+
+        mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
+      } else {
+        mapConfigProps = {
+          ...this.validate(configObj),
+          id: this.id,
+          language: this.language as 'en-CA' | 'fr-CA',
+        };
+      }
+    } else {
+      mapConfigProps = { ...this._config, id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
+    }
+
+    return mapConfigProps;
+  }
+
+  /**
+   * Initialize a map config from either inline div, url params, json file
+   *
+   * @returns {TypeMapConfigProps} the initialized valid map config
+   */
   async initializeMapConfig(): Promise<TypeMapConfigProps | undefined> {
     let mapConfigProps: TypeMapConfigProps | undefined;
 
@@ -390,17 +488,22 @@ export class Config {
     // update map id if provided in map element
     if (mapId) this.id = mapId;
 
-    // get the value that will check if any url params passed will override existing map
-    const shared = this.mapElement.getAttribute('data-shared');
-
     // create a new config object to store provided config by user
     let configObj: TypeMapSchemaProps | undefined;
+
+    // check if a config file url is provided
+    const jsonFileConfig = await this.getJsonFileConfig();
+
+    if (jsonFileConfig) configObj = { ...jsonFileConfig };
 
     // check if inline div config has been passed
     const inlineDivConfig = this.getInlintDivConfig();
 
     // use inline config if provided
     if (inlineDivConfig) configObj = { ...inlineDivConfig };
+
+    // get the value that will check if any url params passed will override existing map
+    const shared = this.mapElement.getAttribute('data-shared');
 
     // check if config params have been passed
     const urlParamsConfig = await this.getUrlParamsConfig();
@@ -475,6 +578,12 @@ export class Config {
     return obj;
   }
 
+  /**
+   * Get url parameters from url param search string
+   *
+   * @param {objStr} objStr the url parameters string
+   * @returns {TypeJsonObject} an object containing url parameters
+   */
   private parseObjectFromUrl(objStr: string): TypeJsonObject {
     const obj: TypeJsonObject = {};
 

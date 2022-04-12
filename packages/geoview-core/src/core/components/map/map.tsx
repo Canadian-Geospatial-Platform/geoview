@@ -23,7 +23,7 @@ import { MapViewer } from '../../../geo/map/map';
 import { Cast, TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
-  const { map: mapProps, extraOptions, language } = props;
+  const { map: mapProps, extraOptions, language, components } = props;
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
@@ -104,7 +104,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   return (
     <MapContainer
-      disabled
       id={id}
       center={mapProps.initialView.center}
       zoom={mapProps.initialView.zoom}
@@ -177,7 +176,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           {deviceSizeMedUp && <MousePosition id={id} />}
           <ScaleControl position="bottomright" imperial={false} />
           {deviceSizeMedUp && <Attribution attribution={attribution} />}
-          <NorthArrow projection={crs} />
+          {components !== undefined && components.indexOf('northArrow') > -1 && <NorthArrow projection={crs} />}
           <NorthPoleFlag projection={crs} />
           <Crosshair id={id} />
           <ClickMarker />

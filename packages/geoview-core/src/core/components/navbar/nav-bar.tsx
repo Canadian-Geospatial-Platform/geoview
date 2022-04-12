@@ -15,7 +15,7 @@ import { EVENT_NAMES } from '../../../api/event';
 
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
-import { TypeButtonPanel, Cast } from '../../types/cgpv-types';
+import { TypeButtonPanel } from '../../types/cgpv-types';
 import { MapContext } from '../../app-start';
 
 const navBtnWidth = '32px';
@@ -75,7 +75,6 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
-  const [controlsVisible, setControlsVisible] = useState(true);
   const [refreshCount, setRefreshCount] = useState(0);
 
   const classes = useStyles();
@@ -96,17 +95,6 @@ export function Navbar(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    // listen to new navbar panel creation
-    api.event.on(
-      EVENT_NAMES.EVENT_NAVBAR_TOGGLE_CONTROLS,
-      (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
-          setControlsVisible(Cast<boolean>(payload.status));
-        }
-      },
-      mapId
-    );
-
     // listen to new navbar panel creation
     api.event.on(
       EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
@@ -230,18 +218,14 @@ export function Navbar(): JSX.Element {
           }
           return null;
         })}
-        {controlsVisible && (
-          <>
-            <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" className={classes.navBtnGroup}>
-              <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
-              <ZoomOut className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
-            </ButtonGroup>
-            <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar', '')} variant="contained" className={classes.navBtnGroup}>
-              <Fullscreen className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
-              <Home className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
-            </ButtonGroup>
-          </>
-        )}
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" className={classes.navBtnGroup}>
+          <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+          <ZoomOut className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+        </ButtonGroup>
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar', '')} variant="contained" className={classes.navBtnGroup}>
+          <Fullscreen className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+          <Home className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+        </ButtonGroup>
       </div>
     </div>
   );

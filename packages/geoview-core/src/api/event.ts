@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../core/utils/utilities';
-import { toJsonObject, TypeJsonValue, TypeJsonObject, TypeJsonArray } from '../core/types/cgpv-types';
+import { toJsonObject, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
 
 /**
  * constant contains event names
