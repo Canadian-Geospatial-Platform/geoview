@@ -1,5 +1,14 @@
 /* eslint-disable react/require-default-props */
-import { TypeWindow, toJsonObject, TypeJsonArray, TypeCGPVMUI } from 'geoview-core';
+import {
+  TypeWindow,
+  toJsonObject,
+  TypeJsonArray,
+  TypeCGPVMUI,
+  TypeDynamicLayerEntry,
+  TypeWMSLayerEntry,
+  TypeWFSLayerEntry,
+  TypeOgcFeatureLayerEntry,
+} from 'geoview-core';
 
 type Event = { target: { value: string } };
 
@@ -41,7 +50,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const [layerType, setLayerType] = useState('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
-  const [layerEntry, setLayerEntry] = useState('');
+  const [layerEntries, setLayerEntries] = useState<
+    (TypeDynamicLayerEntry | TypeWMSLayerEntry | TypeWFSLayerEntry | TypeOgcFeatureLayerEntry | TypeWFSLayerEntry)[]
+  >([]);
 
   const useStyles = ui.makeStyles(() => ({
     buttonGroup: {
@@ -143,7 +154,11 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       const layers = (wms.Capability.Layer.Layer as TypeJsonArray).map((aLayer) => [aLayer.Name, aLayer.Title]);
       if (layers.length === 1) {
         setLayerName(layers[0][1] as string);
-        setLayerEntry(layers[0][0] as string);
+        setLayerEntries([
+          {
+            id: layers[0][0] as string,
+          },
+        ]);
       } else setLayerList(layers);
     } catch (err) {
       if (err === 'proj') emitErrorProj('WMS', proj, supportedProj);
@@ -169,7 +184,11 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       ]);
       if (layers.length === 1) {
         setLayerName(layers[0][1] as string);
-        setLayerEntry(layers[0][0] as string);
+        setLayerEntries([
+          {
+            id: layers[0][0] as string,
+          },
+        ]);
       } else setLayerList(layers);
     } catch (err) {
       emitErrorServer('WFS');
@@ -193,7 +212,11 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       const layers = (json.collections as TypeJsonArray).map((aFeatureType) => [aFeatureType.id, aFeatureType.title]);
       if (layers.length === 1) {
         setLayerName(layers[0][1] as string);
-        setLayerEntry(layers[0][0] as string);
+        setLayerEntries([
+          {
+            id: layers[0][0] as string,
+          },
+        ]);
       } else setLayerList(layers);
     } catch (err) {
       emitErrorServer('OGC API Feature');
@@ -217,11 +240,19 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           const layers = (esri.layers as TypeJsonArray).map((aLayer) => [aLayer.id, aLayer.name]);
           if (layers.length === 1) {
             setLayerName(layers[0][1] as string);
-            setLayerEntry(layers[0][0] as string);
+            setLayerEntries([
+              {
+                index: layers[0][0] as number,
+              },
+            ]);
           } else setLayerList(layers);
         } else {
           setLayerName(esri.name as string);
-          setLayerEntry(String(esri.id));
+          setLayerEntries([
+            {
+              index: esri.id as number,
+            },
+          ]);
         }
       } else {
         throw new Error('err');
@@ -307,7 +338,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const handleStep3 = () => {
     let valid = true;
-    if (layerEntry.length === 0) {
+    if (layerEntries.length === 0) {
       valid = false;
       emitErrorEmpty('Layer');
     }
@@ -321,13 +352,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let valid = true;
     const name = layerName;
     let url = layerURL;
-    let entries = layerEntry;
-    if (Array.isArray(entries)) entries = entries.join(',');
+    let entries = layerEntries;
+    // if (Array.isArray(entries)) entries = entries.join(',');
     if (layerType === ESRI_DYNAMIC) url = api.geoUtilities.getMapServerUrl(layerURL);
     else if (layerType === ESRI_FEATURE) {
-      url = `${api.geoUtilities.getMapServerUrl(layerURL)}/${layerEntry}`;
-      entries = '';
+      url = `${api.geoUtilities.getMapServerUrl(layerURL)}/${(layerEntries as TypeDynamicLayerEntry[])[0].index}`;
+      entries = [];
     }
+
     if (layerName === '') {
       valid = false;
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
@@ -368,7 +400,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     setLayerType('');
     setLayerList([]);
     setLayerName('');
-    setLayerEntry('');
+    setLayerEntries([]);
   };
 
   /**
@@ -380,21 +412,45 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     setLayerType(event.target.value);
     setLayerList([]);
     setLayerName('');
-    setLayerEntry('');
+    setLayerEntries([]);
   };
 
   /**
    * Set the currently selected layer from a list
    *
-   * @param _ Select event
+   * @param event Select event
    * @param newValue value/label pairs of select options
    */
   const handleSelectLayer = (event: Event, newValue: string[]) => {
     if (isMultiple()) {
-      setLayerEntry(newValue.map((x) => x[0])[0]);
+      setLayerEntries(
+        newValue.map((x: string) => {
+          if (layerType === ESRI_DYNAMIC) {
+            return {
+              index: parseInt(x[0], 10),
+            };
+          }
+
+          return {
+            id: x[0] as string,
+          };
+        })
+      );
       setLayerName(newValue.map((x) => x[1]).join(', '));
     } else {
-      setLayerEntry(newValue[0]);
+      if (layerType === ESRI_DYNAMIC) {
+        setLayerEntries([
+          {
+            index: parseInt(newValue[0], 10),
+          },
+        ]);
+      } else {
+        setLayerEntries([
+          {
+            id: newValue[0],
+          },
+        ]);
+      }
       setLayerName(newValue[1]);
     }
   };
@@ -459,10 +515,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       <Step>
         <StepLabel>Configure layer</StepLabel>
         <StepContent>
-          {layerList.length === 0 && layerEntry === '' && (
+          {layerList.length === 0 && layerEntries.length === 0 && (
             <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
           )}
-          {layerList.length === 0 && layerEntry !== '' && <Typography>{layerName}</Typography>}
+          {layerList.length === 0 && layerEntries.length > 0 && <Typography>{layerName}</Typography>}
           {layerList.length > 1 && (
             <FormControl fullWidth>
               <Autocomplete

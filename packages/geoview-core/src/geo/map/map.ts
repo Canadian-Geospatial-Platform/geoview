@@ -300,7 +300,7 @@ export class MapViewer {
    * @param {string} interaction map interaction
    */
   toggleMapInteraction = (interaction: string) => {
-    if (interaction === 'dynamic') {
+    if (interaction === 'dynamic' || !interaction) {
       // dynamic map
       this.map.dragging.enable();
       this.map.touchZoom.enable();
