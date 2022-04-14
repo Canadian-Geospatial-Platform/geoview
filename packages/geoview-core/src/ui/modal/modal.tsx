@@ -206,7 +206,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
   useEffect(() => {
     // to open the modal
     api.event.on(
-      EVENT_NAMES.EVENT_MODAL_OPEN,
+      EVENT_NAMES.MODAL.EVENT_MODAL_OPEN,
       (args) => {
         if (id === (args.id as string) && (args.handlerName as string) === mapId) {
           const modal = api.map(mapId).modal.modals[args.id as string] as TypeModalProps;
@@ -221,7 +221,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
 
     // to update modals
     api.event.on(
-      EVENT_NAMES.EVENT_MODAL_UPDATE,
+      EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE,
       (args) => {
         if (id === (args.id as string) && (args.handlerName as string) === mapId) {
           const modal = api.map(mapId).modal.modals[args.id as string] as TypeModalProps;
@@ -234,7 +234,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
 
     // to close the modal
     api.event.on(
-      EVENT_NAMES.EVENT_MODAL_CLOSE,
+      EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE,
       (args) => {
         if (id === (args.id as string) && (args.handlerName as string) === mapId) {
           if (!args.open) openEvent = false;
@@ -245,9 +245,9 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MODAL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.EVENT_MODAL_CLOSE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_MODAL_UPDATE, mapId);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, mapId);
     };
   }, [updateModal, createdModal]);
 

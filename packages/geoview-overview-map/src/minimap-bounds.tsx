@@ -82,7 +82,7 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
 
     // listen to API event when the overview map is toggled
     api.event.on(
-      EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE,
+      EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE,
       (payload: TypeJsonObject) => {
         if (payload && parentId === (payload.handlerName as string)) {
           updateMap();
@@ -94,7 +94,7 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, parentId);
+      api.event.off(EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE, parentId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -3,213 +3,39 @@ import EventEmitter from 'eventemitter3';
 import { generateId } from '../core/utils/utilities';
 import { toJsonObject, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
 
+import { MAP } from './events/map';
+import { LAYER } from './events/layer';
+import { APPBAR } from './events/appbar';
+import { NAVBAR } from './events/navbar';
+import { SNACKBAR } from './events/snackbar';
+import { BASEMAP } from './events/basemap';
+import { OVERVIEW_MAP } from './events/overview-map';
+import { DETAILS_PANEL } from './events/details-panel';
+import { MARKER_ICON } from './events/marker-icon';
+import { CLUSTER_ELEMENT } from './events/cluster-element';
+import { DRAWER } from './events/drawer';
+import { MODAL } from './events/modal';
+import { PANEL } from './events/panel';
+import { VECTOR } from './events/vector';
+
 /**
  * constant contains event names
  */
 export const EVENT_NAMES = {
-  /**
-   * Event triggered when map is loaded and api ready
-   */
-  EVENT_MAP_LOADED: 'map/loaded',
-
-  /**
-   * Event triggered to reload the map
-   */
-  EVENT_MAP_RELOAD: 'map/reload',
-
-  /**
-   * Event triggered when a user stops moving the map
-   */
-  EVENT_MAP_MOVE_END: 'map/moveend',
-
-  /**
-   * Event triggered when a user stops zooming the map
-   */
-  EVENT_MAP_ZOOM_END: 'map/zoomend',
-
-  /**
-   * Event triggered when a user wants to add a component
-   */
-  EVENT_MAP_ADD_COMPONENT: 'map/add_component',
-
-  /**
-   * Event triggered when a user wants to remove a component
-   */
-  EVENT_MAP_REMOVE_COMPONENT: 'map/remove_component',
-
-  /**
-   * Event triggered when a user end a select box
-   */
-  EVENT_BOX_SELECT_END: 'box/zoom_or_select_end',
-
-  /**
-   * Event triggered when a user focus the map with keyboard (WCAG)
-   */
-  EVENT_MAP_IN_KEYFOCUS: 'map/inkeyfocus',
-
-  /**
-   * Event triggered to enable / disable crosshair
-   */
-  EVENT_MAP_CROSSHAIR_ENABLE_DISABLE: 'map/crosshair_enable_disable',
-
-  /**
-   * Event triggered when the overview map is toggled
-   */
-  EVENT_OVERVIEW_MAP_TOGGLE: 'overview_map/toggle',
-
-  /**
-   * Event triggered when a drawer opens/closes
-   */
-  EVENT_DRAWER_OPEN_CLOSE: 'drawer/open_close',
-
-  /**
-   * Event triggered when a new appbar panel has been created
-   */
-  EVENT_APPBAR_PANEL_CREATE: 'appbar/panel_create',
-
-  /**
-   * Event triggered when an appbar button panel has been removed
-   */
-  EVENT_APPBAR_PANEL_REMOVE: 'appbar/panel_remove',
-
-  /**
-   * Event triggered when a new navbar button or panel has been created
-   */
-  EVENT_NAVBAR_BUTTON_PANEL_CREATE: 'navbar/button_panel_create',
-  /**
-   * Event triggered when a navbar button or button panel has been removed
-   */
-  EVENT_NAVBAR_BUTTON_PANEL_REMOVE: 'navbar/button_panel_remove',
-
-  /**
-   * Enable / Disable controls (zoom,home,fullscreen buttons)
-   */
-  EVENT_NAVBAR_TOGGLE_CONTROLS: 'navbar/toggle_controls',
-
-  /**
-   * Event triggered when a request is made to open a panel
-   */
-  EVENT_PANEL_OPEN: 'panel/open',
-  /**
-   * Event triggered when a request is made to close a panel
-   */
-  EVENT_PANEL_CLOSE: 'panel/close',
-  /**
-   * Event triggered when a request is made to add an action button
-   */
-  EVENT_PANEL_ADD_ACTION: 'panel/add_action',
-  /**
-   * Event triggered when a request is made to remove an action button
-   */
-  EVENT_PANEL_REMOVE_ACTION: 'panel/remove_action',
-  /**
-   * Event triggered when a request is made to change panel content
-   */
-  EVENT_PANEL_CHANGE_CONTENT: 'panel/change_content',
-
-  /**
-   * Event triggered when adding a new layer
-   */
-  EVENT_LAYER_ADD: 'layer/add',
-  /**
-   * Event triggered when adding a new layer
-   */
-  EVENT_LAYER_ADDED: 'layer/added',
-  /**
-   * Event triggered when removing a layer
-   */
-  EVENT_REMOVE_LAYER: 'layer/remove',
-  /**
-   * Event triggered when getting all layers
-   */
-  EVENT_GET_LAYERS: 'layer/get_layers',
-
-  /**
-   * Event triggered when a request is made to add a vector
-   */
-  EVENT_VECTOR_ADD: 'vector/add',
-  /**
-   * Event triggered when a request is made to remove a vector
-   */
-  EVENT_VECTOR_REMOVE: 'vector/remove',
-  /**
-   * Event is triggered when a vector has been added
-   */
-  EVENT_VECTOR_ADDED: 'vector/added',
-  /**
-   * Event is triggered when you want to turn off all visible vectors
-   */
-  EVENT_VECTOR_OFF: 'vector/off',
-  /**
-   * Event is triggered when you want to turn on all visible vectors
-   */
-  EVENT_VECTOR_ON: 'vector/on',
-
-  /**
-   * Event triggered when a request is made to add a cluster element
-   */
-  EVENT_CLUSTER_ELEMENT_ADD: 'cluster_element/add',
-  /**
-   * Event triggered when a request is made to remove a cluster element
-   */
-  EVENT_CLUSTER_ELEMENT_REMOVE: 'cluster_element/remove',
-  /**
-   * Event is triggered when a cluster element has been added
-   */
-  EVENT_CLUSTER_ELEMENT_ADDED: 'cluster_element/added',
-  /**
-   * Event is triggered when a cluster element start blinking
-   */
-  EVENT_CLUSTER_ELEMENT_START_BLINKING: 'cluster_element/start_blinking',
-  /**
-   * Event is triggered when a cluster element stop blinking
-   */
-  EVENT_CLUSTER_ELEMENT_STOP_BLINKING: 'cluster_element/stop_blinking',
-  /**
-   * Event is triggered when a cluster element selection indicator changes
-   */
-  EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED: 'cluster_element/selection_has_changed',
-
-  /**
-   * Event is triggered when updating the basemap layers
-   */
-  EVENT_BASEMAP_LAYERS_UPDATE: 'basemap/layers_update',
-
-  /**
-   * Event is triggered when a snackbar notification opens
-   */
-  EVENT_SNACKBAR_OPEN: 'snackbar/open',
-
-  /**
-   * Event is triggered when a user press enter on a crosshair to open details panel
-   */
-  EVENT_DETAILS_PANEL_CROSSHAIR_ENTER: 'details_panel/crosshair_enter',
-
-  /**
-   * Event is triggered when a call is made to show a marker on map click in details panel
-   */
-  EVENT_MARKER_ICON_SHOW: 'marker_icon/show',
-  /**
-   * Event is triggered when a call is made to hide the marker
-   */
-  EVENT_MARKER_ICON_HIDE: 'marker_icon/hide',
-
-  /**
-   * Event is triggered when a new modal is created
-   */
-  EVENT_MODAL_CREATE: 'modal/create',
-  /**
-   * Event is triggered when a modal opens
-   */
-  EVENT_MODAL_OPEN: 'modal/open',
-  /**
-   * Event is triggered when a modal is closed
-   */
-  EVENT_MODAL_CLOSE: 'modal/close',
-  /**
-   * Event is triggered when a modal is updated
-   */
-  EVENT_MODAL_UPDATE: 'modal/update',
+  MAP,
+  LAYER,
+  APPBAR,
+  NAVBAR,
+  MARKER_ICON,
+  CLUSTER_ELEMENT,
+  PANEL,
+  MODAL,
+  OVERVIEW_MAP,
+  DETAILS_PANEL,
+  SNACKBAR,
+  BASEMAP,
+  DRAWER,
+  VECTOR,
 };
 
 /**

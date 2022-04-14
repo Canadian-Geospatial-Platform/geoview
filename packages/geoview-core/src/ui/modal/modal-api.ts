@@ -108,7 +108,7 @@ export class ModalApi {
     this.modals[id].width = modal.width || this.modals[id].width;
     this.modals[id].height = modal.height || this.modals[id].height;
 
-    api.event.emit(EVENT_NAMES.EVENT_MODAL_CREATE, this.mapId, {
+    api.event.emit(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, this.mapId, {
       id,
     });
   };

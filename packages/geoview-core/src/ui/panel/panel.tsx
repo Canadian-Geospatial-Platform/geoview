@@ -99,7 +99,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    */
   const closePanel = (): void => {
     // emit an event to hide the marker when using the details panel
-    api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId, {});
+    api.event.emit(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId, {});
 
     const buttonElement = document.getElementById(button.id!);
 
@@ -113,7 +113,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // if in focus trap mode, trigger the event
       if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
         mapCont.classList.add('keyboard-focus');
-        api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`, {});
+        api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`, {});
       }
     }
 
@@ -122,7 +122,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
   // listen to change panel content and rerender right after the panel has been created
   api.event.on(
-    EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT,
+    EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
     (args) => {
       // set focus on close button on panel content change
       setTimeout(() => {
@@ -144,7 +144,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
+      EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
       (args) => {
         if ((args.buttonId as string) === button.id! && (args.handlerId as string) === mapId) {
           // set focus on close button on panel open
@@ -159,7 +159,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     );
 
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CLOSE,
+      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
       (args) => {
         if ((args.buttonId as string) === button.id! && (args.handlerId as string) === mapId) {
           closePanel();
@@ -170,7 +170,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
     // listen to add action button event
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_ADD_ACTION,
+      EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
       (args) => {
         if ((args.buttonId as string) === button.id!) {
           const { actionButton } = args;
@@ -207,7 +207,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
     // listen to remove action button event
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION,
+      EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
       (args) => {
         if ((args.buttonId as string) === button.id!) {
           const { actionButtonId } = args;
@@ -222,11 +222,11 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

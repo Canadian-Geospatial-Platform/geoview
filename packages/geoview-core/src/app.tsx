@@ -48,7 +48,7 @@ Marker.prototype.options.icon = DefaultIcon;
 // TODO look for a better place to put this when working on issue #8
 
 // listen to map reload event
-api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
+api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
   if (payload && payload.handlerId) {
     const payloadHandlerId = payload.handlerId as string;
     // unsubscribe from all events registered on this map

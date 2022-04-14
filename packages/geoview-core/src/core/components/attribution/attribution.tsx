@@ -52,7 +52,7 @@ export function Attribution(props: AttributionProps): JSX.Element {
   useEffect(() => {
     // listen to new panel creation
     api.event.on(
-      EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE,
+      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
         if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
           updateComponent();
@@ -63,7 +63,7 @@ export function Attribution(props: AttributionProps): JSX.Element {
 
     // listen on panel removal
     api.event.on(
-      EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE,
+      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
         if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
           updateComponent();
@@ -73,8 +73,8 @@ export function Attribution(props: AttributionProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
     };
   }, [mapId, updateComponent]);
 

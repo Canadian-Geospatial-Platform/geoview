@@ -166,7 +166,7 @@ export class MarkerClusterClass {
 
     // listen to marker cluster element start blinking events
     api.event.on(
-      EVENT_NAMES.EVENT_CLUSTER_ELEMENT_START_BLINKING,
+      EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_START_BLINKING,
       (payload) => {
         if (this.disableblinkingEvent) return;
         if (this.blinkingElement && this.blinkingElement.id !== payload.id) {
@@ -186,7 +186,7 @@ export class MarkerClusterClass {
 
     // listen to marker cluster element stop blinking events
     api.event.on(
-      EVENT_NAMES.EVENT_CLUSTER_ELEMENT_STOP_BLINKING,
+      EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_STOP_BLINKING,
       (payload) => {
         if (this.disableblinkingEvent) return;
         if (this.blinkingElement && this.blinkingElement.id === (payload.id as string)) {
@@ -198,7 +198,7 @@ export class MarkerClusterClass {
 
     // listen to add marker cluster events
     api.event.on(
-      EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADD,
+      EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_ADD,
       (payload) => {
         const id = payload.id && (payload.id as string);
         this.addMarkerElement(
@@ -213,7 +213,7 @@ export class MarkerClusterClass {
 
     // listen to outside events to remove a marker cluster element
     api.event.on(
-      EVENT_NAMES.EVENT_CLUSTER_ELEMENT_REMOVE,
+      EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_REMOVE,
       (payload) => {
         // remove marker cluster from outside
         this.deleteMarkerClusterElement(payload.id as string);
@@ -223,7 +223,7 @@ export class MarkerClusterClass {
 
     // listen to outside events to process select by bounding polygone
     api.event.on(
-      EVENT_NAMES.EVENT_BOX_SELECT_END,
+      EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END,
       (payload) => {
         // Get the select bounding box.
         const bbox = Cast<L.LatLngBounds>(payload.selectBoxBounds);
@@ -387,7 +387,7 @@ export class MarkerClusterClass {
     marker.addTo(Cast<L.LayerGroup>(this.clusterGroups[this.activeClusterGroupIndex]));
 
     // emit an event that a marker vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_CLUSTER_ELEMENT_ADDED, this.markerClusterMap.id, { ...marker });
+    api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_ADDED, this.markerClusterMap.id, { ...marker });
 
     return marker;
   };
@@ -723,7 +723,7 @@ export class MarkerClusterClass {
       if (clusterGroup.options.visible) clusterGroup.removeFrom(this.markerClusterMap);
     });
     // turn off all visible geometry groups
-    api.event.emit(api.eventNames.EVENT_VECTOR_OFF, this.markerClusterMap.id, {});
+    api.event.emit(api.eventNames.VECTOR.EVENT_VECTOR_OFF, this.markerClusterMap.id, {});
     // Insert only the markers associated to the current group in the new spiderfied cluster
     // and keep a reference to the last child marker clone
     let i = 0;
@@ -785,7 +785,7 @@ export class MarkerClusterClass {
     this.spiderfiedMarkerGroup = this.newClusterGroupInstance('SpiderfiedClusterGroup', this.spiderfiedClusterGroupOptions);
     event.target.on('unspiderfied', this.onUnspiderfyCluster);
     // turn on all visible geometry groups
-    api.event.emit(api.eventNames.EVENT_VECTOR_ON, this.markerClusterMap.id, {});
+    api.event.emit(api.eventNames.VECTOR.EVENT_VECTOR_ON, this.markerClusterMap.id, {});
     // turn on all visible cluster group
     this.clusterGroups.forEach((clusterGroup) => {
       if (clusterGroup.options.visible) clusterGroup.addTo(this.markerClusterMap);

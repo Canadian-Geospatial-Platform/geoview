@@ -105,7 +105,7 @@ export function Shell(props: ShellProps): JSX.Element {
   useEffect(() => {
     // listen to adding a new component events
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_ADD_COMPONENT,
+      EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
         if (payload && payload.handlerName === id)
           setComponents((tempComponents) => ({
@@ -118,7 +118,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
     // listen to removing a component events
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT,
+      EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
         if (payload && payload.handlerName === id) {
           const tempComponents: TypeJsonObject = { ...(components as object) };
@@ -133,7 +133,7 @@ export function Shell(props: ShellProps): JSX.Element {
     );
 
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_LOADED,
+      EVENT_NAMES.MAP.EVENT_MAP_LOADED,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(id)) {
           // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
@@ -145,7 +145,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
     // CHANGED
     api.event.on(
-      EVENT_NAMES.EVENT_MODAL_CREATE,
+      EVENT_NAMES.MODAL.EVENT_MODAL_CREATE,
       (payload) => {
         if (payload.handlerName === id) {
           updateShell();
@@ -155,10 +155,10 @@ export function Shell(props: ShellProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, id);
-      api.event.off(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, id);
-      api.event.off(EVENT_NAMES.EVENT_MAP_LOADED, id);
-      api.event.off(EVENT_NAMES.EVENT_MODAL_CREATE, id);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, id);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, id);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_LOADED, id);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, id);
     };
   }, [components, id, updateShell]);
 

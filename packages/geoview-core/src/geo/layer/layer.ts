@@ -66,7 +66,7 @@ export class Layer {
 
     // listen to outside events to add layers
     api.event.on(
-      EVENT_NAMES.EVENT_LAYER_ADD,
+      EVENT_NAMES.LAYER.EVENT_LAYER_ADD,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(this.#mapId)) {
           if (payload.layer.layerType === CONST_LAYER_TYPES.GEOJSON) {
@@ -129,7 +129,7 @@ export class Layer {
 
     // listen to outside events to remove layers
     api.event.on(
-      EVENT_NAMES.EVENT_REMOVE_LAYER,
+      EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
         // remove layer from outside
         this.removeLayerById(payload.layer.id as string);
@@ -139,7 +139,7 @@ export class Layer {
 
     // Load layers that was passed in with the map config
     if (layers && layers.length > 0) {
-      layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#mapId, { layer }));
+      layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, { layer }));
     }
   }
 
@@ -160,7 +160,7 @@ export class Layer {
 
     setTimeout(() => {
       if (!isLoaded) {
-        api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.#mapId, {
+        api.event.emit(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
           message: {
             type: 'key',
             value: 'validation.layer.loadfailed',
@@ -182,7 +182,7 @@ export class Layer {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
     if (typeof cgpvLayer.layer === 'string') {
-      api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, this.#mapId, {
+      api.event.emit(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
         message: {
           type: 'key',
           value: 'validation.layer.loadfailed',
@@ -200,7 +200,7 @@ export class Layer {
       cgpvLayer.layer!.addTo(api.map(this.#mapId).map);
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
-      api.event.emit(EVENT_NAMES.EVENT_LAYER_ADDED, this.#mapId, {
+      api.event.emit(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, {
         layer: cgpvLayer.layer,
       });
     }
@@ -249,7 +249,7 @@ export class Layer {
   addLayer = (layer: TypeLayerConfig): string => {
     // eslint-disable-next-line no-param-reassign
     layer.id = generateId(layer.id);
-    api.event.emit(EVENT_NAMES.EVENT_LAYER_ADD, this.#mapId, { layer });
+    api.event.emit(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, { layer });
 
     return layer.id;
   };
@@ -262,7 +262,7 @@ export class Layer {
   removeLayer = (layer: AbstractWebLayersClass): string => {
     // eslint-disable-next-line no-param-reassign
     layer.id = generateId(layer.id);
-    api.event.emit(EVENT_NAMES.EVENT_REMOVE_LAYER, this.#mapId, { layer });
+    api.event.emit(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, { layer });
 
     return layer.id;
   };

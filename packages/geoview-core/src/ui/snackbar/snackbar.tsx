@@ -73,7 +73,7 @@ export function Snackbar(props: SnackBarProps): null {
   useEffect(() => {
     // listen to API event when app wants to show message
     api.event.on(
-      EVENT_NAMES.EVENT_SNACKBAR_OPEN,
+      EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
       (payload) => {
         const opts = payload.options ? payload.options : {};
 
@@ -101,7 +101,7 @@ export function Snackbar(props: SnackBarProps): null {
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_SNACKBAR_OPEN, mapId);
+      api.event.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
