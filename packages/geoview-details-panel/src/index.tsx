@@ -97,7 +97,7 @@ class DetailsPlugin extends AbstractPluginClass {
 
     if (this.buttonPanel) {
       api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
-      api.event.emit(api.eventNames.EVENT_MARKER_ICON_HIDE, mapId as string, {});
+      api.event.emit(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId as string, {});
     }
   }
 }

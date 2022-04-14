@@ -105,7 +105,7 @@ export class AppbarButtons {
       this.buttons[group][id] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, this.mapId, {
+      api.event.emit(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, {
         handlerId: this.mapId,
         groupName: group,
         id,
@@ -176,7 +176,7 @@ export class AppbarButtons {
       delete group[id];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, this.mapId, {
+      api.event.emit(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, {
         handlerId: this.mapId,
         id,
         groupName,

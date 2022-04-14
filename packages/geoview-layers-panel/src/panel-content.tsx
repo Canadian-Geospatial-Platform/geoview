@@ -53,7 +53,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     setMapLayers(() => ({ ...api.map(mapId).layer.layers }));
 
     api.event.on(
-      api.eventNames.EVENT_LAYER_ADDED,
+      api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () =>
         setMapLayers(() => ({
           ...api.map(mapId).layer.layers,
@@ -61,7 +61,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       mapId
     );
     api.event.on(
-      api.eventNames.EVENT_REMOVE_LAYER,
+      api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       () =>
         setMapLayers(() => ({
           ...api.map(mapId).layer.layers,
@@ -69,7 +69,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       mapId
     );
     api.event.on(
-      api.eventNames.EVENT_PANEL_CLOSE,
+      api.eventNames.PANEL.EVENT_PANEL_CLOSE,
       () => {
         setAddLayerVisible(false);
       },
@@ -77,9 +77,9 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(api.eventNames.EVENT_LAYER_ADDED, mapId);
-      api.event.off(api.eventNames.EVENT_REMOVE_LAYER, mapId);
-      api.event.off(api.eventNames.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
+      api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
+      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId);
     };
   }, [api, mapId]);
 

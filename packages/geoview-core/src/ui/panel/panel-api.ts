@@ -67,7 +67,7 @@ export class PanelApi {
     // close all other panels
     this.closeAll();
 
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_OPEN, this.mapId, {
+    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
       type: this.type,
@@ -115,7 +115,7 @@ export class PanelApi {
   close = (): void => {
     this.status = false;
 
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_CLOSE, this.mapId, {
+    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
       type: this.type,
@@ -132,7 +132,7 @@ export class PanelApi {
    * @returns {Panel} the panel
    */
   addActionButton = (id: string, title: string, icon: string | React.ReactElement | Element, action: () => void): PanelApi => {
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_ADD_ACTION, this.mapId, {
+    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
       actionButton: {
@@ -169,7 +169,7 @@ export class PanelApi {
   changeContent = (content: React.ReactNode | Element): PanelApi => {
     this.content = content;
 
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_CHANGE_CONTENT, this.mapId, {
+    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
       content,
@@ -185,7 +185,7 @@ export class PanelApi {
    * @returns {Panel} this panel
    */
   removeActionButton = (id: string): PanelApi => {
-    api.event.emit(EVENT_NAMES.EVENT_PANEL_REMOVE_ACTION, this.mapId, {
+    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, this.mapId, {
       handlerId: this.mapId,
       buttonId: this.buttonId,
       actionButtonId: `${this.buttonId}_${id}`,

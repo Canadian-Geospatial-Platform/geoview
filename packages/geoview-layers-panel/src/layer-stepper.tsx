@@ -100,7 +100,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorEmpty = (textField: string) => {
-    api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
+    api.event.emit(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
       message: {
         type: 'string',
         value: `${textField} cannot be empty`,
@@ -114,7 +114,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param serviceName type of service provided by the URL
    */
   const emitErrorServer = (serviceName: string) => {
-    api.event.emit(api.eventNames.EVENT_SNACKBAR_OPEN, mapId, {
+    api.event.emit(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
       message: {
         type: 'string',
         value: `URL is not a valid ${serviceName} Server`,

@@ -86,7 +86,7 @@ export class GeoUtilities {
 
           activeEl?.classList.forEach((item) => {
             if (item.includes('leaflet-map-')) {
-              api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId, {});
+              api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId, {});
             }
           });
         }

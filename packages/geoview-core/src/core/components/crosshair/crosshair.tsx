@@ -90,7 +90,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
       if (isCrosshairsActiveValue.current) {
         // emit an event with the latlng point
-        api.event.emit(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
+        api.event.emit(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
           latlng: latlngPoint,
         });
       }
@@ -106,7 +106,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     mapContainer.removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
     isCrosshairsActiveValue.current = false;
-    api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
+    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
       active: false,
     });
   }
@@ -114,12 +114,12 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
   useEffect(() => {
     // on map keyboard focus, add crosshair
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
+      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(id)) {
           setCrosshairsActive(true);
           isCrosshairsActiveValue.current = true;
-          api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
+          api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
             active: true,
           });
 
@@ -134,7 +134,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     mapContainer.addEventListener('blur', removeCrosshair);
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId);
       mapContainer.removeEventListener('keydown', simulateClick);
       mapContainer.removeEventListener('keydown', removeCrosshair);
     };

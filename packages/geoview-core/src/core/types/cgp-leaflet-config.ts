@@ -328,7 +328,7 @@ L.Map.addInitHook(function fn(this: L.Map) {
   if (this.options.selectBox) {
     this.on('boxselectend', (e: L.LeafletEvent) => {
       const bounds = Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
-      api.event.emit(EVENT_NAMES.EVENT_BOX_SELECT_END, e.target.id, {
+      api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END, e.target.id, {
         selectBoxBounds: bounds,
       });
     });

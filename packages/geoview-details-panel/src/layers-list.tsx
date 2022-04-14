@@ -152,7 +152,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
                                     // if a layer is clicked
                                     goToFeatureList(data, layerKey);
 
-                                    api.event.emit(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId, {
+                                    api.event.emit(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, {
                                       latlng: clickPos,
                                       symbology: getSymbol(data.layers[layerKey].renderer, layerData[0].attributes),
                                     });
