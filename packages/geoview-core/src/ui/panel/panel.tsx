@@ -15,9 +15,12 @@ import { HtmlToReact } from '../../core/containers/html-to-react';
 import { MapContext } from '../../core/app-start';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import { IconButton, CloseIcon, Divider } from '..';
+import { PayloadBaseClass } from '../../api/events/payloads/payload-base-class';
+import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '../../api/events/payloads/panel-payload';
+import { InKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -99,7 +102,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    */
   const closePanel = (): void => {
     // emit an event to hide the marker when using the details panel
-    api.event.emit(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId, {});
+    api.event.emit(new PayloadBaseClass(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
 
     const buttonElement = document.getElementById(button.id!);
 
@@ -113,7 +116,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // if in focus trap mode, trigger the event
       if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
         mapCont.classList.add('keyboard-focus');
-        api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`, {});
+        api.event.emit(new InKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`));
       }
     }
 
@@ -123,14 +126,16 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   // listen to change panel content and rerender right after the panel has been created
   api.event.on(
     EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
-    (args) => {
-      // set focus on close button on panel content change
-      setTimeout(() => {
-        if (closeBtnRef && closeBtnRef.current) (closeBtnRef.current as HTMLElement).focus();
-      }, 100);
+    (payload) => {
+      if (payloadIsAPanelContent(payload)) {
+        // set focus on close button on panel content change
+        setTimeout(() => {
+          if (closeBtnRef && closeBtnRef.current) (closeBtnRef.current as HTMLElement).focus();
+        }, 100);
 
-      if ((args.buttonId as string) === button.id!) {
-        updateComponent();
+        if (payload.buttonId === button.id!) {
+          updateComponent();
+        }
       }
     },
     mapId
@@ -145,13 +150,15 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
-      (args) => {
-        if ((args.buttonId as string) === button.id! && (args.handlerId as string) === mapId) {
-          // set focus on close button on panel open
-          setPanelStatus(true);
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.buttonId === button.id! && payload.handlerId === mapId) {
+            // set focus on close button on panel open
+            setPanelStatus(true);
 
-          if (closeBtnRef && closeBtnRef.current) {
-            (closeBtnRef.current as HTMLElement).focus();
+            if (closeBtnRef && closeBtnRef.current) {
+              (closeBtnRef.current as HTMLElement).focus();
+            }
           }
         }
       },
@@ -160,9 +167,11 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
 
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-      (args) => {
-        if ((args.buttonId as string) === button.id! && (args.handlerId as string) === mapId) {
-          closePanel();
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.buttonId === button.id! && payload.handlerId === mapId) {
+            closePanel();
+          }
         }
       },
       mapId
@@ -171,35 +180,37 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // listen to add action button event
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
-      (args) => {
-        if ((args.buttonId as string) === button.id!) {
-          const { actionButton } = args;
+      (payload) => {
+        if (payloadIsAPanelAction(payload)) {
+          if (payload.buttonId === button.id!) {
+            const { actionButton } = payload;
 
-          setActionButtons((prev) => [
-            ...prev,
-            <IconButton
-              key={actionButton.id as string}
-              tooltip={actionButton.title as string}
-              tooltipPlacement="right"
-              id={actionButton.id as string}
-              aria-label={actionButton.title as string}
-              onClick={Cast<React.MouseEventHandler>(actionButton.action)}
-              size="large"
-            >
-              {typeof actionButton.icon === 'string' ? (
-                <HtmlToReact
-                  style={{
-                    display: 'flex',
-                  }}
-                  htmlContent={actionButton.icon}
-                />
-              ) : typeof actionButton.icon === 'object' ? (
-                actionButton.icon
-              ) : (
-                <actionButton.icon />
-              )}
-            </IconButton>,
-          ]);
+            setActionButtons((prev) => [
+              ...prev,
+              <IconButton
+                key={actionButton.id}
+                tooltip={actionButton.title}
+                tooltipPlacement="right"
+                id={actionButton.id}
+                aria-label={actionButton.title}
+                onClick={Cast<React.MouseEventHandler>(actionButton.action)}
+                size="large"
+              >
+                {typeof actionButton.icon === 'string' ? (
+                  <HtmlToReact
+                    style={{
+                      display: 'flex',
+                    }}
+                    htmlContent={actionButton.icon}
+                  />
+                ) : typeof actionButton.icon === 'object' ? (
+                  actionButton.icon
+                ) : (
+                  <actionButton.icon />
+                )}
+              </IconButton>,
+            ]);
+          }
         }
       },
       mapId
@@ -208,14 +219,15 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // listen to remove action button event
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
-      (args) => {
-        if ((args.buttonId as string) === button.id!) {
-          const { actionButtonId } = args;
-          setActionButtons((list) =>
-            list.filter((item) => {
-              return item.props.id !== actionButtonId;
-            })
-          );
+      (payload) => {
+        if (payloadIsAPanelAction(payload)) {
+          if (payload.buttonId === button.id!) {
+            setActionButtons((list) =>
+              list.filter((item) => {
+                return item.props.id !== payload.actionButton.id;
+              })
+            );
+          }
         }
       },
       mapId

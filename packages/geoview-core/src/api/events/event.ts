@@ -1,22 +1,22 @@
 import EventEmitter from 'eventemitter3';
 
-import { generateId } from '../core/utils/utilities';
-import { toJsonObject, TypeJsonValue, TypeJsonObject } from '../core/types/cgpv-types';
+import { generateId } from '../../core/utils/utilities';
 
-import { MAP } from './events/map';
-import { LAYER } from './events/layer';
-import { APPBAR } from './events/appbar';
-import { NAVBAR } from './events/navbar';
-import { SNACKBAR } from './events/snackbar';
-import { BASEMAP } from './events/basemap';
-import { OVERVIEW_MAP } from './events/overview-map';
-import { DETAILS_PANEL } from './events/details-panel';
-import { MARKER_ICON } from './events/marker-icon';
-import { CLUSTER_ELEMENT } from './events/cluster-element';
-import { DRAWER } from './events/drawer';
-import { MODAL } from './events/modal';
-import { PANEL } from './events/panel';
-import { VECTOR } from './events/vector';
+import { MAP } from './constants/map';
+import { LAYER } from './constants/layer';
+import { APPBAR } from './constants/appbar';
+import { NAVBAR } from './constants/navbar';
+import { SNACKBAR } from './constants/snackbar';
+import { BASEMAP } from './constants/basemap';
+import { OVERVIEW_MAP } from './constants/overview-map';
+import { DETAILS_PANEL } from './constants/details-panel';
+import { MARKER_ICON } from './constants/marker-icon';
+import { CLUSTER_ELEMENT } from './constants/cluster-element';
+import { DRAWER } from './constants/drawer';
+import { MODAL } from './constants/modal';
+import { PANEL } from './constants/panel';
+import { VECTOR } from './constants/vector';
+import { PayloadBaseClass } from './payloads/payload-base-class';
 
 /**
  * constant contains event names
@@ -26,17 +26,64 @@ export const EVENT_NAMES = {
   LAYER,
   APPBAR,
   NAVBAR,
-  MARKER_ICON,
-  CLUSTER_ELEMENT,
-  PANEL,
-  MODAL,
-  OVERVIEW_MAP,
-  DETAILS_PANEL,
   SNACKBAR,
   BASEMAP,
+  OVERVIEW_MAP,
+  DETAILS_PANEL,
+  MARKER_ICON,
+  CLUSTER_ELEMENT,
   DRAWER,
+  MODAL,
+  PANEL,
   VECTOR,
 };
+
+export type EventStringId =
+  | 'map/loaded'
+  | 'map/reload'
+  | 'map/moveend'
+  | 'map/zoomend'
+  | 'map/add_component'
+  | 'map/remove_component'
+  | 'map/inkeyfocus'
+  | 'map/crosshair_enable_disable'
+  | 'layer/add'
+  | 'layer/added'
+  | 'layer/remove'
+  | 'layer/get_layers'
+  | 'appbar/panel_create'
+  | 'appbar/panel_remove'
+  | 'navbar/button_panel_create'
+  | 'navbar/button_panel_remove'
+  | 'navbar/toggle_controls'
+  | 'snackbar/open'
+  | 'basemap/layers_update'
+  | 'overview_map/toggle'
+  | 'details_panel/crosshair_enter'
+  | 'marker_icon/show'
+  | 'marker_icon/hide'
+  | 'cluster_element/add'
+  | 'cluster_element/remove'
+  | 'cluster_element/added'
+  | 'cluster_element/start_blinking'
+  | 'cluster_element/stop_blinking'
+  | 'cluster_element/selection_has_changed'
+  | 'box/zoom_or_select_end'
+  | 'drawer/open_close'
+  | 'modal/create'
+  | 'modal/open'
+  | 'modal/close'
+  | 'modal/update'
+  | 'panel/open'
+  | 'panel/close'
+  | 'panel/add_action'
+  | 'panel/remove_action'
+  | 'panel/change_content'
+  | 'vector/add'
+  | 'vector/remove'
+  | 'vector/added'
+  | 'vector/off'
+  | 'vector/on';
 
 /**
  * Class used to handle event emitting and subscribing for the API
@@ -49,7 +96,7 @@ export class Event {
   eventEmitter: EventEmitter;
 
   // events object containing all registered events
-  events: TypeJsonObject = {};
+  events: Record<string, Record<string, PayloadBaseClass>> = {};
 
   /**
    * Initiate the event emitter
@@ -65,18 +112,18 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  on = (eventName: string, listener: (payload: TypeJsonObject) => void, handlerName?: string): void => {
+  on = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJsonObject) => {
-      let listenerPayload: TypeJsonObject;
+    const listen = (payload: PayloadBaseClass) => {
+      let listenerPayload: PayloadBaseClass;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && (payload.handlerName as string) === handlerName) {
+      if (handlerName && payload.handlerName === handlerName) {
         listenerPayload = this.events[eName][handlerName];
       } else {
         listenerPayload = payload;
@@ -95,15 +142,15 @@ export class Event {
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
    */
-  once = (eventName: string, listener: (payload: TypeJsonValue) => void, handlerName?: string): void => {
+  once = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
      * @param payload payload being passed when emitted
      */
-    const listen = (payload: TypeJsonObject) => {
-      let listenerPayload: TypeJsonObject;
+    const listen = (payload: PayloadBaseClass) => {
+      let listenerPayload: PayloadBaseClass;
 
       // if a handler name was specefieid, callback will return that data if found
       if (handlerName && payload.handlerName === handlerName) {
@@ -124,7 +171,7 @@ export class Event {
    * @param {string} eventName the event name of the event to be removed
    * @param {string} handlerName the name of the handler an event needs to be removed from
    */
-  off = (eventName: string, handlerName?: string): void => {
+  off = (eventName: EventStringId, handlerName?: string): void => {
     const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     this.eventEmitter.off(eName);
@@ -140,7 +187,7 @@ export class Event {
   offAll = (handlerName: string): void => {
     Object.keys(this.events).forEach((event) => {
       if (event.includes(handlerName)) {
-        this.off(event);
+        this.off(event as EventStringId);
       }
     });
   };
@@ -152,7 +199,9 @@ export class Event {
    * @param {string} handlerName the event handler, used if there are multiple emitters with same event name
    * @param {object} payload a payload (data) to be emitted with the event
    */
-  emit = (event: string, handlerName: string | undefined | null, payload: Record<string, unknown>): void => {
+  emit = (payload: PayloadBaseClass): void => {
+    const { handlerName, event } = payload;
+
     // event name
     const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
@@ -163,17 +212,17 @@ export class Event {
       this.events[eventName] = {};
     }
 
+    // YC Check if needed
     if (!this.events[eventName][hName]) {
-      this.events[eventName][hName] = {};
+      this.events[eventName][hName] = {} as PayloadBaseClass;
     }
 
     // store the emitted event to the events array
-    this.events[eventName][hName] = toJsonObject({
-      handlerName,
+    this.events[eventName][hName] = {
       ...payload,
-    });
+    } as PayloadBaseClass;
 
-    this.eventEmitter.emit(eventName, { ...payload, handlerName }, handlerName);
+    this.eventEmitter.emit(eventName, { ...payload }, handlerName);
   };
 
   /**

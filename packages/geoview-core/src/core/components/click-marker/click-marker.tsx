@@ -11,10 +11,11 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapContext } from '../../app-start';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 
 import { generateId } from '../../utils/utilities';
 import { Cast } from '../../types/cgpv-types';
+import { payloadIsAMarkerDefinition } from '../../../api/events/payloads/marker-definition-payload';
 
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
@@ -99,43 +100,45 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(mapId)) {
-          // toggle the marker icon
-          setShowMarker(true);
+        if (payloadIsAMarkerDefinition(payload)) {
+          if (payload.handlerName!.includes(mapId)) {
+            // toggle the marker icon
+            setShowMarker(true);
 
-          // set the overlay... get map size and apply mapPane transform to the overlay
-          const test = api.geoUtilities.getTranslateValues(map.getPane('mapPane')!);
-          const size = map.getSize();
-          overlay.style.height = `${size.y}px`;
-          overlay.style.width = `${size.x}px`;
-          overlay.style.transform = `translate3d(${-test.x}px,${-test.y}px,${test.z})`;
-          overlay.style.visibility = 'visible';
+            // set the overlay... get map size and apply mapPane transform to the overlay
+            const test = api.geoUtilities.getTranslateValues(map.getPane('mapPane')!);
+            const size = map.getSize();
+            overlay.style.height = `${size.y}px`;
+            overlay.style.width = `${size.x}px`;
+            overlay.style.transform = `translate3d(${-test.x}px,${-test.y}px,${test.z})`;
+            overlay.style.visibility = 'visible';
 
-          // hide marker pane marker (mostly comes from ESRI feature or GeoJSON)
-          hideMarker();
+            // hide marker pane marker (mostly comes from ESRI feature or GeoJSON)
+            hideMarker();
 
-          // update the click location
-          setMarkerPos(Cast<L.LatLng>(payload.latlng));
+            // update the click location
+            setMarkerPos(Cast<L.LatLng>(payload.latlng));
 
-          if (payload.symbology) {
-            const theSymbology = payload.symbology;
-            let iconHtml = '';
+            if (payload.symbology) {
+              const theSymbology = payload.symbology;
+              let iconHtml = '';
 
-            // get symbology image
-            if (theSymbology.imageData) {
-              iconHtml = `<img class='${classes.symbologyIcon}' src='data:${theSymbology.contentType};base64,${theSymbology.imageData}' alt="" />`;
-            } else if (theSymbology.legendImageUrl) {
-              iconHtml = `<img class='${classes.symbologyIcon}' src='${theSymbology.legendImageUrl}' alt='' />`;
+              // get symbology image
+              if (theSymbology.imageData) {
+                iconHtml = `<img class='${classes.symbologyIcon}' src='data:${theSymbology.contentType};base64,${theSymbology.imageData}' alt="" />`;
+              } else if (theSymbology.legendImageUrl) {
+                iconHtml = `<img class='${classes.symbologyIcon}' src='${theSymbology.legendImageUrl}' alt='' />`;
+              }
+
+              setMarkerIcon(
+                divIcon({
+                  className: classes.markerIcon,
+                  html: iconHtml,
+                })
+              );
+            } else {
+              setMarkerIcon(icon);
             }
-
-            setMarkerIcon(
-              divIcon({
-                className: classes.markerIcon,
-                html: iconHtml,
-              })
-            );
-          } else {
-            setMarkerIcon(icon);
           }
         }
       },
@@ -145,9 +148,11 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(mapId)) {
-          setShowMarker(false);
-          overlay.style.visibility = 'hidden';
+        if (payloadIsAMarkerDefinition(payload)) {
+          if (payload.handlerName!.includes(mapId)) {
+            setShowMarker(false);
+            overlay.style.visibility = 'hidden';
+          }
         }
       },
       mapId

@@ -9,7 +9,8 @@ import { MapServiceOptions } from 'esri-leaflet';
 import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
+import { SelectBoxPayload } from '../../api/events/payloads/select-box-payload';
 
 /*-----------------------------------------------------------------------------
  *
@@ -328,9 +329,7 @@ L.Map.addInitHook(function fn(this: L.Map) {
   if (this.options.selectBox) {
     this.on('boxselectend', (e: L.LeafletEvent) => {
       const bounds = Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
-      api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END, e.target.id, {
-        selectBoxBounds: bounds,
-      });
+      api.event.emit(new SelectBoxPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END, e.target.id, bounds));
     });
   }
 });

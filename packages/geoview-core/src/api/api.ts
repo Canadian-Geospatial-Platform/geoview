@@ -1,6 +1,6 @@
 import { Map } from 'leaflet';
 
-import { Event, EVENT_NAMES } from './event';
+import { Event, EVENT_NAMES } from './events/event';
 
 import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';
 

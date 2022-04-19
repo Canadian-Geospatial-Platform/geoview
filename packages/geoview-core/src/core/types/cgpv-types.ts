@@ -49,6 +49,29 @@ export { XYZTiles } from '../../geo/layer/web-layers/map-tile/xyz-tiles';
 export { OgcFeature } from '../../geo/layer/web-layers/ogc/ogc_feature';
 export { WFS } from '../../geo/layer/web-layers/ogc/wfs';
 export { WMS } from '../../geo/layer/web-layers/ogc/wms';
+
+export * from '../../api/events/payloads/basemap-layers-payload';
+export * from '../../api/events/payloads/boolean-payload';
+export * from '../../api/events/payloads/button-panel-payload';
+export * from '../../api/events/payloads/cluster-element-payload';
+export * from '../../api/events/payloads/in-keyfocus-payload';
+export * from '../../api/events/payloads/lat-long-payload';
+export * from '../../api/events/payloads/layer-config-payload';
+export * from '../../api/events/payloads/map-component-payload';
+export * from '../../api/events/payloads/map-config-payload';
+export * from '../../api/events/payloads/map-payload';
+export * from '../../api/events/payloads/marker-cluster-config-payload';
+export * from '../../api/events/payloads/marker-definition-payload';
+export * from '../../api/events/payloads/modal-payload';
+export * from '../../api/events/payloads/number-payload';
+export * from '../../api/events/payloads/panel-payload';
+export * from '../../api/events/payloads/payload-base-class';
+export * from '../../api/events/payloads/select-box-payload';
+export * from '../../api/events/payloads/snackbar-message-payload';
+export * from '../../api/events/payloads/vector-config-payload';
+export * from '../../api/events/payloads/vector-payload';
+export * from '../../api/events/payloads/web-layer-payload';
+
 export * from './material-ui.d';
 
 declare global {
@@ -171,7 +194,7 @@ export type TypeIconCreationFunction = () => L.DivIcon;
 export type TypeLegendJsonDynamic = {
   layerId: string;
   layerName: string;
-  layerType: string;
+  layerType: TypeWebLayers;
   maxScale: number;
   minScale: number;
   legend: {
@@ -375,7 +398,7 @@ export type TypeBasemapOptions = {
 /**
  * interface used when adding a new layer
  */
-export interface TypeLayerConfig extends TypeAbstractWebLayersConfig {
+export interface TypeLayerConfig extends TypeBaseWebLayersConfig {
   state?: TypeLayerSettings;
 }
 
@@ -424,7 +447,7 @@ export interface TypeGeoJSONLayer extends TypeLayerConfig {
   details?: TypeDetailsLayerSettings;
 }
 
-export type TypeWFSLayerEntry = {
+export type TypeOgcLayerEntry = {
   id: string;
   name?: TypeLangString;
   state?: TypeLayerSettings;
@@ -432,21 +455,15 @@ export type TypeWFSLayerEntry = {
 
 export interface TypeWFSLayer extends TypeLayerConfig {
   nameField?: string;
-  layerEntries: TypeWFSLayerEntry[];
+  layerEntries: TypeOgcLayerEntry[];
   tooltipField?: string;
   renderer?: TypeJsonObject;
   details?: TypeDetailsLayerSettings;
 }
 
-export type TypeWMSLayerEntry = {
-  id: string;
-  name?: TypeLangString;
-  state?: TypeLayerSettings;
-};
-
 export interface TypeWMSLayer extends TypeLayerConfig {
   metadataUrl?: TypeLangString;
-  layerEntries: TypeWMSLayerEntry[];
+  layerEntries: TypeOgcLayerEntry[];
   details?: TypeDetailsLayerSettings;
 }
 
@@ -462,17 +479,14 @@ export interface TypeGeoCoreLayer extends Omit<TypeLayerConfig, 'url'> {
   url?: TypeLangString;
 }
 
-export type TypeXYZTiles = TypeLayerConfig;
-
-export type TypeOgcFeatureLayerEntry = {
-  id: string;
-  name?: TypeLangString;
+export interface TypeXYZTiles extends TypeLayerConfig {
+  // may seems useless, but ensure attribute defined as TypeXYZTiles keeps its native type
   state?: TypeLayerSettings;
-};
+}
 
 export interface TypeOgcFeatureLayer extends TypeLayerConfig {
   metadataUrl?: TypeLangString;
-  layerEntries: TypeWMSLayerEntry[];
+  layerEntries: TypeOgcLayerEntry[];
   details?: TypeDetailsLayerSettings;
 }
 
@@ -620,6 +634,15 @@ export const CONST_PANEL_TYPES = {
  * UI Types
  *
  *---------------------------------------------------------------------------*/
+
+/**
+ * Interface used to initialize a snackbar message
+ */
+export type TypeSnackbarMessage = {
+  type: string;
+  value: string;
+  params?: TypeJsonArray;
+};
 
 /**
  * Interface used to initialize a button panel
@@ -890,11 +913,12 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
  * interface used to define the web-layers
  */
 export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 
 /**
  * constant contains layer types
  */
-export const CONST_LAYER_TYPES: { [key: string]: TypeWebLayers } = {
+export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeWebLayers> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   GEOJSON: 'geojson',
@@ -907,7 +931,7 @@ export const CONST_LAYER_TYPES: { [key: string]: TypeWebLayers } = {
 /**
  * constant contains default layer names
  */
-export const DEFAULT_LAYER_NAMES: { [key: string]: string } = {
+export const DEFAULT_LAYER_NAMES: Record<TypeWebLayers, string> = {
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
   geojson: 'GeoJson Layer',
@@ -920,13 +944,13 @@ export const DEFAULT_LAYER_NAMES: { [key: string]: string } = {
 /**
  * interface used by all web layers
  */
-export type TypeAbstractWebLayersConfig = {
+export type TypeBaseWebLayersConfig = {
+  layerType: TypeWebLayers;
   id?: string;
   name?: TypeLangString;
   url: TypeLangString;
+  layerEntries?: (TypeDynamicLayerEntry | TypeOgcLayerEntry)[];
 };
-
-// AbstractWebLayersClass types
 
 /**
  * interface used by all plugins to define their options

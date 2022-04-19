@@ -1,7 +1,17 @@
+import { EventStringId } from '../event';
+
 /**
  * Panel event types
  */
-export const PANEL = {
+
+type PanelEventKey =
+  | 'EVENT_PANEL_OPEN'
+  | 'EVENT_PANEL_CLOSE'
+  | 'EVENT_PANEL_ADD_ACTION'
+  | 'EVENT_PANEL_REMOVE_ACTION'
+  | 'EVENT_PANEL_CHANGE_CONTENT';
+
+export const PANEL: Record<PanelEventKey, EventStringId> = {
   /**
    * Event triggered when a request is made to open a panel
    */

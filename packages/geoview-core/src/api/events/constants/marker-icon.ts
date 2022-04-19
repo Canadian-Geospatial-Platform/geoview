@@ -1,7 +1,12 @@
+import { EventStringId } from '../event';
+
 /**
  * Marker icon event types
  */
-export const MARKER_ICON = {
+
+type MarkerIconEventKey = 'EVENT_MARKER_ICON_SHOW' | 'EVENT_MARKER_ICON_HIDE';
+
+export const MARKER_ICON: Record<MarkerIconEventKey, EventStringId> = {
   /**
    * Event is triggered when a call is made to show a marker on map click in details panel
    */

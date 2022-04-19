@@ -1,7 +1,12 @@
+import { EventStringId } from '../event';
+
 /**
  * Constant that contains appbar event types
  */
-export const APPBAR = {
+
+type AppbarEventKey = 'EVENT_APPBAR_PANEL_CREATE' | 'EVENT_APPBAR_PANEL_REMOVE';
+
+export const APPBAR: Record<AppbarEventKey, EventStringId> = {
   /**
    * Event triggered when a new appbar panel has been created
    */

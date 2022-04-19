@@ -26,12 +26,13 @@ import * as UI from './ui';
 import AppStart from './core/app-start';
 import * as types from './core/types/cgpv-types';
 
-import { EVENT_NAMES } from './api/event';
+import { EVENT_NAMES } from './api/events/event';
 import { API } from './api/api';
 
 import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 
 import { Config } from './core/utils/config';
+import { payloadIsAMapConfig } from './api/events/payloads/map-config-payload';
 
 export * from './core/types/cgpv-types';
 export const api = new API();
@@ -49,26 +50,27 @@ Marker.prototype.options.icon = DefaultIcon;
 
 // listen to map reload event
 api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
-  if (payload && payload.handlerId) {
-    const payloadHandlerId = payload.handlerId as string;
-    // unsubscribe from all events registered on this map
-    api.event.offAll(payloadHandlerId);
+  if (payloadIsAMapConfig(payload)) {
+    if (payload.handlerId) {
+      // unsubscribe from all events registered on this map
+      api.event.offAll(payload.handlerId);
 
-    // unload all loaded plugins on the map
-    api.plugin.removePlugins(payloadHandlerId);
+      // unload all loaded plugins on the map
+      api.plugin.removePlugins(payload.handlerId);
 
-    // get the map container
-    const map = document.getElementById(payloadHandlerId);
+      // get the map container
+      const map = document.getElementById(payload.handlerId);
 
-    if (map) {
-      // remove the dom element (remove rendered map)
-      ReactDOM.unmountComponentAtNode(map);
+      if (map) {
+        // remove the dom element (remove rendered map)
+        ReactDOM.unmountComponentAtNode(map);
 
-      // delete the map instance from the maps array
-      delete api.maps[payloadHandlerId];
+        // delete the map instance from the maps array
+        delete api.maps[payload.handlerId];
 
-      // re-render map with updated config keeping previous values if unchanged
-      ReactDOM.render(<AppStart configObj={types.Cast<types.TypeMapConfigProps>(payload.config)} />, map);
+        // re-render map with updated config keeping previous values if unchanged
+        ReactDOM.render(<AppStart configObj={payload.config} />, map);
+      }
     }
   }
 });

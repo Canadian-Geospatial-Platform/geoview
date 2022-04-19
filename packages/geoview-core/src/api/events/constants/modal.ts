@@ -1,7 +1,12 @@
+import { EventStringId } from '../event';
+
 /**
  * Modal event types
  */
-export const MODAL = {
+
+type ModalEventKey = 'EVENT_MODAL_CREATE' | 'EVENT_MODAL_OPEN' | 'EVENT_MODAL_CLOSE' | 'EVENT_MODAL_UPDATE';
+
+export const MODAL: Record<ModalEventKey, EventStringId> = {
   /**
    * Event is triggered when a new modal is created
    */

@@ -1,7 +1,20 @@
+import { EventStringId } from '../event';
+
 /**
  * A constant that exports all event types for the map
  */
-export const MAP = {
+
+type MapEventKey =
+  | 'EVENT_MAP_LOADED'
+  | 'EVENT_MAP_RELOAD'
+  | 'EVENT_MAP_MOVE_END'
+  | 'EVENT_MAP_ZOOM_END'
+  | 'EVENT_MAP_ADD_COMPONENT'
+  | 'EVENT_MAP_REMOVE_COMPONENT'
+  | 'EVENT_MAP_IN_KEYFOCUS'
+  | 'EVENT_MAP_CROSSHAIR_ENABLE_DISABLE';
+
+export const MAP: Record<MapEventKey, EventStringId> = {
   /**
    * Event triggered when map is loaded and api ready
    */

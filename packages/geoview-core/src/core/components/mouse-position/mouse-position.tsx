@@ -10,7 +10,8 @@ import { LatLng } from 'leaflet';
 import { debounce } from 'lodash';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
+import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
   mouseposition: {
@@ -107,8 +108,10 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(id)) {
-          isCrosshairsActive.current = payload.active as boolean;
+        if (payloadIsABoolean(payload)) {
+          if (payload.handlerName!.includes(id)) {
+            isCrosshairsActive.current = payload.status;
+          }
         }
       },
       mapId

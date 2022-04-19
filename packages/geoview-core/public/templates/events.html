@@ -89,35 +89,42 @@
 
         // listen to map moveend event
         cgpv.api.event.on(
-          'map/moveend',
-          (args) => {
-            mapsPosition[0].innerHTML =
-              mapsPosition[0].innerHTML = `<p>Map ${args.handlerName} with latitude ${args.position.lat} and longitude ${args.position.lng}</p>`;
+          cgpv.api.eventNames.MAP.EVENT_MAP_MOVE_END,
+          (payload) => {
+            if (cgpv.types.payloadIsALatLng(payload)) {
+              mapsPosition[0].innerHTML =
+                mapsPosition[0].innerHTML = `<p>Map ${payload.handlerName} with latitude ${payload.latLng.lat} and longitude ${payload.latLng.lng}</p>`;
+            }
           },
           'EVNT1'
         );
 
         // snackbar notification
-        window.cgpv.api.event.emit('snackbar/open', 'EVNT1', {
-          message: {
-            type: 'string',
-            value: 'This is my first snackbar!',
-          },
-        });
+        cgpv.api.event.emit(
+          cgpv.types.snackbarMessagePayload(
+            cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
+              type: 'string',
+              value: 'This is my first snackbar!',
+            }
+          )
+        );
 
         setInterval(() => {
-          window.cgpv.api.event.emit('snackbar/open', 'EVNT1', {
-            message: {
-              type: 'string',
-              value: 'I can even apply a function',
-            },
-            button: {
-              label: 'Click me!',
-              action: () => {
-                alert('You clicked me!');
+          cgpv.api.event.emit(
+            cgpv.types.snackbarMessagePayload(
+              cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
+                type: 'string',
+                value: 'I can even apply a function',
               },
-            },
-          });
+              {},
+              {
+                label: 'Click me!',
+                action: () => {
+                  alert('You clicked me!');
+                },
+              },
+            )
+          );
         }, 20000);
 
         //create snippets

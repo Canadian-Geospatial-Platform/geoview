@@ -1,7 +1,12 @@
+import { EventStringId } from '../event';
+
 /**
  * Constant that contains navbar event types
  */
-export const NAVBAR = {
+
+type NavbarEventKey = 'EVENT_NAVBAR_BUTTON_PANEL_CREATE' | 'EVENT_NAVBAR_BUTTON_PANEL_REMOVE' | 'EVENT_NAVBAR_TOGGLE_CONTROLS';
+
+export const NAVBAR: Record<NavbarEventKey, EventStringId> = {
   /**
    * Event triggered when a new navbar button or panel has been created
    */
@@ -12,6 +17,7 @@ export const NAVBAR = {
    */
   EVENT_NAVBAR_BUTTON_PANEL_REMOVE: 'navbar/button_panel_remove',
 
+  // TODO there is no code linked to the following event for the moment
   /**
    * Enable / Disable controls (zoom,home,fullscreen buttons)
    */

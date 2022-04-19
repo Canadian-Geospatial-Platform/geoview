@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import { TypeLayersListProps, AbstractWebLayersClass, TypeWindow, toJsonObject } from 'geoview-core';
+import { MarkerDefinitionPayload } from 'geoview-core/src/api/events/payloads/marker-definition-payload';
 
 // get the window object
 const w = window as TypeWindow;
@@ -152,10 +153,14 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
                                     // if a layer is clicked
                                     goToFeatureList(data, layerKey);
 
-                                    api.event.emit(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, {
-                                      latlng: clickPos,
-                                      symbology: getSymbol(data.layers[layerKey].renderer, layerData[0].attributes),
-                                    });
+                                    api.event.emit(
+                                      new MarkerDefinitionPayload(
+                                        EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW,
+                                        mapId,
+                                        clickPos!,
+                                        getSymbol(data.layers[layerKey].renderer, layerData[0].attributes)!
+                                      )
+                                    );
                                   }
                                 : undefined
                             }

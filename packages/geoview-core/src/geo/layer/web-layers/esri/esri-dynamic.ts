@@ -13,9 +13,14 @@ import {
   TypeJsonArray,
   TypeLegendJsonDynamic,
   toJsonObject,
+  TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
+
+export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeDynamicLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+};
 
 /**
  * a class to add esri dynamic layer

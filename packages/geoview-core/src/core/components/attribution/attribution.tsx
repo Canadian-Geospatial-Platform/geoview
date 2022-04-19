@@ -5,9 +5,10 @@ import makeStyles from '@mui/styles/makeStyles';
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 
 import { MapContext } from '../../app-start';
+import { payloadIsAButtonPanel } from '../../../api/events/payloads/button-panel-payload';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -54,8 +55,10 @@ export function Attribution(props: AttributionProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
-          updateComponent();
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            updateComponent();
+          }
         }
       },
       mapId
@@ -65,8 +68,10 @@ export function Attribution(props: AttributionProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
-          updateComponent();
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            updateComponent();
+          }
         }
       },
       mapId

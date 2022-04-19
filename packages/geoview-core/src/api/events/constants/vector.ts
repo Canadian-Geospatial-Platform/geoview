@@ -1,7 +1,12 @@
+import { EventStringId } from '../event';
+
 /**
  * Vector event types
  */
-export const VECTOR = {
+
+type VectorEventKey = 'EVENT_VECTOR_ADD' | 'EVENT_VECTOR_REMOVE' | 'EVENT_VECTOR_ADDED' | 'EVENT_VECTOR_OFF' | 'EVENT_VECTOR_ON';
+
+export const VECTOR: Record<VectorEventKey, EventStringId> = {
   /**
    * Event triggered when a request is made to add a vector
    */

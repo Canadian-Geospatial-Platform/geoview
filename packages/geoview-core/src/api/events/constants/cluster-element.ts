@@ -1,7 +1,19 @@
+import { EventStringId } from '../event';
+
 /**
  * Cluster element event types
  */
-export const CLUSTER_ELEMENT = {
+
+type ClusterEventKey =
+  | 'EVENT_CLUSTER_ELEMENT_ADD'
+  | 'EVENT_CLUSTER_ELEMENT_REMOVE'
+  | 'EVENT_CLUSTER_ELEMENT_ADDED'
+  | 'EVENT_CLUSTER_ELEMENT_START_BLINKING'
+  | 'EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED'
+  | 'EVENT_CLUSTER_ELEMENT_STOP_BLINKING'
+  | 'EVENT_BOX_SELECT_END';
+
+export const CLUSTER_ELEMENT: Record<ClusterEventKey, EventStringId> = {
   /**
    * Event triggered when a request is made to add a cluster element
    */

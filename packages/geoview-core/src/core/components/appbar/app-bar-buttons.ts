@@ -1,12 +1,13 @@
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 
 import { PanelApi } from '../../../ui';
 
 import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 import { generateId } from '../../utils/utilities';
+import { ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
 /**
  * Class to manage buttons on the appbar
@@ -105,12 +106,7 @@ export class AppbarButtons {
       this.buttons[group][id] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emit(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, {
-        handlerId: this.mapId,
-        groupName: group,
-        id,
-        buttonPanel,
-      });
+      api.event.emit(new ButtonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, this.mapId, id, group, buttonPanel));
 
       return buttonPanel;
     }
@@ -176,11 +172,7 @@ export class AppbarButtons {
       delete group[id];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, {
-        handlerId: this.mapId,
-        id,
-        groupName,
-      });
+      api.event.emit(new ButtonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, this.mapId, id, groupName));
     });
   };
 }

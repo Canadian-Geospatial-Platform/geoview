@@ -14,7 +14,7 @@ import { Layer } from '../layer/layer';
 import { MapProjection } from '../projection/map-projection';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import '../../core/types/cgp-leaflet-config';
 import { generateId } from '../../core/utils/utilities';
@@ -31,6 +31,9 @@ import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
 
 import { ModalApi } from '../../ui';
+import { MapPayload } from '../../api/events/payloads/map-payload';
+import { MapComponentPayload } from '../../api/events/payloads/map-component-payload';
+import { MapConfigPayload } from '../../api/events/payloads/map-config-payload';
 
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
@@ -192,10 +195,7 @@ export class MapViewer {
   addComponent = (id: string, component: JSX.Element): void => {
     if (id && component) {
       // emit an event to add the component
-      api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.id, {
-        id,
-        component,
-      });
+      api.event.emit(new MapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.id, id, component));
     }
   };
 
@@ -207,9 +207,7 @@ export class MapViewer {
   removeComponent = (id: string): void => {
     if (id) {
       // emit an event to add the component
-      api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.id, {
-        id,
-      });
+      api.event.emit(new MapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.id, id));
     }
   };
 
@@ -242,7 +240,7 @@ export class MapViewer {
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady = (): void => {
-    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.id, { map: this.map });
+    api.event.emit(new MapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.id, this.map));
   };
 
   /**
@@ -270,10 +268,7 @@ export class MapViewer {
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, {
-      handlerId: this.id,
-      config: updatedConfig,
-    });
+    api.event.emit(new MapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, this.id, updatedConfig));
   };
 
   /**
@@ -288,10 +283,7 @@ export class MapViewer {
     const configObj = config.getMapConfigFromFunc(mapConfig);
 
     // emit an event to reload the map with the new config
-    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, {
-      handlerId: this.id,
-      config: configObj,
-    });
+    api.event.emit(new MapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, this.id, configObj!));
   };
 
   /**

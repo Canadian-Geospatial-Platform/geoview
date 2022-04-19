@@ -10,10 +10,13 @@ import { useMap } from 'react-leaflet';
 import { MapContext } from '../../app-start';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '../../../ui';
+import { LatLngPayload } from '../../../api/events/payloads/lat-long-payload';
+import { BooleanPayload } from '../../../api/events/payloads/boolean-payload';
+import { payloadIsAInKeyfocus } from '../../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
@@ -90,9 +93,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
       if (isCrosshairsActiveValue.current) {
         // emit an event with the latlng point
-        api.event.emit(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
-          latlng: latlngPoint,
-        });
+        api.event.emit(new LatLngPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, latlngPoint));
       }
     }
   }
@@ -106,9 +107,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     mapContainer.removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
     isCrosshairsActiveValue.current = false;
-    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
-      active: false,
-    });
+    api.event.emit(new BooleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, false));
   }
 
   useEffect(() => {
@@ -116,15 +115,15 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(id)) {
-          setCrosshairsActive(true);
-          isCrosshairsActiveValue.current = true;
-          api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
-            active: true,
-          });
+        if (payloadIsAInKeyfocus(payload)) {
+          if (payload.handlerName!.includes(id)) {
+            setCrosshairsActive(true);
+            isCrosshairsActiveValue.current = true;
+            api.event.emit(new BooleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, true));
 
-          mapContainer.addEventListener('keydown', simulateClick);
-          panelButtonId.current = 'detailsPanel';
+            mapContainer.addEventListener('keydown', simulateClick);
+            panelButtonId.current = 'detailsPanel';
+          }
         }
       },
       mapId
