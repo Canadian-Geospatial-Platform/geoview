@@ -15,9 +15,9 @@ import { EVENT_NAMES } from '../../api/events/event';
 
 import { Cast, CONST_LAYER_TYPES, AbstractWebLayersClass, TypeLayerConfig, TypeJsonObject } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
-import { LayerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
-import { payloadIsAWebLayer, WebLayerPayload } from '../../api/events/payloads/web-layer-payload';
-import { SnackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
+import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
+import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 // import "esri-leaflet-renderers";
@@ -127,7 +127,7 @@ export class Layer {
 
     // Load layers that was passed in with the map config
     if (layers && layers.length > 0) {
-      layers?.forEach((layerConfig) => api.event.emit(new LayerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig)));
+      layers?.forEach((layerConfig) => api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig)));
     }
   }
 
@@ -149,7 +149,7 @@ export class Layer {
     setTimeout(() => {
       if (!isLoaded) {
         api.event.emit(
-          new SnackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
             type: 'key',
             value: 'validation.layer.loadfailed',
             params: [name as TypeJsonObject, this.#mapId as TypeJsonObject],
@@ -171,7 +171,7 @@ export class Layer {
     // do not add to the map
     if (typeof cgpvLayer.layer === null) {
       api.event.emit(
-        new SnackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
+        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
           type: 'key',
           value: 'validation.layer.loadfailed',
           params: [cgpvLayer.name as TypeJsonObject, this.#mapId as TypeJsonObject],
@@ -188,7 +188,7 @@ export class Layer {
       cgpvLayer.layer!.addTo(api.map(this.#mapId).map);
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
-      api.event.emit(new WebLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
+      api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
     }
   }
 
@@ -235,7 +235,7 @@ export class Layer {
   addLayer = (layerConfig: TypeLayerConfig): string => {
     // eslint-disable-next-line no-param-reassign
     layerConfig.id = generateId(layerConfig.id);
-    api.event.emit(new LayerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig));
+    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig));
 
     return layerConfig.id;
   };
@@ -248,7 +248,7 @@ export class Layer {
   removeLayer = (cgpvLayer: AbstractWebLayersClass): string => {
     // eslint-disable-next-line no-param-reassign
     cgpvLayer.id = generateId(cgpvLayer.id);
-    api.event.emit(new WebLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, cgpvLayer));
+    api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, cgpvLayer));
 
     return cgpvLayer.id;
   };

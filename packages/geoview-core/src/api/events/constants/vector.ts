@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Vector event types
  */
 
-type VectorEventKey = 'EVENT_VECTOR_ADD' | 'EVENT_VECTOR_REMOVE' | 'EVENT_VECTOR_ADDED' | 'EVENT_VECTOR_OFF' | 'EVENT_VECTOR_ON';
+export type VectorEventKey = 'EVENT_VECTOR_ADD' | 'EVENT_VECTOR_REMOVE' | 'EVENT_VECTOR_ADDED' | 'EVENT_VECTOR_OFF' | 'EVENT_VECTOR_ON';
 
 export const VECTOR: Record<VectorEventKey, EventStringId> = {
   /**

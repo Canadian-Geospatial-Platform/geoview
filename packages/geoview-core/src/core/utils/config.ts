@@ -434,7 +434,7 @@ export class Config {
           const error = validate.errors[j];
           console.log(error);
           // api.event.emit(
-          //   new SnackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
+          //   snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
           //     type: 'key',
           //     value: error.message,
           //     params: [mapId],
@@ -512,7 +512,7 @@ export class Config {
           const error = validate.errors[j];
           console.log(error);
           // api.event.emit(
-          //   new SnackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
+          //   snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
           //     type: 'key',
           //     value: error.message,
           //     params: [mapId],

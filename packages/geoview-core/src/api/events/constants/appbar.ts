@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Constant that contains appbar event types
  */
 
-type AppbarEventKey = 'EVENT_APPBAR_PANEL_CREATE' | 'EVENT_APPBAR_PANEL_REMOVE';
+export type AppbarEventKey = 'EVENT_APPBAR_PANEL_CREATE' | 'EVENT_APPBAR_PANEL_REMOVE';
 
 export const APPBAR: Record<AppbarEventKey, EventStringId> = {
   /**

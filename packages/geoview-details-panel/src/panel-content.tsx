@@ -22,8 +22,8 @@ import {
 } from 'geoview-core';
 
 import { payloadIsALatLng } from 'geoview-core/src/api/events/payloads/lat-long-payload';
-import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
-import { MarkerDefinitionPayload } from 'geoview-core/src/api/events/payloads/marker-definition-payload';
+import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
+import { markerDefinitionPayload } from 'geoview-core/src/api/events/payloads/marker-definition-payload';
 import LayersList from './layers-list';
 import FeaturesList from './features-list';
 import FeatureInfo from './feature-info';
@@ -134,7 +134,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       setFeatureInfo(showFeaturesInfo);
 
       // emit content change event so the panel can focus on close button
-      api.event.emit(new PayloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId));
+      api.event.emit(payloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [buttonPanel.panel, mapId]
@@ -434,7 +434,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       // if there is multiple layers with entries then symbology will be of the first layer
       // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
       // if no layers contains any entry then the default symbology with crosshair will show
-      api.event.emit(new MarkerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, latlng, symbology!));
+      api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, latlng, symbology!));
 
       // set focus to the close button of the panel
       if (panelContainer) {

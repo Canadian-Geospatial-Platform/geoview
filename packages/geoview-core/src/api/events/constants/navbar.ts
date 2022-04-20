@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Constant that contains navbar event types
  */
 
-type NavbarEventKey = 'EVENT_NAVBAR_BUTTON_PANEL_CREATE' | 'EVENT_NAVBAR_BUTTON_PANEL_REMOVE' | 'EVENT_NAVBAR_TOGGLE_CONTROLS';
+export type NavbarEventKey = 'EVENT_NAVBAR_BUTTON_PANEL_CREATE' | 'EVENT_NAVBAR_BUTTON_PANEL_REMOVE' | 'EVENT_NAVBAR_TOGGLE_CONTROLS';
 
 export const NAVBAR: Record<NavbarEventKey, EventStringId> = {
   /**

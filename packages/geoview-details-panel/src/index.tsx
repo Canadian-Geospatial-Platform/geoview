@@ -9,7 +9,7 @@ import {
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core';
-import { PayloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
+import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
 
 import PanelContent from './panel-content';
 
@@ -98,7 +98,7 @@ class DetailsPlugin extends AbstractPluginClass {
 
     if (this.buttonPanel) {
       api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
-      api.event.emit(new PayloadBaseClass(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
+      api.event.emit(payloadBaseClass(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
     }
   }
 }

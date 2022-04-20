@@ -18,9 +18,9 @@ import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
 import { IconButton, CloseIcon, Divider } from '..';
-import { PayloadBaseClass } from '../../api/events/payloads/payload-base-class';
+import { payloadBaseClass } from '../../api/events/payloads/payload-base-class';
 import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '../../api/events/payloads/panel-payload';
-import { InKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -102,7 +102,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
    */
   const closePanel = (): void => {
     // emit an event to hide the marker when using the details panel
-    api.event.emit(new PayloadBaseClass(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
+    api.event.emit(payloadBaseClass(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
 
     const buttonElement = document.getElementById(button.id!);
 
@@ -116,7 +116,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // if in focus trap mode, trigger the event
       if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
         mapCont.classList.add('keyboard-focus');
-        api.event.emit(new InKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`));
+        api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `leaflet-map-${mapId}`));
       }
     }
 

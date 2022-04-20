@@ -11,7 +11,7 @@ import { EVENT_NAMES } from '../../api/events/event';
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '../../core/app-start';
 import { TypeDrawerProps } from '../../core/types/cgpv-types';
-import { BooleanPayload, payloadIsABoolean } from '../../api/events/payloads/boolean-payload';
+import { booleanPayload, payloadIsABoolean } from '../../api/events/payloads/boolean-payload';
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
@@ -72,7 +72,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     setOpen(drawerStatus);
 
     // if appbar is open then close it
-    api.event.emit(new BooleanPayload(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId, drawerStatus));
+    api.event.emit(booleanPayload(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId, drawerStatus));
 
     // if panel is open then close it
     // if (panelOpen) openClosePanel(false);

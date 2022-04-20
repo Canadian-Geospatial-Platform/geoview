@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Constant that contains layer event types
  */
 
-type LayerEventKey = 'EVENT_LAYER_ADD' | 'EVENT_LAYER_ADDED' | 'EVENT_REMOVE_LAYER' | 'EVENT_GET_LAYERS';
+export type LayerEventKey = 'EVENT_LAYER_ADD' | 'EVENT_LAYER_ADDED' | 'EVENT_REMOVE_LAYER' | 'EVENT_GET_LAYERS';
 
 export const LAYER: Record<LayerEventKey, EventStringId> = {
   /**

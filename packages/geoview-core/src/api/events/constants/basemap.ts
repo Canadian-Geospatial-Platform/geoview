@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Basemap event types
  */
 
-type BasmapEventKey = 'EVENT_BASEMAP_LAYERS_UPDATE';
+export type BasmapEventKey = 'EVENT_BASEMAP_LAYERS_UPDATE';
 
 export const BASEMAP: Record<BasmapEventKey, EventStringId> = {
   /**

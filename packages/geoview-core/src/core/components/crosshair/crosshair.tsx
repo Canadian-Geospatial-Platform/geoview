@@ -14,8 +14,8 @@ import { EVENT_NAMES } from '../../../api/events/event';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '../../../ui';
-import { LatLngPayload } from '../../../api/events/payloads/lat-long-payload';
-import { BooleanPayload } from '../../../api/events/payloads/boolean-payload';
+import { latLngPayload } from '../../../api/events/payloads/lat-long-payload';
+import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
 import { payloadIsAInKeyfocus } from '../../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
@@ -93,7 +93,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
       if (isCrosshairsActiveValue.current) {
         // emit an event with the latlng point
-        api.event.emit(new LatLngPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, latlngPoint));
+        api.event.emit(latLngPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, latlngPoint));
       }
     }
   }
@@ -107,7 +107,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     mapContainer.removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
     isCrosshairsActiveValue.current = false;
-    api.event.emit(new BooleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, false));
+    api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, false));
   }
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
           if (payload.handlerName!.includes(id)) {
             setCrosshairsActive(true);
             isCrosshairsActiveValue.current = true;
-            api.event.emit(new BooleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, true));
+            api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, true));
 
             mapContainer.addEventListener('keydown', simulateClick);
             panelButtonId.current = 'detailsPanel';

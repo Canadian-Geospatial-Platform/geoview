@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Panel event types
  */
 
-type PanelEventKey =
+export type PanelEventKey =
   | 'EVENT_PANEL_OPEN'
   | 'EVENT_PANEL_CLOSE'
   | 'EVENT_PANEL_ADD_ACTION'

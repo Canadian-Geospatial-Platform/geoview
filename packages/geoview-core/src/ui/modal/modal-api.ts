@@ -5,7 +5,7 @@ import { generateId } from '../../core/utils/utilities';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
-import { ModalPayload } from '../../api/events/payloads/modal-payload';
+import { modalPayload } from '../../api/events/payloads/modal-payload';
 
 /**
  * Both header and footer actions' properties interface
@@ -109,7 +109,7 @@ export class ModalApi {
     this.modals[id].width = modal.width || this.modals[id].width;
     this.modals[id].height = modal.height || this.modals[id].height;
 
-    api.event.emit(new ModalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, this.mapId, id));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, this.mapId, id));
   };
 
   /**

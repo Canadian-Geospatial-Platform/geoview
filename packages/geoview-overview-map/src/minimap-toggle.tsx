@@ -1,5 +1,5 @@
 import { Cast, TypeWindow } from 'geoview-core';
-import { BooleanPayload } from 'geoview-core/src/api/events/payloads/boolean-payload';
+import { booleanPayload } from 'geoview-core/src/api/events/payloads/boolean-payload';
 
 import { MINIMAP_SIZE } from './overview-map';
 
@@ -92,7 +92,7 @@ export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     }
 
     // trigger a new event when overview map is toggled
-    api.event.emit(new BooleanPayload(EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE, parentId, status));
+    api.event.emit(booleanPayload(EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE, parentId, status));
   }
 
   useEffect(() => {

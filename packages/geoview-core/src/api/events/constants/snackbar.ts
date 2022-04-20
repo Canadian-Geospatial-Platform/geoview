@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Snackbar event types
  */
 
-type SnackbarEventKey = 'EVENT_SNACKBAR_OPEN';
+export type SnackbarEventKey = 'EVENT_SNACKBAR_OPEN';
 
 export const SNACKBAR: Record<SnackbarEventKey, EventStringId> = {
   /**

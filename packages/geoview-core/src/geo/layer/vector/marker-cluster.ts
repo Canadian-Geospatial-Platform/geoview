@@ -12,10 +12,10 @@ import { generateId } from '../../../core/utils/utilities';
 import '../../../core/types/marker-cluster-element';
 
 import * as MarkerDefinitions from '../../../core/types/marker-definitions';
-import { ClusterElementPayload, payloadIsAClusterElement } from '../../../api/events/payloads/cluster-element-payload';
+import { clusterElementPayload, payloadIsAClusterElement } from '../../../api/events/payloads/cluster-element-payload';
 import { payloadIsAMarkerClusterConfig } from '../../../api/events/payloads/marker-cluster-config-payload';
 import { payloadIsASelectBox } from '../../../api/events/payloads/select-box-payload';
-import { PayloadBaseClass } from '../../../api/events/payloads/payload-base-class';
+import { payloadBaseClass } from '../../../api/events/payloads/payload-base-class';
 
 let { getClusterIconFull, getClusterIconPart, getClusterIconEmpty } = MarkerDefinitions;
 
@@ -395,7 +395,7 @@ export class MarkerClusterClass {
     marker.addTo(Cast<L.LayerGroup>(this.clusterGroups[this.activeClusterGroupIndex]));
 
     // emit an event that a marker vector has been added
-    api.event.emit(new ClusterElementPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_ADDED, this.markerClusterMap.id, marker));
+    api.event.emit(clusterElementPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_ADDED, this.markerClusterMap.id, marker));
 
     return marker;
   };
@@ -731,7 +731,7 @@ export class MarkerClusterClass {
       if (clusterGroup.options.visible) clusterGroup.removeFrom(this.markerClusterMap);
     });
     // turn off all visible geometry groups
-    api.event.emit(new PayloadBaseClass(api.eventNames.VECTOR.EVENT_VECTOR_OFF, this.markerClusterMap.id));
+    api.event.emit(payloadBaseClass(api.eventNames.VECTOR.EVENT_VECTOR_OFF, this.markerClusterMap.id));
     // Insert only the markers associated to the current group in the new spiderfied cluster
     // and keep a reference to the last child marker clone
     let i = 0;
@@ -793,7 +793,7 @@ export class MarkerClusterClass {
     this.spiderfiedMarkerGroup = this.newClusterGroupInstance('SpiderfiedClusterGroup', this.spiderfiedClusterGroupOptions);
     event.target.on('unspiderfied', this.onUnspiderfyCluster);
     // turn on all visible geometry groups
-    api.event.emit(new PayloadBaseClass(api.eventNames.VECTOR.EVENT_VECTOR_ON, this.markerClusterMap.id));
+    api.event.emit(payloadBaseClass(api.eventNames.VECTOR.EVENT_VECTOR_ON, this.markerClusterMap.id));
     // turn on all visible cluster group
     this.clusterGroups.forEach((clusterGroup) => {
       if (clusterGroup.options.visible) clusterGroup.addTo(this.markerClusterMap);

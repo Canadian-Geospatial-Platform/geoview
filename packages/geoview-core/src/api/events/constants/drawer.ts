@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Drawer event types
  */
 
-type DrawerEventKey = 'EVENT_DRAWER_OPEN_CLOSE';
+export type DrawerEventKey = 'EVENT_DRAWER_OPEN_CLOSE';
 
 export const DRAWER: Record<DrawerEventKey, EventStringId> = {
   /**

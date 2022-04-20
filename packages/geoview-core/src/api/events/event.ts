@@ -2,20 +2,20 @@ import EventEmitter from 'eventemitter3';
 
 import { generateId } from '../../core/utils/utilities';
 
-import { MAP } from './constants/map';
-import { LAYER } from './constants/layer';
-import { APPBAR } from './constants/appbar';
-import { NAVBAR } from './constants/navbar';
-import { SNACKBAR } from './constants/snackbar';
-import { BASEMAP } from './constants/basemap';
-import { OVERVIEW_MAP } from './constants/overview-map';
-import { DETAILS_PANEL } from './constants/details-panel';
-import { MARKER_ICON } from './constants/marker-icon';
-import { CLUSTER_ELEMENT } from './constants/cluster-element';
-import { DRAWER } from './constants/drawer';
-import { MODAL } from './constants/modal';
-import { PANEL } from './constants/panel';
-import { VECTOR } from './constants/vector';
+import { MAP, MapEventKey } from './constants/map';
+import { LAYER, LayerEventKey } from './constants/layer';
+import { APPBAR, AppbarEventKey } from './constants/appbar';
+import { NAVBAR, NavbarEventKey } from './constants/navbar';
+import { SNACKBAR, SnackbarEventKey } from './constants/snackbar';
+import { BASEMAP, BasmapEventKey } from './constants/basemap';
+import { OVERVIEW_MAP, OverviewEventKey } from './constants/overview-map';
+import { DETAILS_PANEL, DetailPanelEventKey } from './constants/details-panel';
+import { MARKER_ICON, MarkerIconEventKey } from './constants/marker-icon';
+import { CLUSTER_ELEMENT, ClusterEventKey } from './constants/cluster-element';
+import { DRAWER, DrawerEventKey } from './constants/drawer';
+import { MODAL, ModalEventKey } from './constants/modal';
+import { PANEL, PanelEventKey } from './constants/panel';
+import { VECTOR, VectorEventKey } from './constants/vector';
 import { PayloadBaseClass } from './payloads/payload-base-class';
 
 /**
@@ -37,6 +37,39 @@ export const EVENT_NAMES = {
   PANEL,
   VECTOR,
 };
+
+export type EventCategories =
+  | 'MAP'
+  | 'LAYER'
+  | 'APPBAR'
+  | 'NAVBAR'
+  | 'SNACKBAR'
+  | 'BASEMAP'
+  | 'OVERVIEW_MAP'
+  | 'DETAILS_PANEL'
+  | 'MARKER_ICON'
+  | 'CLUSTER_ELEMENT'
+  | 'DRAWER'
+  | 'MODAL'
+  | 'PANEL'
+  | 'VECTOR';
+
+export type EventKey =
+  | MapEventKey
+  | LayerEventKey
+  | AppbarEventKey
+  | NavbarEventKey
+  | SnackbarEventKey
+  | BasmapEventKey
+  | OverviewEventKey
+  | DetailPanelEventKey
+  | MarkerIconEventKey
+  | ClusterEventKey
+  | DrawerEventKey
+  | ModalEventKey
+  | PanelEventKey
+  | PanelEventKey
+  | VectorEventKey;
 
 export type EventStringId =
   | 'map/loaded'
@@ -113,7 +146,7 @@ export class Event {
    * @param {string} [handlerName] the handler name to return data from
    */
   on = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string): void => {
-    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+    const eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
@@ -124,7 +157,7 @@ export class Event {
 
       // if a handler name was specified, callback will return that data if found
       if (handlerName && payload.handlerName === handlerName) {
-        listenerPayload = this.events[eName][handlerName];
+        listenerPayload = this.events[eventNameId][handlerName];
       } else {
         listenerPayload = payload;
       }
@@ -132,7 +165,7 @@ export class Event {
       listener(listenerPayload);
     };
 
-    this.eventEmitter.on(eName, listen);
+    this.eventEmitter.on(eventNameId, listen);
   };
 
   /**
@@ -143,7 +176,7 @@ export class Event {
    * @param {string} [handlerName] the handler name to return data from
    */
   once = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string): void => {
-    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+    const eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     /**
      * Listen callback, sets the data that will be returned back
@@ -154,7 +187,7 @@ export class Event {
 
       // if a handler name was specefieid, callback will return that data if found
       if (handlerName && payload.handlerName === handlerName) {
-        listenerPayload = this.events[eName][handlerName];
+        listenerPayload = this.events[eventNameId][handlerName];
       } else {
         listenerPayload = payload;
       }
@@ -162,7 +195,7 @@ export class Event {
       listener(listenerPayload);
     };
 
-    this.eventEmitter.once(eName, listen);
+    this.eventEmitter.once(eventNameId, listen);
   };
 
   /**
@@ -172,11 +205,11 @@ export class Event {
    * @param {string} handlerName the name of the handler an event needs to be removed from
    */
   off = (eventName: EventStringId, handlerName?: string): void => {
-    const eName = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+    const eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
-    this.eventEmitter.off(eName);
+    this.eventEmitter.off(eventNameId);
 
-    delete this.events[eName];
+    delete this.events[eventNameId];
   };
 
   /**
@@ -195,9 +228,7 @@ export class Event {
   /**
    * Will emit the event on the event name with the @payload
    *
-   * @param {string} event the event name to emit
-   * @param {string} handlerName the event handler, used if there are multiple emitters with same event name
-   * @param {object} payload a payload (data) to be emitted with the event
+   * @param {object} payload a payload (data) to be emitted for the event
    */
   emit = (payload: PayloadBaseClass): void => {
     const { handlerName, event } = payload;
@@ -206,19 +237,19 @@ export class Event {
     const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
-    const hName = generateId(handlerName);
+    const handlerNameId = generateId(handlerName);
 
     if (!this.events[event]) {
       this.events[eventName] = {};
     }
 
     // YC Check if needed
-    if (!this.events[eventName][hName]) {
-      this.events[eventName][hName] = {} as PayloadBaseClass;
+    if (!this.events[eventName][handlerNameId]) {
+      this.events[eventName][handlerNameId] = {} as PayloadBaseClass;
     }
 
     // store the emitted event to the events array
-    this.events[eventName][hName] = {
+    this.events[eventName][handlerNameId] = {
       ...payload,
     } as PayloadBaseClass;
 
@@ -242,7 +273,7 @@ export class Event {
    * Get all events with their data and event handler names
    * @returns all the events with their data and handler names
    */
-  getEvents = (): Record<string, Record<string, unknown>> => {
+  getEvents = (): Record<string, Record<string, PayloadBaseClass>> => {
     return this.events;
   };
 }

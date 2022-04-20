@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Modal event types
  */
 
-type ModalEventKey = 'EVENT_MODAL_CREATE' | 'EVENT_MODAL_OPEN' | 'EVENT_MODAL_CLOSE' | 'EVENT_MODAL_UPDATE';
+export type ModalEventKey = 'EVENT_MODAL_CREATE' | 'EVENT_MODAL_OPEN' | 'EVENT_MODAL_CLOSE' | 'EVENT_MODAL_UPDATE';
 
 export const MODAL: Record<ModalEventKey, EventStringId> = {
   /**

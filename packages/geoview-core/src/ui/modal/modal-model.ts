@@ -2,7 +2,7 @@ import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
 import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './modal-api';
-import { ModalPayload } from '../../api/events/payloads/modal-payload';
+import { modalPayload } from '../../api/events/payloads/modal-payload';
 
 /**
  * Class used to create a template (model) of a modal
@@ -41,7 +41,7 @@ export class ModalModel {
   open = (): void => {
     this.active = true;
 
-    api.event.emit(new ModalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.id!, this.mapId!, true));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.id!, this.mapId!, true));
   };
 
   /**
@@ -50,7 +50,7 @@ export class ModalModel {
   close = (): void => {
     this.active = false;
 
-    api.event.emit(new ModalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.id!, this.mapId!, false));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.id!, this.mapId!, false));
   };
 
   /**
@@ -137,6 +137,6 @@ export class ModalModel {
    * to update the modal as soon as a change is made to any content
    */
   reRender = (): void => {
-    api.event.emit(new ModalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, this.mapId!, this.id!));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, this.mapId!, this.id!));
   };
 }

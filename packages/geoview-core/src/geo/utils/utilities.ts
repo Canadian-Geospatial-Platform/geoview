@@ -6,7 +6,7 @@ import { getXMLHttpRequest, xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
-import { InKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
 
 export class GeoUtilities {
   /**
@@ -87,7 +87,7 @@ export class GeoUtilities {
 
           activeEl?.classList.forEach((item) => {
             if (item.includes('leaflet-map-')) {
-              api.event.emit(new InKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
+              api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
             }
           });
         }

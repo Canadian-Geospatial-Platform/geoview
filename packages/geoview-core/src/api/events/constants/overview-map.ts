@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Overview map event types
  */
 
-type OverviewEventKey = 'EVENT_OVERVIEW_MAP_TOGGLE';
+export type OverviewEventKey = 'EVENT_OVERVIEW_MAP_TOGGLE';
 
 export const OVERVIEW_MAP: Record<OverviewEventKey, EventStringId> = {
   /**

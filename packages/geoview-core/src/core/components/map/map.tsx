@@ -22,8 +22,8 @@ import { MapViewer } from '../../../geo/map/map';
 
 import { TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
-import { NumberPayload } from '../../../api/events/payloads/number-payload';
-import { LatLngPayload } from '../../../api/events/payloads/lat-long-payload';
+import { numberPayload } from '../../../api/events/payloads/number-payload';
+import { latLngPayload } from '../../../api/events/payloads/lat-long-payload';
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
   const { map: mapProps, extraOptions, language, components } = props;
@@ -66,7 +66,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.map(id).currentPosition = position;
 
     // emit the moveend event to the api
-    api.event.emit(new LatLngPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id, position));
+    api.event.emit(latLngPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id, position));
   }
 
   /**
@@ -83,7 +83,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.map(id).currentZoom = currentZoom;
 
     // emit the moveend event to the api
-    api.event.emit(new NumberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
+    api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
   }
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         cgpMap.setView(mapProps.initialView.center, mapProps.initialView.zoom);
 
         // emit the initial map position
-        api.event.emit(new LatLngPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', cgpMap.getCenter()));
+        api.event.emit(latLngPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', cgpMap.getCenter()));
 
         // listen to map move end events
         cgpMap.on('moveend', mapMoveEnd);

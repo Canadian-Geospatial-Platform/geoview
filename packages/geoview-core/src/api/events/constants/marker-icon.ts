@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Marker icon event types
  */
 
-type MarkerIconEventKey = 'EVENT_MARKER_ICON_SHOW' | 'EVENT_MARKER_ICON_HIDE';
+export type MarkerIconEventKey = 'EVENT_MARKER_ICON_SHOW' | 'EVENT_MARKER_ICON_HIDE';
 
 export const MARKER_ICON: Record<MarkerIconEventKey, EventStringId> = {
   /**

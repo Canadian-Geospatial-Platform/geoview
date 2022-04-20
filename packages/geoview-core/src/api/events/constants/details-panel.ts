@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Details panel event types
  */
 
-type DetailPanelEventKey = 'EVENT_DETAILS_PANEL_CROSSHAIR_ENTER';
+export type DetailPanelEventKey = 'EVENT_DETAILS_PANEL_CROSSHAIR_ENTER';
 
 export const DETAILS_PANEL: Record<DetailPanelEventKey, EventStringId> = {
   /**

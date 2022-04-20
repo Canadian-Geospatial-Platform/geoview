@@ -9,7 +9,7 @@ import {
   TypeLayerConfig,
   TypeWebLayers,
 } from 'geoview-core';
-import { SnackbarMessagePayload } from 'geoview-core/src/api/events/payloads/snackbar-message-payload';
+import { snackbarMessagePayload } from 'geoview-core/src/api/events/payloads/snackbar-message-payload';
 
 type Event = { target: { value: string } };
 
@@ -100,7 +100,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorEmpty = (textField: string) => {
     api.event.emit(
-      new SnackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
         value: `${textField} cannot be empty`,
       })
@@ -114,7 +114,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorServer = (serviceName: string) => {
     api.event.emit(
-      new SnackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
         value: `URL is not a valid ${serviceName} Server`,
       })
@@ -129,7 +129,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
     api.event.emit(
-      new SnackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
         value: `${serviceName} does not support current map projection ${proj}, only ${supportedProj.join(', ')}`,
       })

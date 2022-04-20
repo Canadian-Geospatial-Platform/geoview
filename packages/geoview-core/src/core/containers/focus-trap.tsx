@@ -14,7 +14,7 @@ import { EVENT_NAMES } from '../../api/events/event';
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '../../ui';
-import { InKeyfocusPayload, payloadIsAInKeyfocus } from '../../api/events/payloads/in-keyfocus-payload';
+import { inKeyfocusPayload, payloadIsAInKeyfocus } from '../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   trap: {
@@ -118,7 +118,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       // focus the map element and emit the map keyboard focus event
       (document.getElementById(id)?.getElementsByClassName(`leaflet-map-${id}`)[0] as HTMLElement).focus();
-      api.event.emit(new InKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id));
+      api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id));
     }
   }
 

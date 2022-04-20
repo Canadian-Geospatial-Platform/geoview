@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * Cluster element event types
  */
 
-type ClusterEventKey =
+export type ClusterEventKey =
   | 'EVENT_CLUSTER_ELEMENT_ADD'
   | 'EVENT_CLUSTER_ELEMENT_REMOVE'
   | 'EVENT_CLUSTER_ELEMENT_ADDED'

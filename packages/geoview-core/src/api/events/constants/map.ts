@@ -4,7 +4,7 @@ import { EventStringId } from '../event';
  * A constant that exports all event types for the map
  */
 
-type MapEventKey =
+export type MapEventKey =
   | 'EVENT_MAP_LOADED'
   | 'EVENT_MAP_RELOAD'
   | 'EVENT_MAP_MOVE_END'
