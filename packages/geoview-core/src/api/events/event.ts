@@ -239,13 +239,8 @@ export class Event {
     // handler name, registers a unique handler to be used when multiple events emit with same event name
     const handlerNameId = generateId(handlerName);
 
-    if (!this.events[event]) {
+    if (!this.events[eventName]) {
       this.events[eventName] = {};
-    }
-
-    // YC Check if needed
-    if (!this.events[eventName][handlerNameId]) {
-      this.events[eventName][handlerNameId] = {} as PayloadBaseClass;
     }
 
     // store the emitted event to the events array

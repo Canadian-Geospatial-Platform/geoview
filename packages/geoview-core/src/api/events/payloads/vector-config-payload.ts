@@ -40,7 +40,7 @@ export interface CircleMarkerConfigPayload extends VectorConfigPayload {
 }
 
 export const payloadIsAMarkerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerConfigPayload => {
-  if (payloadIsAMarkerConfig(verifyIfPayload)) {
+  if (payloadIsAVectorConfig(verifyIfPayload)) {
     return verifyIfPayload.type === CONST_VECTOR_TYPES.MARKER;
   }
   return false;
