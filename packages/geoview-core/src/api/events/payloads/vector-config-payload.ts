@@ -162,7 +162,7 @@ export class VectorConfigPayload extends PayloadBaseClass {
     options: L.PolylineOptions,
     id?: string
   ): PolylineConfigPayload => {
-    const polylineConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYGON, id) as PolylineConfigPayload;
+    const polylineConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYLINE, id) as PolylineConfigPayload;
     polylineConfigPayload.points = points;
     polylineConfigPayload.options = options;
     return polylineConfigPayload;
