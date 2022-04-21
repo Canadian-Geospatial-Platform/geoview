@@ -19,11 +19,11 @@ import {
   EsriFeature,
   EsriDynamic,
   CONST_LAYER_TYPES,
+  payloadIsALatLng,
+  payloadBaseClass,
+  markerDefinitionPayload,
 } from 'geoview-core';
 
-import { payloadIsALatLng } from 'geoview-core/src/api/events/payloads/lat-long-payload';
-import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
-import { markerDefinitionPayload } from 'geoview-core/src/api/events/payloads/marker-definition-payload';
 import LayersList from './layers-list';
 import FeaturesList from './features-list';
 import FeatureInfo from './feature-info';
