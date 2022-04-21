@@ -1,9 +1,11 @@
 import { EventStringId } from '../event';
 
 /**
- * Panel event types
+ * This file defines the constants of the PANEL category. The constants are placed
+ * in a record that associates an event key with its event string id for each event.
  */
 
+// Valid keys for the PANEL category
 export type PanelEventKey =
   | 'EVENT_PANEL_OPEN'
   | 'EVENT_PANEL_CLOSE'
@@ -11,6 +13,7 @@ export type PanelEventKey =
   | 'EVENT_PANEL_REMOVE_ACTION'
   | 'EVENT_PANEL_CHANGE_CONTENT';
 
+// Record that associates PANEL's event keys to their event string id
 export const PANEL: Record<PanelEventKey, EventStringId> = {
   /**
    * Event triggered when a request is made to open a panel
