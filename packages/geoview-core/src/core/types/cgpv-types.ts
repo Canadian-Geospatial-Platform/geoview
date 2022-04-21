@@ -309,9 +309,14 @@ export type TypeRecordOfPlugin = {
 export type TypeOfVector = 'polyline' | 'polygon' | 'circle' | 'circle_marker' | 'marker';
 
 /**
+ * interface used to define the vector type keys
+ */
+export type TypeVectorKeys = 'POLYLINE' | 'POLYGON' | 'CIRCLE' | 'CIRCLE_MARKER' | 'MARKER';
+
+/**
  * constant used to specify available vectors to draw
  */
-export const CONST_VECTOR_TYPES = {
+export const CONST_VECTOR_TYPES: Record<TypeVectorKeys, TypeOfVector> = {
   POLYLINE: 'polyline' as TypeOfVector,
   POLYGON: 'polygon' as TypeOfVector,
   CIRCLE: 'circle' as TypeOfVector,
