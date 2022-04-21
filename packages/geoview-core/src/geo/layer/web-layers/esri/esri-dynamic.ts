@@ -188,7 +188,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param entries MapServer layer IDs
    */
   setEntries = (entries: number[]) => {
-    (this.layer as DynamicMapLayer).options.layers = entries;
-    (this.layer as DynamicMapLayer).redraw();
+    this.layer!.options.layers = entries;
+    this.layer!.redraw();
   };
 }

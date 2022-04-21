@@ -137,8 +137,6 @@ declare module 'leaflet' {
   interface LayerOptions {
     id?: string;
     visible?: boolean;
-    layers?: number[];
-    url?: string;
   }
 
   interface Layer {
@@ -147,6 +145,7 @@ declare module 'leaflet' {
     type: string;
   }
 }
+
 L.Layer.addInitHook(function fn(this: L.Layer) {
   if (this.options && this.options.id) this.id = this.options.id;
 });
@@ -159,7 +158,7 @@ L.Layer.addInitHook(function fn(this: L.Layer) {
 
 declare module 'leaflet' {
   interface CircleMarkerOptions {
-    id: string;
+    id?: string;
   }
 
   interface CircleMarker {
@@ -190,7 +189,7 @@ L.Circle.addInitHook(function fn(this: L.Circle) {
 
 declare module 'leaflet' {
   interface PolylineOptions {
-    id: string;
+    id?: string;
   }
 
   interface Polyline {
@@ -217,7 +216,7 @@ L.Polygon.addInitHook(function fn(this: L.Polygon) {
  *---------------------------------------------------------------------------*/
 declare module 'leaflet' {
   interface MarkerOptions {
-    id: string;
+    id?: string;
   }
 
   interface Marker {
@@ -241,7 +240,7 @@ L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
 
 declare module 'leaflet' {
   interface FeatureGroupOptions extends LayerOptions {
-    id: string;
+    id?: string;
     visible?: boolean;
   }
 
@@ -357,5 +356,9 @@ declare module 'react-leaflet' {
 declare module 'esri-leaflet' {
   interface MapService {
     options: MapServiceOptions;
+  }
+
+  interface DynamicMapLayer {
+    options: DynamicMapLayerOptions;
   }
 }
