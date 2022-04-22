@@ -532,7 +532,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
               if (layerData.id in activeLayers) {
                 // query the layer information from the map server by appending the index at the end of the URL
                 // eslint-disable-next-line no-await-in-loop
-                const layerInfo = await queryServer((mapLayer.layer!.options as L.LayerOptions).url + layerData.id);
+                const layerInfo = await queryServer((mapLayer.layer!.options as L.esri.DynamicMapLayerOptions).url + layerData.id);
 
                 addLayer(mapLayer, data, layerInfo, layerData.subLayerIds !== null && layerData.subLayerIds !== undefined);
 
@@ -542,7 +542,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                     const subLayer = layerData.subLayerIds[j];
 
                     // eslint-disable-next-line no-await-in-loop
-                    const subLayerInfo = await queryServer((mapLayer.layer!.options as L.LayerOptions).url + subLayer);
+                    const subLayerInfo = await queryServer((mapLayer.layer!.options as L.esri.DynamicMapLayerOptions).url + subLayer);
 
                     addLayer(mapLayer, data, subLayerInfo, false);
                   }
