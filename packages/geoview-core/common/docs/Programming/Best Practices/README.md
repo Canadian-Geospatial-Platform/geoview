@@ -9,8 +9,10 @@ The decision to use typescript to code the GeoView application implies that we d
 code. Otherwise, we would not have imposed this constraint on ourselves. Declaring types allows us to detect inconsistencies
 in the code at the time of writing, which saves us from difficult debugging sessions when switching to runtime mode.
 
-Never use `any` if you can define the type of the data used. The use of type `any` is only permitted if it is impossible
-to do otherwise. If you are forced to use it, insert a comment on the previous line to explain why.
+Never use `any` if you can define the type of the data used. The use of the `any` type is only allowed if it is impossible
+to do otherwise. If you must use it, disable eslint detection on the previous line and insert a comment above the disable line
+to explain why. It is strongly discouraged to disable the `any` type detection for the whole file because programmers who edit
+the file in the future will not be warned if they use the type `any` without realizing it. Believe me, it can happen.
 
 Avoid using TypeJsonObject, TypeJsonValue and TypeJsonArray types when you can define the structure of the type you use. These
 three types should be used as a last resort, when we cannot accurately predict the structure of the data that usually comes
@@ -20,7 +22,7 @@ When using react hooks, define the data type they use, even if it's trivial. Thi
 type to be associated with the hook so that typescript features can perform code validation. Type definition is done using the
 brackets '<' and '>' as follows:
 
-```
+```ts
 const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
 ```
 
@@ -44,9 +46,49 @@ cleared up.
 
 ## 4- Use inheritance whenever possible. ##
 
-Inheritance eliminates the repetitive code required to create disjoint classes that have basically the same characteristics.
-One can use an abstract class as a parent at the root of the inheritance tree to provide a template for child classes.
-Inheritance also allows to exploit polymorphism. To do so, you just have to define a variable having as type a base class,
-whether it is abstract or not. You can then assign any object of a derived class to this variable without having to negotiate
-the type with the Cast function or the as operator. To see examples of inheritance, go to the geoview-core/src/core/abstract
-folder.
+Inheritance eliminates the repetitive code needed to create disjoint classes that have basically the same characteristics. A base
+class, whether abstract or not, can be used as a parent at the root of the inheritance tree to provide a starting template for child
+classes. Inheritance also allows to exploit polymorphism. To do this, you just need to define a variable with a base class as type,
+whether it is abstract or not. This variable can then be assigned any object of a derived class without having to negotiate the type.
+Polymorphism allows to expose the common characteristics of the different classes of the inheritance tree. When we want to use child
+specific fields, typescript allows us to code type gard functions that allow us to do a type ascension in a safer way than a blind
+cast. The type gard functions have as parameter a polymorphic variable whose type is a parent class and use the known attributes of
+this class to determine unambiguously that the type of the object passed as parameter corresponds to a child class of the inheritance
+tree. They return a boolean as output and perform a type ascension to the type of the child if the value of this boolean is true.
+Type guard functions are used in if clauses and when the boolean returned is true, the type of the parameter passed to the function
+will have ascended to the child type for the duration of the block associated with the `then` section. This concept is a bit abstract
+and difficult to explain, but the following code is a better way to understand what is going on.
+
+```ts
+class BaseClass {
+  type: 'child_a' | 'chil_b';
+  constructor(type: 'child_a' | 'chil_b') {
+    this.type = type;
+  }
+}
+
+class Child_A extends BaseClass {
+  constructor() {
+    super('child_a');
+  }
+}
+
+// Type gard function for Child_A
+const childTypeIs_A = (verifyIfChildType: BaseClass): verifyIfChildType is Child_A => {
+  return verifyIfChildType.type === 'child_a';
+};
+
+// Here, we could do something similar to define a class and a type gard for child_b
+
+const typeGardExample = () {
+  const instance: BaseClass = getTheInstanceByAnyMeans(); // Here, instance type is BaseClass
+
+  if (childTypeIs_A(instance)) {
+    // Inside this block, instance type is Child_A since the condition is true
+  }
+  // And here, instance type has returned to BaseClass
+}
+```
+
+If you want to see how classes and type gards are used in the viewer, have a look at the
+/packages/geoview-core/src/api/events/payloads/ folder and search where we use these payloads through the code.
