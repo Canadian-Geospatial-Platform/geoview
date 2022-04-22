@@ -92,3 +92,21 @@ const typeGardExample = () {
 
 If you want to see how classes and type gards are used in the viewer, have a look at the
 /packages/geoview-core/src/api/events/payloads/ folder and search where we use these payloads through the code.
+
+
+## 5- Use the spreading operator only when necessary ##
+
+When you spread two objects in the same object, sooner or later you run the risk of a collision. It is better to assign each
+object to an attribute in order to partition their contents rather than cramming everything in the same level.
+
+```ts
+const object1 = { a: 'a', collision: 1 };
+const object2 = { b: 'b', collision: 2 };
+
+// Here, we have a collision and loose value of object1.collision
+const spredingCollision = { ...object1, ...object2 };
+
+// Here, value of attribute collision is preserved for both object
+const noCollision = { object1, object2 };
+```
+
