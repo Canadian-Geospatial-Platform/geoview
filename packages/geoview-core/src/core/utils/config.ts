@@ -10,11 +10,9 @@ import {
   TypeDynamicLayerEntry,
   TypeFeatureLayer,
   TypeWMSLayer,
-  TypeWMSLayerEntry,
+  TypeOgcLayerEntry,
   TypeWFSLayer,
-  TypeWFSLayerEntry,
   TypeOgcFeatureLayer,
-  TypeOgcFeatureLayerEntry,
   TypeGeoJSONLayer,
   TypeXYZTiles,
   TypeMapCorePackages,
@@ -28,6 +26,7 @@ import {
   TypeInteraction,
   TypeLayerConfig,
   CONST_LAYER_TYPES,
+  TypeJsonArray,
 } from '../types/cgpv-types';
 import { generateId, isJsonString } from './utilities';
 
@@ -160,7 +159,7 @@ export class Config {
       if (urlParams.keys) {
         const requestUrl = `${catalogUrl}/${this.language.split('-')[0]}/${urlParams.keys}`;
 
-        const result = await axios.get(requestUrl);
+        const result = await axios.get<TypeJsonObject>(requestUrl);
 
         if (result && result.data) {
           for (let i = 0; i < result.data.length; i++) {
@@ -172,151 +171,135 @@ export class Config {
               if (layer) {
                 const { layerType, layerEntries, name, url, id } = layer;
 
-                const isFeature = url.indexOf('FeatureServer') > -1;
+                const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
                 if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
-                  layers.push(
-                    Cast<TypeDynamicLayer>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      layerEntries: layerEntries.map((item: TypeDynamicLayerEntry) => {
-                        return {
-                          index: item.index,
-                        };
-                      }),
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                    })
-                  );
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                      return {
+                        index: item.index,
+                      } as TypeDynamicLayerEntry;
+                    }),
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                  } as TypeDynamicLayer);
                 } else if (isFeature) {
                   for (let j = 0; j < layerEntries.length; j++) {
                     const featureUrl = `${url}/${layerEntries[j].index}`;
-                    layers.push(
-                      Cast<TypeFeatureLayer>({
-                        id,
-                        name: {
-                          en: name,
-                          fr: name,
-                        },
-                        url: {
-                          en: featureUrl,
-                          fr: featureUrl,
-                        },
-                        layerType: CONST_LAYER_TYPES.ESRI_FEATURE,
-                      })
-                    );
+                    layers.push({
+                      id,
+                      name: {
+                        en: name,
+                        fr: name,
+                      },
+                      url: {
+                        en: featureUrl,
+                        fr: featureUrl,
+                      },
+                      layerType: CONST_LAYER_TYPES.ESRI_FEATURE,
+                    } as TypeFeatureLayer);
                   }
                 } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
-                  layers.push(
-                    Cast<TypeFeatureLayer>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                    })
-                  );
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                  } as TypeFeatureLayer);
                 } else if (layerType === CONST_LAYER_TYPES.WMS) {
-                  layers.push(
-                    Cast<TypeWMSLayer>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                      layerEntries: layerEntries.map((item: TypeWMSLayerEntry) => {
-                        return {
-                          id: item.id,
-                        };
-                      }),
-                    })
-                  );
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                      return {
+                        id: item.id,
+                      } as TypeOgcLayerEntry;
+                    }),
+                  } as TypeWMSLayer);
                 } else if (layerType === CONST_LAYER_TYPES.WFS) {
-                  layers.push(
-                    Cast<TypeWFSLayer>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      layerEntries: layerEntries.map((item: TypeWFSLayerEntry) => {
-                        return {
-                          index: item.id,
-                        };
-                      }),
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                    })
-                  );
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                      return {
+                        id: item.id,
+                      } as TypeOgcLayerEntry;
+                    }),
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                  } as TypeWFSLayer);
                 } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-                  layers.push(
-                    Cast<TypeOgcFeatureLayer>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      layerEntries: layerEntries.map((item: TypeOgcFeatureLayerEntry) => {
-                        return {
-                          index: item.id,
-                        };
-                      }),
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                    })
-                  );
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                      return {
+                        id: item.id,
+                      } as TypeOgcLayerEntry;
+                    }),
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                  } as TypeOgcFeatureLayer);
                 } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
-                  layers.push(
-                    Cast<TypeGeoJSONLayer>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                    })
-                  );
-                } else if (layerType === CONST_LAYER_TYPES.XYZTiles) {
-                  layers.push(
-                    Cast<TypeXYZTiles>({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      url: {
-                        en: url,
-                        fr: url,
-                      },
-                      layerType,
-                    })
-                  );
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                  } as TypeGeoJSONLayer);
+                } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
+                  layers.push({
+                    id,
+                    name: {
+                      en: name,
+                      fr: name,
+                    },
+                    url: {
+                      en: url,
+                      fr: url,
+                    },
+                    layerType,
+                  } as TypeXYZTiles);
                 }
               }
             }
@@ -450,13 +433,13 @@ export class Config {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
           console.log(error);
-          // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
-          //   message: {
+          // api.event.emit(
+          //   snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
           //     type: 'key',
           //     value: error.message,
           //     params: [mapId],
-          //   },
-          // });
+          //   })
+          // );
         }
 
         mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
@@ -528,13 +511,13 @@ export class Config {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
           console.log(error);
-          // api.event.emit(EVENT_NAMES.EVENT_SNACKBAR_OPEN, null, {
-          //   message: {
+          // api.event.emit(
+          //   snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
           //     type: 'key',
           //     value: error.message,
           //     params: [mapId],
-          //   },
-          // });
+          //   })
+          // );
         }
 
         mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };

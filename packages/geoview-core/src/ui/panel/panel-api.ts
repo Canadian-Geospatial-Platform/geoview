@@ -1,11 +1,12 @@
 import { createElement } from 'react';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
 import { TypePanelProps } from '../../core/types/cgpv-types';
+import { PanelPayload, TypeActionButton } from '../../api/events/payloads/panel-payload';
 
 /**
  * Class used to handle creating a new panel
@@ -67,11 +68,7 @@ export class PanelApi {
     // close all other panels
     this.closeAll();
 
-    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, this.mapId, {
-      handlerId: this.mapId,
-      buttonId: this.buttonId,
-      type: this.type,
-    });
+    api.event.emit(PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, this.mapId, this.mapId, this.buttonId, this.type!));
   };
 
   /**
@@ -115,11 +112,9 @@ export class PanelApi {
   close = (): void => {
     this.status = false;
 
-    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, {
-      handlerId: this.mapId,
-      buttonId: this.buttonId,
-      type: this.type,
-    });
+    api.event.emit(
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, this.mapId, this.buttonId, this.type!)
+    );
   };
 
   /**
@@ -132,16 +127,21 @@ export class PanelApi {
    * @returns {Panel} the panel
    */
   addActionButton = (id: string, title: string, icon: string | React.ReactElement | Element, action: () => void): PanelApi => {
-    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, this.mapId, {
-      handlerId: this.mapId,
-      buttonId: this.buttonId,
-      actionButton: {
-        id: `${this.buttonId}_${id}`,
-        title,
-        icon,
-        action,
-      },
-    });
+    const actionButton: TypeActionButton = {
+      id: `${this.buttonId}_${id}`,
+      title,
+      icon,
+      action,
+    };
+    api.event.emit(
+      PanelPayload.withButtonIdAndActionButton(
+        EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
+        this.mapId,
+        this.mapId,
+        this.buttonId,
+        actionButton
+      )
+    );
 
     return this;
   };
@@ -169,11 +169,9 @@ export class PanelApi {
   changeContent = (content: React.ReactNode | Element): PanelApi => {
     this.content = content;
 
-    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, this.mapId, {
-      handlerId: this.mapId,
-      buttonId: this.buttonId,
-      content,
-    });
+    api.event.emit(
+      PanelPayload.withButtonIdAndContent(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, this.mapId, this.mapId, this.buttonId, content)
+    );
 
     return this;
   };
@@ -185,11 +183,18 @@ export class PanelApi {
    * @returns {Panel} this panel
    */
   removeActionButton = (id: string): PanelApi => {
-    api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, this.mapId, {
-      handlerId: this.mapId,
-      buttonId: this.buttonId,
-      actionButtonId: `${this.buttonId}_${id}`,
-    });
+    const actionButton: TypeActionButton = {
+      id: `${this.buttonId}_${id}`,
+    };
+    api.event.emit(
+      PanelPayload.withButtonIdAndActionButton(
+        EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
+        this.mapId,
+        this.mapId,
+        this.buttonId,
+        actionButton
+      )
+    );
 
     return this;
   };

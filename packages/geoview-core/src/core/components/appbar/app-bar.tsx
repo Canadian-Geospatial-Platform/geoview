@@ -5,11 +5,13 @@ import makeStyles from '@mui/styles/makeStyles';
 import { Divider, List, ListItem, Panel, Button } from '../../../ui';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 
 import { MapContext } from '../../app-start';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
+import { payloadIsAButtonPanel } from '../../../api/events/payloads/button-panel-payload';
+import { payloadHasAButtonIdAndType } from '../../../api/events/payloads/panel-payload';
 
 import { TypeButtonPanel } from '../../types/cgpv-types';
 
@@ -98,8 +100,10 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
-          addButtonPanel(payload);
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            addButtonPanel(payload);
+          }
         }
       },
       mapId
@@ -109,8 +113,10 @@ export function Appbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
-          removeButtonPanel(payload);
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            removeButtonPanel(payload);
+          }
         }
       },
       mapId
@@ -119,9 +125,11 @@ export function Appbar(): JSX.Element {
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
-      (args) => {
-        if ((args.handlerName as string) === mapId && (args.type as string) === 'appbar') {
-          updateComponent();
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.handlerName === mapId && payload.type === 'appbar') {
+            updateComponent();
+          }
         }
       },
       mapId
@@ -129,9 +137,11 @@ export function Appbar(): JSX.Element {
 
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-      (args) => {
-        if ((args.handlerName as string) === mapId && (args.type as string) === 'appbar') {
-          updateComponent();
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.handlerName === mapId && payload.type === 'appbar') {
+            updateComponent();
+          }
         }
       },
       mapId

@@ -5,10 +5,11 @@ import {
   TypeJsonArray,
   TypeCGPVMUI,
   TypeDynamicLayerEntry,
-  TypeWMSLayerEntry,
-  TypeWFSLayerEntry,
-  TypeOgcFeatureLayerEntry,
+  TypeOgcLayerEntry,
+  TypeLayerConfig,
+  TypeWebLayers,
 } from 'geoview-core';
+import { snackbarMessagePayload } from 'geoview-core/src/api/events/payloads/snackbar-message-payload';
 
 type Event = { target: { value: string } };
 
@@ -47,12 +48,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
-  const [layerType, setLayerType] = useState('');
+  const [layerType, setLayerType] = useState<TypeWebLayers>();
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
-  const [layerEntries, setLayerEntries] = useState<
-    (TypeDynamicLayerEntry | TypeWMSLayerEntry | TypeWFSLayerEntry | TypeOgcFeatureLayerEntry | TypeWFSLayerEntry)[]
-  >([]);
+  const [layerEntries, setLayerEntries] = useState<(TypeDynamicLayerEntry | TypeOgcLayerEntry)[]>([]);
 
   const useStyles = ui.makeStyles(() => ({
     buttonGroup: {
@@ -100,12 +99,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorEmpty = (textField: string) => {
-    api.event.emit(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-      message: {
+    api.event.emit(
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
         value: `${textField} cannot be empty`,
-      },
-    });
+      })
+    );
   };
 
   /**
@@ -114,12 +113,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param serviceName type of service provided by the URL
    */
   const emitErrorServer = (serviceName: string) => {
-    api.event.emit(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
-      message: {
+    api.event.emit(
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
         value: `URL is not a valid ${serviceName} Server`,
-      },
-    });
+      })
+    );
   };
 
   /**
@@ -129,12 +128,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param proj current map projection
    */
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
-    api.event.emit('snackbar/open', mapId, {
-      message: {
+    api.event.emit(
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
         value: `${serviceName} does not support current map projection ${proj}, only ${supportedProj.join(', ')}`,
-      },
-    });
+      })
+    );
   };
 
   /**
@@ -319,7 +318,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const handleStep2 = async () => {
     let valid = true;
-    if (layerType === '') {
+    if (layerType === undefined) {
       valid = false;
       emitErrorEmpty('Service Type');
     }
@@ -364,13 +363,13 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
-    const layerConfig = {
+    const layerConfig: TypeLayerConfig = {
       id: api.generateId(),
       name: {
         en: name,
         fr: name,
       },
-      layerType,
+      layerType: layerType!,
       url: {
         en: url,
         fr: url,
@@ -397,7 +396,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const handleInput = (event: Event) => {
     setLayerURL(event.target.value);
-    setLayerType('');
+    setLayerType(undefined);
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);
@@ -409,7 +408,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param e TextField event
    */
   const handleSelectType = (event: Event) => {
-    setLayerType(event.target.value);
+    setLayerType(event.target.value as TypeWebLayers);
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);
@@ -428,12 +427,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           if (layerType === ESRI_DYNAMIC) {
             return {
               index: parseInt(x[0], 10),
-            };
+            } as TypeDynamicLayerEntry;
           }
 
           return {
             id: x[0] as string,
-          };
+          } as TypeOgcLayerEntry;
         })
       );
       setLayerName(newValue.map((x) => x[1]).join(', '));
@@ -442,13 +441,13 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerEntries([
           {
             index: parseInt(newValue[0], 10),
-          },
+          } as TypeDynamicLayerEntry,
         ]);
       } else {
         setLayerEntries([
           {
             id: newValue[0],
-          },
+          } as TypeOgcLayerEntry,
         ]);
       }
       setLayerName(newValue[1]);

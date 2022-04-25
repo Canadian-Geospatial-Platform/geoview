@@ -1,6 +1,6 @@
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 
 import {
   TypeBasemapProps,
@@ -11,6 +11,7 @@ import {
 } from '../../../core/types/cgpv-types';
 
 import { generateId } from '../../../core/utils/utilities';
+import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -162,9 +163,7 @@ export class Basemap {
     const layers = this.getBasemapLayers();
 
     // emit an event to update the basemap layers on the map
-    api.event.emit(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, {
-      layers,
-    });
+    api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, layers));
   };
 
   /**
@@ -238,9 +237,7 @@ export class Basemap {
     const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.id === id)[0];
 
     // emit an event to update the basemap layers on the map
-    api.event.emit(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, {
-      layers: basemap.layers,
-    });
+    api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, basemap.layers));
   };
 
   /**

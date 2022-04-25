@@ -1,32 +1,23 @@
 import { Layer as leafletLayer } from 'leaflet';
 
-import { EsriDynamic } from './web-layers/esri/esri-dynamic';
-import { EsriFeature } from './web-layers/esri/esri-feature';
-import { WMS } from './web-layers/ogc/wms';
-import { WFS } from './web-layers/ogc/wfs';
-import { OgcFeature } from './web-layers/ogc/ogc_feature';
-import { XYZTiles } from './web-layers/map-tile/xyz-tiles';
-import { GeoJSON } from './web-layers/file/geojson';
+import { EsriDynamic, layerConfigIsEsriDynamic } from './web-layers/esri/esri-dynamic';
+import { EsriFeature, layerConfigIsEsriFeature } from './web-layers/esri/esri-feature';
+import { layerConfigIsWMS, WMS } from './web-layers/ogc/wms';
+import { layerConfigIsWFS, WFS } from './web-layers/ogc/wfs';
+import { layerConfigIsOgcFeature, OgcFeature } from './web-layers/ogc/ogc_feature';
+import { layerConfigIsXYZTiles, XYZTiles } from './web-layers/map-tile/xyz-tiles';
+import { GeoJSON, layerConfigIsGeoJSON } from './web-layers/file/geojson';
 import { Vector } from './vector/vector';
 import { MarkerClusterClass } from './vector/marker-cluster';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
-import {
-  Cast,
-  CONST_LAYER_TYPES,
-  AbstractWebLayersClass,
-  TypeLayerConfig,
-  TypeWMSLayer,
-  TypeDynamicLayer,
-  TypeFeatureLayer,
-  TypeGeoJSONLayer,
-  TypeWFSLayer,
-  TypeOgcFeatureLayer,
-  TypeXYZTiles,
-} from '../../core/types/cgpv-types';
+import { Cast, CONST_LAYER_TYPES, AbstractWebLayersClass, TypeLayerConfig, TypeJsonObject } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
+import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
+import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
+import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 // import "esri-leaflet-renderers";
@@ -68,59 +59,54 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.LAYER.EVENT_LAYER_ADD,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(this.#mapId)) {
-          if (payload.layer.layerType === CONST_LAYER_TYPES.GEOJSON) {
-            const layerConf = Cast<TypeGeoJSONLayer>(payload.layer);
-            const geoJSON = new GeoJSON(this.#mapId, layerConf);
-            geoJSON.add(layerConf as TypeGeoJSONLayer).then((layer) => {
-              geoJSON.layer = layer;
-              this.addToMap(geoJSON);
-            });
-
-            this.removeTabindex();
-          } else if (payload.layer.layerType === CONST_LAYER_TYPES.WMS) {
-            const layerConf = Cast<TypeWMSLayer>(payload.layer);
-            const wmsLayer = new WMS(this.#mapId, layerConf);
-            wmsLayer.add(layerConf as TypeWMSLayer).then((layer) => {
-              wmsLayer.layer = layer;
-              this.addToMap(wmsLayer);
-            });
-          } else if (payload.layer.layerType === CONST_LAYER_TYPES.XYZ_TILES) {
-            const layerConf = Cast<TypeXYZTiles>(payload.layer);
-            const xyzTiles = new XYZTiles(this.#mapId, layerConf);
-            xyzTiles.add(layerConf as TypeXYZTiles).then((layer) => {
-              xyzTiles.layer = layer;
-              this.addToMap(xyzTiles);
-            });
-          } else if (payload.layer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-            const layerConf = Cast<TypeDynamicLayer>(payload.layer);
-            const esriDynamic = new EsriDynamic(this.#mapId, layerConf);
-            esriDynamic.add(layerConf as TypeDynamicLayer).then((layer) => {
-              esriDynamic.layer = layer;
-              this.addToMap(esriDynamic);
-            });
-          } else if (payload.layer.layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
-            const layerConf = Cast<TypeFeatureLayer>(payload.layer);
-            const esriFeature = new EsriFeature(this.#mapId, layerConf);
-            esriFeature.add(layerConf as TypeFeatureLayer).then((layer) => {
-              esriFeature.layer = layer;
-              this.addToMap(esriFeature);
-            });
-            this.removeTabindex();
-          } else if (payload.layer.layerType === CONST_LAYER_TYPES.WFS) {
-            const layerConf = Cast<TypeWFSLayer>(payload.layer);
-            const wfsLayer = new WFS(this.#mapId, layerConf);
-            wfsLayer.add(layerConf as TypeWFSLayer).then((layer) => {
-              wfsLayer.layer = layer;
-              this.addToMap(wfsLayer);
-            });
-          } else if (payload.layer.layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-            const layerConf = Cast<TypeOgcFeatureLayer>(payload.layer);
-            const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConf);
-            ogcFeatureLayer.add(layerConf as TypeOgcFeatureLayer).then((layer) => {
-              ogcFeatureLayer.layer = layer;
-              this.addToMap(ogcFeatureLayer);
-            });
+        if (payloadIsALayerConfig(payload)) {
+          if (payload.handlerName!.includes(this.#mapId)) {
+            const { layerConfig } = payload;
+            if (layerConfigIsGeoJSON(layerConfig)) {
+              const geoJSON = new GeoJSON(this.#mapId, layerConfig);
+              geoJSON.add(layerConfig).then((layer) => {
+                geoJSON.layer = layer;
+                this.addToMap(geoJSON);
+              });
+              this.removeTabindex();
+            } else if (layerConfigIsWMS(layerConfig)) {
+              const wmsLayer = new WMS(this.#mapId, layerConfig);
+              wmsLayer.add(layerConfig).then((layer) => {
+                wmsLayer.layer = layer;
+                this.addToMap(wmsLayer);
+              });
+            } else if (layerConfigIsEsriDynamic(layerConfig)) {
+              const esriDynamic = new EsriDynamic(this.#mapId, layerConfig);
+              esriDynamic.add(layerConfig).then((layer) => {
+                esriDynamic.layer = layer;
+                this.addToMap(esriDynamic);
+              });
+            } else if (layerConfigIsEsriFeature(layerConfig)) {
+              const esriFeature = new EsriFeature(this.#mapId, layerConfig);
+              esriFeature.add(layerConfig).then((layer) => {
+                esriFeature.layer = layer;
+                this.addToMap(esriFeature);
+              });
+              this.removeTabindex();
+            } else if (layerConfigIsWFS(layerConfig)) {
+              const wfsLayer = new WFS(this.#mapId, layerConfig);
+              wfsLayer.add(layerConfig).then((layer) => {
+                wfsLayer.layer = layer;
+                this.addToMap(wfsLayer);
+              });
+            } else if (layerConfigIsOgcFeature(layerConfig)) {
+              const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConfig);
+              ogcFeatureLayer.add(layerConfig).then((layer) => {
+                ogcFeatureLayer.layer = layer;
+                this.addToMap(ogcFeatureLayer);
+              });
+            } else if (layerConfigIsXYZTiles(layerConfig)) {
+              const xyzTiles = new XYZTiles(this.#mapId, layerConfig);
+              xyzTiles.add(layerConfig).then((layer) => {
+                xyzTiles.layer = layer;
+                this.addToMap(xyzTiles);
+              });
+            }
           }
         }
       },
@@ -131,15 +117,17 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
-        // remove layer from outside
-        this.removeLayerById(payload.layer.id as string);
+        if (payloadIsAWebLayer(payload)) {
+          // remove layer from outside
+          this.removeLayerById(payload.webLayer.id);
+        }
       },
       this.#mapId
     );
 
     // Load layers that was passed in with the map config
     if (layers && layers.length > 0) {
-      layers?.forEach((layer: TypeLayerConfig) => api.event.emit(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, { layer }));
+      layers?.forEach((layerConfig) => api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig)));
     }
   }
 
@@ -160,13 +148,13 @@ export class Layer {
 
     setTimeout(() => {
       if (!isLoaded) {
-        api.event.emit(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
-          message: {
+        api.event.emit(
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
             type: 'key',
             value: 'validation.layer.loadfailed',
-            params: [name, this.#mapId],
-          },
-        });
+            params: [name as TypeJsonObject, this.#mapId as TypeJsonObject],
+          })
+        );
 
         // TODO: some layer take time to load e.g. geomet so try to find a wayd to ping the layer
         // this.removeLayer(layer.id);
@@ -181,28 +169,26 @@ export class Layer {
   private addToMap(cgpvLayer: AbstractWebLayersClass): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
-    if (typeof cgpvLayer.layer === 'string') {
-      api.event.emit(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
-        message: {
+    if (typeof cgpvLayer.layer === null) {
+      api.event.emit(
+        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
           type: 'key',
           value: 'validation.layer.loadfailed',
-          params: [cgpvLayer.name, this.#mapId],
-        },
-      });
+          params: [cgpvLayer.name as TypeJsonObject, this.#mapId as TypeJsonObject],
+        })
+      );
     } else {
       if (
         cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON &&
         cgpvLayer.type !== CONST_LAYER_TYPES.WFS &&
         cgpvLayer.type !== CONST_LAYER_TYPES.OGC_FEATURE
       )
-        this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer as leafletLayer);
+        this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer!);
 
       cgpvLayer.layer!.addTo(api.map(this.#mapId).map);
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
-      api.event.emit(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, {
-        layer: cgpvLayer.layer,
-      });
+      api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
     }
   }
 
@@ -244,14 +230,14 @@ export class Layer {
   /**
    * Add a layer to the map
    *
-   * @param {TypeLayerConfig} layer the layer configuration to add
+   * @param {TypeLayerConfig} layerConfig the layer configuration to add
    */
-  addLayer = (layer: TypeLayerConfig): string => {
+  addLayer = (layerConfig: TypeLayerConfig): string => {
     // eslint-disable-next-line no-param-reassign
-    layer.id = generateId(layer.id);
-    api.event.emit(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, { layer });
+    layerConfig.id = generateId(layerConfig.id);
+    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig));
 
-    return layer.id;
+    return layerConfig.id;
   };
 
   /**
@@ -259,12 +245,12 @@ export class Layer {
    *
    * @param {TypeLayerConfig} layer the layer configuration to remove
    */
-  removeLayer = (layer: AbstractWebLayersClass): string => {
+  removeLayer = (cgpvLayer: AbstractWebLayersClass): string => {
     // eslint-disable-next-line no-param-reassign
-    layer.id = generateId(layer.id);
-    api.event.emit(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, { layer });
+    cgpvLayer.id = generateId(cgpvLayer.id);
+    api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, cgpvLayer));
 
-    return layer.id;
+    return cgpvLayer.id;
   };
 
   /**

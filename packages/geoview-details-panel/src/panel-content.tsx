@@ -19,6 +19,9 @@ import {
   EsriFeature,
   EsriDynamic,
   CONST_LAYER_TYPES,
+  payloadIsALatLng,
+  payloadBaseClass,
+  markerDefinitionPayload,
 } from 'geoview-core';
 
 import LayersList from './layers-list';
@@ -131,7 +134,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       setFeatureInfo(showFeaturesInfo);
 
       // emit content change event so the panel can focus on close button
-      api.event.emit(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId, {});
+      api.event.emit(payloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [buttonPanel.panel, mapId]
@@ -431,10 +434,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       // if there is multiple layers with entries then symbology will be of the first layer
       // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
       // if no layers contains any entry then the default symbology with crosshair will show
-      api.event.emit(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, {
-        latlng,
-        symbology,
-      });
+      api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, latlng, symbology!));
 
       // set focus to the close button of the panel
       if (panelContainer) {
@@ -532,7 +532,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
               if (layerData.id in activeLayers) {
                 // query the layer information from the map server by appending the index at the end of the URL
                 // eslint-disable-next-line no-await-in-loop
-                const layerInfo = await queryServer((mapLayer.layer!.options as L.LayerOptions).url + layerData.id);
+                const layerInfo = await queryServer((mapLayer.layer!.options as L.esri.DynamicMapLayerOptions).url + layerData.id);
 
                 addLayer(mapLayer, data, layerInfo, layerData.subLayerIds !== null && layerData.subLayerIds !== undefined);
 
@@ -542,7 +542,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                     const subLayer = layerData.subLayerIds[j];
 
                     // eslint-disable-next-line no-await-in-loop
-                    const subLayerInfo = await queryServer((mapLayer.layer!.options as L.LayerOptions).url + subLayer);
+                    const subLayerInfo = await queryServer((mapLayer.layer!.options as L.esri.DynamicMapLayerOptions).url + subLayer);
 
                     addLayer(mapLayer, data, subLayerInfo, false);
                   }
@@ -570,9 +570,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER,
       (payload) => {
-        const args = Cast<{ handlerName: string; latlng: L.LatLng }>(payload);
-        if (args.handlerName === mapId) {
-          handleOpenDetailsPanel(args.latlng);
+        if (payloadIsALatLng(payload)) {
+          if (payload.handlerName === mapId) {
+            handleOpenDetailsPanel(payload.latLng);
+          }
         }
       },
       mapId

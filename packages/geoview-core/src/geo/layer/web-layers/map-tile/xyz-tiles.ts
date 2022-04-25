@@ -2,7 +2,13 @@ import L from 'leaflet';
 
 import { api } from '../../../../app';
 
-import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeWebLayers, TypeXYZTiles } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  CONST_LAYER_TYPES,
+  TypeBaseWebLayersConfig,
+  TypeWebLayers,
+  TypeXYZTiles,
+} from '../../../../core/types/cgpv-types';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -11,6 +17,10 @@ import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeWebLayers, TypeXYZTiles 
 // e.g.: http://{s}.somedomain.com/blabla/{z}/{x}/{y}{r}.png?url=http://smtg/cog.tif&TileMatrixSetId=CanadianNAD83_LCC&resampling_method=bilinear
 
 // TODO: Add more customization (minZoom, maxZoom, TMS)
+
+export const layerConfigIsXYZTiles = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeXYZTiles => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.XYZ_TILES;
+};
 
 /**
  * a class to add xyz-tiles layer

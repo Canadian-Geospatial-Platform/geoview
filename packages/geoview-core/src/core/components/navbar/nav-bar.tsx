@@ -11,12 +11,14 @@ import Home from './buttons/home';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/event';
+import { EVENT_NAMES } from '../../../api/events/event';
 
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
 import { TypeButtonPanel } from '../../types/cgpv-types';
 import { MapContext } from '../../app-start';
+import { payloadIsAButtonPanel } from '../../../api/events/payloads/button-panel-payload';
+import { payloadHasAButtonIdAndType } from '../../../api/events/payloads/panel-payload';
 
 const navBtnWidth = '32px';
 const navBtnHeight = '32px';
@@ -99,8 +101,10 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
-          updateComponent();
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            updateComponent();
+          }
         }
       },
       mapId
@@ -110,8 +114,10 @@ export function Navbar(): JSX.Element {
     api.event.on(
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
-          updateComponent();
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            updateComponent();
+          }
         }
       },
       mapId
@@ -120,9 +126,11 @@ export function Navbar(): JSX.Element {
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
-      (args) => {
-        if (args.handlerName === mapId && args.type === 'navbar') {
-          updateComponent();
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.handlerName === mapId && payload.type === 'navbar') {
+            updateComponent();
+          }
         }
       },
       mapId
@@ -130,9 +138,11 @@ export function Navbar(): JSX.Element {
 
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-      (args) => {
-        if (args.handlerName === mapId && args.type === 'navbar') {
-          updateComponent();
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.handlerName === mapId && payload.type === 'navbar') {
+            updateComponent();
+          }
         }
       },
       mapId

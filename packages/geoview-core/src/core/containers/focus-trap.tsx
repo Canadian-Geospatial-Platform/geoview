@@ -9,11 +9,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import { HtmlToReact } from './html-to-react';
 
 import { Modal, Button } from '../../ui';
+import { inKeyfocusPayload, payloadIsAInKeyfocus } from '../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   trap: {
@@ -117,7 +118,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       // focus the map element and emit the map keyboard focus event
       (document.getElementById(id)?.getElementsByClassName(`leaflet-map-${id}`)[0] as HTMLElement).focus();
-      api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id, {});
+      api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id));
     }
   }
 
@@ -128,22 +129,24 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(id)) {
-          // when mnap element get focus and focus is not trap, show dialog window
-          const mapElement = document.getElementById(id);
+        if (payloadIsAInKeyfocus(payload)) {
+          if (payload.handlerName!.includes(id)) {
+            // when mnap element get focus and focus is not trap, show dialog window
+            const mapElement = document.getElementById(id);
 
-          if (mapElement && !mapElement.classList.contains('map-focus-trap')) {
-            setOpen(true);
+            if (mapElement && !mapElement.classList.contains('map-focus-trap')) {
+              setOpen(true);
 
-            // if user move the mouse over the map, cancel the dialog
-            mapElement.addEventListener(
-              'mousemove',
-              () => {
-                setOpen(false);
-                exitFocus();
-              },
-              { once: true }
-            );
+              // if user move the mouse over the map, cancel the dialog
+              mapElement.addEventListener(
+                'mousemove',
+                () => {
+                  setOpen(false);
+                  exitFocus();
+                },
+                { once: true }
+              );
+            }
           }
         }
       },

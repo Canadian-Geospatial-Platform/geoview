@@ -1,6 +1,6 @@
 import { Layer, TileLayer } from 'leaflet';
 
-import { TypeWebLayers, TypeAbstractWebLayersConfig, TypeLayersInWebLayer, DEFAULT_LAYER_NAMES } from '../cgpv-types';
+import { TypeWebLayers, TypeBaseWebLayersConfig, TypeLayersInWebLayer, DEFAULT_LAYER_NAMES } from '../cgpv-types';
 
 import { generateId } from '../../utils/utilities';
 
@@ -36,10 +36,10 @@ export abstract class AbstractWebLayersClass {
 
   abstract setOpacity(opacity: number): void;
 
-  constructor(type: TypeWebLayers, layerConfig: TypeAbstractWebLayersConfig, mapId: string) {
+  constructor(type: TypeWebLayers, layerConfig: TypeBaseWebLayersConfig, mapId: string) {
     this.type = type;
     this.id = layerConfig.id || generateId('');
-    this.name = layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : DEFAULT_LAYER_NAMES.type;
+    this.name = layerConfig.name ? layerConfig.name[api.map(mapId).getLanguageCode()] : DEFAULT_LAYER_NAMES[type];
     this.url = layerConfig.url[api.map(mapId).getLanguageCode()].trim();
     this.mapId = mapId;
   }

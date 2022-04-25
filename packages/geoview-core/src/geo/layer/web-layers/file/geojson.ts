@@ -8,9 +8,14 @@ import {
   TypeGeoJSONLayer,
   toJsonObject,
   Cast,
+  TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
+
+export const layerConfigIsGeoJSON = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeGeoJSONLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOJSON;
+};
 
 /**
  * Class used to add geojson layer to the map
