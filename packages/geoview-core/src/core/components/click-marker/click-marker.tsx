@@ -97,7 +97,7 @@ export function ClickMarker(): JSX.Element {
     map.getPane('markerPane')?.append(overlay);
 
     api.event.on(
-      EVENT_NAMES.EVENT_MARKER_ICON_SHOW,
+      EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(mapId)) {
           // toggle the marker icon
@@ -143,7 +143,7 @@ export function ClickMarker(): JSX.Element {
     );
 
     api.event.on(
-      EVENT_NAMES.EVENT_MARKER_ICON_HIDE,
+      EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(mapId)) {
           setShowMarker(false);
@@ -154,8 +154,8 @@ export function ClickMarker(): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_SHOW, mapId);
-      api.event.off(EVENT_NAMES.EVENT_MARKER_ICON_HIDE, mapId);
+      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId);
+      api.event.off(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

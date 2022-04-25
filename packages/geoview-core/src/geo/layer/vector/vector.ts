@@ -41,7 +41,7 @@ export class Vector {
 
     // listen to add vector events
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_ADD,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD,
       (payload) => {
         type TypePayloadPoints = LatLngExpression[] | LatLngExpression[][];
         const id = payload.id ? (payload.id as string) : undefined;
@@ -72,7 +72,7 @@ export class Vector {
 
     // listen to outside events to remove geometries
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_REMOVE,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE,
       (payload) => {
         // remove geometry from outside
         this.deleteGeometry(payload.id as string);
@@ -82,7 +82,7 @@ export class Vector {
 
     // listen to outside events to turn on geometry groups
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_ON,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_ON,
       () => {
         this.turnOnGeometryGroups();
       },
@@ -91,7 +91,7 @@ export class Vector {
 
     // listen to outside events to turn off geometry groups
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_OFF,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_OFF,
       () => {
         this.turnOffGeometryGroups();
       },
@@ -118,7 +118,7 @@ export class Vector {
     this.geometries.push(polyline);
 
     // emit an event that a polyline vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.#mapId, {
+    api.event.emit(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, {
       ...polyline,
     });
 
@@ -148,7 +148,7 @@ export class Vector {
     this.geometries.push(polygon);
 
     // emit an event that a polygon vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.#mapId, { ...polygon });
+    api.event.emit(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, { ...polygon });
 
     return polygon;
   };
@@ -173,7 +173,7 @@ export class Vector {
     circle.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a circle vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.#mapId, { ...circle });
+    api.event.emit(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, { ...circle });
 
     return circle;
   };
@@ -202,7 +202,7 @@ export class Vector {
     circleMarker.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a circleMarker vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.#mapId, {
+    api.event.emit(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, {
       ...circleMarker,
     });
 
@@ -232,7 +232,7 @@ export class Vector {
     marker.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a marker vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.#mapId, { ...marker });
+    api.event.emit(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, { ...marker });
 
     return marker;
   };

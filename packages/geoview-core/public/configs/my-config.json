@@ -1,0 +1,49 @@
+{
+  "map": {
+    "interaction": "static",
+    "initialView": {
+      "zoom": 4,
+      "center": [50, -110]
+    },
+    "projection": 3978,
+    "basemapOptions": {
+      "id": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "layers": [
+      {
+        "id": "esriDynamicLYR2",
+        "name": {
+          "en": "Energy Infrastructure of North America",
+          "fr": "Infrastructure énergétique d'Amérique du Nord"
+        },
+        "url": {
+          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
+          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
+        },
+        "layerType": "esriDynamic",
+        "layerEntries": [
+          {
+            "index": 1
+          },
+          {
+            "index": 2
+          },
+          {
+            "index": 3
+          },
+          {
+            "index": 4
+          }
+        ]
+      }
+    ],
+    "controls": {
+      "selectBox": true,
+      "boxZoom": true
+    }
+  },
+  "theme": "dark",
+  "languages": ["en-CA", "fr-CA"]
+}

@@ -48,7 +48,7 @@ Marker.prototype.options.icon = DefaultIcon;
 // TODO look for a better place to put this when working on issue #8
 
 // listen to map reload event
-api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
+api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
   if (payload && payload.handlerId) {
     const payloadHandlerId = payload.handlerId as string;
     // unsubscribe from all events registered on this map
@@ -78,12 +78,9 @@ api.event.on(EVENT_NAMES.EVENT_MAP_RELOAD, (payload) => {
  *
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
-function init(callback: () => void) {
+async function init(callback: () => void) {
   // apply focus to element when keyboard navigation is use
   api.geoUtilities.manageKeyboardFocus();
-
-  // set the API callback if a callback is provided
-  if (callback) api.readyCallback = callback;
 
   const mapElements = document.getElementsByClassName('llwp-map');
 
@@ -97,7 +94,8 @@ function init(callback: () => void) {
     // initialize config
     // if config provided (either by inline, url params) validate it with schema
     // otherwise return the default config
-    const configObj = config.initializeMapConfig();
+    // eslint-disable-next-line no-await-in-loop
+    const configObj = await config.initializeMapConfig();
 
     // if valid config was provided
     if (configObj) {
@@ -105,6 +103,9 @@ function init(callback: () => void) {
       ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
     }
   }
+
+  // set the API callback if a callback is provided
+  if (callback) api.readyCallback = callback;
 }
 
 // cgpv object to be exported with the api for outside use

@@ -112,18 +112,24 @@
       <div
         id="LNG1"
         class="llwp-map"
-        data-leaflet="{
-                    'projection': 3978,
-                    'zoom': 4,
-                    'center': [60,-100],
-                    'language': 'fr-CA',
-                    'basemapOptions': {
-                        'id': 'transport',
-                        'shaded': true,
-                        'labeled': true
-                    },
-                    'layers': []
-                }"
+        data-lang="fr-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [60, -100]
+            },
+            'projection': 3978,
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'theme': 'dark',
+          'languages': ['fr-CA']
+        }"
       ></div>
     </div>
     <p><strong>Configuration Snippet:</strong></p>

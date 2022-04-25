@@ -97,7 +97,7 @@ export function Navbar(): JSX.Element {
   useEffect(() => {
     // listen to new navbar panel creation
     api.event.on(
-      EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
+      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
           updateComponent();
@@ -108,7 +108,7 @@ export function Navbar(): JSX.Element {
 
     // listen to new navbar panel removal
     api.event.on(
-      EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
+      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
         if (payload && payload.handlerName && payload.handlerName === mapId) {
           updateComponent();
@@ -119,7 +119,7 @@ export function Navbar(): JSX.Element {
 
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
+      EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
       (args) => {
         if (args.handlerName === mapId && args.type === 'navbar') {
           updateComponent();
@@ -129,7 +129,7 @@ export function Navbar(): JSX.Element {
     );
 
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CLOSE,
+      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
       (args) => {
         if (args.handlerName === mapId && args.type === 'navbar') {
           updateComponent();
@@ -139,10 +139,10 @@ export function Navbar(): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateComponent]);

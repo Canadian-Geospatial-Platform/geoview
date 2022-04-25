@@ -23,7 +23,7 @@ import { MapViewer } from '../../../geo/map/map';
 import { Cast, TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
-  const { map: mapProps, extraOptions, language } = props;
+  const { map: mapProps, extraOptions, language, components } = props;
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
@@ -63,7 +63,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.map(id).currentPosition = position;
 
     // emit the moveend event to the api
-    api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id, {
+    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id, {
       position,
     });
   }
@@ -82,7 +82,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.map(id).currentZoom = currentZoom;
 
     // emit the moveend event to the api
-    api.event.emit(EVENT_NAMES.EVENT_MAP_ZOOM_END, id, {
+    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, {
       currentZoom,
     });
   }
@@ -90,7 +90,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   useEffect(() => {
     // listen to adding a new basemap events
     api.event.on(
-      EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE,
+      EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
         if (payload && payload.handlerName === id) setBasemapLayers(Cast<TypeBasemapLayer[]>(payload.layers));
       },
@@ -98,7 +98,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_BASEMAP_LAYERS_UPDATE, id);
+      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
   }, [id]);
 
@@ -129,7 +129,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         cgpMap.setView(mapProps.initialView.center, mapProps.initialView.zoom);
 
         // emit the initial map position
-        api.event.emit(EVENT_NAMES.EVENT_MAP_MOVE_END, id || '', {
+        api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', {
           position: cgpMap.getCenter(),
         });
 
@@ -156,6 +156,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // emit the map loaded event
         setIsLoaded(true);
+
+        viewer.toggleMapInteraction(mapProps.interaction);
       }}
     >
       {isLoaded && crs && (
@@ -174,7 +176,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           {deviceSizeMedUp && <MousePosition id={id} />}
           <ScaleControl position="bottomright" imperial={false} />
           {deviceSizeMedUp && <Attribution attribution={attribution} />}
-          <NorthArrow projection={crs} />
+          {components !== undefined && components.indexOf('northArrow') > -1 && <NorthArrow projection={crs} />}
           <NorthPoleFlag projection={crs} />
           <Crosshair id={id} />
           <ClickMarker />

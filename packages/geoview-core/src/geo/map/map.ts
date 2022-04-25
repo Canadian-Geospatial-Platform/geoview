@@ -18,7 +18,15 @@ import { EVENT_NAMES } from '../../api/event';
 
 import '../../core/types/cgp-leaflet-config';
 import { generateId } from '../../core/utils/utilities';
-import { TypeMapConfigProps, TypeLayerConfig, TypeLanguages, TypeLocalizedLanguages } from '../../core/types/cgpv-types';
+import { Config } from '../../core/utils/config';
+import {
+  TypeMapConfigProps,
+  TypeLayerConfig,
+  TypeLanguages,
+  TypeLocalizedLanguages,
+  TypeMapSchemaProps,
+} from '../../core/types/cgpv-types';
+
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
 
@@ -184,7 +192,7 @@ export class MapViewer {
   addComponent = (id: string, component: JSX.Element): void => {
     if (id && component) {
       // emit an event to add the component
-      api.event.emit(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, this.id, {
+      api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.id, {
         id,
         component,
       });
@@ -199,7 +207,7 @@ export class MapViewer {
   removeComponent = (id: string): void => {
     if (id) {
       // emit an event to add the component
-      api.event.emit(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, this.id, {
+      api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.id, {
         id,
       });
     }
@@ -234,7 +242,7 @@ export class MapViewer {
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady = (): void => {
-    api.event.emit(EVENT_NAMES.EVENT_MAP_LOADED, this.id, { map: this.map });
+    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.id, { map: this.map });
   };
 
   /**
@@ -262,11 +270,64 @@ export class MapViewer {
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
+    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, {
       handlerId: this.id,
       config: updatedConfig,
     });
   };
 
+  /**
+   * Load a new map config from a function call
+   *
+   * @param {TypeMapSchemaProps} mapConfig a new config passed in from the function call
+   */
+  loadMapConfig = (mapConfig: TypeMapSchemaProps) => {
+    // create a new config for this map element
+    const config = new Config(this.map.getContainer());
+
+    const configObj = config.getMapConfigFromFunc(mapConfig);
+
+    // emit an event to reload the map with the new config
+    api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, {
+      handlerId: this.id,
+      config: configObj,
+    });
+  };
+
+  /**
+   * Set map to either dynamic or static
+   *
+   * @param {string} interaction map interaction
+   */
+  toggleMapInteraction = (interaction: string) => {
+    if (interaction === 'dynamic' || !interaction) {
+      // dynamic map
+      this.map.dragging.enable();
+      this.map.touchZoom.enable();
+      this.map.doubleClickZoom.enable();
+      this.map.scrollWheelZoom.enable();
+      this.map.boxZoom.enable();
+      this.map.keyboard.enable();
+      if (this.map.tap) this.map.tap.enable();
+      this.map.getContainer().style.cursor = 'grab';
+    } else {
+      // static map
+      this.map.dragging.disable();
+      this.map.touchZoom.disable();
+      this.map.doubleClickZoom.disable();
+      this.map.scrollWheelZoom.disable();
+      this.map.boxZoom.disable();
+      this.map.keyboard.disable();
+      if (this.map.tap) this.map.tap.disable();
+      this.map.getContainer().style.cursor = 'default';
+    }
+  };
+
+  /**
+   * Create bounds on map
+   *
+   * @param {LatLng.LatLngBounds} bounds map bounds
+   * @returns the bounds
+   */
   fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
 }

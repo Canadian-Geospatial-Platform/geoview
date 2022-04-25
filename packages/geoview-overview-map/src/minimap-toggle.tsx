@@ -91,7 +91,7 @@ export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
     }
 
     // trigger a new event when overview map is toggled
-    api.event.emit(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, parentId, {
+    api.event.emit(EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE, parentId, {
       status,
     });
   }

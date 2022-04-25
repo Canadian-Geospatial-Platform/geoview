@@ -128,6 +128,7 @@ export type TypeChildren = React.ReactNode;
  */
 export type TypeMapContext = {
   id: string;
+  interaction: string;
 };
 
 /*-----------------------------------------------------------------------------
@@ -404,7 +405,7 @@ export interface TypeFeatureLayer extends TypeLayerConfig {
 }
 
 export type TypeDynamicLayerEntry = {
-  index: string;
+  index: number;
   name?: TypeLangString;
   nameField?: string;
   outfields?: string;

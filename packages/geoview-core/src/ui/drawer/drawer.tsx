@@ -71,7 +71,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     setOpen(drawerStatus);
 
     // if appbar is open then close it
-    api.event.emit(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId, {
+    api.event.emit(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId, {
       drawerStatus,
     });
 
@@ -88,7 +88,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
 
     // listen to drawer open/close events
     api.event.on(
-      EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE,
+      EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE,
       (payload) => {
         if (payload && (payload.handlerName as string) === mapId) {
           setOpen(payload.status as boolean);
@@ -98,7 +98,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_DRAWER_OPEN_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId);
     };
   }, [mapId, status]);
 

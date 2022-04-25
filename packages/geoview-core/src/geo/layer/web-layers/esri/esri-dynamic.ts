@@ -38,7 +38,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
   constructor(mapId: string, layerConfig: TypeDynamicLayer) {
     super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
 
-    const entries = layerConfig.layerEntries.map((item) => parseInt(item.index, 10));
+    const entries = layerConfig.layerEntries.map((item) => item.index);
     this.entries = entries?.filter((item) => !Number.isNaN(item));
 
     this.mapService = esriMapService({

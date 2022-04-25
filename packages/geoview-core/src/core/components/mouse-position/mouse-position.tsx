@@ -105,7 +105,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   useEffect(() => {
     // on map crosshair enable\disable, set variable for WCAG mouse position
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
+      EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(id)) {
           isCrosshairsActive.current = payload.active as boolean;
@@ -115,7 +115,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -65,7 +65,7 @@ export function Appbar(): JSX.Element {
   useEffect(() => {
     // listen to new panel creation
     api.event.on(
-      EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE,
+      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
         if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
           updateComponent();
@@ -76,7 +76,7 @@ export function Appbar(): JSX.Element {
 
     // listen on panel removal
     api.event.on(
-      EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE,
+      EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
         if (payload && payload.handlerName && (payload.handlerName as string) === mapId) {
           updateComponent();
@@ -87,7 +87,7 @@ export function Appbar(): JSX.Element {
 
     // listen to open panel to activate focus trap and focus on close
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
+      EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
       (args) => {
         if ((args.handlerName as string) === mapId && (args.type as string) === 'appbar') {
           updateComponent();
@@ -97,7 +97,7 @@ export function Appbar(): JSX.Element {
     );
 
     api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CLOSE,
+      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
       (args) => {
         if ((args.handlerName as string) === mapId && (args.type as string) === 'appbar') {
           updateComponent();
@@ -107,10 +107,10 @@ export function Appbar(): JSX.Element {
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_CREATE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_APPBAR_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
     };
   }, [mapId, updateComponent]);
 

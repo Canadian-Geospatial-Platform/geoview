@@ -117,7 +117,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
       // focus the map element and emit the map keyboard focus event
       (document.getElementById(id)?.getElementsByClassName(`leaflet-map-${id}`)[0] as HTMLElement).focus();
-      api.event.emit(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, id, {});
+      api.event.emit(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id, {});
     }
   }
 
@@ -126,7 +126,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     // on map keyboard focus, show focus trap dialog
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
+      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payload && (payload.handlerName as string).includes(id)) {
           // when mnap element get focus and focus is not trap, show dialog window
@@ -152,7 +152,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
     return () => {
       document.removeEventListener('keydown', manageBottomLink);
-      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, id);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
