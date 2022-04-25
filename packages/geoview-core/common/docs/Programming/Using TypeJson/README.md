@@ -14,7 +14,7 @@ There are only three types defined to manipulate Json objects: TypeJsonObject, T
 
 Here are two declaration examples that use the TypeJsonObject type.
 
-- Declaration of a type:
+- Declaration of a typed variable:
 
 ```ts
       getMetadata = async (): Promise<TypeJsonObject> => {
