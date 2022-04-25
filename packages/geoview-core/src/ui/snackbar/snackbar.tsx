@@ -9,9 +9,10 @@ import { useSnackbar } from 'notistack';
 import { MapContext } from '../../core/app-start';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
+import { payloadIsASnackbarMessage } from '../../api/events/payloads/snackbar-message-payload';
 
 /**
  * Snackbar properties interface
@@ -75,26 +76,26 @@ export function Snackbar(props: SnackBarProps): null {
     api.event.on(
       EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
       (payload) => {
-        const opts = payload.options ? payload.options : {};
+        if (payloadIsASnackbarMessage(payload)) {
+          const options = payload.options ? payload.options : {};
 
-        // apply function if provided
-        (opts.action as TypeJsonValue) = payload.button
-          ? Cast<TypeJsonValue>(
-              SnackButton({
-                label: payload.button.label as string,
-                action: Cast<() => void>(payload.button.action),
-              })
-            )
-          : null;
+          // apply function if provided
+          (options.action as TypeJsonValue) = payload.button
+            ? Cast<TypeJsonValue>(
+                SnackButton({
+                  label: payload.button.label as string,
+                  action: Cast<() => void>(payload.button.action),
+                })
+              )
+            : null;
 
-        // get message
-        const message =
-          (payload.message.type as TypeJsonValue) === 'string'
-            ? payload.message.value
-            : replaceParams(payload.message.params as TypeJsonArray, t(payload.message.value as string));
+          // get message
+          const message =
+            payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params!, t(payload.message.value));
 
-        // show the notification
-        if (payload && id === (payload.handlerName as TypeJsonValue)) enqueueSnackbar(message, opts);
+          // show the notification
+          if (payload && id === payload.handlerName) enqueueSnackbar(message, options);
+        }
       },
       mapId
     );

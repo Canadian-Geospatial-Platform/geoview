@@ -11,11 +11,16 @@ import {
   TypeJsonValue,
   TypeJsonObject,
   toJsonObject,
+  TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
 import { api } from '../../../../app';
+
+export const layerConfigIsEsriFeature = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeFeatureLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+};
 
 /**
  * a class to add esri feature layer

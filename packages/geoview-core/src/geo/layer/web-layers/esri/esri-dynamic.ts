@@ -13,9 +13,14 @@ import {
   TypeJsonArray,
   TypeLegendJsonDynamic,
   toJsonObject,
+  TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
+
+export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeDynamicLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+};
 
 /**
  * a class to add esri dynamic layer
@@ -183,7 +188,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param entries MapServer layer IDs
    */
   setEntries = (entries: number[]) => {
-    (this.layer as DynamicMapLayer).options.layers = entries;
-    (this.layer as DynamicMapLayer).redraw();
+    this.layer!.options.layers = entries;
+    this.layer!.redraw();
   };
 }

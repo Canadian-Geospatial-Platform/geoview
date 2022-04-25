@@ -230,13 +230,7 @@
           'Marker-8'
         );
 
-        cgpv.api.event.emit(cgpv.api.eventNames.EVENT_VECTOR_ADD, 'LNG1', {
-          type: 'marker',
-          latitude: 56,
-          longitude: -97,
-          options: { title: 'Marker-9' },
-          id: 'Marker-9',
-        });
+        cgpv.api.event.emit(cgpv.types.VectorConfigPayload.forMarker(cgpv.api.eventNames.VECTOR.EVENT_VECTOR_ADD, 'LNG1', 56, -97, { title: 'Marker-9' }, 'Marker-9'));
       }
 
       function addMarkerCluster(mapViewer) {
@@ -322,7 +316,9 @@
           'MarkerClusterElement-8'
         );
 
-        cgpv.api.event.emit(cgpv.api.eventNames.EVENT_CLUSTER_ELEMENT_ADD, 'LNG1', {
+        cgpv.api.event.emit({
+          event: 'cluster_element/add',
+          handlerName: 'LNG1',
           latitude: 56,
           longitude: -97,
           options: { title: 'MarkerClusterElement-9' },

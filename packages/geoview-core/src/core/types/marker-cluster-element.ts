@@ -4,9 +4,10 @@ import './marker-cluster-element.d';
 import 'leaflet.markercluster/src';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 import { TypeIconCreationFunction } from './cgpv-types';
 import * as MarkerDefinitions from './marker-definitions';
+import { clusterElementPayload } from '../../api/events/payloads/cluster-element-payload';
 
 let { unselectedMarkerIconCreator, selectedMarkerIconCreator } = MarkerDefinitions;
 
@@ -90,7 +91,9 @@ export const MarkerClusterElement = L.Marker.extend({
     } else {
       this.setIcon(this.getUnselectedMarkerIcon());
     }
-    api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED, this.options.mapId, this);
+    api.event.emit(
+      clusterElementPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_SELECTION_HAS_CHANGED, this.options.mapId, this)
+    );
   },
 
   startBlinking() {
@@ -98,7 +101,7 @@ export const MarkerClusterElement = L.Marker.extend({
     this.options.blinking = true;
     L.DomUtil.addClass(this.options.icon.options, 'blinking-icon-enabled');
     if (this._icon) L.DomUtil.addClass(this._icon, 'blinking-icon-enabled');
-    api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_START_BLINKING, this.options.mapId, this);
+    api.event.emit(clusterElementPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_START_BLINKING, this.options.mapId, this));
   },
 
   stopBlinking() {
@@ -106,7 +109,7 @@ export const MarkerClusterElement = L.Marker.extend({
     this.options.blinking = false;
     L.DomUtil.removeClass(this.options.icon.options, 'blinking-icon-enabled');
     if (this._icon) L.DomUtil.removeClass(this._icon, 'blinking-icon-enabled');
-    api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_STOP_BLINKING, this.options.mapId, this);
+    api.event.emit(clusterElementPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_STOP_BLINKING, this.options.mapId, this));
   },
 });
 

@@ -10,11 +10,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import { toJsonObject, TypeDialogProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 import { api } from '../../app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
+import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -207,13 +208,15 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     // to open the modal
     api.event.on(
       EVENT_NAMES.MODAL.EVENT_MODAL_OPEN,
-      (args) => {
-        if (id === (args.id as string) && (args.handlerName as string) === mapId) {
-          const modal = api.map(mapId).modal.modals[args.id as string] as TypeModalProps;
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          openEvent = true;
+      (payload) => {
+        if (payloadIsAModal(payload)) {
+          if (id === payload.id && payload.handlerName === mapId) {
+            const modal = api.map(mapId).modal.modals[payload.id] as TypeModalProps;
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            openEvent = true;
 
-          setCreatedModal(ceatedModalJSXReturner(modal));
+            setCreatedModal(ceatedModalJSXReturner(modal));
+          }
         }
       },
       mapId
@@ -222,11 +225,13 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     // to update modals
     api.event.on(
       EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE,
-      (args) => {
-        if (id === (args.id as string) && (args.handlerName as string) === mapId) {
-          const modal = api.map(mapId).modal.modals[args.id as string] as TypeModalProps;
+      (payload) => {
+        if (payloadIsAModal(payload)) {
+          if (id === payload.id && payload.handlerName === mapId) {
+            const modal = api.map(mapId).modal.modals[payload.id] as TypeModalProps;
 
-          setCreatedModal(ceatedModalJSXReturner(modal));
+            setCreatedModal(ceatedModalJSXReturner(modal));
+          }
         }
       },
       mapId
@@ -235,10 +240,12 @@ export function Modal(props: TypeDialogProps): JSX.Element {
     // to close the modal
     api.event.on(
       EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE,
-      (args) => {
-        if (id === (args.id as string) && (args.handlerName as string) === mapId) {
-          if (!args.open) openEvent = false;
-          setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
+      (payload) => {
+        if (payloadIsAModal(payload)) {
+          if (id === payload.id && payload.handlerName === mapId) {
+            if (!payload.open) openEvent = false;
+            setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
+          }
         }
       },
       mapId

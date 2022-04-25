@@ -9,7 +9,8 @@ import { MapServiceOptions } from 'esri-leaflet';
 import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
+import { selectBoxPayload } from '../../api/events/payloads/select-box-payload';
 
 /*-----------------------------------------------------------------------------
  *
@@ -136,8 +137,6 @@ declare module 'leaflet' {
   interface LayerOptions {
     id?: string;
     visible?: boolean;
-    layers?: number[];
-    url?: string;
   }
 
   interface Layer {
@@ -146,6 +145,7 @@ declare module 'leaflet' {
     type: string;
   }
 }
+
 L.Layer.addInitHook(function fn(this: L.Layer) {
   if (this.options && this.options.id) this.id = this.options.id;
 });
@@ -158,7 +158,7 @@ L.Layer.addInitHook(function fn(this: L.Layer) {
 
 declare module 'leaflet' {
   interface CircleMarkerOptions {
-    id: string;
+    id?: string;
   }
 
   interface CircleMarker {
@@ -189,7 +189,7 @@ L.Circle.addInitHook(function fn(this: L.Circle) {
 
 declare module 'leaflet' {
   interface PolylineOptions {
-    id: string;
+    id?: string;
   }
 
   interface Polyline {
@@ -216,7 +216,7 @@ L.Polygon.addInitHook(function fn(this: L.Polygon) {
  *---------------------------------------------------------------------------*/
 declare module 'leaflet' {
   interface MarkerOptions {
-    id: string;
+    id?: string;
   }
 
   interface Marker {
@@ -240,7 +240,7 @@ L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
 
 declare module 'leaflet' {
   interface FeatureGroupOptions extends LayerOptions {
-    id: string;
+    id?: string;
     visible?: boolean;
   }
 
@@ -328,9 +328,7 @@ L.Map.addInitHook(function fn(this: L.Map) {
   if (this.options.selectBox) {
     this.on('boxselectend', (e: L.LeafletEvent) => {
       const bounds = Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
-      api.event.emit(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END, e.target.id, {
-        selectBoxBounds: bounds,
-      });
+      api.event.emit(selectBoxPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END, e.target.id, bounds));
     });
   }
 });
@@ -358,5 +356,9 @@ declare module 'react-leaflet' {
 declare module 'esri-leaflet' {
   interface MapService {
     options: MapServiceOptions;
+  }
+
+  interface DynamicMapLayer {
+    options: DynamicMapLayerOptions;
   }
 }

@@ -6,11 +6,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import { Drawer as MaterialDrawer } from '@mui/material';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '../../core/app-start';
 import { TypeDrawerProps } from '../../core/types/cgpv-types';
+import { booleanPayload, payloadIsABoolean } from '../../api/events/payloads/boolean-payload';
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({
@@ -71,9 +72,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     setOpen(drawerStatus);
 
     // if appbar is open then close it
-    api.event.emit(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId, {
-      drawerStatus,
-    });
+    api.event.emit(booleanPayload(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId, drawerStatus));
 
     // if panel is open then close it
     // if (panelOpen) openClosePanel(false);
@@ -90,8 +89,10 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE,
       (payload) => {
-        if (payload && (payload.handlerName as string) === mapId) {
-          setOpen(payload.status as boolean);
+        if (payloadIsABoolean(payload)) {
+          if (payload.handlerName === mapId) {
+            setOpen(payload.status);
+          }
         }
       },
       mapId

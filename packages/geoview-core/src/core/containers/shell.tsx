@@ -14,12 +14,15 @@ import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
 
 import { FocusTrapDialog } from './focus-trap';
-import { TypeMapConfigProps, TypeJsonObject } from '../types/cgpv-types';
+import { TypeMapConfigProps } from '../types/cgpv-types';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/event';
+import { EVENT_NAMES } from '../../api/events/event';
 
 import { CircularProgress, Modal, Snackbar } from '../../ui';
+import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
+import { payloadIsAMap } from '../../api/events/payloads/map-payload';
+import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -78,7 +81,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const [activeTrap, setActivetrap] = useState(false);
 
   // render additional components if added by api
-  const [components, setComponents] = useState<TypeJsonObject>({});
+  const [components, setComponents] = useState<Record<string, JSX.Element>>({});
 
   const [, setUpdate] = useState<number>(0);
 
@@ -107,11 +110,13 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
-        if (payload && payload.handlerName === id)
-          setComponents((tempComponents) => ({
-            ...(tempComponents as object),
-            [payload.id as string]: payload.component,
-          }));
+        if (payloadIsAMapComponent(payload)) {
+          if (payload.handlerName === id)
+            setComponents((tempComponents) => ({
+              ...tempComponents,
+              [payload.id]: payload.component!,
+            }));
+        }
       },
       id
     );
@@ -120,13 +125,15 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
-        if (payload && payload.handlerName === id) {
-          const tempComponents: TypeJsonObject = { ...(components as object) };
-          delete tempComponents[payload.id as string];
+        if (payloadIsAMapComponent(payload)) {
+          if (payload.handlerName === id) {
+            const tempComponents: Record<string, JSX.Element> = { ...components };
+            delete tempComponents[payload.id];
 
-          setComponents(() => ({
-            ...tempComponents,
-          }));
+            setComponents(() => ({
+              ...tempComponents,
+            }));
+          }
         }
       },
       id
@@ -135,9 +142,11 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_LOADED,
       (payload) => {
-        if (payload && (payload.handlerName as string).includes(id)) {
-          // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
-          setIsLoaded(true);
+        if (payloadIsAMap(payload)) {
+          if (payload.handlerName!.includes(id)) {
+            // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
+            setIsLoaded(true);
+          }
         }
       },
       id
@@ -147,8 +156,10 @@ export function Shell(props: ShellProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MODAL.EVENT_MODAL_CREATE,
       (payload) => {
-        if (payload.handlerName === id) {
-          updateShell();
+        if (payloadIsAModal(payload)) {
+          if (payload.handlerName === id) {
+            updateShell();
+          }
         }
       },
       id

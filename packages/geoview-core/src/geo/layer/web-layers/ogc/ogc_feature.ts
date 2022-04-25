@@ -11,9 +11,14 @@ import {
   TypeJsonObject,
   TypeOgcFeatureLayer,
   TypeJsonArray,
+  TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
+
+export const layerConfigIsOgcFeature = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeOgcFeatureLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.OGC_FEATURE;
+};
 
 /**
  * a class to add OGC api feature layer

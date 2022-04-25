@@ -5,9 +5,20 @@ import L from 'leaflet';
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { xmlToJson } from '../../../../core/utils/utilities';
-import { AbstractWebLayersClass, CONST_LAYER_TYPES, TypeJsonObject, TypeWFSLayer, TypeJsonArray } from '../../../../core/types/cgpv-types';
+import {
+  AbstractWebLayersClass,
+  CONST_LAYER_TYPES,
+  TypeJsonObject,
+  TypeWFSLayer,
+  TypeJsonArray,
+  TypeBaseWebLayersConfig,
+} from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
+
+export const layerConfigIsWFS = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeWFSLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.WFS;
+};
 
 /**
  * a class to add WFS layer

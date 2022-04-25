@@ -34,8 +34,9 @@
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
-    "lint": "eslint 'src/**/*.{ts,tsx,js}' 'tests/**/*.{ts,tsx,js}'",
-    "fix": "eslint 'src/**/*.{ts,tsx,js}' 'tests/**/*.{ts,tsx,js}' --fix"
+    "lint": "eslint src/**/*.{ts,tsx,js}",
+    "fix": "eslint src/**/*.{ts,tsx,js} --fix",
+    "generate.d.ts": "tsc --noEmit false --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
     "@mui/material": "^5.4.3",
