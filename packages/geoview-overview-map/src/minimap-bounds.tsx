@@ -28,8 +28,9 @@ const { useEventHandlers } = reactLeafletCore;
 interface MiniboundProps {
   parentId: string;
   parentMap: L.Map;
-  minimap: L.Map;
   zoomFactor: number;
+  minimap: L.Map;
+  setMinimap: React.Dispatch<React.SetStateAction<L.Map | null>>;
 }
 
 /**
@@ -37,7 +38,7 @@ interface MiniboundProps {
  * @param {MiniboundProps} props bound properties
  */
 export function MinimapBounds(props: MiniboundProps): JSX.Element {
-  const { parentId, parentMap, zoomFactor, minimap } = props;
+  const { parentId, parentMap, zoomFactor, minimap, setMinimap } = props;
 
   const [toggle, setToggle] = useState(false);
 
@@ -98,6 +99,7 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
     // remove the listener when the component unmounts
     return () => {
       api.event.off(EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE, parentId);
+      setMinimap(null);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -1,4 +1,4 @@
-import { Cast, TypeWindow } from 'geoview-core';
+import { TypeWindow } from 'geoview-core';
 import { booleanPayload } from 'geoview-core/src/api/events/payloads/boolean-payload';
 
 import { MINIMAP_SIZE } from './overview-map';
@@ -63,7 +63,7 @@ interface MinimapToggleProps {
 export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   const { parentId, minimap } = props;
 
-  const divRef = useRef(null);
+  const divRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
 
@@ -96,7 +96,7 @@ export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   }
 
   useEffect(() => {
-    DomEvent.disableClickPropagation(Cast<HTMLElement>(divRef.current));
+    DomEvent.disableClickPropagation(divRef.current!);
   }, []);
 
   return (
