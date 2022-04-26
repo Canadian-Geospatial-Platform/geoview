@@ -7,6 +7,7 @@ import { PanelApi } from '../../../ui';
 import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 import { generateId } from '../../utils/utilities';
+
 import { buttonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
 /**
@@ -106,7 +107,7 @@ export class AppbarButtons {
       this.buttons[group][id] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, this.mapId, id, group, buttonPanel));
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, id, group, buttonPanel));
 
       return buttonPanel;
     }
@@ -168,11 +169,11 @@ export class AppbarButtons {
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 
+      // trigger an event that a panel has been removed to update the state and re-render
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
+
       // delete the panel from the group
       delete group[id];
-
-      // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, this.mapId, id, groupName));
     });
   };
 }

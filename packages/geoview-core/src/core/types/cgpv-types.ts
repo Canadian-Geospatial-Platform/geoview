@@ -695,6 +695,8 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
  * type for the panel properties used when creating a new panel
  */
 export type TypePanelProps = {
+  // panel id
+  id?: string;
   // panel type (appbar, navbar)
   type?: string;
   // panel open status (open/closed)

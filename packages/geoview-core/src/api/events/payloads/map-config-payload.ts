@@ -20,9 +20,6 @@ export const payloadIsAMapConfig = (verifyIfPayload: PayloadBaseClass): verifyIf
  * Class definition for MapConfigPayload
  */
 export class MapConfigPayload extends PayloadBaseClass {
-  // the handler id
-  handlerId: string;
-
   // the map configuration
   config: TypeMapConfigProps;
 
@@ -31,15 +28,13 @@ export class MapConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} the event identifier for which the payload is constructed
    * @param {string | null} the handler Name
-   * @param {string} the handler id
    * @param {TypeMapConfigProps} the map configuration
    *
    * @returns {MapConfigPayload} the MapConfigPayload object created
    */
-  constructor(event: EventStringId, handlerName: string | null, handlerId: string, config: TypeMapConfigProps) {
+  constructor(event: EventStringId, handlerName: string | null, config: TypeMapConfigProps) {
     if (!validEvents.includes(event)) throw new Error(`MapConfigPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.handlerId = handlerId;
     this.config = config;
   }
 }
@@ -50,16 +45,10 @@ export class MapConfigPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} the event identifier for which the payload is constructed
  * @param {string | null} the handler Name
- * @param {string} the handler id
  * @param {TypeMapConfigProps} the map configuration
  *
  * @returns {MapConfigPayload} the MapConfigPayload object created
  */
-export const mapConfigPayload = (
-  event: EventStringId,
-  handlerName: string | null,
-  handlerId: string,
-  config: TypeMapConfigProps
-): MapConfigPayload => {
-  return new MapConfigPayload(event, handlerName, handlerId, config);
+export const mapConfigPayload = (event: EventStringId, handlerName: string | null, config: TypeMapConfigProps): MapConfigPayload => {
+  return new MapConfigPayload(event, handlerName, config);
 };

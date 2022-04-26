@@ -10,8 +10,7 @@ import { EVENT_NAMES } from '../../../api/events/event';
 import { MapContext } from '../../app-start';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
-import { payloadIsAButtonPanel } from '../../../api/events/payloads/button-panel-payload';
-import { payloadHasAButtonIdAndType } from '../../../api/events/payloads/panel-payload';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
 import { TypeButtonPanel } from '../../types/cgpv-types';
 
@@ -49,7 +48,6 @@ export const useStyles = makeStyles((theme) => ({
  * Create an appbar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
-  const [refreshCount, setRefreshCount] = useState(0);
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
 
   const classes = useStyles();
@@ -61,20 +59,20 @@ export function Appbar(): JSX.Element {
   const mapId = mapConfig.id;
 
   const addButtonPanel = useCallback(
-    (payload) => {
+    (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
         ...buttonPanelGroups,
         [payload.groupName]: {
           ...buttonPanelGroups[payload.groupName],
-          [payload.id]: payload.buttonPanel,
+          [payload.id]: payload.buttonPanel as TypeButtonPanel,
         },
       });
     },
-    [setButtonPanelGroups, buttonPanelGroups]
+    [buttonPanelGroups]
   );
 
   const removeButtonPanel = useCallback(
-    (payload) => {
+    (payload: ButtonPanelPayload) => {
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
@@ -87,13 +85,6 @@ export function Appbar(): JSX.Element {
     },
     [setButtonPanelGroups]
   );
-
-  /**
-   * function that causes rerender when changing appbar content
-   */
-  const updateComponent = useCallback(() => {
-    setRefreshCount((refresh) => refresh + 1);
-  }, []);
 
   useEffect(() => {
     // listen to new panel creation
@@ -122,83 +113,60 @@ export function Appbar(): JSX.Element {
       mapId
     );
 
-    // listen to open panel to activate focus trap and focus on close
-    api.event.on(
-      EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
-      (payload) => {
-        if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.handlerName === mapId && payload.type === 'appbar') {
-            updateComponent();
-          }
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-      (payload) => {
-        if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.handlerName === mapId && payload.type === 'appbar') {
-            updateComponent();
-          }
-        }
-      },
-      mapId
-    );
-
     return () => {
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
     };
-  }, [addButtonPanel, mapId, removeButtonPanel, updateComponent]);
+  }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
     <div className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`} ref={appBar}>
-      <div className={classes.appBarButtons}>
-        {Object.keys(buttonPanelGroups).map((groupName: string) => {
-          // get button panels from group
-          const buttonPanels = buttonPanelGroups[groupName];
+      {Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter((buttonPanel) => {
+        return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel].button?.visible;
+      }).length > 0 && (
+        <div className={classes.appBarButtons}>
+          {Object.keys(buttonPanelGroups).map((groupName: string) => {
+            // get button panels from group
+            const buttonPanels = buttonPanelGroups[groupName];
 
-          // display the button panels in the list
-          return (
-            <List key={groupName}>
-              {Object.keys(buttonPanels).map((buttonId) => {
-                const buttonPanel = buttonPanels[buttonId];
+            // display the button panels in the list
+            return (
+              <List key={groupName}>
+                {Object.keys(buttonPanels).map((buttonId) => {
+                  const buttonPanel = buttonPanels[buttonId];
 
-                return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
-                  <Fragment key={buttonPanel.button.id}>
-                    <ListItem>
-                      <Button
-                        id={buttonPanel.button.id}
-                        variant="text"
-                        tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement="right"
-                        type="icon"
-                        className={classes.appBarButton}
-                        iconClassName={classes.appBarButtonIcon}
-                        onClick={() => {
-                          if (!buttonPanel.panel?.status) {
-                            buttonPanel.panel?.open();
-                          } else {
-                            buttonPanel.panel?.close();
-                          }
-                        }}
-                        icon={buttonPanel.button.icon}
-                      >
-                        {buttonPanel.button.tooltip}
-                      </Button>
-                    </ListItem>
-                    <Divider />
-                  </Fragment>
-                ) : null;
-              })}
-            </List>
-          );
-        })}
-      </div>
+                  return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
+                    <Fragment key={buttonPanel.button.id}>
+                      <ListItem>
+                        <Button
+                          id={buttonPanel.button.id}
+                          variant="text"
+                          tooltip={buttonPanel.button.tooltip}
+                          tooltipPlacement="right"
+                          type="icon"
+                          className={classes.appBarButton}
+                          iconClassName={classes.appBarButtonIcon}
+                          onClick={() => {
+                            if (!buttonPanel.panel?.status) {
+                              buttonPanel.panel?.open();
+                            } else {
+                              buttonPanel.panel?.close();
+                            }
+                          }}
+                          icon={buttonPanel.button.icon}
+                        >
+                          {buttonPanel.button.tooltip}
+                        </Button>
+                      </ListItem>
+                      <Divider />
+                    </Fragment>
+                  ) : null;
+                })}
+              </List>
+            );
+          })}
+        </div>
+      )}
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
         // get button panels from group
         const buttonPanels = buttonPanelGroups[groupName];
@@ -209,9 +177,7 @@ export function Appbar(): JSX.Element {
             {Object.keys(buttonPanels).map((buttonId) => {
               const buttonPanel = buttonPanels[buttonId];
 
-              return buttonPanel?.panel ? (
-                <Panel key={buttonPanel.button.id} panel={buttonPanel.panel} button={buttonPanel.button} />
-              ) : null;
+              return buttonPanel?.panel ? <Panel key={buttonPanel.panel.id} panel={buttonPanel.panel} button={buttonPanel.button} /> : null;
             })}
           </div>
         );

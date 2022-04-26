@@ -268,7 +268,7 @@ export class MapViewer {
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, this.id, updatedConfig));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.id, updatedConfig));
   };
 
   /**
@@ -283,7 +283,7 @@ export class MapViewer {
     const configObj = config.getMapConfigFromFunc(mapConfig);
 
     // emit an event to reload the map with the new config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, this.id, configObj!));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.id, configObj!));
   };
 
   /**

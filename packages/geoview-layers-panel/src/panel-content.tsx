@@ -12,7 +12,7 @@ const w = window as TypeWindow;
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
 function PanelContent(props: TypePanelContentProps): JSX.Element {
-  const { mapId } = props;
+  const { mapId, buttonPanel } = props;
 
   const { cgpv } = w;
   const { api, react, ui } = cgpv;
@@ -73,15 +73,16 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       () => {
         setAddLayerVisible(false);
       },
-      mapId
+      mapId,
+      buttonPanel.id
     );
 
     return () => {
       api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
       api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
-      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId, buttonPanel.id);
     };
-  }, [api, mapId]);
+  }, [api, buttonPanel.id, mapId]);
 
   return (
     <>
