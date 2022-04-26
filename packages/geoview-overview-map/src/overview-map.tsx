@@ -1,4 +1,4 @@
-import { Cast, TypeWindow } from 'geoview-core';
+import { TypeWindow } from 'geoview-core';
 
 import { MinimapBounds } from './minimap-bounds';
 import { MinimapToggle } from './minimap-toggle';
@@ -84,11 +84,11 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
 
   const basemaps = api.map(id).basemap.getBasemapLayers();
 
-  const overviewRef = useRef(null);
+  const overviewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // disable events on container
-    const overviewHTMLElement = Cast<HTMLElement>(overviewRef.current);
+    const overviewHTMLElement = overviewRef.current;
     if (overviewHTMLElement) {
       DomEvent.disableClickPropagation(overviewHTMLElement);
       DomEvent.disableScrollPropagation(overviewHTMLElement);
@@ -114,7 +114,6 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
         zoomControl={false}
         whenCreated={(cgpMap: L.Map) => {
           const cgpMapContainer = cgpMap.getContainer();
-          DomEvent.disableClickPropagation(cgpMapContainer);
           DomEvent.disableScrollPropagation(cgpMapContainer);
           const cgpMapContainerParentElement = cgpMapContainer.parentElement as HTMLElement;
           cgpMapContainerParentElement.style.margin = theme.spacing(3);
@@ -127,7 +126,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
             {basemaps.map((base: { id: string | number | null | undefined; url: string }) => (
               <TileLayer key={base.id} url={base.url} />
             ))}
-            <MinimapBounds parentId={id} parentMap={parentMap} minimap={minimap} zoomFactor={zoomFactor} />
+            <MinimapBounds parentId={id} parentMap={parentMap} zoomFactor={zoomFactor} minimap={minimap} />
             <MinimapToggle parentId={id} minimap={minimap} />
           </>
         ) : (
