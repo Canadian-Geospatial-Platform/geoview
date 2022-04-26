@@ -108,22 +108,17 @@ export const payloadIsAPanel = (verifyIfPayload: PayloadBaseClass): verifyIfPayl
  * Class definition for PanelPayload
  */
 export class PanelPayload extends PayloadBaseClass {
-  // handler id, generally the map id
-  handlerId: string;
-
   /*
    * Constructor for the class
    *
    * @param {EventStringId} the event identifier for which the payload is constructed
    * @param {string | null} the handler Name
-   * @param {string} the panel handler id
    *
    * @returns {PanelPayload} the PanelPayload object created
    */
-  constructor(event: EventStringId, handlerName: string | null, handlerId: string) {
+  constructor(event: EventStringId, handlerName: string | null) {
     if (!validEvents.includes(event)) throw new Error(`PanelPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.handlerId = handlerId;
   }
 
   /*
@@ -131,7 +126,6 @@ export class PanelPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} the event identifier for which the payload is constructed
    * @param {string | null} the handler Name
-   * @param {string} the panel handler id
    * @param {string} the panel buton id
    * @param {string} the panel type
    *
@@ -140,12 +134,11 @@ export class PanelPayload extends PayloadBaseClass {
   static withButtonIdAndType = (
     event: EventStringId,
     handlerName: string | null,
-    handlerId: string,
     buttonId: string,
     type: string
   ): PanelWithAButtonIdAndTypePayload => {
     if (!validEvents4ButtonIdAndType.includes(event)) throw new Error(`PanelPayload can't use withButtonIdAndType for ${event}`);
-    const panelWithAButtonIdAndTypePayload = new PanelPayload(event, handlerName, handlerId) as PanelWithAButtonIdAndTypePayload;
+    const panelWithAButtonIdAndTypePayload = new PanelPayload(event, handlerName) as PanelWithAButtonIdAndTypePayload;
     panelWithAButtonIdAndTypePayload.buttonId = buttonId;
     panelWithAButtonIdAndTypePayload.type = type;
     return panelWithAButtonIdAndTypePayload;
@@ -156,7 +149,6 @@ export class PanelPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} the event identifier for which the payload is constructed
    * @param {string | null} the handler Name
-   * @param {string} the panel handler id
    * @param {string} the panel buton id
    * @param {TypeActionButton} the action buton information
    *
@@ -165,12 +157,11 @@ export class PanelPayload extends PayloadBaseClass {
   static withButtonIdAndActionButton = (
     event: EventStringId,
     handlerName: string | null,
-    handlerId: string,
     buttonId: string,
     actionButton: TypeActionButton
   ): PanelAndActionPayload => {
     if (!validEvents4Action.includes(event)) throw new Error(`PanelPayload can't use withButtonIdAndActionButton for ${event}`);
-    const panelAndActionPayload = new PanelPayload(event, handlerName, handlerId) as PanelAndActionPayload;
+    const panelAndActionPayload = new PanelPayload(event, handlerName) as PanelAndActionPayload;
     panelAndActionPayload.buttonId = buttonId;
     panelAndActionPayload.actionButton = actionButton;
     return panelAndActionPayload;
@@ -181,7 +172,6 @@ export class PanelPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} the event identifier for which the payload is constructed
    * @param {string | null} the handler Name
-   * @param {string} the panel handler id
    * @param {string} the panel buton id
    * @param {Element | React.ReactNode} the content object
    *
@@ -190,12 +180,11 @@ export class PanelPayload extends PayloadBaseClass {
   static withButtonIdAndContent = (
     event: EventStringId,
     handlerName: string | null,
-    handlerId: string,
     buttonId: string,
     content: Element | React.ReactNode
   ): PanelAndContentPayload => {
     if (!validEvents4Content.includes(event)) throw new Error(`PanelPayload can't use withButtonIdAndContent for ${event}`);
-    const panelAndContentPayload = new PanelPayload(event, handlerName, handlerId) as PanelAndContentPayload;
+    const panelAndContentPayload = new PanelPayload(event, handlerName) as PanelAndContentPayload;
     panelAndContentPayload.buttonId = buttonId;
     panelAndContentPayload.content = content;
     return panelAndContentPayload;
@@ -208,10 +197,9 @@ export class PanelPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} the event identifier for which the payload is constructed
  * @param {string | null} the handler Name
- * @param {handlerId} the panel handler id
  *
  * @returns {PanelPayload} the PanelPayload object created
  */
-export const panelPayload = (event: EventStringId, handlerName: string | null, handlerId: string): PanelPayload => {
-  return new PanelPayload(event, handlerName, handlerId);
+export const panelPayload = (event: EventStringId, handlerName: string | null): PanelPayload => {
+  return new PanelPayload(event, handlerName);
 };

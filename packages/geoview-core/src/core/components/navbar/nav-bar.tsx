@@ -11,14 +11,13 @@ import Home from './buttons/home';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
-
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
-import { TypeButtonPanel } from '../../types/cgpv-types';
 import { MapContext } from '../../app-start';
-import { payloadIsAButtonPanel } from '../../../api/events/payloads/button-panel-payload';
-import { payloadHasAButtonIdAndType } from '../../../api/events/payloads/panel-payload';
+import { TypeButtonPanel } from '../../types/cgpv-types';
+
+import { EVENT_NAMES } from '../../../api/events/event';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
 const navBtnWidth = '32px';
 const navBtnHeight = '32px';
@@ -77,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
-  const [refreshCount, setRefreshCount] = useState(0);
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
 
   const classes = useStyles();
 
@@ -89,12 +88,33 @@ export function Navbar(): JSX.Element {
 
   const mapId = mapConfig.id;
 
-  /**
-   * function that causes rerender when changing navbar content
-   */
-  const updateComponent = useCallback(() => {
-    setRefreshCount((refresh) => refresh + 1);
-  }, []);
+  const addButtonPanel = useCallback(
+    (payload: ButtonPanelPayload) => {
+      setButtonPanelGroups({
+        ...buttonPanelGroups,
+        [payload.groupName]: {
+          ...buttonPanelGroups[payload.groupName],
+          [payload.id]: payload.buttonPanel as TypeButtonPanel,
+        },
+      });
+    },
+    [buttonPanelGroups]
+  );
+
+  const removeButtonPanel = useCallback(
+    (payload: ButtonPanelPayload) => {
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+
+        const group = state[payload.groupName];
+
+        delete group[payload.id];
+
+        return state;
+      });
+    },
+    [setButtonPanelGroups]
+  );
 
   useEffect(() => {
     // listen to new navbar panel creation
@@ -103,7 +123,7 @@ export function Navbar(): JSX.Element {
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
           if (payload.handlerName && payload.handlerName === mapId) {
-            updateComponent();
+            addButtonPanel(payload);
           }
         }
       },
@@ -116,32 +136,7 @@ export function Navbar(): JSX.Element {
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
           if (payload.handlerName && payload.handlerName === mapId) {
-            updateComponent();
-          }
-        }
-      },
-      mapId
-    );
-
-    // listen to open panel to activate focus trap and focus on close
-    api.event.on(
-      EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
-      (payload) => {
-        if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.handlerName === mapId && payload.type === 'navbar') {
-            updateComponent();
-          }
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
-      (payload) => {
-        if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.handlerName === mapId && payload.type === 'navbar') {
-            updateComponent();
+            removeButtonPanel(payload);
           }
         }
       },
@@ -151,16 +146,13 @@ export function Navbar(): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateComponent]);
+  }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
     <div ref={navBarRef} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}>
-      {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
-        const buttons = api.map(mapId).navBarButtons.buttons[groupName];
+      {Object.keys(buttonPanelGroups).map((groupName) => {
+        const buttons = buttonPanelGroups[groupName];
 
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
@@ -175,8 +167,8 @@ export function Navbar(): JSX.Element {
         return null;
       })}
       <div className={classes.navBtnGroupContainer}>
-        {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
-          const buttons = api.map(mapId).navBarButtons.buttons[groupName];
+        {Object.keys(buttonPanelGroups).map((groupName) => {
+          const buttons = buttonPanelGroups[groupName];
 
           // if not an empty object, only then render any HTML
           if (Object.keys(buttons).length !== 0) {
@@ -194,7 +186,7 @@ export function Navbar(): JSX.Element {
                   return buttonPanel.button.visible ? (
                     !buttonPanel.panel ? (
                       <Button
-                        key={`${buttonPanel.button.id}-${refreshCount}`}
+                        key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
                         type="icon"
                         tooltip={buttonPanel.button.tooltip}
@@ -205,7 +197,7 @@ export function Navbar(): JSX.Element {
                       />
                     ) : (
                       <Button
-                        key={`${buttonPanel.button.id}-${refreshCount}`}
+                        key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
                         type="icon"
                         tooltip={buttonPanel.button.tooltip}

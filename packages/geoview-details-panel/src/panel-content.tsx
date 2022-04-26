@@ -134,7 +134,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       setFeatureInfo(showFeaturesInfo);
 
       // emit content change event so the panel can focus on close button
-      api.event.emit(payloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId));
+      api.event.emit(payloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId), buttonPanel.id);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [buttonPanel.panel, mapId]

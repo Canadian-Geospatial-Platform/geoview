@@ -7,6 +7,7 @@ import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
 import { TypePanelProps } from '../../core/types/cgpv-types';
 import { PanelPayload, TypeActionButton } from '../../api/events/payloads/panel-payload';
+import { generateId } from '../../core/utils/utilities';
 
 /**
  * Class used to handle creating a new panel
@@ -15,6 +16,9 @@ import { PanelPayload, TypeActionButton } from '../../api/events/payloads/panel-
  * @class PanelApi
  */
 export class PanelApi {
+  // panel id
+  id: string;
+
   // panel type (appbar, navbar)
   type: string | undefined;
 
@@ -49,6 +53,7 @@ export class PanelApi {
    * @param {string} mapId the map id that this panel belongs to
    */
   constructor(panel: TypePanelProps, buttonId: string, mapId: string) {
+    this.id = panel.id || generateId();
     this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
@@ -68,7 +73,10 @@ export class PanelApi {
     // close all other panels
     this.closeAll();
 
-    api.event.emit(PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, this.mapId, this.mapId, this.buttonId, this.type!));
+    api.event.emit(
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, this.mapId, this.buttonId, this.type!),
+      this.buttonId
+    );
   };
 
   /**
@@ -113,7 +121,8 @@ export class PanelApi {
     this.status = false;
 
     api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, this.mapId, this.buttonId, this.type!)
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, this.buttonId, this.type!),
+      this.buttonId
     );
   };
 
@@ -134,13 +143,8 @@ export class PanelApi {
       action,
     };
     api.event.emit(
-      PanelPayload.withButtonIdAndActionButton(
-        EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
-        this.mapId,
-        this.mapId,
-        this.buttonId,
-        actionButton
-      )
+      PanelPayload.withButtonIdAndActionButton(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, this.mapId, this.buttonId, actionButton),
+      this.buttonId
     );
 
     return this;
@@ -170,7 +174,8 @@ export class PanelApi {
     this.content = content;
 
     api.event.emit(
-      PanelPayload.withButtonIdAndContent(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, this.mapId, this.mapId, this.buttonId, content)
+      PanelPayload.withButtonIdAndContent(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, this.mapId, this.buttonId, content),
+      this.buttonId
     );
 
     return this;
@@ -187,13 +192,8 @@ export class PanelApi {
       id: `${this.buttonId}_${id}`,
     };
     api.event.emit(
-      PanelPayload.withButtonIdAndActionButton(
-        EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
-        this.mapId,
-        this.mapId,
-        this.buttonId,
-        actionButton
-      )
+      PanelPayload.withButtonIdAndActionButton(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, this.mapId, this.buttonId, actionButton),
+      this.buttonId
     );
 
     return this;

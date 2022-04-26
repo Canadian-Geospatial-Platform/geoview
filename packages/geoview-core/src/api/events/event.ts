@@ -144,9 +144,15 @@ export class Event {
    * @param {string} eventName the event name to listen to
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
+   * @param {string[]} args optional additional arguments
    */
-  on = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string): void => {
-    const eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+  on = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string, ...args: string[]): void => {
+    let eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+
+    // check if args provided
+    for (let argIndex = 0; argIndex < args.length; argIndex++) {
+      eventNameId = `${eventNameId}/${args[argIndex]}`;
+    }
 
     /**
      * Listen callback, sets the data that will be returned back
@@ -156,7 +162,7 @@ export class Event {
       let listenerPayload: PayloadBaseClass;
 
       // if a handler name was specified, callback will return that data if found
-      if (handlerName && payload.handlerName === handlerName) {
+      if (handlerName && payload.handlerName === handlerName && this.events[eventNameId] && this.events[eventNameId][handlerName]) {
         listenerPayload = this.events[eventNameId][handlerName];
       } else {
         listenerPayload = payload;
@@ -174,9 +180,15 @@ export class Event {
    * @param {string} eventName the event name to listen to
    * @param {function} listener the callback function
    * @param {string} [handlerName] the handler name to return data from
+   * @param {string[]} args optional additional arguments
    */
-  once = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string): void => {
-    const eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+  once = (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string, ...args: string[]): void => {
+    let eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+
+    // check if args provided
+    for (let argIndex = 0; argIndex < args.length; argIndex++) {
+      eventNameId = `${eventNameId}/${args[argIndex]}`;
+    }
 
     /**
      * Listen callback, sets the data that will be returned back
@@ -203,9 +215,15 @@ export class Event {
    *
    * @param {string} eventName the event name of the event to be removed
    * @param {string} handlerName the name of the handler an event needs to be removed from
+   * @param {string[]} args optional additional arguments
    */
-  off = (eventName: EventStringId, handlerName?: string): void => {
-    const eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+  off = (eventName: EventStringId, handlerName?: string, ...args: string[]): void => {
+    let eventNameId = eventName + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+
+    // check if args provided
+    for (let argIndex = 0; argIndex < args.length; argIndex++) {
+      eventNameId = `${eventNameId}/${args[argIndex]}`;
+    }
 
     this.eventEmitter.off(eventNameId);
 
@@ -229,12 +247,18 @@ export class Event {
    * Will emit the event on the event name with the @payload
    *
    * @param {object} payload a payload (data) to be emitted for the event
+   * @param {string[]} args optional additional arguments
    */
-  emit = (payload: PayloadBaseClass): void => {
+  emit = (payload: PayloadBaseClass, ...args: string[]): void => {
     const { handlerName, event } = payload;
 
     // event name
-    const eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+    let eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
+
+    // check if args provided
+    for (let argIndex = 0; argIndex < args.length; argIndex++) {
+      eventName = `${eventName}/${args[argIndex]}`;
+    }
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
     const handlerNameId = generateId(handlerName);

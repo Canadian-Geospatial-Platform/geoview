@@ -25,9 +25,6 @@ export const payloadIsAButtonPanel = (verifyIfPayload: PayloadBaseClass): verify
  * Class definition for ButtonPanelPayload
  */
 export class ButtonPanelPayload extends PayloadBaseClass {
-  // handler id, generally the map id
-  handlerId: string;
-
   // id of the appbar panel
   id: string;
 
@@ -35,31 +32,22 @@ export class ButtonPanelPayload extends PayloadBaseClass {
   groupName: string;
 
   // button panel configuration
-  buttonPanel?: TypeButtonPanel;
+  buttonPanel: TypeButtonPanel;
 
   /*
    * Constructor for the class
    *
    * @param {EventStringId} the event identifier for which the payload is constructed
    * @param {string | null} the handler Name
-   * @param {string} the handler identifier carried by the payload
    * @param {string} the the appbar panel identifier carried by the payload
    * @param {string} the the appbar panel group name carried by the payload
    * @param {TypeButtonPanel} optional button panel configuration carried by the payload
    *
    * @returns {ButtonPanelPayload} the ButtonPanelPayload object created
    */
-  constructor(
-    event: EventStringId,
-    handlerName: string | null,
-    handlerId: string,
-    id: string,
-    groupName: string,
-    buttonPanel?: TypeButtonPanel
-  ) {
+  constructor(event: EventStringId, handlerName: string | null, id: string, groupName: string, buttonPanel: TypeButtonPanel) {
     if (!validEvents.includes(event)) throw new Error(`ButtonPanelPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.handlerId = handlerId;
     this.id = id;
     this.groupName = groupName;
     this.buttonPanel = buttonPanel;
@@ -72,7 +60,6 @@ export class ButtonPanelPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} the event identifier for which the payload is constructed
  * @param {string | null} the handler Name
- * @param {string} the handler identifier carried by the payload
  * @param {string} the the appbar panel identifier carried by the payload
  * @param {string} the the appbar panel group name carried by the payload
  * @param {TypeButtonPanel} optional button panel configuration carried by the payload
@@ -82,10 +69,9 @@ export class ButtonPanelPayload extends PayloadBaseClass {
 export const buttonPanelPayload = (
   event: EventStringId,
   handlerName: string | null,
-  handlerId: string,
   id: string,
   groupName: string,
-  buttonPanel?: TypeButtonPanel
+  buttonPanel: TypeButtonPanel
 ): ButtonPanelPayload => {
-  return new ButtonPanelPayload(event, handlerName, handlerId, id, groupName, buttonPanel);
+  return new ButtonPanelPayload(event, handlerName, id, groupName, buttonPanel);
 };
