@@ -28,8 +28,8 @@ const { useEventHandlers } = reactLeafletCore;
 interface MiniboundProps {
   parentId: string;
   parentMap: L.Map;
-  minimap: L.Map;
   zoomFactor: number;
+  minimap: L.Map;
 }
 
 /**
@@ -58,24 +58,30 @@ export function MinimapBounds(props: MiniboundProps): JSX.Element {
     left: 0,
   });
 
+  // Update the minimap's view to match the parent map's center and zoom
   function updateMap(): void {
-    // Update the minimap's view to match the parent map's center and zoom
-    const newZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
+    // Only perform an update if the minimap exist (has panes)
+    if (Object.keys(minimap.getPanes()).length) {
+      const newZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
 
-    minimap.flyTo(parentMap.getCenter(), newZoom);
+      minimap.flyTo(parentMap.getCenter(), newZoom);
 
-    // Set in timeout the calculation to create the bound so parentMap getBounds has the updated bounds
-    setTimeout(() => {
-      minimap.invalidateSize();
-      const pMin = minimap.latLngToContainerPoint(parentMap.getBounds().getSouthWest());
-      const pMax = minimap.latLngToContainerPoint(parentMap.getBounds().getNorthEast());
-      setBounds({
-        height: pMin.y - pMax.y,
-        width: pMax.x - pMin.x,
-        top: pMax.y,
-        left: pMin.x,
-      });
-    }, 500);
+      // Set in timeout the calculation to create the bound so parentMap getBounds has the updated bounds
+      setTimeout(() => {
+        // Only run the function if the minimap exist (has panes)
+        if (Object.keys(minimap.getPanes()).length) {
+          minimap.invalidateSize();
+          const pMin = minimap.latLngToContainerPoint(parentMap.getBounds().getSouthWest());
+          const pMax = minimap.latLngToContainerPoint(parentMap.getBounds().getNorthEast());
+          setBounds({
+            height: pMin.y - pMax.y,
+            width: pMax.x - pMin.x,
+            top: pMax.y,
+            left: pMin.x,
+          });
+        }
+      }, 500);
+    }
   }
 
   useEffect(() => {
