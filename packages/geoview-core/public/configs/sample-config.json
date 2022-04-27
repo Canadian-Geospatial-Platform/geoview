@@ -1,0 +1,112 @@
+{
+    "map": {
+        "interaction": "dynamic",
+        "controls": {
+            "boxZoom": true,
+            "selectBox": true
+        },
+        "projection": 3978,
+        "initialView": {
+            "zoom": 12,
+            "center": [60, -100]
+        },
+        "basemapOptions": {
+            "id": "transport",
+            "shaded": true,
+            "labeled": true
+        },
+        "layers": [
+            {
+                "id":"wmsLYR1",
+                "name": {
+                    "en": "Topographic OSM WMS",
+                    "fr": "WMS OSM Topographique"
+                 },
+                "url": {
+                    "en": "https://ows.mundialis.de/services/service?",
+                    "fr": "https://ows.mundialis.de/services/service?"
+                },
+                "layerType": "ogcWMS",
+                "layerEntries": [{
+                    "id": "TOPO-OSM-WMS"
+                }]
+            }, {
+                "id":"esriDynamicLYR3",
+                "name": {
+                    "en": "Energy Infrastructure of North America",
+                    "fr": "Infrastructure énergétique d'Amérique du Nord"
+                 },
+                "url": {
+                    "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
+                    "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
+                },
+                "layerType": "esriDynamic",
+                "layerEntries": [
+                    {
+                        "id": "4",
+                        "name": {
+                            "en": "Natural Gas Processing Plants - config",
+                            "fr": "Usines de traitement du gaz naturel - config"
+                        }
+                    }, {
+                        "id": "5"
+                    }, {
+                        "id": "6"
+                    }
+                ]
+            }, {
+                "id":"esriFeatureLYR4",
+                "name": {
+                    "en": "Geothermal",
+                    "fr": "Géothermie"
+                 },
+                "url": {
+                    "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19",
+                    "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21"
+                },
+                "layerType": "esriFeature"
+            }, {
+                "id":"esriFeatureLYR5",
+                "url": {
+                    "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10",
+                    "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10"
+                },
+                "layerType": "esriFeature"
+            }, {
+                "name": {
+                    "en": "GeoJSON Sample",
+                    "fr": "Exemple GeoJSON"
+                 },
+                 "url": {
+                     "en":"./geojson/polygons.json",
+                     "fr":"./geojson/polygons.json"
+                 },
+                 "layerType": "geojson"
+            }, {
+                "id": "geojsonEnPointLYR6",
+                "name": {
+                    "en": "GeoJSON Service End Point Sample",
+                    "fr": "Exemple Service GeoJSON"
+                 },
+                 "url": {
+                     "en":"https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/",
+                     "fr":"https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/"
+                 },
+                 "layerType": "geojsonEndpoint"
+            }, {
+                "id": "9e1507cd-f25c-4c64-995b-6563bf9d65bd",
+                "url": "https://maps.canada.ca/geonetwork/srv/api/v2/docs/en/",
+                "layerType": "geoCore"
+            }
+        ]
+    },
+    "theme": "dark",
+    "components": ["appbar", "navbar", "northArrow"],
+    "corePackages": ["overview-map", "basemap-switcher", "layers-panel", "details-panel"],
+    "externalPackages": [],
+    "serviceUrls": {
+        "keys": "https://geocore.api.geo.ca"
+    },
+    "languages": ["en-CA", "fr-CA"],
+    "version": "1.0"
+}
