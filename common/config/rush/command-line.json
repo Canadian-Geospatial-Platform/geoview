@@ -5,13 +5,13 @@
       "commandKind": "global",
       "name": "serve",
       "summary": "Serves the page locally with hot-reload.",
-      "shellCommand": "npm run --prefix packages/geoview-loader serve"
+      "shellCommand": "npm run --prefix packages/geoview-core serve"
     },
     {
       "commandKind": "global",
       "name": "host",
       "summary": "Deploys the geoview project to github pages.",
-      "shellCommand": "npm run --prefix packages/geoview-loader deploy"
+      "shellCommand": "npm run --prefix packages/geoview-core deploy"
     },
     {
       "commandKind": "bulk",

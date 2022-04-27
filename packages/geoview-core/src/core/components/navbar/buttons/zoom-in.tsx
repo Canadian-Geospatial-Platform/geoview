@@ -1,17 +1,26 @@
-import { useContext } from "react";
+import { useContext } from 'react';
 
-import { MapContext } from "../../../app-start";
+import { MapContext } from '../../../app-start';
 
-import { api } from "../../../../api/api";
+import { api } from '../../../../app';
 
-import { Button, ZoomInIcon } from "../../../../ui";
+import { Button, ZoomInIcon } from '../../../../ui';
 
 /**
  * Zoom in button properties
  */
 interface ZoomInProps {
-  className?: string | undefined;
+  className?: string;
+  iconClassName?: string;
 }
+
+/**
+ * default properties values
+ */
+const defaultProps = {
+  className: '',
+  iconClassName: '',
+};
 
 /**
  * Create a zoom in button
@@ -20,9 +29,9 @@ interface ZoomInProps {
  * @returns {JSX.Element} return the created zoom in button
  */
 export default function ZoomIn(props: ZoomInProps): JSX.Element {
-  const { className } = props;
+  const { className, iconClassName } = props;
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -40,8 +49,11 @@ export default function ZoomIn(props: ZoomInProps): JSX.Element {
       tooltip="mapnav.zoomIn"
       tooltipPlacement="left"
       icon={<ZoomInIcon />}
-      onClick={zoomIn}
+      onClick={() => zoomIn()}
       className={className}
+      iconClassName={iconClassName}
     />
   );
 }
+
+ZoomIn.defaultProps = defaultProps;

@@ -1,47 +1,52 @@
 /* eslint-disable react/no-danger */
-import { useEffect, useState, useRef, CSSProperties } from "react";
+import { useEffect, useState, useRef, useContext } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import { useMap } from "react-leaflet";
+import { useMap } from 'react-leaflet';
 
-import { api } from "../../../api/api";
-import { EVENT_NAMES } from "../../../api/event";
-import { CrosshairIcon } from "./crosshair-icon";
+import { MapContext } from '../../app-start';
 
-import { Fade } from "../../../ui";
+import { api } from '../../../app';
+import { EVENT_NAMES } from '../../../api/events/event';
+import { CrosshairIcon } from './crosshair-icon';
+
+import { Fade } from '../../../ui';
+import { latLngPayload } from '../../../api/events/payloads/lat-long-payload';
+import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
+import { payloadIsAInKeyfocus } from '../../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   crosshairContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: theme.spacing(0),
     right: theme.spacing(0),
     left: theme.spacing(0),
     bottom: theme.spacing(0),
     paddingBottom: theme.spacing(6),
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    "pointer-events": "none !important",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    'pointer-events': 'none !important',
     zIndex: theme.zIndex.leafletControl,
   },
   crosshairInfo: {
-    position: "absolute",
+    position: 'absolute',
     top: theme.spacing(0),
     right: theme.spacing(0),
     left: theme.spacing(0),
-    height: "calc(1em + 8px)",
+    height: 'calc(1em + 8px)',
     padding: theme.spacing(2, 1, 4, 1),
-    backgroundColor: "rgba(228, 227, 227, 0.9)",
-    "& span": {
+    backgroundColor: 'rgba(228, 227, 227, 0.9)',
+    '& span': {
       paddingLeft: 70,
     },
   },
   crosshairIcon: {
-    width: 275, // (theme.overrides?.crosshairIcon?.size as CSSProperties).width,
-    height: 275, // (theme.overrides?.crosshairIcon?.size as CSSProperties).height,
+    width: theme.overrides.crosshairIcon.size.width,
+    height: theme.overrides.crosshairIcon?.size.height,
   },
 }));
 
@@ -63,9 +68,10 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext);
+  const mapId = mapConfig.id;
 
-  const mapId = api.mapInstance(map).id;
+  const map = useMap();
 
   const mapContainer = map.getContainer();
 
@@ -74,7 +80,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
 
   // do not use useState for item used inside function only without rendering... use useRef
   const isCrosshairsActiveValue = useRef(false);
-  const panelButtonId = useRef("");
+  const panelButtonId = useRef('');
 
   /**
    * Siimulate map mouse click to trigger details panel
@@ -82,14 +88,12 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
    * @param {KeyboardEvent} evt the keyboard event
    */
   function simulateClick(evt: KeyboardEvent): void {
-    if (evt.key === "Enter") {
+    if (evt.key === 'Enter') {
       const latlngPoint = map.getCenter();
 
       if (isCrosshairsActiveValue.current) {
         // emit an event with the latlng point
-        api.event.emit(EVENT_NAMES.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, {
-          latlng: latlngPoint,
-        });
+        api.event.emit(latLngPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, latlngPoint));
       }
     }
   }
@@ -100,40 +104,38 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
    */
   function removeCrosshair(): void {
     // remove simulate click event listener
-    mapContainer.removeEventListener("keydown", simulateClick);
+    mapContainer.removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
     isCrosshairsActiveValue.current = false;
-    api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
-      active: false,
-    });
+    api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, false));
   }
 
   useEffect(() => {
     // on map keyboard focus, add crosshair
     api.event.on(
-      EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS,
+      EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
-        if (payload && payload.handlerName.includes(id)) {
-          setCrosshairsActive(true);
-          isCrosshairsActiveValue.current = true;
-          api.event.emit(EVENT_NAMES.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, {
-            active: true,
-          });
+        if (payloadIsAInKeyfocus(payload)) {
+          if (payload.handlerName!.includes(id)) {
+            setCrosshairsActive(true);
+            isCrosshairsActiveValue.current = true;
+            api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, true));
 
-          mapContainer.addEventListener("keydown", simulateClick);
-          panelButtonId.current = "detailsPanel";
+            mapContainer.addEventListener('keydown', simulateClick);
+            panelButtonId.current = 'detailsPanel';
+          }
         }
       },
       mapId
     );
 
     // when map blur, remove the crosshair and click event
-    mapContainer.addEventListener("blur", removeCrosshair);
+    mapContainer.addEventListener('blur', removeCrosshair);
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_MAP_IN_KEYFOCUS, mapId);
-      mapContainer.removeEventListener("keydown", simulateClick);
-      mapContainer.removeEventListener("keydown", removeCrosshair);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId);
+      mapContainer.removeEventListener('keydown', simulateClick);
+      mapContainer.removeEventListener('keydown', removeCrosshair);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -142,16 +144,16 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     <div
       className={classes.crosshairContainer}
       style={{
-        visibility: isCrosshairsActive ? "visible" : "hidden",
+        visibility: isCrosshairsActive ? 'visible' : 'hidden',
       }}
     >
-      <Fade fadeIn={isCrosshairsActive}>
+      <Fade in={isCrosshairsActive}>
         <div className={classes.crosshairIcon}>
           <CrosshairIcon />
         </div>
       </Fade>
       <div className={classes.crosshairInfo}>
-        <span dangerouslySetInnerHTML={{ __html: t("mapctrl.crosshair") }} />
+        <span dangerouslySetInnerHTML={{ __html: t('mapctrl.crosshair') }} />
       </div>
     </div>
   );

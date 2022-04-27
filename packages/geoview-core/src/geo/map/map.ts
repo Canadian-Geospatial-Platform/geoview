@@ -1,32 +1,39 @@
-import { i18n } from "i18next";
+import { i18n } from 'i18next';
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import L from 'leaflet';
 
-import { LatLng, LatLngBounds } from "leaflet";
+import { LatLng, LatLngBounds } from 'leaflet';
 
-import queryString from "query-string";
-import screenfull from "screenfull";
+import queryString from 'query-string';
+import screenfull from 'screenfull';
 
-import { Basemap } from "../layer/basemap/basemap";
-import { Layer } from "../layer/layer";
-import { MapProjection } from "../projection/map-projection";
+import { Basemap } from '../layer/basemap/basemap';
+import { Layer } from '../layer/layer';
 
-import "../../core/types/cgp-leaflet-config";
+import { MapProjection } from '../projection/map-projection';
 
-import { api } from "../../api/api";
+import { api } from '../../app';
+import { EVENT_NAMES } from '../../api/events/event';
+
+import '../../core/types/cgp-leaflet-config';
+import { generateId } from '../../core/utils/utilities';
+import { Config } from '../../core/utils/config';
 import {
   TypeMapConfigProps,
   TypeLayerConfig,
-} from "../../core/types/cgpv-types";
+  TypeLanguages,
+  TypeLocalizedLanguages,
+  TypeMapSchemaProps,
+} from '../../core/types/cgpv-types';
 
-import { generateId } from "../../core/utils/utilities";
+import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
+import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
 
-import { EVENT_NAMES } from "../../api/event";
-import { AppbarButtons } from "../../core/components/appbar/app-bar-buttons";
-import { NavbarButtons } from "../../core/components/navbar/nav-bar-buttons";
-
-import { ModalApi } from "../../ui";
+import { ModalApi } from '../../ui';
+import { mapPayload } from '../../api/events/payloads/map-payload';
+import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
+import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 
 // LCC map options
 // ! Map bounds doesn't work for projection other then Web Mercator
@@ -41,10 +48,7 @@ const wmMapOptionsParam: L.MapOptions = {
   zoomFactor: 5,
   minZoom: 2,
   maxZoom: 19,
-  maxBounds: new LatLngBounds(
-    { lat: -89.999, lng: -180 },
-    { lat: 89.999, lng: 180 }
-  ),
+  maxBounds: new LatLngBounds({ lat: -89.999, lng: -180 }, { lat: 89.999, lng: 180 }),
   maxBoundsViscosity: 0.0,
 };
 
@@ -77,7 +81,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
-  language: string;
+  language: TypeLocalizedLanguages;
 
   // get used projection
   currentProjection: number;
@@ -101,9 +105,10 @@ export class MapViewer {
    * Add the map instance to the maps array in the api
    *
    * @param {TypeMapConfigProps} mapProps map properties
+   * @param {i18n} i18instance language instance
    */
-  constructor(mapProps: TypeMapConfigProps, i18n: i18n) {
-    this.id = mapProps.id!;
+  constructor(mapProps: TypeMapConfigProps, i18instance: i18n) {
+    this.id = mapProps.id;
 
     // add map viewer instance to api
     api.maps[this.id] = this;
@@ -111,10 +116,10 @@ export class MapViewer {
     this.mapProps = mapProps;
 
     this.language = mapProps.language;
-    this.currentProjection = mapProps.projection;
-    this.i18nInstance = i18n;
-    this.currentZoom = mapProps.zoom;
-    this.currentPosition = new LatLng(mapProps.center[0], mapProps.center[1]);
+    this.currentProjection = mapProps.map.projection;
+    this.i18nInstance = i18instance;
+    this.currentZoom = mapProps.map.initialView.zoom;
+    this.currentPosition = new LatLng(mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]);
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
@@ -128,25 +133,20 @@ export class MapViewer {
    * @param cgpMap
    */
   initMap(cgpMap: L.Map): void {
-    this.id = cgpMap.id as string;
+    this.id = cgpMap.id;
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(cgpMap, this.mapProps.layers);
+    this.layer = new Layer(this.id, this.mapProps.map.layers);
 
     // initialize the projection
-    this.projection = new MapProjection(this.mapProps.projection);
+    this.projection = new MapProjection(this.mapProps.map.projection);
 
     // check if geometries are provided from url
     this.loadGeometries();
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(
-      this.mapProps.basemapOptions,
-      this.mapProps.language,
-      this.mapProps.projection,
-      this.id
-    );
+    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
   }
 
   /**
@@ -154,16 +154,13 @@ export class MapViewer {
    */
   loadGeometries(): void {
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint =
-      this.map
-        .getContainer()
-        ?.closest(".llwp-map")
-        ?.getAttribute("data-geometry-endpoint") || "";
+    const servEndpoint = this.map.getContainer()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
+
     // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
 
-    if (parsed.geoms && servEndpoint !== "") {
-      const geoms = (parsed.geoms as string).split(",");
+    if (parsed.geoms && servEndpoint !== '') {
+      const geoms = (parsed.geoms as string).split(',');
 
       // for the moment, only polygon are supported but if need be, other geometries can easely be use as well
       geoms.forEach((key: string) => {
@@ -171,17 +168,15 @@ export class MapViewer {
           // only process valid response
           if (response.status === 200) {
             response.json().then((data) => {
-              if (typeof data.geometry !== "undefined") {
+              if (typeof data.geometry !== 'undefined') {
                 // reverse the array because they are x, y instead of default lat long couple y, x
                 // TODO: check if we can know and set this info from outside
-                data.geometry.coordinates.forEach((r: Array<Array<number>>) =>
-                  r.forEach((c: Array<number>) => c.reverse())
-                );
+                data.geometry.coordinates.forEach((r: Array<Array<number>>) => r.forEach((c: Array<number>) => c.reverse()));
 
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
                 this.layer.vector.addPolygon(data.geometry.coordinates, {
-                  id: generateId(""),
+                  id: generateId(''),
                 });
               }
             });
@@ -200,10 +195,7 @@ export class MapViewer {
   addComponent = (id: string, component: JSX.Element): void => {
     if (id && component) {
       // emit an event to add the component
-      api.event.emit(EVENT_NAMES.EVENT_MAP_ADD_COMPONENT, this.id, {
-        id: id,
-        component: component,
-      });
+      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.id, id, component));
     }
   };
 
@@ -215,9 +207,7 @@ export class MapViewer {
   removeComponent = (id: string): void => {
     if (id) {
       // emit an event to add the component
-      api.event.emit(EVENT_NAMES.EVENT_MAP_REMOVE_COMPONENT, this.id, {
-        id: id,
-      });
+      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.id, id));
     }
   };
 
@@ -249,7 +239,18 @@ export class MapViewer {
   /**
    * Function called when the map has been rendered and ready to be customized
    */
-  mapReady = (): void => {};
+  mapReady = (): void => {
+    api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.id, this.map));
+  };
+
+  /**
+   * Return the language code from localized language
+   *
+   * @returns {TypeLanguages} returns the language code from localized language. Ex: en, fr
+   */
+  getLanguageCode = (): TypeLanguages => {
+    return this.language.split('-')[0] as TypeLanguages;
+  };
 
   /**
    * Change the language of the map
@@ -257,19 +258,68 @@ export class MapViewer {
    * @param {string} language the language to use (en-CA, fr-CA)
    * @param {TypeLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (language: string, layers?: TypeLayerConfig[]): void => {
-    let updatedConfig = { ...this.mapProps };
+  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeLayerConfig[]): void => {
+    const updatedConfig = { ...this.mapProps };
 
-    updatedConfig["language"] = language;
+    updatedConfig.language = language;
 
     if (layers && layers.length > 0) {
-      updatedConfig["layers"] = updatedConfig["layers"]?.concat(layers);
+      updatedConfig.map.layers = updatedConfig.map.layers?.concat(layers);
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(EVENT_NAMES.EVENT_MAP_RELOAD, null, {
-      handlerId: this.id,
-      config: updatedConfig,
-    });
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.id, updatedConfig));
   };
+
+  /**
+   * Load a new map config from a function call
+   *
+   * @param {TypeMapSchemaProps} mapConfig a new config passed in from the function call
+   */
+  loadMapConfig = (mapConfig: TypeMapSchemaProps) => {
+    // create a new config for this map element
+    const config = new Config(this.map.getContainer());
+
+    const configObj = config.getMapConfigFromFunc(mapConfig);
+
+    // emit an event to reload the map with the new config
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.id, configObj!));
+  };
+
+  /**
+   * Set map to either dynamic or static
+   *
+   * @param {string} interaction map interaction
+   */
+  toggleMapInteraction = (interaction: string) => {
+    if (interaction === 'dynamic' || !interaction) {
+      // dynamic map
+      this.map.dragging.enable();
+      this.map.touchZoom.enable();
+      this.map.doubleClickZoom.enable();
+      this.map.scrollWheelZoom.enable();
+      this.map.boxZoom.enable();
+      this.map.keyboard.enable();
+      if (this.map.tap) this.map.tap.enable();
+      this.map.getContainer().style.cursor = 'grab';
+    } else {
+      // static map
+      this.map.dragging.disable();
+      this.map.touchZoom.disable();
+      this.map.doubleClickZoom.disable();
+      this.map.scrollWheelZoom.disable();
+      this.map.boxZoom.disable();
+      this.map.keyboard.disable();
+      if (this.map.tap) this.map.tap.disable();
+      this.map.getContainer().style.cursor = 'default';
+    }
+  };
+
+  /**
+   * Create bounds on map
+   *
+   * @param {LatLng.LatLngBounds} bounds map bounds
+   * @returns the bounds
+   */
+  fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
 }

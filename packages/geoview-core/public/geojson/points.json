@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "data": "92;43.54;12.3;66;75",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120, 45]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "data": "553;54;32.553;5.43;55",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-110, 45]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "data": "255;255;255",
+        "label": "Red;Green;Blue"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-100, 45]
+      }
+    }
+  ]
+}

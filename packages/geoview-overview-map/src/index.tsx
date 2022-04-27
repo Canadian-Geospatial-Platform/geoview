@@ -1,56 +1,39 @@
-import { TypeProps } from "geoview-core";
-import { OverviewMap } from "./overview-map";
+import { Cast, AbstractPluginClass, TypeJsonObject, TypeWindow } from 'geoview-core';
+import { OverviewMap } from './overview-map';
 
-const w = window as any;
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
  */
-class OverviewMapPlugin {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  OverviewMapPluginProps: TypeProps;
-
-  constructor(id: string, props: TypeProps) {
-    this.id = id;
-    this.OverviewMapPluginProps = props;
-  }
-
+class OverviewMapPlugin extends AbstractPluginClass {
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<string>> = {
-    "en-CA": {},
-    "fr-CA": {},
+  translations: TypeJsonObject = {
+    'en-CA': {},
+    'fr-CA': {},
   };
 
   /**
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.OverviewMapPluginProps;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
 
-    const { language, projection, getMapOptions, currentProjection } =
-      api.map(mapId);
+    const { language, projection, getMapOptions, currentProjection } = api.map(mapId);
 
     api
       .map(mapId)
       .addComponent(
-        "overviewMap",
-        <OverviewMap
-          id={mapId}
-          language={language}
-          crs={projection.getCRS()}
-          zoomFactor={getMapOptions(currentProjection).zoomFactor}
-        />
+        'overviewMap',
+        <OverviewMap id={mapId} language={language} crs={projection.getCRS()} zoomFactor={getMapOptions(currentProjection).zoomFactor!} />
       );
   };
 
@@ -58,19 +41,19 @@ class OverviewMapPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.OverviewMapPluginProps;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
 
-    api.map(mapId).removeComponent("overviewMap");
+    api.map(mapId).removeComponent('overviewMap');
   }
 }
 
 export default OverviewMapPlugin;
 
-w["plugins"] = w["plugins"] || {};
-w["plugins"]["overviewMap"] = OverviewMapPlugin;
+w.plugins = w.plugins || {};
+w.plugins['overview-map'] = Cast<AbstractPluginClass>(OverviewMapPlugin);

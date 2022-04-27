@@ -1,54 +1,52 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import PanelContent from "./panel-content";
-
 import {
+  Cast,
+  AbstractPluginClass,
+  toJsonObject,
+  TypeJsonObject,
+  TypeWindow,
+  TypePluginOptions,
   TypeButtonPanel,
-  TypeProps,
   TypeButtonProps,
   TypePanelProps,
-} from "geoview-core";
+} from 'geoview-core';
 
-const w = window as any;
+import PanelContent from './panel-content';
+
+const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
  */
-class LayersPanelPlugin {
-  // id of the plugin
-  id: string;
-
-  // plugin properties
-  LayersPanelPluginProps: TypeProps;
-
+class LayersPanelPlugin extends AbstractPluginClass {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypeProps) {
-    this.id = id;
-    this.LayersPanelPluginProps = props;
+  constructor(id: string, props: TypePluginOptions) {
+    super(id, props);
     this.buttonPanel = null;
   }
 
   /**
    * translations object to inject to the viewer translations
    */
-  translations: TypeProps<TypeProps<any>> = {
-    "en-CA": {
-      layersPanel: "Layers",
+  translations: TypeJsonObject = toJsonObject({
+    'en-CA': {
+      layersPanel: 'Layers',
     },
-    "fr-CA": {
-      layersPanel: "Couches",
+    'fr-CA': {
+      layersPanel: 'Couches',
     },
-  };
+  });
 
   /**
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.LayersPanelPluginProps;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -57,11 +55,11 @@ class LayersPanelPlugin {
 
     // button props
     const button: TypeButtonProps = {
-      id: "layersPanelButton",
-      tooltip: this.translations[language].layersPanel,
-      tooltipPlacement: "right",
+      id: 'layersPanelButton',
+      tooltip: this.translations[language].layersPanel as string,
+      tooltipPlacement: 'right',
       icon: '<i class="material-icons">layers</i>',
-      type: "textWithIcon",
+      type: 'textWithIcon',
     };
 
     // panel props
@@ -72,24 +70,20 @@ class LayersPanelPlugin {
     };
 
     // create a new button panel on the appbar
-    this.buttonPanel = api
-      .map(mapId)
-      .appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(
-      <PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />
-    );
+    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
   };
 
   /**
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.LayersPanelPluginProps;
+    const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
-    const cgpv = w["cgpv"];
+    const { cgpv } = w;
 
     // access the api calls
     const { api } = cgpv;
@@ -102,5 +96,5 @@ class LayersPanelPlugin {
 
 export default LayersPanelPlugin;
 
-w["plugins"] = w["plugins"] || {};
-w["plugins"]["layersPanel"] = LayersPanelPlugin;
+w.plugins = w.plugins || {};
+w.plugins['layers-panel'] = Cast<AbstractPluginClass>(LayersPanelPlugin);

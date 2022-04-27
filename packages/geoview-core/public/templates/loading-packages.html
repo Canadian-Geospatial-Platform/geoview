@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <style>
+      .panel {
+        display: inline-block;
+        background: #ffffff;
+        box-shadow: 0px 0px 5px 5px #666666;
+        -webkit-box-shadow: 2px 2px 5px 5x #666666;
+        -moz-box-shadow: 2px 2px 5px 5px #666666;
+        margin: 10px;
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        margin: 10px;
+      }
+
+      body {
+        padding: 50px;
+      }
+
+      .titleheader {
+        width: 979px;
+        text-align: center;
+      }
+
+      .header-table {
+        width: 1180px;
+        text-align: left;
+        margin: 0 auto;
+      }
+
+      .logo {
+        height: 120px;
+        width: 120px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Loading Packages</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td><a href="./index.html">Main</a><br /></td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase loading / unloading packages at runtime.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="toolbar">
+      <button id="load-details-panel-btn">Load Details Panel</button>
+      <button id="unload-details-panel-btn">Unload Details Panel</button>
+
+      <button id="load-overview-map-btn">Load Overview Map</button>
+      <button id="unload-overview-map-btn">Unload Overview Map</button>
+    </div>
+    <div class="toolbar">
+      <button id="load-basemap-switcher-btn">Load Basemap Switcher</button>
+      <button id="unload-basemap-switcher-btn">Unload Basemap Switcher</button>
+    </div>
+    <div class="toolbar">
+      <button id="load-layers-panel-btn">Load Layers Panel</button>
+      <button id="unload-layers-panel-btn">Unload Layers Panel</button>
+    </div>
+    <div>
+      <div
+        id="mapWM"
+        class="llwp-map"
+        data-lang="en-CA"
+        data-shared="true"
+        data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'initialView': {
+            'zoom': 4,
+            'center': [60, -100]
+          },
+          'projection': 3978,
+          'basemapOptions': {
+            'id': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'layers': [
+            {
+              'id': 'wmsLYR1',
+              'name': {
+                'en': 'Première Nation / First Nation',
+                'fr': 'Première Nation / First Nation'
+              },
+              'url': {
+                'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
+              },
+              'layerType': 'ogcWms',
+              'layerEntries': [
+                {
+                  'id': '0'
+                }
+              ]
+            },
+            {
+              'id': 'esriDynamicLYR2',
+              'name': {
+                'en': 'Energy Infrastructure of North America',
+                'fr': 'Infrastructure énergétique d'Amérique du Nord'
+              },
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
+              },
+              'layerType': 'esriDynamic',
+              'layerEntries': [
+                {
+                  'index': 4,
+                  'name': {
+                    'en': 'Natural Gas Processing Plants - config',
+                    'fr': 'Usines de traitement du gaz naturel - config'
+                  }
+                },
+                {
+                  'index': 5
+                },
+                {
+                  'index': 6
+                }
+              ]
+            },
+            {
+              'id': 'esriFeatureLYR3',
+              'name': {
+                'en': 'Geothermal',
+                'fr': 'Géothermie'
+              },
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21'
+              },
+              'layerType': 'esriFeature'
+            },
+            {
+              'id': 'esriFeatureLYR4',
+              'url': {
+                'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10',
+                'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10'
+              },
+              'layerType': 'esriFeature'
+            },
+            {
+              'id': 'geojsonLYR5',
+              'name': {
+                'en': 'GeoJSON Sample',
+                'fr': 'Exemple GeoJSON'
+              },
+              'url': {
+                'en': './geojson/polygons.json',
+                'fr': './geojson/polygons.json'
+              },
+              'layerType': 'geojson'
+            },
+            {
+              'id': 'wfsLYR6',
+              'name': {
+                'en': 'Airport data',
+                'fr': 'Airport data'
+              },
+              'url': {
+                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
+                'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+              },
+              'layerType': 'ogcWfs',
+              'layerEntries': [
+                {
+                  'id': 'GISDATA.AIRPORTS_PT'
+                }
+              ]
+            },
+            {
+              'id': 'ogcFeatureLYR7',
+              'name': {
+                'en': 'Large Lakes',
+                'fr': 'Large Lakes'
+              },
+              'url': {
+                'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
+                'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
+              },
+              'layerType': 'ogcFeature',
+              'layerEntries': [
+                {
+                  'id': 'lakes'
+                }
+              ]
+            },
+            {
+              'id': 'xyzTilesLYR8',
+              'name': {
+                'en': 'CARTO Raster Basemap',
+                'fr': 'CARTO Raster Basemap'
+              },
+              'url': {
+                'en': 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+                'fr': 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png'
+              },
+              'layerType': 'xyzTiles'
+            }
+          ]
+        },
+        'theme': 'dark',
+        'appBar': {
+          'about': {
+              'en': '# An example of a markdown',
+              'fr': '# Un exemple de démarque'
+          }
+        },
+        'components': ['appbar', 'navbar', 'northArrow'],
+        'corePackages': ['overview-map', 'basemap-switcher', 'details-panel', 'layers-panel'],
+        'externalPackages': [],
+        'languages': ['en-CA']
+      }"
+      ></div>
+
+      <p>This map is in LCC projection with an English interface.</p>
+      <p><strong>Configuraion Snippet:</strong></p>
+      <div id="mapWMCS" class="panel"></div>
+    </div>
+    <p><strong>Code Snippet:</strong></p>
+    <div id="codeSnippet" class="panel"></div>
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        createCodeSnippet();
+        createConfigSnippet();
+
+        // get load details panel button element
+        var loadDetailsPanelBtn = document.getElementById('load-details-panel-btn');
+
+        // add event handler to the load details panel button
+        loadDetailsPanelBtn.addEventListener('click', function (e) {
+          cgpv.api.addPlugin('details-panel', 'mapWM', window.plugins['details-panel'], {
+            mapId: 'mapWM',
+          });
+        });
+
+        // get unload details panel button element
+        var unloadDetailsPanelBtn = document.getElementById('unload-details-panel-btn');
+
+        // add event handler to the unload details panel button
+        unloadDetailsPanelBtn.addEventListener('click', function (e) {
+          cgpv.api.removePlugin('details-panel');
+        });
+
+        // get load overview map button element
+        var loadOverviewMapBtn = document.getElementById('load-overview-map-btn');
+
+        // add event handler to the load overview map button
+        loadOverviewMapBtn.addEventListener('click', function (e) {
+          cgpv.api.addPlugin('overview-map', 'mapWM', window.plugins['overview-map'], {
+            mapId: 'mapWM',
+          });
+        });
+
+        // get unload overview map button element
+        var unloadOverviewMapBtn = document.getElementById('unload-overview-map-btn');
+
+        // add event handler to the unload overview map button
+        unloadOverviewMapBtn.addEventListener('click', function (e) {
+          cgpv.api.removePlugin('overview-map');
+        });
+
+        // get load basemap switcher button element
+        var loadBasemapSwitcherBtn = document.getElementById('load-basemap-switcher-btn');
+
+        // add event handler to the load basemap switcher button
+        loadBasemapSwitcherBtn.addEventListener('click', function (e) {
+          cgpv.api.addPlugin('basemap-switcher', 'mapWM', window.plugins['basemap-switcher'], {
+            mapId: 'mapWM',
+          });
+        });
+
+        // get unload basemap switcher button element
+        var unloadBasemapSwitcherBtn = document.getElementById('unload-basemap-switcher-btn');
+
+        // add event handler to the unload basemap switcher button
+        unloadBasemapSwitcherBtn.addEventListener('click', function (e) {
+          cgpv.api.removePlugin('basemap-switcher', 'mapWM');
+        });
+
+        // get load basemap switcher button element
+        var loadLayersPanelBtn = document.getElementById('load-layers-panel-btn');
+
+        // add event handler to the load basemap switcher button
+        loadLayersPanelBtn.addEventListener('click', function (e) {
+          cgpv.api.addPlugin('layers-panel', 'mapWM', window.plugins['layers-panel'], {
+            mapId: 'mapWM',
+          });
+        });
+
+        // get unload basemap switcher button element
+        var unloadLayersPanelBtn = document.getElementById('unload-layers-panel-btn');
+
+        // add event handler to the unload basemap switcher button
+        unloadLayersPanelBtn.addEventListener('click', function (e) {
+          cgpv.api.removePlugin('layers-panel');
+        });
+      });
+    </script>
+  </body>
+</html>

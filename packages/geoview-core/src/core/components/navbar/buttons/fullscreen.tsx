@@ -1,17 +1,26 @@
-import { useContext, useState } from "react";
+import { useContext, useState } from 'react';
 
-import { MapContext } from "../../../app-start";
+import { MapContext } from '../../../app-start';
 
-import { api } from "../../../../api/api";
+import { api } from '../../../../app';
 
-import { Button, FullscreenIcon, FullscreenExitIcon } from "../../../../ui";
+import { Button, FullscreenIcon, FullscreenExitIcon } from '../../../../ui';
 
 /**
  * Interface used for fullscreen button properties
  */
 interface FullscreenProps {
-  className?: string | undefined;
+  className?: string;
+  iconClassName?: string;
 }
+
+/**
+ * default properties values
+ */
+const defaultProps = {
+  className: '',
+  iconClassName: '',
+};
 
 /**
  * Create a toggle button to toggle between fullscreen
@@ -20,11 +29,11 @@ interface FullscreenProps {
  * @returns {JSX.Element} the fullscreen toggle button
  */
 export default function Fullscreen(props: FullscreenProps): JSX.Element {
-  const { className } = props;
+  const { className, iconClassName } = props;
 
   const [fs, setFs] = useState(false);
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
@@ -33,10 +42,12 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
    * Toggle between fullscreen and window mode
    */
   function setFullscreen() {
-    setFs(!fs);
-    api
-      .map(mapId)
-      .toggleFullscreen(api.map(mapId).map.getContainer().parentElement!);
+    const { parentElement } = api.map(mapId).map.getContainer();
+
+    if (parentElement) {
+      setFs(!fs);
+      api.map(mapId).toggleFullscreen(parentElement);
+    }
   }
 
   return (
@@ -46,8 +57,11 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
       tooltip="mapnav.fullscreen"
       tooltipPlacement="left"
       icon={!fs ? <FullscreenIcon /> : <FullscreenExitIcon />}
-      onClick={setFullscreen}
+      onClick={() => setFullscreen()}
       className={className}
+      iconClassName={iconClassName}
     />
   );
 }
+
+Fullscreen.defaultProps = defaultProps;

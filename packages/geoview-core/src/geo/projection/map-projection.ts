@@ -1,8 +1,9 @@
-import { CRS } from "leaflet";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { CRS } from 'leaflet';
 
-import { Projection } from "./projection";
+import { Projection } from './projection';
 
-import { api } from "../../api/api";
+import { api } from '../../app';
 
 /**
  * A class that manages the projection for the loaded map
@@ -33,10 +34,7 @@ export class MapProjection extends Projection {
    * @param projection the projection to use
    */
   setCRS = (projection: number): void => {
-    this.crs =
-      projection === 3857
-        ? CRS.EPSG3857
-        : api.projection.getProjection(projection);
+    this.crs = projection === 3857 ? CRS.EPSG3857 : api.projection.getProjection(projection);
   };
 
   /**

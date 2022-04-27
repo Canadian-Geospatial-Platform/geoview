@@ -1,17 +1,13 @@
-import { api } from "../../../api/api";
+import { api } from '../../../app';
 
-import { EVENT_NAMES } from "../../../api/event";
+import { EVENT_NAMES } from '../../../api/events/event';
 
-import { ButtonApi, PanelApi } from "../../../ui";
+import { PanelApi } from '../../../ui';
 
-import {
-  TypeButtonPanel,
-  TypeButtonProps,
-  TypePanelProps,
-  CONST_PANEL_TYPES,
-} from "../../types/cgpv-types";
+import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
-import { generateId } from "../../utils/utilities";
+import { generateId } from '../../utils/utilities';
+import { buttonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
 /**
  * Class to manage buttons on the navbar
@@ -69,46 +65,43 @@ export class NavbarButtons {
   ): TypeButtonPanel | null => {
     if (buttonProps) {
       // generate an id if not provided
-      buttonProps.id = generateId(buttonProps.id);
+      const id = generateId(buttonProps.id);
 
       // if group was not specified then add button panels to the default group
-      if (!groupName) {
-        groupName = "default";
-      }
+      const group = groupName || 'default';
 
       // if group does not exist then create it
-      if (!this.buttons[groupName]) {
-        this.buttons[groupName] = {};
+      if (!this.buttons[group]) {
+        this.buttons[group] = {};
       }
 
+      const button: TypeButtonProps = {
+        ...buttonProps,
+        id,
+        visible: !buttonProps.visible ? true : buttonProps.visible,
+      };
+
       const buttonPanel: TypeButtonPanel = {
-        id: buttonProps.id,
-        button: new ButtonApi(buttonProps),
-        groupName,
+        id,
+        button,
+        groupName: group,
       };
 
       // if adding a panel
       if (panelProps) {
-        // set panel type
-        if (panelProps) panelProps.type = CONST_PANEL_TYPES.NAVBAR;
+        const panel: TypePanelProps = {
+          ...panelProps,
+          type: CONST_PANEL_TYPES.NAVBAR,
+        };
 
-        buttonPanel.panel = new PanelApi(
-          panelProps,
-          buttonProps.id,
-          this.mapId
-        );
+        buttonPanel.panel = new PanelApi(panel, id, this.mapId);
       }
 
       // add the new button panel to the correct group
-      this.buttons[groupName][buttonProps.id] = buttonPanel;
+      this.buttons[group][id] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, {
-        handlerId: this.mapId,
-        buttonPanel,
-        id: buttonProps.id,
-        groupName,
-      });
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, id, group, buttonPanel));
 
       return buttonPanel;
     }
@@ -125,11 +118,7 @@ export class NavbarButtons {
    *
    * @returns the created button panel
    */
-  createNavbarButtonPanel = (
-    buttonProps: TypeButtonProps,
-    panelProps: TypePanelProps,
-    groupName: string
-  ): TypeButtonPanel | null => {
+  createNavbarButtonPanel = (buttonProps: TypeButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
     return this.createButtonPanel(buttonProps, panelProps, groupName);
   };
 
@@ -141,10 +130,7 @@ export class NavbarButtons {
    *
    * @returns the create button
    */
-  createNavbarButton = (
-    buttonProps: TypeButtonProps,
-    groupName: string
-  ): TypeButtonPanel | null => {
+  createNavbarButton = (buttonProps: TypeButtonProps, groupName: string): TypeButtonPanel | null => {
     return this.createButtonPanel(buttonProps, null, groupName);
   };
 
@@ -156,11 +142,9 @@ export class NavbarButtons {
    */
   getNavBarButtonPanelById = (id: string): TypeButtonPanel | null => {
     // loop through groups of appbar button panels
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
 
-      // eslint-disable-next-line no-plusplus
       for (let j = 0; j < Object.keys(group).length; j++) {
         const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 
@@ -184,11 +168,7 @@ export class NavbarButtons {
       const group = this.buttons[groupName];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emit(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, {
-        handlerId: this.mapId,
-        id,
-        groupName,
-      });
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
 
       // delete the button or panel from the group
       delete group[id];

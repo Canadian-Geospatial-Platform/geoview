@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-underscore-dangle */
-import L, { Util, LatLngBounds } from "leaflet";
-import "leaflet.markercluster/src";
-import "react-leaflet";
+/* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
+import L, { Util, LatLngBounds } from 'leaflet';
+import 'leaflet.markercluster/src';
+import 'react-leaflet';
 
-import * as DomUtil from "leaflet/src/dom/DomUtil";
-import * as DomEvent from "leaflet/src/dom/DomEvent";
-import { Cast, CONST_VECTOR_TYPES } from "./cgpv-types";
+import * as DomUtil from 'leaflet/src/dom/DomUtil';
+import * as DomEvent from 'leaflet/src/dom/DomEvent';
+import { MapServiceOptions } from 'esri-leaflet';
+import { Cast, CONST_VECTOR_TYPES } from './cgpv-types';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../app';
+import { EVENT_NAMES } from '../../api/events/event';
+import { selectBoxPayload } from '../../api/events/payloads/select-box-payload';
 
 /*-----------------------------------------------------------------------------
  *
@@ -19,13 +20,7 @@ import { EVENT_NAMES } from "../../api/event";
 
 (L.Map as any).BoxZoom.include({
   _onMouseDown: function _onMouseDown(e: MouseEvent): void {
-    if (
-      !e.shiftKey ||
-      e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     // Clear the deferred resetState if it hasn't executed yet, otherwise it
     // will interrupt the interaction and orphan a box element in the container.
@@ -51,13 +46,7 @@ import { EVENT_NAMES } from "../../api/event";
 
   _onMouseUp: function _onMouseUp(e: MouseEvent): void {
     this._finish();
-    if (
-      !e.shiftKey ||
-      e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (!e.shiftKey || e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     if (!this._moved) return;
     // Postpone to next JS tick so internal click event handling
@@ -65,12 +54,9 @@ import { EVENT_NAMES } from "../../api/event";
     this._clearDeferredResetState();
     this._resetStateTimeout = setTimeout(Util.bind(this._resetState, this), 0);
 
-    const bounds = new LatLngBounds(
-      this._map.containerPointToLatLng(this._startPoint),
-      this._map.containerPointToLatLng(this._point)
-    );
+    const bounds = new LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
 
-    this._map.fitBounds(bounds).fire("boxzoomend", { boxZoomBounds: bounds });
+    this._map.fitBounds(bounds).fire('boxzoomend', { boxZoomBounds: bounds });
   },
 });
 
@@ -79,10 +65,10 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
     if (!this._moved) {
       this._moved = true;
 
-      this._box = DomUtil.create("div", "leaflet-zoom-box", this._container);
-      DomUtil.addClass(this._container, "leaflet-crosshair");
+      this._box = DomUtil.create('div', 'leaflet-zoom-box', this._container);
+      DomUtil.addClass(this._container, 'leaflet-crosshair');
 
-      this._map.fire("boxzoomstart");
+      this._map.fire('boxzoomstart');
     }
 
     this._point = this._map.mouseEventToContainerPoint(e);
@@ -97,13 +83,7 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
   },
 
   _onMouseDown: function _onMouseDown(e: MouseEvent): void {
-    if (
-      e.shiftKey ||
-      !e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     // Clear the deferred resetState if it hasn't executed yet, otherwise it
     // will interrupt the interaction and orphan a box element in the container.
@@ -131,13 +111,7 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
   _onMouseUp: function _onMouseUp(e: MouseEvent): void {
     this._finish();
     this._map.dragging.enable();
-    if (
-      e.shiftKey ||
-      !e.altKey ||
-      e.ctrlKey ||
-      (e.which !== 1 && e.button !== 1)
-    )
-      return;
+    if (e.shiftKey || !e.altKey || e.ctrlKey || (e.which !== 1 && e.button !== 1)) return;
 
     if (!this._moved) return;
     // Postpone to next JS tick so internal click event handling
@@ -145,16 +119,13 @@ export const SelectBox = (L.Map as any).BoxZoom.extend({
     this._clearDeferredResetState();
     this._resetStateTimeout = setTimeout(Util.bind(this._resetState, this), 0);
 
-    const bounds = new LatLngBounds(
-      this._map.containerPointToLatLng(this._startPoint),
-      this._map.containerPointToLatLng(this._point)
-    );
+    const bounds = new LatLngBounds(this._map.containerPointToLatLng(this._startPoint), this._map.containerPointToLatLng(this._point));
 
-    this._map.fire("boxselectend", { selectBoxBounds: bounds });
+    this._map.fire('boxselectend', { selectBoxBounds: bounds });
   },
 });
 
-L.Map.addInitHook("addHandler", "selectBox", SelectBox);
+L.Map.addInitHook('addHandler', 'selectBox', SelectBox);
 
 /*-----------------------------------------------------------------------------
  *
@@ -162,7 +133,7 @@ L.Map.addInitHook("addHandler", "selectBox", SelectBox);
  *
  *---------------------------------------------------------------------------*/
 
-declare module "leaflet" {
+declare module 'leaflet' {
   interface LayerOptions {
     id?: string;
     visible?: boolean;
@@ -185,9 +156,9 @@ L.Layer.addInitHook(function fn(this: L.Layer) {
  *
  *---------------------------------------------------------------------------*/
 
-declare module "leaflet" {
+declare module 'leaflet' {
   interface CircleMarkerOptions {
-    id: string;
+    id?: string;
   }
 
   interface CircleMarker {
@@ -207,18 +178,18 @@ L.CircleMarker.addInitHook(function fn(this: L.CircleMarker) {
 L.Circle.addInitHook(function fn(this: L.Circle) {
   this.type = CONST_VECTOR_TYPES.CIRCLE;
   // Radius of the circle is in meters, we convert it to km
-  this._mRadius = (this.options.radius as number) * 1000;
+  this._mRadius = this.options.radius! * 1000;
 });
 
 /*-----------------------------------------------------------------------------
  *
- * L.Polyline and Polygon configuration
+ * L.Polyline and L.Polygon configuration
  *
  *---------------------------------------------------------------------------*/
 
-declare module "leaflet" {
+declare module 'leaflet' {
   interface PolylineOptions {
-    id: string;
+    id?: string;
   }
 
   interface Polyline {
@@ -243,26 +214,19 @@ L.Polygon.addInitHook(function fn(this: L.Polygon) {
  * L.Marker and L.MarkerCluster configuration
  *
  *---------------------------------------------------------------------------*/
-declare module "leaflet" {
+declare module 'leaflet' {
   interface MarkerOptions {
-    id: string;
+    id?: string;
   }
 
   interface Marker {
-    initialize: (latLng: L.LatLng, options: L.MarkerOptions) => void;
-  }
-
-  interface MarkerCluster {
-    spiderfy: () => void;
-    unspiderfy: () => void;
-    getAllChildMarkers(): L.MarkerClusterElement[];
-    zoomToBounds(options: { padding: [number, number] }): void;
+    initialize: (latLng: LatLng, options: MarkerOptions) => void;
   }
 }
 
 L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
-  if ("getAllChildMarkers" in this) {
-    this.type = "marker_cluster";
+  if ('getAllChildMarkers' in this) {
+    this.type = 'marker_cluster';
   } else {
     this.type = CONST_VECTOR_TYPES.MARKER;
   }
@@ -274,9 +238,9 @@ L.Marker.addInitHook(function fn(this: L.Marker | L.MarkerCluster) {
  *
  *---------------------------------------------------------------------------*/
 
-declare module "leaflet" {
+declare module 'leaflet' {
   interface FeatureGroupOptions extends LayerOptions {
-    id: string;
+    id?: string;
     visible?: boolean;
   }
 
@@ -284,24 +248,25 @@ declare module "leaflet" {
     visible: boolean;
   }
 
-  export function featureGroup(
-    layers?: Layer[],
-    options?: FeatureGroupOptions
-  ): FeatureGroup;
+  export function featureGroup(layers?: Layer[], options?: FeatureGroupOptions): FeatureGroup;
+
+  export interface Evented extends Class {
+    on(type: 'clusterclick' | 'unspiderfied' | 'spiderfied', fn: MarkerClusterMouseEventHandlerFn): void;
+    off(type: 'clusterclick' | 'unspiderfied' | 'spiderfied', fn: MarkerClusterMouseEventHandlerFn): void;
+    fire(type: 'click', event: MarkerClusterMouseEvent, propagate: boolean): void;
+  }
 
   export interface MarkerClusterMouseEvent extends LeafletMouseEvent {
     latlng: LatLng;
     layerPoint: Point;
     containerPoint: Point;
     originalEvent: MouseEvent;
-    propagatedFrom: MarkerCluster;
+    propagatedFrom: MarkerClusterElement;
     target: MarkerClusterGroup;
     type: string;
   }
 
-  export type MarkerClusterMouseEventHandlerFn = (
-    event: MarkerClusterMouseEvent
-  ) => void;
+  export type MarkerClusterMouseEventHandlerFn = (event: MarkerClusterMouseEvent) => void;
 
   interface MarkerClusterGroupOnOptions {
     clusterclick?: MarkerClusterMouseEventHandlerFn;
@@ -309,7 +274,7 @@ declare module "leaflet" {
     spiderfied?: MarkerClusterMouseEventHandlerFn;
   }
 
-  interface MarkerClusterGroupOptions {
+  interface MarkerClusterGroupOptions extends LayerOptions {
     id?: string;
     visible?: boolean;
     on?: MarkerClusterGroupOnOptions;
@@ -318,41 +283,23 @@ declare module "leaflet" {
   interface MarkerClusterGroup extends FeatureGroup {
     visible: boolean;
     type: string;
-    addLayer(marker: MarkerClusterElement): this;
-    removeLayer(marker: MarkerClusterElement): this;
-    eachLayer(fn: (layer: L.MarkerClusterElement) => void, context?: any): this;
-    getLayers(): MarkerClusterElement[];
     getVisibleParent(marker: MarkerClusterElement): MarkerCluster;
     unspiderfy(): void;
-    on(
-      type: "clusterclick" | "unspiderfied" | "spiderfied",
-      fn: MarkerClusterMouseEventHandlerFn
-    ): void;
-    off(
-      type: "clusterclick" | "unspiderfied" | "spiderfied",
-      fn: MarkerClusterMouseEventHandlerFn
-    ): void;
-    fire(
-      type: "click",
-      event: MarkerClusterMouseEvent,
-      propagate: boolean
-    ): void;
+    eachLayer(fn: (marker: MarkerClusterElement) => void, context?: any): this;
   }
 }
 
-L.FeatureGroup.addInitHook(function fn(
-  this: L.FeatureGroup | L.MarkerClusterGroup
-) {
-  if ("visible" in this.options) {
+L.FeatureGroup.addInitHook(function fn(this: L.FeatureGroup | L.MarkerClusterGroup) {
+  if ('visible' in this.options) {
     this.visible = this.options.visible as boolean;
   } else {
     this.visible = true;
     this.options.visible = true;
   }
-  if ("getVisibleParent" in this) {
-    this.type = "MarkerClusterGroup";
+  if ('getVisibleParent' in this) {
+    this.type = 'MarkerClusterGroup';
   } else {
-    this.type = "FeatureGroup";
+    this.type = 'FeatureGroup';
   }
 });
 
@@ -362,7 +309,7 @@ L.FeatureGroup.addInitHook(function fn(
  *
  *---------------------------------------------------------------------------*/
 
-declare module "leaflet" {
+declare module 'leaflet' {
   interface MapOptions {
     id?: string;
     zoomFactor?: number;
@@ -379,12 +326,9 @@ declare module "leaflet" {
 L.Map.addInitHook(function fn(this: L.Map) {
   if (this.options && this.options.id) this.id = this.options.id;
   if (this.options.selectBox) {
-    this.on("boxselectend", (e: L.LeafletEvent) => {
-      const bounds =
-        Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
-      api.event.emit(EVENT_NAMES.EVENT_BOX_SELECT_END, e.target.id, {
-        selectBoxBounds: bounds,
-      });
+    this.on('boxselectend', (e: L.LeafletEvent) => {
+      const bounds = Cast<{ selectBoxBounds: L.LatLngBounds }>(e).selectBoxBounds;
+      api.event.emit(selectBoxPayload(EVENT_NAMES.CLUSTER_ELEMENT.EVENT_BOX_SELECT_END, e.target.id, bounds));
     });
   }
 });
@@ -395,10 +339,26 @@ L.Map.addInitHook(function fn(this: L.Map) {
  *
  *---------------------------------------------------------------------------*/
 
-declare module "react-leaflet" {
+declare module 'react-leaflet' {
   interface MapContainerProps {
     id?: string;
     boxZoom?: boolean;
     selectBox?: boolean;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+ *
+ * L.esri.MapService configuration
+ *
+ *---------------------------------------------------------------------------*/
+
+declare module 'esri-leaflet' {
+  interface MapService {
+    options: MapServiceOptions;
+  }
+
+  interface DynamicMapLayer {
+    options: DynamicMapLayerOptions;
   }
 }

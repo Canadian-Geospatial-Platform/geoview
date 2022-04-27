@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Events</strong></h1>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HLNG1">1. Snackbar Notification</a><br />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase how emit and listen to events from the API works</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3 id="HEVNT1">1. Snackbar Notification</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div
+        id="EVNT1"
+        class="llwp-map"
+        data-lang="en-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [60, -100]
+            },
+            'projection': 3978,
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': true,
+              'labeled': true
+            }
+          },
+          'theme': 'dark',
+          'languages': ['en-CA']
+        }"
+      ></div>
+
+      <p>This script tag will trigger a basic notification on load and another with a custom function every 20 seconds.</p>
+
+      <div class="panel">
+        <h3>Accessing map center from outside of the core viewer using api event listeners</h3>
+        <div class="maps-position"></div>
+      </div>
+
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="EVNT1CS" class="panel"></div>
+      <p><strong>Code Snippet:</strong></p>
+      <div id="codeSnippet" class="panel"></div>
+    </div>
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //get map posiion panel
+        const mapsPosition = document.getElementsByClassName('maps-position');
+
+        // listen to map moveend event
+        cgpv.api.event.on(
+          cgpv.api.eventNames.MAP.EVENT_MAP_MOVE_END,
+          (payload) => {
+            if (cgpv.types.payloadIsALatLng(payload)) {
+              mapsPosition[0].innerHTML =
+                mapsPosition[0].innerHTML = `<p>Map ${payload.handlerName} with latitude ${payload.latLng.lat} and longitude ${payload.latLng.lng}</p>`;
+            }
+          },
+          'EVNT1'
+        );
+
+        // snackbar notification
+        cgpv.api.event.emit(
+          cgpv.types.snackbarMessagePayload(
+            cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
+              type: 'string',
+              value: 'This is my first snackbar!',
+            }
+          )
+        );
+
+        setInterval(() => {
+          cgpv.api.event.emit(
+            cgpv.types.snackbarMessagePayload(
+              cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
+                type: 'string',
+                value: 'I can even apply a function',
+              },
+              {},
+              {
+                label: 'Click me!',
+                action: () => {
+                  alert('You clicked me!');
+                },
+              },
+            )
+          );
+        }, 20000);
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

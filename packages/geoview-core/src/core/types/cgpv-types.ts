@@ -1,68 +1,157 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties } from 'react';
 
-import L from "leaflet";
+import { useTranslation } from 'react-i18next';
 
-import { TooltipProps } from "@mui/material";
+import * as ReactLeaflet from 'react-leaflet';
+import * as ReactLeafletCore from '@react-leaflet/core';
 
-import { Plugin } from "../../api/plugin";
-import { API } from "../../api/api";
+import L from 'leaflet';
 
-import { PanelApi, ButtonApi } from "../../ui";
+import {
+  TooltipProps,
+  ButtonProps,
+  ButtonGroupProps,
+  CircularProgressProps,
+  DividerProps,
+  DrawerProps,
+  FadeProps,
+  IconButtonProps,
+  ListItemProps,
+  ListProps,
+  DialogProps,
+  BaseTextFieldProps,
+  useMediaQuery,
+} from '@mui/material';
+
+import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+
+import * as MUI from '@mui/material';
+
+import { Plugin } from '../../api/plugin';
+import { API } from '../../api/api';
+
+import { PanelApi } from '../../ui';
+import * as UI from '../../ui';
+
+import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
+
+import { AbstractWebLayersClass } from './abstract/abstract-web-layers';
+import { AbstractPluginClass } from './abstract/abstract-plugin';
+
+export { AbstractWebLayersClass } from './abstract/abstract-web-layers';
+export { AbstractPluginClass } from './abstract/abstract-plugin';
+
+export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
+export { EsriFeature } from '../../geo/layer/web-layers/esri/esri-feature';
+export { GeoJSON } from '../../geo/layer/web-layers/file/geojson';
+export { XYZTiles } from '../../geo/layer/web-layers/map-tile/xyz-tiles';
+export { OgcFeature } from '../../geo/layer/web-layers/ogc/ogc_feature';
+export { WFS } from '../../geo/layer/web-layers/ogc/wfs';
+export { WMS } from '../../geo/layer/web-layers/ogc/wms';
+
+export * from '../../api/events/payloads/basemap-layers-payload';
+export * from '../../api/events/payloads/boolean-payload';
+export * from '../../api/events/payloads/button-panel-payload';
+export * from '../../api/events/payloads/cluster-element-payload';
+export * from '../../api/events/payloads/in-keyfocus-payload';
+export * from '../../api/events/payloads/lat-long-payload';
+export * from '../../api/events/payloads/layer-config-payload';
+export * from '../../api/events/payloads/map-component-payload';
+export * from '../../api/events/payloads/map-config-payload';
+export * from '../../api/events/payloads/map-payload';
+export * from '../../api/events/payloads/marker-cluster-config-payload';
+export * from '../../api/events/payloads/marker-definition-payload';
+export * from '../../api/events/payloads/modal-payload';
+export * from '../../api/events/payloads/number-payload';
+export * from '../../api/events/payloads/panel-payload';
+export * from '../../api/events/payloads/payload-base-class';
+export * from '../../api/events/payloads/select-box-payload';
+export * from '../../api/events/payloads/snackbar-message-payload';
+export * from '../../api/events/payloads/vector-config-payload';
+export * from '../../api/events/payloads/vector-payload';
+export * from '../../api/events/payloads/web-layer-payload';
+
+export * from './material-ui.d';
+
+declare global {
+  interface Window {
+    cgpv: TypeCGPV;
+    plugins: Record<string, unknown>;
+  }
+}
 
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
 }
 
 export interface TypeWindow extends Window {
-  cgpv?: TypeCGPV;
-  plugins?: Record<string, Plugin>;
+  cgpv: TypeCGPV;
+  plugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPluginClass | undefined };
 }
+
+export type TypeCGPVUI = {
+  useTheme: typeof useTheme;
+  useMediaQuery: typeof useMediaQuery;
+  makeStyles: typeof makeStyles;
+  elements: typeof UI;
+};
+
+export type TypeCGPVMUI = {
+  Stepper: typeof MUI.Stepper;
+  Step: typeof MUI.Step;
+  StepLabel: typeof MUI.StepLabel;
+  StepContent: typeof MUI.StepContent;
+  TextField: typeof MUI.TextField;
+  Typography: typeof MUI.Stepper;
+  InputLabel: typeof MUI.InputLabel;
+  FormControl: typeof MUI.FormControl;
+  Select: typeof MUI.Select;
+  MenuItem: typeof MUI.MenuItem;
+  Autocomplete: typeof MUI.Autocomplete;
+  Slider: typeof MUI.Slider;
+  Tooltip: typeof MUI.Tooltip;
+  Checkbox: typeof MUI.Checkbox;
+};
+
+export type TypeCGPVConstants = {
+  leafletPositionClasses: typeof LEAFLET_POSITION_CLASSES;
+};
 
 export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
-  react: Object;
-  leaflet: Object;
-  reactLeaflet: Object;
-  reactLeafletCore: Object;
-  mui?: Object;
-  ui: Object;
-  useTranslation: Object;
+  react: typeof React;
+  leaflet: typeof L;
+  reactLeaflet: typeof ReactLeaflet;
+  reactLeafletCore: typeof ReactLeafletCore;
+  mui?: typeof MUI;
+  ui: TypeCGPVUI;
+  useTranslation: typeof useTranslation;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   types: Object;
-  constants: Object;
+  constants: TypeCGPVConstants;
 };
 
 export type TypeCallback = (callback: () => void) => void;
 
 export type TypeFunction = () => void;
 
-//export interface TypeApi extends API, Event, Projection, Plugin {} //#427
+// export interface TypeApi extends API, Event, Projection, Plugin {} //#427
 export interface TypeApi extends API, Event, Plugin {}
 
 export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
 
-export type TypeChild = React.ReactElement<any, any> | undefined;
-
-export type TypeChildren =
-  | number
-  | boolean
-  | {}
-  | JSX.Element
-  | Element
-  | React.ReactElement<any, any | string | React.JSXElementConstructor<any>>
-  | Iterable<React.ReactNode>
-  | React.ReactPortal
-  | (JSX.Element | null)[]
-  | null;
+export type TypeChildren = React.ReactNode;
 
 /**
- * Map types
+ * Map context
  */
-export type TypeMapComponent = {
+export type TypeMapContext = {
   id: string;
-  component: JSX.Element;
+  interaction: string;
 };
 
 /*-----------------------------------------------------------------------------
@@ -71,25 +160,21 @@ export type TypeMapComponent = {
  *
  *---------------------------------------------------------------------------*/
 
-export type TypeJSONValue =
-  | string
-  | number
-  | boolean
-  | null
-  | TypeJSONValue[]
-  | TypeJSONObject;
+export type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject };
 
-export type TypeJSONObject = {
-  [key: string]: TypeJSONValue;
-};
+export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
 
-export type TypeJSONObjectLoop = {
-  [key: string]: TypeJSONObjectLoop;
-};
+export type TypeJsonObject = TypeJsonValue & { [key: string]: TypeJsonObject };
 
-export type TypeJSONObjectMapComponent = {
-  [key: string]: TypeMapComponent;
-};
+export function toJsonObject(p: unknown): TypeJsonObject {
+  if (!(p instanceof Object) || p instanceof Array) {
+    // eslint-disable-next-line no-console
+    console.log(p);
+    throw new Error(`Can't convert parameter to TypeJsonObject! typeof = ${typeof p}`);
+  }
+
+  return p as TypeJsonObject;
+}
 
 /*-----------------------------------------------------------------------------
  *
@@ -104,73 +189,48 @@ export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
 export type TypeIconCreationFunction = () => L.DivIcon;
 
 /**
- * constant contains layer types
+ * ESRI Json Legend for Dynamic Layer
  */
-export const CONST_LAYER_TYPES = {
-  WMS: "ogcWMS",
-  GEOJSON: "geoJSON",
-  ESRI_DYNAMIC: "esriDynamic",
-  ESRI_FEATURE: "esriFeature",
-  XYZ_TILES: "xyzTiles",
-};
-
-/**
- * interface used when adding a new layer
- */
-export type TypeLayerConfig = {
-  id?: string;
-  name?: string;
-  url: string;
-  type: string;
-  entries?: string;
-};
-
-/**
- * interface used when adding a new layer
- */
-
-export type TypeLayerData = {
-  id: string;
-  type: "ogcWMS" | "geoJSON" | "esriDynamic" | "esriFeature" | "xyzTiles";
-  name: string;
-  layer: {
-    options: {
-      url: string;
+export type TypeLegendJsonDynamic = {
+  layerId: string;
+  layerName: string;
+  layerType: TypeWebLayers;
+  maxScale: number;
+  minScale: number;
+  legend: {
+    contentType: string;
+    height: number;
+    imageData: string;
+    label: string;
+    url: string;
+    width: number;
+  }[];
+  extent: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+    spatialReference: {
+      wkid: number;
+      latestWkid: number;
     };
-    metadata: (
-      fn: (
-        error: any,
-        res: { layers: { id: string; subLayerIds: string[] }[] }
-      ) => void
-    ) => void;
-    _url: string;
-    entries: {
-      attributes: TypeJSONObject;
-    }[];
-    mapService: {
-      options: {
-        url: string;
-      };
-    };
-    getLayers: () => Array<number>;
-  } & L.Layer;
-  layers: TypeLayersInLayerData;
+  };
 };
 
-export type TypeLayersInLayerData = Record<string, TypeLayersEntry>;
+export type TypeLayersInWebLayer = Record<string, TypeLayersEntry>;
 
 export type TypeLayersEntry = {
-  layerData: TypeJSONValue[];
+  layerData: TypeJsonArray;
   groupLayer: boolean;
   displayField: string;
-  fieldAliases: TypeJSONObject;
+  fieldAliases: TypeJsonValue;
   layer: TypeLayerInfo;
   entries?: TypeEntry[];
   renderer: TypeRendererSymbol;
 };
 
 export type TypeEntry = {
-  attributes: TypeJSONObject;
+  attributes: TypeJsonObject;
 };
 
 export type TypeLayerInfo = {
@@ -181,13 +241,15 @@ export type TypeLayerInfo = {
   drawingInfo: {
     renderer: TypeRendererSymbol;
   };
-  fields: TypeFieldNameAlias[];
+  fields: TypeFieldNameAliasArray;
 };
 
-export type TypeFieldNameAlias = {
+export type TypeFieldNameAliasArray = {
   name: string;
   alias: string;
-};
+}[];
+
+export type TypeFieldAlias = { [name: string]: string };
 
 export type TypeFoundLayers = {
   layer: TypeLayersEntry;
@@ -199,68 +261,67 @@ export type TypeFoundLayers = {
  */
 export type TypeFeaturesListProps = {
   buttonPanel: TypeButtonPanel;
-  getSymbol: (
-    renderer: TypeRendererSymbol,
-    attributes: TypeJSONObject
-  ) => TypeJSONObject;
-  selectFeature: (featureData: TypeJSONObject) => void;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
+  selectFeature: (featureData: TypeJsonObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
   // eslint-disable-next-line @typescript-eslint/ban-types
   selectedLayer: TypeLayersEntry | {};
-  setPanel: (
-    showLayersList: boolean,
-    showFeaturesList: boolean,
-    showFeaturesInfo: boolean
-  ) => void;
+  setPanel: (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => void;
 };
 
 export type TypeRendererSymbol = {
   symbol: {
+    contentType: string;
+    label: string;
     legendImageUrl: string;
+    type: 'simple' | 'uniqueValue';
   };
-  uniqueValueInfos: TypeJSONObject[];
+  uniqueValueInfos: TypeJsonArray;
   field1: string;
   field2: string;
   field3: string;
 };
 
 /**
- * Interface used to initialize a button panel
+ * interface used when creating the actual plugin
  */
-export type TypeButtonPanelProps = {
-  panel: TypePanelProps;
-  button: TypeButtonProps;
-};
-
-/**
- * Interface used when creating a new button panel
- */
-export type TypeButtonPanel = {
-  id: string;
-  panel?: PanelApi;
-  button: ButtonApi;
-  groupName?: string | null;
-};
-
-/**
- * interface used when creating a new plugin
- */
-export type TypePlugin = {
+export type TypePluginStructure = {
   // id of the plugin
   id: string;
-  // plugin class object
-  plugin: any;
+  api: API;
+  createElement: typeof React.createElement;
+  react: typeof React;
+  props: TypeJsonValue;
+  translate: TypeJsonValue;
+  translations: TypeJsonObject;
+  makeStyles: typeof makeStyles;
+  added?: () => void;
+  removed?: () => void;
 };
+
+export type TypeRecordOfPlugin = {
+  [MapId: string]: { [pluginId: string]: TypePluginStructure };
+};
+
+/**
+ * interface used to define the vector types
+ */
+export type TypeOfVector = 'polyline' | 'polygon' | 'circle' | 'circle_marker' | 'marker';
+
+/**
+ * interface used to define the vector type keys
+ */
+export type TypeVectorKeys = 'POLYLINE' | 'POLYGON' | 'CIRCLE' | 'CIRCLE_MARKER' | 'MARKER';
 
 /**
  * constant used to specify available vectors to draw
  */
-export const CONST_VECTOR_TYPES = {
-  POLYLINE: "polyline",
-  POLYGON: "polygon",
-  CIRCLE: "circle",
-  CIRCLE_MARKER: "circle_marker",
-  MARKER: "marker",
+export const CONST_VECTOR_TYPES: Record<TypeVectorKeys, TypeOfVector> = {
+  POLYLINE: 'polyline' as TypeOfVector,
+  POLYGON: 'polygon' as TypeOfVector,
+  CIRCLE: 'circle' as TypeOfVector,
+  CIRCLE_MARKER: 'circle_marker' as TypeOfVector,
+  MARKER: 'marker' as TypeOfVector,
 };
 
 /**
@@ -269,7 +330,7 @@ export const CONST_VECTOR_TYPES = {
 export type TypePanelAppProps = {
   panel: PanelApi;
   //   panelOpen: boolean;
-  button: ButtonApi;
+  button: TypeButtonProps;
 };
 
 /**
@@ -278,36 +339,36 @@ export type TypePanelAppProps = {
 export type TypeFeatureInfoProps = {
   buttonPanel: TypeButtonPanel;
   selectedFeature: TypeSelectedFeature;
-  setPanel: (
-    showLayersList: boolean,
-    showFeaturesList: boolean,
-    showFeaturesInfo: boolean
-  ) => void;
+  setPanel: (showLayersList: boolean, showFeaturesList: boolean, showFeaturesInfo: boolean) => void;
 };
 
 export type TypeSelectedFeature = {
-  attributes: TypeJSONObject;
-  displayField: TypeJSONValue;
-  fieldAliases: TypeJSONObject;
+  attributes: TypeJsonObject;
+  displayField: TypeJsonObject;
+  fieldAliases: TypeJsonObject;
   numOfEntries: number;
-  symbol: TypeJSONObject;
+  symbol: TypeJsonObject;
 };
 
-export type TypeProps<T = string & unknown> = Record<string, T>;
-
 /**
- * interface for the layers list properties
+ * interface for the layers list properties in details panel
  */
 export type TypeLayersListProps = {
-  clickPos?: L.LatLng | undefined;
-  getSymbol?: (
-    renderer: TypeRendererSymbol,
-    attributes: TypeJSONObject
-  ) => TypeJSONValue;
-  layersData: Record<string, TypeLayerData>;
-  mapId?: string;
-  selectFeature?: (featureData: TypeJSONObject) => void;
-  selectLayer?: (layerData?: TypeLayersEntry) => void;
+  clickPos?: L.LatLng;
+  getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
+  layersData: Record<string, AbstractWebLayersClass>;
+  mapId: string;
+  selectFeature: (featureData: TypeJsonObject) => void;
+  selectLayer: (layerData?: TypeLayersEntry) => void;
+};
+
+/**
+ * interface for the layers list properties in layers panel
+ */
+export type TypeLayersPanelListProps = {
+  mapId: string;
+  layers: Record<string, AbstractWebLayersClass>;
+  language: string;
 };
 
 /**
@@ -318,31 +379,184 @@ export type TypePanelContentProps = {
   mapId: string;
 };
 
-/**
- * Interface used when creating a map to validate configuration object
- */
-export type TypeMapConfigProps = {
-  id: string;
-  name?: string;
-  center: L.LatLngTuple;
-  zoom: number;
-  projection: number;
-  language: string;
-  selectBox: boolean;
+export type TypeMapControls = {
   boxZoom: boolean;
-  basemapOptions: TypeBasemapOptions;
-  layers?: TypeLayerConfig[];
-  plugins: string[];
+  selectBox: boolean;
 };
+
+export type TypeMapInitialView = {
+  zoom: number;
+  center: L.LatLngTuple;
+};
+
+export type TypeProjections = 3978 | 3857;
 
 /**
  * interface for basemap options
  */
 export type TypeBasemapOptions = {
-  id: string;
+  id: 'transport' | 'shaded' | 'label' | 'simple';
   shaded: boolean;
   labeled: boolean;
 };
+
+/**
+ * interface used when adding a new layer
+ */
+export interface TypeLayerConfig extends TypeBaseWebLayersConfig {
+  state?: TypeLayerSettings;
+}
+
+export type TypeLayerSettings = {
+  opacity: number;
+  visibility: boolean;
+  boundingBox: boolean;
+  query: boolean;
+};
+
+export type TypeDetailsLayerSettings = {
+  parser?: string;
+  template: TypeLangString;
+};
+
+export interface TypeBasicLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeFeatureLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+  nameField?: string;
+  tooltipField?: string;
+  outfields?: string;
+}
+
+export type TypeDynamicLayerEntry = {
+  index: number;
+  name?: TypeLangString;
+  nameField?: string;
+  outfields?: string;
+};
+
+export interface TypeDynamicLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  details?: TypeDetailsLayerSettings;
+  layerEntries: TypeDynamicLayerEntry[];
+}
+
+export interface TypeGeoJSONLayer extends TypeLayerConfig {
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJsonObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export type TypeOgcLayerEntry = {
+  id: string;
+  name?: TypeLangString;
+  state?: TypeLayerSettings;
+};
+
+export interface TypeWFSLayer extends TypeLayerConfig {
+  nameField?: string;
+  layerEntries: TypeOgcLayerEntry[];
+  tooltipField?: string;
+  renderer?: TypeJsonObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeWMSLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  layerEntries: TypeOgcLayerEntry[];
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeGeometryEndpointLayer extends TypeLayerConfig {
+  name: TypeLangString;
+  nameField?: string;
+  tooltipField?: string;
+  renderer?: TypeJsonObject;
+  details?: TypeDetailsLayerSettings;
+}
+
+export interface TypeGeoCoreLayer extends Omit<TypeLayerConfig, 'url'> {
+  url?: TypeLangString;
+}
+
+export interface TypeXYZTiles extends TypeLayerConfig {
+  // may seems useless, but ensure attribute defined as TypeXYZTiles keeps its native type
+  state?: TypeLayerSettings;
+}
+
+export interface TypeOgcFeatureLayer extends TypeLayerConfig {
+  metadataUrl?: TypeLangString;
+  layerEntries: TypeOgcLayerEntry[];
+  details?: TypeDetailsLayerSettings;
+}
+
+export type TypeInteraction = 'static' | 'dynamic';
+
+export type TypeMapConfig = {
+  interaction: TypeInteraction;
+  controls?: TypeMapControls;
+  initialView: TypeMapInitialView;
+  projection: number;
+  basemapOptions: TypeBasemapOptions;
+  layers?: TypeLayerConfig[];
+};
+
+export type TypeLangString = {
+  en: string;
+  fr: string;
+};
+
+export type TypeAppBarProps = {
+  about: TypeLangString;
+};
+
+export type TypeNavBarProps = TypeJsonObject;
+
+export type TypeNorthArrowProps = TypeJsonObject;
+
+export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';
+
+export type TypeMapCorePackages = 'overview-map' | 'basemap-switcher' | 'layers-panel' | 'details-panel' | 'geolocator';
+
+export type TypeExternalPackages = {
+  name: string;
+  configUrl?: string;
+};
+
+export type TypeServiceUrls = {
+  keys: string;
+};
+
+export type TypeLanguages = 'en' | 'fr';
+export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
+
+export type TypeMapSchemaProps = {
+  map: TypeMapConfig;
+  theme?: 'dark' | 'light';
+  appBar?: TypeAppBarProps;
+  navBar?: TypeNavBarProps;
+  northArrow?: TypeNorthArrowProps;
+  components?: TypeMapComponents[];
+  corePackages?: TypeMapCorePackages[];
+  externalPackages?: TypeExternalPackages[];
+  serviceUrls?: TypeServiceUrls;
+  languages: TypeLocalizedLanguages[];
+  version?: string;
+  extraOptions: TypeJsonObject;
+};
+
+/**
+ * Interface used when creating a map to validate configuration object
+ */
+export interface TypeMapConfigProps extends TypeMapSchemaProps {
+  id: string;
+  language: TypeLocalizedLanguages;
+}
 
 /**
  * interface for basemap basic properties
@@ -378,8 +592,8 @@ export type TypeZoomLevels = {
  * interface for attribution value
  */
 export type TypeAttribution = {
-  "en-CA": string;
-  "fr-CA": string;
+  'en-CA': string;
+  'fr-CA': string;
 };
 
 /**
@@ -413,53 +627,76 @@ export type TypeAppVersion = {
 };
 
 /**
+ * constant that defines the panel types
+ */
+export const CONST_PANEL_TYPES = {
+  APPBAR: 'appbar',
+  NAVBAR: 'navbar',
+};
+
+/*-----------------------------------------------------------------------------
+ *
+ * UI Types
+ *
+ *---------------------------------------------------------------------------*/
+
+/**
+ * Interface used to initialize a snackbar message
+ */
+export type TypeSnackbarMessage = {
+  type: string;
+  value: string;
+  params?: TypeJsonArray;
+};
+
+/**
+ * Interface used to initialize a button panel
+ */
+export type TypeButtonPanelProps = {
+  panel: TypePanelProps;
+  button: TypeButtonProps;
+};
+
+/**
+ * Interface used when creating a new button panel
+ */
+export type TypeButtonPanel = {
+  id: string;
+  panel?: PanelApi;
+  button: TypeButtonProps;
+  groupName?: string;
+};
+
+/**
  * Interface for the button properties used when creating a new button
  */
-export type TypeButtonProps = {
+export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
   // generated button id
   id?: string;
   // button tooltip
   tooltip?: string;
   // location for tooltip
-  tooltipPlacement?: TooltipProps["placement"];
+  tooltipPlacement?: TooltipProps['placement'];
   // button icon
   icon?: TypeChildren;
-  // optional callback function to run on button click
-  callback?: TypeFunction;
-  // on click function
-  onClick?: TypeFunction;
-  // should the button be displayed in the appbar/navbar?
-  visible?: boolean;
   // optional class names
-  className?: string | undefined;
-  // optional style properties
-  style?: CSSProperties | undefined;
-  // button type
-  type: "text" | "textWithIcon" | "icon";
+  iconClassName?: string;
+  // optional class names
+  textClassName?: string;
   // button state
-  state?: "expanded" | "collapsed";
-  // button style variant
-  variant?: "text" | "contained" | "outlined";
-  // button children
-  children?: TypeChildren;
-  // focus used for accessibility to enable focus
-  autoFocus?: boolean;
-  // button disabling
-  disabled?: boolean;
-};
+  state?: 'expanded' | 'collapsed';
+  // button type
+  type: 'text' | 'textWithIcon' | 'icon';
+  // button visibility
+  visible?: boolean;
+}
 
 /**
- * constant that defines the panel types
- */
-export const CONST_PANEL_TYPES = {
-  APPBAR: "appbar",
-  NAVBAR: "navbar",
-};
-
-/**
- * Interface for the panel properties used when creating a new panel
+ * type for the panel properties used when creating a new panel
  */
 export type TypePanelProps = {
+  // panel id
+  id?: string;
   // panel type (appbar, navbar)
   type?: string;
   // panel open status (open/closed)
@@ -469,13 +706,262 @@ export type TypePanelProps = {
   // panel header icon
   icon: React.ReactNode | Element;
   // panel header title
-  title: string;
+  title: string | TypeJsonValue;
   // panel body content
   content?: React.ReactNode | Element;
 };
 
-export interface TypeMarkerClusterElementOptions extends L.MarkerOptions {
-  selected?: boolean;
-  blinking?: boolean;
-  on?: Record<string, L.LeafletEventHandlerFn>;
+/**
+ * Button Group properties
+ */
+export type TypeButtonGroupProps = ButtonGroupProps;
+
+/**
+ * Circular Progress Properties
+ */
+export interface TypeCircularProgressProps extends CircularProgressProps {
+  className?: string;
+  style?: CSSProperties;
+  isLoaded: boolean;
 }
+
+/**
+ * Properties for the Divider
+ */
+export interface TypeDividerProps extends DividerProps {
+  orientation?: 'horizontal' | 'vertical';
+  grow?: boolean;
+}
+
+/**
+ * Drawer Properties
+ */
+export interface TypeDrawerProps extends DrawerProps {
+  status?: boolean;
+}
+
+/**
+ * Properties for the Fade element
+ */
+export type TypeFadeProps = FadeProps;
+
+/**
+ * Properties for the icon button
+ */
+export interface TypeIconButtonProps extends IconButtonProps {
+  children?: TypeChildren;
+  tooltip?: string;
+  tooltipPlacement?: TooltipProps['placement'];
+  id?: string;
+  tabIndex?: number;
+  iconRef?: React.RefObject<HTMLButtonElement>;
+}
+
+/**
+ * Properties for the List UI
+ */
+export interface TypeListProps extends ListProps {
+  type?: 'ul' | 'ol';
+}
+
+/**
+ * List item properties
+ */
+export type TypeListItemProps = ListItemProps;
+
+/**
+ * Customized Material UI Dialog Properties
+ */
+export interface TypeDialogProps extends Omit<DialogProps, 'title'> {
+  id?: string;
+
+  // custom dialog classes and styles
+  className?: string;
+  style?: CSSProperties;
+
+  // custom title
+  title?: TypeChildren;
+  titleId?: string;
+
+  // dialog content and content styling
+  content?: TypeChildren;
+  contentClassName?: string;
+  contentStyle?: CSSProperties;
+
+  // dialog text content container styling
+  contentTextId?: string;
+  contentTextClassName?: string;
+  contentTextStyle?: CSSProperties;
+
+  // action elements / buttons
+  actions?: TypeChildren;
+
+  // id of the map that is using this modal
+  mapId: string;
+}
+
+/**
+ * Required and optional properties for the item object
+ */
+export interface TypeItemProps {
+  id: string;
+  value: string;
+  default?: boolean;
+}
+
+/**
+ * Required and optional properties for the items (options) of select
+ */
+export interface TypeSelectItems {
+  category?: string;
+  items: Array<TypeItemProps>;
+}
+
+/**
+ * Properties for the Select component
+ */
+export interface TypeSelectProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // the label for the select component
+  label: string;
+
+  // the menu items (<option>) for <select>
+  selectItems: Array<Record<string, TypeSelectItems>> | Array<Record<string, TypeItemProps>>;
+
+  // callback that is passed for the select component
+  callBack?: <T>(params: T) => void;
+
+  // helper text for the form
+  helperText?: string;
+
+  // if multiple selection of items is allowed
+  multiple?: boolean;
+}
+
+/**
+ * Properties for the Steps of Stepper
+ */
+export interface TypeStepperSteps {
+  // the text label for the step
+  label?: string;
+
+  // the body of the step
+  description: JSX.Element | HTMLElement | string;
+
+  // whether the user is allowed to move to the next step or not
+  disableStepMovement?: boolean;
+}
+
+/**
+ * Properties for the Stepper
+ */
+export interface TypeStepperProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // orientaion of the Stepper component. By default, its horizontal
+  orientation?: 'horizontal' | 'vertical';
+
+  // alternative label for the steps. Alternative labels appear at the bottom of step icons
+  alternativeLabel?: boolean;
+
+  // allows the user to enter a multi-step flow at any point
+  // i.e. previous step needs to be completed to move on to the next one
+  nonLinear?: boolean;
+
+  // to be able to switch to another step by clicking on the step's button label
+  buttonedLabels?: boolean;
+
+  // the steps that will be involved in the component
+  steps?: Array<Record<string, TypeStepperSteps>>;
+
+  // text for the back (previous) button that goes to the previous step
+  backButtonText?: string;
+
+  // text for the next button that goes to the next step
+  nextButtonText?: string;
+
+  // text for the reset button that resets the step count
+  resetButtonText?: string;
+}
+
+/**
+ * Customized Material UI TextField Properties
+ */
+export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
+  id: string;
+
+  // the helper text (as defined above) but only if there is an error
+  errorHelpertext?: string | undefined;
+
+  // the HTML Element (for example, an icon) that is embedded inside the text field (left side)
+  prefix?: string | JSX.Element | HTMLElement | TypeChildren;
+
+  // the HTML Element (for example, an icon) that is embedded inside the text field (right side)
+  suffix?: string | JSX.Element | HTMLElement | undefined;
+
+  // Function that handles change in input
+  changeHandler?: <T>(params: T) => void;
+}
+
+/*-----------------------------------------------------------------------------
+ *
+ * Types related to abstract class
+ *
+ *---------------------------------------------------------------------------*/
+
+// AbstractWebLayersClass types
+
+/**
+ * interface used to define the web-layers
+ */
+export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+
+/**
+ * constant contains layer types
+ */
+export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeWebLayers> = {
+  ESRI_DYNAMIC: 'esriDynamic',
+  ESRI_FEATURE: 'esriFeature',
+  GEOJSON: 'geojson',
+  XYZ_TILES: 'xyzTiles',
+  OGC_FEATURE: 'ogcFeature',
+  WFS: 'ogcWfs',
+  WMS: 'ogcWms',
+};
+
+/**
+ * constant contains default layer names
+ */
+export const DEFAULT_LAYER_NAMES: Record<TypeWebLayers, string> = {
+  esriDynamic: 'Esri Dynamic Layer',
+  esriFeature: 'Esri Feature Layer',
+  geojson: 'GeoJson Layer',
+  xyzTiles: 'XYZ Tiles',
+  ogcFeature: 'OGC Feature Layer',
+  ogcWfs: 'WFS Layer',
+  ogcWms: 'WMS Layer',
+};
+
+/**
+ * interface used by all web layers
+ */
+export type TypeBaseWebLayersConfig = {
+  layerType: TypeWebLayers;
+  id?: string;
+  name?: TypeLangString;
+  url: TypeLangString;
+  layerEntries?: (TypeDynamicLayerEntry | TypeOgcLayerEntry)[];
+};
+
+/**
+ * interface used by all plugins to define their options
+ */
+export type TypePluginOptions = {
+  mapId: string;
+};

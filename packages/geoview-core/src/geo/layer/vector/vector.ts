@@ -1,10 +1,18 @@
-/* eslint-disable no-plusplus */
-import L, { LatLngExpression } from "leaflet";
+import L, { LatLngExpression } from 'leaflet';
 
-import { api } from "../../../api/api";
-import { EVENT_NAMES } from "../../../api/event";
-import { CONST_VECTOR_TYPES } from "../../../core/types/cgpv-types";
-import { generateId } from "../../../core/utils/utilities";
+import { api } from '../../../app';
+import { EVENT_NAMES } from '../../../api/events/event';
+
+import { generateId } from '../../../core/utils/utilities';
+import {
+  payloadIsACircleConfig,
+  payloadIsACircleMarkerConfig,
+  payloadIsAMarkerConfig,
+  payloadIsAPolygonConfig,
+  payloadIsAPolylineConfig,
+  payloadIsAVectorConfig,
+} from '../../../api/events/payloads/vector-config-payload';
+import { VectorPayload } from '../../../api/events/payloads/vector-payload';
 
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
@@ -13,8 +21,8 @@ import { generateId } from "../../../core/utils/utilities";
  * @class Vector
  */
 export class Vector {
-  // reference to the map object
-  private map: L.Map;
+  // reference to the map id
+  #mapId: string;
 
   // used to store geometry groups
   geometryGroups: L.FeatureGroup[] = [];
@@ -23,7 +31,7 @@ export class Vector {
   geometries: L.Layer[] = [];
 
   // default geometry group name
-  defaultGeometryGroupId = "defaultGeomGroup";
+  defaultGeometryGroupId = 'defaultGeomGroup';
 
   // index of the active geometry group used to add new geometries in the map
   activeGeometryGroupIndex = 0;
@@ -31,75 +39,61 @@ export class Vector {
   /**
    * Initialize map, vectors, and listen to add vector events
    *
-   * @param {Map} map leaflet map object
+   * @param {string} mapId leaflet map id
    */
-  constructor(map: L.Map) {
-    this.map = map;
+  constructor(mapId: string) {
+    this.#mapId = mapId;
 
     // create default geometry group
     this.createGeometryGroup(this.defaultGeometryGroupId);
 
     // listen to add vector events
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_ADD,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD,
       (payload) => {
-        const id = payload.id ? payload.id : null;
-        if (payload.type === CONST_VECTOR_TYPES.CIRCLE) {
-          this.addCircle(
-            payload.latitude,
-            payload.longitude,
-            payload.options,
-            id
-          );
-        } else if (payload.type === CONST_VECTOR_TYPES.POLYGON) {
-          this.addPolygon(payload.points, payload.options, id);
-        } else if (payload.type === CONST_VECTOR_TYPES.POLYLINE) {
-          this.addPolyline(payload.points, payload.options, id);
-        } else if (payload.type === CONST_VECTOR_TYPES.MARKER) {
-          this.addMarker(
-            payload.latitude,
-            payload.longitude,
-            payload.options,
-            id
-          );
-        } else if (payload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER) {
-          this.addCircleMarker(
-            payload.latitude,
-            payload.longitude,
-            payload.options,
-            id
-          );
+        if (payloadIsACircleConfig(payload)) {
+          this.addCircle(payload.latitude, payload.longitude, payload.options, payload.id);
+        } else if (payloadIsAPolygonConfig(payload)) {
+          this.addPolygon(payload.points, payload.options, payload.id);
+        } else if (payloadIsAPolylineConfig(payload)) {
+          this.addPolyline(payload.points, payload.options, payload.id);
+        } else if (payloadIsAMarkerConfig(payload)) {
+          this.addMarker(payload.latitude, payload.longitude, payload.options, payload.id);
+        } else if (payloadIsACircleMarkerConfig(payload)) {
+          this.addCircleMarker(payload.latitude, payload.longitude, payload.options, payload.id);
         }
       },
-      map.id
+      this.#mapId
     );
 
     // listen to outside events to remove geometries
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_REMOVE,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE,
       (payload) => {
-        // remove geometry from outside
-        this.deleteGeometry(payload.id);
+        if (payloadIsAVectorConfig(payload)) {
+          // remove geometry from outside
+          this.deleteGeometry(payload.id!);
+        }
       },
-      map.id
+      this.#mapId
     );
 
     // listen to outside events to turn on geometry groups
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_ON,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_ON,
       () => {
         this.turnOnGeometryGroups();
       },
-      map.id
+      this.#mapId
     );
 
     // listen to outside events to turn off geometry groups
     api.event.on(
-      EVENT_NAMES.EVENT_VECTOR_OFF,
+      EVENT_NAMES.VECTOR.EVENT_VECTOR_OFF,
       () => {
         this.turnOffGeometryGroups();
       },
-      map.id
+      this.#mapId
     );
   }
 
@@ -112,11 +106,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addPolyline = (
-    points: LatLngExpression[] | LatLngExpression[][],
-    options: L.PolylineOptions,
-    id?: string
-  ): L.Polyline => {
+  addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: L.PolylineOptions, id?: string): L.Polyline => {
     const lId = generateId(id);
 
     const polyline = L.polyline(points, { ...options, id: lId });
@@ -126,9 +116,7 @@ export class Vector {
     this.geometries.push(polyline);
 
     // emit an event that a polyline vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.map.id, {
-      ...polyline,
-    });
+    api.event.emit(VectorPayload.forPolyline(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, polyline));
 
     return polyline;
   };
@@ -156,7 +144,7 @@ export class Vector {
     this.geometries.push(polygon);
 
     // emit an event that a polygon vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.map.id, { ...polygon });
+    api.event.emit(VectorPayload.forPolygon(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, polygon));
 
     return polygon;
   };
@@ -171,12 +159,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addCircle = (
-    latitude: number,
-    longitude: number,
-    options: L.CircleMarkerOptions,
-    id?: string
-  ): L.Circle => {
+  addCircle = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.Circle => {
     const lId = options.id || generateId(id);
 
     const circle = L.circle([latitude, longitude], { ...options, id: lId });
@@ -186,7 +169,7 @@ export class Vector {
     circle.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a circle vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.map.id, { ...circle });
+    api.event.emit(VectorPayload.forCircle(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circle));
 
     return circle;
   };
@@ -202,12 +185,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addCircleMarker = (
-    latitude: number,
-    longitude: number,
-    options: L.CircleMarkerOptions,
-    id?: string
-  ): L.CircleMarker => {
+  addCircleMarker = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.CircleMarker => {
     const lId = options.id || generateId(id);
 
     const circleMarker = L.circleMarker([latitude, longitude], {
@@ -220,9 +198,7 @@ export class Vector {
     circleMarker.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a circleMarker vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.map.id, {
-      ...circleMarker,
-    });
+    api.event.emit(VectorPayload.forCircleMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circleMarker));
 
     return circleMarker;
   };
@@ -237,12 +213,7 @@ export class Vector {
    *
    * @returns a geometry containing the id and the created geometry
    */
-  addMarker = (
-    latitude: number,
-    longitude: number,
-    options: L.MarkerOptions,
-    id?: string
-  ): L.Marker => {
+  addMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.Marker => {
     const idMarker = generateId(id);
 
     const marker = L.marker([latitude, longitude], {
@@ -255,7 +226,7 @@ export class Vector {
     marker.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a marker vector has been added
-    api.event.emit(EVENT_NAMES.EVENT_VECTOR_ADDED, this.map.id, { ...marker });
+    api.event.emit(VectorPayload.forMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, marker));
 
     return marker;
   };
@@ -295,16 +266,13 @@ export class Vector {
    *
    * @param {string} geometryGroupid the id of the group to use when managing this group
    */
-  createGeometryGroup = (
-    geometryGroupid: string,
-    options?: L.FeatureGroupOptions
-  ): L.FeatureGroup => {
+  createGeometryGroup = (geometryGroupid: string, options?: L.FeatureGroupOptions): L.FeatureGroup => {
     let featureGroup = this.getGeometryGroup(geometryGroupid);
     if (!featureGroup) {
       const featureGroupOptions = { ...options, id: geometryGroupid };
       featureGroup = L.featureGroup([], featureGroupOptions);
       if (featureGroup.visible) {
-        featureGroup.addTo(this.map);
+        featureGroup.addTo(api.map(this.#mapId).map);
       }
       this.geometryGroups.push(featureGroup);
     }
@@ -349,9 +317,7 @@ export class Vector {
   getGeometryGroup = (geometryGroupId?: string): L.FeatureGroup => {
     let geometryGroup: L.FeatureGroup;
     if (geometryGroupId) {
-      [geometryGroup] = this.geometryGroups.filter(
-        (theGeometryGroup) => theGeometryGroup.id === geometryGroupId
-      );
+      [geometryGroup] = this.geometryGroups.filter((theGeometryGroup) => theGeometryGroup.id === geometryGroupId);
     } else {
       geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
     }
@@ -388,7 +354,7 @@ export class Vector {
    */
   setGeometryGroupAsVisible = (geometryGroupId?: string): void => {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
-    geometryGroup.addTo(this.map);
+    geometryGroup.addTo(api.map(this.#mapId).map);
     geometryGroup.visible = true;
     geometryGroup.options.visible = true;
   };
@@ -401,7 +367,7 @@ export class Vector {
    */
   setGeometryGroupAsInvisible = (geometryGroupId?: string): void => {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
-    geometryGroup.removeFrom(this.map);
+    geometryGroup.removeFrom(api.map(this.#mapId).map);
     geometryGroup.visible = false;
     geometryGroup.options.visible = false;
   };
@@ -413,8 +379,7 @@ export class Vector {
    */
   turnOnGeometryGroups = (): void => {
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].visible)
-        this.geometryGroups[i].addTo(this.map);
+      if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(api.map(this.#mapId).map);
     }
   };
 
@@ -425,8 +390,7 @@ export class Vector {
    */
   turnOffGeometryGroups = (): void => {
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].visible)
-        this.geometryGroups[i].removeFrom(this.map);
+      if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(api.map(this.#mapId).map);
     }
   };
 
@@ -473,10 +437,7 @@ export class Vector {
    * @param {string} geometryId the geometry id to be deleted
    * @param {string} geometryGroupid optional group id
    */
-  deleteGeometryFromGroup = (
-    geometryId: string,
-    geometryGroupid?: string
-  ): void => {
+  deleteGeometryFromGroup = (geometryId: string, geometryGroupid?: string): void => {
     const geometry = this.getGeometry(geometryId);
     const geometryGroup = this.getGeometryGroup(geometryGroupid);
     geometryGroup.getLayers().forEach((layer) => {

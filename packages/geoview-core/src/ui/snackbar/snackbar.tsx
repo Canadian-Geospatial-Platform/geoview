@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useContext } from 'react';
 
-import { useMap } from "react-leaflet";
+import { useTranslation } from 'react-i18next';
 
-import { useTranslation } from "react-i18next";
+import { Button } from '@mui/material';
 
-import { Button } from "@mui/material";
+import { useSnackbar } from 'notistack';
 
-import { useSnackbar } from "notistack";
+import { MapContext } from '../../core/app-start';
 
-import { api } from "../../api/api";
-import { EVENT_NAMES } from "../../api/event";
+import { api } from '../../app';
+import { EVENT_NAMES } from '../../api/events/event';
+
+import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
+import { payloadIsASnackbarMessage } from '../../api/events/payloads/snackbar-message-payload';
 
 /**
  * Snackbar properties interface
@@ -49,9 +52,9 @@ export function Snackbar(props: SnackBarProps): null {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext);
 
-  const mapId = api.mapInstance(map)?.id;
+  const mapId = mapConfig.id;
 
   /**
    * Take string and replace parameters from array of values
@@ -59,10 +62,10 @@ export function Snackbar(props: SnackBarProps): null {
    * @param {string} message original message
    * @returns {string} message with values replaced
    */
-  function replaceParams(params: string[], message: string) {
+  function replaceParams(params: TypeJsonArray | string[], message: string) {
     let tmpMess = message;
-    params.forEach((item: string) => {
-      tmpMess = tmpMess.replace("__param__", item);
+    (params as string[]).forEach((item: string) => {
+      tmpMess = tmpMess.replace('__param__', item);
     });
 
     return tmpMess;
@@ -71,34 +74,35 @@ export function Snackbar(props: SnackBarProps): null {
   useEffect(() => {
     // listen to API event when app wants to show message
     api.event.on(
-      EVENT_NAMES.EVENT_SNACKBAR_OPEN,
+      EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN,
       (payload) => {
-        const opts = payload.options ? payload.options : {};
+        if (payloadIsASnackbarMessage(payload)) {
+          const options = payload.options ? payload.options : {};
 
-        // apply function if provided
-        opts.action = payload.button
-          ? SnackButton({
-              label: payload.button.label,
-              action: payload.button.action,
-            })
-          : null;
+          // apply function if provided
+          (options.action as TypeJsonValue) = payload.button
+            ? Cast<TypeJsonValue>(
+                SnackButton({
+                  label: payload.button.label as string,
+                  action: Cast<() => void>(payload.button.action),
+                })
+              )
+            : null;
 
-        // get message
-        const message =
-          payload.message.type === "string"
-            ? payload.message.value
-            : replaceParams(payload.message.params, t(payload.message.value));
+          // get message
+          const message =
+            payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params!, t(payload.message.value));
 
-        // show the notification
-        if (payload && id === payload.handlerName)
-          enqueueSnackbar(message, opts);
+          // show the notification
+          if (payload && id === payload.handlerName) enqueueSnackbar(message, options);
+        }
       },
       mapId
     );
 
     // remove the listener when the component unmounts
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_SNACKBAR_OPEN, mapId);
+      api.event.off(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

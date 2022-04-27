@@ -16,27 +16,18 @@ If a handler name is specified then the data related to the handler name will be
 
 ```js
 var myHandler = function (param) {
-    doStuff(param);
+  doStuff(param);
 };
-cgpv.api.on('map/moveend', myHandler, 'mapWM');
-```
-
-To listen to multiple events fired with the same event name, example in case two maps are rendered on same page and are emitting the mouseend event you can use `all()`, this method requires only the event name and a callback handler.
-
-```js
-var myHandler = function (param) {
-    doStuff(param);
-};
-cgpv.api.all('map/moveend', myHandler);
+cgpv.api.event.on(cgpv.api.eventnames.MAP.EVENT_MAP_MOVE_END, myHandler, 'mapWM');
 ```
 
 Similarly, the `once()` method can be used to set up a one-time event handler. After the handler is triggered by the event, it is unregistered automatically.
 
 ```js
 var myOneTimeHandler = function (param) {
-    doStuff(param);
+  doStuff(param);
 };
-cgpv.api.once('map/moveend', myOneTimeHandler, 'mapWM');
+cgpv.api.event.once(cgpv.api.eventnames.MAP.EVENT_MAP_MOVE_END, myOneTimeHandler, 'mapWM');
 ```
 
 ### Removing an Event Handler
@@ -45,7 +36,7 @@ To cause an active event handler to stop reacting to an event, use the `off()` m
 
 ```js
 // remove the handler set up in the .on() example
-cgpv.api.off('map/moveend');
+cgpv.api.event.off(cgpv.api.eventnames.MAP.EVENT_MAP_MOVE_END);
 ```
 
 ### Manually Firing an Event
@@ -54,7 +45,7 @@ To emit an event, use the `emit()` method. The event can be an existing event us
 
 ```js
 // manually trigger a map click event
-cgpv.api.emit('map/moveend', mapCenterPayload, 'map3');
+cgpv.api.event.emit(cgpv.api.eventnames.MAP.EVENT_MAP_MOVE_END, mapCenterPayload, 'map3');
 ```
 
 While event names can be any string, it is suggested using the `domain/description` format.
@@ -68,7 +59,7 @@ The `getEvents()` method will return an object containing all triggered events t
 ```js
 var events = cgpv.api.getEvents();
 // console.log(events);
-/* 
+/*
 {
   "map/moveend": {
     "mapWM": {
@@ -98,7 +89,7 @@ var events = cgpv.api.getEvents();
       "status": true
     }
   }
-} 
+}
 */
 ```
 
@@ -107,7 +98,7 @@ var events = cgpv.api.getEvents();
 The `getHandlerNames()` method will return an array of event handler names that are registered with an event name. If an event has not been triggered yet with that handler name then the handler name will not be listed in the array. The method takes the event name and returns the list of handler names with it.
 
 ```js
-var handlerNames = cgpv.api.getHandlerNames('map/moveend');
+var handlerNames = cgpv.api.event.getHandlerNames(cgpv.api.eventnames.MAP.EVENT_MAP_MOVE_END, );
 
 // (2) ["mapWM", "mapLCC"]
 ```

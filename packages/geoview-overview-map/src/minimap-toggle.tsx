@@ -1,12 +1,13 @@
-import { Cast } from "geoview-core";
+import { TypeWindow } from 'geoview-core';
+import { booleanPayload } from 'geoview-core/src/api/events/payloads/boolean-payload';
 
-import { MINIMAP_SIZE } from "./overview-map";
+import { MINIMAP_SIZE } from './overview-map';
 
 // access window object
-const w = window as any;
+const w = window as TypeWindow;
 
 // access the cgpv object from the window object
-const cgpv = w["cgpv"];
+const { cgpv } = w;
 
 // access the api calls
 const { api, react, leaflet, ui, constants, useTranslation } = cgpv;
@@ -26,20 +27,23 @@ const { IconButton, ChevronLeftIcon } = ui.elements;
 // get leaflet positions
 const { leafletPositionClasses } = constants;
 
-const useStyles = ui.makeStyles((theme: any) => ({
+const useStyles = ui.makeStyles((theme) => ({
   toggleBtn: {
-    transform: "rotate(45deg)",
+    transform: 'rotate(45deg)',
     color: theme.palette.primary.contrastText,
     zIndex: theme.zIndex.tooltip,
+    '&:hover': {
+      cursor: 'pointer',
+    },
   },
   toggleBtnContainer: {
     zIndex: theme.zIndex.tooltip,
   },
   minimapOpen: {
-    transform: "rotate(-45deg)",
+    transform: 'rotate(-45deg)',
   },
   minimapClosed: {
-    transform: "rotate(135deg)",
+    transform: 'rotate(135deg)',
   },
 }));
 
@@ -56,10 +60,10 @@ interface MinimapToggleProps {
  * @param {MinimapToggleProps} props toggle properties
  * @return {JSX.Element} the toggle control
  */
-export const MinimapToggle = (props: MinimapToggleProps): JSX.Element => {
+export function MinimapToggle(props: MinimapToggleProps): JSX.Element {
   const { parentId, minimap } = props;
 
-  const divRef = useRef(null);
+  const divRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation();
 
@@ -77,10 +81,10 @@ export const MinimapToggle = (props: MinimapToggleProps): JSX.Element => {
     setStatus(!status);
 
     if (status) {
-      const buttonSize = theme.overrides?.button?.size;
+      const buttonSize = theme.overrides.button?.size;
       // decrease size of overview map to the size of the toggle btn
-      minimap.getContainer().style.width = buttonSize.width as string;
-      minimap.getContainer().style.height = buttonSize.height as string;
+      minimap.getContainer().style.width = buttonSize.width;
+      minimap.getContainer().style.height = buttonSize.height;
     } else {
       // restore the size of the overview map
       minimap.getContainer().style.width = MINIMAP_SIZE.width;
@@ -88,36 +92,29 @@ export const MinimapToggle = (props: MinimapToggleProps): JSX.Element => {
     }
 
     // trigger a new event when overview map is toggled
-    api.event.emit(EVENT_NAMES.EVENT_OVERVIEW_MAP_TOGGLE, parentId, {
-      status,
-    });
+    api.event.emit(booleanPayload(EVENT_NAMES.OVERVIEW_MAP.EVENT_OVERVIEW_MAP_TOGGLE, parentId, status));
   }
 
   useEffect(() => {
-    DomEvent.disableClickPropagation(Cast<HTMLElement>(divRef.current));
+    DomEvent.disableClickPropagation(divRef.current!);
   }, []);
 
   return (
-    <div
-      ref={divRef}
-      className={`${leafletPositionClasses.topright} ${classes.toggleBtnContainer}`}
-    >
+    <div ref={divRef} className={`${leafletPositionClasses.topright} ${classes.toggleBtnContainer}`}>
       <IconButton
-        className={`leaflet-control ${classes.toggleBtn} ${
-          !status ? classes.minimapOpen : classes.minimapClosed
-        }`}
+        className={`leaflet-control ${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
         style={{
           margin: `-${theme.spacing(3)}`,
           padding: 0,
-          height: "initial",
-          minWidth: "initial",
+          height: 'initial',
+          minWidth: 'initial',
         }}
-        aria-label={t("mapctrl.overviewmap.toggle")}
-        onClick={toggleMinimap}
+        aria-label={t('mapctrl.overviewmap.toggle')}
+        onClick={() => toggleMinimap()}
         size="large"
       >
         <ChevronLeftIcon />
       </IconButton>
     </div>
   );
-};
+}

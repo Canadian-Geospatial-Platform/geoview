@@ -1,47 +1,47 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
-import makeStyles from "@mui/styles/makeStyles";
+import makeStyles from '@mui/styles/makeStyles';
 
-import ZoomIn from "./buttons/zoom-in";
-import ZoomOut from "./buttons/zoom-out";
-import Fullscreen from "./buttons/fullscreen";
-import Home from "./buttons/home";
+import ZoomIn from './buttons/zoom-in';
+import ZoomOut from './buttons/zoom-out';
+import Fullscreen from './buttons/fullscreen';
+import Home from './buttons/home';
 
-import { LEAFLET_POSITION_CLASSES } from "../../../geo/utils/constant";
-import { api } from "../../../api/api";
-import { EVENT_NAMES } from "../../../api/event";
+import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
+import { api } from '../../../app';
+import { Panel, ButtonGroup, Button } from '../../../ui';
 
-import { Panel, ButtonGroup, Button } from "../../../ui";
+import { MapContext } from '../../app-start';
+import { TypeButtonPanel } from '../../types/cgpv-types';
 
-import { TypeButtonPanel } from "../../types/cgpv-types";
-import { MapContext } from "../../app-start";
+import { EVENT_NAMES } from '../../../api/events/event';
+import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
-const navBtnWidth = "32px";
-const navBtnHeight = "32px";
+const navBtnWidth = '32px';
+const navBtnHeight = '32px';
 
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
-    display: "flex",
-    flexDirection: "row",
+    display: 'flex',
+    flexDirection: 'row',
     marginRight: 5,
     paddingBottom: 30,
     zIndex: theme.zIndex.appBar,
-    pointerEvents: "all",
-    height: "100%",
-    overflow: "auto",
+    pointerEvents: 'all',
+    height: '100%',
+    overflow: 'auto',
   },
   navBtnGroupContainer: {
-    display: "flex",
-    position: "relative",
-    flexDirection: "column",
-    pointerEvents: "auto",
-    justifyContent: "end",
+    display: 'flex',
+    position: 'relative',
+    flexDirection: 'column',
+    pointerEvents: 'auto',
+    justifyContent: 'end',
   },
   navBtnGroup: {
-    "&:not(:last-child)": {
+    '&:not(:last-child)': {
       marginBottom: theme.spacing(2),
     },
     borderTopLeftRadius: theme.spacing(5),
@@ -50,18 +50,24 @@ const useStyles = makeStyles((theme) => ({
     borderBottomRightRadius: theme.spacing(5),
   },
   navBarButton: {
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.primary.light,
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
     borderRadius: theme.spacing(5),
     width: navBtnWidth,
     height: navBtnHeight,
     maxWidth: navBtnWidth,
     minWidth: navBtnWidth,
-    padding: "initial",
-    "&:hover": {
-      backgroundColor: theme.palette.primary.dark,
-      color: theme.palette.primary.light,
-      borderRadius: theme.spacing(5),
+    padding: 'initial',
+    '&:hover': {
+      backgroundColor: theme.palette.primary.light,
+      color: theme.palette.primary.dark,
+    },
+  },
+  navBarButtonIcon: {
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
+    '&:hover *': {
+      fontSize: '1.8rem',
     },
   },
 }));
@@ -70,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
  * Create a navbar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
-  const [refreshCount, setRefreshCount] = useState(0);
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
 
   const classes = useStyles();
 
@@ -78,24 +84,47 @@ export function Navbar(): JSX.Element {
 
   const navBarRef = useRef<HTMLDivElement>(null);
 
-  const mapConfig = useContext(MapContext)!;
+  const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
 
-  /**
-   * function that causes rerender when changing navbar content
-   */
-  const updateComponent = useCallback(() => {
-    setRefreshCount((refresh) => refresh + 1);
-  }, []);
+  const addButtonPanel = useCallback(
+    (payload: ButtonPanelPayload) => {
+      setButtonPanelGroups({
+        ...buttonPanelGroups,
+        [payload.groupName]: {
+          ...buttonPanelGroups[payload.groupName],
+          [payload.id]: payload.buttonPanel as TypeButtonPanel,
+        },
+      });
+    },
+    [buttonPanelGroups]
+  );
+
+  const removeButtonPanel = useCallback(
+    (payload: ButtonPanelPayload) => {
+      setButtonPanelGroups((prevState) => {
+        const state = { ...prevState };
+
+        const group = state[payload.groupName];
+
+        delete group[payload.id];
+
+        return state;
+      });
+    },
+    [setButtonPanelGroups]
+  );
 
   useEffect(() => {
     // listen to new navbar panel creation
     api.event.on(
-      EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
+      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
-          updateComponent();
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            addButtonPanel(payload);
+          }
         }
       },
       mapId
@@ -103,72 +132,43 @@ export function Navbar(): JSX.Element {
 
     // listen to new navbar panel removal
     api.event.on(
-      EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
+      EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
-        if (payload && payload.handlerName && payload.handlerName === mapId) {
-          updateComponent();
-        }
-      },
-      mapId
-    );
-
-    // listen to open panel to activate focus trap and focus on close
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_OPEN,
-      (args) => {
-        if (args.handlerName === mapId && args.type === "navbar") {
-          updateComponent();
-        }
-      },
-      mapId
-    );
-
-    api.event.on(
-      EVENT_NAMES.EVENT_PANEL_CLOSE,
-      (args) => {
-        if (args.handlerName === mapId && args.type === "navbar") {
-          updateComponent();
+        if (payloadIsAButtonPanel(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            removeButtonPanel(payload);
+          }
         }
       },
       mapId
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_OPEN, mapId);
-      api.event.off(EVENT_NAMES.EVENT_PANEL_CLOSE, mapId);
+      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
+      api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
     };
-  }, [updateComponent]);
+  }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
-    <div
-      ref={navBarRef}
-      className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}
-    >
-      {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
-        const buttons = api.map(mapId).navBarButtons.buttons[groupName];
+    <div ref={navBarRef} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}>
+      {Object.keys(buttonPanelGroups).map((groupName) => {
+        const buttons = buttonPanelGroups[groupName];
 
         // display the panels in the list
         const panels = Object.keys(buttons).map((buttonId) => {
           const buttonPanel = buttons[buttonId];
 
-          return buttonPanel.panel ? (
-            <Panel
-              key={buttonPanel.button.id}
-              button={buttonPanel.button}
-              panel={buttonPanel.panel}
-            />
-          ) : null;
+          return buttonPanel.panel ? <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} /> : null;
         });
 
         if (panels.length > 0) {
           return <div key={groupName}>{panels}</div>;
         }
+        return null;
       })}
       <div className={classes.navBtnGroupContainer}>
-        {Object.keys(api.map(mapId).navBarButtons.buttons).map((groupName) => {
-          const buttons = api.map(mapId).navBarButtons.buttons[groupName];
+        {Object.keys(buttonPanelGroups).map((groupName) => {
+          const buttons = buttonPanelGroups[groupName];
 
           // if not an empty object, only then render any HTML
           if (Object.keys(buttons).length !== 0) {
@@ -176,7 +176,7 @@ export function Navbar(): JSX.Element {
               <ButtonGroup
                 key={groupName}
                 orientation="vertical"
-                ariaLabel={t("mapnav.arianavbar")}
+                aria-label={t('mapnav.arianavbar')}
                 variant="contained"
                 className={classes.navBtnGroup}
               >
@@ -193,10 +193,7 @@ export function Navbar(): JSX.Element {
                         tooltipPlacement="left"
                         icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
-                        onClick={() => {
-                          if (buttonPanel.button.callback)
-                            buttonPanel.button.callback();
-                        }}
+                        onClick={buttonPanel.button.onClick}
                       />
                     ) : (
                       <Button
@@ -221,24 +218,15 @@ export function Navbar(): JSX.Element {
               </ButtonGroup>
             );
           }
+          return null;
         })}
-        <ButtonGroup
-          orientation="vertical"
-          ariaLabel={t("mapnav.arianavbar")}
-          variant="contained"
-          className={classes.navBtnGroup}
-        >
-          <ZoomIn className={classes.navBarButton} />
-          <ZoomOut className={classes.navBarButton} />
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" className={classes.navBtnGroup}>
+          <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+          <ZoomOut className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
         </ButtonGroup>
-        <ButtonGroup
-          orientation="vertical"
-          ariaLabel={t("mapnav.arianavbar", "")}
-          variant="contained"
-          className={classes.navBtnGroup}
-        >
-          <Fullscreen className={classes.navBarButton} />
-          <Home className={classes.navBarButton} />
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar', '')} variant="contained" className={classes.navBtnGroup}>
+          <Fullscreen className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+          <Home className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
         </ButtonGroup>
       </div>
     </div>
