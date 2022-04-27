@@ -45,6 +45,7 @@
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@react-leaflet/core": "^1.1.1",
+    "dayjs": "^1.11.1",
     "prop-types": "^15.8.1",
     "axios": "^0.25.0",
     "domhandler": "^4.3.0",

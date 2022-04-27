@@ -8,6 +8,7 @@ import { MapViewer } from '../geo/map/map';
 
 import { Plugin } from './plugin';
 import { GeoUtilities } from '../geo/utils/utilities';
+import { DateMgt } from '../core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
@@ -50,6 +51,9 @@ export class API {
   // utilities object
   geoUtilities: GeoUtilities;
 
+  // dates utilities object
+  dateUtilities: DateMgt;
+
   // used to access marker definitions
   markerDefinitions = MarkerDefinitions;
 
@@ -64,6 +68,7 @@ export class API {
     this.projection = new Projection();
     this.plugin = new Plugin();
     this.geoUtilities = new GeoUtilities();
+    this.dateUtilities = new DateMgt();
   }
 
   /**
