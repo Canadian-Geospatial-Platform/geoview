@@ -21,17 +21,17 @@ const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) =>
     title: 'Canadian Geospatial Platform Viewer',
     inject: 'head',
     scriptLoading: 'blocking',
-    chunks: ['gcpv-main'],
+    chunks: ['cgpv-main'],
   });
 });
 
 const config = {
   entry: {
-    'gcpv-main': './src/app.tsx',
-    'geoview-details-panel': { import: '../geoview-details-panel/src/index.tsx', dependOn: 'gcpv-main' },
-    'geoview-overview-map': { import: '../geoview-overview-map/src/index.tsx', dependOn: 'gcpv-main' },
-    'geoview-basemap-switcher': { import: '../geoview-basemap-switcher/src/index.tsx', dependOn: 'gcpv-main' },
-    'geoview-layers-panel': { import: '../geoview-layers-panel/src/index.tsx', dependOn: 'gcpv-main' },
+    'cgpv-main': './src/app.tsx',
+    'geoview-details-panel': { import: '../geoview-details-panel/src/index.tsx', dependOn: 'cgpv-main' },
+    'geoview-overview-map': { import: '../geoview-overview-map/src/index.tsx', dependOn: 'cgpv-main' },
+    'geoview-basemap-switcher': { import: '../geoview-basemap-switcher/src/index.tsx', dependOn: 'cgpv-main' },
+    'geoview-layers-panel': { import: '../geoview-layers-panel/src/index.tsx', dependOn: 'cgpv-main' },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
