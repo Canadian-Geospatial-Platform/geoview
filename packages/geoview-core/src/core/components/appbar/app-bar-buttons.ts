@@ -169,11 +169,11 @@ export class AppbarButtons {
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 
-      // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
-
       // delete the panel from the group
       delete group[id];
+
+      // trigger an event that a panel has been removed to update the state and re-render
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
     });
   };
 }
