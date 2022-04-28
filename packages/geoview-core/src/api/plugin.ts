@@ -38,8 +38,29 @@ export class Plugin {
     return new Promise((resolve) => {
       const existingScript = document.getElementById(id);
       if (!existingScript) {
+        // get all loaded js scripts on the page
+        const scripts = document.getElementsByTagName('script');
+        let scriptPath: string | null = null;
+
+        if (scripts && scripts.length) {
+          // go through all loaded scripts on the page
+          for (let scriptIndex = 0; scriptIndex < scripts.length; scriptIndex++) {
+            // search for the core script
+            if (scripts[scriptIndex].src.includes('cgpv-main')) {
+              // get the src of the core script
+              const { src } = scripts[scriptIndex];
+
+              // extract the host from the loaded core script
+              scriptPath = src.substring(0, src.lastIndexOf('/'));
+
+              break;
+            }
+          }
+        }
+
+        // create a script element
         const script = document.createElement('script');
-        script.src = `./geoview-${id}.js`;
+        script.src = `${scriptPath}/corePackages/geoview-${id}.js`;
         script.id = id;
         document.body.appendChild(script);
         script.onload = () => {

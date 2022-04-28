@@ -28,10 +28,26 @@ const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) =>
 const config = {
   entry: {
     'cgpv-main': './src/app.tsx',
-    'geoview-details-panel': { import: '../geoview-details-panel/src/index.tsx', dependOn: 'cgpv-main' },
-    'geoview-overview-map': { import: '../geoview-overview-map/src/index.tsx', dependOn: 'cgpv-main' },
-    'geoview-basemap-switcher': { import: '../geoview-basemap-switcher/src/index.tsx', dependOn: 'cgpv-main' },
-    'geoview-layers-panel': { import: '../geoview-layers-panel/src/index.tsx', dependOn: 'cgpv-main' },
+    'geoview-details-panel': {
+      import: '../geoview-details-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
+    'geoview-overview-map': {
+      import: '../geoview-overview-map/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
+    'geoview-basemap-switcher': {
+      import: '../geoview-basemap-switcher/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
+    'geoview-layers-panel': {
+      import: '../geoview-layers-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
