@@ -167,11 +167,11 @@ export class NavbarButtons {
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 
-      // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
-
       // delete the button or panel from the group
       delete group[id];
+
+      // trigger an event that a button or panel has been removed to update the state and re-render
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
     });
   };
 }
