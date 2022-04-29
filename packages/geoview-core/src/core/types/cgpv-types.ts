@@ -965,3 +965,23 @@ export type TypeBaseWebLayersConfig = {
 export type TypePluginOptions = {
   mapId: string;
 };
+
+/**
+ * constant/interface used to define the precision for date object (yyyy, mm, dd)
+ */
+export const DEFAULT_DATE_PRECISION = {
+  year: 'YYYY',
+  month: 'YYYY-MM',
+  day: 'YYYY-MM-DD'
+}
+export type DatePrecision = 'year' | 'month' | 'day';
+
+/**
+ * constant/interface used to define the precision for time object (hh, mm, ss)
+ */
+ export const DEFAULT_TIME_PRECISION = {
+  hour: 'THHZ',
+  minute: 'THH:MMZ',
+  second: 'THH:MM:SSZ',
+}
+export type TimePrecision = 'hour' | 'minute' | 'second';
