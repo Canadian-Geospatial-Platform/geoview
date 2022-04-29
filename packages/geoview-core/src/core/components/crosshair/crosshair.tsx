@@ -107,7 +107,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
     mapContainer.removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
     isCrosshairsActiveValue.current = false;
-    api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, false));
+    api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, false));
   }
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
           if (payload.handlerName!.includes(id)) {
             setCrosshairsActive(true);
             isCrosshairsActiveValue.current = true;
-            api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, id, true));
+            api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
 
             mapContainer.addEventListener('keydown', simulateClick);
             panelButtonId.current = 'detailsPanel';
