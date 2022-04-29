@@ -78,6 +78,7 @@ export * from '../../api/events/payloads/number-payload';
 export * from '../../api/events/payloads/panel-payload';
 export * from '../../api/events/payloads/payload-base-class';
 export * from '../../api/events/payloads/select-box-payload';
+export * from '../../api/events/payloads/slider-payload';
 export * from '../../api/events/payloads/snackbar-message-payload';
 export * from '../../api/events/payloads/vector-config-payload';
 export * from '../../api/events/payloads/vector-payload';
@@ -784,13 +785,6 @@ export interface TypeTypographyProps extends TypographyProps {
 }
 
 /**
- * Custom MUI slider properties
- */
-export interface TypeSliderProps extends SliderProps {
-  mapId?: string;
-}
-
-/**
  * Custom MUI Checkbox properties
  */
 export interface TypeCheckboxProps extends CheckboxProps {
@@ -886,6 +880,37 @@ export interface TypeCustomSelectProps {
 
   // if multiple selection of items is allowed
   multiple?: boolean;
+}
+
+/**
+ * Properties for the Slider
+ */
+ export interface TypeSliderProps extends SliderProps {
+  id: string;
+
+  // custom slider classes and styles
+  className?: string;
+  style?: CSSProperties;
+
+  // default values (min, max, range)
+  min: number;
+  max: number;
+  value: Array<number> | number;
+
+  // custom onChange callback
+  customOnChange?: (value: number[] | number) => void;
+  
+  // MUI optional props
+  disabled?: boolean;
+  marks?: Array<{ label?: string, value: number }>;
+  orientation?: 'vertical' | 'horizontal' | undefined;
+  step?: number;
+  size?: 'small' | 'medium';
+  track?: 'inverted' | 'normal' | false;
+  ariaLabelledby?: string;
+  
+  // optional map id to link the slider to
+  mapId?: string;
 }
 
 /**
