@@ -1,3 +1,5 @@
+import ReactDOM from 'react-dom';
+
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
 
 /**
@@ -104,4 +106,14 @@ export function getXMLHttpRequest(url: string): Promise<string> {
   });
 
   return request;
+}
+
+/**
+ * Add a UI component to a custom div. Do not listen to event from here, pass in the props
+ * 
+ * @param {React.ReactElement} component the UI react component
+ * @param {string} targetDivId the div id to insert the component in
+ */
+export function addUiComponent(targetDivId: string, component: React.ReactElement) {
+  ReactDOM.render(component, document.getElementById(targetDivId));
 }

@@ -157,7 +157,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setIsLoaded(true);
 
         viewer.toggleMapInteraction(mapProps.interaction);
-      }}
+      } }
     >
       {isLoaded && crs && (
         <>
@@ -168,8 +168,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
                 url={basemapLayer.url}
                 attribution={attribution}
                 opacity={basemapLayer.opacity}
-                pane={basemapLayer.basemapPaneName}
-              />
+                pane={basemapLayer.basemapPaneName} />
             );
           })}
           {deviceSizeMedUp && <MousePosition id={id} />}

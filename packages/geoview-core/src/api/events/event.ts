@@ -15,6 +15,7 @@ import { CLUSTER_ELEMENT, ClusterEventKey } from './constants/cluster-element';
 import { DRAWER, DrawerEventKey } from './constants/drawer';
 import { MODAL, ModalEventKey } from './constants/modal';
 import { PANEL, PanelEventKey } from './constants/panel';
+import { SLIDER, SliderEventKey } from './constants/slider';
 import { VECTOR, VectorEventKey } from './constants/vector';
 import { PayloadBaseClass } from './payloads/payload-base-class';
 
@@ -35,6 +36,7 @@ export const EVENT_NAMES = {
   DRAWER,
   MODAL,
   PANEL,
+  SLIDER,
   VECTOR,
 };
 
@@ -52,6 +54,7 @@ export type EventCategories =
   | 'DRAWER'
   | 'MODAL'
   | 'PANEL'
+  | 'SLIDER'
   | 'VECTOR';
 
 export type EventKey =
@@ -68,7 +71,7 @@ export type EventKey =
   | DrawerEventKey
   | ModalEventKey
   | PanelEventKey
-  | PanelEventKey
+  | SliderEventKey
   | VectorEventKey;
 
 export type EventStringId =
@@ -112,6 +115,9 @@ export type EventStringId =
   | 'panel/add_action'
   | 'panel/remove_action'
   | 'panel/change_content'
+  | 'slider/on_change_value'
+  | 'slider/set_values'
+  | 'slider/set_min_max'
   | 'vector/add'
   | 'vector/remove'
   | 'vector/added'
