@@ -41,7 +41,7 @@ export class ModalModel {
   open = (): void => {
     this.active = true;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.id!, this.mapId!, true));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.mapId!, this.id!, true));
   };
 
   /**
@@ -50,7 +50,7 @@ export class ModalModel {
   close = (): void => {
     this.active = false;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.id!, this.mapId!, false));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.mapId!, this.id!, false));
   };
 
   /**
