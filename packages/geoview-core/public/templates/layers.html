@@ -37,7 +37,8 @@
               <a href="#HLYR4">4. Esri Feature Servive Layer</a><br />
               <a href="#HLYR5">5. GeoJSON Layer</a><br />
               <a href="#HLYR6">6. WFS Layer</a><br />
-              <a href="#HLYR7">7. OGC API Feature Layer</a>
+              <a href="#HLYR7">7. OGC API Feature Layer</a><br />
+              <a href="#HLYR8">8. GeoCore UUID Layer</a>
             </td>
           </tr>
         </tbody>
@@ -336,6 +337,7 @@
     <div>
       <h3 id="HLYR6">6. WFS Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
+
       <div
         id="LYR6"
         class="llwp-map"
@@ -429,6 +431,42 @@
       <p>This map has an OGC API feature layer added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
       <div id="LYR7CS" class="panel"></div>
+    </div>
+    <div>
+      <h3 id="HLYR8">8. GeoCore UUID Layer</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div
+        id="LYR8"
+        class="llwp-map"
+        data-lang="en-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'initialView': {
+              'zoom': 4,
+              'center': [60, -100]
+            },
+            'projection': 3857,
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'layers': [
+              {
+                'id': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
+                'layerType': 'geoCore'
+              }
+            ]
+          },
+          'theme': 'dark',
+          'languages': ['en-CA']
+        }"
+      ></div>
+
+      <p>This map requests a layer from the catalog using uuid added from configuration.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="LYR8CS" class="panel"></div>
     </div>
     <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>

@@ -2,13 +2,15 @@ import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
-import 'dayjs/locale/en-ca'
-import 'dayjs/locale/fr-ca'
+
+import { DatePrecision, DEFAULT_DATE_PRECISION, TimePrecision, DEFAULT_TIME_PRECISION, TypeLocalizedLanguages } from '../types/cgpv-types';
+
+import 'dayjs/locale/en-ca';
+import 'dayjs/locale/fr-ca';
+
 dayjs.extend(utc);
 dayjs.extend(duration);
 dayjs.extend(localizedFormat);
-
-import { DatePrecision, DEFAULT_DATE_PRECISION, TimePrecision, DEFAULT_TIME_PRECISION, TypeLocalizedLanguages } from '../types/cgpv-types';
 
 /**
  * Create a date module to handle date format and creation who support ISO standard.
@@ -36,7 +38,7 @@ import { DatePrecision, DEFAULT_DATE_PRECISION, TimePrecision, DEFAULT_TIME_PREC
  *        SSS: 3-digit millisecond
  *        T: date time separator
  *        Z: Zulu time zone (UTC) (The WMS specification does not provide for other time zones)
- * 
+ *
  * Time Patterns | Examples
  *    YYYY-MM-DDTHH:MM:SSZ | 2004-10-12T13:55:20Z
  *    YYYY-MM-DDTHH:MM:SS | 2004-10-12T13:55:20
@@ -64,7 +66,7 @@ import { DatePrecision, DEFAULT_DATE_PRECISION, TimePrecision, DEFAULT_TIME_PREC
  *    H is the hour designator that follows the value for the number of hours.
  *    M is the minute designator that follows the value for the number of minutes.
  *    S is the second designator that follows the value for the number of seconds.
- * 
+ *
  * For example, "P3Y6M4DT12H30M5S" represents a duration of "three years, six months, four days, twelve hours, thirty minutes, and five seconds"
  */
 
@@ -72,10 +74,10 @@ const INVALID_DATE = 'Invalid Date';
 const INVALID_TIME_DIMENSION = 'Invalid Time Dimension';
 const INVALID_TIME_DIMENSION_DURATION = 'Invalid Time Dimension Duration';
 const isValidDate = (date: string) => dayjs(date).isValid();
-const isValidDuration = (duration: string) => dayjs.isDuration(dayjs.duration(duration));
+const isValidDuration = (durationCheck: string) => dayjs.isDuration(dayjs.duration(durationCheck));
 const isDiscreteRange = (ogcTimeDimension: string) => ogcTimeDimension.split(',').length > 1;
 const isAbsoluteRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/').length > 1;
-const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/')[1].substring(0,1) === 'P';
+const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/')[1].substring(0, 1) === 'P';
 
 /**
  * Class used to handle date as ISO 8601
@@ -196,12 +198,12 @@ export class DateMgt {
     if (isDiscreteRange(ogcTimeDimension)) rangeItems = ogcTimeDimension.split(',');
     else if (isRelativeRange(ogcTimeDimension)) rangeItems = this.#createRelativeIntervale(ogcTimeDimension);
     else if (isAbsoluteRange(ogcTimeDimension)) rangeItems = this.#createAbsoluteInterval(ogcTimeDimension);
-    
+
     // cheak if dimension is valid
     if (rangeItems.length === 0) throw INVALID_TIME_DIMENSION;
 
     // create marker array from OGC time dimension
-    return rangeItems
+    return rangeItems;
   }
 
   /**
@@ -212,7 +214,9 @@ export class DateMgt {
    */
   createDateLocaleTooltip(date: string, locale: TypeLocalizedLanguages): string {
     // Handle locale for date label
-    const tooltips = dayjs(date).locale(locale).format(`${date.split('T').length > 1 ? 'LLL' : 'LL'}`);
+    const tooltips = dayjs(date)
+      .locale(locale)
+      .format(`${date.split('T').length > 1 ? 'LLL' : 'LL'}`);
 
     return tooltips;
   }
@@ -227,12 +231,12 @@ export class DateMgt {
     // Absolute interval:
     // A client may request information over a continuous interval instead of a single instant by specifying a start and end time, separated by a / character.
     // 2002-09-01T00:00:00.0Z/2002-09-30T23:59:59.999Z
-    const [date1, date2, duration]: string[] = ogcTimeDimension.split('/');
+    const [date1, date2, durationCheck]: string[] = ogcTimeDimension.split('/');
 
     // check if dates are valid
     if (!isValidDate(date1)) throw INVALID_DATE;
     if (!isValidDate(date2)) throw INVALID_DATE;
-    if (!isValidDuration(duration)) throw INVALID_TIME_DIMENSION_DURATION;
+    if (!isValidDuration(durationCheck)) throw INVALID_TIME_DIMENSION_DURATION;
 
     // get the date format
     const format: string = this.extractDateFormat(date1);
@@ -242,16 +246,16 @@ export class DateMgt {
     const max: string = dayjs(date2).format(format);
 
     // create intervalle items
-    const msDuration: number = dayjs.duration(duration).asMilliseconds();
+    const msDuration: number = dayjs.duration(durationCheck).asMilliseconds();
     const items: string[] = [];
     let i = 0;
 
     // TODO: handle leap year
     do {
-      let calcDuration = i * msDuration;
+      const calcDuration = i * msDuration;
       items.push(dayjs(min).add(calcDuration).format(format));
-      i++
-    } while (dayjs(items[items.length -1]).isBefore(max));
+      i++;
+    } while (dayjs(items[items.length - 1]).isBefore(max));
 
     // add last item
     items.push(max);
@@ -270,17 +274,17 @@ export class DateMgt {
     // A client may request information over a relative time interval instead of a set time range by specifying a start or end time with an associated duration, separated by a / character.
     // One end of the interval must be a time value, but the other may be a duration
     // 2002-09-01T00:00:00.0Z/P1M or !!! NOT SUPPORTED FOR NOW PT36H/PRESENT
-    const [date, duration]: string[] = ogcTimeDimension.split('/');
+    const [date, durationCheck]: string[] = ogcTimeDimension.split('/');
 
     // check if date and duration are valid
-    if (!isValidDuration(duration)) throw INVALID_TIME_DIMENSION_DURATION;
+    if (!isValidDuration(durationCheck)) throw INVALID_TIME_DIMENSION_DURATION;
     if (!isValidDate(date)) throw INVALID_DATE;
 
     // get the date format
     const format: string = this.extractDateFormat(date);
 
-    // set min and max
-    const msDuration = dayjs.duration(duration);
+    // set min and maxs
+    const msDuration = dayjs.duration(durationCheck);
     const min: string = dayjs(date).format(format);
     const max: Dayjs = dayjs(date).add(msDuration);
 
