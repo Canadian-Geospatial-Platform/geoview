@@ -1,7 +1,7 @@
 /* eslint-disable no-console, no-underscore-dangle */
 import { LatLngTuple } from 'leaflet';
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import Ajv from 'ajv';
 
@@ -32,7 +32,7 @@ import { generateId, isJsonString } from './utilities';
 
 import schema from '../../../schema.json';
 
-const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
+export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 
 /**
  * Class to handle configuration validation. Will validate every item for structure and valid values. If error found, will replace by default values
@@ -130,6 +130,163 @@ export class Config {
   }
 
   /**
+   * Generate layer configs from uuid request result
+   *
+   * @param {TypeJsonObject} result the uuid request result
+   * @returns {TypeLayerConfig[]} layers parsed from uuid result
+   */
+  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeLayerConfig[] => {
+    const layers: TypeLayerConfig[] = [];
+
+    if (result && result.data) {
+      for (let i = 0; i < result.data.length; i++) {
+        const data = result.data[i];
+
+        if (data && data.layers && data.layers.length > 0) {
+          const layer = data.layers[0];
+
+          if (layer) {
+            const { layerType, layerEntries, name, url, id } = layer;
+
+            const isFeature = (url as string).indexOf('FeatureServer') > -1;
+
+            if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                  return {
+                    index: item.index,
+                  } as TypeDynamicLayerEntry;
+                }),
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+              } as TypeDynamicLayer);
+            } else if (isFeature) {
+              for (let j = 0; j < layerEntries.length; j++) {
+                const featureUrl = `${url}/${layerEntries[j].index}`;
+                layers.push({
+                  id,
+                  name: {
+                    en: name,
+                    fr: name,
+                  },
+                  url: {
+                    en: featureUrl,
+                    fr: featureUrl,
+                  },
+                  layerType: CONST_LAYER_TYPES.ESRI_FEATURE,
+                } as TypeFeatureLayer);
+              }
+            } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+              } as TypeFeatureLayer);
+            } else if (layerType === CONST_LAYER_TYPES.WMS) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                  return {
+                    id: item.id,
+                  } as TypeOgcLayerEntry;
+                }),
+              } as TypeWMSLayer);
+            } else if (layerType === CONST_LAYER_TYPES.WFS) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                  return {
+                    id: item.id,
+                  } as TypeOgcLayerEntry;
+                }),
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+              } as TypeWFSLayer);
+            } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                  return {
+                    id: item.id,
+                  } as TypeOgcLayerEntry;
+                }),
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+              } as TypeOgcFeatureLayer);
+            } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+              } as TypeGeoJSONLayer);
+            } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
+              layers.push({
+                id,
+                name: {
+                  en: name,
+                  fr: name,
+                },
+                url: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
+              } as TypeXYZTiles);
+            }
+          }
+        }
+      }
+    }
+
+    return layers;
+  };
+
+  /**
    * Get map config from url parameters
    *
    * @returns {TypeMapSchemaProps | undefined} a config object generated from url parameters
@@ -153,7 +310,7 @@ export class Config {
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
-      const layers: TypeLayerConfig[] = [];
+      let layers: TypeLayerConfig[] = [];
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
@@ -161,150 +318,7 @@ export class Config {
 
         const result = await axios.get<TypeJsonObject>(requestUrl);
 
-        if (result && result.data) {
-          for (let i = 0; i < result.data.length; i++) {
-            const data = result.data[i];
-
-            if (data && data.layers && data.layers.length > 0) {
-              const layer = data.layers[0];
-
-              if (layer) {
-                const { layerType, layerEntries, name, url, id } = layer;
-
-                const isFeature = (url as string).indexOf('FeatureServer') > -1;
-
-                if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
-                      return {
-                        index: item.index,
-                      } as TypeDynamicLayerEntry;
-                    }),
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                  } as TypeDynamicLayer);
-                } else if (isFeature) {
-                  for (let j = 0; j < layerEntries.length; j++) {
-                    const featureUrl = `${url}/${layerEntries[j].index}`;
-                    layers.push({
-                      id,
-                      name: {
-                        en: name,
-                        fr: name,
-                      },
-                      url: {
-                        en: featureUrl,
-                        fr: featureUrl,
-                      },
-                      layerType: CONST_LAYER_TYPES.ESRI_FEATURE,
-                    } as TypeFeatureLayer);
-                  }
-                } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                  } as TypeFeatureLayer);
-                } else if (layerType === CONST_LAYER_TYPES.WMS) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
-                      return {
-                        id: item.id,
-                      } as TypeOgcLayerEntry;
-                    }),
-                  } as TypeWMSLayer);
-                } else if (layerType === CONST_LAYER_TYPES.WFS) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
-                      return {
-                        id: item.id,
-                      } as TypeOgcLayerEntry;
-                    }),
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                  } as TypeWFSLayer);
-                } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    layerEntries: (layerEntries as TypeJsonArray).map((item) => {
-                      return {
-                        id: item.id,
-                      } as TypeOgcLayerEntry;
-                    }),
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                  } as TypeOgcFeatureLayer);
-                } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                  } as TypeGeoJSONLayer);
-                } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
-                  layers.push({
-                    id,
-                    name: {
-                      en: name,
-                      fr: name,
-                    },
-                    url: {
-                      en: url,
-                      fr: url,
-                    },
-                    layerType,
-                  } as TypeXYZTiles);
-                }
-              }
-            }
-          }
-        }
+        layers = Config.getLayerConfigFromUUID(result);
       }
 
       // get core packages if any
@@ -396,8 +410,6 @@ export class Config {
       } catch (error) {
         console.log(`- map: ${this.id} - Invalid config url provided -`);
       }
-    } else {
-      console.log(`- map: ${this.id} - Invalid config url provided -`);
     }
 
     return configObj;

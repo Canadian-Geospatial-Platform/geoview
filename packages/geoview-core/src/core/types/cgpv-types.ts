@@ -481,7 +481,8 @@ export interface TypeGeometryEndpointLayer extends TypeLayerConfig {
 }
 
 export interface TypeGeoCoreLayer extends Omit<TypeLayerConfig, 'url'> {
-  url?: TypeLangString;
+  id: string;
+  url?: string;
 }
 
 export interface TypeXYZTiles extends TypeLayerConfig {
@@ -919,8 +920,8 @@ export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
 /**
  * interface used to define the web-layers
  */
-export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
-export type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 
 /**
  * constant contains layer types
@@ -929,6 +930,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeWebLayers> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
   GEOJSON: 'geojson',
+  GEOCORE: 'geoCore',
   XYZ_TILES: 'xyzTiles',
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',
@@ -942,6 +944,7 @@ export const DEFAULT_LAYER_NAMES: Record<TypeWebLayers, string> = {
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
   geojson: 'GeoJson Layer',
+  geoCore: 'GeoCore Layer',
   xyzTiles: 'XYZ Tiles',
   ogcFeature: 'OGC Feature Layer',
   ogcWfs: 'WFS Layer',
@@ -972,16 +975,16 @@ export type TypePluginOptions = {
 export const DEFAULT_DATE_PRECISION = {
   year: 'YYYY',
   month: 'YYYY-MM',
-  day: 'YYYY-MM-DD'
-}
+  day: 'YYYY-MM-DD',
+};
 export type DatePrecision = 'year' | 'month' | 'day';
 
 /**
  * constant/interface used to define the precision for time object (hh, mm, ss)
  */
- export const DEFAULT_TIME_PRECISION = {
+export const DEFAULT_TIME_PRECISION = {
   hour: 'THHZ',
   minute: 'THH:MMZ',
   second: 'THH:MM:SSZ',
-}
+};
 export type TimePrecision = 'hour' | 'minute' | 'second';

@@ -7,6 +7,7 @@ import { layerConfigIsWFS, WFS } from './web-layers/ogc/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from './web-layers/ogc/ogc_feature';
 import { layerConfigIsXYZTiles, XYZTiles } from './web-layers/map-tile/xyz-tiles';
 import { GeoJSON, layerConfigIsGeoJSON } from './web-layers/file/geojson';
+import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 import { MarkerClusterClass } from './vector/marker-cluster';
 
@@ -62,7 +63,13 @@ export class Layer {
         if (payloadIsALayerConfig(payload)) {
           if (payload.handlerName!.includes(this.#mapId)) {
             const { layerConfig } = payload;
-            if (layerConfigIsGeoJSON(layerConfig)) {
+
+            if (layerConfigIsGeoCore(layerConfig)) {
+              const geoCore = new GeoCore(this.#mapId);
+              geoCore.add(layerConfig).then((uuidLayerConfig) => {
+                if (uuidLayerConfig) this.addLayer(uuidLayerConfig);
+              });
+            } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.#mapId, layerConfig);
               geoJSON.add(layerConfig).then((layer) => {
                 geoJSON.layer = layer;
