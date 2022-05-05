@@ -13,8 +13,30 @@ import {
 
 import { api } from '../../../../app';
 
+/* ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeGeoJSONLayer
+ * if the layerType attribute of the verifyIfLayer parameter is GEOJSON. The type ascention
+ * applies only to the the true block of the if clause that use this function.
+ *
+ * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
 export const layerConfigIsGeoJSON = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeGeoJSONLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOJSON;
+};
+
+/* ******************************************************************************************************************************
+ * Type Gard function that redefines an AbstractWebLayersClass as a GeoJSON
+ * if the type attribute of the verifyIfWebLayer parameter is GEOJSON. The type ascention
+ * applies only to the the true block of the if clause that use this function.
+ *
+ * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
+export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is GeoJSON => {
+  return verifyIfWebLayer.type === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /**

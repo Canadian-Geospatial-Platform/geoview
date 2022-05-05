@@ -1,20 +1,17 @@
 /* eslint-disable react/no-array-index-key */
 import {
-  Cast,
   TypeLayersPanelListProps,
-  EsriFeature,
-  EsriDynamic,
   TypeJsonValue,
   TypeJsonArray,
-  WMS,
   toJsonObject,
   TypeJsonObject,
   AbstractWebLayersClass,
   TypeWindow,
   TypeCGPVMUI,
-  CONST_LAYER_TYPES,
+  webLayerIsWMS,
+  webLayerIsEsriDynamic,
+  webLayerIsEsriFeature,
 } from 'geoview-core';
-import { generateId } from 'geoview-core/src/core/utils/utilities';
 
 type Event = { target: { value: number } };
 
@@ -142,15 +139,13 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const setLayerLegendAll = () =>
     Object.values(layers).forEach(async (layer) => {
-      if (layer.type === CONST_LAYER_TYPES.WMS) {
-        const wmsLayer = Cast<WMS>(layer);
-        const dataUrl = await wmsLayer.getLegendGraphic();
+      if (webLayerIsWMS(layer)) {
+        const dataUrl = await layer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
-      } else if (layer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC || layer.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
-        const EsriLayer = Cast<EsriFeature | EsriDynamic>(layer);
-        const legend = await EsriLayer.getLegendJson();
+      } else if (webLayerIsEsriDynamic(layer) || webLayerIsEsriFeature(layer)) {
+        const legend = await layer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];
         setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
       }
@@ -229,7 +224,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
       latlngs.push({ lat: bounds.getNorth(), lng });
     }
     latlngs.push(bounds.getNorthWest());
-    return L.polygon(latlngs, { id: generateId(), color: 'red' });
+    return L.polygon(latlngs, { id: api.generateId(), color: 'red' });
   };
 
   /**
