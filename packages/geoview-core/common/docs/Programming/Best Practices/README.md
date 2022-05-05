@@ -110,3 +110,6 @@ const spredingCollision = { ...object1, ...object2 };
 const noCollision = { object1, object2 };
 ```
 
+## 6- Do not leave dead code in the source code ##
+
+It is useless to comment old code segments in order to remember how the viewer used to work. This unduly pollutes the code and affects its readability. The code is kept in a github repository and it is possible to go back in time to see how the viewer was coded at a given date.

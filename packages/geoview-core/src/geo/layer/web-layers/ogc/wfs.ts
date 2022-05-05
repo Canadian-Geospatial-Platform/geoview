@@ -16,8 +16,30 @@ import {
 
 import { api } from '../../../../app';
 
+/* ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeWFSLayer
+ * if the layerType attribute of the verifyIfLayer parameter is WFS. The type ascention
+ * applies only to the the true block of the if clause that use this function.
+ *
+ * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
 export const layerConfigIsWFS = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeWFSLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.WFS;
+};
+
+/* ******************************************************************************************************************************
+ * Type Gard function that redefines an AbstractWebLayersClass as a WFS
+ * if the type attribute of the verifyIfWebLayer parameter is WFS. The type ascention
+ * applies only to the the true block of the if clause that use this function.
+ *
+ * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
+export const webLayerIsWFS = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is WFS => {
+  return verifyIfWebLayer.type === CONST_LAYER_TYPES.WFS;
 };
 
 /**
