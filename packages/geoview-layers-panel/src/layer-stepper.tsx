@@ -46,7 +46,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
-  const [layerType, setLayerType] = useState<TypeWebLayers>();
+  const [layerType, setLayerType] = useState<TypeWebLayers>('esriDynamic');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<(TypeDynamicLayerEntry | TypeOgcLayerEntry)[]>([]);
@@ -394,7 +394,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const handleInput = (event: Event) => {
     setLayerURL(event.target.value);
-    setLayerType(undefined);
+    setLayerType('esriDynamic');
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);
