@@ -5,8 +5,6 @@ import StepContent from '@mui/material/StepContent';
 
 import { TypeStepperProps, TypeStep } from '../../core/types/cgpv-types';
 
-import { generateId } from '../../core/utils/utilities';
-
 /**
  * Create a Material UI Stepper component
  *
@@ -19,14 +17,13 @@ export function Stepper(props: TypeStepperProps): JSX.Element {
   return (
     <MaterialStepper {...stepperProps}>
       {steps &&
-        steps.map((step: TypeStep | null) => {
+        steps.map((step: TypeStep | null, index) => {
           if (step) {
-            const { id, props: stepProps, stepLabel, stepContent } = step;
-
-            const stepId = generateId(id);
+            const { props: stepProps, stepLabel, stepContent } = step;
 
             return (
-              <Step key={stepId} {...stepProps}>
+              // eslint-disable-next-line react/no-array-index-key
+              <Step key={index} {...stepProps}>
                 <StepLabel {...stepLabel} />
                 <StepContent {...stepContent} />
               </Step>

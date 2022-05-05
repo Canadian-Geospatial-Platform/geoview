@@ -235,6 +235,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       if ((esri.capabilities as string).includes(esriOptions(type).capability)) {
         if ('layers' in esri) {
           const layers = (esri.layers as TypeJsonArray).map((aLayer) => [aLayer.id, aLayer.name]);
+
           if (layers.length === 1) {
             setLayerName(layers[0][1] as string);
             setLayerEntries([
@@ -544,12 +545,21 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                   <Autocomplete
                     fullWidth
                     multiple={isMultiple()}
-                    disableCloseOnSelect={isMultiple()}
+                    disableCloseOnSelect
                     disableClearable={!isMultiple()}
                     id="service-layer-label"
                     options={layerList}
                     getOptionLabel={(option) => `${option[1]} (${option[0]})`}
                     renderOption={(props, option) => <span {...props}>{option[1]}</span>}
+                    // value={
+                    //   layerType === ESRI_DYNAMIC
+                    //     ? layerEntries.map((entry) => {
+                    //         return (entry as TypeDynamicLayerEntry).index.toString();
+                    //       })
+                    //     : layerEntries.map((entry) => {
+                    //         return (entry as TypeOgcLayerEntry).id;
+                    //       })
+                    // }
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onChange={handleSelectLayer as any}
                     renderInput={(params) => <TextField {...params} label="Select Layer" />}
