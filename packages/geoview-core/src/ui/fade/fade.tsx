@@ -1,4 +1,4 @@
-import { Fade as MaterialFade } from '@mui/material';
+import MaterialFade from '@mui/material/Fade';
 
 import { TypeFadeProps } from '../../core/types/cgpv-types';
 

@@ -1,3 +1,14 @@
+import Layers from '@mui/icons-material/Layers';
+import GitHub from '@mui/icons-material/GitHub';
+import ChevronLeft from '@mui/icons-material/ChevronLeft';
+import ChevronRight from '@mui/icons-material/ChevronRight';
+import Fullscreen from '@mui/icons-material/Fullscreen';
+import FullscreenExit from '@mui/icons-material/FullscreenExit';
+import Home from '@mui/icons-material/Home';
+import Add from '@mui/icons-material/Add';
+import Remove from '@mui/icons-material/Remove';
+import Close from '@mui/icons-material/Close';
+
 export {
   Layers as LayersIcon,
   GitHub as GitHubIcon,
@@ -9,4 +20,4 @@ export {
   Add as ZoomInIcon,
   Remove as ZoomOutIcon,
   Close as CloseIcon,
-} from '@mui/icons-material';
+};

@@ -1,5 +1,5 @@
 import makeStyles from '@mui/styles/makeStyles';
-import { CircularProgress as MaterialCircularProgress } from '@mui/material';
+import MaterialCircularProgress from '@mui/material/CircularProgress';
 
 import { TypeCircularProgressProps } from '../../core/types/cgpv-types';
 

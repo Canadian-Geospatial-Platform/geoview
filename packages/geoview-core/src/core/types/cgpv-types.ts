@@ -21,12 +21,23 @@ import {
   DialogProps,
   BaseTextFieldProps,
   useMediaQuery,
+  AutocompleteProps,
+  TypographyProps,
+  SliderProps,
+  CheckboxProps,
+  StepperProps,
+  StepLabelProps,
+  StepContentProps,
+  StepProps,
+  TextFieldProps,
+  SelectProps,
+  MenuItemProps,
+  InputLabelProps,
+  SelectChangeEvent,
 } from '@mui/material';
 
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
-
-import * as MUI from '@mui/material';
 
 import { Plugin } from '../../api/plugin';
 import { API } from '../../api/api';
@@ -97,23 +108,6 @@ export type TypeCGPVUI = {
   elements: typeof UI;
 };
 
-export type TypeCGPVMUI = {
-  Stepper: typeof MUI.Stepper;
-  Step: typeof MUI.Step;
-  StepLabel: typeof MUI.StepLabel;
-  StepContent: typeof MUI.StepContent;
-  TextField: typeof MUI.TextField;
-  Typography: typeof MUI.Stepper;
-  InputLabel: typeof MUI.InputLabel;
-  FormControl: typeof MUI.FormControl;
-  Select: typeof MUI.Select;
-  MenuItem: typeof MUI.MenuItem;
-  Autocomplete: typeof MUI.Autocomplete;
-  Slider: typeof MUI.Slider;
-  Tooltip: typeof MUI.Tooltip;
-  Checkbox: typeof MUI.Checkbox;
-};
-
 export type TypeCGPVConstants = {
   leafletPositionClasses: typeof LEAFLET_POSITION_CLASSES;
 };
@@ -125,7 +119,6 @@ export type TypeCGPV = {
   leaflet: typeof L;
   reactLeaflet: typeof ReactLeaflet;
   reactLeafletCore: typeof ReactLeafletCore;
-  mui?: typeof MUI;
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -771,6 +764,47 @@ export interface TypeListProps extends ListProps {
 export type TypeListItemProps = ListItemProps;
 
 /**
+ * Customized Material UI Autocomplete properties
+ */
+export interface TypeAutocompleteProps<
+  T,
+  Multiple extends boolean | undefined = undefined,
+  DisableClearable extends boolean | undefined = undefined,
+  FreeSolo extends boolean | undefined = undefined
+> extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
+  mapId?: string;
+  fullWidth?: boolean;
+}
+
+/**
+ * Custom Material UI Typography properties
+ */
+export interface TypeTypographyProps extends TypographyProps {
+  mapId?: string;
+}
+
+/**
+ * Custom MUI slider properties
+ */
+export interface TypeSliderProps extends SliderProps {
+  mapId?: string;
+}
+
+/**
+ * Custom MUI Checkbox properties
+ */
+export interface TypeCheckboxProps extends CheckboxProps {
+  mapId?: string;
+}
+
+/**
+ * Custom MUI Tooltip properties
+ */
+export interface TypeTooltipProps extends TooltipProps {
+  mapId?: string;
+}
+
+/**
  * Customized Material UI Dialog Properties
  */
 export interface TypeDialogProps extends Omit<DialogProps, 'title'> {
@@ -810,6 +844,8 @@ export interface TypeItemProps {
   default?: boolean;
 }
 
+export type TypeSelectChangeEvent<unkown> = SelectChangeEvent<unkown>;
+
 /**
  * Required and optional properties for the items (options) of select
  */
@@ -819,9 +855,19 @@ export interface TypeSelectItems {
 }
 
 /**
- * Properties for the Select component
+ * Custom MUI Select properties
  */
-export interface TypeSelectProps {
+export interface TypeSelectProps extends SelectProps {
+  mapId?: string;
+  fullWidth?: boolean;
+  menuItems: (MenuItemProps | null)[];
+  inputLabel: InputLabelProps;
+}
+
+/**
+ * Properties for the Custom Select component
+ */
+export interface TypeCustomSelectProps {
   id: string;
   className?: string;
   style?: CSSProperties;
@@ -857,9 +903,27 @@ export interface TypeStepperSteps {
 }
 
 /**
- * Properties for the Stepper
+ * Object that holds a step of a stepper component
  */
-export interface TypeStepperProps {
+export interface TypeStep {
+  id?: string | null;
+  stepLabel?: StepLabelProps;
+  stepContent?: StepContentProps;
+  props?: StepProps;
+}
+
+/**
+ * Custom MUI Stepper Props
+ */
+export interface TypeStepperProps extends StepperProps {
+  mapId?: string;
+  steps: (TypeStep | null)[];
+}
+
+/**
+ * Properties for the Custom Stepper
+ */
+export interface TypeCustomStepperProps {
   id: string;
   className?: string;
   style?: CSSProperties;
@@ -891,9 +955,14 @@ export interface TypeStepperProps {
 }
 
 /**
- * Customized Material UI TextField Properties
+ * Custom Material UI Textfield properties
  */
-export interface TypeTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
+export type TypeTextFieldProps = TextFieldProps & { mapId?: string };
+
+/**
+ * Customized Material UI Custom TextField Properties
+ */
+export interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
   id: string;
 
   // the helper text (as defined above) but only if there is an error

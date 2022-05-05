@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
-import { Drawer as MaterialDrawer } from '@mui/material';
+import MaterialDrawer from '@mui/material/Drawer';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';

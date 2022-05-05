@@ -8,7 +8,9 @@ import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 
 import makeStyles from '@mui/styles/makeStyles';
-import { Card, CardHeader, CardContent } from '@mui/material';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
 
 import { Cast, TypePanelAppProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';

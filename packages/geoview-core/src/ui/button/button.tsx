@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { DomEvent } from 'leaflet';
 
 import makeStyles from '@mui/styles/makeStyles';
-import { Tooltip, Fade, Button as MaterialButton } from '@mui/material';
+
+import Tooltip from '@mui/material/Tooltip';
+import Fade from '@mui/material/Fade';
+import MaterialButton from '@mui/material/Button';
 
 import { Cast, TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
 
