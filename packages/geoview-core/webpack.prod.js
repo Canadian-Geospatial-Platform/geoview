@@ -8,6 +8,7 @@ const common = require('./webpack.common');
 
 const config = {
   mode: 'production',
+  devtool: 'source-map',
   optimization: {
     minimizer: [new TerserPlugin({})],
   },

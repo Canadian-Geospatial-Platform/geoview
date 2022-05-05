@@ -11,7 +11,6 @@ import {
   TypeJsonObject,
   AbstractWebLayersClass,
   TypeWindow,
-  TypeCGPVMUI,
   CONST_LAYER_TYPES,
 } from 'geoview-core';
 import { generateId } from 'geoview-core/src/core/utils/utilities';
@@ -39,7 +38,6 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
 
   const { cgpv } = w;
   const { ui, react, api, leaflet: L } = cgpv;
-  const mui = cgpv.mui as TypeCGPVMUI;
   const { useState, useEffect } = react;
 
   const [selectedLayer, setSelectedLayer] = useState<string>('');
@@ -50,8 +48,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({});
   const [subLayerVisibility, setSubLayerVisibility] = useState<TypeSubLayerVisibility>({});
 
-  const { Slider, Tooltip, Checkbox } = mui;
-  const { Button } = ui.elements;
+  const { Button, Slider, Tooltip, Checkbox } = ui.elements;
 
   const translations: TypeJsonObject = toJsonObject({
     'en-CA': {

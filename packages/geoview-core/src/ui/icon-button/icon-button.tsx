@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { IconButton as MaterialIconButton, Tooltip, Fade } from '@mui/material';
+import MaterialIconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Fade from '@mui/material/Fade';
 
 import { TypeIconButtonProps } from '../../core/types/cgpv-types';
 

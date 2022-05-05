@@ -1,4 +1,4 @@
-import { ListItem as MaterialListItem } from '@mui/material';
+import MaterialListItem from '@mui/material/ListItem';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { TypeListItemProps } from '../../core/types/cgpv-types';

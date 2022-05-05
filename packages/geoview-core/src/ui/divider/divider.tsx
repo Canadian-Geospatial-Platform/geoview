@@ -1,4 +1,4 @@
-import { Divider as MaterialDivider } from '@mui/material';
+import MaterialDivider from '@mui/material/Divider';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { TypeDividerProps } from '../../core/types/cgpv-types';

@@ -8,9 +8,6 @@ import * as ReactLeafletCore from '@react-leaflet/core';
 
 import { useTranslation } from 'react-i18next';
 
-// TODO: remove as soon as element UI components are created
-import * as MUI from '@mui/material';
-
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
@@ -123,7 +120,6 @@ export const cgpv: types.TypeCGPV = {
   leaflet: L,
   reactLeaflet: ReactLeaflet,
   reactLeafletCore: ReactLeafletCore,
-  mui: MUI,
   ui: {
     useTheme,
     useMediaQuery,

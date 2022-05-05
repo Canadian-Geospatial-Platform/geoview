@@ -1,4 +1,4 @@
-import { ButtonGroup as MaterialButtonGroup } from '@mui/material';
+import MaterialButtonGroup from '@mui/material/ButtonGroup';
 
 import { TypeButtonGroupProps } from '../../core/types/cgpv-types';
 

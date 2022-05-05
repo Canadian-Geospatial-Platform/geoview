@@ -3,9 +3,14 @@ import React, { useState, useEffect, useCallback, Fragment } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import { ClassNameMap, withStyles } from '@mui/styles';
+import { ClassNameMap } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import makeStyles from '@mui/styles/makeStyles';
+
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 
 import { toJsonObject, TypeDialogProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';

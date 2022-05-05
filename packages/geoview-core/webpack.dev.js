@@ -6,7 +6,7 @@ const common = require('./webpack.common');
 
 const config = {
   mode: 'development',
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   devServer: {
     historyApiFallback: true,
     static: {
