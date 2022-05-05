@@ -15,6 +15,9 @@ import {
   toJsonObject,
   TypeJsonObject,
   TypeJsonArray,
+  webLayerIsWMS,
+  webLayerIsEsriDynamic,
+  webLayerIsEsriFeature,
   WMS,
   EsriFeature,
   EsriDynamic,
@@ -471,10 +474,9 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       });
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (mapLayer.type === CONST_LAYER_TYPES.WMS) {
-        const ogcWMSLayer = Cast<WMS>(mapLayer);
+      if (webLayerIsWMS(mapLayer)) {
         // get layer ids / entries from the loaded WMS layer
-        const { entries } = ogcWMSLayer;
+        const { entries } = mapLayer;
 
         if (entries)
           for (let i = 0; i < entries.length; i++) {
@@ -482,11 +484,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             // query the layer information
             // eslint-disable-next-line no-await-in-loop
-            const layerInfo = await queryServer(ogcWMSLayer.mapService.options.url! + layerId);
+            const layerInfo = await queryServer(mapLayer.mapService.options.url! + layerId);
 
             // try to add the legend image url for the WMS layer
             // const legendImageUrl = `${ogcWMSLayer.url}?request=GetLegendGraphic&version=1.0.0&Service=WMS&format=image/png&layer=${layerId}`;
-            const legendImageUrl = ogcWMSLayer.getLegendGraphic();
+            const legendImageUrl = mapLayer.getLegendGraphic();
 
             // assign the url to the renderer
             if (layerInfo.drawingInfo && layerInfo.drawingInfo.renderer && layerInfo.drawingInfo.renderer.symbol) {
@@ -499,17 +501,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             addLayer(mapLayer, data, layerInfo, false);
           }
-      } else if (mapLayer.type === CONST_LAYER_TYPES.ESRI_FEATURE) {
-        const esriFeatureLayer = Cast<EsriFeature>(mapLayer);
-
+      } else if (webLayerIsEsriFeature(mapLayer)) {
         // query the layer information, feature layer URL will end by a number provided in the map config
-        const layerInfo = await queryServer(esriFeatureLayer.url);
+        const layerInfo = await queryServer(mapLayer.url);
 
         addLayer(mapLayer, data, layerInfo, false);
-      } else if (mapLayer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
-        const esriDynamicLayer = Cast<EsriDynamic>(mapLayer);
+      } else if (webLayerIsEsriDynamic(mapLayer)) {
         // get active layers
-        const entries = esriDynamicLayer.layer!.getLayers();
+        const entries = mapLayer.layer!.getLayers();
 
         const activeLayers: Record<number, number> = {};
 
@@ -520,7 +519,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
         // get the metadata of the dynamic layer
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        esriDynamicLayer.layer!.metadata(async (error: any, res: { layers: { id: string; subLayerIds: string[] }[] }) => {
+        mapLayer.layer!.metadata(async (error: any, res: { layers: { id: string; subLayerIds: string[] }[] }) => {
           if (error) return;
 
           if (res.layers) {

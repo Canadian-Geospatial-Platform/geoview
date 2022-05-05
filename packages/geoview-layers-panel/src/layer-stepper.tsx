@@ -8,8 +8,8 @@ import {
   TypeLayerConfig,
   TypeWebLayers,
   TypeSelectChangeEvent,
+  snackbarMessagePayload,
 } from 'geoview-core';
-import { snackbarMessagePayload } from 'geoview-core/src/api/events/payloads/snackbar-message-payload';
 
 type Event = { target: { value: string } };
 
@@ -46,7 +46,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
-  const [layerType, setLayerType] = useState<TypeWebLayers>('esriDynamic');
+  const [layerType, setLayerType] = useState<TypeWebLayers | ''>('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<(TypeDynamicLayerEntry | TypeOgcLayerEntry)[]>([]);
@@ -367,7 +367,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         en: name,
         fr: name,
       },
-      layerType: layerType!,
+      layerType: layerType as TypeWebLayers,
       url: {
         en: url,
         fr: url,
@@ -394,7 +394,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   const handleInput = (event: Event) => {
     setLayerURL(event.target.value);
-    setLayerType('esriDynamic');
+    setLayerType('');
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);

@@ -53,13 +53,13 @@ import { AbstractPluginClass } from './abstract/abstract-plugin';
 export { AbstractWebLayersClass } from './abstract/abstract-web-layers';
 export { AbstractPluginClass } from './abstract/abstract-plugin';
 
-export { EsriDynamic } from '../../geo/layer/web-layers/esri/esri-dynamic';
-export { EsriFeature } from '../../geo/layer/web-layers/esri/esri-feature';
-export { GeoJSON } from '../../geo/layer/web-layers/file/geojson';
-export { XYZTiles } from '../../geo/layer/web-layers/map-tile/xyz-tiles';
-export { OgcFeature } from '../../geo/layer/web-layers/ogc/ogc_feature';
-export { WFS } from '../../geo/layer/web-layers/ogc/wfs';
-export { WMS } from '../../geo/layer/web-layers/ogc/wms';
+export * from '../../geo/layer/web-layers/esri/esri-dynamic';
+export * from '../../geo/layer/web-layers/esri/esri-feature';
+export * from '../../geo/layer/web-layers/file/geojson';
+export * from '../../geo/layer/web-layers/map-tile/xyz-tiles';
+export * from '../../geo/layer/web-layers/ogc/ogc_feature';
+export * from '../../geo/layer/web-layers/ogc/wfs';
+export * from '../../geo/layer/web-layers/ogc/wms';
 
 export * from '../../api/events/payloads/basemap-layers-payload';
 export * from '../../api/events/payloads/boolean-payload';

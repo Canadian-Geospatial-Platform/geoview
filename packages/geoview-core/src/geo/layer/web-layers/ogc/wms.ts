@@ -20,8 +20,30 @@ import {
 
 import { api } from '../../../../app';
 
+/* ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeWMSLayer
+ * if the layerType attribute of the verifyIfLayer parameter is WMS. The type ascention
+ * applies only to the the true block of the if clause that use this function.
+ *
+ * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
 export const layerConfigIsWMS = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeWMSLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.WMS;
+};
+
+/* ******************************************************************************************************************************
+ * Type Gard function that redefines an AbstractWebLayersClass as a WMS
+ * if the type attribute of the verifyIfWebLayer parameter is WMS. The type ascention
+ * applies only to the the true block of the if clause that use this function.
+ *
+ * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
+export const webLayerIsWMS = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is WMS => {
+  return verifyIfWebLayer.type === CONST_LAYER_TYPES.WMS;
 };
 
 // TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
@@ -172,6 +194,28 @@ export class WMS extends AbstractWebLayersClass {
   };
 
   /**
+   * Get the legend image of a layer from the capabilities. Return null if it does not exist,,
+   *
+   * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
+   */
+  getLegendUrlFromCapabilities = (): TypeJsonObject | null => {
+    const layerName = this.layer!.options.layers;
+    let legendUrl = null;
+    (this.#capabilities.Capability.Layer.Layer as TypeJsonArray).forEach((currentLayer) => {
+      if (currentLayer.Name === layerName && currentLayer.Style) {
+        (currentLayer.Style as TypeJsonArray).forEach((currentStyle) => {
+          if (currentStyle.LegendURL) {
+            (currentStyle.LegendURL as TypeJsonArray).forEach((currentLegend) => {
+              if (currentLegend.Format === 'image/png') legendUrl = currentLegend;
+            });
+          }
+        });
+      }
+    });
+    return legendUrl;
+  };
+
+  /**
    * Get the legend image of a layer
    *
    * @param {layerName} string the name of the layer to get the legend image for
@@ -186,7 +230,13 @@ export class WMS extends AbstractWebLayersClass {
         reader.readAsDataURL(blob);
       });
 
-    const legendUrl = `${this.url}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${this.entries}`;
+    const legendUrlFromCapabilities = this.getLegendUrlFromCapabilities();
+    let legendUrl: string;
+    if (legendUrlFromCapabilities) {
+      legendUrl = legendUrlFromCapabilities.OnlineResource as string;
+    } else {
+      legendUrl = `${this.url}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${this.entries}`;
+    }
     const response = await axios.get<TypeJsonObject>(legendUrl, { responseType: 'blob' });
     return readAsyncFile(Cast<Blob>(response.data));
   };
