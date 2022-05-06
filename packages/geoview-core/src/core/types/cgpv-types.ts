@@ -855,6 +855,9 @@ export interface TypeSelectItems {
   items: Array<TypeItemProps>;
 }
 
+/**
+ * Menu Item properties
+ */
 export interface TypeMenuItemProps {
   type?: 'item' | 'header';
   item: MenuItemProps | ListSubheaderProps | null;
