@@ -34,6 +34,7 @@ import {
   MenuItemProps,
   InputLabelProps,
   SelectChangeEvent,
+  ListSubheaderProps,
 } from '@mui/material';
 
 import { useTheme } from '@mui/material/styles';
@@ -854,13 +855,18 @@ export interface TypeSelectItems {
   items: Array<TypeItemProps>;
 }
 
+export interface TypeMenuItemProps {
+  type?: 'item' | 'header';
+  item: MenuItemProps | ListSubheaderProps | null;
+}
+
 /**
  * Custom MUI Select properties
  */
 export interface TypeSelectProps extends SelectProps {
   mapId?: string;
   fullWidth?: boolean;
-  menuItems: (MenuItemProps | null)[];
+  menuItems: TypeMenuItemProps[];
   inputLabel: InputLabelProps;
 }
 
