@@ -521,8 +521,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                   }}
                   menuItems={layerOptions.map(([value, label]) => ({
                     key: value,
-                    value,
-                    children: label,
+                    item: {
+                      value,
+                      children: label,
+                    },
                   }))}
                 />
                 <NavButtons handleNext={handleStep2} />
