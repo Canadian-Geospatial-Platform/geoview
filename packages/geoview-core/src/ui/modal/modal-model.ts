@@ -14,7 +14,7 @@ export class ModalModel {
 
   header?: modalHeader;
 
-  content: string;
+  content: React.ReactNode | string;
 
   footer?: modalFooter;
 
@@ -29,9 +29,9 @@ export class ModalModel {
   /**
    * constructor to initiate the modal properties
    *
-   * @param { string } content is the body copy (description) of the modal
+   * @param { React.ReactNode | string } content is the body copy (description) of the modal
    */
-  constructor(content: string) {
+  constructor(content: React.ReactNode | string) {
     this.content = content;
   }
 

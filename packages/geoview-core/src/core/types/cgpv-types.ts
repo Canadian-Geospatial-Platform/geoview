@@ -123,8 +123,7 @@ export type TypeCGPV = {
   reactLeafletCore: typeof ReactLeafletCore;
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  types: Object;
+  types: typeof import('./cgpv-types');
   constants: TypeCGPVConstants;
 };
 
@@ -894,7 +893,7 @@ export interface TypeCustomSelectProps {
 /**
  * Properties for the Slider
  */
- export interface TypeSliderProps extends SliderProps {
+export interface TypeSliderProps extends SliderProps {
   id: string;
 
   // custom slider classes and styles
@@ -908,16 +907,16 @@ export interface TypeCustomSelectProps {
 
   // custom onChange callback
   customOnChange?: (value: number[] | number) => void;
-  
+
   // MUI optional props
   disabled?: boolean;
-  marks?: Array<{ label?: string, value: number }>;
+  marks?: Array<{ label?: string; value: number }>;
   orientation?: 'vertical' | 'horizontal' | undefined;
   step?: number;
   size?: 'small' | 'medium';
   track?: 'inverted' | 'normal' | false;
   ariaLabelledby?: string;
-  
+
   // optional map id to link the slider to
   mapId?: string;
 }
