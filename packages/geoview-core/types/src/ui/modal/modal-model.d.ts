@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './modal-api';
 /**
  * Class used to create a template (model) of a modal
@@ -7,7 +8,7 @@ import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './mo
 export declare class ModalModel {
     id?: string;
     header?: modalHeader;
-    content: string;
+    content: React.ReactNode | string;
     footer?: modalFooter;
     active?: boolean;
     mapId?: string;
@@ -16,9 +17,9 @@ export declare class ModalModel {
     /**
      * constructor to initiate the modal properties
      *
-     * @param { string } content is the body copy (description) of the modal
+     * @param { React.ReactNode | string } content is the body copy (description) of the modal
      */
-    constructor(content: string);
+    constructor(content: React.ReactNode | string);
     /**
      * Trigger an event to open the modal
      */

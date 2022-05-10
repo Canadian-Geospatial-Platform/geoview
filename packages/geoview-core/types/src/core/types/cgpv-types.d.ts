@@ -76,7 +76,7 @@ export declare type TypeCGPV = {
     reactLeafletCore: typeof ReactLeafletCore;
     ui: TypeCGPVUI;
     useTranslation: typeof useTranslation;
-    types: Object;
+    types: typeof import('./cgpv-types');
     constants: TypeCGPVConstants;
 };
 export declare type TypeCallback = (callback: () => void) => void;

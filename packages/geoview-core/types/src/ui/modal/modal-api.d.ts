@@ -1,3 +1,4 @@
+/// <reference types="react" />
 import { ModalModel } from './modal-model';
 import { TypeFunction, TypeChildren } from '../../core/types/cgpv-types';
 /**
@@ -26,7 +27,7 @@ export interface modalFooter {
 export declare type TypeModalProps = {
     id?: string;
     header?: modalHeader;
-    content: string;
+    content: React.ReactNode | string;
     footer?: modalFooter;
     active?: boolean;
     open?: TypeFunction;
