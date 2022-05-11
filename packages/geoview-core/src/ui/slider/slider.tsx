@@ -67,12 +67,12 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   // handle constant change on the slider to set active thumb and instant values
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number) => {
     setActiveThumb(newActiveThumb);
-    setValue(newValue as number[]);
+    setValue(newValue);
   };
 
   // handle the commit change event when mouseup is fired
   const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]) => {
-    setValue(newValue as number[]);
+    setValue(newValue);
 
     // run the custon onChange function
     if (properties.customOnChange !== undefined) properties.customOnChange(newValue);
@@ -97,10 +97,10 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     let testIndex = 1;
 
     // loop until all labels are tested
-    while (testIndex !== markers.length) {
+    while (testIndex <= markers.length) {
       // get div rectangle and check for collision
-      const d1 = (markers[curIndex] as Element).getBoundingClientRect();
-      const d2 = (markers[testIndex] as Element).getBoundingClientRect();
+      const d1 = markers[curIndex].getBoundingClientRect();
+      const d2 = markers[testIndex].getBoundingClientRect();
       const ox = Math.abs(d1.x - d2.x) < (d1.x < d2.x ? d2.width : d1.width);
       const oy = Math.abs(d1.y - d2.y) < (d1.y < d2.y ? d2.height : d1.height);
 
