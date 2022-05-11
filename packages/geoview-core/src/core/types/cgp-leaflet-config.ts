@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, no-underscore-dangle */
 import L, { Util, LatLngBounds } from 'leaflet';
 import 'leaflet.markercluster/src';
+import 'leaflet.heat';
 import 'react-leaflet';
 
 import * as DomUtil from 'leaflet/src/dom/DomUtil';
