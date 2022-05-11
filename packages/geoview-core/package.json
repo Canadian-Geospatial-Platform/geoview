@@ -30,7 +30,7 @@
   },
   "scripts": {
     "serve": "webpack serve --progress --color --config webpack.dev.js",
-    "build": "webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "build": "webpack --progress --color --config webpack.prod.js && npm run generate.d.ts && npm --prefix types install && npm --prefix types run release",
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
