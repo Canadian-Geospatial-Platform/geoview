@@ -81,3 +81,5 @@ common/config/rush/pnpm-lock.yaml
 **/temp
 
 .idea/
+
+**/types

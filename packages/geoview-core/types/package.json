@@ -1,9 +1,0 @@
-{
-  "name": "geoview-core-types",
-  "version": "1.0.0",
-  "description": "Geoview Core Types",
-  "main": "src/app.d.ts",
-  "types": "src/app.d.ts",
-  "author": "Saleh Yassin",
-  "license": "MIT"
-}
