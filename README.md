@@ -36,11 +36,17 @@ $ rush update
 ### Build the project:
 
 ```
-$ rush build
+$ rush build:core
 ```
 
 ### Serve the project
 
 ```
 $ rush serve
+```
+
+### Deploy the project
+
+```
+$ rush host
 ```
