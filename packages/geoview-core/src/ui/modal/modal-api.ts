@@ -48,7 +48,7 @@ export type TypeModalProps = {
   header?: modalHeader;
 
   // content (description) of the modal. The HTML passed will be displayed inside a <div> element
-  content: string;
+  content: React.ReactNode | string;
 
   // footer object for the modal. Can contain buttons list as an array of JSX elements. If none provided, there will be no action buttons or footer
   footer?: modalFooter;

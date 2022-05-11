@@ -208,10 +208,8 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                     }}
                     htmlContent={actionButton.icon}
                   />
-                ) : typeof actionButton.icon === 'object' ? (
-                  actionButton.icon
                 ) : (
-                  <actionButton.icon />
+                  actionButton.icon
                 )}
               </IconButton>,
             ]);
@@ -280,15 +278,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           className={classes.avatar}
           classes={{ action: classes.actionButton }}
           ref={panelHeader}
-          avatar={
-            typeof panel.icon === 'string' ? (
-              <HtmlToReact className={classes.buttonIcon} htmlContent={panel.icon} />
-            ) : typeof panel.icon === 'object' ? (
-              panel.icon
-            ) : (
-              <panel.icon />
-            )
-          }
+          avatar={typeof panel.icon === 'string' ? <HtmlToReact className={classes.buttonIcon} htmlContent={panel.icon} /> : panel.icon}
           title={t(panel.title)}
           action={
             panelStatus ? (
@@ -313,13 +303,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         />
         <Divider />
         <CardContent className={classes.cardContainer}>
-          {typeof panel.content === 'string' ? (
-            <HtmlToReact htmlContent={panel.content} />
-          ) : typeof panel.content === 'object' ? (
-            panel.content
-          ) : (
-            <panel.content />
-          )}
+          {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
         </CardContent>
       </Card>
     </FocusTrap>

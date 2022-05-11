@@ -9,7 +9,7 @@ import { EVENT_NAMES } from '../../api/events/event';
 import { TypeSliderProps } from '../../core/types/cgpv-types';
 import { sliderPayload, payloadIsASlider, SliderTypePayload } from '../../api/events/payloads/slider-payload';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   slider: {
     '& .MuiSlider-root': {
       color: '#fff',
@@ -65,25 +65,25 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const [activeThumb, setActiveThumb] = useState<number>(-1);
 
   // handle constant change on the slider to set active thumb and instant values
-  const handleChange = (event: React.SyntheticEvent | Event, value: number | number[], activeThumb: number) => {
-    setActiveThumb(activeThumb);
-    setValue(value as number[]);
+  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number) => {
+    setActiveThumb(newActiveThumb);
+    setValue(newValue as number[]);
   };
 
   // handle the commit change event when mouseup is fired
-  const handleChangeCommitted = (event: React.SyntheticEvent | Event, value: number | number[]) => {
-    setValue(value as number[]);
+  const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]) => {
+    setValue(newValue as number[]);
 
     // run the custon onChange function
-    if (properties.customOnChange !== undefined) properties.customOnChange(value);
+    if (properties.customOnChange !== undefined) properties.customOnChange(newValue);
 
     // create the payload
     const sliderValues: SliderTypePayload = {
-      min: min,
-      max: max,
-      value: value,
-      activeThumb: activeThumb,
-    }
+      min,
+      max,
+      value: newValue,
+      activeThumb,
+    };
 
     // emit the slider values change event to the api
     api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.id);
@@ -95,26 +95,26 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     const markers = document.getElementsByClassName('MuiSlider-markLabel');
     let curIndex = 0;
     let testIndex = 1;
-  
+
     // loop until all labels are tested
     while (testIndex !== markers.length) {
-        // get div rectangle and check for collision
-        let d1 = (markers[curIndex] as any).getBoundingClientRect();
-        let d2 = (markers[testIndex] as any).getBoundingClientRect();
-        let ox = Math.abs(d1.x - d2.x) < (d1.x < d2.x ? d2.width : d1.width);
-        let oy = Math.abs(d1.y - d2.y) < (d1.y < d2.y ? d2.height : d1.height);
+      // get div rectangle and check for collision
+      const d1 = (markers[curIndex] as Element).getBoundingClientRect();
+      const d2 = (markers[testIndex] as Element).getBoundingClientRect();
+      const ox = Math.abs(d1.x - d2.x) < (d1.x < d2.x ? d2.width : d1.width);
+      const oy = Math.abs(d1.y - d2.y) < (d1.y < d2.y ? d2.height : d1.height);
 
-        // if there is a collision, set classname and test with the next pips
-        if (ox && oy) {
-            markers[testIndex].classList.add('MuiSlider-markLabel-overlap');
-        } else {
-            // if there is no  collision and reset the curIndex to be the one before the testIndex
-            curIndex = (testIndex - curIndex !== 1) ? testIndex : curIndex + 1;
-        }
+      // if there is a collision, set classname and test with the next pips
+      if (ox && oy) {
+        markers[testIndex].classList.add('MuiSlider-markLabel-overlap');
+      } else {
+        // if there is no  collision and reset the curIndex to be the one before the testIndex
+        curIndex = testIndex - curIndex !== 1 ? testIndex : curIndex + 1;
+      }
 
-        testIndex++;
+      testIndex++;
     }
-  }
+  };
 
   useEffect(() => {
     // remove overlaping labels
@@ -132,9 +132,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
           const sliderValues: SliderTypePayload = {
             min: payload.sliderValues.min,
             max: payload.sliderValues.max,
-            value: value,
-            activeThumb: activeThumb,
-          }
+            value,
+            activeThumb,
+          };
           api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.id);
         }
       },
@@ -153,11 +153,11 @@ export function Slider(props: TypeSliderProps): JSX.Element {
 
           // emit the slider values change event to the api
           const sliderValues: SliderTypePayload = {
-            min: min,
-            max: max,
+            min,
+            max,
             value: payload.sliderValues.value,
-            activeThumb: activeThumb,
-          }
+            activeThumb,
+          };
           api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.id);
         }
       },
@@ -176,8 +176,8 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     <MaterialSlider
       className={`${properties.className !== undefined ? properties.className : classes.slider}`}
       style={properties.style}
-      getAriaLabel={() => "To implement with translation"}
-      getAriaValueText={() => "To implement with translation"}
+      getAriaLabel={() => 'To implement with translation'}
+      getAriaValueText={() => 'To implement with translation'}
       aria-labelledby={properties.ariaLabelledby}
       value={value}
       min={min}
