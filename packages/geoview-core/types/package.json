@@ -5,14 +5,5 @@
   "main": "src/app.d.ts",
   "types": "src/app.d.ts",
   "author": "Saleh Yassin",
-  "license": "MIT",
-  "scripts": {
-    "release": "release-it --ci"
-  },
-  "devDependencies": {
-    "release-it": "^15.0.0"
-  },
-  "dependencies": {
-    "geoview-core": "file:.."
-  }
+  "license": "MIT"
 }
