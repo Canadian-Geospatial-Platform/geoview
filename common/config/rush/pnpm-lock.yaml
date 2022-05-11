@@ -131,6 +131,7 @@ importers:
       '@types/glob': ^7.2.0
       '@types/jest': ^27.4.0
       '@types/leaflet': ^1.7.9
+      '@types/leaflet.heat': 0.2.1
       '@types/leaflet.markercluster': ^1.0.3
       '@types/lodash': ^4.14.178
       '@types/lodash-webpack-plugin': ^0.11.6
@@ -164,6 +165,7 @@ importers:
       esri-leaflet: ^3.0.4
       eventemitter3: ^4.0.7
       file-loader: ^6.2.0
+      flatgeobuf: 3.22.2
       focus-trap-react: ^8.9.1
       gh-pages: ^3.2.3
       glob: ^7.2.0
@@ -174,6 +176,7 @@ importers:
       immutable: ^4.0.0
       jest: ^27.4.7
       leaflet: ^1.7.1
+      leaflet.heat: 0.2.0
       leaflet.markercluster: ^1.5.3
       lodash: ^4.17.21
       lodash-webpack-plugin: ^0.11.6
@@ -214,12 +217,14 @@ importers:
       domhandler: 4.3.1
       esri-leaflet: 3.0.8_leaflet@1.8.0
       eventemitter3: 4.0.7
+      flatgeobuf: 3.22.2
       focus-trap-react: 8.11.0_75cb922c19ee1b7939faae9b4d1f4cf7
       html-react-parser: 1.4.12_react@17.0.2
       i18next: 19.9.2
       i18next-http-backend: 1.4.0
       immutable: 4.0.0
       leaflet: 1.8.0
+      leaflet.heat: 0.2.0
       leaflet.markercluster: 1.5.3_leaflet@1.8.0
       lodash: 4.17.21
       notistack: 2.0.4_a0f37b59a11b03b2b669ea83d3919577
@@ -267,6 +272,7 @@ importers:
       '@types/glob': 7.2.0
       '@types/jest': 27.5.0
       '@types/leaflet': 1.7.9
+      '@types/leaflet.heat': 0.2.1
       '@types/leaflet.markercluster': 1.4.6
       '@types/lodash': 4.14.182
       '@types/lodash-webpack-plugin': 0.11.6
@@ -2560,6 +2566,10 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: false
 
+  /@repeaterjs/repeater/3.0.4:
+    resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
+    dev: false
+
   /@sinonjs/commons/1.8.3:
     resolution: {integrity: sha512-xkNcLAn/wZaX14RPlwizcKicDk9G3F8m2nU3L7Ukm5zBgTwiT0wsoFAHx9Jq56fJA1z/7uKGtCRu16sOUCLIHQ==}
     dependencies:
@@ -2760,6 +2770,12 @@ packages:
 
   /@types/json5/0.0.29:
     resolution: {integrity: sha1-7ihweulOEdK4J7y+UnC86n8+ce4=}
+    dev: true
+
+  /@types/leaflet.heat/0.2.1:
+    resolution: {integrity: sha512-NESIrQcnaT2gONYOUMfuppWdPDNkmH69qTa5F1kHCSh2WXno84YpOzJn/U+aGSNjUFRdVnRcxn1uxJn68/GNRA==}
+    dependencies:
+      '@types/leaflet': 1.7.9
     dev: true
 
   /@types/leaflet.markercluster/1.4.6:
@@ -5001,6 +5017,20 @@ packages:
       rimraf: 3.0.2
     dev: true
 
+  /flatbuffers/2.0.6:
+    resolution: {integrity: sha512-QTTZTXTbVfuOVQu2X6eLOw4vefUxnFJZxAKeN3rEPhjEzBtIbehimJLfVGHPM8iX0Na+9i76SBEg0skf0c0sCA==}
+    dev: false
+
+  /flatgeobuf/3.22.2:
+    resolution: {integrity: sha512-IF4vFWg/ZLt+qbjAEMed+OhiryjIsBLKxDopdyazBjF0z7Q2XJqlEBhXafpDsrRhg+BP/QjlMwC5pRJ9sRLbMQ==}
+    peerDependencies:
+      ol: ^6
+    dependencies:
+      '@repeaterjs/repeater': 3.0.4
+      flatbuffers: 2.0.6
+      slice-source: 0.4.1
+    dev: false
+
   /flatted/3.2.5:
     resolution: {integrity: sha512-WIWGi2L3DyTUvUrwRKgGi9TwxQMUEqPOPQBVi71R96jZXJdFskXEmf54BoZaS1kknGODoIGASGEzBUYdyMCBJg==}
     dev: true
@@ -6464,6 +6494,10 @@ packages:
       language-subtag-registry: 0.3.21
     dev: true
 
+  /leaflet.heat/0.2.0:
+    resolution: {integrity: sha1-EJ2M9Ybwre5B8Fr/Ax4np3/swik=}
+    dev: false
+
   /leaflet.markercluster/1.5.3_leaflet@1.8.0:
     resolution: {integrity: sha512-vPTw/Bndq7eQHjLBVlWpnGeLa3t+3zGiuM7fJwCkiMFq+nmRuG3RI3f7f4N4TDX7T4NpbAXpR2+NTRSEGfCSeA==}
     peerDependencies:
@@ -7788,6 +7822,10 @@ packages:
     resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
     engines: {node: '>=12'}
     dev: true
+
+  /slice-source/0.4.1:
+    resolution: {integrity: sha1-QKV6wDxmaLXaIA4FN44AC/KmHXk=}
+    dev: false
 
   /sockjs/0.3.24:
     resolution: {integrity: sha512-GJgLTZ7vYb/JtPSSZ10hsOYIvEYsjbNU+zPdIHcUaWVNUEPivzxku31865sSSud0Da0W4lEeOPlmw93zLQchuQ==}

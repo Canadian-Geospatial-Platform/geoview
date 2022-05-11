@@ -112,6 +112,7 @@ export function ClickMarker(): JSX.Element {
             overlay.style.width = `${size.x}px`;
             overlay.style.transform = `translate3d(${-test.x}px,${-test.y}px,${test.z})`;
             overlay.style.visibility = 'visible';
+            overlay.style.display = 'block';
 
             // hide marker pane marker (mostly comes from ESRI feature or GeoJSON)
             hideMarker();
@@ -148,11 +149,11 @@ export function ClickMarker(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE,
       (payload) => {
-        if (payloadIsAMarkerDefinition(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
-            setShowMarker(false);
-            overlay.style.visibility = 'hidden';
-          }
+        // we do not need to verify the payload as no marker are pass
+        // we only need to validate if we have handler name (map id)
+        if (payload.handlerName!.includes(mapId)) {
+          setShowMarker(false);
+          overlay.style.display = 'none';
         }
       },
       mapId

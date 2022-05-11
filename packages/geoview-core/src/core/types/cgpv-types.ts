@@ -1102,3 +1102,30 @@ export const DEFAULT_TIME_PRECISION = {
   second: 'THH:MM:SSZ',
 };
 export type TimePrecision = 'hour' | 'minute' | 'second';
+
+/**
+ * Type for return value for feature layer like GeoJSON, OGC API, Vector
+ */
+export type TypeFilterFeatures = {
+  pass: TypeJsonObject[];
+  fail: TypeJsonObject[];
+}
+
+/**
+ * Type for building filter query
+ */
+export type TypeFilterQuery = {
+  connector?: '&&' | '||',
+  field: string,
+  operator: '===' | '!==' | '<=' | '>=' | '<' | '>',
+  value: string | number,
+}
+
+export const FILTER_OPERATOR: { [key: string]: Function; } = {
+  '===': function (a: string | number, b: string | number) { return a === b; },
+  '==': function (a: string | number, b: string | number) { return a == b; },
+  '<=': function (a: string | number, b: string | number) { return a <= b; },
+  '>=': function (a: string | number, b: string | number) { return a >= b; },
+  '<': function (a: string | number, b: string | number) { return a < b; },
+  '>': function (a: string | number, b: string | number) { return a > b; }
+};
