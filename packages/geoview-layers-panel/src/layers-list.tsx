@@ -365,7 +365,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     size="small"
                     value={layerOpacity[layer.id]}
                     valueLabelDisplay="auto"
-                    onChange={(event, value) => onSliderChange(value as number, layer)}
+                    customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
                 </div>
                 <Tooltip title={translations[language].visibility}>
