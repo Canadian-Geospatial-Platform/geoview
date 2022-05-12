@@ -97,7 +97,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     let testIndex = 1;
 
     // loop until all labels are tested
-    while (testIndex <= markers.length) {
+    while (testIndex < markers.length) {
       // get div rectangle and check for collision
       const d1 = markers[curIndex].getBoundingClientRect();
       const d2 = markers[testIndex].getBoundingClientRect();
