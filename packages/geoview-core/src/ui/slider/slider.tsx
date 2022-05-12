@@ -93,11 +93,9 @@ export function Slider(props: TypeSliderProps): JSX.Element {
   const removeLabelOverlap = () => {
     // get slider labels
     const markers = document.getElementsByClassName('MuiSlider-markLabel');
-    let curIndex = 0;
-    let testIndex = 1;
 
     // loop until all labels are tested
-    while (testIndex < markers.length) {
+    for (let curIndex = 0, testIndex = 1; testIndex < markers.length; testIndex++) {
       // get div rectangle and check for collision
       const d1 = markers[curIndex].getBoundingClientRect();
       const d2 = markers[testIndex].getBoundingClientRect();
@@ -111,8 +109,6 @@ export function Slider(props: TypeSliderProps): JSX.Element {
         // if there is no  collision and reset the curIndex to be the one before the testIndex
         curIndex = testIndex - curIndex !== 1 ? testIndex : curIndex + 1;
       }
-
-      testIndex++;
     }
   };
 
