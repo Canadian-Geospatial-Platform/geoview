@@ -9,7 +9,6 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { MapContext } from '../../app-start';
 
-import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
 import { TypeButtonPanel } from '../../types/cgpv-types';
@@ -120,7 +119,7 @@ export function Appbar(): JSX.Element {
   }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
-    <div className={`${LEAFLET_POSITION_CLASSES.topleft} ${classes.appBar}`} ref={appBar}>
+    <div className={classes.appBar} ref={appBar}>
       {Object.keys(api.map(mapId).appBarButtons.getAllButtonPanels()).filter((buttonPanel) => {
         return api.map(mapId).appBarButtons.getAllButtonPanels()[buttonPanel].button?.visible;
       }).length > 0 && (

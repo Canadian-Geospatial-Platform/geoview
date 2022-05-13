@@ -31,11 +31,14 @@ async function _run() {
 
   await execCommand(`git symbolic-ref HEAD refs/heads/${deployBranch}`);
   await execCommand(`git --work-tree ${deployDirectory} reset --mixed --quiet`);
+  await execCommand(
+    `git --work-tree ${deployDirectory} checkout origin/${deployBranch} package.json`
+  );
   await execCommand(`git --work-tree ${deployDirectory} add --all`);
   await execCommand(
     `git --work-tree ${deployDirectory} commit -nm "types updates"`
   );
-  await execCommand(`git push --quiet ${deployRepo} ${deployBranch}`);
+  await execCommand(`git push --force --quiet ${deployRepo} ${deployBranch}`);
   await execCommand(`git symbolic-ref HEAD refs/heads/${prevBranch}`);
   await execCommand(`git reset --mixed`);
 }
