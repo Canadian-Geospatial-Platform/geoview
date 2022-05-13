@@ -10,6 +10,7 @@ import {
   TypeFeatureLayer,
   TypeJsonValue,
   TypeJsonObject,
+  TypeJsonArray,
   toJsonObject,
   TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
@@ -81,17 +82,32 @@ export class EsriFeature extends AbstractWebLayersClass {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     // define a default blue icon
-    let iconSymbol = blueCircleIcon;
+    const iconSymbols: { field: string | null; valueAndSymbol: Record<string, L.Icon> } = {
+      field: null,
+      valueAndSymbol: { default: blueCircleIcon },
+    };
 
     const res = await axios.get<TypeJsonObject>(queryUrl);
 
-    if (res.data.drawingInfo && res.data.drawingInfo.renderer && res.data.drawingInfo.renderer.symbol) {
-      const symbolInfo: TypeJsonObject = res.data.drawingInfo.renderer.symbol;
-      iconSymbol = new L.Icon({
-        iconUrl: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
-        iconSize: [symbolInfo.width as number, symbolInfo.height as number],
-        iconAnchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
-      });
+    const renderer = res.data.drawingInfo && res.data.drawingInfo.renderer;
+    if (renderer) {
+      if (renderer.type === 'uniqueValue') {
+        iconSymbols.field = renderer.field1 as string;
+        (renderer.uniqueValueInfos as TypeJsonArray).forEach((symbolInfo) => {
+          iconSymbols.valueAndSymbol[symbolInfo.value as string] = new L.Icon({
+            iconUrl: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
+            iconSize: [symbolInfo.symbol.width as number, symbolInfo.symbol.height as number],
+            iconAnchor: [Math.round((symbolInfo.symbol.width as number) / 2), Math.round((symbolInfo.symbol.height as number) / 2)],
+          });
+        });
+      } else if (renderer.symbol) {
+        const symbolInfo = renderer.symbol;
+        iconSymbols.valueAndSymbol.default = new L.Icon({
+          iconUrl: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
+          iconSize: [symbolInfo.width as number, symbolInfo.height as number],
+          iconAnchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
+        });
+      }
     }
 
     const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
@@ -107,7 +123,11 @@ export class EsriFeature extends AbstractWebLayersClass {
             const feature = featureLayer({
               url: layer.url[api.map(this.mapId).getLanguageCode()],
               pointToLayer: (aFeature, latlng) => {
-                return L.marker(latlng, { icon: iconSymbol, id: generateId() });
+                const iconToUse =
+                  iconSymbols.field && aFeature.properties[iconSymbols.field] in iconSymbols.valueAndSymbol
+                    ? iconSymbols.valueAndSymbol[aFeature.properties[iconSymbols.field]]
+                    : iconSymbols.valueAndSymbol.default;
+                return L.marker(latlng, { icon: iconToUse, id: generateId() });
               },
             } as FeatureLayerOptions);
 
