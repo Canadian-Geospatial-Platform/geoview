@@ -512,6 +512,10 @@ export type TypeAppBarProps = {
 
 export type TypeNavBarProps = TypeJsonObject;
 
+export type TypeFooterbarProps = {
+  attribution: string;
+};
+
 export type TypeNorthArrowProps = TypeJsonObject;
 
 export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';

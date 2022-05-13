@@ -1,31 +1,33 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef, useContext } from 'react';
+
+import { LatLng } from 'leaflet';
 
 import makeStyles from '@mui/styles/makeStyles';
 
 import { useTranslation } from 'react-i18next';
-
-import { useMapEvent, useMap } from 'react-leaflet';
-import { LatLng } from 'leaflet';
 
 import { debounce } from 'lodash';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
+import { MapContext } from '../../app-start';
 
 const useStyles = makeStyles((theme) => ({
-  mouseposition: {
-    position: 'absolute',
-    right: '120px !important',
-    zIndex: theme.zIndex.leafletControl,
-    textAlign: 'center',
-    bottom: theme.spacing(0),
-    padding: theme.spacing(2),
-    display: 'flex !important',
-    flexDirection: 'column',
-    fontSize: theme.typography.control.fontSize,
-    fontWeight: theme.typography.control.fontWeight,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  mousePositionContainer: {
+    display: 'flex',
+    padding: theme.spacing(0, 4),
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  mousePositionText: {
+    fontSize: theme.typography.subtitle2.fontSize,
+    color: theme.palette.primary.light,
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
   },
 }));
 
@@ -69,9 +71,9 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   // keep track of crosshair status to know when update coord from keyboard navigation
   const isCrosshairsActive = useRef(false);
 
-  const map = useMap();
+  const mapConfig = useContext(MapContext);
 
-  const mapId = api.mapInstance(map)?.id;
+  const mapId = mapConfig.id;
 
   /**
    * Format the coordinates output
@@ -90,7 +92,6 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     }, 250),
     [t]
   );
-  useMapEvent('mousemove', onMouseMove);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMoveEnd = useCallback(
@@ -101,9 +102,13 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     }, 500),
     [t]
   );
-  useMapEvent('moveend', onMoveEnd);
 
   useEffect(() => {
+    const { map } = api.map(mapId);
+
+    map.addEventListener('mousemove', onMouseMove);
+    map.addEventListener('moveend', onMoveEnd);
+
     // on map crosshair enable\disable, set variable for WCAG mouse position
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
@@ -119,13 +124,17 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
+      map.removeEventListener('mousemove');
+      map.removeEventListener('moveend');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <span className={classes.mouseposition}>
-      {position.lat} | {position.lng}
-    </span>
+    <div className={classes.mousePositionContainer}>
+      <span className={classes.mousePositionText}>
+        {position.lat} | {position.lng}
+      </span>
+    </div>
   );
 }

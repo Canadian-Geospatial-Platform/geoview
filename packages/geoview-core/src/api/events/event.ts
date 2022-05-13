@@ -4,6 +4,7 @@ import { generateId } from '../../core/utils/utilities';
 
 import { MAP, MapEventKey } from './constants/map';
 import { LAYER, LayerEventKey } from './constants/layer';
+import { ATTRIBUTION, AttributionEventKey } from './constants/attribution';
 import { APPBAR, AppbarEventKey } from './constants/appbar';
 import { NAVBAR, NavbarEventKey } from './constants/navbar';
 import { SNACKBAR, SnackbarEventKey } from './constants/snackbar';
@@ -38,6 +39,7 @@ export const EVENT_NAMES = {
   PANEL,
   SLIDER,
   VECTOR,
+  ATTRIBUTION,
 };
 
 export type EventCategories =
@@ -55,7 +57,8 @@ export type EventCategories =
   | 'MODAL'
   | 'PANEL'
   | 'SLIDER'
-  | 'VECTOR';
+  | 'VECTOR'
+  | 'ATTRIBUTION';
 
 export type EventKey =
   | MapEventKey
@@ -72,7 +75,8 @@ export type EventKey =
   | ModalEventKey
   | PanelEventKey
   | SliderEventKey
-  | VectorEventKey;
+  | VectorEventKey
+  | AttributionEventKey;
 
 export type EventStringId =
   | 'map/loaded'
@@ -122,7 +126,8 @@ export type EventStringId =
   | 'vector/remove'
   | 'vector/added'
   | 'vector/off'
-  | 'vector/on';
+  | 'vector/on'
+  | 'attribution/update';
 
 /**
  * Class used to handle event emitting and subscribing for the API

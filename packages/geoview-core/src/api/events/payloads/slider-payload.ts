@@ -5,7 +5,7 @@ import { EventStringId, EVENT_NAMES } from '../event';
 const validEvents: EventStringId[] = [
   EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE,
   EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_VALUES,
-  EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX
+  EVENT_NAMES.SLIDER.EVENT_SLIDER_SET_MINMAX,
 ];
 
 /* ******************************************************************************************************************************

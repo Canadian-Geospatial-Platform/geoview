@@ -12,8 +12,7 @@ import { DateMgt } from '../core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
-import { generateId } from '../core/utils/utilities';
-import { addUiComponent } from '../core/utils/utilities';
+import { generateId, addUiComponent } from '../core/utils/utilities';
 
 /**
  * Class used to handle api calls (events, functions etc...)

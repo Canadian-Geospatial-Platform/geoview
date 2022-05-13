@@ -2,14 +2,11 @@
 import { useEffect, useState } from 'react';
 
 import { CRS } from 'leaflet';
-import { MapContainer, TileLayer, ScaleControl } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 
-import { useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 
 import { Crosshair } from '../crosshair/crosshair';
-import { MousePosition } from '../mouse-position/mouse-position';
-import { Attribution } from '../attribution/attribution';
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { ClickMarker } from '../click-marker/click-marker';
 
@@ -24,6 +21,14 @@ import { TypeMapConfigProps, TypeBasemapLayer } from '../../types/cgpv-types';
 import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { latLngPayload } from '../../../api/events/payloads/lat-long-payload';
+import { attributionPayload } from '../../../api/events/payloads/attribution-payload';
+import { Footerbar } from '../footerbar/footer-bar';
+
+export const useStyles = makeStyles(() => ({
+  mapContainer: {
+    width: '100%',
+  },
+}));
 
 export function Map(props: TypeMapConfigProps): JSX.Element {
   const { map: mapProps, extraOptions, language, components } = props;
@@ -35,19 +40,16 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const [basemapLayers, setBasemapLayers] = useState<TypeBasemapLayer[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const classes = useStyles();
+
   // projection crs
   const [crs, setCRS] = useState<CRS>();
 
   // attribution used by the map
   const [attribution, setAttribution] = useState<string>('');
 
-  const defaultTheme = useTheme();
-
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
-
-  // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   // get map option from selected basemap projection
   const mapOptions: L.MapOptions = viewer.getMapOptions(mapProps.projection);
@@ -106,6 +108,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   return (
     <MapContainer
       id={id}
+      className={classes.mapContainer}
       center={mapProps.initialView.center}
       zoom={mapProps.initialView.zoom}
       crs={api.projection.getProjection(mapProps.projection)}
@@ -145,7 +148,12 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setCRS(viewer.projection.getCRS());
 
         // get attribution
-        setAttribution(language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA']);
+        const attr = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
+
+        setAttribution(attr);
+
+        // emit attribution update to footerbar
+        api.event.emit(attributionPayload(EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE, id, attr));
 
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
@@ -157,7 +165,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         setIsLoaded(true);
 
         viewer.toggleMapInteraction(mapProps.interaction);
-      } }
+      }}
     >
       {isLoaded && crs && (
         <>
@@ -168,16 +176,15 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
                 url={basemapLayer.url}
                 attribution={attribution}
                 opacity={basemapLayer.opacity}
-                pane={basemapLayer.basemapPaneName} />
+                pane={basemapLayer.basemapPaneName}
+              />
             );
           })}
-          {deviceSizeMedUp && <MousePosition id={id} />}
-          <ScaleControl position="bottomright" imperial={false} />
-          {deviceSizeMedUp && <Attribution attribution={attribution} />}
           {components !== undefined && components.indexOf('northArrow') > -1 && <NorthArrow projection={crs} />}
           <NorthPoleFlag projection={crs} />
           <Crosshair id={id} />
           <ClickMarker />
+          <Footerbar attribution={attribution} />
         </>
       )}
     </MapContainer>

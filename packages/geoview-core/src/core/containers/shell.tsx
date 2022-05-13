@@ -27,12 +27,19 @@ import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
 const useStyles = makeStyles((theme) => {
   return {
     shell: {
+      display: 'flex',
+      flexDirection: 'column',
       top: theme.spacing(0),
       right: theme.spacing(0),
       left: theme.spacing(0),
       bottom: theme.spacing(0),
       overflow: 'hidden',
       zIndex: 0,
+      height: '100%',
+    },
+    mapContainer: {
+      display: 'flex',
+      flexDirection: 'row',
       height: '100%',
     },
     skip: {
@@ -180,9 +187,11 @@ export function Shell(props: ShellProps): JSX.Element {
         <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
-        {config.components !== undefined && config.components.indexOf('appbar') > -1 && <Appbar />}
-        {config.components !== undefined && config.components.indexOf('navbar') > -1 && <Navbar />}
-        <Map {...config} />
+        <div className={classes.mapContainer}>
+          {config.components !== undefined && config.components.indexOf('appbar') > -1 && <Appbar />}
+          <Map {...config} />
+          {config.components !== undefined && config.components.indexOf('navbar') > -1 && <Navbar />}
+        </div>
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}
