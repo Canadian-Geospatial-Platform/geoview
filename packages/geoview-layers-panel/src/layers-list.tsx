@@ -12,8 +12,6 @@ import {
   webLayerIsEsriFeature,
 } from 'geoview-core';
 
-type Event = { target: { value: number } };
-
 type TypeLegend =
   | TypeJsonValue[]
   | {
@@ -38,7 +36,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { useState, useEffect } = react;
 
   const [selectedLayer, setSelectedLayer] = useState<string>('');
-  const [layerLegend, setLayerLegend] = useState<{ [x: string]: TypeLegend }>({});
+  const [layerLegend, setLayerLegend] = useState<{ [id: string]: TypeLegend }>({});
   const [layerBounds, setLayerBounds] = useState<Record<string, L.LatLngBounds>>({});
   const [layerBbox, setLayerBbox] = useState(L.polygon([]));
   const [layerOpacity, setLayerOpacity] = useState<Record<string, number>>({});
@@ -361,11 +359,13 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 </Tooltip>
                 <div className={classes.slider}>
                   <Slider
+                    id={api.generateId()}
+                    min={0}
+                    max={100}
                     size="small"
                     value={layerOpacity[layer.id]}
                     valueLabelDisplay="auto"
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onChange={((event: Event) => onSliderChange(event.target.value, layer)) as any}
+                    customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
                 </div>
                 <Tooltip title={translations[language].visibility}>
