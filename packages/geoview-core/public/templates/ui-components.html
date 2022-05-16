@@ -72,7 +72,7 @@
     </div>
 
     <!-- SLIDER SECTION START -->
-    <div id="UI1-slider1" class="Panel" style="padding-top: 40px; width: 75%; padding-left: 25%;"></div>
+    <div id="UI1-slider1" class="Panel" style="padding-top: 40px; width: 75%; padding-left: 25%"></div>
     <div class="toolbar">
       <button type="button" id="sliderminmax">Set Slider Min/Max</button>
       <button type="button" id="slidervalues">Set Slider Values</button>
@@ -81,13 +81,16 @@
       <h3>Accessing slider value from outside of the core viewer using api event listeners</h3>
       <div class="slider-position1"></div>
     </div>
-    <div id="UI1-slider2" class="Panel" style="padding-top: 40px; width: 50%; padding-left: 25%;"></div>
+    <div id="UI1-slider2" class="Panel" style="padding-top: 40px; width: 50%; padding-left: 25%"></div>
     <div class="panel">
       <h3>Accessing slider value from outside of the core viewer using api event listeners</h3>
       <div class="slider-position2"></div>
     </div>
     <!-- SLIDER SECTION END -->
-
+    <p><strong>Configuration Snippet:</strong></p>
+    <div id="UI1CS" class="panel"></div>
+    <p><strong>Code Snippet:</strong></p>
+    <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
@@ -105,7 +108,7 @@
             'UI1-slider1'
           );
         }
-        document.getElementById ("sliderminmax").addEventListener ("click", setSliderMinMax, false);
+        document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
 
         // set values
         function setSliderValues() {
@@ -115,7 +118,7 @@
             'UI1-slider1'
           );
         }
-        document.getElementById ("slidervalues").addEventListener ("click", setSliderValues, false);
+        document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
 
         // listen to slider value change event
         const sliderPosition1 = document.getElementsByClassName('slider-position1');
@@ -130,16 +133,26 @@
         );
 
         // add a slider component and link it to a map with mapId props
-        cgpv.api.addUiComponent('UI1-slider1', cgpv.react.createElement(cgpv.ui.elements.Slider,
-          {
+        cgpv.api.addUiComponent(
+          'UI1-slider1',
+          cgpv.react.createElement(cgpv.ui.elements.Slider, {
             mapId: 'UI1',
             id: 'UI1-slider1',
-            min:0,
-            max:18,
-            value:5,
-            marks: [{ value: 0, label: 'Min Level 0'}, {value: 4, label: 'Level 4'}, {value: 8, label: 'Level 8'}, {value: 18, label: 'Max Level 18'}],
+            min: 0,
+            max: 18,
+            value: 5,
+            marks: [
+              { value: 0, label: 'Min Level 0' },
+              { value: 4, label: 'Level 4' },
+              { value: 8, label: 'Level 8' },
+              { value: 18, label: 'Max Level 18' },
+            ],
             track: false,
-            customOnChange: (zoomLevel) => { const lat = 50; const lng = -95; cgpv.api.map('UI1').map.setView([lat, lng], zoomLevel) }
+            customOnChange: (zoomLevel) => {
+              const lat = 50;
+              const lng = -95;
+              cgpv.api.map('UI1').map.setView([lat, lng], zoomLevel);
+            },
           })
         );
 
@@ -149,25 +162,40 @@
           cgpv.api.eventNames.SLIDER.EVENT_SLIDER_CHANGE,
           (payload) => {
             if (cgpv.types.payloadIsASlider(payload)) {
-              sliderPosition2[0].innerHTML = `<p>Slider min ${payload.sliderValues.min}, max ${payload.sliderValues.max}, values ${payload.sliderValues.value} and active thumb ${payload.sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
+              sliderPosition2[0].innerHTML = `<p>Slider min ${payload.sliderValues.min}, max ${payload.sliderValues.max}, values ${
+                payload.sliderValues.value
+              } and active thumb ${payload.sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
             }
           },
           'UI1-slider2'
         );
 
         // add a slider component and DO NOT link it to a map
-        cgpv.api.addUiComponent('UI1-slider2', cgpv.react.createElement(cgpv.ui.elements.Slider,
-          {
+        cgpv.api.addUiComponent(
+          'UI1-slider2',
+          cgpv.react.createElement(cgpv.ui.elements.Slider, {
             id: 'UI1-slider2',
-            min:0,
-            max:18,
-            value:[5, 10],
-            marks: [{ value: 0, label: 'Min Level 0'}, {value: 2}, {value: 4, label: 'Level 4'}, {value: 5, label: 'Level 5'}, {value: 6, label: 'Level 6'}, {value: 8, label: 'Level 8'}, {value: 18, label: 'Max Level 18'}],
+            min: 0,
+            max: 18,
+            value: [5, 10],
+            marks: [
+              { value: 0, label: 'Min Level 0' },
+              { value: 2 },
+              { value: 4, label: 'Level 4' },
+              { value: 5, label: 'Level 5' },
+              { value: 6, label: 'Level 6' },
+              { value: 8, label: 'Level 8' },
+              { value: 18, label: 'Max Level 18' },
+            ],
           })
         );
         /**
          * SLIDER UI SECTION END
          */
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
       });
     </script>
   </body>

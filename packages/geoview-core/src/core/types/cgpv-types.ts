@@ -148,6 +148,14 @@ export type TypeMapContext = {
   interaction: string;
 };
 
+/**
+ * Update scale event properties
+ */
+export type TypeUpdateScaleEvent = {
+  pixels: number;
+  distance: string;
+};
+
 /*-----------------------------------------------------------------------------
  *
  * General Json type

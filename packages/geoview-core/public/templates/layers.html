@@ -490,8 +490,16 @@
       addGeoJSONButton.addEventListener('click', function (e) {
         // adding a geojson layer requires a type of geojson and url
         const layerID = cgpv.api.map('LYR5').layer.addLayer({
-          type: 'geoJSON',
-          url: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+          id: 'geoJsonSample',
+          name: {
+            en: 'geojson sample',
+            fr: 'exemple geojson',
+          },
+          layerType: 'geojson',
+          url: {
+            en: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+            fr: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
+          },
         });
         document.getElementById('new-layer-id').innerText = layerID;
       });

@@ -98,7 +98,7 @@
     <div id="sourcedLayers" class="load-test-params">
       <label>Layer Type</label>
       <select name="layerType" id="layerType">
-        <option value="ogcWMS">WMS Layer</option>
+        <option value="ogcWms">WMS Layer</option>
         <option value="esriFeature">Esri Feature Layer</option>
         <option value="esriDynamic">Esri Dynamic Layer</option>
         <option value="geoJSONPoint">GeoJson Point Layer</option>
@@ -560,10 +560,12 @@
         </tbody>
       </table>
     </div>
+    <p><strong>Code Snippet:</strong></p>
+    <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>
       let tzoom0 = 0;
-      const layerOptionValues = ['ogcWMS', 'esriFeature', 'esriDynamic', 'geoJSONPoint', 'geoJSONLine', 'geoJSONPolygon'];
+      const layerOptionValues = ['ogcWms', 'esriFeature', 'esriDynamic', 'geoJSONPoint', 'geoJSONLine', 'geoJSONPolygon'];
       const jsonFeatureOptionValues = ['jsonPoint', 'jsonLine', 'jsonPolygon'];
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
@@ -600,7 +602,7 @@
               'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer';
             document.getElementById('entries').value = '0, 2, 4, 5';
             break;
-          case 'ogcWMS':
+          case 'ogcWms':
             document.getElementById('url').value =
               'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer';
             document.getElementById('entries').value = '0';
@@ -630,16 +632,42 @@
       addFeatureButton.addEventListener('click', function (e) {
         if (typeof parseInt(document.getElementById('layerCount').value) === 'number') {
           let type = layerOptionValues[document.getElementById('layerType').selectedIndex];
-          type = type.indexOf('geoJSON') === -1 ? type : 'geoJSON';
+          type = type.indexOf('geoJSON') === -1 ? type : 'geojson';
+
+          let layerEntries = [];
+          let entriesValue = document.getElementById('entries').value;
+
+          if (entriesValue) {
+            if (type === 'esriDynamic') {
+              layerEntries = entriesValue.split(',').map((entry) => {
+                return {
+                  index: parseInt(entry),
+                };
+              });
+            } else {
+              layerEntries = entriesValue.split(',').map((entry) => {
+                return {
+                  id: entry,
+                };
+              });
+            }
+          }
 
           var t0 = performance.now();
 
           for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
             cgpv.api.map('mapWM').layer.addLayer({
               id: new Date().getTime().toString(),
+              name: {
+                en: 'test',
+                fr: 'test',
+              },
               layerType: type,
-              layerEntries: document.getElementById('entries').value,
-              url: document.getElementById('url').value,
+              layerEntries,
+              url: {
+                en: document.getElementById('url').value,
+                fr: document.getElementById('url').value,
+              },
             });
           }
 
@@ -766,6 +794,9 @@
         }
         document.getElementById(e.path[0].id + 'tab').style.display = 'block';
       }
+
+      //create snippets
+      createCodeSnippet();
     </script>
   </body>
 </html>
