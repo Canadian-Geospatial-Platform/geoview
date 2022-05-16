@@ -68,13 +68,19 @@
       ></div>
 
       <p>This map is in WM projection with an English interface.</p>
+      <p><strong>Configuraion Snippet:</strong></p>
+      <div id="mapWMCS" class="panel"></div>
     </div>
+    <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
+
+        //config snippets
+        createConfigSnippet();
 
         //create snippets
         createCodeSnippet();

@@ -1,6 +1,7 @@
+/* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';
 
-import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+import { Cast, TypeUpdateScaleEvent, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
 
 /**
  * Generate a unique id if an id was not provided
@@ -110,10 +111,28 @@ export function getXMLHttpRequest(url: string): Promise<string> {
 
 /**
  * Add a UI component to a custom div. Do not listen to event from here, pass in the props
- * 
+ *
  * @param {React.ReactElement} component the UI react component
  * @param {string} targetDivId the div id to insert the component in
  */
 export function addUiComponent(targetDivId: string, component: React.ReactElement) {
   ReactDOM.render(component, document.getElementById(targetDivId));
+}
+
+/**
+ * Add any functions that will extend leaflet features
+ */
+export function extendLeafletFeatures() {
+  // create a custom scale update event listener "scaleupdate"
+  L.Control.Scale.include({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _originalUpdateScale: (L.Control.Scale.prototype as any)._updateScale,
+    _updateScale(scale: { style: { width: number } }, text: string, ratio: number) {
+      this._originalUpdateScale.call(this, scale, text, ratio);
+      this._map.fire('scaleupdate', {
+        pixels: scale.style.width,
+        distance: text,
+      } as TypeUpdateScaleEvent);
+    },
+  });
 }

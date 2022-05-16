@@ -8,6 +8,8 @@ import { api } from '../../../app';
 
 import { MapContext } from '../../app-start';
 
+import { TypeUpdateScaleEvent } from '../../types/cgpv-types';
+
 const useStyles = makeStyles((theme) => ({
   scaleContainer: {
     display: 'flex',
@@ -34,14 +36,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Update scale event properties
- */
-type UpdateScaleEvent = {
-  pixels: number;
-  distance: string;
-};
-
-/**
  * Create an element that displays the scale
  *
  * @returns {JSX.Element} created scale element
@@ -58,25 +52,13 @@ export function Scale(): JSX.Element {
   const classes = useStyles();
 
   useEffect(() => {
-    L.Control.Scale.include({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      _originalUpdateScale: (L.Control.Scale.prototype as any)._updateScale,
-      _updateScale(scale: { style: { width: number } }, text: string, ratio: number) {
-        this._originalUpdateScale.call(this, scale, text, ratio);
-        this._map.fire('scaleupdate', {
-          pixels: scale.style.width,
-          distance: text,
-        } as UpdateScaleEvent);
-      },
-    });
-
     const scaleControl = L.control.scale({
       position: 'bottomleft',
       imperial: false,
     });
 
     map.on('scaleupdate', (event) => {
-      setScaleText((event as unknown as UpdateScaleEvent).distance);
+      setScaleText((event as unknown as TypeUpdateScaleEvent).distance);
     });
 
     scaleControl.addTo(map);

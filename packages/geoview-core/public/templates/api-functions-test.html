@@ -68,7 +68,10 @@
       <p>These text areas show the metadata value for a ESRI and a WMS layer.</p>
       <textarea id="esriMetadata" name="esriMetadata" rows="4" cols="500"></textarea>
       <textarea id="wmsMetadata" name="wmsMetadata" rows="4" cols="500"></textarea>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="LNG1CS" class="panel"></div>
     </div>
+    <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>
@@ -78,6 +81,7 @@
 
         // create snippets
         createCodeSnippet();
+        createConfigSnippet();
 
         const urls = [
           'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/1',

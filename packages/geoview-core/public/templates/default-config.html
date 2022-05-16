@@ -39,6 +39,9 @@
               <a href="#HLCONF2">2. Load with wrong JSON object</a><br />
               <a href="#HLCONF3">3. Load with bad config values</a><br />
               <a href="#HLCONF4">4. Load layers with bad config values</a><br />
+              <a href="#HLCONF5">5. Load config from URL params</a><br />
+              <a href="#HLCONF6">6. Load config from file</a><br />
+              <a href="#HLCONF7">7. Load config from function call</a><br />
             </td>
           </tr>
         </tbody>
@@ -319,7 +322,7 @@
         console.log('api is ready');
 
         if (cgpv.api.map('CONF7')) {
-            cgpv.api.map('CONF7').loadMapConfig({
+          cgpv.api.map('CONF7').loadMapConfig({
             map: {
               interaction: 'dynamic',
               initialView: {

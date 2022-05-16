@@ -12,7 +12,7 @@ import { DateMgt } from '../core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
-import { generateId, addUiComponent } from '../core/utils/utilities';
+import { generateId, addUiComponent, extendLeafletFeatures } from '../core/utils/utilities';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -72,6 +72,9 @@ export class API {
     this.plugin = new Plugin();
     this.geoUtilities = new GeoUtilities();
     this.dateUtilities = new DateMgt();
+
+    // call the function that extends leaflet features
+    extendLeafletFeatures();
   }
 
   /**
