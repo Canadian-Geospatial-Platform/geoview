@@ -199,10 +199,10 @@ export class WMS extends AbstractWebLayersClass {
    * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
    */
   getLegendUrlFromCapabilities = (): TypeJsonObject | null => {
-    const layerName = this.layer!.options.layers;
+    const layerNames = this.layer!.options.layers!.split(',');
     let legendUrl = null;
     (this.#capabilities.Capability.Layer.Layer as TypeJsonArray).forEach((currentLayer) => {
-      if (currentLayer.Name === layerName && currentLayer.Style) {
+      if (layerNames.includes(currentLayer.Name as string) && currentLayer.Style) {
         (currentLayer.Style as TypeJsonArray).forEach((currentStyle) => {
           if (currentStyle.LegendURL) {
             (currentStyle.LegendURL as TypeJsonArray).forEach((currentLegend) => {
