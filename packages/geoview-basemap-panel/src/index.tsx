@@ -10,17 +10,17 @@ import {
   TypeSchemaObject,
   TypeJsonObject,
 } from 'geoview-core';
-import { BasemapSwitcher } from './basemap-switcher';
+import { BasemapPanel } from './basemap-panel';
 
 import schema from '../schema.json';
-import defaultConfig from '../default-config-basemap-switcher.json';
+import defaultConfig from '../default-config-basemap-panel.json';
 
 const w = window as TypeWindow;
 
 /**
  * Create a class for the plugin instance
  */
-class BasemapSwitcherPlugin extends AbstractPluginClass {
+class BasemapPanelPlugin extends AbstractPluginClass {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
@@ -48,49 +48,10 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    */
   translations = toJsonObject({
     'en-CA': {
-      basemapSwitcher: 'Basemaps',
-      'basemap-transport-label': {
-        name: 'Transport with Labels',
-        desc: '',
-      },
-      'basemap-transport': {
-        name: 'Transport without labels',
-        desc: '',
-      },
-      'basemap-shaded': {
-        name: 'Shaded Relief',
-        desc: '',
-      },
-      'basemap-shaded-label': {
-        name: 'Shaded Relief with Labels',
-        desc: '',
-      },
-      layer: {
-        type: 'CBMT',
-      },
+      basemapPanel: 'Basemaps',
     },
     'fr-CA': {
-      basemapSwitcher: 'Fond de carte',
-      'basemap-transport-label': {
-        name: 'Transport avec des étiquettes',
-        desc: '',
-      },
-      'basemap-transport': {
-        name: 'Transport sans étiquettes',
-        desc: '',
-      },
-      'basemap-shaded': {
-        name: 'Relief ombré',
-        desc: '',
-      },
-      'basemap-shaded-label': {
-        name: 'Relief ombré avec étiquettes',
-        desc: '',
-      },
-
-      layer: {
-        type: 'CBCT',
-      },
+      basemapPanel: 'Fond de carte',
     },
   });
 
@@ -113,7 +74,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // button props
       const button: TypeButtonProps = {
-        tooltip: this.translations[language].basemapSwitcher as string,
+        tooltip: this.translations[language].basemapPanel as string,
         tooltipPlacement: 'right',
         icon: '<i class="material-icons">map</i>',
         type: 'textWithIcon',
@@ -121,7 +82,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
 
       // panel props
       const panel: TypePanelProps = {
-        title: this.translations[language].basemapSwitcher,
+        title: this.translations[language].basemapPanel,
         icon: '<i class="material-icons">map</i>',
         width: 200,
         status: configObj?.isOpen as boolean,
@@ -131,7 +92,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
       this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
       // set panel content
-      this.buttonPanel?.panel?.changeContent(<BasemapSwitcher mapId={mapId} />);
+      this.buttonPanel?.panel?.changeContent(<BasemapPanel mapId={mapId} />);
     }
   };
 
@@ -155,7 +116,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
   }
 }
 
-export default BasemapSwitcherPlugin;
+export default BasemapPanelPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins['basemap-switcher'] = Cast<AbstractPluginClass>(BasemapSwitcherPlugin);
+w.plugins['basemap-panel'] = Cast<AbstractPluginClass>(BasemapPanelPlugin);

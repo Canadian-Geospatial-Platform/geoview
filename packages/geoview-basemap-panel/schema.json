@@ -1,75 +1,75 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "GeoView Basemap Switcher Schema",
+  "title": "GeoView Basemap  Panel Schema",
   "type": "object",
   "version": 1.0,
-  "comments": "Configuration for GeoView basemap switcher package.",
+  "comments": "Configuration for GeoView basemap switcher panel package.",
   "additionalProperties": false,
   "definitions": {
     "basemapNameNode": {
       "type": "object",
       "properties": {
         "en": {
-          "type": "string",
-          "description": "The display name of the basemap (English)."
+          "type": "string"
         },
         "fr": {
-          "type": "string",
-          "description": "The display name of the layer (French)."
+          "type": "string"
         }
-      }
+      },
+      "description": "The display name of the layer."
     },
     "basemapDescriptionNode": {
       "type": "object",
       "properties": {
         "en": {
-          "type": "string",
-          "description": "Basemap description (English)."
+          "type": "string"
         },
         "fr": {
-          "type": "string",
-          "description": "Basemap description (French)."
+          "type": "string"
         }
-      }
+      },
+      "description": "Basemap description."
     },
     "thumbnailUrlNode": {
       "type": "object",
       "properties": {
         "en": {
-          "type": "string",
-          "description": "Basemap thumbnail url (English)."
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
         },
         "fr": {
-          "type": "string",
-          "description": "Basemap thumbnail url (French)."
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
         }
-      }
+      },
+      "description": "Basemap thumbnail urls."
     },
     "basemapLayerUrlNode": {
       "type": "object",
       "properties": {
         "en": {
-          "type": "string",
-          "description": "The service endpoint of the basemap layer (English)."
+          "type": "string"
         },
         "fr": {
-          "type": "string",
-          "description": "The service endpoint of the basemap layer (French)."
+          "type": "string"
         }
-      }
+      },
+      "description": "The service endpoint of the basemap layer."
     },
     "basemapAttributionNode": {
       "type": "object",
       "properties": {
         "en": {
-          "type": "string",
-          "description": "Basemap attribution text (English)."
+          "type": "string"
         },
         "fr": {
-          "type": "string",
-          "description": "Basemap attribution text (French)."
+          "type": "string"
+          
         }
-      }
+      },
+      "description": "Basemap attribution text."
     },
     "basemapLayersNode": {
       "type": "object",
@@ -85,10 +85,6 @@
           "type": "integer",
           "description": "the opacity of this layer",
           "default": 0
-        },
-        "basemapPaneName": {
-          "type": "string",
-          "description": "basemap layer pan name"
         },
         "options": {
           "type": "object",
@@ -115,7 +111,7 @@
         }
       },
       "additionalItems": false,
-      "required": ["id", "url", "basemapPaneName"]
+      "required": ["id", "url"]
     },
     "basemap": {
       "type": "object",
@@ -180,7 +176,7 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 24,
-              "default": 0
+              "default": 24
             }
           },
           "additionalProperties": false,
@@ -235,5 +231,5 @@
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
   },
-  "required": ["languages"]
+  "required": ["coreBasemaps", "customBasemaps", "languages"]
 }

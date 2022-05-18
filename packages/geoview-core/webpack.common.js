@@ -38,8 +38,8 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-basemap-switcher': {
-      import: '../geoview-basemap-switcher/src/index.tsx',
+    'geoview-basemap-panel': {
+      import: '../geoview-basemap-panel/src/index.tsx',
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },

@@ -1,11 +1,11 @@
 {
-  "name": "geoview-basemap-switcher",
+  "name": "geoview-basemap-panel",
   "version": "1.0.0",
-  "description": "A Basemap Switcher for the geoview project",
+  "description": "A Basemap Switcher panel for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
     "react",
-    "basemap switcher"
+    "basemap switcher panel"
   ],
   "author": "Saleh Yassin",
   "license": "MIT",

@@ -300,6 +300,7 @@ export type TypePluginStructure = {
   props: TypeJsonValue;
   translate: TypeJsonValue;
   translations: TypeJsonObject;
+  configObj: TypeJsonObject;
   makeStyles: typeof makeStyles;
   schema?: () => TypeSchemaObject;
   defaultConfig?: () => TypeJsonObject;
@@ -534,7 +535,7 @@ export type TypeNorthArrowProps = TypeJsonObject;
 
 export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';
 
-export type TypeMapCorePackages = 'overview-map' | 'basemap-switcher' | 'layers-panel' | 'details-panel' | 'geolocator';
+export type TypeMapCorePackages = 'overview-map' | 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
 
 export type TypeExternalPackages = {
   name: string;

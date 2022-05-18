@@ -94,7 +94,12 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
         if (payloadIsABasemapLayerArray(payload)) {
-          if (payload.handlerName === id) setBasemapLayers(payload.layers);
+          if (payload.handlerName === id) {
+            // clear the layers then apply them
+            // if not layers orders may be messed up
+            setBasemapLayers([]);
+            setTimeout(() => setBasemapLayers(payload.layers), 100);
+          }
         }
       },
       id

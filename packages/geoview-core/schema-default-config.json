@@ -19,7 +19,7 @@
   },
   "theme": "dark",
   "components": ["appbar", "navbar", "northArrow"],
-  "corePackages": ["overview-map", "basemap-switcher", "layers-panel", "details-panel"],
+  "corePackages": ["overview-map", "basemap-panel", "layers-panel", "details-panel"],
   "externalPackages": [],
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca"

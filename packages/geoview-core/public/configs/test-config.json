@@ -44,7 +44,7 @@
       "boxZoom": true
     }
   },
-  "corePackages": ["basemap-switcher", "layers-panel"],
+  "corePackages": ["basemap-panel", "layers-panel"],
   "components": ["navbar", "appbar"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]
