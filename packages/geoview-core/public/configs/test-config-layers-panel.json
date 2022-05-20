@@ -1,0 +1,10 @@
+{
+  "reorderable": true,
+  "allowImport": true,
+  "isOpen": {
+    "small": false,
+    "medium": false,
+    "large": true
+  },
+  "languages": ["en-CA", "fr-CA"]
+}

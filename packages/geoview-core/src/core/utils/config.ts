@@ -30,6 +30,11 @@ import {
 } from '../types/cgpv-types';
 import { generateId, isJsonString } from './utilities';
 
+import { api } from '../../app';
+
+import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../../api/events/event';
+
 import schema from '../../../schema.json';
 
 export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
@@ -424,6 +429,12 @@ export class Config {
   getMapConfigFromFunc(configObj: TypeMapSchemaProps): TypeMapConfigProps | undefined {
     let mapConfigProps: TypeMapConfigProps | undefined;
 
+    // get the id from the map element
+    const mapId = this.mapElement.getAttribute('id');
+
+    // update map id if provided in map element
+    if (mapId) this.id = mapId;
+
     const language = this.mapElement.getAttribute('data-lang');
 
     // update language if provided from map element
@@ -433,6 +444,7 @@ export class Config {
       // create a validator object
       const validator = new Ajv({
         strict: false,
+        allErrors: true,
       });
 
       // initialize validator with schema file
@@ -445,13 +457,17 @@ export class Config {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
           console.log(error);
-          // api.event.emit(
-          //   snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
-          //     type: 'key',
-          //     value: error.message,
-          //     params: [mapId],
-          //   })
-          // );
+
+          setTimeout(() => {
+            const errorMessage = `Map ${mapId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
+
+            api.event.emit(
+              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+                type: 'string',
+                value: errorMessage,
+              })
+            );
+          }, 2000);
         }
 
         mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
@@ -486,16 +502,16 @@ export class Config {
     // create a new config object to store provided config by user
     let configObj: TypeMapSchemaProps | undefined;
 
-    // check if a config file url is provided
-    const jsonFileConfig = await this.getJsonFileConfig();
-
-    if (jsonFileConfig) configObj = { ...jsonFileConfig };
-
     // check if inline div config has been passed
     const inlineDivConfig = this.getInlintDivConfig();
 
     // use inline config if provided
     if (inlineDivConfig) configObj = { ...inlineDivConfig };
+
+    // check if a config file url is provided
+    const jsonFileConfig = await this.getJsonFileConfig();
+
+    if (jsonFileConfig) configObj = { ...jsonFileConfig };
 
     // get the value that will check if any url params passed will override existing map
     const shared = this.mapElement.getAttribute('data-shared');
@@ -511,6 +527,7 @@ export class Config {
       // create a validator object
       const validator = new Ajv({
         strict: false,
+        allErrors: true,
       });
 
       // initialize validator with schema file
@@ -523,13 +540,17 @@ export class Config {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
           console.log(error);
-          // api.event.emit(
-          //   snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
-          //     type: 'key',
-          //     value: error.message,
-          //     params: [mapId],
-          //   })
-          // );
+
+          setTimeout(() => {
+            const errorMessage = `Map ${mapId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
+
+            api.event.emit(
+              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+                type: 'string',
+                value: errorMessage,
+              })
+            );
+          }, 2000);
         }
 
         mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };

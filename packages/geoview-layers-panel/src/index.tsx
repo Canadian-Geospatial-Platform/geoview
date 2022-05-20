@@ -9,9 +9,13 @@ import {
   TypeButtonPanel,
   TypeButtonProps,
   TypePanelProps,
+  TypeSchemaObject,
 } from 'geoview-core';
 
 import PanelContent from './panel-content';
+
+import schema from '../schema.json';
+import defaultConfig from '../default-config-layers-panel.json';
 
 const w = window as TypeWindow;
 
@@ -26,6 +30,20 @@ class LayersPanelPlugin extends AbstractPluginClass {
     super(id, props);
     this.buttonPanel = null;
   }
+
+  /**
+   * Return the schema that is defined for this package
+   *
+   * @returns {TypeSchemaObject} returns the schema for this package
+   */
+  schema = (): TypeSchemaObject => schema;
+
+  /**
+   * Return the default config for this package
+   *
+   * @returns {TypeJsonObject} the default config
+   */
+  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
 
   /**
    * translations object to inject to the viewer translations
@@ -53,6 +71,10 @@ class LayersPanelPlugin extends AbstractPluginClass {
 
     const { language } = api.map(mapId);
 
+    let panelStatus = false;
+
+    panelStatus = this.configObj?.isOpen?.large as boolean;
+
     // button props
     const button: TypeButtonProps = {
       id: 'layersPanelButton',
@@ -67,6 +89,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
       title: this.translations[language].layersPanel,
       icon: '<i class="material-icons">layers</i>',
       width: 200,
+      status: panelStatus,
     };
 
     // create a new button panel on the appbar

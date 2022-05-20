@@ -7,6 +7,8 @@ import * as ReactLeafletCore from '@react-leaflet/core';
 
 import L from 'leaflet';
 
+import { AnySchemaObject } from 'ajv';
+
 import {
   TooltipProps,
   ButtonProps,
@@ -130,6 +132,8 @@ export type TypeCGPV = {
 export type TypeCallback = (callback: () => void) => void;
 
 export type TypeFunction = () => void;
+
+export type TypeSchemaObject = AnySchemaObject;
 
 // export interface TypeApi extends API, Event, Projection, Plugin {} //#427
 export interface TypeApi extends API, Event, Plugin {}
@@ -297,6 +301,8 @@ export type TypePluginStructure = {
   translate: TypeJsonValue;
   translations: TypeJsonObject;
   makeStyles: typeof makeStyles;
+  schema?: () => TypeSchemaObject;
+  defaultConfig?: () => TypeJsonObject;
   added?: () => void;
   removed?: () => void;
 };
