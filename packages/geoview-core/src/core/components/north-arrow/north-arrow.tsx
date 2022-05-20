@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useContext } from 'react';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -13,6 +13,9 @@ import { PROJECTION_NAMES } from '../../../geo/projection/projection';
 
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { generateId } from '../../utils/utilities';
+
+import { MapContext } from '../../app-start';
+import { api } from '../../../app';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
@@ -231,9 +234,17 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   const { projection } = props;
 
-  // Create a pane for the north pole marker
-  const map = useMap();
-  map.createPane('NorthPolePane');
+  const [pane, setPane] = useState(false);
+
+  const mapConfig = useContext(MapContext);
+
+  const mapId = mapConfig.id;
+
+  useEffect(() => {
+    api.map(mapId).map.createPane('NorthPolePane');
+    setPane(true);
+    // Create a pane for the north pole marker
+  }, [mapId]);
 
   // Create the icon
   const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace('#', '%23');
@@ -243,7 +254,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
     iconAnchor: [6, 18],
   });
 
-  return projection.code === PROJECTION_NAMES.LCC ? (
+  return projection.code === PROJECTION_NAMES.LCC && pane ? (
     <Marker id={generateId('')} position={northPolePosition} icon={northPoleIcon} keyboard={false} pane="NorthPolePane" />
   ) : (
     <div />

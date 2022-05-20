@@ -25,6 +25,9 @@ export class Basemap {
   // used to hold all created basemaps for a map
   basemaps: TypeBasemapProps[] = [];
 
+  // active basemap
+  activeBasemap!: TypeBasemapProps;
+
   // the language to use
   language: string;
 
@@ -110,16 +113,14 @@ export class Basemap {
   };
 
   /**
-   * Build basemap array using projection and language...
-   *
-   * @return {TypeBasemapLayer[]} basemapLayers the array of basemap layer
+   * Create the default basemap and add the layers to it
    */
-  getBasemapLayers(): TypeBasemapLayer[] {
+  createDefaultBasemap(): void {
     const basemapLayers: TypeBasemapLayer[] = [];
     let mainBasemapOpacity = 1;
 
     if (this.basemapOptions) {
-      if (this.basemapOptions.shaded !== false) {
+      if (this.basemapOptions.shaded) {
         basemapLayers.push({
           id: 'shaded',
           type: 'shaded',
@@ -140,7 +141,7 @@ export class Basemap {
         basemapPaneName: this.basemapsPaneName,
       });
 
-      if (this.basemapOptions.labeled !== false) {
+      if (this.basemapOptions.labeled) {
         // get proper label url
         basemapLayers.push({
           id: 'label',
@@ -153,14 +154,31 @@ export class Basemap {
       }
     }
 
-    return basemapLayers;
+    this.createBasemap({
+      name: 'Default Basemap',
+      layers: basemapLayers,
+      type: 'default',
+      description: '',
+      descSummary: '',
+      altText: '',
+      thumbnailUrl: '',
+      attribution: '',
+      zoomLevels: {
+        min: 0,
+        max: 0,
+      },
+    });
   }
 
   /**
    * load the default basemaps that was passed in the map config
    */
   loadDefaultBasemaps = (): void => {
-    const layers = this.getBasemapLayers();
+    this.createDefaultBasemap();
+
+    const { layers } = this.basemaps[0];
+
+    [this.activeBasemap] = [this.basemaps[0]];
 
     // emit an event to update the basemap layers on the map
     api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, layers));
@@ -223,8 +241,6 @@ export class Basemap {
 
     // add the basemap to the basemaps
     this.basemaps.push(basemapProps);
-
-    if (this.basemaps.length === 1) this.setBasemap(basemapProps.id);
   };
 
   /**
@@ -235,6 +251,9 @@ export class Basemap {
   setBasemap = (id: string): void => {
     // get basemap by id
     const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.id === id)[0];
+
+    // set active basemap
+    this.activeBasemap = basemap;
 
     // emit an event to update the basemap layers on the map
     api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.mapId, basemap.layers));
