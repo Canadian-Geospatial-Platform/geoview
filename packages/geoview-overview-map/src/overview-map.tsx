@@ -82,7 +82,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
   const parentMap = api.map(id).map;
   const mapZoom = parentMap.getZoom() - zoomFactor > 0 ? parentMap.getZoom() - zoomFactor : 0;
 
-  const basemaps = api.map(id).basemap.getBasemapLayers();
+  const { activeBasemap } = api.map(id).basemap;
 
   const overviewRef = useRef<HTMLDivElement>(null);
 
@@ -123,7 +123,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
       >
         {minimap ? (
           <>
-            {basemaps.map((base: { id: string | number | null | undefined; url: string }) => (
+            {activeBasemap.layers.map((base: { id: string | number | null | undefined; url: string }) => (
               <TileLayer key={base.id} url={base.url} />
             ))}
             <MinimapBounds parentId={id} parentMap={parentMap} zoomFactor={zoomFactor} minimap={minimap} />
@@ -135,7 +135,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
       </MapContainer>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parentMap, crs, mapZoom, basemaps, zoomFactor, minimap]
+    [parentMap, crs, mapZoom, zoomFactor, minimap]
   );
 
   return deviceSizeMedUp ? (
