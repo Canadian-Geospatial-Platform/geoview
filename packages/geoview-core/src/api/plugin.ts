@@ -114,7 +114,7 @@ export class Plugin {
 
       if (plugin) {
         // a config object used to store package config
-        let pluginConfigObj: unknown;
+        let pluginConfigObj: unknown = {};
 
         // if a schema is defined then look for a config for this plugin
         if (plugin.schema && plugin.defaultConfig) {

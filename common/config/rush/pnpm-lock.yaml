@@ -165,7 +165,6 @@ importers:
       esri-leaflet: ^3.0.4
       eventemitter3: ^4.0.7
       file-loader: ^6.2.0
-      flatgeobuf: 3.22.2
       focus-trap-react: ^8.9.1
       gh-pages: ^3.2.3
       glob: ^7.2.0
@@ -217,7 +216,6 @@ importers:
       domhandler: 4.3.1
       esri-leaflet: 3.0.8_leaflet@1.8.0
       eventemitter3: 4.0.7
-      flatgeobuf: 3.22.2
       focus-trap-react: 8.11.0_75cb922c19ee1b7939faae9b4d1f4cf7
       html-react-parser: 1.4.12_react@17.0.2
       i18next: 19.9.2
@@ -2564,10 +2562,6 @@ packages:
       leaflet: 1.8.0
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-    dev: false
-
-  /@repeaterjs/repeater/3.0.4:
-    resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
     dev: false
 
   /@sinonjs/commons/1.8.3:
@@ -5016,20 +5010,6 @@ packages:
       flatted: 3.2.5
       rimraf: 3.0.2
     dev: true
-
-  /flatbuffers/2.0.6:
-    resolution: {integrity: sha512-QTTZTXTbVfuOVQu2X6eLOw4vefUxnFJZxAKeN3rEPhjEzBtIbehimJLfVGHPM8iX0Na+9i76SBEg0skf0c0sCA==}
-    dev: false
-
-  /flatgeobuf/3.22.2:
-    resolution: {integrity: sha512-IF4vFWg/ZLt+qbjAEMed+OhiryjIsBLKxDopdyazBjF0z7Q2XJqlEBhXafpDsrRhg+BP/QjlMwC5pRJ9sRLbMQ==}
-    peerDependencies:
-      ol: ^6
-    dependencies:
-      '@repeaterjs/repeater': 3.0.4
-      flatbuffers: 2.0.6
-      slice-source: 0.4.1
-    dev: false
 
   /flatted/3.2.5:
     resolution: {integrity: sha512-WIWGi2L3DyTUvUrwRKgGi9TwxQMUEqPOPQBVi71R96jZXJdFskXEmf54BoZaS1kknGODoIGASGEzBUYdyMCBJg==}
@@ -7822,10 +7802,6 @@ packages:
     resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
     engines: {node: '>=12'}
     dev: true
-
-  /slice-source/0.4.1:
-    resolution: {integrity: sha1-QKV6wDxmaLXaIA4FN44AC/KmHXk=}
-    dev: false
 
   /sockjs/0.3.24:
     resolution: {integrity: sha512-GJgLTZ7vYb/JtPSSZ10hsOYIvEYsjbNU+zPdIHcUaWVNUEPivzxku31865sSSud0Da0W4lEeOPlmw93zLQchuQ==}
