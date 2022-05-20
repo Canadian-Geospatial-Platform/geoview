@@ -25,7 +25,7 @@ import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndTy
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
+  panelContainer: {
     minWidth: 300,
     width: 400,
     height: '100%',
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
       minWidth: '100%',
     },
   },
-  cardContainer: {
+  panelContentContainer: {
     flexBasis: 'auto',
     overflow: 'hidden',
     overflowY: 'auto',
@@ -147,6 +147,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   useEffect(() => {
     // if the panel was still open on reload then close it
     if (panel.status) {
+      panel.closeAll();
       setPanelStatus(true);
     }
 
@@ -263,7 +264,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     >
       <Card
         ref={panelRef as React.MutableRefObject<null>}
-        className={`${classes.root}`}
+        className={`${classes.panelContainer}`}
         style={{
           display: panelStatus ? 'flex' : 'none',
         }}
@@ -302,7 +303,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           }
         />
         <Divider />
-        <CardContent className={classes.cardContainer}>
+        <CardContent className={classes.panelContentContainer}>
           {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
         </CardContent>
       </Card>

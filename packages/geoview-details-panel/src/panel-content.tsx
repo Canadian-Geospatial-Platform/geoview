@@ -294,7 +294,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         // loop through all layers in each map server
         for (let j = 0; j < Object.keys(layers).length; j++) {
           const layerKey = Object.keys(layers)[j];
-          console.log('in')
+
           // we don't want to query a group layer because we already added it's sub layers
           if (!layers[layerKey].groupLayer) {
             // clear previous entry data for this layer

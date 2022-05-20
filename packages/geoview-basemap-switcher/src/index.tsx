@@ -7,8 +7,13 @@ import {
   TypeWindow,
   toJsonObject,
   TypePanelProps,
+  TypeSchemaObject,
+  TypeJsonObject,
 } from 'geoview-core';
 import { BasemapSwitcher } from './basemap-switcher';
+
+import schema from '../schema.json';
+import defaultConfig from '../default-config-basemap-switcher.json';
 
 const w = window as TypeWindow;
 
@@ -23,6 +28,20 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
     super(id, props);
     this.buttonPanel = null;
   }
+
+  /**
+   * Return the package schema
+   *
+   * @returns {TypeSchemaObject} the package schema
+   */
+  schema = (): TypeSchemaObject => schema;
+
+  /**
+   * Return the default config for this package
+   *
+   * @returns {TypeJsonObject} the default config
+   */
+  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
 
   /**
    * translations object to inject to the viewer translations
@@ -79,7 +98,9 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
    * Added function called after the plugin has been initialized
    */
   added = (): void => {
-    const { mapId } = this.pluginProps;
+    const { configObj, pluginProps } = this;
+
+    const { mapId } = pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
@@ -103,6 +124,7 @@ class BasemapSwitcherPlugin extends AbstractPluginClass {
         title: this.translations[language].basemapSwitcher,
         icon: '<i class="material-icons">map</i>',
         width: 200,
+        status: configObj?.isOpen as boolean,
       };
 
       // create a new button panel on the appbar

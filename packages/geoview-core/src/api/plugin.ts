@@ -3,6 +3,8 @@ import React from 'react';
 import i18next from 'i18next';
 import * as translate from 'react-i18next';
 
+import Ajv from 'ajv';
+
 import makeStyles from '@mui/styles/makeStyles';
 
 import { MapViewer } from '../geo/map/map';
@@ -18,6 +20,9 @@ import {
   TypePluginStructure,
   TypeRecordOfPlugin,
 } from '../core/types/cgpv-types';
+
+import { EVENT_NAMES } from './events/event';
+import { snackbarMessagePayload } from './events/payloads/snackbar-message-payload';
 
 /**
  * Class to manage plugins
@@ -108,6 +113,67 @@ export class Plugin {
       }
 
       if (plugin) {
+        // a config object used to store package config
+        let pluginConfigObj: unknown = {};
+
+        // if a schema is defined then look for a config for this plugin
+        if (plugin.schema && plugin.defaultConfig) {
+          const schema = plugin.schema();
+          const defaultConfig = plugin.defaultConfig();
+
+          // create a validator object
+          const validator = new Ajv({
+            strict: false,
+            allErrors: true,
+          });
+
+          // initialize validator with schema file
+          const validate = validator.compile(schema);
+
+          // if no config is provided then use default
+          pluginConfigObj = defaultConfig;
+
+          /**
+           * If a user is using map config from a file then attempt to look
+           * for custom config for loaded core packages on the same path of the map config.
+           * If none exists then load the default config
+           */
+          const configUrl = document.getElementById(mapId)?.getAttribute('data-config-url');
+
+          if (configUrl) {
+            const configPath = `${configUrl.split('.json')[0]}-${pluginId}.json`;
+
+            try {
+              // try to find get the custom config from the config path
+              const result = await (await fetch(configPath)).json();
+
+              if (result) {
+                pluginConfigObj = result;
+              }
+            } catch (error) {
+              // config not found
+            }
+          }
+
+          // validate configuration
+          const valid = validate(pluginConfigObj);
+
+          if (!valid && validate.errors && validate.errors.length) {
+            for (let j = 0; j < validate.errors.length; j += 1) {
+              const error = validate.errors[j];
+
+              const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
+
+              api.event.emit(
+                snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+                  type: 'string',
+                  value: errorMessage,
+                })
+              );
+            }
+          }
+        }
+
         // add translations if provided
         if (typeof plugin.translations === 'object') {
           const { translations } = plugin;
@@ -128,6 +194,7 @@ export class Plugin {
           props: { value: props !== undefined && props !== null ? props : {} },
           translate: { value: translate },
           makeStyles: { value: makeStyles },
+          configObj: { value: toJsonObject(pluginConfigObj) },
         });
 
         if (!this.plugins[mapId]) {
@@ -208,8 +275,10 @@ export class Plugin {
 
       // load plugins if provided in the config
       if (map.mapProps.corePackages && map.mapProps.corePackages.length > 0) {
-        map.mapProps.corePackages.forEach((pluginId) => {
+        map.mapProps.corePackages.forEach(async (pluginId) => {
           const { plugins } = Cast<TypeWindow>(window);
+
+          // if a user developed plugin with same pluginId is loaded from a script tag
           if (plugins && plugins[pluginId]) {
             this.addPlugin(
               pluginId,

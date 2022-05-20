@@ -205,7 +205,7 @@ export function Shell(props: ShellProps): JSX.Element {
         <SnackbarProvider
           maxSnack={3}
           dense
-          autoHideDuration={4000}
+          autoHideDuration={5000}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'center',
