@@ -1,4 +1,4 @@
-# geoview-basemap-switcher
+# geoview-basemap-panel
 
 A plugin that displays all layers used on the map.
 

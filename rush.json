@@ -28,8 +28,8 @@
       "projectFolder": "packages/geoview-overview-map"
     },
     {
-      "packageName": "geoview-basemap-switcher",
-      "projectFolder": "packages/geoview-basemap-switcher"
+      "packageName": "geoview-basemap-panel",
+      "projectFolder": "packages/geoview-basemap-panel"
     },
     {
       "packageName": "geoview-layers-panel",

@@ -6,7 +6,7 @@ The viewer allows loading plugins to extend the viewer's functionalities.
 
 You can see an example plugin below
 
-`public/plugins/basemap/basemap-switcher.js`
+`public/plugins/basemap/basemap-panel.js`
 
 ## Creating a plugin
 
@@ -190,7 +190,7 @@ After that you can load the plugin by passing the plugin name in the map config.
     id="mapWM"
     class="llwp-map"
     data-leaflet="{'name': 'LCC', 'projection': 3978, 'zoom': 4, 'center': [60,-100], 'language': 'en-CA', 'basemapOptions': { 'id': 'transport', 'shaded': false },
-            'layers':[], 'plugins': ['basemapSwitcher']}"
+            'layers':[], 'plugins': ['basemap-panel']}"
 ></div>
 ```
 

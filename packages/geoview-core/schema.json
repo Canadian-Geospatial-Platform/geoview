@@ -750,9 +750,9 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["overview-map", "basemap-switcher", "layers-panel", "details-panel", "geolocator"]
+        "enum": ["overview-map", "basemap-panel", "layers-panel", "details-panel", "geolocator"]
       },
-      "default": ["overview-map", "basemap-switcher", "layers-panel", "details-panel", "geolocator"],
+      "default": ["overview-map", "basemap-panel", "layers-panel", "details-panel", "geolocator"],
       "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
       "minItems": 0
     },
