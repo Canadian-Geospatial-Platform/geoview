@@ -106,6 +106,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     );
 
     return () => {
+      api.map(id).map.off('moveend');
+      api.map(id).map.off('zoomend');
+      api.map(id).map.off('zoomanim');
       api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
   }, [id]);
