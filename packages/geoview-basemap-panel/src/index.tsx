@@ -92,7 +92,7 @@ class BasemapPanelPlugin extends AbstractPluginClass {
       this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
       // set panel content
-      this.buttonPanel?.panel?.changeContent(<BasemapPanel mapId={mapId} />);
+      this.buttonPanel?.panel?.changeContent(<BasemapPanel mapId={mapId} config={configObj || {}} />);
     }
   };
 
@@ -111,6 +111,11 @@ class BasemapPanelPlugin extends AbstractPluginClass {
 
       if (this.buttonPanel) {
         api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+
+        // reset basemaps array
+        api.map(mapId).basemap.basemaps = [];
+        // reload default basemap
+        api.map(mapId).basemap.loadDefaultBasemaps(api.map(mapId).basemap.basemapOptions);
       }
     }
   }

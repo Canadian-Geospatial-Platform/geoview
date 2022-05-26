@@ -25,32 +25,34 @@ const defaultCircleMarkerStyle: L.CircleMarkerOptions = {
   color: '#000000',
   weight: 1,
   opacity: 1,
-  fillOpacity: 0.4
-}
+  fillOpacity: 0.4,
+};
 const defaultLineStringStyle: L.PathOptions = {
   color: '#000000',
   weight: 2,
   opacity: 1,
-}
+};
 const defaultLinePolygonStyle: L.PathOptions = {
   color: '#000000',
   weight: 2,
   opacity: 1,
   fillColor: '#000000',
   fillOpacity: 0.5,
-}
+};
 const defaultSelectStyle: L.PathOptions = {
   color: '#0000FF',
   weight: 3,
   opacity: 1,
   fillColor: '#0000FF',
   fillOpacity: 0.5,
-}
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultStyle: any = {
-  'Point': defaultCircleMarkerStyle,
-  'Line': defaultLineStringStyle,
-  'Polygon': defaultLinePolygonStyle,
-}
+  Point: defaultCircleMarkerStyle,
+  Line: defaultLineStringStyle,
+  Polygon: defaultLinePolygonStyle,
+};
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeGeoJSONLayer
@@ -87,7 +89,9 @@ export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractWebLayersClass): ver
 export class GeoJSON extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
-  features: Object[] = []
+
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  features: Object[] = [];
 
   /**
    * Initialize layer
@@ -124,27 +128,29 @@ export class GeoJSON extends AbstractWebLayersClass {
 
               layer.on({
                 // highlight on hover
-                'mouseover': function(e) {
-                    const layer = e.target;
-                    if (layer.options.opacity !== 0 || layer.options.fillOpacity !== 0) {
-                      layer.setStyle(defaultSelectStyle);
-                      layer.bringToFront();
-                    }
+                mouseover: (e) => {
+                  const mouseOverLayer = e.target;
+                  if (mouseOverLayer.options.opacity !== 0 || mouseOverLayer.options.fillOpacity !== 0) {
+                    mouseOverLayer.setStyle(defaultSelectStyle);
+                    mouseOverLayer.bringToFront();
+                  }
                 },
                 // remove highlight when hover stops
-                'mouseout': function(e) {
-                    const layer = e.target;
-                    if (layer.options.opacity !== 0 || layer.options.fillOpacity !== 0)
-                      layer.setStyle(geoLayer.renderer || defaultStyle[layer.feature?.geometry.type]);
-                }
-            })
+                mouseout: (e) => {
+                  const mouseOutLayer = e.target;
+                  if (mouseOutLayer.options.opacity !== 0 || mouseOutLayer.options.fillOpacity !== 0)
+                    mouseOutLayer.setStyle(geoLayer.renderer || defaultStyle[mouseOutLayer.feature?.geometry.type]);
+                },
+              });
             },
             // TODO classes will be created to style the elements, it may get the info from theming
             // add styling
             style: (feature) => {
               if (feature?.geometry.type === 'Polygon') {
                 return geoLayer.renderer || defaultLinePolygonStyle;
-              } else if (feature?.geometry.type === 'LineString') {
+              }
+
+              if (feature?.geometry.type === 'LineString') {
                 return geoLayer.renderer || defaultLineStringStyle;
               }
               return {};
@@ -165,31 +171,35 @@ export class GeoJSON extends AbstractWebLayersClass {
     const result: TypeFilterFeatures = { pass: [], fail: [] };
 
     // get type of values
-    const typeOfValue = filters.map(item => typeof item.value);
+    const typeOfValue = filters.map((item) => typeof item.value);
 
     // loop all layer features
-    for (let feature of this.features as TypeJsonObject[]) {
-          // for each field, check value type associtaed and cast if needed
-          let featValues: (string | number)[] = [];
-          filters.forEach((filter: TypeFilterQuery, i: number) => {
-            let tmpValue = (typeOfValue[i] === 'string') ?
-              String(feature.layer.feature.properties[filter.field]) : Number(feature.layer.feature.properties[filter.field]);
-            featValues.push(tmpValue);
-          });
+    for (let featureIndex = 0; featureIndex < this.features.length; featureIndex++) {
+      const feature = this.features[featureIndex] as TypeJsonObject;
 
-          // apply the filters
-          let pass: boolean[] = [];
-          filters.forEach((filter: TypeFilterQuery, i: number) => {
-            pass.push(FILTER_OPERATOR[filter.operator as string](featValues[i], filter.value));
-          });
+      // for each field, check value type associtaed and cast if needed
+      const featValues: (string | number)[] = [];
+      filters.forEach((filter: TypeFilterQuery, i: number) => {
+        const tmpValue =
+          typeOfValue[i] === 'string'
+            ? String(feature.layer.feature.properties[filter.field])
+            : Number(feature.layer.feature.properties[filter.field]);
+        featValues.push(tmpValue);
+      });
 
-          // check if pass
-          // TODO: redevelop to have unlimited number of filters
-          if (!pass.includes(false) && filters[1].connector === '&&' || pass.includes(true) && filters[1].connector === '||') {
-            result.pass.push(feature);
-          } else {
-            result.fail.push(feature);
-          }
+      // apply the filters
+      const pass: boolean[] = [];
+      filters.forEach((filter: TypeFilterQuery, i: number) => {
+        pass.push(FILTER_OPERATOR[filter.operator as string](featValues[i], filter.value));
+      });
+
+      // check if pass
+      // TODO: redevelop to have unlimited number of filters
+      if ((!pass.includes(false) && filters[1].connector === '&&') || (pass.includes(true) && filters[1].connector === '||')) {
+        result.pass.push(feature);
+      } else {
+        result.fail.push(feature);
+      }
     }
 
     return result;

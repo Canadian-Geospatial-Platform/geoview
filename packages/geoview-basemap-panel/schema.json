@@ -66,7 +66,6 @@
         },
         "fr": {
           "type": "string"
-          
         }
       },
       "description": "Basemap attribution text."
@@ -82,7 +81,7 @@
           "$ref": "#/definitions/basemapLayerUrlNode"
         },
         "opacity": {
-          "type": "integer",
+          "type": "number",
           "description": "the opacity of this layer",
           "default": 0
         },
