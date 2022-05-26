@@ -4,10 +4,11 @@ const w = window as TypeWindow;
 
 interface BaseMapPanelProps {
   mapId: string;
+  config: TypeJsonObject;
 }
 
 export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
-  const { mapId } = props;
+  const { mapId, config } = props;
 
   const { cgpv } = w;
 
@@ -74,26 +75,27 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    * load existing basemaps and create new basemaps
    */
   useEffect(() => {
+    // reset the basemaps array
+    api.map(mapId).basemap.basemaps = [];
+
     // get existing basemaps
     const { basemaps } = api.map(mapId).basemap;
 
-    const config = api.plugins[mapId]['basemap-panel'].configObj;
-
     // create the core basemap
-    for (let basemap of config.coreBasemaps as TypeJsonObject[]) {
+    for (let basemapIndex = 0; basemapIndex < config.coreBasemaps.length; basemapIndex++) {
+      const basemap = config.coreBasemaps[basemapIndex] as TypeJsonObject;
       api.map(mapId).basemap.createCoreBasemap(basemap as unknown as TypeBasemapOptions);
     }
 
     // create the custom config basemap
-    for (let customBasemap of config.customBasemaps as TypeJsonObject[]) {
+    for (let basemapIndex = 0; basemapIndex < config.customBasemaps.length; basemapIndex++) {
+      const customBasemap = config.customBasemaps[basemapIndex] as TypeJsonObject;
       api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
     }
 
     // set the basemaps in the list
     setBasemapList(basemaps);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [api, config.coreBasemaps, config.customBasemaps, mapId]);
 
   return (
     <div className={classes.listContainer}>

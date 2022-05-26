@@ -34,7 +34,7 @@ export class Basemap {
   language: string;
 
   // the basemap options passed from the map config
-  private basemapOptions: TypeBasemapOptions | null | undefined;
+  basemapOptions: TypeBasemapOptions;
 
   // the projection number
   private projection: number;
@@ -52,7 +52,7 @@ export class Basemap {
    * @param {string} language language to be used either en-CA or fr-CA
    * @param {number} projection projection number
    */
-  constructor(basemapOptions: TypeBasemapOptions | null | undefined, language: string, projection: number, mapId?: string) {
+  constructor(basemapOptions: TypeBasemapOptions, language: string, projection: number, mapId?: string) {
     this.basemapOptions = basemapOptions;
 
     this.language = language;
@@ -116,7 +116,7 @@ export class Basemap {
 
   /**
    * Get basemap thumbnail url
-   * 
+   *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
    * @param {TypeProjections} projection basemap projection
    * @param {TypeLocalizedLanguages} language basemap language
@@ -125,25 +125,31 @@ export class Basemap {
   private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjections, language: TypeLocalizedLanguages): string[] => {
     const thumbnailUrls: string[] = [];
 
-    for (let type of basemapTypes) {
+    for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
+      const type = basemapTypes[typeIndex];
+
       if (type === 'transport') {
-        thumbnailUrls.push(
-          this.basemapsList[projection].transport
-            .replace('{z}', '8')
-            .replace('{y}', projection === 3978 ? '285' : '91')
-            .replace('{x}', projection === 3978 ? '268' : '74')
-        );
+        if (this.basemapsList[projection].transport) {
+          thumbnailUrls.push(
+            this.basemapsList[projection].transport
+              .replace('{z}', '8')
+              .replace('{y}', projection === 3978 ? '285' : '91')
+              .replace('{x}', projection === 3978 ? '268' : '74')
+          );
+        }
       }
-      
+
       if (type === 'simple') {
-        thumbnailUrls.push(
-          this.basemapsList[projection].simple
-            .replace('{z}', '8')
-            .replace('{y}', projection === 3978 ? '285' : '91')
-            .replace('{x}', projection === 3978 ? '268' : '74')
-        );
+        if (this.basemapsList[projection].simple) {
+          thumbnailUrls.push(
+            this.basemapsList[projection].simple
+              .replace('{z}', '8')
+              .replace('{y}', projection === 3978 ? '285' : '91')
+              .replace('{x}', projection === 3978 ? '268' : '74')
+          );
+        }
       }
-      
+
       if (type === 'shaded') {
         if (this.basemapsList[projection].shaded) {
           thumbnailUrls.push(
@@ -154,56 +160,63 @@ export class Basemap {
           );
         }
       }
-      
+
       if (type === 'label') {
-        thumbnailUrls.push(
-          this.basemapsList[this.projection].label
-            .replace('xxxx', language === 'en-CA' ? 'CBMT' : 'CBCT')
-            .replace('{z}', '8')
-            .replace('{y}', projection === 3978 ? '285' : '91')
-            .replace('{x}', projection === 3978 ? '268' : '74')
-        );
+        if (this.basemapsList[this.projection].label) {
+          thumbnailUrls.push(
+            this.basemapsList[this.projection].label
+              .replace('xxxx', language === 'en-CA' ? 'CBMT' : 'CBCT')
+              .replace('{z}', '8')
+              .replace('{y}', projection === 3978 ? '285' : '91')
+              .replace('{x}', projection === 3978 ? '268' : '74')
+          );
+        }
       }
     }
 
     return thumbnailUrls;
-  }
+  };
 
   /**
    * Get basemap information (nbame and description)
-   * 
+   *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
    * @param {TypeProjections} projection basemap projection
    * @param {TypeLocalizedLanguages} language basemap language
    * @returns {string} array with information [name, description]
    */
   private getInfo = (basemapTypes: string[], projection: TypeProjections, language: TypeLocalizedLanguages): string[] => {
-    const info = { name: '', description: '' };
+    // const info = { name: '', description: '' };
+
     let name = '';
     let description = '';
 
     if (basemapTypes.includes('transport')) {
       name = 'Transport';
-      description = `${language === 'en-CA' ?
-        'The Canada Base Map - Transportation (CBMT). This web mapping service provides spatial reference context with an emphasis on transportation networks. It is designed especially for use as a background map in a web mapping application or geographic information system (GIS).'
-        : 'Carte de base du Canada - Transport (CBCT). Ce service de cartographie Web offre un contexte de référence spatiale axé sur les réseaux de transport. Il est particulièrement conçu pour être utilisé comme fond de carte dans une application cartographique Web ou un système d\'information géographique (SIG).'}`;
+      description = `${
+        language === 'en-CA'
+          ? 'The Canada Base Map - Transportation (CBMT). This web mapping service provides spatial reference context with an emphasis on transportation networks. It is designed especially for use as a background map in a web mapping application or geographic information system (GIS).'
+          : "Carte de base du Canada - Transport (CBCT). Ce service de cartographie Web offre un contexte de référence spatiale axé sur les réseaux de transport. Il est particulièrement conçu pour être utilisé comme fond de carte dans une application cartographique Web ou un système d'information géographique (SIG)."
+      }`;
     } else if (basemapTypes.includes('simple')) {
-      name = 'Simple'
+      name = 'Simple';
     } else if (basemapTypes.includes('shaded')) {
-      name = `${language === 'en-CA' ? 'Shaded relief' : 'Relief ombré'}`
-      description = `${language === 'en-CA' ?
-        'The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada, is intended primarily for online mapping application users and developers'
-        : 'Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d\'applications de cartographie en ligne.'}`;
+      name = `${language === 'en-CA' ? 'Shaded relief' : 'Relief ombré'}`;
+      description = `${
+        language === 'en-CA'
+          ? 'The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada, is intended primarily for online mapping application users and developers'
+          : "Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d'applications de cartographie en ligne."
+      }`;
     }
 
     if (basemapTypes.includes('label')) name = `${name} ${language === 'en-CA' ? 'with labels' : 'avec étiquettes'}`;
-    
+
     return [name, description];
-  }
+  };
 
   /**
    * Check if the type of basemap already exist
-   * 
+   *
    * @param {string} type basemap type
    * @returns {boolean} true if basemap exist, false otherwise
    */
@@ -212,12 +225,12 @@ export class Basemap {
     const exists = this.basemaps.length === 0 ? [] : this.basemaps.filter((basemap: TypeBasemapProps) => basemap.type === type);
 
     // return true if basemap exist
-    return (exists.length !== 0);
-  }
+    return exists.length !== 0;
+  };
 
   /**
    * Create the core basemap and add the layers to it
-   * 
+   *
    * @param {TypeBasemapOptions} basemapOptions basemap options
    */
   createCoreBasemap = (basemapOptions: TypeBasemapOptions): void => {
@@ -225,9 +238,9 @@ export class Basemap {
     let mainBasemapOpacity = 1;
     const basemaplayerTypes: string[] = [];
 
-    const coreBasemapOptions = (basemapOptions === undefined) ? this.basemapOptions : basemapOptions;
+    const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
     if (coreBasemapOptions) {
-      if (coreBasemapOptions.shaded) {
+      if (coreBasemapOptions.shaded && this.basemapsList[this.projection].shaded) {
         basemapLayers.push({
           id: 'shaded',
           type: 'shaded',
@@ -240,17 +253,19 @@ export class Basemap {
         basemaplayerTypes.push('shaded');
       }
 
-      basemapLayers.push({
-        id: coreBasemapOptions.id || 'transport',
-        type: 'transport',
-        url: this.basemapsList[this.projection][coreBasemapOptions.id] || this.basemapsList[this.projection].transport,
-        options: this.basemapLayerOptions,
-        opacity: mainBasemapOpacity,
-        basemapPaneName: this.basemapsPaneName,
-      });
-      basemaplayerTypes.push(coreBasemapOptions.id);
+      if (this.basemapsList[this.projection][coreBasemapOptions.id]) {
+        basemapLayers.push({
+          id: coreBasemapOptions.id || 'transport',
+          type: 'transport',
+          url: this.basemapsList[this.projection][coreBasemapOptions.id] || this.basemapsList[this.projection].transport,
+          options: this.basemapLayerOptions,
+          opacity: mainBasemapOpacity,
+          basemapPaneName: this.basemapsPaneName,
+        });
+        basemaplayerTypes.push(coreBasemapOptions.id || 'transport');
+      }
 
-      if (coreBasemapOptions.labeled) {
+      if (basemapLayers.length && coreBasemapOptions.labeled) {
         // get proper label url
         basemapLayers.push({
           id: 'label',
@@ -284,17 +299,17 @@ export class Basemap {
         },
       });
     }
-  }
+  };
 
   /**
    * Create a custom basemap
-   * 
+   *
    * @param {TypeBasemapProps} basemapProps basemap properties
    */
   createCustomBasemap = (basemapProps: TypeBasemapProps): void => {
     interface bilingual {
-      en: 'string',
-      fr: 'string',
+      en: string;
+      fr: string;
     }
 
     // extract bilangual sections
@@ -304,29 +319,37 @@ export class Basemap {
     const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
 
     // extract url from luanguage
-    const formattedLayers: TypeBasemapLayer[] = [ ...basemapProps.layers ];
-    for (let layer of formattedLayers) {
-      let urls = layer.url as unknown as bilingual;
-      layer.url = (this.language === 'en-CA') ? urls.en : urls.fr;
-      layer.basemapPaneName = this.basemapsPaneName;
+    const formattedLayers: TypeBasemapLayer[] = [...basemapProps.layers];
+
+    for (let layerIndex = 0; layerIndex < formattedLayers.length; layerIndex++) {
+      // const layer = formattedLayers[layerIndex];
+      // const urls = layer.url as unknown as bilingual;
+      // layer.url = this.language === 'en-CA' ? urls.en : urls.fr;
+      // layer.basemapPaneName = this.basemapsPaneName;
     }
-  
+
     // create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
-    formatProps.name = (this.language === 'en-CA') ? name.en : name.fr;
-    formatProps.layers = formattedLayers;
-    formatProps.type = 'test'
-    formatProps.description = (this.language === 'en-CA') ? description.en : description.fr;
-    formatProps.altText = (this.language === 'en-CA') ? description.en : description.fr;
-    formatProps.thumbnailUrl = (this.language === 'en-CA') ? thumbnailUrl.en : thumbnailUrl.fr;
-    formatProps.attribution = (this.language === 'en-CA') ? attribution.en : attribution.fr;
+    formatProps.name = this.language === 'en-CA' ? name.en : name.fr;
+    formatProps.layers = basemapProps.layers.map((layer) => {
+      return {
+        ...layer,
+        url: this.language === 'en-CA' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+        basemapPaneName: this.basemapsPaneName,
+      };
+    });
+    formatProps.type = 'test';
+    formatProps.description = this.language === 'en-CA' ? description.en : description.fr;
+    formatProps.altText = this.language === 'en-CA' ? description.en : description.fr;
+    formatProps.thumbnailUrl = this.language === 'en-CA' ? thumbnailUrl.en : thumbnailUrl.fr;
+    formatProps.attribution = this.language === 'en-CA' ? attribution.en : attribution.fr;
 
     this.createBasemap(formatProps);
-  }
+  };
 
   /**
    * Load the default basemap that was passed in the map config
-   * 
+   *
    * @param {TypeBasemapOptions} basemapOptions basemap options
    */
   loadDefaultBasemaps = (basemapOptions: TypeBasemapOptions): void => {
@@ -350,12 +373,12 @@ export class Basemap {
     // eslint-disable-next-line no-param-reassign
     if (!basemapProps.id) basemapProps.id = generateId(basemapProps.id);
 
-    let thumbnailUrls: string[] = [];
+    const thumbnailUrls: string[] = [];
 
     // set thumbnail if not provided
     if (!basemapProps.thumbnailUrl || basemapProps.thumbnailUrl.length === 0) {
       basemapProps.layers.forEach((layer) => {
-        const { type } = layer;
+        // const { type } = layer;
 
         // eslint-disable-next-line no-param-reassign
         layer.basemapPaneName = this.basemapsPaneName;
@@ -367,8 +390,8 @@ export class Basemap {
       basemapProps.thumbnailUrl = thumbnailUrls;
     }
 
-    // add the basemap to the basemaps
-    this.basemaps.push(basemapProps);
+    // add the basemap to the basemaps if it has layers
+    if (basemapProps.layers.length) this.basemaps.push(basemapProps);
   };
 
   /**

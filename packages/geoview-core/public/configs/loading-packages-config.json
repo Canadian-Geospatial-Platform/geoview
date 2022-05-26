@@ -1,0 +1,155 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "initialView": {
+      "zoom": 4,
+      "center": [60, -100]
+    },
+    "projection": 3978,
+    "basemapOptions": {
+      "id": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "layers": [
+      {
+        "id": "wmsLYR1",
+        "name": {
+          "en": "Première Nation / First Nation",
+          "fr": "Première Nation / First Nation"
+        },
+        "url": {
+          "en": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
+          "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
+        },
+        "layerType": "ogcWms",
+        "layerEntries": [
+          {
+            "id": "0"
+          }
+        ]
+      },
+      {
+        "id": "wmsMSI",
+        "name": {
+          "en": "Probability of permanent snow and ice (94% or more)",
+          "fr": "Probabilité de neige et glace permanente (94% ou plus)"
+        },
+        "url": {
+          "en": "https://datacube.services.geo.ca/ows/msi",
+          "fr": "https://datacube.services.geo.ca/ows/msi"
+        },
+        "layerType": "ogcWms",
+        "layerEntries": [
+          {
+            "id": "msi-94-or-more"
+          }
+        ]
+      },
+      {
+        "id": "esriDynamicLYR2",
+        "name": {
+          "en": "Energy Infrastructure of North America",
+          "fr": "Infrastructure énergétique d'Amérique du Nord"
+        },
+        "url": {
+          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
+          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
+        },
+        "layerType": "esriDynamic",
+        "layerEntries": [
+          {
+            "index": 4,
+            "name": {
+              "en": "Natural Gas Processing Plants - config",
+              "fr": "Usines de traitement du gaz naturel - config"
+            }
+          },
+          {
+            "index": 5
+          },
+          {
+            "index": 6
+          }
+        ]
+      },
+      {
+        "id": "esriFeatureLYR3",
+        "name": {
+          "en": "Geothermal",
+          "fr": "Géothermie"
+        },
+        "url": {
+          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19",
+          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21"
+        },
+        "layerType": "esriFeature"
+      },
+      {
+        "id": "esriFeatureLYR4",
+        "url": {
+          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10",
+          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10"
+        },
+        "layerType": "esriFeature"
+      },
+      {
+        "id": "geojsonLYR5",
+        "name": {
+          "en": "GeoJSON Sample",
+          "fr": "Exemple GeoJSON"
+        },
+        "url": {
+          "en": "./geojson/polygons.json",
+          "fr": "./geojson/polygons.json"
+        },
+        "layerType": "geojson"
+      },
+      {
+        "id": "wfsLYR6",
+        "name": {
+          "en": "Airport data",
+          "fr": "Airport data"
+        },
+        "url": {
+          "en": "https://giswebservices.massgis.state.ma.us/geoserver/wfs",
+          "fr": "https://giswebservices.massgis.state.ma.us/geoserver/wfs"
+        },
+        "layerType": "ogcWfs",
+        "layerEntries": [
+          {
+            "id": "GISDATA.AIRPORTS_PT"
+          }
+        ]
+      },
+      {
+        "id": "ogcFeatureLYR7",
+        "name": {
+          "en": "Large Lakes",
+          "fr": "Large Lakes"
+        },
+        "url": {
+          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+          "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
+        },
+        "layerType": "ogcFeature",
+        "layerEntries": [
+          {
+            "id": "lakes"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "appBar": {
+    "about": {
+      "en": "# An example of a markdown",
+      "fr": "# Un exemple de démarque"
+    }
+  },
+  "components": ["appbar", "navbar", "northArrow"],
+  "corePackages": ["overview-map", "basemap-panel", "details-panel", "layers-panel"],
+  "externalPackages": [],
+  "languages": ["en-CA"]
+}

@@ -11,9 +11,7 @@ import { MapViewer } from '../geo/map/map';
 
 import { api } from '../app';
 import {
-  Cast,
   AbstractPluginClass,
-  TypeWindow,
   toJsonObject,
   TypeJsonObject,
   TypeJsonValue,
@@ -31,6 +29,12 @@ import { snackbarMessagePayload } from './events/payloads/snackbar-message-paylo
  * @class
  */
 export class Plugin {
+  // used for a timer to check if all plugins are loaded then execute a timer
+  #pluginsReady = 0;
+
+  // used to indicate that all initial plugins finished loading
+  pluginsLoaded = false;
+
   plugins: TypeRecordOfPlugin = {};
 
   /**
@@ -42,6 +46,7 @@ export class Plugin {
   loadScript = async (id: string): Promise<any> => {
     return new Promise((resolve) => {
       const existingScript = document.getElementById(id);
+
       if (!existingScript) {
         // get all loaded js scripts on the page
         const scripts = document.getElementsByTagName('script');
@@ -76,6 +81,7 @@ export class Plugin {
           resolve(null);
         };
       }
+
       if (existingScript && window.plugins && window.plugins[id]) {
         resolve(window.plugins[id]);
       }
@@ -104,12 +110,6 @@ export class Plugin {
         // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         plugin = new (constructor as any)(pluginId, props);
-      } else {
-        const InstanceConstructor = await this.loadScript(pluginId);
-
-        // const InstanceConstructor = (await import(`${'../plugins'}/${id}/index.tsx`)).default;
-
-        if (InstanceConstructor) plugin = new InstanceConstructor(pluginId, props);
       }
 
       if (plugin) {
@@ -194,7 +194,7 @@ export class Plugin {
           props: { value: props !== undefined && props !== null ? props : {} },
           translate: { value: translate },
           makeStyles: { value: makeStyles },
-          configObj: { value: toJsonObject(pluginConfigObj) },
+          configObj: { value: pluginConfigObj },
         });
 
         if (!this.plugins[mapId]) {
@@ -210,6 +210,26 @@ export class Plugin {
           plugin.added();
         }
       }
+    }
+
+    // call this only if plugins are being loaded from map config
+    // this will not call if a plugin is loaded later from an api call
+    if (!this.pluginsLoaded) {
+      /**
+       * are we still calling addPlugin to load more plugins? If so
+       * Clear our timeout throughout the addPlugin call
+       */
+      window.clearTimeout(this.#pluginsReady);
+
+      /**
+       * If nothing clears this timeout
+       * this will only be called after the last call of addPlugin
+       */
+      this.#pluginsReady = window.setTimeout(() => {
+        this.pluginsLoaded = true;
+
+        api.callInitCallback();
+      }, 1000);
     }
   };
 
@@ -266,40 +286,59 @@ export class Plugin {
   };
 
   /**
+   * A function that will load each plugin on a map then checks if there are a next plugin to load
+   *
+   * @param {string} mapIndex the map index to load the plugin at
+   * @param {string} pluginIndex the plugin index to load
+   */
+  loadPlugin = (mapIndex: number, pluginIndex: number) => {
+    const mapId = Object.keys(api.maps)[mapIndex];
+    const map = api.maps[mapId] as MapViewer;
+
+    // check if the map at this index have core packages and if there is a package at the plugin index
+    if (map.mapProps.corePackages && map.mapProps.corePackages[pluginIndex]) {
+      const pluginId = map.mapProps.corePackages[pluginIndex];
+
+      // load the plugin from the script tag or create it
+      this.loadScript(pluginId).then((constructor) => {
+        // add the plugin by passing in the loaded constructor from the script tag
+        this.addPlugin(
+          pluginId,
+          mapId,
+          constructor,
+          toJsonObject({
+            mapId,
+          })
+        );
+
+        // check if there is a next plugin at the current map index
+        if (map.mapProps.corePackages && map.mapProps.corePackages[pluginIndex + 1]) {
+          // load next plugin at the same map index
+          this.loadPlugin(mapIndex, pluginIndex + 1);
+          // if no more plugins at current map index then check if there is another map
+        } else if (Object.keys(api.maps)[mapIndex + 1]) {
+          // try to load first plugin at the next map
+          this.loadPlugin(mapIndex + 1, 0);
+        }
+      });
+      // if previous map did not have any packages then try to load packages from next map
+    } else if (Object.keys(api.maps)[mapIndex + 1]) {
+      // load packages at next map if exists
+      this.loadPlugin(mapIndex + 1, 0);
+      // if no plugins loaded then call init callback function
+    } else if (Object.keys(this.plugins).length === 0) {
+      api.callInitCallback();
+    }
+  };
+
+  /**
    * Load plugins provided by map config
    */
   loadPlugins = (): void => {
-    // loop through each map and check if the config contains any plugins to load
-    Object.keys(api.maps).forEach((mapId: string) => {
-      const map = api.maps[mapId] as MapViewer;
-
-      // load plugins if provided in the config
-      if (map.mapProps.corePackages && map.mapProps.corePackages.length > 0) {
-        map.mapProps.corePackages.forEach(async (pluginId) => {
-          const { plugins } = Cast<TypeWindow>(window);
-
-          // if a user developed plugin with same pluginId is loaded from a script tag
-          if (plugins && plugins[pluginId]) {
-            this.addPlugin(
-              pluginId,
-              mapId,
-              plugins[pluginId],
-              toJsonObject({
-                mapId,
-              })
-            );
-          } else {
-            this.addPlugin(
-              pluginId,
-              mapId,
-              undefined,
-              toJsonObject({
-                mapId,
-              })
-            );
-          }
-        });
-      }
-    });
+    // check if a map exists
+    if (Object.keys(api.maps)[0]) {
+      // start loading core packages on first map and first package
+      this.loadPlugin(0, 0);
+    }
   };
 }

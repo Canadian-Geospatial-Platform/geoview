@@ -162,7 +162,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
         // call the ready function since rendering of this map instance is done
         api.ready(() => {
-          // load plugins once all maps has rendered
+          // load plugins once all maps have rendered
           api.plugin.loadPlugins();
         });
 

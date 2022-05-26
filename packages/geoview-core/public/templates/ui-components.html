@@ -94,8 +94,8 @@
       ></div>
     </div>
 
-    <h3 style="padding-top: 40px; width: 75%; padding-left: 25%;">Filter GeoJSON from slider</h3>
-    <div id="UI1-slider-flood" class="Panel" style="padding-top: 40px; width: 75%; padding-left: 25%;"></div>
+    <h3 style="padding-top: 40px; width: 75%; padding-left: 25%">Filter GeoJSON from slider</h3>
+    <div id="UI1-slider-flood" class="Panel" style="padding-top: 40px; width: 75%; padding-left: 25%"></div>
     <!-- SLIDER SECTION START -->
     <div id="UI1-slider1" class="Panel" style="padding-top: 40px; width: 75%; padding-left: 25%"></div>
     <div class="toolbar">
@@ -224,7 +224,7 @@
       });
     </script>
     <script>
-      document.addEventListener('DOMContentLoaded', async () => { 
+      document.addEventListener('DOMContentLoaded', async () => {
         // get map
         let map = cgpv.api.map('UI1');
 
@@ -246,14 +246,22 @@
 
         // add a slider component and link it to a map with mapId props
         // TODO: add the bind popup to link to details panel....
-        cgpv.api.addUiComponent('UI1-slider-flood', cgpv.react.createElement(cgpv.ui.elements.Slider,
-          {
+        cgpv.api.addUiComponent(
+          'UI1-slider-flood',
+          cgpv.react.createElement(cgpv.ui.elements.Slider, {
             mapId: 'UI1',
             id: 'UI1-slider-flood',
             min: 1696,
             max: 2022,
             value: [1696, 2022],
-            marks: [{ value: 1696, label: '1696'}, {value: 1700, label: '1700'}, {value: 1800, label: '1800'}, {value: 1900, label: '1900'}, {value:20800, label: '2000'}, {value: 2022, label: '2022'}],
+            marks: [
+              { value: 1696, label: '1696' },
+              { value: 1700, label: '1700' },
+              { value: 1800, label: '1800' },
+              { value: 1900, label: '1900' },
+              { value: 20800, label: '2000' },
+              { value: 2022, label: '2022' },
+            ],
             track: 'normal',
             customOnChange: (dates) => {
               const result = cgpv.api.maps.UI1.layer.layers.geojsonHistoFlood.filterFeatures([
@@ -267,15 +275,20 @@
               for (let feature of result.fail) {
                 feature.layer.setStyle({ opacity: 0, fillOpacity: 0 });
               }
-            }
-          }
-        ));
+            },
+          })
+        );
 
         // create heatmap layer
         setTimeout(() => {
-          cgpv.leaflet.heatLayer(cgpv.api.maps.UI1.layer.layers.geojsonHistoFlood.features.map(item => item.layer.feature.geometry.coordinates.reverse()), { radius: 20, blur: 15, maxZoom: 10 }).addTo(map.map);
+          cgpv.leaflet
+            .heatLayer(
+              cgpv.api.maps.UI1.layer.layers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
+              { radius: 20, blur: 15, maxZoom: 10 }
+            )
+            .addTo(map.map);
         }, 1000);
       });
-  </script>
+    </script>
   </body>
 </html>

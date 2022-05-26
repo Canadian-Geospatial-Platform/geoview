@@ -1116,23 +1116,36 @@ export type TimePrecision = 'hour' | 'minute' | 'second';
 export type TypeFilterFeatures = {
   pass: TypeJsonObject[];
   fail: TypeJsonObject[];
-}
+};
 
 /**
  * Type for building filter query
  */
 export type TypeFilterQuery = {
-  connector?: '&&' | '||',
-  field: string,
-  operator: '===' | '!==' | '<=' | '>=' | '<' | '>',
-  value: string | number,
-}
+  connector?: '&&' | '||';
+  field: string;
+  operator: '===' | '!==' | '<=' | '>=' | '<' | '>';
+  value: string | number;
+};
 
-export const FILTER_OPERATOR: { [key: string]: Function; } = {
-  '===': function (a: string | number, b: string | number) { return a === b; },
-  '==': function (a: string | number, b: string | number) { return a == b; },
-  '<=': function (a: string | number, b: string | number) { return a <= b; },
-  '>=': function (a: string | number, b: string | number) { return a >= b; },
-  '<': function (a: string | number, b: string | number) { return a < b; },
-  '>': function (a: string | number, b: string | number) { return a > b; }
+export const FILTER_OPERATOR: { [key: string]: (a: string | number, b: string | number) => boolean } = {
+  '===': (a: string | number, b: string | number) => {
+    return a === b;
+  },
+  '==': (a: string | number, b: string | number) => {
+    // eslint-disable-next-line eqeqeq
+    return a == b;
+  },
+  '<=': (a: string | number, b: string | number) => {
+    return a <= b;
+  },
+  '>=': (a: string | number, b: string | number) => {
+    return a >= b;
+  },
+  '<': (a: string | number, b: string | number) => {
+    return a < b;
+  },
+  '>': (a: string | number, b: string | number) => {
+    return a > b;
+  },
 };

@@ -43,7 +43,7 @@ export class API {
   isReady = 0;
 
   // callback function to call after everything is ready
-  readyCallback: () => void = () => undefined;
+  readyCallback?: () => void;
 
   // load plugins API
   plugin: Plugin;
@@ -93,18 +93,25 @@ export class API {
     // Set a timeout to run after render ends
     // this will only be called after the last map renders so no delay in rendering and performance will happen
     this.isReady = window.setTimeout(() => {
+      // call the callback function to load plugins
       if (callback) callback();
-
-      // run the map ready function on each map instance
-      for (let i = 0; i < Object.keys(this.maps).length; i++) {
-        const mapId = Object.keys(this.maps)[i];
-
-        this.map(mapId).mapReady();
-      }
-
-      // Run the callback
-      if (this.readyCallback) this.readyCallback();
     }, 500);
+  };
+
+  /**
+   * Call map ready functions and the init callback once everything is done loading
+   * including plugins
+   */
+  callInitCallback = () => {
+    // run the map ready function on each map instance
+    for (let mapIndex = 0; mapIndex < Object.keys(this.maps).length; mapIndex++) {
+      const mapId = Object.keys(this.maps)[mapIndex];
+
+      this.map(mapId).mapReady();
+    }
+
+    // Run the callback
+    if (this.readyCallback) this.readyCallback();
   };
 
   /**
