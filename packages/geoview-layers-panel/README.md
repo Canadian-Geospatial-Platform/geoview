@@ -1,6 +1,6 @@
-# geoview-basemap-panel
+# geoview-layers-panel
 
-A plugin that displays all layers used on the map.
+A package that displays all layers used on the map.
 
 Future functionality:
 

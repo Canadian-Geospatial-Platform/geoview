@@ -60,11 +60,13 @@ $ npm install -g @microsoft/rush
 
 ### Install dependencies
 
+It's always recommended to run the below command if you pull any changes.
+
 ```
 $ rush update
 ```
 
-It's always recommended to run this command if you pull any changes. If you need to re-download the modules you can run
+If you need to re-download the modules you can run
 
 ```
 $ rush update --full
@@ -74,6 +76,12 @@ $ rush update --full
 
 ```
 $ rush build:core
+```
+
+Output build files will be placed under
+
+```
+packages/geoview-core/dist
 ```
 
 ### Run/Serve the project
