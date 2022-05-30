@@ -18,13 +18,15 @@ GeoView mapping capabilites are based on [Leafet](https://github.com/Leaflet/Lea
 
 This project is now a monorepo and contains the following packages under the `packages` folder:
 
-- [geoview-core](packages/geoview-core) (the core is responsible for rendering the maps and exposing API access to the outside)
+- [geoview-core](packages/geoview-core) - the core is responsible for managing APIs, layers, user interface and rendering the maps. The core will also expose API access to be used in internal, external packages and apps that uses the viewer.
 
-- geoview-details-panel (a plugin that displays a panel with details when a location / feature is clicked on the map)
+- [geoview-details-panel](packages/geoview-details-panel) - a package that displays a panel with details when a location / feature is clicked on the map.
 
-- geoview-overview-map (a plugin that displays an overview map)
+- [geoview-basemap-panel](packages/geoview-basemap-panel) - a package that displays a panel with a list of basemaps that can be selected to switch the map's basemap.
 
-- geoview-loader (the loader that compiles, builds and serves the project with all the packages)
+- [geoview-layers-panel](packages/geoview-layers-panel) - a package that displays a panel with a list of loaded layers and their legend.
+
+- [geoview-overview-map](packages/geoview-overview-map) a package that displays an overview map (mini-map)
 
 ## Developpement
 
@@ -41,73 +43,43 @@ Developement is made with [Visual Studio Code](https://code.visualstudio.com/) a
 ### First clone this repo
 
 ```
-
-
-
 $ git clone https://github.com/Canadian-Geospatial-Platform/GeoView.git
-
-
-
 ```
 
 ### Go to the directory of the cloned repo
 
 ```
-
-
-
-cd GeoView
-
-
-
+$ cd GeoView
 ```
 
 ### Install rush globally
 
 ```
-
-
-
 $ npm install -g @microsoft/rush
-
-
-
 ```
 
 ### Install dependencies
 
 ```
-
-
-
 $ rush update
+```
 
+It's always recommended to run this command if you pull any changes. If you need to re-download the modules you can run
 
-
+```
+$ rush update --full
 ```
 
 ### Build the project:
 
 ```
-
-
-
-$ rush build
-
-
-
+$ rush build:core
 ```
 
-### Serve the project
+### Run/Serve the project
 
 ```
-
-
-
 $ rush serve
-
-
-
 ```
 
 GeoView will be serve from http://localhost:8080/
@@ -117,30 +89,20 @@ GeoView will be serve from http://localhost:8080/
 ### Build the project:
 
 ```
-
-
-
-$ rush build
-
-
-
+$ rush build:core
 ```
 
 ### Push the dist folder to your gh-pages
 
 ```
-
-
-
-$ rush host .
-
-
-
+$ rush host
 ```
 
-The project is now serve inside your GitHub gh-pages at
+The project will now serve inside your GitHub gh-pages at
 
-`https://[GITHUB-USERNAME].github.io/GeoView/index.html
+```
+https://[GITHUB-USERNAME].github.io/GeoView/index.html
+```
 
 _Make sure GitHub pages are active inside your origin repository_
 
@@ -148,92 +110,176 @@ _Make sure GitHub pages are active inside your origin repository_
 
 We'll go through the simplest way to use the Canadian Geospatial Platform Viewer.
 
-First, grab the most recent release from the [github releases](https://github.com/Canadian-Geospatial-Platform/GeoView/releases). Place the files cgpv-main.js and cgpv-styles.css within your webpage's folder structure. Place also the img and locales folder at the same place. We usually put.
+### Using the viewer on your own project
 
-Then you want to include those files on your page
+For the moment, the released bundle of the viewer is hosted under:
 
-Within head, should be before including any other libraries
-
-```html
-<script src="/cgpv-main.js"></script>
+```
+https://yass0016.github.io/GeoView/cgpv-main.js
 ```
 
-Now that you have the required files on your page we should add the map element. There is 3 ways to do this
+_As the viewer is still in development, this bundle will always contain the latest commits._
 
-- Map div element
+To use the viewer on your own project, you need to include the above script in a script tag in the header of your **HTML** file
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://yass0016.github.io/GeoView/cgpv-main.js"></script>
+  </head>
+  <body>
+    ...
+  </body>
+</html>
+```
+
+After including the viewer in your page, the viewer will allow you to load maps and draw them on your page.
+
+There are multiple ways to load maps. Below we will show a basic usage of loading a map, if you want to see how you can load the map in all supported ways then [click here](docs/).
+
+#### Loading a map using a config passed in as inline to the map div element
+
+The viewer allows you to load multiple maps on the page, you need to provide a **different id** for each map. Maps are added in the body tag of the **HTML** document. _You can also load maps inside any **JS** framework such as React, Angular, VueJS._
+
+For the viewer to recognize that you are trying to render a map on the page, you need to have a **div element** with **class** "llwp-map".
+
+It's **recommended** to pass in an **id attribute**, if an id is not passed then the viewer will auto generate an id for you. If you want to use APIs that control this map then you will need to view all created maps on the page and figure out the id of the created map.
+
+_Tip: to view all maps on the page you can console out the maps using this function `console.log(cgpv.api.maps)_
+
+Below is an example of a simple map, with an id **mapOne**. This map will be using project 3978 and will have a zoom of 4, a center of 60 latitude and -100 longtitude. The interaction of the map will be dynamic (meaning that you can move around and zoom in/out). It will use the transport, shaded with labels as the basemap. It will display an esri dynamic layer with multiple sub layers. The language of the map will be English.
 
 ```html
 <div
-  id="mapLCC"
+  id="mapOne"
   class="llwp-map"
-  data-leaflet="{ 'projection': 3978, 'zoom': 12, 'center': [45,-75], 'language': 'fr-CA', 'basemapOptions': { 'id': 'transport', 'shaded': true, 'labeled': true }, layers:[] }"
+  style="height: 100vh;"
+  data-lang="en-CA"
+  data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'initialView': {
+          'zoom': 4,
+          'center': [60, -100]
+        },
+        'projection': 3978,
+        'basemapOptions': {
+          'id': 'transport',
+          'shaded': true,
+          'labeled': true
+        },
+        'layers': [
+          {
+            'id': 'esriDynamicLYR3',
+            'name': {
+              'en': 'Energy Infrastructure of North America',
+              'fr': 'Infrastructure énergétique d'Amérique du Nord'
+            },
+            'url': {
+              'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
+              'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
+            },
+            'layerType': 'esriDynamic',
+            'layerEntries': [
+              {
+                'index': 4,
+                'name': {
+                  'en': 'Natural Gas Processing Plants - config',
+                  'fr': 'Usines de traitement du gaz naturel - config'
+                }
+              },
+              {
+                'index': 5
+              },
+              {
+                'index': 6
+              }                  
+            ]
+          }
+        ]
+      },
+      'languages': ['en-CA']
+    }"
 ></div>
 ```
 
-- _Work in progress_ -> Url: The url will have parameters to setup the map. The map div, a div element with class **llwp-map**, must be on the page
+Once you add the above to the body of the html file. You must **call** the **init function** to allow the viewer to render the map.
 
 ```html
-<div id="mapLCC" class="llwp-map"></div>
+<script>
+  // init functions, takes one parameter as a function callback. Any code inside the callback will run once map has finished rendering.
+  cgpv.init(function () {});
+</script>
 ```
 
-- _Work in progress_ -> Code: call the create map function from cgpv-main.js with needed parameters
+Full example:
 
-#### Parameters
-
-- projection: The basemap projection to use for the map. Accepted values are 3857 (Web Mercator) or 3978 (LCC)
-
-- zoom: The basemap zomm level. Accepted value is a number between 0 and 20
-
-- center: The default center extent when the map loads. Accepted value is a pair of coordinates [lattitude, longitude]
-
-- language: The map language for labels and tooltips. Accepted values are en-CA and fr-CA
-
-- basemapOptions: Options to display a basemap, currently builtin basemaps are `transport`, `shaded`, and `labeled`
-
-- id: An id to select the main basemap, it should be either `transport`, `shaded` or `simple`
-
-- shaded: a boolean value to enable or disable shaded basemap (if id is set to `shaded` then this should be false)
-
-- labeled: a boolean value to enable or disable labels
-
-- layers: Array of layers to add to the map
-
-- name: the layer's name
-
-- url: The service url
-
-- type: The layer type. Accepted values are esriFeature, esriDynamic, ogcWMS
-
-- entries: For esriDynamic and ogcWMS a list of entries must be specified
-
-```
-
-
-
-'layers':[
-
-
-
-{ 'name': 'Census', 'url': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer', 'type': 'ogcWMS', 'entries': '0' },
-
-
-
-{ 'name': 'Energy', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/Investing_Energy_Canada_en/MapServer', 'type': 'esriDynamic', 'entries': '0, 2' },
-
-
-
-{ 'name': 'Geochron', 'url': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer', 'type': 'esriDynamic', 'entries': '0' },
-
-
-
-{ 'name': 'Geomet', 'url': 'https://geo.weather.gc.ca/geomet', 'type': 'ogcWMS', 'entries': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }
-
-
-
-]
-
-
-
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://yass0016.github.io/GeoView/cgpv-main.js"></script>
+  </head>
+  <body>
+    <div
+      id="mapOne"
+      class="llwp-map"
+      style="height: 100vh;"
+      data-lang="en-CA"
+      data-config="{
+	          'map': {
+	            'interaction': 'dynamic',
+	            'initialView': {
+	              'zoom': 4,
+	              'center': [60, -100]
+	            },
+	            'projection': 3978,
+	            'basemapOptions': {
+	              'id': 'transport',
+	              'shaded': true,
+	              'labeled': true
+	            },
+	            'layers': [
+	              {
+	                'id': 'esriDynamicLYR3',
+	                'name': {
+	                  'en': 'Energy Infrastructure of North America',
+	                  'fr': 'Infrastructure énergétique d'Amérique du Nord'
+	                },
+	                'url': {
+	                  'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
+	                  'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
+	                },
+	                'layerType': 'esriDynamic',
+	                'layerEntries': [
+	                  {
+	                    'index': 4,
+	                    'name': {
+	                      'en': 'Natural Gas Processing Plants - config',
+	                      'fr': 'Usines de traitement du gaz naturel - config'
+	                    }
+	                  },
+	                  {
+	                    'index': 5
+	                  },
+	                  {
+	                    'index': 6
+	                  }                  
+	                ]
+	              }
+	            ]
+	          },
+	          'theme': 'dark',
+	          'languages': ['en-CA']
+	        }"
+    ></div>
+    <script>
+      // init functions, takes one parameter as a function callback. Any code inside the callback will run once map has finished rendering.
+      cgpv.init(function () {});
+    </script>
+  </body>
+</html>
 ```
 
 ## Contributing to the project
