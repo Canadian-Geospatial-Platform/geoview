@@ -114,4 +114,78 @@ Listening to events you create is not difference than listening to existing even
 
 You can create your own event emitter or emit to an existing event.
 
+### Emitting to an existing event
+
+Many of the existing events are being listened by the viewer so you can emit events and the viewer will interact with the emitted event.
+
+Say you are trying to open a snackbar, the viewer listens to an event that opens the snackbar with a custom message.
+
+To emit an event you need to call the `cgpv.api.event.emit()` function. The function takes 1 required parameter and a list of optional parameters
+
+#### The first parameter
+
+The first parameter is an object that contains the **event name** to emit to, a **handler name**, and the **payload data**.
+
+Just like validation functions and event names, the viewer provides a function that creates the object for you. [Click here](event/event-payloads.md) to view a list of exported functions that creates the object for each event. Just like validation functions, the functions that creates the object are exported under `cgpv.types`.
+
+The first parameter in the object creating function is required. To emit an event you must provide the event name to emit. Just like the `.on()` function, you can access the existing event names from `cgpv.api.eventNames`.
+
+The second parameter is an optional parameter for the handler name, usually its the map id. This can be set to null if you are emitting to all maps or if you want to set handler names in the second parameter of the `.emit()` function.
+
+The third parameter is payload data, this can be any types. For **existing** events you need to provide certain payload data. To list a list of payload data [click here](event/event-payloads.md)
+
+```js
+// here you will notice the second parameter for the snackbarMessagePayload function is mapOne. This can be null and you can provide the handler id in the second paramter of the emit function. In here the event name is snackbar/open. Providing the handler name it will automatically become snackbar/open/mapOne. Here we omitted the second parameter for the emit function.
+cgpv.api.event.emit(
+  cgpv.types.snackbarMessagePayload(
+    cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+    "mapOne",
+    {
+      type: "string",
+      value: "Hello, World!",
+    }
+  )
+);
+```
+
+#### The second+ list of optional parameters
+
+Just like the `.on()` function, the `.emit()` function gives the user the option to provide a list of handler names. This is optional because a user has the opportunity to provide a handler name (mainly the map id) in the first parameter. If you add handler names they will automatically be appended to the event name for example
+
+```js
+// you will notice that for the second paramter of the snackbarMessagePayload we set it to null. And for the second paramter of the emit function we provided the handler name. The event name will become snackbar/open/mapOne just like above. The reason we have this is because sometimes you might have multiple handlers such as opening a specefic panel in a specefic map, an example panel/open/mapOne/panelOne.
+
+cgpv.api.event.emit(cgpv.types.snackbarMessagePayload(cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, null, {
+	type: "string",
+	value: "Hello, World!"
+}), "mapOne", // pass here another handler if needed)
+```
+
 ### Creating your own event emitter
+
+You can create your own event emitter in the same way as above except you will want to pass an object directly in the first parameter of the emit function instead of using a function that will create the object for you. Here is an example to emit the same function above to open a snackbar without using a converter function.
+
+```js
+cgpv.api.event.emit({
+	event:  'snackbar/open',
+	handlerName:  null,
+	{
+		type: "string",
+		value: "Hello, World!"
+	}
+}, "mapOne");
+```
+
+## Turning off an event listener
+
+It's always recommended to turn off the event listeners for clean up.
+
+To turn off an event listener use the `cgpv.api.event.off()` function. The function takes 1 required parameter and a list of optional parameters. Like the `emit` and `on` functions. The first parameter is the event name and the second parameter is a list of optional handler names.
+
+```js
+cgpv.api.event.off("snackbar/open", "mapOne");
+```
+
+## Other available functions
+
+`cgpv.api.event.offAll()` takes 1 parameter with a handler name. You can turn off all listeners that includes the handler name.
