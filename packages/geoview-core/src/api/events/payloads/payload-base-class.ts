@@ -1,7 +1,10 @@
 import { EventStringId } from '../event';
 
-/* ******************************************************************************************************************************
+/**
  * Class definition for PayloadBaseClass
+ *
+ * @exports
+ * @class PayloadBaseClass
  */
 export class PayloadBaseClass {
   // Type of payload
@@ -10,13 +13,11 @@ export class PayloadBaseClass {
   // the event handler name of the payload
   handlerName: string | null;
 
-  /*
+  /**
    * Constructor for the class
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   *
-   * @returns {PayloadBaseClass} the PayloadBaseClass object created
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
    */
   constructor(event: EventStringId, handlerName: string | null) {
     this.event = event;
@@ -24,12 +25,12 @@ export class PayloadBaseClass {
   }
 }
 
-/* ******************************************************************************************************************************
+/**
  * Helper function used to instanciate a PayloadBaseClass object. This function
  * avoids the "new PayloadBaseClass" syntax.
  *
- * @param {EventStringId} the event identifier for which the payload is constructed
- * @param {string | null} the handler Name
+ * @param {EventStringId} event the event identifier for which the payload is constructed
+ * @param {string | null} handlerName the handler Name
  *
  * @returns {PayloadBaseClass} the PayloadBaseClass object created
  */

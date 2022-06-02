@@ -45,7 +45,7 @@ export const webLayerIsWFS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
 /**
  * a class to add WFS layer
  *
- * @export
+ * @exports
  * @class WFS
  */
 export class WFS extends AbstractWebLayersClass {

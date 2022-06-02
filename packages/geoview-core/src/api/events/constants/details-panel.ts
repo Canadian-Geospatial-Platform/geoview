@@ -5,10 +5,10 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the DETAILS_PANEL category
+/** Valid keys for the DETAILS_PANEL category */
 export type DetailPanelEventKey = 'EVENT_DETAILS_PANEL_CROSSHAIR_ENTER';
 
-// Record that associates DETAILS_PANEL's event keys to their event string id
+/** Record that associates DETAILS_PANEL's event keys to their event string id */
 export const DETAILS_PANEL: Record<DetailPanelEventKey, EventStringId> = {
   /**
    * Event is triggered when a user press enter on a crosshair to open details panel

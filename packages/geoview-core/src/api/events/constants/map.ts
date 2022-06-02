@@ -5,7 +5,7 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the MAP category
+/** Valid keys for the MAP category */
 export type MapEventKey =
   | 'EVENT_MAP_LOADED'
   | 'EVENT_MAP_RELOAD'
@@ -16,7 +16,7 @@ export type MapEventKey =
   | 'EVENT_MAP_IN_KEYFOCUS'
   | 'EVENT_MAP_CROSSHAIR_ENABLE_DISABLE';
 
-// Record that associates MAP's event keys to their event string id
+/** Record that associates MAP's event keys to their event string id */
 export const MAP: Record<MapEventKey, EventStringId> = {
   /**
    * Event triggered when map is loaded and api ready

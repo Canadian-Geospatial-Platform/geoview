@@ -42,6 +42,9 @@ export const EVENT_NAMES = {
   ATTRIBUTION,
 };
 
+/**
+ * Event categories
+ */
 export type EventCategories =
   | 'MAP'
   | 'LAYER'
@@ -60,6 +63,9 @@ export type EventCategories =
   | 'VECTOR'
   | 'ATTRIBUTION';
 
+/**
+ * Event keys
+ */
 export type EventKey =
   | MapEventKey
   | LayerEventKey
@@ -78,6 +84,9 @@ export type EventKey =
   | VectorEventKey
   | AttributionEventKey;
 
+/**
+ * Event names
+ */
 export type EventStringId =
   | 'map/loaded'
   | 'map/reload'
@@ -132,7 +141,7 @@ export type EventStringId =
 /**
  * Class used to handle event emitting and subscribing for the API
  *
- * @export
+ * @exports
  * @class Event
  */
 export class Event {
@@ -263,16 +272,20 @@ export class Event {
   emit = (payload: PayloadBaseClass, ...args: string[]): void => {
     const { handlerName, event } = payload;
 
+    let customHandlerNames: string | undefined;
+
     // event name
     let eventName = event + (handlerName && handlerName.length > 0 ? `/${handlerName}` : '');
 
     // check if args provided
     for (let argIndex = 0; argIndex < args.length; argIndex++) {
       eventName = `${eventName}/${args[argIndex]}`;
+
+      customHandlerNames = `${customHandlerNames ? `${customHandlerNames}/` : ''}${args[argIndex]}`;
     }
 
     // handler name, registers a unique handler to be used when multiple events emit with same event name
-    const handlerNameId = generateId(handlerName);
+    const handlerNameId = generateId(handlerName || customHandlerNames);
 
     if (!this.events[eventName]) {
       this.events[eventName] = {};
@@ -281,9 +294,10 @@ export class Event {
     // store the emitted event to the events array
     this.events[eventName][handlerNameId] = {
       ...payload,
+      handlerName: handlerName || customHandlerNames,
     } as PayloadBaseClass;
 
-    this.eventEmitter.emit(eventName, { ...payload }, handlerName);
+    this.eventEmitter.emit(eventName, { ...payload, handlerName: handlerName || customHandlerNames }, handlerName || customHandlerNames);
   };
 
   /**

@@ -8,7 +8,7 @@ import { api } from '../../app';
 /**
  * A class that manages the projection for the loaded map
  *
- * @export
+ * @exports
  * @class MapProjection
  */
 export class MapProjection extends Projection {

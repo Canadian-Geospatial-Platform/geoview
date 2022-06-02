@@ -17,7 +17,7 @@ import { VectorPayload } from '../../../api/events/payloads/vector-payload';
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
  *
- * @export
+ * @exports
  * @class Vector
  */
 export class Vector {

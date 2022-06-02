@@ -20,7 +20,7 @@ import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-l
  * can be filtered by projection (currently only WM and LCC projections are listed,
  * in case other projections needed, they need to be added to the list)
  *
- * @export
+ * @exports
  * @class Basemap
  */
 export class Basemap {

@@ -1,28 +1,33 @@
 import L from 'leaflet';
+
 import { PayloadBaseClass } from './payload-base-class';
+
 import { EventStringId, EVENT_NAMES } from '../event';
+
 import { CONST_VECTOR_TYPES, TypeOfVector } from '../../../core/types/cgpv-types';
 
-// Valid events that can create VectorPayload
+/** Valid events that can create VectorPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED];
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a VectorPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsAVector = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is VectorPayload => {
   return validEvents.includes(verifyIfPayload.event);
 };
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a CirclePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsACircle = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CirclePayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -31,19 +36,20 @@ export const payloadIsACircle = (verifyIfPayload: PayloadBaseClass): verifyIfPay
   return false;
 };
 
-/*
+/**
  * Additional attributes needed to define a CirclePayload
  */
 export interface CirclePayload extends VectorPayload {
   circle: L.Circle;
 }
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a CircleMarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsACircleMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleMarkerPayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -52,19 +58,20 @@ export const payloadIsACircleMarker = (verifyIfPayload: PayloadBaseClass): verif
   return false;
 };
 
-/*
+/**
  * Additional attributes needed to define a CircleMarkerPayload
  */
 export interface CircleMarkerPayload extends VectorPayload {
   circleMarker: L.CircleMarker;
 }
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a MarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsAMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerPayload => {
   if (payloadIsAMarker(verifyIfPayload)) {
@@ -73,19 +80,20 @@ export const payloadIsAMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPay
   return false;
 };
 
-/*
+/**
  * Additional attributes needed to define a MarkerPayload
  */
 export interface MarkerPayload extends VectorPayload {
   marker: L.Marker;
 }
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a PolygonPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsAPolygon = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolygonPayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -94,19 +102,20 @@ export const payloadIsAPolygon = (verifyIfPayload: PayloadBaseClass): verifyIfPa
   return false;
 };
 
-/*
+/**
  * Additional attributes needed to define a PolygonPayload
  */
 export interface PolygonPayload extends VectorPayload {
   polygon: L.Polygon;
 }
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a PolylinePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsAPolyline = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolylinePayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -115,28 +124,29 @@ export const payloadIsAPolyline = (verifyIfPayload: PayloadBaseClass): verifyIfP
   return false;
 };
 
-/*
+/**
  * Additional attributes needed to define a PolylinePayload
  */
 export interface PolylinePayload extends VectorPayload {
   polyline: L.Polyline;
 }
 
-/* ******************************************************************************************************************************
+/**
  * Class definition for VectorPayload
+ *
+ * @exports
+ * @class VectorPayload
  */
 export class VectorPayload extends PayloadBaseClass {
   // The type of vector payload
   type: TypeOfVector;
 
-  /*
+  /**
    * Constructor for the class
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {TypeOfVector} the type of vector object that makes up the payload
-   *
-   * @returns {VectorPayload} the VectorPayload object created
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {TypeOfVector} type the type of vector object that makes up the payload
    */
   constructor(event: EventStringId, handlerName: string | null, type: TypeOfVector) {
     if (!validEvents.includes(event)) throw new Error(`VectorPayload can't be instanciated for event of type ${event}`);
@@ -144,12 +154,12 @@ export class VectorPayload extends PayloadBaseClass {
     this.type = type;
   }
 
-  /*
+  /**
    * Static method used to create a CirclePayload
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {L.Circle} the circle payload
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {L.Circle} circle the circle payload
    *
    * @returns {CirclePayload} the CirclePayload object created
    */
@@ -159,12 +169,12 @@ export class VectorPayload extends PayloadBaseClass {
     return circlePayload;
   };
 
-  /*
+  /**
    * Static method used to create a CircleMarkerPayload
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {L.CircleMarker} the circle marker payload
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {L.CircleMarker} circleMarker the circle marker payload
    *
    * @returns {CircleMarkerPayload} the CircleMarkerPayload object created
    */
@@ -174,12 +184,12 @@ export class VectorPayload extends PayloadBaseClass {
     return circleMarkerPayload;
   };
 
-  /*
+  /**
    * Static method used to create a MarkerPayload
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {L.Marker} the marker payload
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {L.Marker} marker the marker payload
    *
    * @returns {MarkerPayload} the MarkerPayload object created
    */
@@ -189,12 +199,12 @@ export class VectorPayload extends PayloadBaseClass {
     return markerPayload;
   };
 
-  /*
+  /**
    * Static method used to create a PolygonPayload
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {L.Polygon} the polygon payload
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {L.Polygon} polygon the polygon payload
    *
    * @returns {PolygonPayload} the PolygonPayload object created
    */
@@ -204,12 +214,12 @@ export class VectorPayload extends PayloadBaseClass {
     return polygonPayload;
   };
 
-  /*
+  /**
    * Static method used to create a PolylinePayload
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {L.Polyline} the polyline payload
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {L.Polyline} polyline the polyline payload
    *
    * @returns {PolylinePayload} the PolylinePayload object created
    */
@@ -220,13 +230,13 @@ export class VectorPayload extends PayloadBaseClass {
   };
 }
 
-/* ******************************************************************************************************************************
+/**
  * Helper function used to instanciate a VectorPayload object. This function
  * avoids the "new VectorPayload" syntax.
  *
- * @param {EventStringId} the event identifier for which the payload is constructed
- * @param {string | null} the handler Name
- * @param {TypeOfVector} the type of vector object that makes up the payload
+ * @param {EventStringId} event the event identifier for which the payload is constructed
+ * @param {string | null} handlerName the handler Name
+ * @param {TypeOfVector} type the type of vector object that makes up the payload
  *
  * @returns {VectorPayload} the VectorPayload object created
  */

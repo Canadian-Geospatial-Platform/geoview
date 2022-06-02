@@ -48,7 +48,7 @@ export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractWebLayersClass):
 /**
  * a class to add esri feature layer
  *
- * @export
+ * @exports
  * @class EsriFeature
  */
 export class EsriFeature extends AbstractWebLayersClass {

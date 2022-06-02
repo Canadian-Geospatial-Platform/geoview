@@ -75,7 +75,7 @@ export type TypeModalProps = {
 /**
  * Class used to handle creating a new modal
  *
- * @export
+ * @exports
  * @class ModalApi
  */
 export class ModalApi {

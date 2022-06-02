@@ -30,7 +30,8 @@
   },
   "scripts": {
     "serve": "webpack serve --progress --color --config webpack.dev.js",
-    "build": "webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
+    "build": "webpack --progress --color --config webpack.prod.js && npm run generate.d.ts && npm run doc",
+    "doc": "typedoc src/app.tsx",
     "deploy": "gh-pages -d dist",
     "test": "jest",
     "update_test": "jest --updateSnapshot",
@@ -147,6 +148,7 @@
     "typescript": "^4.5.5",
     "terser-webpack-plugin": "^5.3.1",
     "glob": "^7.2.0",
+    "typedoc": "^0.22.17",
     "webpack": "^5.68.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-bundle-size-analyzer": "^3.1.0",

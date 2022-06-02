@@ -17,7 +17,7 @@ import { generateId, addUiComponent, extendLeafletFeatures } from '../core/utils
 /**
  * Class used to handle api calls (events, functions etc...)
  *
- * @export
+ * @exports
  * @class API
  */
 export class API {

@@ -1,23 +1,29 @@
 import L from 'leaflet';
+
 import { PayloadBaseClass } from './payload-base-class';
+
 import { EventStringId, EVENT_NAMES } from '../event';
 
-// Valid events that can create MarkerClusterConfigPayload
+/** Valid events that can create MarkerClusterConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.CLUSTER_ELEMENT.EVENT_CLUSTER_ELEMENT_ADD];
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a MarkerClusterConfigPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsAMarkerClusterConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerClusterConfigPayload => {
   return validEvents.includes(verifyIfPayload.event);
 };
 
-/* ******************************************************************************************************************************
+/**
  * Class definition for MarkerClusterConfigPayload
+ *
+ * @exports
+ * @class MarkerClusterConfigPayload
  */
 export class MarkerClusterConfigPayload extends PayloadBaseClass {
   // optional marker cluster identifier
@@ -32,17 +38,15 @@ export class MarkerClusterConfigPayload extends PayloadBaseClass {
   // the marker options
   options: L.MarkerClusterElementOptions;
 
-  /*
+  /**
    * Constructor for the class
    *
-   * @param {EventStringId} the event identifier for which the payload is constructed
-   * @param {string | null} the handler Name
-   * @param {number} the marker latitude
-   * @param {number} the marker longitude
-   * @param {L.MarkerClusterElementOptions} the marker options
-   * @param {string} optional marker cluster identifier
-   *
-   * @returns {MarkerClusterConfigPayload} the MarkerClusterConfigPayload object created
+   * @param {EventStringId} event the event identifier for which the payload is constructed
+   * @param {string | null} handlerName the handler Name
+   * @param {number} latitude the marker latitude
+   * @param {number} longitude the marker longitude
+   * @param {L.MarkerClusterElementOptions} options the marker options
+   * @param {string} id optional marker cluster identifier
    */
   constructor(
     event: EventStringId,
@@ -61,16 +65,16 @@ export class MarkerClusterConfigPayload extends PayloadBaseClass {
   }
 }
 
-/* ******************************************************************************************************************************
+/**
  * Helper function used to instanciate a MarkerClusterConfigPayload object. This function
  * avoids the "new MarkerClusterConfigPayload" syntax.
  *
- * @param {EventStringId} the event identifier for which the payload is constructed
- * @param {string | null} the handler Name
- * @param {number} the marker latitude
- * @param {number} the marker longitude
- * @param {L.MarkerClusterElementOptions} the marker options
- * @param {string} optional marker cluster identifier
+ * @param {EventStringId} event the event identifier for which the payload is constructed
+ * @param {string | null} handlerName the handler Name
+ * @param {number} latitude the marker latitude
+ * @param {number} longitude the marker longitude
+ * @param {L.MarkerClusterElementOptions} options the marker options
+ * @param {string} id optional marker cluster identifier
  *
  * @returns {MarkerClusterConfigPayload} the MarkerClusterConfigPayload object created
  */

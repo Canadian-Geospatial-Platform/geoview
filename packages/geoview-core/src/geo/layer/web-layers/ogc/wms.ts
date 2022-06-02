@@ -51,7 +51,7 @@ export const webLayerIsWMS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
 /**
  * a class to add wms layer
  *
- * @export
+ * @exports
  * @class WMS
  */
 export class WMS extends AbstractWebLayersClass {

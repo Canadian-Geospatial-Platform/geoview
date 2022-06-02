@@ -88,7 +88,7 @@ export const defaultSpiderfiedClusterGroupOptions: L.MarkerClusterGroupOptions =
 /**
  * Class used to manage marker groups
  *
- * @export
+ * @exports
  * @class MarkerCluster
  */
 export class MarkerClusterClass {

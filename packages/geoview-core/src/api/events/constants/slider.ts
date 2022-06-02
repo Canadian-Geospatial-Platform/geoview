@@ -5,10 +5,10 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the SLIDER category
+/** Valid keys for the SLIDER category */
 export type SliderEventKey = 'EVENT_SLIDER_CHANGE' | 'EVENT_SLIDER_SET_VALUES' | 'EVENT_SLIDER_SET_MINMAX';
 
-// Record that associates SLIDER's event keys to their event string id
+/** Record that associates SLIDER's event keys to their event string id */
 export const SLIDER: Record<SliderEventKey, EventStringId> = {
   /**
    * Event is triggered when slider value change

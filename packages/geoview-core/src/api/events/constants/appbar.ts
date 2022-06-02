@@ -5,10 +5,10 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the APPBAR category
+/** Valid keys for the APPBAR category */
 export type AppbarEventKey = 'EVENT_APPBAR_PANEL_CREATE' | 'EVENT_APPBAR_PANEL_REMOVE';
 
-// Record that associates APPBAR's event keys to their event string id
+/** Record that associates APPBAR's event keys to their event string id */
 export const APPBAR: Record<AppbarEventKey, EventStringId> = {
   /**
    * Event triggered when a new appbar panel has been created

@@ -12,7 +12,7 @@ import { generateId } from '../../core/utils/utilities';
 /**
  * Class used to handle creating a new panel
  *
- * @export
+ * @exports
  * @class PanelApi
  */
 export class PanelApi {

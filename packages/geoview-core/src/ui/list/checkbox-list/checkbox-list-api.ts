@@ -5,7 +5,7 @@ import { CheckboxList } from './checkbox-list';
 /**
  * Class used to handle CheckboxList
  *
- * @export
+ * @exports
  * @class CheckboxListAPI
  */
 export class CheckboxListAPI {

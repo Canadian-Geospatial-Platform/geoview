@@ -96,15 +96,29 @@ declare global {
   }
 }
 
+/**
+ * Cast a variable to a different type
+ *
+ * @param {unkown} p a variable to cast to
+ * @returns the casted variable as the new type
+ */
 export function Cast<TargetType = never>(p: unknown): TargetType {
   return p as TargetType;
 }
 
+/**
+ * Type extending the window object
+ */
 export interface TypeWindow extends Window {
+  /** the core */
   cgpv: TypeCGPV;
+  /** plugins added to the core */
   plugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPluginClass | undefined };
 }
 
+/**
+ * Type used for exporting UI
+ */
 export type TypeCGPVUI = {
   useTheme: typeof useTheme;
   useMediaQuery: typeof useMediaQuery;
@@ -112,10 +126,16 @@ export type TypeCGPVUI = {
   elements: typeof UI;
 };
 
+/**
+ * Type used for exporting constants
+ */
 export type TypeCGPVConstants = {
   leafletPositionClasses: typeof LEAFLET_POSITION_CLASSES;
 };
 
+/**
+ * Type used for exporting core
+ */
 export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
@@ -129,23 +149,38 @@ export type TypeCGPV = {
   constants: TypeCGPVConstants;
 };
 
+/**
+ * Type used for a callback function
+ */
 export type TypeCallback = (callback: () => void) => void;
 
+/**
+ * Type used for a function
+ */
 export type TypeFunction = () => void;
 
+/**
+ * Type used for the core schema
+ */
 export type TypeSchemaObject = AnySchemaObject;
 
-// export interface TypeApi extends API, Event, Projection, Plugin {} //#427
+/** export interface TypeApi extends API, Event, Projection, Plugin {} //#427  */
 export interface TypeApi extends API, Event, Plugin {}
 
+/**
+ * Interface used for css style declarations
+ */
 export interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
   mozTransform: string;
 }
 
+/**
+ * Type used for react child nodes
+ */
 export type TypeChildren = React.ReactNode;
 
 /**
- * Map context
+ * Type used for the map context
  */
 export type TypeMapContext = {
   id: string;
@@ -166,16 +201,29 @@ export type TypeUpdateScaleEvent = {
  *
  *---------------------------------------------------------------------------*/
 
+/**
+ * Type used for a value within a json object
+ */
 export type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | { [key: string]: TypeJsonObject };
 
+/**
+ * Type used for an array of objects
+ */
 export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
 
+/**
+ * Type used for a json object
+ */
 export type TypeJsonObject = TypeJsonValue & { [key: string]: TypeJsonObject };
 
+/**
+ * Convert a type of a variable to json object
+ *
+ * @param {unkown} p an object to convert its type to a json object
+ * @returns the variable with the type converted to a json object
+ */
 export function toJsonObject(p: unknown): TypeJsonObject {
   if (!(p instanceof Object) || p instanceof Array) {
-    // eslint-disable-next-line no-console
-    console.log(p);
     throw new Error(`Can't convert parameter to TypeJsonObject! typeof = ${typeof p}`);
   }
 
@@ -188,10 +236,10 @@ export function toJsonObject(p: unknown): TypeJsonObject {
  *
  *---------------------------------------------------------------------------*/
 
-// icon creation function prototype for stamped markers
+/** icon creation function prototype for stamped markers */
 export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
 
-// icon creation function prototype for empty markers
+/** icon creation function prototype for empty markers */
 export type TypeIconCreationFunction = () => L.DivIcon;
 
 /**
@@ -561,7 +609,7 @@ export type TypeMapSchemaProps = {
   serviceUrls?: TypeServiceUrls;
   languages: TypeLocalizedLanguages[];
   version?: string;
-  extraOptions: TypeJsonObject;
+  extraOptions: Record<string, unknown>;
 };
 
 /**
