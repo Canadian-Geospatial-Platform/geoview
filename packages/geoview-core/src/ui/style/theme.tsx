@@ -1,5 +1,29 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
+// needed for TypeScript when customizing a theme
+declare module '@mui/material/styles' {
+  interface Theme {
+    appBar: {
+      border: string;
+      btnActiveBg: string;
+      btnDefaultBg: string;
+      btnFocusBg: string;
+      btnHoverBg: string;
+    };
+  }
+
+  // allow configuration using `createTheme`
+  interface ThemeOptions {
+    appBar?: {
+      border?: string;
+      btnActiveBg?: string;
+      btnDefaultBg?: string;
+      btnFocusBg?: string;
+      btnHoverBg?: string;
+    };
+  }
+}
+
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
   fontWeight: 700,
@@ -10,7 +34,7 @@ const themeOptions: ThemeOptions = {
     primary: {
       light: '#ffffff',
       main: '#808080',
-      dark: '#000000',
+      dark: '#232323',
       contrastText: '#666666',
     },
     secondary: {
@@ -141,6 +165,13 @@ const themeOptions: ThemeOptions = {
     crosshairIcon: {
       size: { width: 275, height: 275 },
     },
+  },
+  appBar: {
+    border: '#393939',
+    btnActiveBg: '#4f4f4f',
+    btnDefaultBg: '#2a2a2a',
+    btnFocusBg: '#393939',
+    btnHoverBg: '#393939',
   },
 };
 
