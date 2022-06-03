@@ -3,7 +3,10 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { TypeListItemProps } from '../../core/types/cgpv-types';
 
+// TODO - KenChase - remove useStyles from here? This is too global. need to apply styling at a more specific levels. '//
+
 const useStyles = makeStyles((theme) => ({
+  /*
   listItem: {
     flexDirection: 'column',
     padding: 0,
@@ -13,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.primary.dark,
     },
   },
+   */
 }));
 
 /**
