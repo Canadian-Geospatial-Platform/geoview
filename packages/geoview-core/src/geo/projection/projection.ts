@@ -14,7 +14,7 @@ export const PROJECTION_NAMES = {
 /**
  * Class used to handle functions for trasforming projections
  *
- * @export
+ * @exports
  * @class Projection
  */
 export class Projection {

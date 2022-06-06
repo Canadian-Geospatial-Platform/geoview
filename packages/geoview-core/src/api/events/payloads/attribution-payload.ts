@@ -1,22 +1,27 @@
 import { PayloadBaseClass } from './payload-base-class';
+
 import { EventStringId, EVENT_NAMES } from '../event';
 
-// Valid events that can create AttributionPayload
+/** Valid events that can create AttributionPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE];
 
-/* ******************************************************************************************************************************
+/**
  * Type Gard function that redefines a PayloadBaseClass as a AttributionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
- * @param {PayloadBaseClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true of the payload is valid
  */
 export const payloadIsAttribution = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is AttributionPayload => {
   return validEvents.includes(verifyIfPayload.event);
 };
 
-/* ******************************************************************************************************************************
+/**
  * Class definition for AttributionPayload
+ *
+ * @exports
+ * @class AttributionPayload
  */
 export class AttributionPayload extends PayloadBaseClass {
   attribution: string;

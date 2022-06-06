@@ -82,7 +82,7 @@ const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/'
 /**
  * Class used to handle date as ISO 8601
  *
- * @export
+ * @exports
  * @class DateMgt
  */
 export class DateMgt {

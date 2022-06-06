@@ -45,7 +45,7 @@ export const webLayerIsOgcFeature = (verifyIfWebLayer: AbstractWebLayersClass): 
 /**
  * a class to add OGC api feature layer
  *
- * @export
+ * @exports
  * @class OgcFeature
  */
 export class OgcFeature extends AbstractWebLayersClass {

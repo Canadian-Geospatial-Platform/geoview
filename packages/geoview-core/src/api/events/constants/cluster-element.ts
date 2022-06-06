@@ -5,7 +5,7 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the CLUSTER_ELEMENT category
+/** Valid keys for the CLUSTER_ELEMENT category */
 export type ClusterEventKey =
   | 'EVENT_CLUSTER_ELEMENT_ADD'
   | 'EVENT_CLUSTER_ELEMENT_REMOVE'
@@ -15,7 +15,7 @@ export type ClusterEventKey =
   | 'EVENT_CLUSTER_ELEMENT_STOP_BLINKING'
   | 'EVENT_BOX_SELECT_END';
 
-// Record that associates CLUSTER_ELEMENT's event keys to their event string id
+/** Record that associates CLUSTER_ELEMENT's event keys to their event string id */
 export const CLUSTER_ELEMENT: Record<ClusterEventKey, EventStringId> = {
   /**
    * Event triggered when a request is made to add a cluster element

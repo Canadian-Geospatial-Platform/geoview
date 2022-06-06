@@ -26,7 +26,7 @@ import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-messa
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
- * @export
+ * @exports
  * @class Layer
  */
 export class Layer {

@@ -10,6 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "strictPropertyInitialization": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "jsx": "preserve",
     "allowJs": true,
     "noEmit": true,

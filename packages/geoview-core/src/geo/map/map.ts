@@ -55,7 +55,7 @@ const wmMapOptionsParam: L.MapOptions = {
 /**
  * Class used to manage created maps
  *
- * @export
+ * @exports
  * @class MapViewer
  */
 export class MapViewer {

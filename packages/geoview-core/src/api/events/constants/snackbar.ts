@@ -5,10 +5,10 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the SNACKBAR category
+/** Valid keys for the SNACKBAR category */
 export type SnackbarEventKey = 'EVENT_SNACKBAR_OPEN';
 
-// Record that associates SNACKBAR's event keys to their event string id
+/** Record that associates SNACKBAR's event keys to their event string id */
 export const SNACKBAR: Record<SnackbarEventKey, EventStringId> = {
   /**
    * Event is triggered when a snackbar notification opens

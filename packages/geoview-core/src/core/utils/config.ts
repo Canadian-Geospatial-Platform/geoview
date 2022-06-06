@@ -44,7 +44,7 @@ export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
  * and sent a message in the console for developers to know something went wrong
  *
  * @exports
- * @class
+ * @class Config
  */
 export class Config {
   // map id

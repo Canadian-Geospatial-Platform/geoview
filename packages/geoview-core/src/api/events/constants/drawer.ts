@@ -5,10 +5,10 @@ import { EventStringId } from '../event';
  * in a record that associates an event key with its event string id for each event.
  */
 
-// Valid keys for the DRAWER category
+/** Valid keys for the DRAWER category */
 export type DrawerEventKey = 'EVENT_DRAWER_OPEN_CLOSE';
 
-// Record that associates DRAWER's event keys to their event string id
+/** Record that associates DRAWER's event keys to their event string id */
 export const DRAWER: Record<DrawerEventKey, EventStringId> = {
   /**
    * Event triggered when a drawer opens/closes

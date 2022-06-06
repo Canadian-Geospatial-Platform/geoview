@@ -21,7 +21,7 @@ export const layerConfigIsGeoCore = (verifyIfLayer: Omit<TypeBaseWebLayersConfig
 /**
  * Class used to add geoCore layer to the map
  *
- * @export
+ * @exports
  * @class GeoCore
  */
 export class GeoCore {

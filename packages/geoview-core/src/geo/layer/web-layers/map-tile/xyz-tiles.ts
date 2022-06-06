@@ -47,7 +47,7 @@ export const webLayerIsXYZTiles = (verifyIfWebLayer: AbstractWebLayersClass): ve
 /**
  * a class to add xyz-tiles layer
  *
- * @export
+ * @exports
  * @class XYZTiles
  */
 export class XYZTiles extends AbstractWebLayersClass {

@@ -83,7 +83,7 @@ export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractWebLayersClass): ver
 /**
  * Class used to add geojson layer to the map
  *
- * @export
+ * @exports
  * @class GeoJSON
  */
 export class GeoJSON extends AbstractWebLayersClass {

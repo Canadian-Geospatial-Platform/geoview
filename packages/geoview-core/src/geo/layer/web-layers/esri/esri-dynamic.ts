@@ -47,7 +47,7 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
 /**
  * a class to add esri dynamic layer
  *
- * @export
+ * @exports
  * @class EsriDynamic
  */
 export class EsriDynamic extends AbstractWebLayersClass {
