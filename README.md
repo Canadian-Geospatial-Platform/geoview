@@ -144,7 +144,7 @@ To use the viewer on your own project, you need to include the above script in a
 
 After including the viewer in your page, the viewer will allow you to load maps and draw them on your page.
 
-There are multiple ways to load maps. Below we will show a basic usage of loading a map, if you want to see how you can load the map in all supported ways then [click here](docs/).
+There are multiple ways to load maps. Below we will show a basic usage of loading a map, if you want to see how you can load the map in all supported ways then [click here](docs/loading-maps.md).
 
 #### Loading a map using a config passed in as inline to the map div element
 

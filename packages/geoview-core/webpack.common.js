@@ -101,6 +101,7 @@ const config = {
     }),
     new CopyWebpackPlugin({
       patterns: [
+        { from: './public/docs', to: 'docs' },
         { from: './public/img', to: 'img' },
         { from: './public/configs', to: 'configs' },
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
