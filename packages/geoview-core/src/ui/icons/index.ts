@@ -8,6 +8,9 @@ import Home from '@mui/icons-material/Home';
 import Add from '@mui/icons-material/Add';
 import Remove from '@mui/icons-material/Remove';
 import Close from '@mui/icons-material/Close';
+import Details from '@mui/icons-material/Details';
+import LayersOutlined from '@mui/icons-material/LayersOutlined';
+import Map from '@mui/icons-material/Map';
 
 export {
   Layers as LayersIcon,
@@ -20,4 +23,7 @@ export {
   Add as ZoomInIcon,
   Remove as ZoomOutIcon,
   Close as CloseIcon,
+  Details as DetailsIcon,
+  LayersOutlined as LayersOutlinedIcon,
+  Map as MapIcon,
 };

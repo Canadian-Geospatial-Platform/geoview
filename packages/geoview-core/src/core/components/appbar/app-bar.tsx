@@ -2,11 +2,7 @@ import { useState, useRef, useEffect, useCallback, Fragment, useContext } from '
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import DetailsIcon from '@mui/icons-material/Details';
-import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
-import MapIcon from '@mui/icons-material/Map';
-
-import { List, ListItem, Panel, IconButton } from '../../../ui';
+import { List, ListItem, Panel, IconButton, DetailsIcon, LayersOutlinedIcon, MapIcon } from '../../../ui';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
