@@ -25,16 +25,19 @@ export const useStyles = makeStyles((theme) => ({
   },
   appBarList: {
     width: 64,
-  },
-  appBarListItem: {
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    margin: '16px 0',
-    padding: 0,
-    '&:hover': {
+    '& li': {
       backgroundColor: 'transparent',
+      color: theme.palette.primary.light,
+      justifyContent: 'center',
+      margin: '16px 0',
+      padding: 0,
+      '&:hover': {
+        backgroundColor: 'transparent',
+        color: theme.palette.primary.light,
+      },
     },
   },
+
   appBarButtons: {
     borderRightColor: theme.appBar.border,
     borderRightWidth: 1,
@@ -158,12 +161,12 @@ export function Appbar(): JSX.Element {
 
             // display the button panels in the list
             return (
-              <List key={groupName}>
+              <List key={groupName} className={classes.appBarList}>
                 {Object.keys(buttonPanels).map((buttonId) => {
                   const buttonPanel = buttonPanels[buttonId];
                   return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
                     <Fragment key={buttonPanel.button.id}>
-                      <ListItem className={classes.appBarListItem}>
+                      <ListItem>
                         <IconButton
                           id={buttonPanel.button.id}
                           aria-label={buttonPanel.button.tooltip}
