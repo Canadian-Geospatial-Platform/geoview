@@ -1,29 +1,5 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
-// needed for TypeScript when customizing a theme
-declare module '@mui/material/styles' {
-  interface Theme {
-    appBar: {
-      border: string;
-      btnActiveBg: string;
-      btnDefaultBg: string;
-      btnFocusBg: string;
-      btnHoverBg: string;
-    };
-  }
-
-  // allow configuration using `createTheme`
-  interface ThemeOptions {
-    appBar?: {
-      border?: string;
-      btnActiveBg?: string;
-      btnDefaultBg?: string;
-      btnFocusBg?: string;
-      btnHoverBg?: string;
-    };
-  }
-}
-
 const headingStyles = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
   fontWeight: 700,
