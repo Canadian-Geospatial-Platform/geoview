@@ -2,7 +2,7 @@ import {
   Cast,
   AbstractPluginClass,
   TypePluginOptions,
-  TypeButtonProps,
+  TypeIconButtonProps,
   TypeButtonPanel,
   TypeWindow,
   toJsonObject,
@@ -10,8 +10,8 @@ import {
   TypeSchemaObject,
   TypeJsonObject,
 } from 'geoview-core';
+import { MapIcon } from 'geoview-core/src/ui/icons';
 import { BasemapPanel } from './basemap-panel';
-
 import schema from '../schema.json';
 import defaultConfig from '../default-config-basemap-panel.json';
 
@@ -73,11 +73,12 @@ class BasemapPanelPlugin extends AbstractPluginClass {
       const { language } = api.map(mapId);
 
       // button props
-      const button: TypeButtonProps = {
+      const button: TypeIconButtonProps = {
+        id: 'basemapPanelButton',
         tooltip: this.translations[language].basemapPanel as string,
         tooltipPlacement: 'right',
-        icon: '<i class="material-icons">map</i>',
-        type: 'textWithIcon',
+        children: <MapIcon />,
+        visible: true,
       };
 
       // panel props

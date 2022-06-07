@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, Fragment, useContext } from '
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { List, ListItem, Panel, IconButton, DetailsIcon, LayersOutlinedIcon, MapIcon } from '../../../ui';
+import { List, ListItem, Panel, IconButton } from '../../../ui';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
@@ -161,22 +161,6 @@ export function Appbar(): JSX.Element {
               <List key={groupName}>
                 {Object.keys(buttonPanels).map((buttonId) => {
                   const buttonPanel = buttonPanels[buttonId];
-                  let iconMod;
-
-                  // TODO -  KenChase - Where's the best place to place the icon values?
-                  switch (buttonPanel.button.tooltip) {
-                    case 'Basemaps':
-                      iconMod = <MapIcon />;
-                      break;
-                    case 'Details':
-                      iconMod = <DetailsIcon />;
-                      break;
-                    case 'Layers':
-                      iconMod = <LayersOutlinedIcon />;
-                      break;
-                    default:
-                      iconMod = '';
-                  }
                   return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
                     <Fragment key={buttonPanel.button.id}>
                       <ListItem className={classes.appBarListItem}>
@@ -196,7 +180,7 @@ export function Appbar(): JSX.Element {
                             }
                           }}
                         >
-                          {iconMod}
+                          {buttonPanel.button.children}
                         </IconButton>
                       </ListItem>
                     </Fragment>
