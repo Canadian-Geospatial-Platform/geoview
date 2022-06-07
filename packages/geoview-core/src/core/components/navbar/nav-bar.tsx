@@ -11,7 +11,7 @@ import Home from './buttons/home';
 
 import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 import { api } from '../../../app';
-import { Panel, ButtonGroup, Button } from '../../../ui';
+import { Panel, ButtonGroup, IconButton } from '../../../ui';
 
 import { MapContext } from '../../app-start';
 import { TypeButtonPanel } from '../../types/cgpv-types';
@@ -185,24 +185,20 @@ export function Navbar(): JSX.Element {
                   // eslint-disable-next-line no-nested-ternary
                   return buttonPanel.button.visible ? (
                     !buttonPanel.panel ? (
-                      <Button
+                      <IconButton
                         key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
-                        type="icon"
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="left"
-                        icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
                         onClick={buttonPanel.button.onClick}
                       />
                     ) : (
-                      <Button
+                      <IconButton
                         key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
-                        type="icon"
                         tooltip={buttonPanel.button.tooltip}
                         tooltipPlacement="left"
-                        icon={buttonPanel.button.icon}
                         className={classes.navBarButton}
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {
