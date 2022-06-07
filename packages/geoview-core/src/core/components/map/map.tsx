@@ -1,8 +1,18 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, MutableRefObject } from 'react';
+
+import { fromLonLat, Projection, toLonLat } from 'ol/proj';
+import OLMap from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import XYZ from 'ol/source/XYZ';
+import ImageWMS from 'ol/source/ImageWMS';
+import ImageLayer from 'ol/layer/Image';
+import TileGrid from 'ol/tilegrid/TileGrid';
+import { OSM } from 'ol/source';
 
 import { CRS } from 'leaflet';
-import { MapContainer, TileLayer } from 'react-leaflet';
+// import { MapContainer, TileLayer } from 'react-leaflet';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -37,13 +47,21 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const id = props.id ? props.id : generateId('');
 
+  const [olMap, setOlMap] = useState<OLMap>();
+
   const [basemapLayers, setBasemapLayers] = useState<TypeBasemapLayer[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const classes = useStyles();
-
   // projection crs
   const [crs, setCRS] = useState<CRS>();
+
+  const [featuresLayer, setFeaturesLayer] = useState();
+  const [selectedCoord, setSelectedCoord] = useState();
+
+  const classes = useStyles();
+
+  // get ref to div element
+  const mapElement = useRef<HTMLDivElement | null>();
 
   // attribution used by the map
   const [attribution, setAttribution] = useState<string>('');
@@ -88,113 +106,206 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
   }
 
+  // useEffect(() => {
+  //   // listen to adding a new basemap events
+  //   api.event.on(
+  //     EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
+  //     (payload) => {
+  //       if (payloadIsABasemapLayerArray(payload)) {
+  //         if (payload.handlerName === id) {
+  //           // clear the layers then apply them
+  //           // if not layers orders may be messed up
+  //           setBasemapLayers([]);
+  //           setTimeout(() => setBasemapLayers(payload.layers), 100);
+  //         }
+  //       }
+  //     },
+  //     id
+  //   );
+
+  //   return () => {
+  //     api.map(id).map.off('moveend');
+  //     api.map(id).map.off('zoomend');
+  //     api.map(id).map.off('zoomanim');
+  //     api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
+  //   };
+  // }, [id]);
+
+  // return (
+  //   <MapContainer
+  //     id={id}
+  //     className={classes.mapContainer}
+  //     center={mapProps.initialView.center}
+  //     zoom={mapProps.initialView.zoom}
+  //     crs={api.projection.getProjection(mapProps.projection)}
+  //     zoomControl={false}
+  //     selectBox={mapProps.controls?.selectBox}
+  //     boxZoom={mapProps.controls?.boxZoom}
+  //     attributionControl={false}
+  //     minZoom={mapOptions.minZoom}
+  //     maxZoom={mapOptions.maxZoom}
+  //     maxBounds={mapOptions.maxBounds}
+  //     keyboardPanDelta={20}
+  //     // eslint-disable-next-line react/jsx-props-no-spreading
+  //     {...extraOptions}
+  //     whenCreated={(cgpMap: L.Map) => {
+  //       // eslint-disable-next-line no-param-reassign
+  //       cgpMap.id = id;
+
+  //       // add a class to map container to easely find the container
+  //       cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
+
+  //       // reset the view when created so overview map is moved at the right place
+  //       cgpMap.setView(mapProps.initialView.center, mapProps.initialView.zoom);
+
+  //       // emit the initial map position
+  //       api.event.emit(latLngPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', cgpMap.getCenter()));
+
+  //       // listen to map move end events
+  //       cgpMap.on('moveend', mapMoveEnd);
+
+  //       // listen to map zoom end events
+  //       cgpMap.on('zoomend', mapZoomEnd);
+
+  //       // initialize the map viewer and load plugins
+  //       viewer.initMap(cgpMap);
+
+  //       // get crs
+  //       setCRS(viewer.projection.getCRS());
+
+  //       // get attribution
+  //       const attr = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
+
+  //       setAttribution(attr);
+
+  //       // emit attribution update to footerbar
+  //       api.event.emit(attributionPayload(EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE, id, attr));
+
+  //       // call the ready function since rendering of this map instance is done
+  //       api.ready(() => {
+  //         // load plugins once all maps have rendered
+  //         api.plugin.loadPlugins();
+  //       });
+
+  //       // emit the map loaded event
+  //       setIsLoaded(true);
+
+  //       viewer.toggleMapInteraction(mapProps.interaction);
+  //     }}
+  //   >
+  //     {isLoaded && crs && (
+  //       <>
+  //         {basemapLayers.map((basemapLayer: TypeBasemapLayer) => {
+  //           return (
+  //             <TileLayer
+  //               key={basemapLayer.id}
+  //               url={basemapLayer.url}
+  //               attribution={attribution}
+  //               opacity={basemapLayer.opacity}
+  //               pane={basemapLayer.basemapPaneName}
+  //             />
+  //           );
+  //         })}
+  //         {components !== undefined && components.indexOf('northArrow') > -1 && <NorthArrow projection={crs} />}
+  //         <NorthPoleFlag projection={crs} />
+  //         <Crosshair id={id} />
+  //         <ClickMarker />
+  //         <Footerbar attribution={attribution} />
+  //       </>
+  //     )}
+  //   </MapContainer>
+  // );
+
+  const initCGPVMap = (cgpvMap: OLMap) => {
+    cgpvMap.set('id', id);
+
+    // initialize the map viewer and load plugins
+    viewer.initMap(cgpvMap);
+
+    // call the ready function since rendering of this map instance is done
+    api.ready(() => {
+      // load plugins once all maps have rendered
+      api.plugin.loadPlugins();
+    });
+
+    // emit the map loaded event
+    setIsLoaded(true);
+
+    // viewer.toggleMapInteraction(mapProps.interaction);
+  };
+
   useEffect(() => {
+    // create map
+    const projectionConfig = api.projection.projections[mapProps.projection];
+
+    const initialMap = new OLMap({
+      target: mapElement.current as string | HTMLElement | undefined,
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+      ],
+      view: new View({
+        projection: projectionConfig.projection,
+        center: fromLonLat([mapProps.initialView.center[0], mapProps.initialView.center[1]], projectionConfig.projection),
+        zoom: mapProps.initialView.zoom,
+        extent: projectionConfig.extent,
+      }),
+      controls: [],
+    });
+
     // listen to adding a new basemap events
     api.event.on(
       EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
         if (payloadIsABasemapLayerArray(payload)) {
           if (payload.handlerName === id) {
-            // clear the layers then apply them
-            // if not layers orders may be messed up
-            setBasemapLayers([]);
-            setTimeout(() => setBasemapLayers(payload.layers), 100);
+            const projectionCode = api.map(id).currentProjection;
+
+            const projConfig = api.projection.projections[projectionCode.toString()];
+
+            // set the basemap layers
+            // initialMap?.setLayers(
+            //   payload.layers.map((layer) => {
+            //     return new TileLayer({
+            //       opacity: layer.opacity,
+            //       source: new XYZ({
+            //         projection: projConfig.projection,
+            //         url: layer.url,
+            //         tileGrid: new TileGrid({
+            //           extent: projConfig.extent,
+            //           origin: projConfig.origin,
+            //           resolutions: projConfig.resolutions,
+            //         }),
+            //       }),
+            //     });
+            //   })
+            // );
+            // initialMap.getLayers().forEach((layer) => layer.changed());
           }
         }
       },
       id
     );
 
+    initCGPVMap(initialMap);
+
     return () => {
-      api.map(id).map.off('moveend');
-      api.map(id).map.off('zoomend');
-      api.map(id).map.off('zoomanim');
       api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
-  }, [id]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <MapContainer
+    <div
       id={id}
+      ref={mapElement as MutableRefObject<HTMLDivElement | null>}
       className={classes.mapContainer}
-      center={mapProps.initialView.center}
-      zoom={mapProps.initialView.zoom}
-      crs={api.projection.getProjection(mapProps.projection)}
-      zoomControl={false}
-      selectBox={mapProps.controls?.selectBox}
-      boxZoom={mapProps.controls?.boxZoom}
-      attributionControl={false}
-      minZoom={mapOptions.minZoom}
-      maxZoom={mapOptions.maxZoom}
-      maxBounds={mapOptions.maxBounds}
-      keyboardPanDelta={20}
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      {...extraOptions}
-      whenCreated={(cgpMap: L.Map) => {
-        // eslint-disable-next-line no-param-reassign
-        cgpMap.id = id;
-
-        // add a class to map container to easely find the container
-        cgpMap.getContainer().classList.add(`leaflet-map-${id}`);
-
-        // reset the view when created so overview map is moved at the right place
-        cgpMap.setView(mapProps.initialView.center, mapProps.initialView.zoom);
-
-        // emit the initial map position
-        api.event.emit(latLngPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', cgpMap.getCenter()));
-
-        // listen to map move end events
-        cgpMap.on('moveend', mapMoveEnd);
-
-        // listen to map zoom end events
-        cgpMap.on('zoomend', mapZoomEnd);
-
-        // initialize the map viewer and load plugins
-        viewer.initMap(cgpMap);
-
-        // get crs
-        setCRS(viewer.projection.getCRS());
-
-        // get attribution
-        const attr = language === 'en-CA' ? viewer.basemap.attribution['en-CA'] : viewer.basemap.attribution['fr-CA'];
-
-        setAttribution(attr);
-
-        // emit attribution update to footerbar
-        api.event.emit(attributionPayload(EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE, id, attr));
-
-        // call the ready function since rendering of this map instance is done
-        api.ready(() => {
-          // load plugins once all maps have rendered
-          api.plugin.loadPlugins();
-        });
-
-        // emit the map loaded event
-        setIsLoaded(true);
-
-        viewer.toggleMapInteraction(mapProps.interaction);
+      style={{
+        width: '100%',
+        height: '100vh',
       }}
-    >
-      {isLoaded && crs && (
-        <>
-          {basemapLayers.map((basemapLayer: TypeBasemapLayer) => {
-            return (
-              <TileLayer
-                key={basemapLayer.id}
-                url={basemapLayer.url}
-                attribution={attribution}
-                opacity={basemapLayer.opacity}
-                pane={basemapLayer.basemapPaneName}
-              />
-            );
-          })}
-          {components !== undefined && components.indexOf('northArrow') > -1 && <NorthArrow projection={crs} />}
-          <NorthPoleFlag projection={crs} />
-          <Crosshair id={id} />
-          <ClickMarker />
-          <Footerbar attribution={attribution} />
-        </>
-      )}
-    </MapContainer>
+    />
   );
 }

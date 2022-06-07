@@ -1,5 +1,8 @@
 import { useContext } from 'react';
 
+import { View } from 'ol';
+import { fromLonLat } from 'ol/proj';
+
 import { MapContext } from '../../../app-start';
 
 import { Button, HomeIcon } from '../../../../ui';
@@ -42,7 +45,17 @@ export default function Home(props: HomeProps): JSX.Element {
     // get map and set initial bounds to use in zoom home
     const { center, zoom } = api.map(mapId).mapProps.map.initialView;
 
-    api.map(mapId).map.setView(new L.LatLng(center[0], center[1]), zoom);
+    const { currentProjection } = api.map(mapId);
+
+    const projectionConfig = api.projection.projections[currentProjection];
+
+    api.map(mapId).map.setView(
+      new View({
+        projection: projectionConfig.projection,
+        zoom,
+        center: fromLonLat(center, projectionConfig.projection),
+      })
+    );
   }
 
   return (

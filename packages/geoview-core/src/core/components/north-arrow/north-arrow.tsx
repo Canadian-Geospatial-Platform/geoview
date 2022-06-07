@@ -241,7 +241,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   const mapId = mapConfig.id;
 
   useEffect(() => {
-    api.map(mapId).map.createPane('NorthPolePane');
+    // api.map(mapId).map.createPane('NorthPolePane');
     setPane(true);
     // Create a pane for the north pole marker
   }, [mapId]);

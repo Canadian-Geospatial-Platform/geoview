@@ -124,8 +124,8 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
-      map.removeEventListener('mousemove');
-      map.removeEventListener('moveend');
+      map.removeEventListener('mousemove', onMouseMove);
+      map.removeEventListener('moveend', onMoveEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -8,7 +8,7 @@ import {
   TypeBasemapLayer,
   TypeBasemapOptions,
   TypeAttribution,
-  TypeProjections,
+  TypeProjectionCodes,
   TypeLocalizedLanguages,
 } from '../../../core/types/cgpv-types';
 
@@ -62,12 +62,6 @@ export class Basemap {
     if (mapId) {
       this.mapId = mapId;
 
-      const { map } = api.map(this.mapId);
-
-      // create new pane to host basemap layers
-      this.basemapsPaneName = 'basemapsPane';
-      map.createPane(this.basemapsPaneName).style.zIndex = '10';
-
       if (this.basemapOptions) {
         this.loadDefaultBasemaps(this.basemapOptions);
       }
@@ -118,11 +112,11 @@ export class Basemap {
    * Get basemap thumbnail url
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeProjections} projection basemap projection
+   * @param {TypeProjectionCodes} projection basemap projection
    * @param {TypeLocalizedLanguages} language basemap language
    * @returns {string[]} array of thumbnail urls
    */
-  private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjections, language: TypeLocalizedLanguages): string[] => {
+  private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjectionCodes, language: TypeLocalizedLanguages): string[] => {
     const thumbnailUrls: string[] = [];
 
     for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
@@ -181,11 +175,11 @@ export class Basemap {
    * Get basemap information (nbame and description)
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeProjections} projection basemap projection
+   * @param {TypeProjectionCodes} projection basemap projection
    * @param {TypeLocalizedLanguages} language basemap language
    * @returns {string} array with information [name, description]
    */
-  private getInfo = (basemapTypes: string[], projection: TypeProjections, language: TypeLocalizedLanguages): string[] => {
+  private getInfo = (basemapTypes: string[], projection: TypeProjectionCodes, language: TypeLocalizedLanguages): string[] => {
     // const info = { name: '', description: '' };
 
     let name = '';
@@ -280,7 +274,7 @@ export class Basemap {
     }
 
     if (!this.isExisting(basemaplayerTypes.join('-'))) {
-      const info = this.getInfo(basemaplayerTypes, this.projection as TypeProjections, this.language as TypeLocalizedLanguages);
+      const info = this.getInfo(basemaplayerTypes, this.projection as TypeProjectionCodes, this.language as TypeLocalizedLanguages);
 
       // id and typer are derived from the basemap type composition (shaded, label, transport, simple)
       this.createBasemap({
@@ -291,7 +285,11 @@ export class Basemap {
         description: info[1],
         descSummary: '',
         altText: info[1],
-        thumbnailUrl: this.getThumbnailUrl(basemaplayerTypes, this.projection as TypeProjections, this.language as TypeLocalizedLanguages),
+        thumbnailUrl: this.getThumbnailUrl(
+          basemaplayerTypes,
+          this.projection as TypeProjectionCodes,
+          this.language as TypeLocalizedLanguages
+        ),
         attribution: '',
         zoomLevels: {
           min: 0,

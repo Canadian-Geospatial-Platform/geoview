@@ -1,5 +1,6 @@
 /* eslint-disable no-console, no-underscore-dangle */
-import { LatLngTuple } from 'leaflet';
+
+import { Coordinate } from 'ol/coordinate';
 
 import axios, { AxiosResponse } from 'axios';
 
@@ -62,7 +63,7 @@ export class Config {
       interaction: 'dynamic',
       initialView: {
         zoom: 4,
-        center: [60, -100],
+        center: [-100, 60],
       },
       projection: 3978,
       basemapOptions: {
@@ -705,7 +706,7 @@ export class Config {
 
     if (JSON.stringify(inConfig.map.initialView.center) !== JSON.stringify(validConfig.map.initialView.center)) {
       console.log(
-        `- map: ${this.id} - Invalid center ${inConfig.map.initialView.center} replaced by ${validConfig.map.initialView.center} -`
+        `- map: ${this.id} - Invalid center ${inConfig.map.initialView.center} replaced by ${validConfig.map.initialView.center}`
       );
     }
 
@@ -751,23 +752,23 @@ export class Config {
   /**
    * Validate the center
    * @param {number} projection valid projection
-   * @param {LatLngTuple} center center of the map
-   * @returns {LatLngTuple} valid center of the map
+   * @param {Coordinate} center center of the map
+   * @returns {Coordinate} valid center of the map
    */
-  private validateCenter(projection: number, center: LatLngTuple): LatLngTuple {
-    const xVal = Number(center[1]);
-    const yVal = Number(center[0]);
+  private validateCenter(projection: number, center: Coordinate): Coordinate {
+    const xVal = Number(center[0]);
+    const yVal = Number(center[1]);
 
     const x =
       !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
         ? xVal
-        : this._config.map.initialView.center[1];
+        : this._config.map.initialView.center[0];
     const y =
       !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
         ? yVal
-        : this._config.map.initialView.center[0];
+        : this._config.map.initialView.center[1];
 
-    return [y, x];
+    return [x, y];
   }
 
   /**

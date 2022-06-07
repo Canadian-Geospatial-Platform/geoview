@@ -1,9 +1,9 @@
 {
   "map": {
-    "interaction": "static",
+    "interaction": "dynamic",
     "initialView": {
       "zoom": 4,
-      "center": [60, -100]
+      "center": [-100, 60]
     },
     "projection": 3978,
     "basemapOptions": {
@@ -44,6 +44,7 @@
       "boxZoom": true
     }
   },
+  "corePackages": [],
   "components": [],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]

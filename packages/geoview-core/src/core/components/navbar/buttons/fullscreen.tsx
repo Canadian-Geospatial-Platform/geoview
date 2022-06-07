@@ -42,7 +42,7 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
    * Toggle between fullscreen and window mode
    */
   function setFullscreen() {
-    const { parentElement } = api.map(mapId).map.getContainer();
+    const { parentElement } = api.map(mapId).map.getTargetElement();
 
     if (parentElement) {
       setFs(!fs);

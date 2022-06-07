@@ -3,6 +3,8 @@ import { i18n } from 'i18next';
 /* eslint-disable @typescript-eslint/no-var-requires */
 // import L from 'leaflet';
 
+import OLMap from 'ol/Map';
+
 import { LatLng, LatLngBounds } from 'leaflet';
 
 import queryString from 'query-string';
@@ -66,7 +68,7 @@ export class MapViewer {
   id!: string;
 
   // the leaflet map
-  map!: L.Map;
+  map!: OLMap;
 
   // used to access button panel API to create buttons and button panels on the appbar
   appBarButtons!: AppbarButtons;
@@ -132,21 +134,21 @@ export class MapViewer {
    *
    * @param cgpMap
    */
-  initMap(cgpMap: L.Map): void {
-    this.id = cgpMap.id;
+  initMap(cgpMap: OLMap): void {
+    this.id = cgpMap.get('id');
     this.map = cgpMap;
-
-    // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.id, this.mapProps.map.layers);
 
     // initialize the projection
     this.projection = new MapProjection(this.mapProps.map.projection);
 
-    // check if geometries are provided from url
-    this.loadGeometries();
-
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
+
+    // initialize layers and load the layers passed in from map config if any
+    this.layer = new Layer(this.id, this.mapProps.map.layers);
+
+    // check if geometries are provided from url
+    // this.loadGeometries();
   }
 
   /**
@@ -154,7 +156,7 @@ export class MapViewer {
    */
   loadGeometries(): void {
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint = this.map.getContainer()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
+    const servEndpoint = this.map.getTargetElement()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
 
     // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
@@ -175,9 +177,11 @@ export class MapViewer {
 
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                this.layer.vector.addPolygon(data.geometry.coordinates, {
-                  id: generateId(''),
-                });
+
+                // TODO
+                // this.layer.vector.addPolygon(data.geometry.coordinates, {
+                //   id: generateId(''),
+                // });
               }
             });
           }
@@ -278,7 +282,7 @@ export class MapViewer {
    */
   loadMapConfig = (mapConfig: TypeMapSchemaProps) => {
     // create a new config for this map element
-    const config = new Config(this.map.getContainer());
+    const config = new Config(this.map.getTargetElement());
 
     const configObj = config.getMapConfigFromFunc(mapConfig);
 
@@ -292,27 +296,27 @@ export class MapViewer {
    * @param {string} interaction map interaction
    */
   toggleMapInteraction = (interaction: string) => {
-    if (interaction === 'dynamic' || !interaction) {
-      // dynamic map
-      this.map.dragging.enable();
-      this.map.touchZoom.enable();
-      this.map.doubleClickZoom.enable();
-      this.map.scrollWheelZoom.enable();
-      this.map.boxZoom.enable();
-      this.map.keyboard.enable();
-      if (this.map.tap) this.map.tap.enable();
-      this.map.getContainer().style.cursor = 'grab';
-    } else {
-      // static map
-      this.map.dragging.disable();
-      this.map.touchZoom.disable();
-      this.map.doubleClickZoom.disable();
-      this.map.scrollWheelZoom.disable();
-      this.map.boxZoom.disable();
-      this.map.keyboard.disable();
-      if (this.map.tap) this.map.tap.disable();
-      this.map.getContainer().style.cursor = 'default';
-    }
+    // if (interaction === 'dynamic' || !interaction) {
+    //   // dynamic map
+    //   this.map.dragging.enable();
+    //   this.map.touchZoom.enable();
+    //   this.map.doubleClickZoom.enable();
+    //   this.map.scrollWheelZoom.enable();
+    //   this.map.boxZoom.enable();
+    //   this.map.keyboard.enable();
+    //   if (this.map.tap) this.map.tap.enable();
+    //   this.map.getContainer().style.cursor = 'grab';
+    // } else {
+    //   // static map
+    //   this.map.dragging.disable();
+    //   this.map.touchZoom.disable();
+    //   this.map.doubleClickZoom.disable();
+    //   this.map.scrollWheelZoom.disable();
+    //   this.map.boxZoom.disable();
+    //   this.map.keyboard.disable();
+    //   if (this.map.tap) this.map.tap.disable();
+    //   this.map.getContainer().style.cursor = 'default';
+    // }
   };
 
   /**
@@ -321,5 +325,5 @@ export class MapViewer {
    * @param {LatLng.LatLngBounds} bounds map bounds
    * @returns the bounds
    */
-  fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
+  // fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
 }

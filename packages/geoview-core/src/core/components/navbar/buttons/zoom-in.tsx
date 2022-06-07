@@ -39,7 +39,11 @@ export default function ZoomIn(props: ZoomInProps): JSX.Element {
    * Causes the map to zoom in
    */
   function zoomIn() {
-    api.map(mapId).map.zoomIn();
+    const { map } = api.map(mapId);
+
+    const currentZoom = map.getView().getZoom();
+
+    if (currentZoom) map.getView().setZoom(currentZoom + 1);
   }
 
   return (

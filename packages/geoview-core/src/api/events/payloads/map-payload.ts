@@ -1,4 +1,4 @@
-import L from 'leaflet';
+import OLMap from 'ol/Map';
 
 import { PayloadBaseClass } from './payload-base-class';
 
@@ -26,7 +26,7 @@ export const payloadIsAMap = (verifyIfPayload: PayloadBaseClass): verifyIfPayloa
  * @class MapPayload
  */
 export class MapPayload extends PayloadBaseClass {
-  map: L.Map;
+  map: OLMap;
 
   /**
    * Constructor for the class
@@ -35,7 +35,7 @@ export class MapPayload extends PayloadBaseClass {
    * @param {string | null} handlerName the handler Name
    * @param {L.Map} map the map payload
    */
-  constructor(event: EventStringId, handlerName: string | null, map: L.Map) {
+  constructor(event: EventStringId, handlerName: string | null, map: OLMap) {
     if (!validEvents.includes(event)) throw new Error(`MapPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.map = map;
@@ -52,6 +52,6 @@ export class MapPayload extends PayloadBaseClass {
  *
  * @returns {MapPayload} the MapPayload object created
  */
-export const mapPayload = (event: EventStringId, handlerName: string | null, map: L.Map): MapPayload => {
+export const mapPayload = (event: EventStringId, handlerName: string | null, map: OLMap): MapPayload => {
   return new MapPayload(event, handlerName, map);
 };

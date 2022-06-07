@@ -2,6 +2,10 @@ import React, { CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { Extent } from 'ol/extent';
+import { Projection as OLProjection } from 'ol/proj';
+import { Coordinate } from 'ol/coordinate';
+
 import * as ReactLeaflet from 'react-leaflet';
 import * as ReactLeafletCore from '@react-leaflet/core';
 
@@ -443,10 +447,20 @@ export type TypeMapControls = {
 
 export type TypeMapInitialView = {
   zoom: number;
-  center: L.LatLngTuple;
+  center: Coordinate;
 };
 
-export type TypeProjections = 3978 | 3857;
+export type TypeProjectionCodes = 3978 | 3857;
+
+/**
+ * Interface used for initializing projections
+ */
+export interface TypeProjection {
+  extent: Extent;
+  projection: OLProjection;
+  resolutions: Array<number>;
+  origin: Array<number>;
+}
 
 /**
  * interface for basemap options

@@ -272,7 +272,8 @@ export class Vector {
       const featureGroupOptions = { ...options, id: geometryGroupid };
       featureGroup = L.featureGroup([], featureGroupOptions);
       if (featureGroup.visible) {
-        featureGroup.addTo(api.map(this.#mapId).map);
+        // TODO
+        // featureGroup.addTo(api.map(this.#mapId).map);
       }
       this.geometryGroups.push(featureGroup);
     }
@@ -354,7 +355,9 @@ export class Vector {
    */
   setGeometryGroupAsVisible = (geometryGroupId?: string): void => {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
-    geometryGroup.addTo(api.map(this.#mapId).map);
+
+    // TODO
+    // geometryGroup.addTo(api.map(this.#mapId).map);
     geometryGroup.visible = true;
     geometryGroup.options.visible = true;
   };
@@ -367,7 +370,9 @@ export class Vector {
    */
   setGeometryGroupAsInvisible = (geometryGroupId?: string): void => {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
-    geometryGroup.removeFrom(api.map(this.#mapId).map);
+
+    // TODO
+    // geometryGroup.removeFrom(api.map(this.#mapId).map);
     geometryGroup.visible = false;
     geometryGroup.options.visible = false;
   };
@@ -379,7 +384,8 @@ export class Vector {
    */
   turnOnGeometryGroups = (): void => {
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(api.map(this.#mapId).map);
+      // TODO
+      // if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(api.map(this.#mapId).map);
     }
   };
 
@@ -390,7 +396,8 @@ export class Vector {
    */
   turnOffGeometryGroups = (): void => {
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(api.map(this.#mapId).map);
+      // TODO
+      // if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(api.map(this.#mapId).map);
     }
   };
 

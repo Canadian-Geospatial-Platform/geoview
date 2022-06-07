@@ -1,5 +1,8 @@
 import { Layer as leafletLayer } from 'leaflet';
 
+import ImageLayer from 'ol/layer/Image';
+import { ImageArcGISRest } from 'ol/source';
+
 import { EsriDynamic, layerConfigIsEsriDynamic } from './web-layers/esri/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from './web-layers/esri/esri-feature';
 import { layerConfigIsWMS, WMS } from './web-layers/ogc/wms';
@@ -34,10 +37,10 @@ export class Layer {
   layers: { [key: string]: AbstractWebLayersClass } = {};
 
   // used to access vector API to create and manage geometries
-  vector: Vector;
+  vector: Vector | undefined;
 
   // used to access marker cluster API to create and manage marker cluster groups
-  markerCluster: MarkerClusterClass;
+  markerCluster: MarkerClusterClass | undefined;
 
   /**
    * used to reference the map id
@@ -53,8 +56,8 @@ export class Layer {
   constructor(id: string, layers?: TypeLayerConfig[]) {
     this.#mapId = id;
 
-    this.vector = new Vector(this.#mapId);
-    this.markerCluster = new MarkerClusterClass(this.#mapId);
+    // this.vector = new Vector(this.#mapId);
+    // this.markerCluster = new MarkerClusterClass(this.#mapId);
 
     // listen to outside events to add layers
     api.event.on(
@@ -185,14 +188,16 @@ export class Layer {
         })
       );
     } else {
-      if (
-        cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON &&
-        cgpvLayer.type !== CONST_LAYER_TYPES.WFS &&
-        cgpvLayer.type !== CONST_LAYER_TYPES.OGC_FEATURE
-      )
-        this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer!);
+      // TODO
+      // if (
+      //   cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON &&
+      //   cgpvLayer.type !== CONST_LAYER_TYPES.WFS &&
+      //   cgpvLayer.type !== CONST_LAYER_TYPES.OGC_FEATURE
+      // )
+      //   this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer!);
 
-      cgpvLayer.layer!.addTo(api.map(this.#mapId).map);
+      api.map(this.#mapId).map.addLayer(cgpvLayer.layer as ImageLayer<ImageArcGISRest>);
+
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
       api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
@@ -230,7 +235,9 @@ export class Layer {
     //   if (item.id === id) item.layer.removeFrom(this.#map);
     //   return item.id !== id;
     // });
-    this.layers[id].layer!.removeFrom(api.map(this.#mapId).map);
+
+    // TODO
+    // this.layers[id].layer!.removeFrom(api.map(this.#mapId).map);
     delete this.layers[id];
   };
 

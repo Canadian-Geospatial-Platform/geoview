@@ -2,6 +2,9 @@ import axios from 'axios';
 
 import L from 'leaflet';
 
+import { ImageArcGISRest, OSM } from 'ol/source';
+import { Image as ImageLayer, Tile as TileLayer } from 'ol/layer';
+
 import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
@@ -52,7 +55,7 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
  */
 export class EsriDynamic extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: DynamicMapLayer | null = null;
+  layer: ImageLayer<ImageArcGISRest> | null = null;
 
   // mapService property
   mapService: MapService;
@@ -77,12 +80,12 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * Add a ESRI dynamic layer to the map.
    *
    * @param {TypeDynamicLayer} layer the layer configuration
-   * @return {Promise<DynamicMapLayer | null>} layers to add to the map
+   * @return {Promise<ImageLayer<ImageArcGISRest> | null>} layers to add to the map
    */
-  add(layer: TypeDynamicLayer): Promise<DynamicMapLayer | null> {
+  add(layer: TypeDynamicLayer): Promise<ImageLayer<ImageArcGISRest> | null> {
     const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
-    const geo = new Promise<DynamicMapLayer | null>((resolve) => {
+    const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
       data.then((value) => {
         if (value !== '{}') {
           // get layers from service and parse layer entries as number
@@ -96,11 +99,20 @@ export class EsriDynamic extends AbstractWebLayersClass {
               return (this.entries as number[])?.includes(searchedItem);
             })
           ) {
-            const feature = dynamicMapLayer({
-              url: layer.url[api.map(this.mapId).getLanguageCode()],
-              layers: this.entries,
-              attribution: '',
-            } as DynamicMapLayerOptions);
+            // const feature = dynamicMapLayer({
+            //   url: layer.url[api.map(this.mapId).getLanguageCode()],
+            //   layers: this.entries,
+            //   attribution: '',
+            // } as DynamicMapLayerOptions);
+
+            const feature = new ImageLayer({
+              source: new ImageArcGISRest({
+                ratio: 1,
+                params: {},
+                url: layer.url[api.map(this.mapId).getLanguageCode()],
+              }),
+            });
+
             resolve(feature);
           } else {
             resolve(null);
@@ -166,7 +178,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    (this.layer as DynamicMapLayer).setOpacity(opacity);
+    this.layer?.setOpacity(opacity);
   };
 
   /**
@@ -210,7 +222,8 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param entries MapServer layer IDs
    */
   setEntries = (entries: number[]) => {
-    this.layer!.options.layers = entries;
-    this.layer!.redraw();
+    // TODO
+    // this.layer!.options.layers = entries;
+    // this.layer!.redraw();
   };
 }

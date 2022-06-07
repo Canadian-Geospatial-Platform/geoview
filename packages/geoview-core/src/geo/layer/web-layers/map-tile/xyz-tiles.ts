@@ -1,5 +1,9 @@
 import L from 'leaflet';
 
+import TileLayer from 'ol/layer/Tile';
+import XYZ from 'ol/source/XYZ';
+import TileGrid from 'ol/tilegrid/TileGrid';
+
 import { api } from '../../../../app';
 
 import {
