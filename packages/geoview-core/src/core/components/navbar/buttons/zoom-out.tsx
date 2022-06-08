@@ -40,7 +40,7 @@ export default function ZoomOut(props: ZoomOutProps): JSX.Element {
 
     const currentZoom = map.getView().getZoom();
 
-    if (currentZoom) map.getView().setZoom(currentZoom - 1);
+    if (currentZoom) map.getView().animate({ zoom: currentZoom - 0.5, duration: 500 });
   }
 
   return (

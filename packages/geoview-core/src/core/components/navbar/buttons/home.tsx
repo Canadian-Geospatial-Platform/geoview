@@ -49,13 +49,14 @@ export default function Home(props: HomeProps): JSX.Element {
 
     const projectionConfig = api.projection.projections[currentProjection];
 
-    api.map(mapId).map.setView(
-      new View({
-        projection: projectionConfig.projection,
-        zoom,
+    api
+      .map(mapId)
+      .map.getView()
+      .animate({
         center: fromLonLat(center, projectionConfig.projection),
-      })
-    );
+        duration: 500,
+        zoom,
+      });
   }
 
   return (

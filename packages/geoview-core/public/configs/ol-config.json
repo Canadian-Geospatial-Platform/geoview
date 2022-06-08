@@ -30,8 +30,8 @@
       "boxZoom": true
     }
   },
-  "corePackages": [],
-  "components": [],
+  "corePackages": ["basemap-panel"],
+  "components": ["appbar", "navbar"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]
 }

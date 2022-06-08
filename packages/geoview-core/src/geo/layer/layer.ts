@@ -2,6 +2,9 @@ import { Layer as leafletLayer } from 'leaflet';
 
 import ImageLayer from 'ol/layer/Image';
 import { ImageArcGISRest, TileArcGISRest } from 'ol/source';
+import TileLayer from 'ol/layer/Tile';
+import VectorImageLayer from 'ol/layer/VectorImage';
+import VectorSource from 'ol/source/Vector';
 
 import { EsriDynamic, layerConfigIsEsriDynamic } from './web-layers/esri/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from './web-layers/esri/esri-feature';
@@ -22,9 +25,6 @@ import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
-import TileLayer from 'ol/layer/Tile';
-import VectorImageLayer from 'ol/layer/VectorImage';
-import VectorSource from 'ol/source/Vector';
 
 // TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
 // import "esri-leaflet-renderers";

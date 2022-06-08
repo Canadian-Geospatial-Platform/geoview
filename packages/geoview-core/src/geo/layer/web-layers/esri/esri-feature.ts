@@ -6,8 +6,9 @@ import { VectorImage as VectorLayer, Image as ImageLayer } from 'ol/layer';
 import { EsriJSON } from 'ol/format';
 import { Fill as StyleFill, Stroke as StyleStroke, Text as StyleText, Icon as StyleIcon, Style } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
-import { tile as tileStrategy } from 'ol/loadingstrategy';
+import { all, tile as tileStrategy } from 'ol/loadingstrategy';
 import { createXYZ } from 'ol/tilegrid';
+import { asArray, Color } from 'ol/color';
 
 import L from 'leaflet';
 
@@ -27,7 +28,6 @@ import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities'
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
 import { api } from '../../../../app';
-import { asArray, Color } from 'ol/color';
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeFeatureLayer
@@ -107,7 +107,7 @@ export class EsriFeature extends AbstractWebLayersClass {
           iconSymbols.valueAndSymbol[symbolInfo.value as string] = new StyleIcon({
             src: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
             scale: (symbolInfo.symbol.height as number) / (symbolInfo.symbol.width as number),
-            anchor: [Math.round((symbolInfo.symbol.width as number) / 2), Math.round((symbolInfo.symbol.height as number) / 2)],
+            // anchor: [Math.round((symbolInfo.symbol.width as number) / 2), Math.round((symbolInfo.symbol.height as number) / 2)],
           });
         });
       } else if (renderer.symbol) {
@@ -115,7 +115,7 @@ export class EsriFeature extends AbstractWebLayersClass {
         iconSymbols.valueAndSymbol.default = new StyleIcon({
           src: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
           scale: (symbolInfo.height as number) / (symbolInfo.width as number),
-          anchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
+          // anchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
         });
       }
     }
@@ -143,6 +143,7 @@ export class EsriFeature extends AbstractWebLayersClass {
                 } else {
                   // dataProjection will be read from document
                   const features = esrijsonFormat.readFeatures(response, {
+                    extent,
                     featureProjection: projection,
                   });
 
@@ -153,11 +154,8 @@ export class EsriFeature extends AbstractWebLayersClass {
                   if (success) success(features);
                 }
               },
-              strategy: tileStrategy(
-                createXYZ({
-                  tileSize: 512,
-                })
-              ),
+              // url: serviceUrl,
+              strategy: all,
             });
 
             const featureStyle = (feature: Feature) => {
@@ -174,6 +172,7 @@ export class EsriFeature extends AbstractWebLayersClass {
             };
 
             const feature = new VectorLayer({
+              extent: api.projection.projections[api.map(this.mapId).currentProjection].extent,
               source: vectorSource,
               style: featureStyle as StyleLike,
             });

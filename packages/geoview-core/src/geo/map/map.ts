@@ -226,17 +226,27 @@ export class MapViewer {
   };
 
   /**
-   * Toggles fullscreen for the app.
+   * Toggle fullscreen / exit fullscreen function
    *
-   * @memberof MapInstance
+   * @param status toggle fullscreen or exit fullscreen status
+   * @param {HTMLElement} element the element to toggle fullscreen on
    */
-  toggleFullscreen = (element: HTMLElement): void => {
+  toggleFullscreen = (status: boolean, element: HTMLElement): void => {
     if (screenfull.isEnabled) {
       // TODO: check if needed
       // DomUtil.hasClass(mapElem, 'leaflet-pseudo-fullscreen') ? DomUtil.removeClass(mapElem, 'leaflet-pseudo-fullscreen') : DomUtil.addClass(mapElem, 'leaflet-pseudo-fullscreen');
       // DomUtil.hasClass(mapElem, 'leaflet-fullscreen-on') ? DomUtil.removeClass(mapElem, 'leaflet-fullscreen-on') : DomUtil.addClass(mapElem, 'leaflet-fullscreen-on');
       // toogle fullscreen
-      screenfull.toggle(element);
+
+      // enter fullscreen
+      if (status) {
+        element.requestFullscreen();
+      }
+
+      // exit fullscreen
+      if (!status) {
+        document.exitFullscreen();
+      }
     }
   };
 

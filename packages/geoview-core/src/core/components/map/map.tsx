@@ -4,8 +4,9 @@ import { useEffect, useState, useRef, MutableRefObject } from 'react';
 import { fromLonLat, Projection, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
+import { Group as LayerGroup } from 'ol/layer';
 import TileLayer from 'ol/layer/Tile';
-import XYZ from 'ol/source/XYZ';
+import WMTS from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import ImageLayer from 'ol/layer/Image';
 import TileGrid from 'ol/tilegrid/TileGrid';
@@ -241,9 +242,9 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
       layers: [
-        new TileLayer({
-          source: new OSM(),
-        }),
+        // new TileLayer({
+        //   source: new OSM(),
+        // }),
       ],
       view: new View({
         projection: projectionConfig.projection,
@@ -264,24 +265,47 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
             const projConfig = api.projection.projections[projectionCode.toString()];
 
-            // set the basemap layers
-            initialMap?.setLayers(
-              payload.layers.map((layer) => {
-                return new TileLayer({
-                  opacity: layer.opacity,
-                  source: new XYZ({
-                    projection: projConfig.projection,
-                    url: layer.url,
-                    tileGrid: new TileGrid({
-                      extent: projConfig.extent,
-                      origin: projConfig.origin,
-                      resolutions: projConfig.resolutions,
-                    }),
+            // remove previous basemaps
+            const layers = api.map(id).map.getAllLayers();
+
+            // loop through all layers on the map
+            for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+              const layer = layers[layerIndex];
+
+              // get group id that this layer belongs to
+              const layerId = layer.get('id');
+
+              // check if the group id matches basemap
+              if (layerId && layerId === 'basemap') {
+                // remove the basemap layer
+                api.map(id).map.removeLayer(layer);
+              }
+            }
+
+            // add basemap layers
+            payload.layers.forEach((layer, index) => {
+              const basemapLayer = new TileLayer({
+                opacity: layer.opacity,
+                source: new WMTS({
+                  projection: projConfig.projection,
+                  url: layer.url,
+                  tileGrid: new TileGrid({
+                    extent: projConfig.extent,
+                    origin: projConfig.origin,
+                    resolutions: projConfig.resolutions,
                   }),
-                });
-              })
-            );
-            initialMap.getLayers().forEach((layer) => layer.changed());
+                }),
+              });
+
+              // set this basemap's group id to basemap
+              basemapLayer.set('id', 'basemap');
+
+              // add the basemap layer
+              api.map(id).map.getLayers().insertAt(index, basemapLayer);
+
+              // render the layer
+              basemapLayer.changed();
+            });
           }
         }
       },
@@ -297,15 +321,5 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div
-      id={id}
-      ref={mapElement as MutableRefObject<HTMLDivElement | null>}
-      className={classes.mapContainer}
-      style={{
-        width: '100%',
-        height: '100vh',
-      }}
-    />
-  );
+  return <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} />;
 }
