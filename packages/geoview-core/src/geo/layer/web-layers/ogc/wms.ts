@@ -2,6 +2,8 @@ import axios from 'axios';
 
 import L from 'leaflet';
 
+import { Extent } from 'ol/extent';
+
 import { mapService as esriMapService, MapService } from 'esri-leaflet';
 
 import WMSCapabilities from 'wms-capabilities';
@@ -379,15 +381,12 @@ export class WMS extends AbstractWebLayersClass {
   /**
    * Get bounds through Leaflet built-in functions
    *
-   * @returns {L.LatLngBounds} layer bounds
+   * @returns {Extent} layer bounds
    */
-  getBounds = (): L.LatLngBounds => {
+  getBounds = (): Extent => {
     const capabilities = this.getCapabilities();
     const bbox = Cast<[number, number, number, number]>(capabilities.Capability.Layer.EX_GeographicBoundingBox);
     const [xmin, ymin, xmax, ymax] = bbox;
-    return L.latLngBounds([
-      [ymin, xmin],
-      [ymax, xmax],
-    ]);
+    return [xmin, ymin, xmax, ymax];
   };
 }

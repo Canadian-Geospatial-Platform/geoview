@@ -8,7 +8,6 @@ import OLMap from 'ol/Map';
 import { LatLng, LatLngBounds } from 'leaflet';
 
 import queryString from 'query-string';
-import screenfull from 'screenfull';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
@@ -232,21 +231,14 @@ export class MapViewer {
    * @param {HTMLElement} element the element to toggle fullscreen on
    */
   toggleFullscreen = (status: boolean, element: HTMLElement): void => {
-    if (screenfull.isEnabled) {
-      // TODO: check if needed
-      // DomUtil.hasClass(mapElem, 'leaflet-pseudo-fullscreen') ? DomUtil.removeClass(mapElem, 'leaflet-pseudo-fullscreen') : DomUtil.addClass(mapElem, 'leaflet-pseudo-fullscreen');
-      // DomUtil.hasClass(mapElem, 'leaflet-fullscreen-on') ? DomUtil.removeClass(mapElem, 'leaflet-fullscreen-on') : DomUtil.addClass(mapElem, 'leaflet-fullscreen-on');
-      // toogle fullscreen
+    // enter fullscreen
+    if (status) {
+      element.requestFullscreen();
+    }
 
-      // enter fullscreen
-      if (status) {
-        element.requestFullscreen();
-      }
-
-      // exit fullscreen
-      if (!status) {
-        document.exitFullscreen();
-      }
+    // exit fullscreen
+    if (!status) {
+      document.exitFullscreen();
     }
   };
 

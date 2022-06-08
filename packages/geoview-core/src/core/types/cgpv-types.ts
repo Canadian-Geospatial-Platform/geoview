@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Extent } from 'ol/extent';
 import { Projection as OLProjection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
+import Feature from 'ol/Feature';
 
 import * as ReactLeaflet from 'react-leaflet';
 import * as ReactLeafletCore from '@react-leaflet/core';
@@ -1176,8 +1177,8 @@ export type TimePrecision = 'hour' | 'minute' | 'second';
  * Type for return value for feature layer like GeoJSON, OGC API, Vector
  */
 export type TypeFilterFeatures = {
-  pass: TypeJsonObject[];
-  fail: TypeJsonObject[];
+  pass: Feature[];
+  fail: Feature[];
 };
 
 /**

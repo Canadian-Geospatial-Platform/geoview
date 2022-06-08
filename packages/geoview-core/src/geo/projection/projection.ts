@@ -37,6 +37,9 @@ export class Projection {
   constructor() {
     this.initWMProjection();
     this.initLCCProjection();
+
+    proj4.defs('EPSG:4617', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
+    register(proj4);
   }
 
   /**

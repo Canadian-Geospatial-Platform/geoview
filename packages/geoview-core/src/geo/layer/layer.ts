@@ -26,9 +26,6 @@ import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payl
 import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 
-// TODO: look at a bundler for esri-leaflet: https://github.com/esri/esri-leaflet-bundler
-// import "esri-leaflet-renderers";
-
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
@@ -84,10 +81,10 @@ export class Layer {
               this.removeTabindex();
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.#mapId, layerConfig);
-              wmsLayer.add(layerConfig).then((layer) => {
-                wmsLayer.layer = layer;
-                this.addToMap(wmsLayer);
-              });
+              // wmsLayer.add(layerConfig).then((layer) => {
+              //   wmsLayer.layer = layer;
+              //   this.addToMap(wmsLayer);
+              // });
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
               const esriDynamic = new EsriDynamic(this.#mapId, layerConfig);
               esriDynamic.add(layerConfig).then((layer) => {
@@ -103,22 +100,22 @@ export class Layer {
               this.removeTabindex();
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.#mapId, layerConfig);
-              wfsLayer.add(layerConfig).then((layer) => {
-                wfsLayer.layer = layer;
-                this.addToMap(wfsLayer);
-              });
+              // wfsLayer.add(layerConfig).then((layer) => {
+              //   wfsLayer.layer = layer;
+              //   this.addToMap(wfsLayer);
+              // });
             } else if (layerConfigIsOgcFeature(layerConfig)) {
               const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConfig);
-              ogcFeatureLayer.add(layerConfig).then((layer) => {
-                ogcFeatureLayer.layer = layer;
-                this.addToMap(ogcFeatureLayer);
-              });
+              // ogcFeatureLayer.add(layerConfig).then((layer) => {
+              //   ogcFeatureLayer.layer = layer;
+              //   this.addToMap(ogcFeatureLayer);
+              // });
             } else if (layerConfigIsXYZTiles(layerConfig)) {
               const xyzTiles = new XYZTiles(this.#mapId, layerConfig);
-              xyzTiles.add(layerConfig).then((layer) => {
-                xyzTiles.layer = layer;
-                this.addToMap(xyzTiles);
-              });
+              // xyzTiles.add(layerConfig).then((layer) => {
+              //   xyzTiles.layer = layer;
+              //   this.addToMap(xyzTiles);
+              // });
             }
           }
         }

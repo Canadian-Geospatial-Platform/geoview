@@ -15,6 +15,19 @@ export function generateId(id?: string | null): string {
 }
 
 /**
+ * Set alpha for a color
+ * @param {number[]} colorArray the array of color numbers
+ * @param {number} alpha the new alpha
+ *
+ * @returns {number[]} the color with the alpha set
+ */
+export function setAlphaColor(colorArray: number[], alpha: number): number[] {
+  const color = colorArray;
+  color[3] = alpha;
+  return color;
+}
+
+/**
  * Validate if a JSON string is well formatted
  * @param {string} str the string to test
  * @returns {bollean} true if the JSON is valid, false otherwise

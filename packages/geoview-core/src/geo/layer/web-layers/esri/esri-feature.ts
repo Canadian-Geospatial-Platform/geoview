@@ -1,18 +1,14 @@
 import axios from 'axios';
 
 import Feature from 'ol/Feature';
-import { ImageArcGISRest, Vector as VectorSource, XYZ } from 'ol/source';
-import { VectorImage as VectorLayer, Image as ImageLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import { VectorImage as VectorLayer } from 'ol/layer';
 import { EsriJSON } from 'ol/format';
-import { Fill as StyleFill, Stroke as StyleStroke, Text as StyleText, Icon as StyleIcon, Style } from 'ol/style';
+import { Icon as StyleIcon, Style } from 'ol/style';
 import { StyleLike } from 'ol/style/Style';
-import { all, tile as tileStrategy } from 'ol/loadingstrategy';
-import { createXYZ } from 'ol/tilegrid';
-import { asArray, Color } from 'ol/color';
-
-import L from 'leaflet';
-
-import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
+import { all } from 'ol/loadingstrategy';
+import { Extent } from 'ol/extent';
+import { Pixel } from 'ol/pixel';
 
 import {
   AbstractWebLayersClass,
@@ -24,7 +20,7 @@ import {
   toJsonObject,
   TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
-import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
 import { api } from '../../../../app';
@@ -65,9 +61,6 @@ export class EsriFeature extends AbstractWebLayersClass {
   // layer from leaflet
   layer: VectorLayer<VectorSource> | null = null;
 
-  // mapService property
-  mapService: MapService;
-
   /**
    * Initialize layer
    *
@@ -76,10 +69,6 @@ export class EsriFeature extends AbstractWebLayersClass {
    */
   constructor(mapId: string, layerConfig: TypeFeatureLayer) {
     super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig, mapId);
-
-    this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(this.url),
-    });
   }
 
   /**
@@ -166,15 +155,41 @@ export class EsriFeature extends AbstractWebLayersClass {
                   ? iconSymbols.valueAndSymbol[featureProperties[iconSymbols.field]]
                   : iconSymbols.valueAndSymbol.default;
 
-              return new Style({
+              const style = new Style({
                 image: iconToUse,
               });
+
+              // add style to feature
+              feature.setStyle(style);
+
+              return style;
             };
 
             const feature = new VectorLayer({
               extent: api.projection.projections[api.map(this.mapId).currentProjection].extent,
               source: vectorSource,
               style: featureStyle as StyleLike,
+            });
+
+            const featureHover = (pixel: Pixel) => {
+              const featureAtPixel = api.map(this.mapId).map.forEachFeatureAtPixel(pixel, (featurePixel) => {
+                return featurePixel;
+              });
+
+              if (featureAtPixel) {
+                api.map(this.mapId).map.getTargetElement().style.cursor = 'pointer';
+              } else {
+                api.map(this.mapId).map.getTargetElement().style.cursor = '';
+              }
+            };
+
+            api.map(this.mapId).map.on('pointermove', (evt) => {
+              if (evt.dragging) {
+                return;
+              }
+              const pixel = api.map(this.mapId).map.getEventPixel(evt.originalEvent);
+
+              featureHover(pixel);
             });
 
             resolve(feature);
@@ -220,34 +235,20 @@ export class EsriFeature extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer
-      ?.getSource()
-      ?.getFeatures()
-      .forEach((feature: Feature) => {
-        const featureStyle = feature.getStyle() as Style;
-        const color = featureStyle?.getFill().getColor();
-        const colorArray = asArray(color as Color).slice();
-        colorArray[3] = opacity;
-        featureStyle.getFill().setColor(colorArray);
-
-        feature.setStyle(featureStyle);
-      });
+    this.layer?.setOpacity(opacity);
   };
 
   /**
    * Get bounds through external metadata
    *
-   * @returns {Promise<L.LatLngBounds>} layer bounds
+   * @returns {Promise<Extent>} layer bounds
    */
-  getBounds = async (): Promise<L.LatLngBounds> => {
+  getBounds = async (): Promise<Extent> => {
     const meta = await this.getMetadata();
     const xmin = meta.extent.xmin as number;
     const xmax = meta.extent.xmax as number;
     const ymin = meta.extent.ymin as number;
     const ymax = meta.extent.ymax as number;
-    return L.latLngBounds([
-      [ymin, xmin],
-      [ymax, xmax],
-    ]);
+    return [xmin, ymin, xmax, ymax];
   };
 }

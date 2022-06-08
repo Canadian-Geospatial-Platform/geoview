@@ -6,11 +6,10 @@ import OLMap from 'ol/Map';
 import View from 'ol/View';
 import { Group as LayerGroup } from 'ol/layer';
 import TileLayer from 'ol/layer/Tile';
-import WMTS from 'ol/source/XYZ';
 import ImageWMS from 'ol/source/ImageWMS';
 import ImageLayer from 'ol/layer/Image';
 import TileGrid from 'ol/tilegrid/TileGrid';
-import { OSM } from 'ol/source';
+import { OSM, XYZ } from 'ol/source';
 
 import { CRS } from 'leaflet';
 // import { MapContainer, TileLayer } from 'react-leaflet';
@@ -286,7 +285,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             payload.layers.forEach((layer, index) => {
               const basemapLayer = new TileLayer({
                 opacity: layer.opacity,
-                source: new WMTS({
+                source: new XYZ({
                   projection: projConfig.projection,
                   url: layer.url,
                   tileGrid: new TileGrid({

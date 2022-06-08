@@ -2,8 +2,7 @@ import axios from 'axios';
 
 import { TileArcGISRest } from 'ol/source';
 import { Tile as TileLayer } from 'ol/layer';
-
-import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
+import { extend, Extent } from 'ol/extent';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import {
@@ -55,9 +54,6 @@ export class EsriDynamic extends AbstractWebLayersClass {
   // layer from leaflet
   layer: TileLayer<TileArcGISRest> | null = null;
 
-  // mapService property
-  mapService: MapService;
-
   /**
    * Initialize layer
    * @param {string} mapId the id of the map
@@ -68,10 +64,6 @@ export class EsriDynamic extends AbstractWebLayersClass {
 
     const entries = layerConfig.layerEntries.map((item) => item.index);
     this.entries = entries?.filter((item) => !Number.isNaN(item));
-
-    this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(this.url),
-    });
   }
 
   /**
@@ -97,15 +89,10 @@ export class EsriDynamic extends AbstractWebLayersClass {
               return (this.entries as number[])?.includes(searchedItem);
             })
           ) {
-            // const feature = dynamicMapLayer({
-            //   url: layer.url[api.map(this.mapId).getLanguageCode()],
-            //   layers: this.entries,
-            //   attribution: '',
-            // } as DynamicMapLayerOptions);
-
             const feature = new TileLayer({
               source: new TileArcGISRest({
                 url: layer.url[api.map(this.mapId).getLanguageCode()],
+                params: { LAYERS: `show:${this.entries}` },
               }),
             });
 
@@ -128,12 +115,6 @@ export class EsriDynamic extends AbstractWebLayersClass {
    @returns {Promise<TypeJsonValue>} a json promise containing the result of the query
    */
   getMetadata = async (): Promise<TypeJsonObject> => {
-    // const feat = featureLayer({
-    //   url: this.url,
-    // });
-    // return feat.metadata(function (error, metadata) {
-    //   return metadata;
-    // });
     const response = await fetch(`${this.url}?f=json`);
     const result: TypeJsonObject = await response.json();
 
@@ -149,19 +130,14 @@ export class EsriDynamic extends AbstractWebLayersClass {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 
-    const feat = dynamicMapLayer({
-      url: this.url,
-      layers: this.entries,
-      attribution: '',
-    });
-
     return axios.get<TypeJsonObject>(queryUrl).then<TypeJsonArray>((res) => {
       const { data } = res;
-      const entryArray: TypeJsonArray = feat.getLayers();
 
-      if (entryArray.length > 0) {
+      if (this.entries && this.entries.length > 0) {
         const result = (data.layers as TypeJsonArray).filter((item) => {
-          return entryArray.includes(item.layerId) as TypeJsonArray;
+          const layerId = item.layerId as string;
+
+          return (this.entries as string[])?.includes(layerId) as TypeJsonArray;
         });
         return result as TypeJsonArray;
       }
@@ -193,23 +169,28 @@ export class EsriDynamic extends AbstractWebLayersClass {
   /**
    * Get bounds through external metadata
    *
-   * @returns {Promise<L.LatLngBounds>} layer bounds
+   * @returns {Promise<Extent>} layer bounds
    */
-  getBounds = async (): Promise<L.LatLngBounds> => {
-    const bounds = L.latLngBounds([]);
+  getBounds = async (): Promise<Extent> => {
+    // eslint-disable-next-line no-async-promise-executor
+    let bounds: Extent | undefined;
+
     if (this.entries) {
-      (this.entries as number[]).forEach(async (entry: number) => {
+      for (let entryIndex = 0; entryIndex < this.entries.length; entryIndex++) {
+        const entry = this.entries[entryIndex] as number;
+
+        // eslint-disable-next-line no-await-in-loop
         const meta = await this.getEntry(entry);
 
         const { xmin, xmax, ymin, ymax } = meta.extent;
-        bounds.extend([
-          [ymin, xmin],
-          [ymax, xmax],
-        ]);
-      });
+
+        if (!bounds) bounds = [xmin, ymin, xmax, ymax];
+
+        bounds = extend(bounds, [xmin, ymin, xmax, ymax]);
+      }
     }
 
-    return bounds;
+    return bounds || [];
   };
 
   /**
@@ -218,8 +199,13 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param entries MapServer layer IDs
    */
   setEntries = (entries: number[]) => {
-    // TODO
-    // this.layer!.options.layers = entries;
-    // this.layer!.redraw();
+    this.layer?.setSource(
+      new TileArcGISRest({
+        url: this.url,
+        params: { LAYERS: `show:${entries}` },
+      })
+    );
+
+    this.layer?.changed();
   };
 }

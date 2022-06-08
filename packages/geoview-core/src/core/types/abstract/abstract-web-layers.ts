@@ -1,5 +1,7 @@
 import { Layer } from 'leaflet';
 
+import { Extent } from 'ol/extent';
+
 import { TileArcGISRest, Vector as VectorSource } from 'ol/source';
 import { VectorImage as VectorLayer, Tile as TileLayer } from 'ol/layer';
 
@@ -35,7 +37,7 @@ export abstract class AbstractWebLayersClass {
 
   setEntries?(entries: number[]): void;
 
-  abstract getBounds(): L.LatLngBounds | Promise<L.LatLngBounds>;
+  abstract getBounds(): L.LatLngBounds | Promise<L.LatLngBounds> | Extent | Promise<Extent>;
 
   abstract setOpacity(opacity: number): void;
 

@@ -1,57 +1,106 @@
-import L from 'leaflet';
+import Feature from 'ol/Feature';
+import { Vector as VectorSource } from 'ol/source';
+import { VectorImage as VectorLayer } from 'ol/layer';
+import { GeoJSON as GeoJSONFormat } from 'ol/format';
+import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
+import { asArray, asString } from 'ol/color';
+import { Pixel } from 'ol/pixel';
+import { Extent } from 'ol/extent';
 
-import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import {
   AbstractWebLayersClass,
   CONST_LAYER_TYPES,
   TypeWebLayers,
   TypeGeoJSONLayer,
   toJsonObject,
-  Cast,
   TypeBaseWebLayersConfig,
   TypeFilterFeatures,
   TypeFilterQuery,
   FILTER_OPERATOR,
   TypeJsonObject,
 } from '../../../../core/types/cgpv-types';
+import { setAlphaColor } from '../../../../core/utils/utilities';
 
 import { api } from '../../../../app';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
-const defaultCircleMarkerStyle: L.CircleMarkerOptions = {
-  radius: 5,
-  fillColor: '#000000',
-  color: '#000000',
-  weight: 1,
-  opacity: 1,
-  fillOpacity: 0.4,
-};
-const defaultLineStringStyle: L.PathOptions = {
-  color: '#000000',
-  weight: 2,
-  opacity: 1,
-};
-const defaultLinePolygonStyle: L.PathOptions = {
-  color: '#000000',
-  weight: 2,
-  opacity: 1,
-  fillColor: '#000000',
-  fillOpacity: 0.5,
-};
-const defaultSelectStyle: L.PathOptions = {
-  color: '#0000FF',
-  weight: 3,
-  opacity: 1,
-  fillColor: '#0000FF',
-  fillOpacity: 0.5,
-};
+const defaultCircleMarkerStyle = new Style({
+  image: new StyleCircle({
+    radius: 5,
+    stroke: new Stroke({
+      color: asString(setAlphaColor(asArray('#000000'), 1)),
+      width: 1,
+    }),
+    fill: new Fill({
+      color: asString(setAlphaColor(asArray('#000000'), 0.4)),
+    }),
+  }),
+});
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const defaultStyle: any = {
+const defaultLineStringStyle = new Style({
+  stroke: new Stroke({
+    color: asString(setAlphaColor(asArray('#000000'), 1)),
+    width: 2,
+  }),
+});
+
+const defaultLinePolygonStyle = new Style({
+  stroke: new Stroke({
+    // 1 is for opacity
+    color: asString(setAlphaColor(asArray('#000000'), 1)),
+    width: 2,
+  }),
+  fill: new Fill({
+    color: asString(setAlphaColor(asArray('#000000'), 0.5)),
+  }),
+});
+
+const defaultSelectStyle = new Style({
+  stroke: new Stroke({
+    color: asString(setAlphaColor(asArray('#0000FF'), 1)),
+    width: 3,
+  }),
+  fill: new Fill({
+    color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
+  }),
+});
+
+const defaultStyle: TypeJsonObject = toJsonObject({
   Point: defaultCircleMarkerStyle,
   Line: defaultLineStringStyle,
   Polygon: defaultLinePolygonStyle,
+});
+
+/**
+ * Create a style from a renderer object
+ *
+ * @param {TypeJsonObject} renderer the render with the style properties
+ * @returns {Style} the new style with the custom renderer
+ */
+const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
+  return renderer.radius
+    ? new Style({
+        image: new StyleCircle({
+          radius: renderer.radius as number,
+          stroke: new Stroke({
+            color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
+            width: 1,
+          }),
+          fill: new Fill({
+            color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
+          }),
+        }),
+      })
+    : new Style({
+        stroke: new Stroke({
+          color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
+          width: 3,
+        }),
+        fill: new Fill({
+          color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
+        }),
+      });
 };
 
 /* ******************************************************************************************************************************
@@ -88,10 +137,10 @@ export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractWebLayersClass): ver
  */
 export class GeoJSON extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: L.GeoJSON | null = null;
+  layer: VectorLayer<VectorSource> | null = null;
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  features: Object[] = [];
+  features: Feature[] = [];
 
   /**
    * Initialize layer
@@ -109,59 +158,84 @@ export class GeoJSON extends AbstractWebLayersClass {
    * @param {TypeGeoJSONLayer} layer the layer configuration
    * @return {Promise<L.GeoJSON | null>} layers to add to the map
    */
-  add(geoLayer: TypeGeoJSONLayer): Promise<L.GeoJSON | null> {
-    const data = getXMLHttpRequest(geoLayer.url[api.map(this.mapId).getLanguageCode()]);
+  add(geoLayer: TypeGeoJSONLayer): Promise<VectorLayer<VectorSource> | null> {
+    const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
+      const geojson = new VectorLayer({
+        source: new VectorSource({
+          url: geoLayer.url[api.map(this.mapId).getLanguageCode()],
+          format: new GeoJSONFormat(),
+        }),
+        style: (feature) => {
+          const geometryType = feature.getGeometry()?.getType();
+          if (geometryType === 'Polygon') {
+            return geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultLinePolygonStyle;
+          }
+          if (geometryType === 'LineString') {
+            return geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultLineStringStyle;
+          }
+          if (geometryType === 'Point') {
+            return geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultCircleMarkerStyle;
+          }
 
-    const geo = new Promise<L.GeoJSON | null>((resolve) => {
-      data.then((value) => {
-        if (value !== '{}') {
-          // parse the json string and convert it to a json object
-          const featureCollection = toJsonObject(JSON.parse(value));
-
-          // add the geojson to the map
-          const geojson = L.geoJSON(Cast<GeoJSON.GeoJsonObject>(featureCollection), {
-            pointToLayer: (feature, latlng): L.Layer | undefined => {
-              return L.circleMarker(latlng, geoLayer.renderer || defaultCircleMarkerStyle);
-            },
-            onEachFeature: (feature, layer) => {
-              this.features.push({ layer });
-
-              layer.on({
-                // highlight on hover
-                mouseover: (e) => {
-                  const mouseOverLayer = e.target;
-                  if (mouseOverLayer.options.opacity !== 0 || mouseOverLayer.options.fillOpacity !== 0) {
-                    mouseOverLayer.setStyle(defaultSelectStyle);
-                    mouseOverLayer.bringToFront();
-                  }
-                },
-                // remove highlight when hover stops
-                mouseout: (e) => {
-                  const mouseOutLayer = e.target;
-                  if (mouseOutLayer.options.opacity !== 0 || mouseOutLayer.options.fillOpacity !== 0)
-                    mouseOutLayer.setStyle(geoLayer.renderer || defaultStyle[mouseOutLayer.feature?.geometry.type]);
-                },
-              });
-            },
-            // TODO classes will be created to style the elements, it may get the info from theming
-            // add styling
-            style: (feature) => {
-              if (feature?.geometry.type === 'Polygon') {
-                return geoLayer.renderer || defaultLinePolygonStyle;
-              }
-
-              if (feature?.geometry.type === 'LineString') {
-                return geoLayer.renderer || defaultLineStringStyle;
-              }
-              return {};
-            },
-          } as L.GeoJSONOptions);
-
-          resolve(geojson);
-        } else {
-          resolve(null);
-        }
+          return defaultSelectStyle;
+        },
       });
+
+      const featureOverlay = new VectorLayer({
+        source: new VectorSource(),
+        map: api.map(this.mapId).map,
+        style: new Style({
+          stroke: new Stroke({
+            color: 'rgba(255, 255, 255, 0.7)',
+            width: 2,
+          }),
+        }),
+      });
+
+      let highlight: Feature | undefined;
+
+      const highlightFeature = (pixel: Pixel) => {
+        const feature = api.map(this.mapId).map.forEachFeatureAtPixel(pixel, (featurePixel) => {
+          return featurePixel;
+        });
+
+        if (feature !== highlight) {
+          if (highlight) {
+            api.map(this.mapId).map.getTargetElement().style.cursor = '';
+
+            featureOverlay.getSource()?.removeFeature(highlight);
+          }
+          if (feature) {
+            api.map(this.mapId).map.getTargetElement().style.cursor = 'pointer';
+
+            featureOverlay.getSource()?.addFeature(feature as Feature);
+          }
+          highlight = feature as Feature;
+        }
+      };
+
+      api.map(this.mapId).map.on('pointermove', (evt) => {
+        if (evt.dragging) {
+          return;
+        }
+        const pixel = api.map(this.mapId).map.getEventPixel(evt.originalEvent);
+
+        highlightFeature(pixel);
+      });
+
+      // click on a feature
+      // api.map(this.mapId).map.on('click', (evt) => {});
+
+      /**
+       * Store features
+       */
+      geojson.getSource()?.on('addfeature', (event) => {
+        const { feature } = event;
+
+        if (feature) this.features.push(feature);
+      });
+
+      resolve(geojson);
     });
 
     return geo;
@@ -175,15 +249,13 @@ export class GeoJSON extends AbstractWebLayersClass {
 
     // loop all layer features
     for (let featureIndex = 0; featureIndex < this.features.length; featureIndex++) {
-      const feature = this.features[featureIndex] as TypeJsonObject;
+      const feature = this.features[featureIndex];
 
       // for each field, check value type associtaed and cast if needed
       const featValues: (string | number)[] = [];
       filters.forEach((filter: TypeFilterQuery, i: number) => {
         const tmpValue =
-          typeOfValue[i] === 'string'
-            ? String(feature.layer.feature.properties[filter.field])
-            : Number(feature.layer.feature.properties[filter.field]);
+          typeOfValue[i] === 'string' ? String(feature.getProperties()[filter.field]) : Number(feature.getProperties()[filter.field]);
         featValues.push(tmpValue);
       });
 
@@ -210,11 +282,7 @@ export class GeoJSON extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
-    this.layer!.getLayers().forEach((layer) => {
-      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
-      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.2 });
-    });
+    this.layer?.setOpacity(opacity);
   };
 
   /**
@@ -222,5 +290,5 @@ export class GeoJSON extends AbstractWebLayersClass {
    *
    * @returns {L.LatLngBounds} layer bounds
    */
-  getBounds = (): L.LatLngBounds => this.layer!.getBounds();
+  getBounds = (): Extent => this.layer?.getExtent() || [];
 }
