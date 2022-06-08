@@ -265,23 +265,23 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             const projConfig = api.projection.projections[projectionCode.toString()];
 
             // set the basemap layers
-            // initialMap?.setLayers(
-            //   payload.layers.map((layer) => {
-            //     return new TileLayer({
-            //       opacity: layer.opacity,
-            //       source: new XYZ({
-            //         projection: projConfig.projection,
-            //         url: layer.url,
-            //         tileGrid: new TileGrid({
-            //           extent: projConfig.extent,
-            //           origin: projConfig.origin,
-            //           resolutions: projConfig.resolutions,
-            //         }),
-            //       }),
-            //     });
-            //   })
-            // );
-            // initialMap.getLayers().forEach((layer) => layer.changed());
+            initialMap?.setLayers(
+              payload.layers.map((layer) => {
+                return new TileLayer({
+                  opacity: layer.opacity,
+                  source: new XYZ({
+                    projection: projConfig.projection,
+                    url: layer.url,
+                    tileGrid: new TileGrid({
+                      extent: projConfig.extent,
+                      origin: projConfig.origin,
+                      resolutions: projConfig.resolutions,
+                    }),
+                  }),
+                });
+              })
+            );
+            initialMap.getLayers().forEach((layer) => layer.changed());
           }
         }
       },

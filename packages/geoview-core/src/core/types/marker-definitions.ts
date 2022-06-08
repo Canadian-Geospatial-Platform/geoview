@@ -1,5 +1,7 @@
 import L from 'leaflet';
 
+import { Icon as StyleIcon } from 'ol/style';
+
 export const yellowIcon = new L.Icon({
   iconUrl: './markers/marker-icon-yellow.png',
   iconSize: [25, 41],
@@ -160,11 +162,10 @@ export const green2xIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-export const blueCircleIcon = new L.Icon({
-  iconUrl:
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAILSURBVDhPpZRNSBRhGMf/M5u5KtnJ1TVBNizdox8giODBQwuxRkinzZMfhwgRRT14DzIKvHgRFEEFTe0gHRShQ2HmRxCU5Ucgy+JhBQ20ZNfN1//z7iQttmrODx6ed56Z/e07M88z+BdKKScjwBjfi6rNtV0V+/5DxSIxtSk165zTujwBw8on8MLa8AF6+r7gxug68HmHNetcigmUZwN1hTpCaVfQYhjGhHVacyKkSNbPhlfR1vwW2InE68kouA4MVgMVbjznYTvF+n//Fj59soSOrg9W4QKkcscvfYDfg24KO6WmhZTdHVrFVN3s6UdwHk4HMFcLVZwFP6WvDcoc4V9Y847g5nm3mYzSLGDhAdZNA15uGr6+lcvLhOVtYCaIW1z6ROiXt2mX0Q2d/OZeFGXSGnZZDOtUYoZ+IudPn9khtK+Ty3QY+K2XNqFHiJn51xCUCbCLJ1OnLTPVgfcyTnapdOs0L3ublNm0i+WYNNnd84HbmJPZvCz3PGxuF96JSz+9jBQ8GqjGoczm/+JOB3qrEOXysRxrBc2f+AwaxnxQMpsXRWQzNVC5GWgUh9QSPgac68DHbfQ3vcFVGaezkNvkziKU1VM2bJVPf10o9R4pvJgO4s7YBgyZAGla6TNpDXmbDwuhylyY5uWtlH2N/zJO0s8VxUVM9xmljDypkRBjmfGKom+6kgBwDEZ2r0wFzVAoAAAAAElFTkSuQmCC',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
+export const blueCircleIcon = new StyleIcon({
+  src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAILSURBVDhPpZRNSBRhGMf/M5u5KtnJ1TVBNizdox8giODBQwuxRkinzZMfhwgRRT14DzIKvHgRFEEFTe0gHRShQ2HmRxCU5Ucgy+JhBQ20ZNfN1//z7iQttmrODx6ed56Z/e07M88z+BdKKScjwBjfi6rNtV0V+/5DxSIxtSk165zTujwBw8on8MLa8AF6+r7gxug68HmHNetcigmUZwN1hTpCaVfQYhjGhHVacyKkSNbPhlfR1vwW2InE68kouA4MVgMVbjznYTvF+n//Fj59soSOrg9W4QKkcscvfYDfg24KO6WmhZTdHVrFVN3s6UdwHk4HMFcLVZwFP6WvDcoc4V9Y847g5nm3mYzSLGDhAdZNA15uGr6+lcvLhOVtYCaIW1z6ROiXt2mX0Q2d/OZeFGXSGnZZDOtUYoZ+IudPn9khtK+Ty3QY+K2XNqFHiJn51xCUCbCLJ1OnLTPVgfcyTnapdOs0L3ublNm0i+WYNNnd84HbmJPZvCz3PGxuF96JSz+9jBQ8GqjGoczm/+JOB3qrEOXysRxrBc2f+AwaxnxQMpsXRWQzNVC5GWgUh9QSPgac68DHbfQ3vcFVGaezkNvkziKU1VM2bJVPf10o9R4pvJgO4s7YBgyZAGla6TNpDXmbDwuhylyY5uWtlH2N/zJO0s8VxUVM9xmljDypkRBjmfGKom+6kgBwDEZ2r0wFzVAoAAAAAElFTkSuQmCC',
+  scale: 1,
+  anchor: [10, 10],
 });
 
 export const getClusterIconFull = (ratio: string): L.DivIcon => {

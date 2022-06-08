@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-import L from 'leaflet';
-
-import { ImageArcGISRest, OSM } from 'ol/source';
-import { Image as ImageLayer, Tile as TileLayer } from 'ol/layer';
+import { TileArcGISRest } from 'ol/source';
+import { Tile as TileLayer } from 'ol/layer';
 
 import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
 
@@ -55,7 +53,7 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
  */
 export class EsriDynamic extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: ImageLayer<ImageArcGISRest> | null = null;
+  layer: TileLayer<TileArcGISRest> | null = null;
 
   // mapService property
   mapService: MapService;
@@ -80,12 +78,12 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * Add a ESRI dynamic layer to the map.
    *
    * @param {TypeDynamicLayer} layer the layer configuration
-   * @return {Promise<ImageLayer<ImageArcGISRest> | null>} layers to add to the map
+   * @return {Promise<TileLayer<TileArcGISRest> | null>} layers to add to the map
    */
-  add(layer: TypeDynamicLayer): Promise<ImageLayer<ImageArcGISRest> | null> {
+  add(layer: TypeDynamicLayer): Promise<TileLayer<TileArcGISRest> | null> {
     const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
-    const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
+    const geo = new Promise<TileLayer<TileArcGISRest> | null>((resolve) => {
       data.then((value) => {
         if (value !== '{}') {
           // get layers from service and parse layer entries as number
@@ -105,10 +103,8 @@ export class EsriDynamic extends AbstractWebLayersClass {
             //   attribution: '',
             // } as DynamicMapLayerOptions);
 
-            const feature = new ImageLayer({
-              source: new ImageArcGISRest({
-                ratio: 1,
-                params: {},
+            const feature = new TileLayer({
+              source: new TileArcGISRest({
                 url: layer.url[api.map(this.mapId).getLanguageCode()],
               }),
             });

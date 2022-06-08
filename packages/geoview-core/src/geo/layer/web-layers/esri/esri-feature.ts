@@ -1,5 +1,14 @@
 import axios from 'axios';
 
+import Feature from 'ol/Feature';
+import { ImageArcGISRest, Vector as VectorSource, XYZ } from 'ol/source';
+import { VectorImage as VectorLayer, Image as ImageLayer } from 'ol/layer';
+import { EsriJSON } from 'ol/format';
+import { Fill as StyleFill, Stroke as StyleStroke, Text as StyleText, Icon as StyleIcon, Style } from 'ol/style';
+import { StyleLike } from 'ol/style/Style';
+import { tile as tileStrategy } from 'ol/loadingstrategy';
+import { createXYZ } from 'ol/tilegrid';
+
 import L from 'leaflet';
 
 import { FeatureLayer, FeatureLayerOptions, featureLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
@@ -18,6 +27,7 @@ import { generateId, getXMLHttpRequest } from '../../../../core/utils/utilities'
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
 import { api } from '../../../../app';
+import { asArray, Color } from 'ol/color';
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeFeatureLayer
@@ -53,7 +63,7 @@ export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractWebLayersClass):
  */
 export class EsriFeature extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: FeatureLayer | null = null;
+  layer: VectorLayer<VectorSource> | null = null;
 
   // mapService property
   mapService: MapService;
@@ -76,13 +86,13 @@ export class EsriFeature extends AbstractWebLayersClass {
    * Add a ESRI feature layer to the map.
    *
    * @param {TypeFeatureLayer} layer the layer configuration
-   * @return {Promise<FeatureLayer | null>} layers to add to the map
+   * @return {Promise<VectorLayer<VectorSource> | null>} layers to add to the map
    */
-  async add(layer: TypeFeatureLayer): Promise<FeatureLayer | null> {
+  async add(layer: TypeFeatureLayer): Promise<VectorLayer<VectorSource> | null> {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
     // define a default blue icon
-    const iconSymbols: { field: string | null; valueAndSymbol: Record<string, L.Icon> } = {
+    const iconSymbols: { field: string | null; valueAndSymbol: Record<string, StyleIcon> } = {
       field: null,
       valueAndSymbol: { default: blueCircleIcon },
     };
@@ -94,42 +104,79 @@ export class EsriFeature extends AbstractWebLayersClass {
       if (renderer.type === 'uniqueValue') {
         iconSymbols.field = renderer.field1 as string;
         (renderer.uniqueValueInfos as TypeJsonArray).forEach((symbolInfo) => {
-          iconSymbols.valueAndSymbol[symbolInfo.value as string] = new L.Icon({
-            iconUrl: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
-            iconSize: [symbolInfo.symbol.width as number, symbolInfo.symbol.height as number],
-            iconAnchor: [Math.round((symbolInfo.symbol.width as number) / 2), Math.round((symbolInfo.symbol.height as number) / 2)],
+          iconSymbols.valueAndSymbol[symbolInfo.value as string] = new StyleIcon({
+            src: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
+            scale: (symbolInfo.symbol.height as number) / (symbolInfo.symbol.width as number),
+            anchor: [Math.round((symbolInfo.symbol.width as number) / 2), Math.round((symbolInfo.symbol.height as number) / 2)],
           });
         });
       } else if (renderer.symbol) {
         const symbolInfo = renderer.symbol;
-        iconSymbols.valueAndSymbol.default = new L.Icon({
-          iconUrl: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
-          iconSize: [symbolInfo.width as number, symbolInfo.height as number],
-          iconAnchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
+        iconSymbols.valueAndSymbol.default = new StyleIcon({
+          src: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
+          scale: (symbolInfo.height as number) / (symbolInfo.width as number),
+          anchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
         });
       }
     }
 
     const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
-    const geo = new Promise<FeatureLayer | null>((resolve) => {
-      data.then((value) => {
+    const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
+      data.then(async (value) => {
         if (value !== '{}') {
           const { type } = toJsonObject(JSON.parse(value));
 
           // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
           // if the path is bad, return will be {}
           if (typeof type !== 'undefined' && type === 'Feature Layer') {
-            const feature = featureLayer({
-              url: layer.url[api.map(this.mapId).getLanguageCode()],
-              pointToLayer: (aFeature, latlng) => {
-                const iconToUse =
-                  iconSymbols.field && aFeature.properties[iconSymbols.field] in iconSymbols.valueAndSymbol
-                    ? iconSymbols.valueAndSymbol[aFeature.properties[iconSymbols.field]]
-                    : iconSymbols.valueAndSymbol.default;
-                return L.marker(latlng, { icon: iconToUse, id: generateId() });
+            const serviceUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/query?f=pjson&outfields=*&where=1%3D1`;
+
+            const esrijsonFormat = new EsriJSON();
+
+            const response = (await axios.get(serviceUrl)).data;
+
+            const vectorSource = new VectorSource({
+              loader: (extent, resolution, projection, success, failure) => {
+                if (response.error) {
+                  if (failure) failure();
+                } else {
+                  // dataProjection will be read from document
+                  const features = esrijsonFormat.readFeatures(response, {
+                    featureProjection: projection,
+                  });
+
+                  if (features.length > 0) {
+                    vectorSource.addFeatures(features);
+                  }
+
+                  if (success) success(features);
+                }
               },
-            } as FeatureLayerOptions);
+              strategy: tileStrategy(
+                createXYZ({
+                  tileSize: 512,
+                })
+              ),
+            });
+
+            const featureStyle = (feature: Feature) => {
+              const featureProperties = feature.getProperties();
+
+              const iconToUse =
+                iconSymbols.field && featureProperties[iconSymbols.field] in iconSymbols.valueAndSymbol
+                  ? iconSymbols.valueAndSymbol[featureProperties[iconSymbols.field]]
+                  : iconSymbols.valueAndSymbol.default;
+
+              return new Style({
+                image: iconToUse,
+              });
+            };
+
+            const feature = new VectorLayer({
+              source: vectorSource,
+              style: featureStyle as StyleLike,
+            });
 
             resolve(feature);
           } else {
@@ -174,10 +221,18 @@ export class EsriFeature extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    (this.layer as FeatureLayer).eachFeature((feature) => {
-      if (feature.setOpacity) feature.setOpacity(opacity);
-      else if (feature.setStyle) feature.setStyle({ opacity, fillOpacity: opacity * 0.2 });
-    });
+    this.layer
+      ?.getSource()
+      ?.getFeatures()
+      .forEach((feature: Feature) => {
+        const featureStyle = feature.getStyle() as Style;
+        const color = featureStyle?.getFill().getColor();
+        const colorArray = asArray(color as Color).slice();
+        colorArray[3] = opacity;
+        featureStyle.getFill().setColor(colorArray);
+
+        feature.setStyle(featureStyle);
+      });
   };
 
   /**

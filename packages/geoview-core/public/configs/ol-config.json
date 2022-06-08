@@ -13,30 +13,16 @@
     },
     "layers": [
       {
-        "id": "esriDynamicLYR2",
+        "id": "esriFeatureLYR3",
         "name": {
-          "en": "Energy Infrastructure of North America",
-          "fr": "Infrastructure énergétique d'Amérique du Nord"
+          "en": "Geothermal",
+          "fr": "Géothermie"
         },
         "url": {
-          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
-          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
+          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/2",
+          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/1"
         },
-        "layerType": "esriDynamic",
-        "layerEntries": [
-          {
-            "index": 1
-          },
-          {
-            "index": 2
-          },
-          {
-            "index": 3
-          },
-          {
-            "index": 4
-          }
-        ]
+        "layerType": "esriFeature"
       }
     ],
     "controls": {
