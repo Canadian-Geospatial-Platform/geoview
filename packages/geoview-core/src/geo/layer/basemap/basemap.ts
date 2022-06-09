@@ -229,7 +229,6 @@ export class Basemap {
    */
   createCoreBasemap = (basemapOptions: TypeBasemapOptions): void => {
     const basemapLayers: TypeBasemapLayer[] = [];
-    let mainBasemapOpacity = 1;
     const basemaplayerTypes: string[] = [];
 
     const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
@@ -240,10 +239,9 @@ export class Basemap {
           type: 'shaded',
           url: this.basemapsList[this.projection].shaded,
           options: this.basemapLayerOptions,
-          opacity: mainBasemapOpacity,
+          opacity: 0.75,
           basemapPaneName: this.basemapsPaneName,
         });
-        mainBasemapOpacity = 0.75;
         basemaplayerTypes.push('shaded');
       }
 
@@ -253,7 +251,7 @@ export class Basemap {
           type: 'transport',
           url: this.basemapsList[this.projection][coreBasemapOptions.id] || this.basemapsList[this.projection].transport,
           options: this.basemapLayerOptions,
-          opacity: mainBasemapOpacity,
+          opacity: 1,
           basemapPaneName: this.basemapsPaneName,
         });
         basemaplayerTypes.push(coreBasemapOptions.id || 'transport');
@@ -266,7 +264,7 @@ export class Basemap {
           type: 'label',
           url: this.basemapsList[this.projection].label.replaceAll('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT'),
           options: this.basemapLayerOptions,
-          opacity: 1,
+          opacity: 0.8,
           basemapPaneName: this.basemapsPaneName,
         });
         basemaplayerTypes.push('label');
