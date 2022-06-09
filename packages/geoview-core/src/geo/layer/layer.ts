@@ -81,10 +81,11 @@ export class Layer {
               this.removeTabindex();
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.#mapId, layerConfig);
-              // wmsLayer.add(layerConfig).then((layer) => {
-              //   wmsLayer.layer = layer;
-              //   this.addToMap(wmsLayer);
-              // });
+
+              wmsLayer.add(layerConfig).then((layer) => {
+                wmsLayer.layer = layer;
+                this.addToMap(wmsLayer);
+              });
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
               const esriDynamic = new EsriDynamic(this.#mapId, layerConfig);
               esriDynamic.add(layerConfig).then((layer) => {

@@ -2,8 +2,6 @@ import axios from 'axios';
 
 import L from 'leaflet';
 
-import { mapService as esriMapService, MapService } from 'esri-leaflet';
-
 import { xmlToJson } from '../../../../core/utils/utilities';
 import {
   AbstractWebLayersClass,
@@ -52,9 +50,6 @@ export class WFS extends AbstractWebLayersClass {
   // layer from leaflet
   layer: L.GeoJSON | null = null;
 
-  // mapService property
-  mapService: MapService;
-
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
 
@@ -70,10 +65,6 @@ export class WFS extends AbstractWebLayersClass {
     super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
 
     this.entries = layerConfig.layerEntries.map((item) => item.id);
-
-    this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(this.url, true),
-    });
   }
 
   /**

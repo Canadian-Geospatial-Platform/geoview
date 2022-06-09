@@ -13,6 +13,25 @@
     },
     "layers": [
       {
+        "id": "geojsonLYR1",
+        "name": {
+          "en": "GeoJSON Sample",
+          "fr": "Exemple GeoJSON"
+        },
+        "url": {
+          "en": "./geojson/polygons.json",
+          "fr": "./geojson/polygons.json"
+        },
+        "renderer": {
+          "fillColor": "#ff7800",
+          "color": "#000",
+          "weight": 1,
+          "opacity": 1,
+          "fillOpacity": 0.8
+        },
+        "layerType": "geojson"
+      },
+      {
         "id": "esriDynamicLYR2",
         "name": {
           "en": "Energy Infrastructure of North America",
@@ -38,25 +57,6 @@
             "index": 6
           }
         ]
-      },
-      {
-        "id": "geojsonLYR1",
-        "name": {
-          "en": "GeoJSON Sample",
-          "fr": "Exemple GeoJSON"
-        },
-        "url": {
-          "en": "./geojson/polygons.json",
-          "fr": "./geojson/polygons.json"
-        },
-        "renderer": {
-          "fillColor": "#ff7800",
-          "color": "#000",
-          "weight": 1,
-          "opacity": 1,
-          "fillOpacity": 0.8
-        },
-        "layerType": "geojson"
       }
     ],
     "controls": {

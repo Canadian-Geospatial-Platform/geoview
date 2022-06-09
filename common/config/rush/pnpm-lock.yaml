@@ -126,7 +126,6 @@ importers:
       '@mui/styles': ^5.4.2
       '@react-leaflet/core': ^1.1.1
       '@types/create-react-class': ^15.6.3
-      '@types/esri-leaflet': ^2.1.9
       '@types/flux': ^3.1.11
       '@types/glob': ^7.2.0
       '@types/jest': ^27.4.0
@@ -162,7 +161,6 @@ importers:
       eslint-plugin-prettier: ^4.0.0
       eslint-plugin-react: ^7.28.0
       eslint-plugin-react-hooks: ^4.3.0
-      esri-leaflet: ^3.0.4
       eventemitter3: ^4.0.7
       file-loader: ^6.2.0
       focus-trap-react: ^8.9.1
@@ -193,7 +191,6 @@ importers:
       react-test-renderer: ^17.0.2
       sass: ^1.49.7
       sass-loader: ^12.4.0
-      screenfull: ^6.0.1
       style-loader: ^3.3.1
       terser-webpack-plugin: ^5.3.1
       typedoc: ^0.22.17
@@ -216,7 +213,6 @@ importers:
       axios: 0.25.0
       dayjs: 1.11.2
       domhandler: 4.3.1
-      esri-leaflet: 3.0.8_leaflet@1.8.0
       eventemitter3: 4.0.7
       focus-trap-react: 8.11.0_75cb922c19ee1b7939faae9b4d1f4cf7
       html-react-parser: 1.4.12_react@17.0.2
@@ -238,7 +234,6 @@ importers:
       react-i18next: 11.16.8_8f2a12f93b34591c18c344cd829419b1
       react-leaflet: 3.2.5_f2bc606f83c617542d0a54cd51b317f0
       react-test-renderer: 17.0.2_react@17.0.2
-      screenfull: 6.0.1
       wms-capabilities: 0.5.1
     devDependencies:
       '@babel/cli': 7.17.10_@babel+core@7.17.10
@@ -268,7 +263,6 @@ importers:
       '@babel/runtime': 7.17.9
       '@babel/runtime-corejs3': 7.17.9
       '@types/create-react-class': 15.6.3
-      '@types/esri-leaflet': 2.1.9
       '@types/flux': 3.1.11
       '@types/glob': 7.2.0
       '@types/jest': 27.5.0
@@ -2611,16 +2605,6 @@ packages:
       '@sinonjs/commons': 1.8.3
     dev: true
 
-  /@terraformer/arcgis/2.1.0:
-    resolution: {integrity: sha512-eKTvNXze2Fo7vAEjvJFIGn5QdU0OP4aD9DuT/uTBLRM1QS+ju7KtPITbVW+xgCviHLnOVeFQ1UsIs9kjkakD4g==}
-    dependencies:
-      '@terraformer/common': 2.0.7
-    dev: false
-
-  /@terraformer/common/2.0.7:
-    resolution: {integrity: sha512-8bl+/JT0Rw6FYe2H3FfJS8uQwgzGl+UHs+8JX0TQLHgA4sMDEwObbMwo0iP3FVONwPXrPHEpC5YH7Grve0cl9A==}
-    dev: false
-
   /@tootallnate/once/1.1.2:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
     engines: {node: '>= 6'}
@@ -2699,12 +2683,6 @@ packages:
     dependencies:
       '@types/estree': 0.0.51
       '@types/json-schema': 7.0.11
-    dev: true
-
-  /@types/esri-leaflet/2.1.9:
-    resolution: {integrity: sha512-Z3GLyJTepEsEpo2FB3eRqSRxGw1Y2Vohpuu5Qp87tc3MGbXjhSUTRYldoaACZj6JQQJuOnyK9FLMdSziq5C1Ow==}
-    dependencies:
-      '@types/leaflet': 1.7.9
     dev: true
 
   /@types/estree/0.0.51:
@@ -4803,16 +4781,6 @@ packages:
     dependencies:
       estraverse: 5.3.0
     dev: true
-
-  /esri-leaflet/3.0.8_leaflet@1.8.0:
-    resolution: {integrity: sha512-mLb4pRfDAbkG1YhuajD22erLXIAtrF1R32hmgmlJNI3t47n6KjTppCb8lViia0O7+GDORXFuJ9Lj9RkpsaKhSA==}
-    peerDependencies:
-      leaflet: ^1.0.0
-    dependencies:
-      '@terraformer/arcgis': 2.1.0
-      leaflet: 1.8.0
-      tiny-binary-search: 1.0.3
-    dev: false
 
   /estraverse/4.3.0:
     resolution: {integrity: sha512-39nnKffWz8xN1BU/2c79n9nB9HDzo0niYUqx6xyqUnyoAnQyyWpOTdZEeiCch8BBu515t4wp9ZmgVfVhn9EBpw==}
@@ -7817,11 +7785,6 @@ packages:
       ajv-keywords: 5.1.0_ajv@8.11.0
     dev: true
 
-  /screenfull/6.0.1:
-    resolution: {integrity: sha512-yzQW+j4zMUBQC51xxWaoDYjxOtl8Kn+xvue3p6v/fv2pIi1jH4AldgVLU8TBfFVgH2x3VXlf3+YiA/AYIPlaew==}
-    engines: {node: ^14.13.1 || >=16.0.0}
-    dev: false
-
   /select-hose/2.0.0:
     resolution: {integrity: sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=}
     dev: true
@@ -8321,10 +8284,6 @@ packages:
   /thunky/1.1.0:
     resolution: {integrity: sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==}
     dev: true
-
-  /tiny-binary-search/1.0.3:
-    resolution: {integrity: sha512-STSHX/L5nI9WTLv6wrzJbAPbO7OIISX83KFBh2GVbX1Uz/vgZOU/ANn/8iV6t35yMTpoPzzO+3OQid3mifE0CA==}
-    dev: false
 
   /tiny-warning/1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}

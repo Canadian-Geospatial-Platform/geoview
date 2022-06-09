@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-import { TileArcGISRest } from 'ol/source';
-import { Tile as TileLayer } from 'ol/layer';
+import { ImageArcGISRest } from 'ol/source';
+import { Image as ImageLayer } from 'ol/layer';
 import { extend, Extent } from 'ol/extent';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
@@ -52,7 +52,7 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
  */
 export class EsriDynamic extends AbstractWebLayersClass {
   // layer from leaflet
-  layer: TileLayer<TileArcGISRest> | null = null;
+  layer: ImageLayer<ImageArcGISRest> | null = null;
 
   /**
    * Initialize layer
@@ -70,12 +70,12 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * Add a ESRI dynamic layer to the map.
    *
    * @param {TypeDynamicLayer} layer the layer configuration
-   * @return {Promise<TileLayer<TileArcGISRest> | null>} layers to add to the map
+   * @return {Promise<ImageLayer<ImageArcGISRest> | null>} layers to add to the map
    */
-  add(layer: TypeDynamicLayer): Promise<TileLayer<TileArcGISRest> | null> {
+  add(layer: TypeDynamicLayer): Promise<ImageLayer<ImageArcGISRest> | null> {
     const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
-    const geo = new Promise<TileLayer<TileArcGISRest> | null>((resolve) => {
+    const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
       data.then((value) => {
         if (value !== '{}') {
           // get layers from service and parse layer entries as number
@@ -89,8 +89,8 @@ export class EsriDynamic extends AbstractWebLayersClass {
               return (this.entries as number[])?.includes(searchedItem);
             })
           ) {
-            const feature = new TileLayer({
-              source: new TileArcGISRest({
+            const feature = new ImageLayer({
+              source: new ImageArcGISRest({
                 url: layer.url[api.map(this.mapId).getLanguageCode()],
                 params: { LAYERS: `show:${this.entries}` },
               }),
@@ -200,7 +200,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    */
   setEntries = (entries: number[]) => {
     this.layer?.setSource(
-      new TileArcGISRest({
+      new ImageArcGISRest({
         url: this.url,
         params: { LAYERS: `show:${entries}` },
       })

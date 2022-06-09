@@ -13,43 +13,17 @@
     },
     "layers": [
       {
-        "id": "esriDynamicLYR2",
-        "name": {
-          "en": "Energy Infrastructure of North America",
-          "fr": "Infrastructure énergétique d'Amérique du Nord"
-        },
-        "url": {
-          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
-          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
-        },
-        "layerType": "esriDynamic",
-        "layerEntries": [
-          {
-            "index": 4,
-            "name": {
-              "en": "Natural Gas Processing Plants - config",
-              "fr": "Usines de traitement du gaz naturel - config"
-            }
-          },
-          {
-            "index": 5
-          },
-          {
-            "index": 6
-          }
-        ]
-      },
-      {
         "id": "geojsonLYR1",
         "name": {
           "en": "GeoJSON Sample",
           "fr": "Exemple GeoJSON"
         },
         "url": {
-          "en": "./geojson/polygons.json",
-          "fr": "./geojson/polygons.json"
+          "en": "./geojson/historical_flood_0.geojson",
+          "fr": "./geojson/historical_flood_0.geojson"
         },
         "renderer": {
+          "radius": 5,
           "fillColor": "#ff7800",
           "color": "#000",
           "weight": 1,

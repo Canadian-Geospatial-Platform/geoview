@@ -160,6 +160,12 @@ export class GeoJSON extends AbstractWebLayersClass {
    */
   add(geoLayer: TypeGeoJSONLayer): Promise<VectorLayer<VectorSource> | null> {
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
+      const style: Record<string, Style> = {
+        Polygon: geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultLinePolygonStyle,
+        LineString: geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultLineStringStyle,
+        Point: geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultCircleMarkerStyle,
+      };
+
       const geojson = new VectorLayer({
         source: new VectorSource({
           url: geoLayer.url[api.map(this.mapId).getLanguageCode()],
@@ -167,17 +173,8 @@ export class GeoJSON extends AbstractWebLayersClass {
         }),
         style: (feature) => {
           const geometryType = feature.getGeometry()?.getType();
-          if (geometryType === 'Polygon') {
-            return geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultLinePolygonStyle;
-          }
-          if (geometryType === 'LineString') {
-            return geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultLineStringStyle;
-          }
-          if (geometryType === 'Point') {
-            return geoLayer.renderer ? createStyleFromRenderer(geoLayer.renderer) : defaultCircleMarkerStyle;
-          }
 
-          return defaultSelectStyle;
+          return style[geometryType] ? style[geometryType] : defaultSelectStyle;
         },
       });
 

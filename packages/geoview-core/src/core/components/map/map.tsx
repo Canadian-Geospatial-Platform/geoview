@@ -250,6 +250,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         center: fromLonLat([mapProps.initialView.center[0], mapProps.initialView.center[1]], projectionConfig.projection),
         zoom: mapProps.initialView.zoom,
         extent: projectionConfig.extent,
+        minZoom: 2,
+        maxZoom: 17,
       }),
       controls: [],
     });

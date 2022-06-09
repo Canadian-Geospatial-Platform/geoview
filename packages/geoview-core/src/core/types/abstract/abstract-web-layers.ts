@@ -2,8 +2,8 @@ import { Layer } from 'leaflet';
 
 import { Extent } from 'ol/extent';
 
-import { TileArcGISRest, Vector as VectorSource } from 'ol/source';
-import { VectorImage as VectorLayer, Tile as TileLayer } from 'ol/layer';
+import { ImageArcGISRest, ImageWMS, Vector as VectorSource } from 'ol/source';
+import { VectorImage as VectorLayer, Image as ImageLayer } from 'ol/layer';
 
 import { TypeWebLayers, TypeBaseWebLayersConfig, TypeLayersInWebLayer, DEFAULT_LAYER_NAMES } from '../cgpv-types';
 
@@ -28,7 +28,7 @@ export abstract class AbstractWebLayersClass {
   protected mapId: string;
 
   // The actual layer
-  abstract layer: TileLayer<TileArcGISRest> | VectorLayer<VectorSource> | Layer | null;
+  abstract layer: ImageLayer<ImageArcGISRest> | ImageLayer<ImageWMS> | VectorLayer<VectorSource> | Layer | null;
 
   layers: TypeLayersInWebLayer = {};
 
