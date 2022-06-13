@@ -40,3 +40,7 @@ Hold all third party libraries override
   background-color: rgba(255, 255, 255, 0.8) !important;
   height: 20px !important;
 }
+
+.ol-scale-line-inner {
+  display: none;
+}

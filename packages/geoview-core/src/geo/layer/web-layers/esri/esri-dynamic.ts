@@ -12,7 +12,6 @@ import {
   TypeJsonObject,
   TypeJsonArray,
   TypeLegendJsonDynamic,
-  toJsonObject,
   TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
@@ -78,28 +77,14 @@ export class EsriDynamic extends AbstractWebLayersClass {
     const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
       data.then((value) => {
         if (value !== '{}') {
-          // get layers from service and parse layer entries as number
-          const { layers } = toJsonObject(JSON.parse(value));
+          const feature = new ImageLayer({
+            source: new ImageArcGISRest({
+              url: layer.url[api.map(this.mapId).getLanguageCode()],
+              params: { LAYERS: `show:${this.entries}` },
+            }),
+          });
 
-          // check if the entries are part of the service
-          if (
-            layers &&
-            (layers as TypeJsonArray).find((item) => {
-              const searchedItem = item.id as number;
-              return (this.entries as number[])?.includes(searchedItem);
-            })
-          ) {
-            const feature = new ImageLayer({
-              source: new ImageArcGISRest({
-                url: layer.url[api.map(this.mapId).getLanguageCode()],
-                params: { LAYERS: `show:${this.entries}` },
-              }),
-            });
-
-            resolve(feature);
-          } else {
-            resolve(null);
-          }
+          resolve(feature);
         } else {
           resolve(null);
         }

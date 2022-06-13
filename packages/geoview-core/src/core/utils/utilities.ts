@@ -1,7 +1,25 @@
 /* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';
 
-import { Cast, TypeUpdateScaleEvent, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+import { api } from '../../app';
+import { EVENT_NAMES } from '../../api/events/event';
+
+import { snackbarMessagePayload, Cast, TypeUpdateScaleEvent, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+
+/**
+ * Display a message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showMessage(mapId: string, message: string) {
+  api.event.emit(
+    snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+      type: 'string',
+      value: message,
+    })
+  );
+}
 
 /**
  * Generate a unique id if an id was not provided

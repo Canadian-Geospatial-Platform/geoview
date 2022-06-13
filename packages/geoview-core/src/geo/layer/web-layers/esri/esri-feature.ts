@@ -166,7 +166,6 @@ export class EsriFeature extends AbstractWebLayersClass {
             };
 
             const feature = new VectorLayer({
-              extent: api.projection.projections[api.map(this.mapId).currentProjection].extent,
               source: vectorSource,
               style: featureStyle as StyleLike,
             });

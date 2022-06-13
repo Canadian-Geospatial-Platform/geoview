@@ -14,7 +14,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
   const { api, react, ui } = cgpv;
 
-  const { useState, useEffect } = react;
+  const { useState, useEffect, useCallback } = react;
 
   const useStyles = ui.makeStyles(() => ({
     listContainer: {
@@ -71,10 +71,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     api.map(mapId).basemap.setBasemap(id);
   };
 
-  /**
-   * load existing basemaps and create new basemaps
-   */
-  useEffect(() => {
+  const addBasemaps = async () => {
     // reset the basemaps array
     api.map(mapId).basemap.basemaps = [];
 
@@ -83,19 +80,26 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
     // create the core basemap
     for (let basemapIndex = 0; basemapIndex < config.coreBasemaps.length; basemapIndex++) {
-      const basemap = config.coreBasemaps[basemapIndex] as TypeJsonObject;
-      api.map(mapId).basemap.createCoreBasemap(basemap as unknown as TypeBasemapOptions);
+      const basemapOptions = config.coreBasemaps[basemapIndex] as TypeJsonObject;
+      // eslint-disable-next-line no-await-in-loop
+      const basemap = await api.map(mapId).basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions);
+      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
     }
 
     // create the custom config basemap
     for (let basemapIndex = 0; basemapIndex < config.customBasemaps.length; basemapIndex++) {
       const customBasemap = config.customBasemaps[basemapIndex] as TypeJsonObject;
-      api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
+      const basemap = api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
+      if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
     }
+  };
 
-    // set the basemaps in the list
-    setBasemapList(basemaps);
-  }, [api, config.coreBasemaps, config.customBasemaps, mapId]);
+  /**
+   * load existing basemaps and create new basemaps
+   */
+  useEffect(() => {
+    addBasemaps();
+  }, []);
 
   return (
     <div className={classes.listContainer}>

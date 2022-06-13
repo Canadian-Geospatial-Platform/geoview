@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useRef, useContext } from 'react';
 
-import { LatLng } from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
+import { toLonLat } from 'ol/proj';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -66,7 +67,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   const classes = useStyles();
 
-  const [position, setPosition] = useState({ lat: '--', lng: '--' });
+  const [position, setPosition] = useState({ lng: '--', lat: '--' });
 
   // keep track of crosshair status to know when update coord from keyboard navigation
   const isCrosshairsActive = useRef(false);
@@ -77,18 +78,18 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   /**
    * Format the coordinates output
-   * @param {LatLng} latlng the Lat and Lng value to format
+   * @param {Coordinate} lnglat the Lng and Lat value to format
    */
-  function formatCoord(latlng: LatLng) {
-    const lat = coordFormnat(latlng.lat, latlng.lat > 0 ? t('mapctrl.mouseposition.north') : t('mapctrl.mouseposition.south'));
-    const lng = coordFormnat(latlng.lng, latlng.lng < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east'));
-    setPosition({ lat, lng });
+  function formatCoord(lnglat: Coordinate) {
+    const lng = coordFormnat(lnglat[0], lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east'));
+    const lat = coordFormnat(lnglat[1], lnglat[1] > 0 ? t('mapctrl.mouseposition.north') : t('mapctrl.mouseposition.south'));
+    setPosition({ lng, lat });
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMouseMove = useCallback(
     debounce((e) => {
-      formatCoord(e.latlng);
+      formatCoord(toLonLat(e.coordinate, api.projection.projections[api.map(mapId).currentProjection]));
     }, 250),
     [t]
   );
@@ -97,7 +98,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   const onMoveEnd = useCallback(
     debounce((e) => {
       if (isCrosshairsActive.current) {
-        formatCoord(e.target.getCenter());
+        formatCoord(toLonLat(e.map.getView().getCenter(), api.projection.projections[api.map(mapId).currentProjection]));
       }
     }, 500),
     [t]
@@ -106,8 +107,8 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   useEffect(() => {
     const { map } = api.map(mapId);
 
-    map.addEventListener('mousemove', onMouseMove);
-    map.addEventListener('moveend', onMoveEnd);
+    map.on('pointermove', onMouseMove);
+    map.on('moveend', onMoveEnd);
 
     // on map crosshair enable\disable, set variable for WCAG mouse position
     api.event.on(

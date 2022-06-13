@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 // Leaflet icons import to solve issues 4968
-import L, { Icon, Marker } from 'leaflet';
+import L from 'leaflet';
 import * as ReactLeaflet from 'react-leaflet';
 import * as ReactLeafletCore from '@react-leaflet/core';
 
@@ -12,12 +12,10 @@ import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-import 'leaflet/dist/leaflet.css';
+import 'ol/ol.css';
 import './ui/style/style.css';
 import './ui/style/vendor.css';
+
 import * as UI from './ui';
 
 import AppStart from './core/app-start';
@@ -33,15 +31,6 @@ import { payloadIsAMapConfig } from './api/events/payloads/map-config-payload';
 
 export * from './core/types/cgpv-types';
 export const api = new API();
-
-// hack for default leaflet icon: https://github.com/Leaflet/Leaflet/issues/4968
-// TODO: put somewhere else
-const DefaultIcon = new Icon({
-  iconUrl: icon,
-  iconAnchor: [13, 40],
-  shadowUrl: iconShadow,
-});
-Marker.prototype.options.icon = DefaultIcon;
 
 // TODO look for a better place to put this when working on issue #8
 

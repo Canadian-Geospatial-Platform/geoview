@@ -89,8 +89,10 @@ export class Layer {
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
               const esriDynamic = new EsriDynamic(this.#mapId, layerConfig);
               esriDynamic.add(layerConfig).then((layer) => {
-                esriDynamic.layer = layer;
-                this.addToMap(esriDynamic);
+                if (layer) {
+                  esriDynamic.layer = layer;
+                  this.addToMap(esriDynamic);
+                }
               });
             } else if (layerConfigIsEsriFeature(layerConfig)) {
               const esriFeature = new EsriFeature(this.#mapId, layerConfig);

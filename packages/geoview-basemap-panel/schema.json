@@ -118,7 +118,7 @@
         "id": {
           "type": "string",
           "description": "the basemap id",
-          "enum": ["transport", "simple", "shaded"]
+          "enum": ["transport", "simple", "osm", "nogeom"]
         },
         "shaded": {
           "type": "boolean",

@@ -683,7 +683,7 @@
           "properties": {
             "id": {
               "type": "string",
-              "enum": ["transport", "shaded", "simple"],
+              "enum": ["transport", "simple", "osm", "nogeom"],
               "default": "transport",
               "description": "Id of the basemap to use."
             },

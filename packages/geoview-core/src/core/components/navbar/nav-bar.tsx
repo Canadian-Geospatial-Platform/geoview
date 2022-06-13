@@ -9,7 +9,6 @@ import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 
-import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
 import { api } from '../../../app';
 import { Panel, ButtonGroup, Button } from '../../../ui';
 
@@ -24,14 +23,19 @@ const navBtnHeight = '32px';
 
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
     display: 'flex',
     flexDirection: 'row',
-    marginRight: 5,
     paddingBottom: 30,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
     height: '100%',
     overflow: 'auto',
+    justifyContent: 'center',
+    width: 40,
+    backgroundColor: 'transparent',
   },
   navBtnGroupContainer: {
     display: 'flex',
@@ -150,7 +154,7 @@ export function Navbar(): JSX.Element {
   }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
-    <div ref={navBarRef} className={`${LEAFLET_POSITION_CLASSES.bottomright} ${classes.navBarRef}`}>
+    <div ref={navBarRef} className={`${classes.navBarRef}`}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttons = buttonPanelGroups[groupName];
 

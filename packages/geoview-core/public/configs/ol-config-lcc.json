@@ -19,6 +19,26 @@
           "fr": "Exemple GeoJSON"
         },
         "url": {
+          "en": "./geojson/historical_flood_0.geojson",
+          "fr": "./geojson/historical_flood_0.geojson"
+        },
+        "renderer": {
+          "radius": 5,
+          "fillColor": "#ff7800",
+          "color": "#000",
+          "weight": 1,
+          "opacity": 1,
+          "fillOpacity": 0.8
+        },
+        "layerType": "geojson"
+      },
+      {
+        "id": "geojsonLYR1",
+        "name": {
+          "en": "GeoJSON Sample",
+          "fr": "Exemple GeoJSON"
+        },
+        "url": {
           "en": "./geojson/polygons.json",
           "fr": "./geojson/polygons.json"
         },

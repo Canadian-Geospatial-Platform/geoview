@@ -89,8 +89,8 @@ export class Config {
 
   // valid basemap ids
   private _basemapId: Record<number, string[]> = {
-    3857: ['transport'],
-    3978: ['transport', 'simple', 'shaded'],
+    3857: ['transport', 'osm', 'nogeom'],
+    3978: ['transport', 'simple', 'osm', 'nogeom'],
   };
 
   // valid shaded basemap values for each projection
@@ -375,7 +375,7 @@ export class Config {
     let configObjStr = this.mapElement.getAttribute('data-config');
 
     if (configObjStr && configObjStr !== '') {
-      configObjStr = configObjStr.replace(/'/g, '"').replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
+      configObjStr = configObjStr.replace(/'/g, '"').replace(/(?:[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
 
       if (!isJsonString(configObjStr)) {
         console.log(`- map: ${this.id} - Invalid JSON configuration object, using default -`);
@@ -606,7 +606,7 @@ export class Config {
 
     if (objStr && objStr.length) {
       // get the text in between { }
-      const objStrPropRegex = /(?<=[{_.])(.*?)(?=[}_.])/g;
+      const objStrPropRegex = /(?:[{_.])(.*?)(?=[}_.])/g;
 
       const objStrProps = objStr.match(objStrPropRegex);
 
@@ -737,7 +737,7 @@ export class Config {
   private validateBasemap(projection: number, basemapOptions: TypeBasemapOptions): TypeBasemapOptions {
     const id = this._basemapId[projection].includes(basemapOptions.id)
       ? basemapOptions.id
-      : (this._basemapId[projection][0] as 'shaded' | 'simple' | 'transport');
+      : (this._basemapId[projection][0] as 'nogeom' | 'osm' | 'simple' | 'transport');
 
     const shaded = this._basemapShaded[projection].includes(basemapOptions.shaded)
       ? basemapOptions.shaded

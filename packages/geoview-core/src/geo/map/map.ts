@@ -4,6 +4,8 @@ import { i18n } from 'i18next';
 // import L from 'leaflet';
 
 import OLMap from 'ol/Map';
+import View from 'ol/View';
+import { fromLonLat } from 'ol/proj';
 
 import { LatLng, LatLngBounds } from 'leaflet';
 
@@ -11,8 +13,6 @@ import queryString from 'query-string';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
-
-import { MapProjection } from '../projection/map-projection';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
@@ -26,6 +26,9 @@ import {
   TypeLanguages,
   TypeLocalizedLanguages,
   TypeMapSchemaProps,
+  TypeHTMLElement,
+  TypeDcoument,
+  TypeMapView,
 } from '../../core/types/cgpv-types';
 
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
@@ -93,9 +96,6 @@ export class MapViewer {
   // store current position
   currentPosition: LatLng;
 
-  // access projection functions for this map instance
-  projection!: MapProjection;
-
   // i18n instance
   i18nInstance!: i18n;
 
@@ -126,6 +126,9 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.id);
 
     this.modal = new ModalApi(this.id);
+
+    // create basemap and pass in the map id to be able to access the map instance
+    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
   }
 
   /**
@@ -136,12 +139,6 @@ export class MapViewer {
   initMap(cgpMap: OLMap): void {
     this.id = cgpMap.get('id');
     this.map = cgpMap;
-
-    // initialize the projection
-    this.projection = new MapProjection(this.mapProps.map.projection);
-
-    // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(this.id, this.mapProps.map.layers);
@@ -230,16 +227,59 @@ export class MapViewer {
    * @param status toggle fullscreen or exit fullscreen status
    * @param {HTMLElement} element the element to toggle fullscreen on
    */
-  toggleFullscreen = (status: boolean, element: HTMLElement): void => {
+  toggleFullscreen = (status: boolean, element: TypeHTMLElement): void => {
     // enter fullscreen
     if (status) {
-      element.requestFullscreen();
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        /* Safari */
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        /* IE11 */
+        element.msRequestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        /* Firefox */
+        element.mozRequestFullScreen();
+      }
     }
 
     // exit fullscreen
     if (!status) {
-      document.exitFullscreen();
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as TypeDcoument).webkitExitFullscreen) {
+        /* Safari */
+        (document as TypeDcoument).webkitExitFullscreen();
+      } else if ((document as TypeDcoument).msExitFullscreen) {
+        /* IE11 */
+        (document as TypeDcoument).msExitFullscreen();
+      } else if ((document as TypeDcoument).mozCancelFullScreen) {
+        /* Firefox */
+        (document as TypeDcoument).mozCancelFullScreen();
+      }
     }
+  };
+
+  /**
+   * Update the map view
+   *
+   * @param {TypeMapView} mapView map view object
+   */
+  setView = (mapView: TypeMapView): void => {
+    const projection = mapView.projection ? mapView.projection : api.projection.projections[this.currentProjection];
+    this.map.setView(
+      new View({
+        projection,
+        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.initialView.zoom,
+        center: mapView.center
+          ? fromLonLat([mapView.center[0], mapView.center[1]], projection)
+          : fromLonLat([this.mapProps.map.initialView.center[0], this.mapProps.map.initialView.center[1]], projection),
+        extent: mapView.extent,
+        minZoom: mapView.minZoom,
+        maxZoom: mapView.maxZoom,
+      })
+    );
   };
 
   /**

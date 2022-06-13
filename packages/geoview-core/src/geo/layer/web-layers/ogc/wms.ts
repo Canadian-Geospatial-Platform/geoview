@@ -186,7 +186,7 @@ export class WMS extends AbstractWebLayersClass {
       ?.getFeatureInfoUrl(
         lnglat,
         api.map(this.mapId).map.getView().getResolution()!,
-        api.projection.projections[api.map(this.mapId).currentProjection].projection,
+        api.projection.projections[api.map(this.mapId).currentProjection],
         {
           LAYERS: this.entries,
           info_format: infoFormat,

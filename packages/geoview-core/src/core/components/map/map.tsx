@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import { useEffect, useState, useRef, MutableRefObject } from 'react';
+import { useEffect, useState, useRef, MutableRefObject, createElement } from 'react';
+import ReactDOM from 'react-dom';
 
 import { fromLonLat, Projection, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
@@ -33,10 +34,15 @@ import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { latLngPayload } from '../../../api/events/payloads/lat-long-payload';
 import { attributionPayload } from '../../../api/events/payloads/attribution-payload';
 import { Footerbar } from '../footerbar/footer-bar';
+import Control from 'ol/control/Control';
+import { Scale } from '../scale/scale';
 
 export const useStyles = makeStyles(() => ({
   mapContainer: {
+    display: 'flex',
+    flexDirection: 'column',
     width: '100%',
+    position: 'relative',
   },
 }));
 
@@ -64,7 +70,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   const mapElement = useRef<HTMLDivElement | null>();
 
   // attribution used by the map
-  const [attribution, setAttribution] = useState<string>('');
+  const [attribution, setAttribution] = useState<string | undefined>('');
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
@@ -234,27 +240,45 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // viewer.toggleMapInteraction(mapProps.interaction);
   };
 
-  useEffect(() => {
+  const initMap = async () => {
     // create map
-    const projectionConfig = api.projection.projections[mapProps.projection];
+    const projection = api.projection.projections[mapProps.projection];
+
+    const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
-      layers: [
-        // new TileLayer({
-        //   source: new OSM(),
-        // }),
-      ],
+      layers: defaultBasemap?.layers.map((layer) => {
+        // create a tile layer for this basemap layer
+        const tileLayer = new TileLayer({
+          opacity: layer.opacity,
+          source: layer.source,
+        });
+
+        // add this layer to the basemap group
+        tileLayer.set('id', 'basemap');
+
+        return tileLayer;
+      }),
       view: new View({
-        projection: projectionConfig.projection,
-        center: fromLonLat([mapProps.initialView.center[0], mapProps.initialView.center[1]], projectionConfig.projection),
+        projection,
+        center: fromLonLat([mapProps.initialView.center[0], mapProps.initialView.center[1]], projection),
         zoom: mapProps.initialView.zoom,
-        extent: projectionConfig.extent,
-        minZoom: 2,
-        maxZoom: 17,
+        // extent: projectionConfig.extent,
+        extent: defaultBasemap?.layers[0].extent,
+        minZoom: defaultBasemap?.layers[0].minScale || 0,
+        maxZoom: defaultBasemap?.layers[0].maxScale || 17,
       }),
       controls: [],
     });
+
+    setAttribution(defaultBasemap?.attribution);
+
+    initCGPVMap(initialMap);
+  };
+
+  useEffect(() => {
+    initMap();
 
     // listen to adding a new basemap events
     api.event.on(
@@ -262,10 +286,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       (payload) => {
         if (payloadIsABasemapLayerArray(payload)) {
           if (payload.handlerName === id) {
-            const projectionCode = api.map(id).currentProjection;
-
-            const projConfig = api.projection.projections[projectionCode.toString()];
-
             // remove previous basemaps
             const layers = api.map(id).map.getAllLayers();
 
@@ -287,15 +307,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             payload.layers.forEach((layer, index) => {
               const basemapLayer = new TileLayer({
                 opacity: layer.opacity,
-                source: new XYZ({
-                  projection: projConfig.projection,
-                  url: layer.url,
-                  tileGrid: new TileGrid({
-                    extent: projConfig.extent,
-                    origin: projConfig.origin,
-                    resolutions: projConfig.resolutions,
-                  }),
-                }),
+                source: layer.source,
               });
 
               // set this basemap's group id to basemap
@@ -313,14 +325,15 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       id
     );
 
-    initCGPVMap(initialMap);
-
     return () => {
       api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
     };
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} />;
+  return (
+    <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
+      {isLoaded && <Footerbar attribution={attribution!} />}
+    </div>
+  );
 }

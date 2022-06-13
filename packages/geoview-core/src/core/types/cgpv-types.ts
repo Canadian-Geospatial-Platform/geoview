@@ -2,10 +2,11 @@ import React, { CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { Extent } from 'ol/extent';
-import { Projection as OLProjection } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import Feature from 'ol/Feature';
+import { Extent } from 'ol/extent';
+import { Projection } from 'ol/proj';
+import { OSM, XYZ } from 'ol/source';
 
 import * as ReactLeaflet from 'react-leaflet';
 import * as ReactLeafletCore from '@react-leaflet/core';
@@ -121,6 +122,18 @@ export interface TypeWindow extends Window {
   plugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPluginClass | undefined };
 }
 
+export interface TypeHTMLElement extends HTMLElement {
+  webkitRequestFullscreen: () => void;
+  msRequestFullscreen: () => void;
+  mozRequestFullScreen: () => void;
+}
+
+export interface TypeDcoument extends Document {
+  webkitExitFullscreen: () => void;
+  msExitFullscreen: () => void;
+  mozCancelFullScreen: () => void;
+}
+
 /**
  * Type used for exporting UI
  */
@@ -190,6 +203,18 @@ export type TypeChildren = React.ReactNode;
 export type TypeMapContext = {
   id: string;
   interaction: string;
+};
+
+/**
+ * Type used when setting map view
+ */
+export type TypeMapView = {
+  zoom: number;
+  minZoom: number;
+  maxZoom: number;
+  projection?: Projection;
+  center?: Coordinate;
+  extent?: Extent;
 };
 
 /**
@@ -454,20 +479,10 @@ export type TypeMapInitialView = {
 export type TypeProjectionCodes = 3978 | 3857;
 
 /**
- * Interface used for initializing projections
- */
-export interface TypeProjection {
-  extent: Extent;
-  projection: OLProjection;
-  resolutions: Array<number>;
-  origin: Array<number>;
-}
-
-/**
  * interface for basemap options
  */
 export type TypeBasemapOptions = {
-  id: 'transport' | 'shaded' | 'label' | 'simple';
+  id: 'transport' | 'osm' | 'simple' | 'nogeom';
   shaded: boolean;
   labeled: boolean;
 };
@@ -645,16 +660,24 @@ export type TypeBasemapLayerOptions = {
   noWrap: boolean;
 };
 
+export type TypeBasemapLayerSource = OSM | XYZ;
+
 /**
  * interface used to define a new basemap layer
  */
 export type TypeBasemapLayer = {
   id: string;
-  url: string;
+  url?: string;
+  jsonUrl?: string;
+  source: TypeBasemapLayerSource;
   type: string;
-  options: TypeBasemapLayerOptions;
+  options?: TypeBasemapLayerOptions;
   opacity: number;
-  basemapPaneName: string;
+  resolutions?: number[];
+  origin?: number[];
+  minScale?: number;
+  maxScale?: number;
+  extent?: Extent;
 };
 
 /**

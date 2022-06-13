@@ -13,8 +13,6 @@ import { Scale } from '../scale/scale';
 
 import { MapContext } from '../../app-start';
 
-import { LEAFLET_POSITION_CLASSES } from '../../../geo/utils/constant';
-
 import { TypeFooterbarProps } from '../../types/cgpv-types';
 
 export const useStyles = makeStyles(() => ({
@@ -28,6 +26,9 @@ export const useStyles = makeStyles(() => ({
     backgroundColor: '#0000008f',
     backdropFilter: 'blur(5px)',
     pointerEvents: 'all',
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
   },
   mouseScaleControlsContainer: {
     display: 'flex',
@@ -80,10 +81,7 @@ export function Footerbar(props: TypeFooterbarProps): JSX.Element {
   }, [mapId]);
 
   return (
-    <div
-      className={`${LEAFLET_POSITION_CLASSES.bottomleft} ${classes.footerBarContainer}`}
-      ref={footerBarRef as MutableRefObject<HTMLDivElement>}
-    >
+    <div id="footerBar" className={`${classes.footerBarContainer}`} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       {deviceSizeMedUp && <Attribution attribution={attribution} />}
       {/* <ScaleControl position="bottomright" imperial={false} /> */}
       <div id="mouseAndScaleControls" className={classes.mouseScaleControlsContainer}>

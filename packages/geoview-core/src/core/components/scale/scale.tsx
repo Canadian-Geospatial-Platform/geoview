@@ -2,6 +2,9 @@
 /* eslint-disable no-underscore-dangle */
 import { useContext, useEffect, useState } from 'react';
 
+import OLMap from 'ol/Map';
+import { ScaleLine } from 'ol/control';
+
 import makeStyles from '@mui/styles/makeStyles';
 
 import Units, { METERS_PER_UNIT } from 'ol/proj/Units';
@@ -43,13 +46,11 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} created scale element
  */
 export function Scale(): JSX.Element {
-  const [scaleText, setScaleText] = useState('');
+  const [scaleText, setScaleText] = useState('1');
 
   const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
-
-  const { map } = api.map(mapId);
 
   const classes = useStyles();
 
@@ -60,7 +61,7 @@ export function Scale(): JSX.Element {
     return METERS_PER_UNIT[unit] * INCHES_PER_METRE;
   }
 
-  const mapRatioScale = ({ toRound = true }): number => {
+  const mapRatioScale = (map: OLMap, { toRound = true }): number => {
     const resolution = map.getView().getResolution()!;
     const unit = map.getView().getProjection().getUnits();
 
@@ -80,11 +81,25 @@ export function Scale(): JSX.Element {
     // return () => {
     //   map.off('scaleupdate');
     // };
-  }, [map]);
+
+    const { map } = api.map(mapId);
+
+    const selectScale = new ScaleLine({ units: 'metric', target: undefined });
+
+    map.addControl(selectScale);
+
+    map.on('moveend', () => {
+      const scale = map.getTargetElement().querySelector('.ol-scale-line-inner')?.innerHTML;
+
+      setScaleText(scale!);
+    });
+  }, [mapId]);
 
   return (
     <div className={classes.scaleContainer}>
-      <span className={classes.scaleText}>{scaleText}</span>
+      <span id="scaleText" className={classes.scaleText}>
+        {scaleText}
+      </span>
     </div>
   );
 }
