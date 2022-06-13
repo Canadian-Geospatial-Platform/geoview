@@ -11,7 +11,6 @@ import {
   TypePanelProps,
   TypeSchemaObject,
 } from 'geoview-core';
-import { LayersOutlinedIcon } from 'geoview-core/src/ui/icons';
 import PanelContent from './panel-content';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-layers-panel.json';
@@ -79,7 +78,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
       id: 'layersPanelButton',
       tooltip: this.translations[language].layersPanel as string,
       tooltipPlacement: 'right',
-      children: <LayersOutlinedIcon />,
+      children: cgpv.react.createElement(cgpv.ui.elements.LayersOutlinedIcon),
       visible: true,
     };
 
