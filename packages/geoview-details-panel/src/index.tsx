@@ -9,7 +9,6 @@ import {
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core';
-import { DetailsIcon } from 'geoview-core/src/ui/icons';
 import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
 import PanelContent from './panel-content';
 
@@ -65,7 +64,7 @@ class DetailsPlugin extends AbstractPluginClass {
       id: 'detailsPanelButton',
       tooltip: this.translations[language].detailsPanel as string,
       tooltipPlacement: 'right',
-      children: <DetailsIcon />,
+      children: cgpv.react.createElement(cgpv.ui.elements.DetailsIcon),
       visible: true,
     };
 
