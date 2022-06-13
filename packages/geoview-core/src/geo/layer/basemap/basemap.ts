@@ -13,7 +13,6 @@ import {
   TypeBasemapLayerOptions,
   TypeBasemapLayer,
   TypeBasemapOptions,
-  TypeAttribution,
   TypeProjectionCodes,
   TypeLocalizedLanguages,
   TypeJsonObject,
@@ -540,7 +539,7 @@ export class Basemap {
 
     // set thumbnail if not provided
     if (!basemapProps.thumbnailUrl || basemapProps.thumbnailUrl.length === 0) {
-      basemapProps.layers.forEach((layer) => {
+      basemapProps.layers.forEach(() => {
         // const { type } = layer;
         // TODO: set thumbnails from configuration
       });
@@ -569,13 +568,4 @@ export class Basemap {
     // emit an event to update the basemap layers on the map
     api.event.emit(basemapLayerArrayPayload(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, this.#mapId, basemap.layers));
   };
-
-  /**
-   * get attribution value to add the the map
-   *
-   * @returns {TypeAttribution} the attribution value
-   */
-  get attribution(): TypeAttribution {
-    return this.attributionVal;
-  }
 }

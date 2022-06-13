@@ -6,6 +6,8 @@ import { api } from '../../../../app';
 
 import { Button, FullscreenIcon, FullscreenExitIcon } from '../../../../ui';
 
+import { TypeHTMLElement } from '../../../types/cgpv-types';
+
 /**
  * Interface used for fullscreen button properties
  */
@@ -47,7 +49,7 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
 
     if (parentElement) {
       setFs(!fs);
-      api.map(mapId).toggleFullscreen(!fs, parentElement);
+      api.map(mapId).toggleFullscreen(!fs, parentElement as TypeHTMLElement);
     }
   }
 

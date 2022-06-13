@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 
-import { View } from 'ol';
 import { fromLonLat } from 'ol/proj';
 
 import { MapContext } from '../../../app-start';
@@ -53,7 +52,7 @@ export default function Home(props: HomeProps): JSX.Element {
       .map(mapId)
       .map.getView()
       .animate({
-        center: fromLonLat(center, projectionConfig.projection),
+        center: fromLonLat(center, projectionConfig),
         duration: 500,
         zoom,
       });
