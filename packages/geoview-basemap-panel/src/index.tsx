@@ -10,7 +10,7 @@ import {
   TypeSchemaObject,
   TypeJsonObject,
 } from 'geoview-core';
-import { MapIcon } from 'geoview-core/src/ui/icons';
+
 import { BasemapPanel } from './basemap-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-basemap-panel.json';
@@ -69,7 +69,6 @@ class BasemapPanelPlugin extends AbstractPluginClass {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-
       const { language } = api.map(mapId);
 
       // button props
@@ -77,7 +76,7 @@ class BasemapPanelPlugin extends AbstractPluginClass {
         id: 'basemapPanelButton',
         tooltip: this.translations[language].basemapPanel as string,
         tooltipPlacement: 'right',
-        children: <MapIcon />,
+        children: cgpv.react.createElement(cgpv.ui.elements.MapIcon),
         visible: true,
       };
 
