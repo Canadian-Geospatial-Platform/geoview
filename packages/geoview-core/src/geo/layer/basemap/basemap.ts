@@ -359,6 +359,14 @@ export class Basemap {
       const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
       if (coreBasemapOptions) {
+        // create shaded layer
+        if (coreBasemapOptions.shaded && this.basemapsList[this.projection].shaded) {
+          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, 0.75, true);
+
+          basemapLayers.push(shadedLayer);
+          basemaplayerTypes.push('shaded');
+        }
+
         // create transport layer
         if (coreBasemapOptions.id === 'transport' && this.basemapsList[this.projection].transport) {
           const transportLayer = await this.createBasemapLayer('transport', this.basemapsList[this.projection].transport, 1, true);
@@ -389,14 +397,6 @@ export class Basemap {
         // no geometry basemap layer
         if (coreBasemapOptions.id === 'nogeom') {
           basemaplayerTypes.push('nogeom');
-        }
-
-        // create shaded layer
-        if (coreBasemapOptions.shaded && this.basemapsList[this.projection].shaded) {
-          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, 0.75, true);
-
-          basemapLayers.push(shadedLayer);
-          basemaplayerTypes.push('shaded');
         }
 
         if (basemapLayers.length && coreBasemapOptions.labeled) {
@@ -518,9 +518,9 @@ export class Basemap {
 
     this.activeBasemap = basemap;
 
-    this.defaultOrigin = basemap?.layers[0].origin;
-    this.defaultResolutions = basemap?.layers[0].resolutions;
-    this.defaultExtent = basemap?.layers[0].extent;
+    this.defaultOrigin = basemap?.layers[1].origin;
+    this.defaultResolutions = basemap?.layers[1].resolutions;
+    this.defaultExtent = basemap?.layers[1].extent;
 
     return basemap;
   };
