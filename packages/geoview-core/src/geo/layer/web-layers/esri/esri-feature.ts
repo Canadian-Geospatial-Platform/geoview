@@ -58,7 +58,7 @@ export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractWebLayersClass):
  * @class EsriFeature
  */
 export class EsriFeature extends AbstractWebLayersClass {
-  // layer from leaflet
+  // layer
   layer: VectorLayer<VectorSource> | null = null;
 
   /**

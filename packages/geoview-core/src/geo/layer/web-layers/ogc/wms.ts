@@ -47,8 +47,6 @@ export const webLayerIsWMS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.WMS;
 };
 
-// TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
-
 /**
  * a class to add wms layer
  *
@@ -310,7 +308,7 @@ export class WMS extends AbstractWebLayersClass {
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
    * @returns {Promise<Extent>} layer bounds
    */

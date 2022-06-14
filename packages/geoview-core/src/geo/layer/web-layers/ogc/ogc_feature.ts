@@ -47,7 +47,7 @@ export const webLayerIsOgcFeature = (verifyIfWebLayer: AbstractWebLayersClass): 
  * @class OgcFeature
  */
 export class OgcFeature extends AbstractWebLayersClass {
-  // layer from leaflet
+  // layer
   layer: L.GeoJSON | null = null;
 
   // private varibale holding wms capabilities
@@ -218,7 +218,7 @@ export class OgcFeature extends AbstractWebLayersClass {
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
    * @returns {L.LatLngBounds} layer bounds
    */

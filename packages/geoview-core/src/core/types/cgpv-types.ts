@@ -710,9 +710,9 @@ export type TypeBasemapProps = {
   layers: TypeBasemapLayer[];
   attribution: string;
   zoomLevels: TypeZoomLevels;
-  defaultOrigin: number[];
-  defaultExtent: Extent;
-  defaultResolutions: number[];
+  defaultOrigin?: number[];
+  defaultExtent?: Extent;
+  defaultResolutions?: number[];
 };
 
 /**

@@ -69,7 +69,7 @@ export class MapViewer {
   // the id of the map
   id!: string;
 
-  // the leaflet map
+  // the openlayer map
   map!: OLMap;
 
   // used to access button panel API to create buttons and button panels on the appbar

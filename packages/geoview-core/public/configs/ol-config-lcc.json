@@ -50,33 +50,6 @@
           "fillOpacity": 0.8
         },
         "layerType": "geojson"
-      },
-      {
-        "id": "esriDynamicLYR2",
-        "name": {
-          "en": "Energy Infrastructure of North America",
-          "fr": "Infrastructure énergétique d'Amérique du Nord"
-        },
-        "url": {
-          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
-          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
-        },
-        "layerType": "esriDynamic",
-        "layerEntries": [
-          {
-            "index": 4,
-            "name": {
-              "en": "Natural Gas Processing Plants - config",
-              "fr": "Usines de traitement du gaz naturel - config"
-            }
-          },
-          {
-            "index": 5
-          },
-          {
-            "index": 6
-          }
-        ]
       }
     ],
     "controls": {

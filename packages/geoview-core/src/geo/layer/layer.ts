@@ -1,11 +1,3 @@
-import { Layer as leafletLayer } from 'leaflet';
-
-import ImageLayer from 'ol/layer/Image';
-import { ImageArcGISRest, TileArcGISRest } from 'ol/source';
-import TileLayer from 'ol/layer/Tile';
-import VectorImageLayer from 'ol/layer/VectorImage';
-import VectorSource from 'ol/source/Vector';
-
 import { EsriDynamic, layerConfigIsEsriDynamic } from './web-layers/esri/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from './web-layers/esri/esri-feature';
 import { layerConfigIsWMS, WMS } from './web-layers/ogc/wms';
@@ -20,7 +12,7 @@ import { MarkerClusterClass } from './vector/marker-cluster';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { Cast, CONST_LAYER_TYPES, AbstractWebLayersClass, TypeLayerConfig, TypeJsonObject } from '../../core/types/cgpv-types';
+import { Cast, AbstractWebLayersClass, TypeLayerConfig, TypeJsonObject } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
@@ -103,10 +95,10 @@ export class Layer {
               this.removeTabindex();
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.#mapId, layerConfig);
-              // wfsLayer.add(layerConfig).then((layer) => {
-              //   wfsLayer.layer = layer;
-              //   this.addToMap(wfsLayer);
-              // });
+              wfsLayer.add(layerConfig).then((layer) => {
+                wfsLayer.layer = layer;
+                this.addToMap(wfsLayer);
+              });
             } else if (layerConfigIsOgcFeature(layerConfig)) {
               const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConfig);
               // ogcFeatureLayer.add(layerConfig).then((layer) => {
@@ -115,10 +107,11 @@ export class Layer {
               // });
             } else if (layerConfigIsXYZTiles(layerConfig)) {
               const xyzTiles = new XYZTiles(this.#mapId, layerConfig);
-              // xyzTiles.add(layerConfig).then((layer) => {
-              //   xyzTiles.layer = layer;
-              //   this.addToMap(xyzTiles);
-              // });
+
+              xyzTiles.add(layerConfig).then((layer) => {
+                xyzTiles.layer = layer;
+                this.addToMap(xyzTiles);
+              });
             }
           }
         }
@@ -145,37 +138,6 @@ export class Layer {
   }
 
   /**
-   * Check if the layer is loading. We do validation prior to this so it should almost alwasy load
-   * @param {string} name layer name
-   * @param {leafletLayer} layer to aply the load event on to see it it loads
-   */
-  private layerIsLoaded(name: string, layer: leafletLayer): void {
-    let isLoaded = false;
-    // we trap most of the erros prior to this. When this load, layer shoud be ok
-    // ! load is not fired for GeoJSON layer
-    if (layer) {
-      layer.once('load', () => {
-        isLoaded = true;
-      });
-    }
-
-    setTimeout(() => {
-      if (!isLoaded) {
-        api.event.emit(
-          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
-            type: 'key',
-            value: 'validation.layer.loadfailed',
-            params: [name as TypeJsonObject, this.#mapId as TypeJsonObject],
-          })
-        );
-
-        // TODO: some layer take time to load e.g. geomet so try to find a wayd to ping the layer
-        // this.removeLayer(layer.id);
-      }
-    }, 10000);
-  }
-
-  /**
    * Add the layer to the map if valid. If not (is a string) emit an error
    * @param {any} cgpvLayer the layer config
    */
@@ -191,15 +153,7 @@ export class Layer {
         })
       );
     } else {
-      // TODO
-      // if (
-      //   cgpvLayer.type !== CONST_LAYER_TYPES.GEOJSON &&
-      //   cgpvLayer.type !== CONST_LAYER_TYPES.WFS &&
-      //   cgpvLayer.type !== CONST_LAYER_TYPES.OGC_FEATURE
-      // )
-      //   this.layerIsLoaded(cgpvLayer.name!, cgpvLayer.layer!);
-
-      api.map(this.#mapId).map.addLayer(cgpvLayer.layer as TileLayer<TileArcGISRest> | VectorImageLayer<VectorSource>);
+      api.map(this.#mapId).map.addLayer(cgpvLayer.layer);
 
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
@@ -280,6 +234,4 @@ export class Layer {
     // return this.layers.filter((layer: AbstractWebLayersClass) => layer.id === id)[0];
     return this.layers[id];
   };
-
-  // WCS https://github.com/stuartmatthews/Leaflet.NonTiledLayer.WCS
 }

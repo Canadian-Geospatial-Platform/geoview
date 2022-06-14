@@ -13,14 +13,19 @@
       "labeled": false
     },
     {
-      "id": "simple",
-      "shaded": true,
+      "id": "osm",
+      "shaded": false,
       "labeled": false
     },
     {
       "id": "nogeom",
       "shaded": false,
       "labeled": true
+    },
+    {
+      "id": "simple",
+      "shaded": true,
+      "labeled": false
     }
   ],
   "customBasemaps": [

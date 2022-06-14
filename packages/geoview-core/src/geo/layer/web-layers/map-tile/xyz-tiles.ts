@@ -1,8 +1,6 @@
-import L from 'leaflet';
-
+import { Extent } from 'ol/extent';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import TileGrid from 'ol/tilegrid/TileGrid';
 
 import { api } from '../../../../app';
 
@@ -55,8 +53,8 @@ export const webLayerIsXYZTiles = (verifyIfWebLayer: AbstractWebLayersClass): ve
  * @class XYZTiles
  */
 export class XYZTiles extends AbstractWebLayersClass {
-  // layer from leaflet
-  layer: L.TileLayer | null = null;
+  // layer
+  layer: TileLayer<XYZ> | null = null;
 
   /**
    * Initialize layer
@@ -72,13 +70,19 @@ export class XYZTiles extends AbstractWebLayersClass {
    * Add a XYZ Tiles layer to the map.
    *
    * @param {TypeXYZTiles} layer the layer configuration
-   * @return {Promise<L.TileLayer | null>} layers to add to the map
+   * @return {Promise<TileLayer<XYZ> | null>} layers to add to the map
    */
-  add(layer: TypeXYZTiles): Promise<L.TileLayer | null> {
-    const tileLayer = new Promise<L.TileLayer | null>((resolve) => {
-      const xyzTileLayer = L.tileLayer(layer.url[api.map(this.mapId).getLanguageCode()]);
+  add(layer: TypeXYZTiles): Promise<TileLayer<XYZ> | null> {
+    const tileLayer = new Promise<TileLayer<XYZ> | null>((resolve) => {
+      // const xyzTileLayer = L.tileLayer();
 
-      resolve(xyzTileLayer || null);
+      const xyzTileLayer = new TileLayer({
+        source: new XYZ({
+          url: layer.url[api.map(this.mapId).getLanguageCode()],
+        }),
+      });
+
+      resolve(xyzTileLayer);
     });
     return tileLayer;
   }
@@ -88,17 +92,13 @@ export class XYZTiles extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    (this.layer as L.TileLayer).setOpacity(opacity);
+    this.layer?.setOpacity(opacity);
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
-   * @returns {L.LatLngBounds} layer bounds
+   * @returns {Extent} layer bounds
    */
-  getBounds = (): L.LatLngBounds =>
-    L.latLngBounds([
-      [-85.05112877980660357, -180],
-      [85.05112877980660357, 180],
-    ]);
+  getBounds = (): Extent => this.layer?.getExtent() || [];
 }

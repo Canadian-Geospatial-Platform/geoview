@@ -50,7 +50,7 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
  * @class EsriDynamic
  */
 export class EsriDynamic extends AbstractWebLayersClass {
-  // layer from leaflet
+  // layer
   layer: ImageLayer<ImageArcGISRest> | null = null;
 
   /**

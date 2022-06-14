@@ -195,6 +195,10 @@ export class Basemap {
           );
         }
       }
+
+      if (type === 'osm') {
+        thumbnailUrls.push('https://tile.openstreetmap.org/0/0/0.png');
+      }
     }
 
     return thumbnailUrls;
@@ -230,6 +234,8 @@ export class Basemap {
           ? 'The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada, is intended primarily for online mapping application users and developers'
           : "Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d'applications de cartographie en ligne."
       }`;
+    } else if (basemapTypes.includes('osm')) {
+      name = `${language === 'en-CA' ? 'Open Street Maps' : 'Ouvrir les cartes des rues'}`;
     } else if (basemapTypes.includes('nogeom')) {
       name = `${language === 'en-CA' ? 'No geometry' : 'Pas de géométrie'}`;
     }
@@ -355,10 +361,11 @@ export class Basemap {
     return new Promise(async (resolve) => {
       const basemapLayers: TypeBasemapLayer[] = [];
       const basemaplayerTypes: string[] = [];
+      const defaultOpacity = 1;
 
-      let defaultOrigin: number[] = [];
-      let defaultExtent: Extent = [];
-      let defaultResolutions: number[] = [];
+      let defaultOrigin: number[] | undefined;
+      let defaultExtent: Extent | undefined;
+      let defaultResolutions: number[] | undefined;
       let minZoom = 0;
       let maxZoom = 17;
 
@@ -367,7 +374,7 @@ export class Basemap {
       if (coreBasemapOptions) {
         // create shaded layer
         if (coreBasemapOptions.shaded && this.basemapsList[this.projection].shaded) {
-          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, 1, true);
+          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, defaultOpacity, true);
 
           basemapLayers.push(shadedLayer);
           basemaplayerTypes.push('shaded');
@@ -375,7 +382,12 @@ export class Basemap {
 
         // create transport layer
         if (coreBasemapOptions.id === 'transport' && this.basemapsList[this.projection].transport) {
-          const transportLayer = await this.createBasemapLayer('transport', this.basemapsList[this.projection].transport, 0.75, true);
+          const transportLayer = await this.createBasemapLayer(
+            'transport',
+            this.basemapsList[this.projection].transport,
+            coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+            true
+          );
 
           basemapLayers.push(transportLayer);
           basemaplayerTypes.push('transport');
@@ -390,7 +402,12 @@ export class Basemap {
 
         // create simple layer
         if (coreBasemapOptions.id === 'simple' && this.basemapsList[this.projection].simple) {
-          const simpleLayer = await this.createBasemapLayer('simple', this.basemapsList[this.projection].simple, 0.75, true);
+          const simpleLayer = await this.createBasemapLayer(
+            'simple',
+            this.basemapsList[this.projection].simple,
+            coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+            true
+          );
 
           basemapLayers.push(simpleLayer);
           basemaplayerTypes.push('simple');
@@ -409,10 +426,10 @@ export class Basemap {
             id: 'osm',
             type: 'osm',
             source: new OSM(),
-            opacity: 0.75,
-            origin: defaultOrigin,
-            extent: defaultExtent,
-            resolutions: defaultResolutions,
+            opacity: coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
+            origin: [],
+            extent: [],
+            resolutions: [],
             minScale: minZoom,
             maxScale: maxZoom,
           });

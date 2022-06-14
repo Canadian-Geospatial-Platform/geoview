@@ -1,8 +1,14 @@
 import axios from 'axios';
 
-import L from 'leaflet';
+import VectorLayer from 'ol/layer/Vector';
+import { Vector as VectorSource } from 'ol/source';
+import { GeoJSON as GeoJSONFormat, WFS as WFSFormat } from 'ol/format';
+import { Extent } from 'ol/extent';
+import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
+import { asArray, asString } from 'ol/color';
 
-import { xmlToJson } from '../../../../core/utils/utilities';
+import { and as andFilter, equalTo as equalToFilter, like as likeFilter } from 'ol/format/filter';
+
 import {
   AbstractWebLayersClass,
   CONST_LAYER_TYPES,
@@ -11,8 +17,83 @@ import {
   TypeJsonArray,
   TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
+import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 
 import { api } from '../../../../app';
+
+// constant to define default style if not set by renderer
+// TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
+const defaultCircleMarkerStyle = new Style({
+  image: new StyleCircle({
+    radius: 5,
+    stroke: new Stroke({
+      color: asString(setAlphaColor(asArray('#000000'), 1)),
+      width: 1,
+    }),
+    fill: new Fill({
+      color: asString(setAlphaColor(asArray('#000000'), 0.4)),
+    }),
+  }),
+});
+
+const defaultLineStringStyle = new Style({
+  stroke: new Stroke({
+    color: asString(setAlphaColor(asArray('#000000'), 1)),
+    width: 2,
+  }),
+});
+
+const defaultLinePolygonStyle = new Style({
+  stroke: new Stroke({
+    // 1 is for opacity
+    color: asString(setAlphaColor(asArray('#000000'), 1)),
+    width: 2,
+  }),
+  fill: new Fill({
+    color: asString(setAlphaColor(asArray('#000000'), 0.5)),
+  }),
+});
+
+const defaultSelectStyle = new Style({
+  stroke: new Stroke({
+    color: asString(setAlphaColor(asArray('#0000FF'), 1)),
+    width: 3,
+  }),
+  fill: new Fill({
+    color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
+  }),
+});
+
+/**
+ * Create a style from a renderer object
+ *
+ * @param {TypeJsonObject} renderer the render with the style properties
+ * @returns {Style} the new style with the custom renderer
+ */
+const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
+  return renderer.radius
+    ? new Style({
+        image: new StyleCircle({
+          radius: renderer.radius as number,
+          stroke: new Stroke({
+            color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
+            width: 1,
+          }),
+          fill: new Fill({
+            color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
+          }),
+        }),
+      })
+    : new Style({
+        stroke: new Stroke({
+          color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
+          width: 3,
+        }),
+        fill: new Fill({
+          color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
+        }),
+      });
+};
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeWFSLayer
@@ -47,8 +128,8 @@ export const webLayerIsWFS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
  * @class WFS
  */
 export class WFS extends AbstractWebLayersClass {
-  // layer from leaflet
-  layer: L.GeoJSON | null = null;
+  // layer
+  layer: VectorLayer<VectorSource> | null = null;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
@@ -71,21 +152,22 @@ export class WFS extends AbstractWebLayersClass {
    * Add a WFS layer to the map.
    *
    * @param {TypeWFSLayer} layer the layer configuration
-   * @return {Promise<L.GeoJSON | null>} layers to add to the map
+   * @return {Promise<VectorLayer<VectorSource> | null>} layers to add to the map
    */
-  async add(layer: TypeWFSLayer): Promise<L.GeoJSON | null> {
-    // const data = getXMLHttpRequest(capUrl);
-    const resCapabilities = await axios.get<TypeJsonObject>(this.url, {
-      params: { request: 'getcapabilities', service: 'WFS' },
-    });
+  async add(layer: TypeWFSLayer): Promise<VectorLayer<VectorSource> | null> {
+    // const resCapabilities = await axios.get<TypeJsonObject>(this.url, {
+    //   params: { request: 'getcapabilities', service: 'WFS' },
+    // });
+    const resCapabilities = await getXMLHttpRequest(`${this.url}?service=WFS&request=getcapabilities`);
 
     // need to pass a xmldom to xmlToJson
-    const xmlDOM = new DOMParser().parseFromString(resCapabilities.data as string, 'text/xml');
+    const xmlDOM = new DOMParser().parseFromString(resCapabilities as string, 'text/xml');
     const json = xmlToJson(xmlDOM);
 
     this.#capabilities = json['wfs:WFS_Capabilities'];
     this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as string;
-    const featTypeInfo = this.getFeatyreTypeInfo(
+
+    const featTypeInfo = this.getFeatureTypeInfo(
       json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
       layer.layerEntries.map((item) => item.id).toString()
     );
@@ -98,48 +180,55 @@ export class WFS extends AbstractWebLayersClass {
 
     if (layerName) this.name = layerName;
 
+    const featureRequest = new WFSFormat().writeGetFeature({
+      srsName: 'EPSG:4326',
+      featureNS: 'http://openstreemap.org',
+      featurePrefix: 'osm',
+      featureTypes: ['water_areas'],
+      outputFormat: 'application/json',
+      filter: andFilter(likeFilter('name', 'Mississippi*'), equalToFilter('waterway', 'riverbank')),
+    });
+
     const params = {
       service: 'WFS',
       version: this.#version,
       request: 'GetFeature',
-      typename: layer.layerEntries.map((item) => item.id).toString(),
+      typeName: layer.layerEntries.map((item) => item.id).toString(),
       srsname: 'EPSG:4326',
       outputFormat: 'application/json',
+      filter: andFilter(likeFilter('name', 'Mississippi*'), equalToFilter('waterway', 'riverbank')),
     };
 
-    const getResponse = axios.get<L.GeoJSON | string>(this.url, { params });
+    const style: Record<string, Style> = {
+      Polygon: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultLinePolygonStyle,
+      LineString: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultLineStringStyle,
+      Point: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultCircleMarkerStyle,
+    };
 
-    const geo = new Promise<L.GeoJSON | null>((resolve) => {
+    const getResponse = fetch(this.url, {
+      method: 'POST',
+      body: new XMLSerializer().serializeToString(featureRequest),
+    });
+
+    // const getResponse = axios.get<VectorLayer<VectorSource> | string>(this.url, { params });
+
+    const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
       getResponse
-        .then((response) => {
-          const geojson = response.data;
-
+        .then((res) => {
+          return res.json();
+        })
+        .then((geojson) => {
           if (geojson && geojson !== '{}') {
-            const wfsLayer = L.geoJSON(
-              geojson as GeoJSON.GeoJsonObject,
-              {
-                pointToLayer: (feature, latlng): L.Layer | undefined => {
-                  if (feature.geometry.type === 'Point') {
-                    return L.circleMarker(latlng);
-                  }
+            const vectorSource = new VectorSource();
 
-                  return undefined;
-                  // if need to use specific style for point
-                  // return L.circleMarker(latlng, {
-                  //  ...geojsonMarkerOptions,
-                  //  id: lId,
-                  // });
-                },
-                style: () => {
-                  return {
-                    stroke: true,
-                    color: '#333',
-                    fillColor: '#FFB27F',
-                    fillOpacity: 0.8,
-                  };
-                },
-              } as L.GeoJSONOptions
-            );
+            const features = new GeoJSONFormat().readFeatures(geojson);
+            console.log(features);
+            vectorSource.addFeatures(features);
+
+            const wfsLayer = new VectorLayer({
+              source: vectorSource,
+              style: defaultCircleMarkerStyle,
+            });
 
             resolve(wfsLayer);
           } else {
@@ -175,13 +264,15 @@ export class WFS extends AbstractWebLayersClass {
    * @param {string} entries names(comma delimited) to check
    * @returns {TypeJsonValue | null} feature type object or null
    */
-  private getFeatyreTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
+  private getFeatureTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
     const res = null;
 
     if (Array.isArray(featureTypeList)) {
       const featureTypeArray: TypeJsonArray = featureTypeList;
+
       for (let i = 0; i < featureTypeArray.length; i += 1) {
         let fName = featureTypeArray[i].Name['#text'] as string;
+
         const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
@@ -223,17 +314,13 @@ export class WFS extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
-    this.layer!.getLayers().forEach((layer) => {
-      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
-      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
-    });
+    this.layer?.setOpacity(opacity);
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
-   * @returns {L.LatLngBounds} layer bounds
+   * @returns {Extent} layer bounds
    */
-  getBounds = (): L.LatLngBounds => (this.layer as L.GeoJSON).getBounds();
+  getBounds = (): Extent => this.layer?.getExtent() || [];
 }

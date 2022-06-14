@@ -12,7 +12,6 @@ import {
   CONST_LAYER_TYPES,
   TypeWebLayers,
   TypeGeoJSONLayer,
-  toJsonObject,
   TypeBaseWebLayersConfig,
   TypeFilterFeatures,
   TypeFilterQuery,
@@ -64,12 +63,6 @@ const defaultSelectStyle = new Style({
   fill: new Fill({
     color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
   }),
-});
-
-const defaultStyle: TypeJsonObject = toJsonObject({
-  Point: defaultCircleMarkerStyle,
-  Line: defaultLineStringStyle,
-  Polygon: defaultLinePolygonStyle,
 });
 
 /**
@@ -136,7 +129,7 @@ export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractWebLayersClass): ver
  * @class GeoJSON
  */
 export class GeoJSON extends AbstractWebLayersClass {
-  // layer from leaflet
+  // layer
   layer: VectorLayer<VectorSource> | null = null;
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -283,7 +276,7 @@ export class GeoJSON extends AbstractWebLayersClass {
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
    * @returns {L.LatLngBounds} layer bounds
    */
