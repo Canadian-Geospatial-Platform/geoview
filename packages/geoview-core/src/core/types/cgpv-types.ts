@@ -673,11 +673,11 @@ export type TypeBasemapLayer = {
   type: string;
   options?: TypeBasemapLayerOptions;
   opacity: number;
-  resolutions?: number[];
-  origin?: number[];
-  minScale?: number;
-  maxScale?: number;
-  extent?: Extent;
+  resolutions: number[];
+  origin: number[];
+  minScale: number;
+  maxScale: number;
+  extent: Extent;
 };
 
 /**
@@ -710,6 +710,9 @@ export type TypeBasemapProps = {
   layers: TypeBasemapLayer[];
   attribution: string;
   zoomLevels: TypeZoomLevels;
+  defaultOrigin: number[];
+  defaultExtent: Extent;
+  defaultResolutions: number[];
 };
 
 /**

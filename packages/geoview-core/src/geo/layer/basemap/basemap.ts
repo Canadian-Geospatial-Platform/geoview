@@ -356,6 +356,12 @@ export class Basemap {
       const basemapLayers: TypeBasemapLayer[] = [];
       const basemaplayerTypes: string[] = [];
 
+      let defaultOrigin: number[] = [];
+      let defaultExtent: Extent = [];
+      let defaultResolutions: number[] = [];
+      let minZoom = 0;
+      let maxZoom = 17;
+
       const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
       if (coreBasemapOptions) {
@@ -373,6 +379,13 @@ export class Basemap {
 
           basemapLayers.push(transportLayer);
           basemaplayerTypes.push('transport');
+
+          // set default origin,extent,resolutions from layer
+          defaultOrigin = transportLayer.origin;
+          defaultExtent = transportLayer.extent;
+          defaultResolutions = transportLayer.resolutions;
+          minZoom = transportLayer.minScale;
+          maxZoom = transportLayer.maxScale;
         }
 
         // create simple layer
@@ -381,6 +394,13 @@ export class Basemap {
 
           basemapLayers.push(simpleLayer);
           basemaplayerTypes.push('simple');
+
+          // set default origin,extent,resolutions from layer
+          defaultOrigin = simpleLayer.origin;
+          defaultExtent = simpleLayer.extent;
+          defaultResolutions = simpleLayer.resolutions;
+          minZoom = simpleLayer.minScale;
+          maxZoom = simpleLayer.maxScale;
         }
 
         // create open street maps layer
@@ -390,6 +410,11 @@ export class Basemap {
             type: 'osm',
             source: new OSM(),
             opacity: 1,
+            origin: defaultOrigin,
+            extent: defaultExtent,
+            resolutions: defaultResolutions,
+            minScale: minZoom,
+            maxScale: maxZoom,
           });
           basemaplayerTypes.push('osm');
         }
@@ -443,9 +468,12 @@ export class Basemap {
           ),
           attribution: this.attribution,
           zoomLevels: {
-            min: 0,
-            max: 17,
+            min: minZoom,
+            max: maxZoom,
           },
+          defaultExtent,
+          defaultOrigin,
+          defaultResolutions,
         });
 
         resolve(basemap);
@@ -518,9 +546,9 @@ export class Basemap {
 
     this.activeBasemap = basemap;
 
-    this.defaultOrigin = basemap?.layers[1].origin;
-    this.defaultResolutions = basemap?.layers[1].resolutions;
-    this.defaultExtent = basemap?.layers[1].extent;
+    this.defaultOrigin = basemap?.defaultOrigin;
+    this.defaultResolutions = basemap?.defaultResolutions;
+    this.defaultExtent = basemap?.defaultExtent;
 
     return basemap;
   };
