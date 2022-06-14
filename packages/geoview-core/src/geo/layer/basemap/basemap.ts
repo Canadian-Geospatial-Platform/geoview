@@ -367,7 +367,7 @@ export class Basemap {
       if (coreBasemapOptions) {
         // create shaded layer
         if (coreBasemapOptions.shaded && this.basemapsList[this.projection].shaded) {
-          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, 0.75, true);
+          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, 1, true);
 
           basemapLayers.push(shadedLayer);
           basemaplayerTypes.push('shaded');
@@ -375,7 +375,7 @@ export class Basemap {
 
         // create transport layer
         if (coreBasemapOptions.id === 'transport' && this.basemapsList[this.projection].transport) {
-          const transportLayer = await this.createBasemapLayer('transport', this.basemapsList[this.projection].transport, 1, true);
+          const transportLayer = await this.createBasemapLayer('transport', this.basemapsList[this.projection].transport, 0.75, true);
 
           basemapLayers.push(transportLayer);
           basemaplayerTypes.push('transport');
@@ -390,7 +390,7 @@ export class Basemap {
 
         // create simple layer
         if (coreBasemapOptions.id === 'simple' && this.basemapsList[this.projection].simple) {
-          const simpleLayer = await this.createBasemapLayer('simple', this.basemapsList[this.projection].simple, 1, true);
+          const simpleLayer = await this.createBasemapLayer('simple', this.basemapsList[this.projection].simple, 0.75, true);
 
           basemapLayers.push(simpleLayer);
           basemaplayerTypes.push('simple');
@@ -409,7 +409,7 @@ export class Basemap {
             id: 'osm',
             type: 'osm',
             source: new OSM(),
-            opacity: 1,
+            opacity: 0.75,
             origin: defaultOrigin,
             extent: defaultExtent,
             resolutions: defaultResolutions,
