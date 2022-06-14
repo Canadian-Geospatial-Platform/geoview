@@ -2,12 +2,11 @@ import axios from 'axios';
 
 import VectorLayer from 'ol/layer/Vector';
 import { Vector as VectorSource } from 'ol/source';
-import { GeoJSON as GeoJSONFormat, WFS as WFSFormat } from 'ol/format';
+import { GeoJSON as GeoJSONFormat } from 'ol/format';
 import { Extent } from 'ol/extent';
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
-
-import { and as andFilter, equalTo as equalToFilter, like as likeFilter } from 'ol/format/filter';
+import { all } from 'ol/loadingstrategy';
 
 import {
   AbstractWebLayersClass,
@@ -27,11 +26,11 @@ const defaultCircleMarkerStyle = new Style({
   image: new StyleCircle({
     radius: 5,
     stroke: new Stroke({
-      color: asString(setAlphaColor(asArray('#000000'), 1)),
+      color: asString(setAlphaColor(asArray('#333'), 1)),
       width: 1,
     }),
     fill: new Fill({
-      color: asString(setAlphaColor(asArray('#000000'), 0.4)),
+      color: asString(setAlphaColor(asArray('#FFB27F'), 0.8)),
     }),
   }),
 });
@@ -129,7 +128,7 @@ export const webLayerIsWFS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
  */
 export class WFS extends AbstractWebLayersClass {
   // layer
-  layer: VectorLayer<VectorSource> | null = null;
+  layer!: VectorLayer<VectorSource>;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
@@ -180,15 +179,6 @@ export class WFS extends AbstractWebLayersClass {
 
     if (layerName) this.name = layerName;
 
-    const featureRequest = new WFSFormat().writeGetFeature({
-      srsName: 'EPSG:4326',
-      featureNS: 'http://openstreemap.org',
-      featurePrefix: 'osm',
-      featureTypes: ['water_areas'],
-      outputFormat: 'application/json',
-      filter: andFilter(likeFilter('name', 'Mississippi*'), equalToFilter('waterway', 'riverbank')),
-    });
-
     const params = {
       service: 'WFS',
       version: this.#version,
@@ -196,7 +186,6 @@ export class WFS extends AbstractWebLayersClass {
       typeName: layer.layerEntries.map((item) => item.id).toString(),
       srsname: 'EPSG:4326',
       outputFormat: 'application/json',
-      filter: andFilter(likeFilter('name', 'Mississippi*'), equalToFilter('waterway', 'riverbank')),
     };
 
     const style: Record<string, Style> = {
@@ -205,55 +194,34 @@ export class WFS extends AbstractWebLayersClass {
       Point: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultCircleMarkerStyle,
     };
 
-    const getResponse = fetch(this.url, {
-      method: 'POST',
-      body: new XMLSerializer().serializeToString(featureRequest),
-    });
-
-    // const getResponse = axios.get<VectorLayer<VectorSource> | string>(this.url, { params });
+    const getResponse = await axios.get<VectorLayer<VectorSource> | string>(this.url, { params });
 
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
-      getResponse
-        .then((res) => {
-          return res.json();
-        })
-        .then((geojson) => {
-          if (geojson && geojson !== '{}') {
-            const vectorSource = new VectorSource();
-
-            const features = new GeoJSONFormat().readFeatures(geojson);
-            console.log(features);
+      const vectorSource = new VectorSource({
+        loader: (extent, resolution, projection, success, failure) => {
+          // TODO check for failure of getResponse then call failure
+          const features = new GeoJSONFormat().readFeatures(getResponse.data, {
+            extent,
+            featureProjection: projection,
+          });
+          if (features.length > 0) {
             vectorSource.addFeatures(features);
-
-            const wfsLayer = new VectorLayer({
-              source: vectorSource,
-              style: defaultCircleMarkerStyle,
-            });
-
-            resolve(wfsLayer);
-          } else {
-            resolve(null);
           }
-        })
-        .catch((error) => {
-          if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            // console.log(error.response.data);
-            // console.log(error.response.status);
-            // console.log(error.response.headers);
-          } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            // console.log(error.request);
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            // console.log("Error", error.message);
-          }
-          // console.log(error.config);
-          resolve(null);
-        });
+          if (success) success(features);
+        },
+        strategy: all,
+      });
+
+      const wfsLayer = new VectorLayer({
+        source: vectorSource,
+        style: (feature) => {
+          const geometryType = feature.getGeometry()?.getType();
+
+          return style[geometryType] ? style[geometryType] : defaultSelectStyle;
+        },
+      });
+
+      resolve(wfsLayer);
     });
     return geo;
   }
@@ -322,5 +290,5 @@ export class WFS extends AbstractWebLayersClass {
    *
    * @returns {Extent} layer bounds
    */
-  getBounds = (): Extent => this.layer?.getExtent() || [];
+  getBounds = (): Extent => this.layer?.getSource()?.getExtent() || [];
 }

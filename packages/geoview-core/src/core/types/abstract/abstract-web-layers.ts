@@ -1,7 +1,4 @@
-import { Layer } from 'leaflet';
-
 import { Extent } from 'ol/extent';
-
 import { ImageArcGISRest, ImageWMS, Vector as VectorSource, XYZ } from 'ol/source';
 import { Vector as VectorLayer, VectorImage, Image as ImageLayer, Tile as TileLayer } from 'ol/layer';
 
@@ -33,9 +30,7 @@ export abstract class AbstractWebLayersClass {
     | ImageLayer<ImageWMS>
     | VectorImage<VectorSource>
     | VectorLayer<VectorSource>
-    | TileLayer<XYZ>
-    | Layer
-    | null;
+    | TileLayer<XYZ>;
 
   layers: TypeLayersInWebLayer = {};
 

@@ -60,7 +60,7 @@ export class WMS extends AbstractWebLayersClass {
   // map config properties
 
   // layer from openlayers
-  layer: ImageLayer<ImageWMS> | null = null;
+  layer!: ImageLayer<ImageWMS>;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};

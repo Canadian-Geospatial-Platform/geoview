@@ -59,7 +59,7 @@ export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractWebLayersClass):
  */
 export class EsriFeature extends AbstractWebLayersClass {
   // layer
-  layer: VectorLayer<VectorSource> | null = null;
+  layer!: VectorLayer<VectorSource>;
 
   /**
    * Initialize layer

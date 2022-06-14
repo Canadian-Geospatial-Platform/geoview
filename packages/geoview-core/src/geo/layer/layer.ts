@@ -1,3 +1,10 @@
+import VectorImageLayer from 'ol/layer/VectorImage';
+import VectorSource from 'ol/source/Vector';
+import ImageLayer from 'ol/layer/Image';
+import { ImageWMS, XYZ } from 'ol/source';
+import VectorLayer from 'ol/layer/Vector';
+import TileLayer from 'ol/layer/Tile';
+
 import { EsriDynamic, layerConfigIsEsriDynamic } from './web-layers/esri/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from './web-layers/esri/esri-feature';
 import { layerConfigIsWMS, WMS } from './web-layers/ogc/wms';
@@ -67,7 +74,7 @@ export class Layer {
             } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.#mapId, layerConfig);
               geoJSON.add(layerConfig).then((layer) => {
-                geoJSON.layer = layer;
+                geoJSON.layer = layer as VectorImageLayer<VectorSource>;
                 this.addToMap(geoJSON);
               });
               this.removeTabindex();
@@ -75,7 +82,7 @@ export class Layer {
               const wmsLayer = new WMS(this.#mapId, layerConfig);
 
               wmsLayer.add(layerConfig).then((layer) => {
-                wmsLayer.layer = layer;
+                wmsLayer.layer = layer as ImageLayer<ImageWMS>;
                 this.addToMap(wmsLayer);
               });
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
@@ -89,27 +96,27 @@ export class Layer {
             } else if (layerConfigIsEsriFeature(layerConfig)) {
               const esriFeature = new EsriFeature(this.#mapId, layerConfig);
               esriFeature.add(layerConfig).then((layer) => {
-                esriFeature.layer = layer;
+                esriFeature.layer = layer as VectorImageLayer<VectorSource>;
                 this.addToMap(esriFeature);
               });
               this.removeTabindex();
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.#mapId, layerConfig);
               wfsLayer.add(layerConfig).then((layer) => {
-                wfsLayer.layer = layer;
+                wfsLayer.layer = layer as VectorLayer<VectorSource>;
                 this.addToMap(wfsLayer);
               });
             } else if (layerConfigIsOgcFeature(layerConfig)) {
               const ogcFeatureLayer = new OgcFeature(this.#mapId, layerConfig);
-              // ogcFeatureLayer.add(layerConfig).then((layer) => {
-              //   ogcFeatureLayer.layer = layer;
-              //   this.addToMap(ogcFeatureLayer);
-              // });
+              ogcFeatureLayer.add(layerConfig).then((layer) => {
+                ogcFeatureLayer.layer = layer as VectorLayer<VectorSource>;
+                this.addToMap(ogcFeatureLayer);
+              });
             } else if (layerConfigIsXYZTiles(layerConfig)) {
               const xyzTiles = new XYZTiles(this.#mapId, layerConfig);
 
               xyzTiles.add(layerConfig).then((layer) => {
-                xyzTiles.layer = layer;
+                xyzTiles.layer = layer as TileLayer<XYZ>;
                 this.addToMap(xyzTiles);
               });
             }

@@ -54,7 +54,7 @@ export const webLayerIsXYZTiles = (verifyIfWebLayer: AbstractWebLayersClass): ve
  */
 export class XYZTiles extends AbstractWebLayersClass {
   // layer
-  layer: TileLayer<XYZ> | null = null;
+  layer!: TileLayer<XYZ>;
 
   /**
    * Initialize layer

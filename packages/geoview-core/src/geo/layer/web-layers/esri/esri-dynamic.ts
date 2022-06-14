@@ -51,7 +51,7 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
  */
 export class EsriDynamic extends AbstractWebLayersClass {
   // layer
-  layer: ImageLayer<ImageArcGISRest> | null = null;
+  layer!: ImageLayer<ImageArcGISRest>;
 
   /**
    * Initialize layer

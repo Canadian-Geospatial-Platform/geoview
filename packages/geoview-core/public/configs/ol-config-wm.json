@@ -13,24 +13,21 @@
     },
     "layers": [
       {
-        "id": "geojsonLYR1",
+        "id": "ogcFeatureLYR7",
         "name": {
-          "en": "GeoJSON Sample",
-          "fr": "Exemple GeoJSON"
+          "en": "Large Lakes",
+          "fr": "Large Lakes"
         },
         "url": {
-          "en": "./geojson/historical_flood_0.geojson",
-          "fr": "./geojson/historical_flood_0.geojson"
+          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
+          "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
         },
-        "renderer": {
-          "radius": 5,
-          "fillColor": "#ff7800",
-          "color": "#000",
-          "weight": 1,
-          "opacity": 1,
-          "fillOpacity": 0.8
-        },
-        "layerType": "geojson"
+        "layerType": "ogcFeature",
+        "layerEntries": [
+          {
+            "id": "lakes"
+          }
+        ]
       }
     ],
     "controls": {

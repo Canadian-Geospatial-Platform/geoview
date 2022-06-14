@@ -130,7 +130,7 @@ export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractWebLayersClass): ver
  */
 export class GeoJSON extends AbstractWebLayersClass {
   // layer
-  layer: VectorLayer<VectorSource> | null = null;
+  layer!: VectorLayer<VectorSource>;
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   features: Feature[] = [];
