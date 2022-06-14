@@ -11,6 +11,9 @@ import Close from '@mui/icons-material/Close';
 import Details from '@mui/icons-material/Details';
 import LayersOutlined from '@mui/icons-material/LayersOutlined';
 import Map from '@mui/icons-material/Map';
+import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
+import Apps from '@mui/icons-material/Apps';
+import Group from '@mui/icons-material/Group';
 
 export {
   Layers as LayersIcon,
@@ -26,4 +29,7 @@ export {
   Details as DetailsIcon,
   LayersOutlined as LayersOutlinedIcon,
   Map as MapIcon,
+  OpenInBrowser as OpenInBrowserIcon,
+  Apps as AppsIcon,
+  Group as GroupIcon,
 };

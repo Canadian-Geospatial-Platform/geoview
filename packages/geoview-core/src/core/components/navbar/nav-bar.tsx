@@ -19,8 +19,8 @@ import { TypeButtonPanel } from '../../types/cgpv-types';
 import { EVENT_NAMES } from '../../../api/events/event';
 import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
-const navBtnWidth = '32px';
-const navBtnHeight = '32px';
+const navBtnWidth = '44px';
+const navBtnHeight = '44px';
 
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
@@ -189,16 +189,18 @@ export function Navbar(): JSX.Element {
                         key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
                         tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement="left"
+                        tooltipPlacement={buttonPanel.button.tooltipPlacement}
                         className={classes.navBarButton}
                         onClick={buttonPanel.button.onClick}
-                      />
+                      >
+                        {buttonPanel.button.children}
+                      </IconButton>
                     ) : (
                       <IconButton
                         key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
                         tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement="left"
+                        tooltipPlacement={buttonPanel.button.tooltipPlacement}
                         className={classes.navBarButton}
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {
@@ -207,7 +209,9 @@ export function Navbar(): JSX.Element {
                             buttonPanel.panel?.close();
                           }
                         }}
-                      />
+                      >
+                        {buttonPanel.button.children}
+                      </IconButton>
                     )
                   ) : null;
                 })}
