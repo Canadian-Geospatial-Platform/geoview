@@ -22,7 +22,7 @@ import {
   EsriFeature,
   EsriDynamic,
   CONST_LAYER_TYPES,
-  payloadIsALatLng,
+  payloadIsALngLat,
   payloadBaseClass,
   markerDefinitionPayload,
 } from 'geoview-core';

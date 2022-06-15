@@ -1,11 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-// Leaflet icons import to solve issues 4968
-import L from 'leaflet';
-import * as ReactLeaflet from 'react-leaflet';
-import * as ReactLeafletCore from '@react-leaflet/core';
-
 import { useTranslation } from 'react-i18next';
 
 import { useMediaQuery } from '@mui/material';
@@ -23,8 +18,6 @@ import * as types from './core/types/cgpv-types';
 
 import { EVENT_NAMES } from './api/events/event';
 import { API } from './api/api';
-
-import { LEAFLET_POSITION_CLASSES } from './geo/utils/constant';
 
 import { Config } from './core/utils/config';
 import { payloadIsAMapConfig } from './api/events/payloads/map-config-payload';
@@ -112,9 +105,6 @@ export const cgpv: types.TypeCGPV = {
     ...api.plugin,
   }),
   react: React,
-  leaflet: L,
-  reactLeaflet: ReactLeaflet,
-  reactLeafletCore: ReactLeafletCore,
   ui: {
     useTheme,
     useMediaQuery,
@@ -124,7 +114,7 @@ export const cgpv: types.TypeCGPV = {
   useTranslation,
   types,
   constants: {
-    leafletPositionClasses: LEAFLET_POSITION_CLASSES,
+    options: {},
   },
 };
 

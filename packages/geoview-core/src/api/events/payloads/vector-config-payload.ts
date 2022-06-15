@@ -1,10 +1,10 @@
-import L from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
 
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event';
 
-import { CONST_VECTOR_TYPES, TypeOfVector } from '../../../core/types/cgpv-types';
+import { CONST_VECTOR_TYPES, TypeFeatureStyle, TypeFeatureCircleStyle, TypeOfVector } from '../../../core/types/cgpv-types';
 
 /** Valid events that can create VectorConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD, EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE];
@@ -40,11 +40,14 @@ export const payloadIsACircleConfig = (verifyIfPayload: PayloadBaseClass): verif
  * Additional attributes needed to define a CircleConfigPayload
  */
 export interface CircleConfigPayload extends VectorConfigPayload {
-  latitude: number;
+  coordintate: Coordinate;
 
-  longitude: number;
+  radius?: number;
 
-  options: L.CircleMarkerOptions;
+  options?: {
+    geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+    style?: TypeFeatureCircleStyle;
+  };
 }
 
 /**
@@ -66,11 +69,14 @@ export const payloadIsACircleMarkerConfig = (verifyIfPayload: PayloadBaseClass):
  * Additional attributes needed to define a CircleMarkerConfigPayload
  */
 export interface CircleMarkerConfigPayload extends VectorConfigPayload {
-  latitude: number;
+  coordinate: Coordinate;
 
-  longitude: number;
+  radius?: number;
 
-  options: L.CircleMarkerOptions;
+  options?: {
+    geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+    style?: TypeFeatureCircleStyle;
+  };
 }
 
 /**
@@ -92,11 +98,12 @@ export const payloadIsAMarkerConfig = (verifyIfPayload: PayloadBaseClass): verif
  * Additional attributes needed to define a MarkerConfigPayload
  */
 export interface MarkerConfigPayload extends VectorConfigPayload {
-  latitude: number;
+  coordinate: Coordinate;
 
-  longitude: number;
-
-  options: L.MarkerOptions;
+  options?: {
+    geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+    style?: TypeFeatureStyle;
+  };
 }
 
 /**
@@ -118,9 +125,12 @@ export const payloadIsAPolygonConfig = (verifyIfPayload: PayloadBaseClass): veri
  * Additional attributes needed to define a PolygonConfigPayload
  */
 export interface PolygonConfigPayload extends VectorConfigPayload {
-  points: L.LatLngExpression[] | L.LatLngExpression[][] | L.LatLngExpression[][][];
+  points: Coordinate;
 
-  options: L.PolylineOptions;
+  options?: {
+    geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+    style?: TypeFeatureStyle;
+  };
 }
 
 /**
@@ -142,9 +152,11 @@ export const payloadIsAPolylineConfig = (verifyIfPayload: PayloadBaseClass): ver
  * Additional attributes needed to define a PolylineConfigPayload
  */
 export interface PolylineConfigPayload extends VectorConfigPayload {
-  points: L.LatLngExpression[] | L.LatLngExpression[][];
-
-  options: L.PolylineOptions;
+  points: Coordinate;
+  options?: {
+    geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+    style?: TypeFeatureStyle;
+  };
 }
 
 /**
@@ -180,9 +192,9 @@ export class VectorConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {number} latitude the circle latitude
-   * @param {number} longitude the circle longitude
-   * @param {L.CircleMarkerOptions} options the circle options
+   * @param {Coordintate} coordinate the long lat coordintate
+   * @param {number} radius optional circle radius
+   * @param options the circle options
    * @param {string} id optional circle identifier
    *
    * @returns {CircleConfigPayload} the CircleConfigPayload object created
@@ -190,14 +202,17 @@ export class VectorConfigPayload extends PayloadBaseClass {
   static forCircle = (
     event: EventStringId,
     handlerName: string | null,
-    latitude: number,
-    longitude: number,
-    options: L.CircleMarkerOptions,
+    coordinate: Coordinate,
+    radius?: number,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureCircleStyle;
+    },
     id?: string
   ): CircleConfigPayload => {
     const circleConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.CIRCLE, id) as CircleConfigPayload;
-    circleConfigPayload.latitude = latitude;
-    circleConfigPayload.longitude = longitude;
+    circleConfigPayload.coordintate = coordinate;
+    circleConfigPayload.radius = radius;
     circleConfigPayload.options = options;
     return circleConfigPayload;
   };
@@ -207,9 +222,9 @@ export class VectorConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {number} latitude the circle marker latitude
-   * @param {number} longitude the circle marker longitude
-   * @param {L.CircleMarkerOptions} options the circle marker options
+   * @param {Coordinate} coordinate the circle marker long lat position
+   * @param {number} radius optional circle marker radius
+   * @param options the circle marker options
    * @param {string} id optional circle marker identifier
    *
    * @returns {CircleMarkerConfigPayload} the CircleMarkerConfigPayload object created
@@ -217,9 +232,12 @@ export class VectorConfigPayload extends PayloadBaseClass {
   static forCircleMarker = (
     event: EventStringId,
     handlerName: string | null,
-    latitude: number,
-    longitude: number,
-    options: L.CircleMarkerOptions,
+    coordinate: Coordinate,
+    radius?: number,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureCircleStyle;
+    },
     id?: string
   ): CircleMarkerConfigPayload => {
     const circleMarkerConfigPayload = new VectorConfigPayload(
@@ -228,8 +246,8 @@ export class VectorConfigPayload extends PayloadBaseClass {
       CONST_VECTOR_TYPES.CIRCLE_MARKER,
       id
     ) as CircleMarkerConfigPayload;
-    circleMarkerConfigPayload.latitude = latitude;
-    circleMarkerConfigPayload.longitude = longitude;
+    circleMarkerConfigPayload.coordinate = coordinate;
+    circleMarkerConfigPayload.radius = radius;
     circleMarkerConfigPayload.options = options;
     return circleMarkerConfigPayload;
   };
@@ -239,9 +257,8 @@ export class VectorConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {number} latitude the marker latitude
-   * @param {number} longitude the marker longitude
-   * @param {L.MarkerOptions} options the marker options
+   * @param {Coordinate} coordinate the marker long lat position
+   * @param options the marker options
    * @param {string} id optional marker identifier
    *
    * @returns {MarkerConfigPayload} the MarkerConfigPayload object created
@@ -249,14 +266,15 @@ export class VectorConfigPayload extends PayloadBaseClass {
   static forMarker = (
     event: EventStringId,
     handlerName: string | null,
-    latitude: number,
-    longitude: number,
-    options: L.MarkerOptions,
+    coordinate: Coordinate,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureStyle;
+    },
     id?: string
   ): MarkerConfigPayload => {
     const markerConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.MARKER, id) as MarkerConfigPayload;
-    markerConfigPayload.latitude = latitude;
-    markerConfigPayload.longitude = longitude;
+    markerConfigPayload.coordinate = coordinate;
     markerConfigPayload.options = options;
     return markerConfigPayload;
   };
@@ -266,8 +284,8 @@ export class VectorConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.LatLngExpression[] | L.LatLngExpression[][] | L.LatLngExpression[][][]} points the polygon points
-   * @param {L.PolylineOptions} options the polygon options
+   * @param {Coordinate} points the polygon points
+   * @param options the polygon options
    * @param {string} id optional polygon identifier
    *
    * @returns {PolygonConfigPayload} the PolygonConfigPayload object created
@@ -275,8 +293,11 @@ export class VectorConfigPayload extends PayloadBaseClass {
   static forPolygon = (
     event: EventStringId,
     handlerName: string | null,
-    points: L.LatLngExpression[] | L.LatLngExpression[][] | L.LatLngExpression[][][],
-    options: L.PolylineOptions,
+    points: Coordinate,
+    options: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureStyle;
+    },
     id?: string
   ): PolygonConfigPayload => {
     const polygonConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYGON, id) as PolygonConfigPayload;
@@ -290,8 +311,8 @@ export class VectorConfigPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.LatLngExpression[] | L.LatLngExpression[][]} points the polyline points
-   * @param {L.PolylineOptions} options the polyline options
+   * @param {Coordinate} points the polyline points
+   * @param options the polyline options
    * @param {string} id optional polyline identifier
    *
    * @returns {PolylineConfigPayload} the PolylineConfigPayload object created
@@ -299,8 +320,11 @@ export class VectorConfigPayload extends PayloadBaseClass {
   static forPolyline = (
     event: EventStringId,
     handlerName: string | null,
-    points: L.LatLngExpression[] | L.LatLngExpression[][],
-    options: L.PolylineOptions,
+    points: Coordinate,
+    options: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureStyle;
+    },
     id?: string
   ): PolylineConfigPayload => {
     const polylineConfigPayload = new VectorConfigPayload(event, handlerName, CONST_VECTOR_TYPES.POLYLINE, id) as PolylineConfigPayload;

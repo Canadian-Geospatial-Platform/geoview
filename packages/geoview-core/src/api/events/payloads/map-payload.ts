@@ -33,7 +33,7 @@ export class MapPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.Map} map the map payload
+   * @param {OLMap} map the map payload
    */
   constructor(event: EventStringId, handlerName: string | null, map: OLMap) {
     if (!validEvents.includes(event)) throw new Error(`MapPayload can't be instanciated for event of type ${event}`);
@@ -48,7 +48,7 @@ export class MapPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {L.Map} map the map payload
+ * @param {OLMap} map the map payload
  *
  * @returns {MapPayload} the MapPayload object created
  */

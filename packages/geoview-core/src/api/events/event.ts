@@ -12,7 +12,6 @@ import { BASEMAP, BasmapEventKey } from './constants/basemap';
 import { OVERVIEW_MAP, OverviewEventKey } from './constants/overview-map';
 import { DETAILS_PANEL, DetailPanelEventKey } from './constants/details-panel';
 import { MARKER_ICON, MarkerIconEventKey } from './constants/marker-icon';
-import { CLUSTER_ELEMENT, ClusterEventKey } from './constants/cluster-element';
 import { DRAWER, DrawerEventKey } from './constants/drawer';
 import { MODAL, ModalEventKey } from './constants/modal';
 import { PANEL, PanelEventKey } from './constants/panel';
@@ -33,7 +32,6 @@ export const EVENT_NAMES = {
   OVERVIEW_MAP,
   DETAILS_PANEL,
   MARKER_ICON,
-  CLUSTER_ELEMENT,
   DRAWER,
   MODAL,
   PANEL,
@@ -55,7 +53,6 @@ export type EventCategories =
   | 'OVERVIEW_MAP'
   | 'DETAILS_PANEL'
   | 'MARKER_ICON'
-  | 'CLUSTER_ELEMENT'
   | 'DRAWER'
   | 'MODAL'
   | 'PANEL'
@@ -76,7 +73,6 @@ export type EventKey =
   | OverviewEventKey
   | DetailPanelEventKey
   | MarkerIconEventKey
-  | ClusterEventKey
   | DrawerEventKey
   | ModalEventKey
   | PanelEventKey
@@ -111,13 +107,6 @@ export type EventStringId =
   | 'details_panel/crosshair_enter'
   | 'marker_icon/show'
   | 'marker_icon/hide'
-  | 'cluster_element/add'
-  | 'cluster_element/remove'
-  | 'cluster_element/added'
-  | 'cluster_element/start_blinking'
-  | 'cluster_element/stop_blinking'
-  | 'cluster_element/selection_has_changed'
-  | 'box/zoom_or_select_end'
   | 'drawer/open_close'
   | 'modal/create'
   | 'modal/open'

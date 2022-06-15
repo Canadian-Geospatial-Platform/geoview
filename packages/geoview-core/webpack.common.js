@@ -33,11 +33,6 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
-    'geoview-overview-map': {
-      import: '../geoview-overview-map/src/index.tsx',
-      dependOn: 'cgpv-main',
-      filename: 'corePackages/[name].js',
-    },
     'geoview-basemap-panel': {
       import: '../geoview-basemap-panel/src/index.tsx',
       dependOn: 'cgpv-main',

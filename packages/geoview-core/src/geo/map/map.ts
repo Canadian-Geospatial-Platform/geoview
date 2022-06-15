@@ -1,13 +1,12 @@
 import { i18n } from 'i18next';
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
-// import L from 'leaflet';
 
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import { fromLonLat } from 'ol/proj';
-
-import { LatLng, LatLngBounds } from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
+import { Extent } from 'ol/extent';
 
 import queryString from 'query-string';
 
@@ -17,8 +16,6 @@ import { Layer } from '../layer/layer';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import '../../core/types/cgp-leaflet-config';
-import { generateId } from '../../core/utils/utilities';
 import { Config } from '../../core/utils/config';
 import {
   TypeMapConfigProps,
@@ -38,23 +35,6 @@ import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
-
-// LCC map options
-// ! Map bounds doesn't work for projection other then Web Mercator
-const lccMapOptionsParam: L.MapOptions = {
-  zoomFactor: 7,
-  minZoom: 3,
-  maxZoom: 19,
-};
-
-// Web Mercator map options
-const wmMapOptionsParam: L.MapOptions = {
-  zoomFactor: 5,
-  minZoom: 2,
-  maxZoom: 19,
-  maxBounds: new LatLngBounds({ lat: -89.999, lng: -180 }, { lat: 89.999, lng: 180 }),
-  maxBoundsViscosity: 0.0,
-};
 
 /**
  * Class used to manage created maps
@@ -94,7 +74,7 @@ export class MapViewer {
   currentZoom: number;
 
   // store current position
-  currentPosition: LatLng;
+  currentPosition: Coordinate;
 
   // i18n instance
   i18nInstance!: i18n;
@@ -120,7 +100,7 @@ export class MapViewer {
     this.currentProjection = mapProps.map.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapProps.map.initialView.zoom;
-    this.currentPosition = new LatLng(mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]);
+    this.currentPosition = [mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]];
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
@@ -209,16 +189,6 @@ export class MapViewer {
       // emit an event to add the component
       api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.id, id));
     }
-  };
-
-  /**
-   * Get map options configurations based on projection
-   *
-   * @param epsgCode projection number
-   * @returns {L.MapOptions} the map options based on the projection
-   */
-  getMapOptions = (epsgCode: number): L.MapOptions => {
-    return epsgCode === 3978 ? lccMapOptionsParam : wmMapOptionsParam;
   };
 
   /**
@@ -338,34 +308,21 @@ export class MapViewer {
    * @param {string} interaction map interaction
    */
   toggleMapInteraction = (interaction: string) => {
-    // if (interaction === 'dynamic' || !interaction) {
-    //   // dynamic map
-    //   this.map.dragging.enable();
-    //   this.map.touchZoom.enable();
-    //   this.map.doubleClickZoom.enable();
-    //   this.map.scrollWheelZoom.enable();
-    //   this.map.boxZoom.enable();
-    //   this.map.keyboard.enable();
-    //   if (this.map.tap) this.map.tap.enable();
-    //   this.map.getContainer().style.cursor = 'grab';
-    // } else {
-    //   // static map
-    //   this.map.dragging.disable();
-    //   this.map.touchZoom.disable();
-    //   this.map.doubleClickZoom.disable();
-    //   this.map.scrollWheelZoom.disable();
-    //   this.map.boxZoom.disable();
-    //   this.map.keyboard.disable();
-    //   if (this.map.tap) this.map.tap.disable();
-    //   this.map.getContainer().style.cursor = 'default';
-    // }
+    if (interaction === 'dynamic' || !interaction) {
+      this.map.getInteractions().forEach((x) => x.setActive(true));
+    } else {
+      this.map.getInteractions().forEach((x) => x.setActive(false));
+    }
   };
 
   /**
    * Create bounds on map
    *
-   * @param {LatLng.LatLngBounds} bounds map bounds
+   * @param {Extent} bounds map bounds
    * @returns the bounds
    */
-  // fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
+  fitBounds = (bounds: Extent) =>
+    this.map.getView().fit(bounds, {
+      size: this.map.getSize(),
+    });
 }

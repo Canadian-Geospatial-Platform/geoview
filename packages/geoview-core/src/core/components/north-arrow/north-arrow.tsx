@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useRef, useState, useContext } from 'react';
 
+import OLMap from 'ol/Map';
+import { Coordinate } from 'ol/coordinate';
+
 import { useTheme } from '@mui/material/styles';
 
 import makeStyles from '@mui/styles/makeStyles';
-
-import { Map, LatLng, CRS, Point, Icon } from 'leaflet';
-import { useMapEvent, Marker, useMap } from 'react-leaflet';
 
 import { debounce } from 'lodash';
 
 import { PROJECTION_NAMES } from '../../../geo/projection/projection';
 
-import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
-import { generateId } from '../../utils/utilities';
+import { NorthArrowIcon } from './north-arrow-icon';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
@@ -30,17 +29,14 @@ const useStyles = makeStyles((theme) => ({
 // The north pole position use for north arrow marker and get north arrow rotation angle
 const northPolePosition: [number, number] = [90, -95];
 
-/**
- * north arrow passed in properties
- */
+// interface used for NorthArrow props
 interface NorthArrowProps {
-  // projection is used when checking which projection is being used in the Map
-  projection: CRS;
+  projection: string;
 }
 
 /**
  * Create a north arrow
- * @param {NorthArrowProps} props north arrow properties
+ *
  * @return {JSX.Element} the north arrow component
  */
 export function NorthArrow(props: NorthArrowProps): JSX.Element {
@@ -57,20 +53,24 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
   // access transitions
   const defaultTheme = useTheme();
 
+  const mapConfig = useContext(MapContext);
+
+  const mapId = mapConfig.id;
+
   /**
    * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
    * https://www.movable-type.co.uk/scripts/latlong.html
    *
-   * @param {LatLng} center Map center in lat long
+   * @param {Coordinate} center Map center in lat long
    * @return {string} the arrow angle
    */
-  const getNorthArrowAngle = (center: LatLng): string => {
+  const getNorthArrowAngle = (center: Coordinate): string => {
     try {
       // north value (set longitude to be half of Canada extent (141° W, 52° W))
       const pointA = { x: northPolePosition[1], y: northPolePosition[0] };
 
       // map center
-      const pointB = new Point(center.lng, center.lat);
+      const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude
       const dLon = ((pointB.x - pointA.x) * Math.PI) / 180;
@@ -91,47 +91,49 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
   /**
    * Check if north is visible. This is not a perfect solution and more a work around
-   * @param {Map} map the map
+   * @param {OLMap} map the map
    * @return {boolean} true if visible, false otherwise
    */
-  function checkNorth(map: Map): boolean {
+  function checkNorth(map: OLMap): boolean {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
-    const pointXY = new Point(map.getSize().x / 2, 1);
-    const pt = map.containerPointToLatLng(pointXY);
+    const pointXY = [map.getSize()![0] / 2, 1];
+
+    const pt = map.getCoordinateFromPixel(pointXY);
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This willl work only for LCC Canada.
-    return pt.lng > 0;
+    return pt ? pt[0] > 0 : true;
   }
 
   /**
    * Calculate the north arrow offset
    * Calculation taken from RAMP: https://github.com/fgpv-vpgf/fgpv-vpgf/blob/master/packages/ramp-core/src/app/geo/map-tools.service.js
-   * @param {Map} map the map
+   * @param {OLMap} map the map
    * @param {number} angleDegrees north arrow rotation
    */
-  function setOffset(map: Map, angleDegrees: number): void {
-    const mapWidth = map.getSize().x / 2;
+  function setOffset(map: OLMap, angleDegrees: number): void {
+    const mapWidth = map.getSize()![0] / 2;
     const arrowWidth = 24;
     const offsetX = mapWidth - arrowWidth / 2;
 
     // hard code north pole so that arrow does not continue pointing past it
-    const screenNorthPoint = map.latLngToContainerPoint(northPolePosition);
-    const screenY = screenNorthPoint.y;
+    const screenNorthPoint = map.getPixelFromCoordinate(northPolePosition);
+    const screenY = screenNorthPoint[1];
 
     // if the extent is near the north pole be more precise otherwise use the original math
     // note: using the precise math would be ideal but when zooming in, the calculations make very
     // large adjustments so reverting to the old less precise math provides a better experience.
     const triangle = {
       x: offsetX,
-      y: map.latLngToContainerPoint(map.getCenter()).y,
+      y: map.getPixelFromCoordinate(map.getView().getCenter()!)[1],
       m: 1,
     }; // original numbers
-    if (screenNorthPoint.x < 2400 && screenNorthPoint.x > -1300 && -screenNorthPoint.y < 3000) {
+    if (screenNorthPoint[0] < 2400 && screenNorthPoint[1] > -1300 && -screenNorthPoint[1] < 3000) {
       // more precise
-      triangle.x = screenNorthPoint.x;
-      triangle.y = -screenNorthPoint.y;
+      // eslint-disable-next-line prefer-destructuring
+      triangle.x = screenNorthPoint[0];
+      triangle.y = -screenNorthPoint[1];
       triangle.m = -1;
     }
 
@@ -142,7 +144,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     let screenX =
       screenY < 0
         ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * 0.01745329252) * z) - arrowWidth / 2
-        : screenNorthPoint.x - arrowWidth;
+        : screenNorthPoint[0] - arrowWidth;
 
     // Limit the arrow to the bounds of the inner shell (+/- 25% from center)
     screenX = Math.max(offsetX - mapWidth * 0.25, Math.min(screenX, offsetX + mapWidth * 0.25));
@@ -151,10 +153,10 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
   /**
    * If the projection is LCC, we rotate and apply offset to the arrow so it is pointing north
-   * @param {Map} map the map
+   * @param {OLMap} map the map
    */
-  function manageArrow(map: Map): void {
-    if (projection.code === PROJECTION_NAMES.LCC) {
+  function manageArrow(map: OLMap): void {
+    if (projection === PROJECTION_NAMES.LCC) {
       // Because of the projection, corners are wrapped and central value of the polygon may be higher then corners values.
       // There is no easy way to see if the user sees the north pole just by using bounding box. One of the solution may
       // be to use a debounce function to call on moveEnd where we
@@ -163,7 +165,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       // - Project the bbox in LCC
       // - Check if upper value of the densify bbox is higher or lower then LCC north value for north pole
       //
-      // Even embeded Leaflet bounds.contains will not work because they work with bbox. Good in WM but terrible in LCC
+      // Even embeded bounds.contains will not work because they work with bbox. Good in WM but terrible in LCC
       //
       // All this happens because the arrow rotation is taken from the middle of the screen and in  LCC projection, the more you go north,
       // the more distortion you have.
@@ -173,7 +175,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
       if (!isPassNorth) {
         // set rotation angle and offset
-        const angleDegrees = 270 - parseFloat(getNorthArrowAngle(map.getCenter()));
+        const angleDegrees = 270 - parseFloat(getNorthArrowAngle(map.getView().getCenter()!));
         setRotationAngle({ angle: 90 - angleDegrees });
         setOffset(map, angleDegrees);
       }
@@ -186,28 +188,26 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMapMoveEnd = useCallback(
     debounce((e) => {
-      const map = e.target as Map;
+      const map = e.map as OLMap;
       manageArrow(map);
     }, 500),
     []
   );
 
-  // listen to map moveend event
-  useMapEvent('moveend', onMapMoveEnd);
-
-  /**
-   * first render, fire the arrow creation
-   */
-  const map = useMap();
   useEffect(() => {
+    const { map } = api.map(mapId);
+
     manageArrow(map);
+
+    // listen to map moveend event
+    map.on('moveend', onMapMoveEnd);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return projection.code === PROJECTION_NAMES.LCC ? (
+  return projection === PROJECTION_NAMES.LCC ? (
     <div
       ref={northArrowRef}
-      className={`leaflet-control leaflet-top leaflet-left ${classes.northArrowContainer}`}
+      className={classes.northArrowContainer}
       style={{
         transition: defaultTheme.transitions.create(['all', 'transform'], {
           duration: defaultTheme.transitions.duration.standard,
@@ -225,38 +225,36 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
   );
 }
 
-/**
- * Create a north pole flag icon
- *
- * @param {NorthArrowProps} props north pole properties (same as NorthArrow)
- * @return {JSX.Element} the north pole marker icon
- */
-export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
-  const { projection } = props;
+// /**
+//  * Create a north pole flag icon
+//  * @param {NorthArrowProps} props north arrow icon props
+//  * @return {JSX.Element} the north pole marker icon
+//  */
+// export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
+//   const { projection } = props;
+//   const [pane, setPane] = useState(false);
 
-  const [pane, setPane] = useState(false);
+//   const mapConfig = useContext(MapContext);
 
-  const mapConfig = useContext(MapContext);
+//   const mapId = mapConfig.id;
 
-  const mapId = mapConfig.id;
+//   useEffect(() => {
+//     // api.map(mapId).map.createPane('NorthPolePane');
+//     setPane(true);
+//     // Create a pane for the north pole marker
+//   }, [mapId]);
 
-  useEffect(() => {
-    // api.map(mapId).map.createPane('NorthPolePane');
-    setPane(true);
-    // Create a pane for the north pole marker
-  }, [mapId]);
+//   // Create the icon
+//   const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace('#', '%23');
+//   const northPoleIcon = new Icon({
+//     iconUrl,
+//     iconSize: [24, 24],
+//     iconAnchor: [6, 18],
+//   });
 
-  // Create the icon
-  const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace('#', '%23');
-  const northPoleIcon = new Icon({
-    iconUrl,
-    iconSize: [24, 24],
-    iconAnchor: [6, 18],
-  });
-
-  return projection.code === PROJECTION_NAMES.LCC && pane ? (
-    <Marker id={generateId('')} position={northPolePosition} icon={northPoleIcon} keyboard={false} pane="NorthPolePane" />
-  ) : (
-    <div />
-  );
-}
+//   return projection.code === PROJECTION_NAMES.LCC && pane ? (
+//     <Marker id={generateId('')} position={northPolePosition} icon={northPoleIcon} keyboard={false} pane="NorthPolePane" />
+//   ) : (
+//     <div />
+//   );
+// }

@@ -14,7 +14,6 @@ import { layerConfigIsXYZTiles, XYZTiles } from './web-layers/map-tile/xyz-tiles
 import { GeoJSON, layerConfigIsGeoJSON } from './web-layers/file/geojson';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
-import { MarkerClusterClass } from './vector/marker-cluster';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
@@ -38,9 +37,6 @@ export class Layer {
   // used to access vector API to create and manage geometries
   vector: Vector | undefined;
 
-  // used to access marker cluster API to create and manage marker cluster groups
-  markerCluster: MarkerClusterClass | undefined;
-
   /**
    * used to reference the map id
    */
@@ -55,8 +51,7 @@ export class Layer {
   constructor(id: string, layers?: TypeLayerConfig[]) {
     this.#mapId = id;
 
-    // this.vector = new Vector(this.#mapId);
-    // this.markerCluster = new MarkerClusterClass(this.#mapId);
+    this.vector = new Vector(this.#mapId);
 
     // listen to outside events to add layers
     api.event.on(

@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { useMap } from 'react-leaflet';
-
 import { MapContext } from '../../app-start';
 
 import { api } from '../../../app';
@@ -14,7 +12,7 @@ import { EVENT_NAMES } from '../../../api/events/event';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '../../../ui';
-import { latLngPayload } from '../../../api/events/payloads/lat-long-payload';
+import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
 import { payloadIsAInKeyfocus } from '../../../api/events/payloads/in-keyfocus-payload';
 
@@ -71,10 +69,6 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
   const mapConfig = useContext(MapContext);
   const mapId = mapConfig.id;
 
-  const map = useMap();
-
-  const mapContainer = map.getContainer();
-
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const [isCrosshairsActive, setCrosshairsActive] = useState(false);
 
@@ -89,11 +83,13 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
    */
   function simulateClick(evt: KeyboardEvent): void {
     if (evt.key === 'Enter') {
-      const latlngPoint = map.getCenter();
+      const { map } = api.map(mapId);
+
+      const lnglatPoint = map.getView().getCenter()!;
 
       if (isCrosshairsActiveValue.current) {
         // emit an event with the latlng point
-        api.event.emit(latLngPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, latlngPoint));
+        api.event.emit(lngLatPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, lnglatPoint));
       }
     }
   }
@@ -103,14 +99,20 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
    * @function removeCrosshair
    */
   function removeCrosshair(): void {
+    const { map } = api.map(mapId);
+
     // remove simulate click event listener
-    mapContainer.removeEventListener('keydown', simulateClick);
+    map.getTargetElement().removeEventListener('keydown', simulateClick);
     setCrosshairsActive(false);
     isCrosshairsActiveValue.current = false;
     api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, false));
   }
 
   useEffect(() => {
+    const { map } = api.map(mapId);
+
+    const mapContainer = map.getTargetElement();
+
     // on map keyboard focus, add crosshair
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,

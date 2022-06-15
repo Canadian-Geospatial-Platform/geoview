@@ -19,10 +19,6 @@ export const PROJECTION_NAMES = {
  * @class Projection
  */
 export class Projection {
-  // proj4 leaflet does the projection on the fly when we add geometries from another projection.
-  // So theses functions are not use at the moment.
-  // TODO: Evaluate what we need to keep from use case.
-
   /**
    * List of supported projections
    */

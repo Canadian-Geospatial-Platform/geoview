@@ -148,8 +148,8 @@ export class GeoJSON extends AbstractWebLayersClass {
   /**
    * Add a GeoJSON layer to the map.
    *
-   * @param {TypeGeoJSONLayer} layer the layer configuration
-   * @return {Promise<L.GeoJSON | null>} layers to add to the map
+   * @param {TypeGeoJSONLayer} geoLayer the layer configuration
+   * @return {Promise<VectorLayer<VectorSource> | null} layers to add to the map
    */
   add(geoLayer: TypeGeoJSONLayer): Promise<VectorLayer<VectorSource> | null> {
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
@@ -278,7 +278,7 @@ export class GeoJSON extends AbstractWebLayersClass {
   /**
    * Get bounds
    *
-   * @returns {L.LatLngBounds} layer bounds
+   * @returns {Extent} layer bounds
    */
   getBounds = (): Extent => this.layer?.getExtent() || [];
 }

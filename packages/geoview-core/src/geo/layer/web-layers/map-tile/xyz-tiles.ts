@@ -74,8 +74,6 @@ export class XYZTiles extends AbstractWebLayersClass {
    */
   add(layer: TypeXYZTiles): Promise<TileLayer<XYZ> | null> {
     const tileLayer = new Promise<TileLayer<XYZ> | null>((resolve) => {
-      // const xyzTileLayer = L.tileLayer();
-
       const xyzTileLayer = new TileLayer({
         source: new XYZ({
           url: layer.url[api.map(this.mapId).getLanguageCode()],

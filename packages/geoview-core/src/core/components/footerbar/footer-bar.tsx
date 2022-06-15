@@ -1,7 +1,5 @@
 import { MutableRefObject, useContext, useEffect, useRef } from 'react';
 
-import { DomEvent } from 'leaflet';
-
 import makeStyles from '@mui/styles/makeStyles';
 
 import { useMediaQuery } from '@mui/material';
@@ -61,10 +59,6 @@ export function Footerbar(props: TypeFooterbarProps): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
 
   useEffect(() => {
-    // disable dom events
-    DomEvent.disableClickPropagation(footerBarRef.current as HTMLElement);
-    DomEvent.disableScrollPropagation(footerBarRef.current as HTMLElement);
-
     // // listen to attribution update
     // api.event.on(
     //   EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE,

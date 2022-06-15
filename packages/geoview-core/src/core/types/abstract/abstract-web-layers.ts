@@ -39,7 +39,7 @@ export abstract class AbstractWebLayersClass {
 
   setEntries?(entries: number[]): void;
 
-  abstract getBounds(): L.LatLngBounds | Promise<L.LatLngBounds> | Extent | Promise<Extent>;
+  abstract getBounds(): Extent | Promise<Extent>;
 
   abstract setOpacity(opacity: number): void;
 

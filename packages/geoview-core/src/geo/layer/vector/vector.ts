@@ -1,9 +1,16 @@
-import L, { LatLngExpression } from 'leaflet';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
+import { Feature } from 'ol';
+import { Circle, LineString, Point, Polygon } from 'ol/geom';
+import { Coordinate } from 'ol/coordinate';
+import { Fill, Stroke, Style } from 'ol/style';
+import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
+import { asArray, asString } from 'ol/color';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
 
-import { generateId } from '../../../core/utils/utilities';
+import { generateId, setAlphaColor } from '../../../core/utils/utilities';
 import {
   payloadIsACircleConfig,
   payloadIsACircleMarkerConfig,
@@ -13,6 +20,15 @@ import {
   payloadIsAVectorConfig,
 } from '../../../api/events/payloads/vector-config-payload';
 import { VectorPayload } from '../../../api/events/payloads/vector-payload';
+import { TypeFeatureStyle, TypeFeatureCircleStyle } from '../../../core/types/cgpv-types';
+/**
+ * Store a group of features
+ */
+interface FeatureCollection {
+  id: string;
+  vectorLayer: VectorLayer<VectorSource>;
+  vectorSource: VectorSource;
+}
 
 /**
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...)
@@ -25,10 +41,10 @@ export class Vector {
   #mapId: string;
 
   // used to store geometry groups
-  geometryGroups: L.FeatureGroup[] = [];
+  geometryGroups: FeatureCollection[] = [];
 
   // contains all the added geometries
-  geometries: L.Layer[] = [];
+  geometries: Feature[] = [];
 
   // default geometry group name
   defaultGeometryGroupId = 'defaultGeomGroup';
@@ -39,7 +55,7 @@ export class Vector {
   /**
    * Initialize map, vectors, and listen to add vector events
    *
-   * @param {string} mapId leaflet map id
+   * @param {string} mapId map id
    */
   constructor(mapId: string) {
     this.#mapId = mapId;
@@ -52,15 +68,15 @@ export class Vector {
       EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD,
       (payload) => {
         if (payloadIsACircleConfig(payload)) {
-          this.addCircle(payload.latitude, payload.longitude, payload.options, payload.id);
+          this.addCircle(payload.coordintate, payload.radius, payload.options, payload.id);
         } else if (payloadIsAPolygonConfig(payload)) {
           this.addPolygon(payload.points, payload.options, payload.id);
         } else if (payloadIsAPolylineConfig(payload)) {
           this.addPolyline(payload.points, payload.options, payload.id);
         } else if (payloadIsAMarkerConfig(payload)) {
-          this.addMarker(payload.latitude, payload.longitude, payload.options, payload.id);
+          this.addMarker(payload.coordinate, payload.options, payload.id);
         } else if (payloadIsACircleMarkerConfig(payload)) {
-          this.addCircleMarker(payload.latitude, payload.longitude, payload.options, payload.id);
+          this.addCircleMarker(payload.coordinate, payload.radius, payload.options, payload.id);
         }
       },
       this.#mapId
@@ -82,7 +98,7 @@ export class Vector {
     api.event.on(
       EVENT_NAMES.VECTOR.EVENT_VECTOR_ON,
       () => {
-        this.turnOnGeometryGroups();
+        this.setGeometryGroupAsVisible();
       },
       this.#mapId
     );
@@ -91,28 +107,74 @@ export class Vector {
     api.event.on(
       EVENT_NAMES.VECTOR.EVENT_VECTOR_OFF,
       () => {
-        this.turnOffGeometryGroups();
+        this.setGeometryGroupAsInvisible();
       },
       this.#mapId
     );
   }
 
   /**
-   * Create a polyline using an array of lat/lng points
+   * Create a polyline using an array of lng/lat points
    *
-   * @param {LatLngExpression[] | LatLngExpression[][]} points points of lat/lng to draw a polyline
+   * @param {Coordinate} points points of lng/lat to draw a polyline
    * @param options polyline options including styling
    * @param {string} id an optional id to be used to manage this geometry
    *
-   * @returns a geometry containing the id and the created geometry
+   * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addPolyline = (points: LatLngExpression[] | LatLngExpression[][], options: L.PolylineOptions, id?: string): L.Polyline => {
+  addPolyline = (
+    points: Coordinate,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureStyle;
+    },
+    id?: string
+  ): Feature => {
+    const polylineOptions = options || {};
+
     const lId = generateId(id);
 
-    const polyline = L.polyline(points, { ...options, id: lId });
+    // create a line geometry
+    const polyline = new Feature({
+      geometry: new LineString(points, polylineOptions.geometryLayout).transform(
+        'EPSG:4326',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
+    });
 
-    polyline.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
+    // if style is provided then set override the vector layer style for this feature
+    if (polylineOptions.style) {
+      let fill: Fill | undefined;
+      let stroke: Stroke | undefined;
 
+      if (polylineOptions.style.fillColor) {
+        fill = new Fill({
+          color: asString(setAlphaColor(asArray(polylineOptions.style.fillColor), polylineOptions.style.fillOpacity || 1)),
+        });
+      }
+
+      if (polylineOptions.style.strokeColor) {
+        stroke = new Stroke({
+          color: asString(setAlphaColor(asArray(polylineOptions.style.strokeColor), polylineOptions.style.strokeOpacity || 1)),
+          width: polylineOptions.style.strokeWidth || 1,
+        });
+      }
+
+      polyline.setStyle(
+        new Style({
+          fill,
+          stroke,
+        })
+      );
+    }
+
+    // set an id to this geometry
+    polyline.set('id', lId);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polyline);
+
+    // add the geometry to the geometries array
     this.geometries.push(polyline);
 
     // emit an event that a polyline vector has been added
@@ -124,23 +186,62 @@ export class Vector {
   /**
    * Create a new polygon
    *
-   * @param {LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][]} points array of points to create the polygon
-   * @param {L.PolylineOptions} options polygon options including styling
+   * @param {Coordinate} points array of points to create the polygon
+   * @param options polygon options including styling
    * @param {string} id an optional id to be used to manage this geometry
    *
-   * @returns a geometry containing the id and the created geometry
+   * @returns {Feature} a geometry containing the id and the created geometry
    */
   addPolygon = (
-    points: LatLngExpression[] | LatLngExpression[][] | LatLngExpression[][][],
-    options: L.PolylineOptions,
+    points: Coordinate,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureStyle;
+    },
     id?: string
-  ): L.Polygon => {
+  ): Feature => {
+    const polygonOptions = options || {};
+
     const lId = generateId(id);
 
-    const polygon = L.polygon(points, { ...options, id: lId });
+    // create a line geometry
+    const polygon = new Feature({
+      geometry: new Polygon(points, polygonOptions.geometryLayout),
+    });
 
-    polygon.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
+    // if style is provided then set override the vector layer style for this feature
+    if (polygonOptions.style) {
+      let fill: Fill | undefined;
+      let stroke: Stroke | undefined;
 
+      if (polygonOptions.style.fillColor) {
+        fill = new Fill({
+          color: asString(setAlphaColor(asArray(polygonOptions.style.fillColor), polygonOptions.style.fillOpacity || 1)),
+        });
+      }
+
+      if (polygonOptions.style.strokeColor) {
+        stroke = new Stroke({
+          color: asString(setAlphaColor(asArray(polygonOptions.style.strokeColor), polygonOptions.style.strokeOpacity || 1)),
+          width: polygonOptions.style.strokeWidth || 1,
+        });
+      }
+
+      polygon.setStyle(
+        new Style({
+          fill,
+          stroke,
+        })
+      );
+    }
+
+    // set an id to this geometry
+    polygon.set('id', lId);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polygon);
+
+    // add the geometry to the geometries array
     this.geometries.push(polygon);
 
     // emit an event that a polygon vector has been added
@@ -152,21 +253,65 @@ export class Vector {
   /**
    * Create a new circle
    *
-   * @param {number} latitude the latitude position of the circle
-   * @param {number} longitude the longitude position of the circle
-   * @param {L.CircleMarkerOptions} options circle options including styling
+   * @param {Coordinate} coordinate long lat coordinate of the circle
+   * @param {number} radius an optional radius
+   * @param options circle options including styling
    * @param {string} id an optional id to be used to manage this geometry
    *
-   * @returns a geometry containing the id and the created geometry
+   * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addCircle = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.Circle => {
-    const lId = options.id || generateId(id);
+  addCircle = (
+    coordinate: Coordinate,
+    radius?: number,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureCircleStyle;
+    },
+    id?: string
+  ): Feature => {
+    const circleOptions = options || {};
 
-    const circle = L.circle([latitude, longitude], { ...options, id: lId });
+    const lId = generateId(id);
 
+    // create a line geometry
+    const circle = new Feature({
+      geometry: new Circle(coordinate, radius, circleOptions.geometryLayout),
+    });
+
+    // if style is provided then set override the vector layer style for this feature
+    if (circleOptions.style) {
+      let fill: Fill | undefined;
+      let stroke: Stroke | undefined;
+
+      if (circleOptions.style.fillColor) {
+        fill = new Fill({
+          color: asString(setAlphaColor(asArray(circleOptions.style.fillColor), circleOptions.style.fillOpacity || 1)),
+        });
+      }
+
+      if (circleOptions.style.strokeColor) {
+        stroke = new Stroke({
+          color: asString(setAlphaColor(asArray(circleOptions.style.strokeColor), circleOptions.style.strokeOpacity || 1)),
+          width: circleOptions.style.strokeWidth || 1,
+        });
+      }
+
+      circle.setStyle(
+        new Style({
+          fill,
+          stroke,
+        })
+      );
+    }
+
+    // set an id to this geometry
+    circle.set('id', lId);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circle);
+
+    // add the geometry to the geometries array
     this.geometries.push(circle);
-
-    circle.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
 
     // emit an event that a circle vector has been added
     api.event.emit(VectorPayload.forCircle(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circle));
@@ -177,27 +322,70 @@ export class Vector {
   /**
    * Create a new circle marker
    *
-   * @param {number} latitude the latitude position of the circle marker
-   * @param {number} longitude the longitude position of the circle marker
-   * @param {L.CircleMarkerOptions} options circle marker options including styling
+   * @param {Coordinate} coordinate long lat coordinate of the circle marker
+   * @param {number} radius optional circle marker radius
+   * @param options circle marker options including styling
    * @param {string} id an optional id to be used to manage this geometry
-   *                 The value from options.id has precedence on the id parameter.
    *
-   * @returns a geometry containing the id and the created geometry
+   * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addCircleMarker = (latitude: number, longitude: number, options: L.CircleMarkerOptions, id?: string): L.CircleMarker => {
-    const lId = options.id || generateId(id);
+  addCircleMarker = (
+    coordinate: Coordinate,
+    radius?: number,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureCircleStyle;
+    },
+    id?: string
+  ): Feature => {
+    const circleMarkerOptions = options || {};
 
-    const circleMarker = L.circleMarker([latitude, longitude], {
-      ...options,
-      id: lId,
+    const lId = generateId(id);
+
+    // create a line geometry
+    const circleMarker = new Feature({
+      geometry: new Circle(coordinate, radius, circleMarkerOptions.geometryLayout).transform(
+        'EPSG:4326',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
     });
 
+    // if style is provided then set override the vector layer style for this feature
+    if (circleMarkerOptions.style) {
+      let fill: Fill | undefined;
+      let stroke: Stroke | undefined;
+
+      if (circleMarkerOptions.style.fillColor) {
+        fill = new Fill({
+          color: asString(setAlphaColor(asArray(circleMarkerOptions.style.fillColor), circleMarkerOptions.style.fillOpacity || 1)),
+        });
+      }
+
+      if (circleMarkerOptions.style.strokeColor) {
+        stroke = new Stroke({
+          color: asString(setAlphaColor(asArray(circleMarkerOptions.style.strokeColor), circleMarkerOptions.style.strokeOpacity || 1)),
+          width: circleMarkerOptions.style.strokeWidth || 1,
+        });
+      }
+
+      circleMarker.setStyle(
+        new Style({
+          fill,
+          stroke,
+        })
+      );
+    }
+
+    // set an id to this geometry
+    circleMarker.set('id', lId);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circleMarker);
+
+    // add the geometry to the geometries array
     this.geometries.push(circleMarker);
 
-    circleMarker.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
-
-    // emit an event that a circleMarker vector has been added
+    // emit an event that a circle vector has been added
     api.event.emit(VectorPayload.forCircleMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, circleMarker));
 
     return circleMarker;
@@ -206,24 +394,63 @@ export class Vector {
   /**
    * Create a new marker
    *
-   * @param {number} latitude the latitude position of the marker
-   * @param {number} longitude the longitude position of the marker
-   * @param {L.Marker} options marker options including styling
+   * @param {Coordinate} coordinate the long lat position of the marker
+   * @param options marker options including styling
    * @param {string} id an optional id to be used to manage this geometry
    *
-   * @returns a geometry containing the id and the created geometry
+   * @returns {Feature} a geometry containing the id and the created geometry
    */
-  addMarker = (latitude: number, longitude: number, options: L.MarkerOptions, id?: string): L.Marker => {
+  addMarker = (
+    coordinate: Coordinate,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeFeatureStyle;
+    },
+    id?: string
+  ): Feature => {
+    const markerOptions = options || {};
+
     const idMarker = generateId(id);
 
-    const marker = L.marker([latitude, longitude], {
-      ...options,
-      id: idMarker,
+    // create a line geometry
+    const marker = new Feature({
+      geometry: new Point(coordinate, markerOptions.geometryLayout),
     });
 
-    this.geometries.push(marker);
+    // if style is provided then set override the vector layer style for this feature
+    if (markerOptions.style) {
+      let fill: Fill | undefined;
+      let stroke: Stroke | undefined;
 
-    marker.addTo(this.geometryGroups[this.activeGeometryGroupIndex]);
+      if (markerOptions.style.fillColor) {
+        fill = new Fill({
+          color: asString(setAlphaColor(asArray(markerOptions.style.fillColor), markerOptions.style.fillOpacity || 1)),
+        });
+      }
+
+      if (markerOptions.style.strokeColor) {
+        stroke = new Stroke({
+          color: asString(setAlphaColor(asArray(markerOptions.style.strokeColor), markerOptions.style.strokeOpacity || 1)),
+          width: markerOptions.style.strokeWidth || 1,
+        });
+      }
+
+      marker.setStyle(
+        new Style({
+          fill,
+          stroke,
+        })
+      );
+    }
+
+    // set an id to this geometry
+    marker.set('id', idMarker);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
+
+    // add the geometry to the geometries array
+    this.geometries.push(marker);
 
     // emit an event that a marker vector has been added
     api.event.emit(VectorPayload.forMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, marker));
@@ -236,10 +463,10 @@ export class Vector {
    *
    * @param {string} id the id of the geometry to return
    *
-   * @returns {L.Layer} a geometry having the specified id
+   * @returns {Feature} a geometry having the specified id
    */
-  getGeometry = (id: string): L.Layer => {
-    return this.geometries.filter((layer) => layer.id === id)[0];
+  getGeometry = (id: string): Feature => {
+    return this.geometries.filter((layer) => layer.get('id') === id)[0];
   };
 
   /**
@@ -249,10 +476,10 @@ export class Vector {
    */
   deleteGeometry = (id: string): void => {
     for (let i = 0; i < this.geometries.length; i++) {
-      if (this.geometries[i].id === id) {
+      if (this.geometries[i].get('id') === id) {
         this.deleteGeometryFromGroups(id);
 
-        this.geometries[i].remove();
+        this.geometries[i].dispose();
 
         this.geometries.splice(i, 1);
 
@@ -264,16 +491,37 @@ export class Vector {
   /**
    * Create a new geometry group to manage multiple geometries at once
    *
-   * @param {string} geometryGroupid the id of the group to use when managing this group
+   * @param {string} geometryGroupId the id of the group to use when managing this group
+   * @param options an optional vector layer and vector source options
+   * @returns {FeatureCollection} created geometry group
    */
-  createGeometryGroup = (geometryGroupid: string, options?: L.FeatureGroupOptions): L.FeatureGroup => {
-    let featureGroup = this.getGeometryGroup(geometryGroupid);
+  createGeometryGroup = (
+    geometryGroupId: string,
+    options?: {
+      vectorLayerOptions?: VectorLayerOptions<VectorSource>;
+      vectorSourceOptions?: VectorSourceOptions;
+    }
+  ): FeatureCollection => {
+    const geometryGroupOptions = options || {};
+
+    let featureGroup = this.getGeometryGroup(geometryGroupId);
     if (!featureGroup) {
-      const featureGroupOptions = { ...options, id: geometryGroupid };
-      featureGroup = L.featureGroup([], featureGroupOptions);
-      if (featureGroup.visible) {
-        // TODO
-        // featureGroup.addTo(api.map(this.#mapId).map);
+      const vectorSource = new VectorSource(geometryGroupOptions.vectorSourceOptions);
+
+      const vectorLayer = new VectorLayer({
+        ...geometryGroupOptions.vectorLayerOptions,
+        source: vectorSource,
+      });
+
+      featureGroup = {
+        id: geometryGroupId,
+        vectorLayer,
+        vectorSource,
+      };
+
+      if (featureGroup.vectorLayer.getVisible()) {
+        api.map(this.#mapId).map.addLayer(featureGroup.vectorLayer);
+        featureGroup.vectorLayer.changed();
       }
       this.geometryGroups.push(featureGroup);
     }
@@ -301,9 +549,9 @@ export class Vector {
   /**
    * Get the active geometry group
    *
-   * @returns {L.FeatureGroup} the active geometry group
+   * @returns {FeatureCollection} the active geometry group
    */
-  getActiveGeometryGroup = (): L.FeatureGroup => {
+  getActiveGeometryGroup = (): FeatureCollection => {
     return this.geometryGroups[this.activeGeometryGroupIndex];
   };
 
@@ -315,8 +563,8 @@ export class Vector {
    *
    * @returns the geomtry group
    */
-  getGeometryGroup = (geometryGroupId?: string): L.FeatureGroup => {
-    let geometryGroup: L.FeatureGroup;
+  getGeometryGroup = (geometryGroupId?: string): FeatureCollection => {
+    let geometryGroup: FeatureCollection;
     if (geometryGroupId) {
       [geometryGroup] = this.geometryGroups.filter((theGeometryGroup) => theGeometryGroup.id === geometryGroupId);
     } else {
@@ -334,13 +582,16 @@ export class Vector {
    * @returns {FeatureGroup | null} the groups that contain the geometry
    *                                or null if not found
    */
-  getGeometryGroupsByGeometryId = (id: string): L.FeatureGroup[] => {
-    const returnValue: L.FeatureGroup[] = [];
+  getGeometryGroupsByGeometryId = (id: string): FeatureCollection[] => {
+    const returnValue: FeatureCollection[] = [];
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      const geometries = this.geometryGroups[i].getLayers();
+      const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
       for (let j = 0; j < geometries.length; j++) {
         const geometry = geometries[j];
-        if (geometry.id === id) returnValue.push(this.geometryGroups[i]);
+
+        const geometryId = geometry.get('id');
+
+        if (geometryId === id) returnValue.push(this.geometryGroups[i]);
       }
     }
 
@@ -356,10 +607,8 @@ export class Vector {
   setGeometryGroupAsVisible = (geometryGroupId?: string): void => {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
 
-    // TODO
-    // geometryGroup.addTo(api.map(this.#mapId).map);
-    geometryGroup.visible = true;
-    geometryGroup.options.visible = true;
+    geometryGroup.vectorLayer.setVisible(true);
+    geometryGroup.vectorLayer.changed();
   };
 
   /**
@@ -371,10 +620,8 @@ export class Vector {
   setGeometryGroupAsInvisible = (geometryGroupId?: string): void => {
     const geometryGroup = this.getGeometryGroup(geometryGroupId);
 
-    // TODO
-    // geometryGroup.removeFrom(api.map(this.#mapId).map);
-    geometryGroup.visible = false;
-    geometryGroup.options.visible = false;
+    geometryGroup.vectorLayer.setVisible(false);
+    geometryGroup.vectorLayer.changed();
   };
 
   /**
@@ -406,11 +653,11 @@ export class Vector {
    * if geometryGroupId is not provided, use the active geometry group. If the
    * geometry group doesn't exist, create it.
    *
-   * @param {L.Layer} geometry the geometry to be added to the group
+   * @param {Feature} geometry the geometry to be added to the group
    * @param {string} geometryGroupId optional id of the group to add the geometry to
    */
-  addToGeometryGroup = (geometry: L.Layer, geometryGroupId?: string): void => {
-    let geometryGroup: L.FeatureGroup;
+  addToGeometryGroup = (geometry: Feature, geometryGroupId?: string): void => {
+    let geometryGroup: FeatureCollection;
     if (geometryGroupId) {
       // create geometry group if it does not exist
       geometryGroup = this.createGeometryGroup(geometryGroupId);
@@ -418,7 +665,8 @@ export class Vector {
       geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
     }
 
-    geometryGroup.addLayer(geometry);
+    geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
+    geometryGroup.vectorLayer.changed();
   };
 
   /**
@@ -429,11 +677,15 @@ export class Vector {
   deleteGeometryFromGroups = (geometryId: string): void => {
     const geometry = this.getGeometry(geometryId);
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      this.geometryGroups[i].getLayers().forEach((layer) => {
-        if (geometry === layer) {
-          this.geometryGroups[i].removeLayer(layer);
-        }
-      });
+      this.geometryGroups[i].vectorLayer
+        .getSource()
+        ?.getFeatures()
+        .forEach((layer) => {
+          if (geometry === layer) {
+            this.geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry);
+            this.geometryGroups[i].vectorLayer.changed();
+          }
+        });
     }
   };
 
@@ -447,11 +699,14 @@ export class Vector {
   deleteGeometryFromGroup = (geometryId: string, geometryGroupid?: string): void => {
     const geometry = this.getGeometry(geometryId);
     const geometryGroup = this.getGeometryGroup(geometryGroupid);
-    geometryGroup.getLayers().forEach((layer) => {
-      if (geometry === layer) {
-        geometryGroup.removeLayer(layer);
-      }
-    });
+    geometryGroup.vectorLayer
+      .getSource()
+      ?.getFeatures()
+      .forEach((layer) => {
+        if (geometry === layer) {
+          geometryGroup.vectorLayer.getSource()?.removeFeature(layer);
+        }
+      });
   };
 
   /**
@@ -459,10 +714,13 @@ export class Vector {
    * If geometryGroupid is not provided, the active geometry group is used.
    *
    * @param {string} geometryGroupid optional group id
+   * @returns {FeatureCollection} the group with empty layers
    */
-  deleteGeometriesFromGroup = (geometryGroupid?: string): L.FeatureGroup => {
+  deleteGeometriesFromGroup = (geometryGroupid?: string): FeatureCollection => {
     const geometryGroup = this.getGeometryGroup(geometryGroupid);
-    geometryGroup.clearLayers();
+    geometryGroup.vectorLayer.dispose();
+    api.map(this.#mapId).map.removeLayer(geometryGroup.vectorLayer);
+
     return geometryGroup;
   };
 

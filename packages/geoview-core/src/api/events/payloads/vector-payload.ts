@@ -1,4 +1,4 @@
-import L from 'leaflet';
+import { Feature } from 'ol';
 
 import { PayloadBaseClass } from './payload-base-class';
 
@@ -40,7 +40,7 @@ export const payloadIsACircle = (verifyIfPayload: PayloadBaseClass): verifyIfPay
  * Additional attributes needed to define a CirclePayload
  */
 export interface CirclePayload extends VectorPayload {
-  circle: L.Circle;
+  circle: Feature;
 }
 
 /**
@@ -62,7 +62,7 @@ export const payloadIsACircleMarker = (verifyIfPayload: PayloadBaseClass): verif
  * Additional attributes needed to define a CircleMarkerPayload
  */
 export interface CircleMarkerPayload extends VectorPayload {
-  circleMarker: L.CircleMarker;
+  circleMarker: Feature;
 }
 
 /**
@@ -84,7 +84,7 @@ export const payloadIsAMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPay
  * Additional attributes needed to define a MarkerPayload
  */
 export interface MarkerPayload extends VectorPayload {
-  marker: L.Marker;
+  marker: Feature;
 }
 
 /**
@@ -106,7 +106,7 @@ export const payloadIsAPolygon = (verifyIfPayload: PayloadBaseClass): verifyIfPa
  * Additional attributes needed to define a PolygonPayload
  */
 export interface PolygonPayload extends VectorPayload {
-  polygon: L.Polygon;
+  polygon: Feature;
 }
 
 /**
@@ -128,7 +128,7 @@ export const payloadIsAPolyline = (verifyIfPayload: PayloadBaseClass): verifyIfP
  * Additional attributes needed to define a PolylinePayload
  */
 export interface PolylinePayload extends VectorPayload {
-  polyline: L.Polyline;
+  polyline: Feature;
 }
 
 /**
@@ -159,11 +159,11 @@ export class VectorPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.Circle} circle the circle payload
+   * @param {Feature} circle the circle payload
    *
    * @returns {CirclePayload} the CirclePayload object created
    */
-  static forCircle = (event: EventStringId, handlerName: string | null, circle: L.Circle): CirclePayload => {
+  static forCircle = (event: EventStringId, handlerName: string | null, circle: Feature): CirclePayload => {
     const circlePayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.CIRCLE) as CirclePayload;
     circlePayload.circle = circle;
     return circlePayload;
@@ -174,11 +174,11 @@ export class VectorPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.CircleMarker} circleMarker the circle marker payload
+   * @param {Feature} circleMarker the circle marker payload
    *
    * @returns {CircleMarkerPayload} the CircleMarkerPayload object created
    */
-  static forCircleMarker = (event: EventStringId, handlerName: string | null, circleMarker: L.CircleMarker): CircleMarkerPayload => {
+  static forCircleMarker = (event: EventStringId, handlerName: string | null, circleMarker: Feature): CircleMarkerPayload => {
     const circleMarkerPayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.CIRCLE_MARKER) as CircleMarkerPayload;
     circleMarkerPayload.circleMarker = circleMarker;
     return circleMarkerPayload;
@@ -189,11 +189,11 @@ export class VectorPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.Marker} marker the marker payload
+   * @param {Feature} marker the marker payload
    *
    * @returns {MarkerPayload} the MarkerPayload object created
    */
-  static forMarker = (event: EventStringId, handlerName: string | null, marker: L.Marker): MarkerPayload => {
+  static forMarker = (event: EventStringId, handlerName: string | null, marker: Feature): MarkerPayload => {
     const markerPayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.MARKER) as MarkerPayload;
     markerPayload.marker = marker;
     return markerPayload;
@@ -204,11 +204,11 @@ export class VectorPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.Polygon} polygon the polygon payload
+   * @param {Feature} polygon the polygon payload
    *
    * @returns {PolygonPayload} the PolygonPayload object created
    */
-  static forPolygon = (event: EventStringId, handlerName: string | null, polygon: L.Polygon): PolygonPayload => {
+  static forPolygon = (event: EventStringId, handlerName: string | null, polygon: Feature): PolygonPayload => {
     const polygonPayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.POLYGON) as PolygonPayload;
     polygonPayload.polygon = polygon;
     return polygonPayload;
@@ -219,11 +219,11 @@ export class VectorPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.Polyline} polyline the polyline payload
+   * @param {Feature} polyline the polyline payload
    *
    * @returns {PolylinePayload} the PolylinePayload object created
    */
-  static forPolyline = (event: EventStringId, handlerName: string | null, polyline: L.Polyline): PolylinePayload => {
+  static forPolyline = (event: EventStringId, handlerName: string | null, polyline: Feature): PolylinePayload => {
     const polylinePayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.POLYGON) as PolylinePayload;
     polylinePayload.polyline = polyline;
     return polylinePayload;

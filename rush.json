@@ -24,10 +24,6 @@
       "projectFolder": "packages/geoview-details-panel"
     },
     {
-      "packageName": "geoview-overview-map",
-      "projectFolder": "packages/geoview-overview-map"
-    },
-    {
       "packageName": "geoview-basemap-panel",
       "projectFolder": "packages/geoview-basemap-panel"
     },

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { snackbarMessagePayload, Cast, TypeUpdateScaleEvent, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+import { snackbarMessagePayload, Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
 
 /**
  * Display a message in the snackbar
@@ -148,22 +148,4 @@ export function getXMLHttpRequest(url: string): Promise<string> {
  */
 export function addUiComponent(targetDivId: string, component: React.ReactElement) {
   ReactDOM.render(component, document.getElementById(targetDivId));
-}
-
-/**
- * Add any functions that will extend leaflet features
- */
-export function extendLeafletFeatures() {
-  // create a custom scale update event listener "scaleupdate"
-  L.Control.Scale.include({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _originalUpdateScale: (L.Control.Scale.prototype as any)._updateScale,
-    _updateScale(scale: { style: { width: number } }, text: string, ratio: number) {
-      this._originalUpdateScale.call(this, scale, text, ratio);
-      this._map.fire('scaleupdate', {
-        pixels: scale.style.width,
-        distance: text,
-      } as TypeUpdateScaleEvent);
-    },
-  });
 }
