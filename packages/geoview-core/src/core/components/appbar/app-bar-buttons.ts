@@ -4,7 +4,7 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { PanelApi } from '../../../ui';
 
-import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeIconButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 import { generateId } from '../../utils/utilities';
 
@@ -63,21 +63,21 @@ export class AppbarButtons {
   /**
    * Create a button on the appbar that will open a panel
    *
-   * @param {TypeButtonProps} buttonProps button properties (icon, tooltip)
+   * @param {TypeIconButtonProps} buttonProps button properties (icon, tooltip)
    * @param {TypePanelProps} panelProps panel properties (icon, title, content)
    * @param {string} groupName optional value to set this button in a group
    *
    * @returns the created panel
    */
   createAppbarPanel = (
-    buttonProps: TypeButtonProps,
+    buttonProps: TypeIconButtonProps,
     panelProps: TypePanelProps,
     groupName?: string | null | undefined
   ): TypeButtonPanel | null => {
     if (buttonProps && panelProps) {
       const id = generateId(buttonProps.id);
 
-      const button: TypeButtonProps = {
+      const button: TypeIconButtonProps = {
         ...buttonProps,
         id,
         visible: !buttonProps.visible ? true : buttonProps.visible,

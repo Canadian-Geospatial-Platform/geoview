@@ -7,13 +7,11 @@ import {
   TypeWindow,
   TypePluginOptions,
   TypeButtonPanel,
-  TypeButtonProps,
+  TypeIconButtonProps,
   TypePanelProps,
   TypeSchemaObject,
 } from 'geoview-core';
-
 import PanelContent from './panel-content';
-
 import schema from '../schema.json';
 import defaultConfig from '../default-config-layers-panel.json';
 
@@ -67,8 +65,8 @@ class LayersPanelPlugin extends AbstractPluginClass {
     const { cgpv } = w;
 
     // access the api calls
-    const { api } = cgpv;
-
+    const { api, ui } = cgpv;
+    const { LayersOutlinedIcon } = ui.elements;
     const { language } = api.map(mapId);
 
     let panelStatus = false;
@@ -76,12 +74,12 @@ class LayersPanelPlugin extends AbstractPluginClass {
     panelStatus = this.configObj?.isOpen?.large as boolean;
 
     // button props
-    const button: TypeButtonProps = {
+    const button: TypeIconButtonProps = {
       id: 'layersPanelButton',
       tooltip: this.translations[language].layersPanel as string,
       tooltipPlacement: 'right',
-      icon: '<i class="material-icons">layers</i>',
-      type: 'textWithIcon',
+      children: <LayersOutlinedIcon />,
+      visible: true,
     };
 
     // panel props

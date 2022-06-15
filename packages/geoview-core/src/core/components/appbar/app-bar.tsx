@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, Fragment, useContext } from '
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { Divider, List, ListItem, Panel, Button } from '../../../ui';
+import { List, ListItem, Panel, IconButton } from '../../../ui';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
@@ -23,16 +23,47 @@ export const useStyles = makeStyles((theme) => ({
     pointerEvents: 'all',
     backgroundColor: theme.palette.primary.dark,
   },
+  appBarList: {
+    width: 64,
+    '& li': {
+      backgroundColor: 'transparent',
+      color: theme.palette.primary.light,
+      justifyContent: 'center',
+      margin: '16px 0',
+      padding: 0,
+      '&:hover': {
+        backgroundColor: 'transparent',
+        color: theme.palette.primary.light,
+      },
+    },
+  },
+
   appBarButtons: {
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    width: 50,
+    borderRightColor: theme.appBar.border,
+    borderRightWidth: 1,
+    borderRightStyle: 'solid',
+    width: 64,
   },
   appBarButton: {
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: theme.appBar.btnDefaultBg,
     color: theme.palette.primary.light,
+    height: 44,
+    width: 44,
+    transition: 'background-color 0.3s ease-in-out',
     '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
+      backgroundColor: theme.appBar.btnHoverBg,
+      color: theme.palette.primary.light,
+    },
+    '&:focus': {
+      backgroundColor: theme.appBar.btnFocusBg,
+      color: theme.palette.primary.light,
+    },
+    '&:active': {
+      backgroundColor: theme.appBar.btnActiveBg,
+      color: theme.palette.primary.light,
+    },
+    '.active': {
+      backgroundColor: theme.appBar.btnActiveBg,
       color: theme.palette.primary.light,
     },
   },
@@ -130,21 +161,20 @@ export function Appbar(): JSX.Element {
 
             // display the button panels in the list
             return (
-              <List key={groupName}>
+              <List key={groupName} className={classes.appBarList}>
                 {Object.keys(buttonPanels).map((buttonId) => {
                   const buttonPanel = buttonPanels[buttonId];
-
                   return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
                     <Fragment key={buttonPanel.button.id}>
                       <ListItem>
-                        <Button
+                        <IconButton
                           id={buttonPanel.button.id}
-                          variant="text"
+                          aria-label={buttonPanel.button.tooltip}
                           tooltip={buttonPanel.button.tooltip}
                           tooltipPlacement="right"
-                          type="icon"
                           className={classes.appBarButton}
-                          iconClassName={classes.appBarButtonIcon}
+                          size="small"
+                          // TODO -  KenChase - need to add active css class to IconButton who's panel is open
                           onClick={() => {
                             if (!buttonPanel.panel?.status) {
                               buttonPanel.panel?.open();
@@ -152,12 +182,10 @@ export function Appbar(): JSX.Element {
                               buttonPanel.panel?.close();
                             }
                           }}
-                          icon={buttonPanel.button.icon}
                         >
-                          {buttonPanel.button.tooltip}
-                        </Button>
+                          {buttonPanel.button.children}
+                        </IconButton>
                       </ListItem>
-                      <Divider />
                     </Fragment>
                   ) : null;
                 })}
