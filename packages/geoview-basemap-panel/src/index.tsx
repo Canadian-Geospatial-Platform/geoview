@@ -68,15 +68,15 @@ class BasemapPanelPlugin extends AbstractPluginClass {
 
     if (cgpv) {
       // access the api calls
-      const { api } = cgpv;
+      const { api, ui } = cgpv;
+      const { MapIcon } = ui.elements;
       const { language } = api.map(mapId);
-
       // button props
       const button: TypeIconButtonProps = {
         id: 'basemapPanelButton',
         tooltip: this.translations[language].basemapPanel as string,
         tooltipPlacement: 'right',
-        children: cgpv.react.createElement(cgpv.ui.elements.MapIcon),
+        children: <MapIcon />,
         visible: true,
       };
 

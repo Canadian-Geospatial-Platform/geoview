@@ -54,8 +54,8 @@ class DetailsPlugin extends AbstractPluginClass {
     const { cgpv } = w;
 
     // access the api calls
-    const { api } = cgpv;
-
+    const { api, ui } = cgpv;
+    const { DetailsIcon } = ui.elements;
     const { language } = api.map(mapId);
 
     // button props
@@ -64,7 +64,7 @@ class DetailsPlugin extends AbstractPluginClass {
       id: 'detailsPanelButton',
       tooltip: this.translations[language].detailsPanel as string,
       tooltipPlacement: 'right',
-      children: cgpv.react.createElement(cgpv.ui.elements.DetailsIcon),
+      children: <DetailsIcon />,
       visible: true,
     };
 

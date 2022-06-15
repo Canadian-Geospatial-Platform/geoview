@@ -65,8 +65,8 @@ class LayersPanelPlugin extends AbstractPluginClass {
     const { cgpv } = w;
 
     // access the api calls
-    const { api } = cgpv;
-
+    const { api, ui } = cgpv;
+    const { LayersOutlinedIcon } = ui.elements;
     const { language } = api.map(mapId);
 
     let panelStatus = false;
@@ -78,7 +78,7 @@ class LayersPanelPlugin extends AbstractPluginClass {
       id: 'layersPanelButton',
       tooltip: this.translations[language].layersPanel as string,
       tooltipPlacement: 'right',
-      children: cgpv.react.createElement(cgpv.ui.elements.LayersOutlinedIcon),
+      children: <LayersOutlinedIcon />,
       visible: true,
     };
 
