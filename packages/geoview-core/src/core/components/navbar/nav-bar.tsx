@@ -10,7 +10,7 @@ import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 
 import { api } from '../../../app';
-import { Panel, ButtonGroup, Button } from '../../../ui';
+import { Panel, ButtonGroup, IconButton } from '../../../ui';
 
 import { MapContext } from '../../app-start';
 import { TypeButtonPanel } from '../../types/cgpv-types';
@@ -18,8 +18,8 @@ import { TypeButtonPanel } from '../../types/cgpv-types';
 import { EVENT_NAMES } from '../../../api/events/event';
 import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 
-const navBtnWidth = '32px';
-const navBtnHeight = '32px';
+const navBtnWidth = '44px';
+const navBtnHeight = '44px';
 
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
@@ -189,24 +189,22 @@ export function Navbar(): JSX.Element {
                   // eslint-disable-next-line no-nested-ternary
                   return buttonPanel.button.visible ? (
                     !buttonPanel.panel ? (
-                      <Button
+                      <IconButton
                         key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
-                        type="icon"
                         tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement="left"
-                        icon={buttonPanel.button.icon}
+                        tooltipPlacement={buttonPanel.button.tooltipPlacement}
                         className={classes.navBarButton}
                         onClick={buttonPanel.button.onClick}
-                      />
+                      >
+                        {buttonPanel.button.children}
+                      </IconButton>
                     ) : (
-                      <Button
+                      <IconButton
                         key={buttonPanel.button.id}
                         id={buttonPanel.button.id}
-                        type="icon"
                         tooltip={buttonPanel.button.tooltip}
-                        tooltipPlacement="left"
-                        icon={buttonPanel.button.icon}
+                        tooltipPlacement={buttonPanel.button.tooltipPlacement}
                         className={classes.navBarButton}
                         onClick={() => {
                           if (!buttonPanel.panel?.status) {
@@ -215,7 +213,9 @@ export function Navbar(): JSX.Element {
                             buttonPanel.panel?.close();
                           }
                         }}
-                      />
+                      >
+                        {buttonPanel.button.children}
+                      </IconButton>
                     )
                   ) : null;
                 })}

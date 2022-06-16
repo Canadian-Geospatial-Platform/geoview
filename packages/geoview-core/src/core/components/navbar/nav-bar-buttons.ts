@@ -4,7 +4,7 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { PanelApi } from '../../../ui';
 
-import { TypeButtonPanel, TypeButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
+import { TypeButtonPanel, TypeIconButtonProps, TypePanelProps, CONST_PANEL_TYPES } from '../../types/cgpv-types';
 
 import { generateId } from '../../utils/utilities';
 import { buttonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
@@ -59,7 +59,7 @@ export class NavbarButtons {
    * @returns the create button / button panel
    */
   private createButtonPanel = (
-    buttonProps: TypeButtonProps,
+    buttonProps: TypeIconButtonProps,
     panelProps: TypePanelProps | null | undefined,
     groupName: string
   ): TypeButtonPanel | null => {
@@ -75,7 +75,7 @@ export class NavbarButtons {
         this.buttons[group] = {};
       }
 
-      const button: TypeButtonProps = {
+      const button: TypeIconButtonProps = {
         ...buttonProps,
         id,
         visible: !buttonProps.visible ? true : buttonProps.visible,
@@ -118,7 +118,7 @@ export class NavbarButtons {
    *
    * @returns the created button panel
    */
-  createNavbarButtonPanel = (buttonProps: TypeButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
+  createNavbarButtonPanel = (buttonProps: TypeIconButtonProps, panelProps: TypePanelProps, groupName: string): TypeButtonPanel | null => {
     return this.createButtonPanel(buttonProps, panelProps, groupName);
   };
 
@@ -130,7 +130,7 @@ export class NavbarButtons {
    *
    * @returns the create button
    */
-  createNavbarButton = (buttonProps: TypeButtonProps, groupName: string): TypeButtonPanel | null => {
+  createNavbarButton = (buttonProps: TypeIconButtonProps, groupName: string): TypeButtonPanel | null => {
     return this.createButtonPanel(buttonProps, null, groupName);
   };
 

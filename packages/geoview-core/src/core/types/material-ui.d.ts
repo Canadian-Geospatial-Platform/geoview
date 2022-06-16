@@ -24,6 +24,13 @@ declare module '@mui/material/styles' {
         size: { width: string | number; height: string | number };
       };
     };
+    appBar?: {
+      border?: string;
+      btnActiveBg?: string;
+      btnDefaultBg?: string;
+      btnFocusBg?: string;
+      btnHoverBg?: string;
+    };
   }
 
   interface Theme {
@@ -37,6 +44,13 @@ declare module '@mui/material/styles' {
       crosshairIcon: {
         size: { width: number; height: number };
       };
+    };
+    appBar: {
+      border: string;
+      btnActiveBg: string;
+      btnDefaultBg: string;
+      btnFocusBg: string;
+      btnHoverBg: string;
     };
   }
 }

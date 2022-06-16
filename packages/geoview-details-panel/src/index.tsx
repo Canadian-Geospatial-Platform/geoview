@@ -5,12 +5,11 @@ import {
   TypePluginOptions,
   TypeButtonPanel,
   toJsonObject,
-  TypeButtonProps,
+  TypeIconButtonProps,
   TypePanelProps,
   TypeWindow,
 } from 'geoview-core';
 import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
-
 import PanelContent from './panel-content';
 
 const w = window as TypeWindow;
@@ -55,19 +54,18 @@ class DetailsPlugin extends AbstractPluginClass {
     const { cgpv } = w;
 
     // access the api calls
-    const { api } = cgpv;
-
+    const { api, ui } = cgpv;
+    const { DetailsIcon } = ui.elements;
     const { language } = api.map(mapId);
 
     // button props
-    const button: TypeButtonProps = {
+    const button: TypeIconButtonProps = {
       // set ID to detailsPanel so that it can be accessed from the core viewer
       id: 'detailsPanelButton',
       tooltip: this.translations[language].detailsPanel as string,
       tooltipPlacement: 'right',
-      icon: '<i class="material-icons">details</i>',
+      children: <DetailsIcon />,
       visible: true,
-      type: 'icon',
     };
 
     // panel props
