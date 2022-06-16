@@ -10,8 +10,6 @@ import { MapContext } from '../../app-start';
 import { payloadIsABasemapLayerArray } from '../../types/cgpv-types';
 
 export function OverviewMap(): JSX.Element {
-  const [overviewMap, setOverviewMap] = useState<OLOverviewMap>();
-
   const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
@@ -23,8 +21,16 @@ export function OverviewMap(): JSX.Element {
       (payload) => {
         if (payloadIsABasemapLayerArray(payload)) {
           if (payload.handlerName === mapId) {
+            const overviewMap = api
+              .map(mapId)
+              .map.getControls()
+              .getArray()
+              .filter((item) => {
+                return item instanceof OLOverviewMap;
+              })[0] as OLOverviewMap;
+
             // remove previous basemaps
-            const layers = overviewMap!.getOverviewMap().getAllLayers();
+            const layers = overviewMap.getOverviewMap().getAllLayers();
 
             // loop through all layers on the map
             for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
@@ -36,12 +42,12 @@ export function OverviewMap(): JSX.Element {
               // check if the group id matches basemap
               if (layerId && layerId === 'basemap') {
                 // remove the basemap layer
-                overviewMap!.getOverviewMap().removeLayer(layer);
+                overviewMap.getOverviewMap().removeLayer(layer);
               }
             }
 
             // add basemap layers
-            payload.layers.forEach((layer, index) => {
+            payload.layers.forEach((layer) => {
               const basemapLayer = new TileLayer({
                 opacity: layer.opacity,
                 source: layer.source,
@@ -51,7 +57,7 @@ export function OverviewMap(): JSX.Element {
               basemapLayer.set('id', 'basemap');
 
               // add the basemap layer
-              overviewMap!.getOverviewMap().addLayer(basemapLayer);
+              overviewMap.getOverviewMap().addLayer(basemapLayer);
 
               // render the layer
               basemapLayer.changed();
@@ -61,11 +67,7 @@ export function OverviewMap(): JSX.Element {
       },
       mapId
     );
-
-    return () => {
-      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
-    };
-  }, [mapId, overviewMap]);
+  }, [mapId]);
 
   useEffect(() => {
     const { map } = api.map(mapId);
@@ -92,8 +94,6 @@ export function OverviewMap(): JSX.Element {
       collapsed: false,
       rotateWithView: true,
     });
-
-    setOverviewMap(overviewMapContrsol);
 
     map.addControl(overviewMapContrsol);
 
