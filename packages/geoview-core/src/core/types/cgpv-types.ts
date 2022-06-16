@@ -415,7 +415,7 @@ export type TypeFeatureStyle = {
 export type TypePanelAppProps = {
   panel: PanelApi;
   //   panelOpen: boolean;
-  button: TypeButtonProps;
+  button: TypeIconButtonProps;
 };
 
 /**
@@ -764,7 +764,7 @@ export type TypeButtonPanelProps = {
 export type TypeButtonPanel = {
   id: string;
   panel?: PanelApi;
-  button: TypeButtonProps;
+  button: TypeIconButtonProps;
   groupName?: string;
 };
 
@@ -856,6 +856,8 @@ export interface TypeIconButtonProps extends IconButtonProps {
   id?: string;
   tabIndex?: number;
   iconRef?: React.RefObject<HTMLButtonElement>;
+  // button visibility
+  visible?: boolean;
 }
 
 /**
