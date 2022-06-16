@@ -63,7 +63,7 @@
           'interaction': 'dynamic',
           'initialView': {
             'zoom': 4,
-            'center': [60, -100]
+            'center': [-100, 60]
           },
           'projection': 3857,
           'basemapOptions': {
@@ -87,14 +87,15 @@
         // call an api function to draw a polyline
         const polyline = cgpv.api.map(map).layer.vector.addPolyline(
           [
-            [45, -100],
-            [50, -105],
+            [-100, 45],
+            [-105, 50],
           ],
           {
-            stroke: true,
-            color: '#000',
-            weight: 5,
-            opacity: '0.8',
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+            },
           }
         );
 
@@ -105,16 +106,17 @@
         // call an api function to draw a polygon
         const polygon = cgpv.api.map(map).layer.vector.addPolygon(
           [
-            [50, -109.05],
-            [54, -109.03],
-            [54, -102.05],
-            [50, -102.04],
+            [-109.05, 50],
+            [-109.03, 54],
+            [-102.05, 54],
+            [-102.04, 50],
           ],
           {
-            stroke: true,
-            color: '#000',
-            weight: 5,
-            opacity: '0.8',
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+            },
           }
         );
         cgpv.api.map(map).layer.vector.addToGeometryGroup(polygon, document.getElementById('groupname').value);
@@ -122,11 +124,12 @@
 
       function addCircle(map) {
         // call an api function to draw a polygon
-        const circle = cgpv.api.map(map).layer.vector.addCircle(50, -109, {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 50.0,
+        const circle = cgpv.api.map(map).layer.vector.addCircle([-109, 50], 50.0, {
+          style: {
+            strokeColor: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+          },
         });
 
         cgpv.api.map(map).layer.vector.addToGeometryGroup(circle, document.getElementById('groupname').value);
@@ -134,11 +137,12 @@
 
       function addCircleMarker(map) {
         // call an api function to draw a polygon
-        const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker(70, -109, {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 50.0,
+        const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker([-109, 70], 50.0, {
+          style: {
+            strokeColor: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+          },
         });
         cgpv.api.map(map).layer.vector.addToGeometryGroup(circleMarker, document.getElementById('groupname').value);
       }

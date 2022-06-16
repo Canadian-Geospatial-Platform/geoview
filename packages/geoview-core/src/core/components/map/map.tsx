@@ -9,6 +9,8 @@ import { ObjectEvent } from 'ol/Object';
 import { MapEvent } from 'ol';
 
 import makeStyles from '@mui/styles/makeStyles';
+import { useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 import { NorthArrow } from '../north-arrow/north-arrow';
 
@@ -24,6 +26,7 @@ import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basema
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
+import { OverviewMap } from '../overview-map/overview-map';
 
 export const useStyles = makeStyles(() => ({
   mapContainer: {
@@ -53,6 +56,11 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
+
+  const defaultTheme = useTheme();
+
+  // if screen size is medium and up
+  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
 
   /**
    * Get the center position of the map when move / drag has ended
@@ -216,10 +224,11 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
       {isLoaded && (
         <>
-          {components !== undefined && components.indexOf('northArrow') > -1 && (
+          {/* {components !== undefined && components.indexOf('northArrow') > -1 && (
             <NorthArrow projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
-          )}
-          <Footerbar attribution={attribution!} />
+          )} */}
+          {deviceSizeMedUp && components !== undefined && components.indexOf('overviewMap') > -1 && <OverviewMap />}
+          {deviceSizeMedUp && <Footerbar attribution={attribution!} />}
         </>
       )}
     </div>

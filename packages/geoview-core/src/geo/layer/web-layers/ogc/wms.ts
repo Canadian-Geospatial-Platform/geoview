@@ -98,7 +98,7 @@ export class WMS extends AbstractWebLayersClass {
       const wms = new ImageLayer({
         source: new ImageWMS({
           url: this.url,
-          params: { LAYERS: entries, TILED: true },
+          params: { LAYERS: entries },
         }),
       });
 

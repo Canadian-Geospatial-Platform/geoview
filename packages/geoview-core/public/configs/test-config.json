@@ -3,7 +3,7 @@
     "interaction": "dynamic",
     "initialView": {
       "zoom": 4,
-      "center": [50, -110]
+      "center": [-110, 50]
     },
     "projection": 3978,
     "basemapOptions": {
@@ -44,7 +44,7 @@
       "boxZoom": true
     }
   },
-  "corePackages": ["basemap-panel", "layers-panel"],
+  "corePackages": ["basemap-panel"],
   "components": ["navbar", "appbar"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]

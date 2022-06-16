@@ -13,6 +13,26 @@
     },
     "layers": [
       {
+        "id": "esriDynamicLYR2",
+        "name": {
+          "en": "Senior care facilities on April 2020",
+          "fr": "Senior care facilities on April 2020"
+        },
+        "url": {
+          "en": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer",
+          "fr": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer"
+        },
+        "layerType": "esriDynamic",
+        "layerEntries": [
+          {
+            "index": 0
+          },
+          {
+            "index": 1
+          }
+        ]
+      },
+      {
         "id": "ogcFeatureLYR7",
         "name": {
           "en": "Large Lakes",
@@ -36,7 +56,7 @@
     }
   },
   "corePackages": ["basemap-panel"],
-  "components": ["appbar", "navbar"],
+  "components": ["appbar", "navbar", "overviewMap"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]
 }

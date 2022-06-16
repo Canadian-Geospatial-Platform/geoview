@@ -78,8 +78,8 @@ export class Config {
       },
     },
     theme: 'dark',
-    components: ['appbar', 'navbar', 'northArrow'],
-    corePackages: ['overview-map'],
+    components: ['appbar', 'navbar', 'northArrow', 'overviewMap'],
+    corePackages: [],
     languages: ['en-CA', 'fr-CA'],
     extraOptions: {},
   };

@@ -8,7 +8,7 @@
     "projection": 3978,
     "initialView": {
       "zoom": 12,
-      "center": [60, -100]
+      "center": [-100, 60]
     },
     "basemapOptions": {
       "id": "transport",
@@ -111,8 +111,8 @@
     ]
   },
   "theme": "dark",
-  "components": ["appbar", "navbar", "northArrow"],
-  "corePackages": ["overview-map", "basemap-panel", "layers-panel", "details-panel"],
+  "components": ["appbar", "navbar", "northArrow", "overviewMap"],
+  "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca"

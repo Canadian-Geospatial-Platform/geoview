@@ -35,6 +35,7 @@ import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
+import { generateId } from '../../core/utils/utilities';
 
 /**
  * Class used to manage created maps
@@ -147,17 +148,11 @@ export class MapViewer {
           if (response.status === 200) {
             response.json().then((data) => {
               if (typeof data.geometry !== 'undefined') {
-                // reverse the array because they are x, y instead of default lat long couple y, x
-                // TODO: check if we can know and set this info from outside
-                data.geometry.coordinates.forEach((r: Array<Array<number>>) => r.forEach((c: Array<number>) => c.reverse()));
-
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
 
                 // TODO
-                // this.layer.vector.addPolygon(data.geometry.coordinates, {
-                //   id: generateId(''),
-                // });
+                this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });
           }

@@ -665,8 +665,10 @@ export class Vector {
       geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
     }
 
-    geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
-    geometryGroup.vectorLayer.changed();
+    try {
+      geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
+      geometryGroup.vectorLayer.changed();
+    } catch (error) {}
   };
 
   /**

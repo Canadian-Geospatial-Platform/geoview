@@ -77,7 +77,6 @@ export function Footerbar(props: TypeFooterbarProps): JSX.Element {
   return (
     <div id="footerBar" className={`${classes.footerBarContainer}`} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       {deviceSizeMedUp && <Attribution attribution={attribution} />}
-      {/* <ScaleControl position="bottomright" imperial={false} /> */}
       <div id="mouseAndScaleControls" className={classes.mouseScaleControlsContainer}>
         {deviceSizeMedUp && <MousePosition id={mapId} />}
         <Scale />

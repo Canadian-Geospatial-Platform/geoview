@@ -63,7 +63,7 @@
               'interaction': 'dynamic',
               'initialView': {
                 'zoom': 4,
-                'center': [60, -100]
+                'center': [-100, 60]
               },
               'projection': 3978,
               'basemapOptions': {
@@ -72,7 +72,8 @@
                 'labeled': true
               }
             },
-            'corePackages': ['overview-map', 'basemap-panel'],
+            'components': ['overviewMap'],
+            'corePackages': ['basemap-panel'],
             'theme': 'dark',
             'languages': ['en-CA']
           }"
@@ -95,7 +96,7 @@
             'interaction': 'dynamic',
             'initialView': {
               'zoom': 4,
-              'center': [60, -100]
+              'center': [-100, 60]
             },
             'projection': 3857,
             'basemapOptions': {
@@ -220,7 +221,8 @@
                 'fr': '# Un exemple de démarque'
             }
           },
-          'corePackages': ['overview-map', 'basemap-panel'],
+          'components': ['overviewMap'],
+          'corePackages': ['basemap-panel'],
           'languages': ['en-CA']
         }"
       ></div>
@@ -240,7 +242,7 @@
             'interaction': 'dynamic',
             'initialView': {
               'zoom': 4,
-              'center': [60, -100]
+              'center': [-100, 60]
             },
             'projection': 3978,
             'basemapOptions': {
@@ -249,7 +251,8 @@
               'labeled': false
             }
           },
-          'corePackages': ['overview-map'],
+          'components': ['overviewMap'],
+          'corePackages': [],
           'theme': 'dark',
           'languages': ['en-CA']
         }"
@@ -270,7 +273,7 @@
             'interaction': 'dynamic',
             'initialView': {
               'zoom': 4,
-              'center': [60, -100]
+              'center': [-100, 60]
             },
             'projection': 3978,
             'basemapOptions': {
@@ -279,7 +282,8 @@
               'labeled': false
             }
           },
-          'corePackages': ['overview-map'],
+          'components': ['overviewMap'],
+          'corePackages': [],
           'theme': 'dark',
           'languages': ['en-CA']
         }"
@@ -296,58 +300,63 @@
         // call an api function to draw a polyline
         const polyline = cgpv.api.map(map).layer.vector.addPolyline(
           [
-            [45, -100],
-            [50, -105],
+            [-100, 45],
+            [-105, 50],
           ],
           {
-            stroke: true,
-            color: '#000',
-            weight: 5,
-            opacity: '0.8',
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+            },
           }
         );
-        cgpv.api.map(map).layer.vector.addToGeometryGroup(polyline);
       }
 
       function addPolygon(map) {
         // call an api function to draw a polygon
         const polygon = cgpv.api.map(map).layer.vector.addPolygon(
           [
-            [48, -109.05],
-            [54, -109.03],
-            [54, -102.05],
-            [48, -102.04],
+            [-109.05, 41.0],
+            [-102.06, 40.99],
+            [-102.03, 36.99],
+            [-109.04, 36.99],
+            [-109.05, 41.0],
           ],
           {
-            stroke: true,
-            color: '#000',
-            weight: 5,
-            opacity: '0.8',
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+              fillColor: 'red',
+              fillOpacity: 1,
+            },
           }
         );
-        cgpv.api.map(map).layer.vector.addToGeometryGroup(polygon);
       }
 
       function addCircle(map) {
         // call an api function to draw a polygon
-        const circle = cgpv.api.map(map).layer.vector.addCircle(50, -109, {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 50.0,
+        const circle = cgpv.api.map(map).layer.vector.addCircle([-109, 50], 50000.0, {
+          style: {
+            strokeColor: 'red',
+            strokeWidth: 1,
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+          },
         });
-        cgpv.api.map(map).layer.vector.addToGeometryGroup(circle);
       }
 
       function addCircleMarker(map) {
         // call an api function to draw a polygon
-        const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker(70, -109, {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0.5,
-          radius: 50.0,
+        const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker([-109, 70], 20.0, {
+          style: {
+            strokeColor: 'red',
+            strokeWidth: 1,
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+          },
         });
-        cgpv.api.map(map).layer.vector.addToGeometryGroup(circleMarker);
       }
 
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

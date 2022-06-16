@@ -52,7 +52,7 @@
             'interaction': 'dynamic',
             'initialView': {
               'zoom': 4,
-              'center': [60, -100]
+              'center': [-100, 60]
             },
             'projection': 3978,
             'basemapOptions': {
@@ -101,18 +101,18 @@
 
         // snackbar notification
         cgpv.api.event.emit(
-          cgpv.types.snackbarMessagePayload(
-            cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
-              type: 'string',
-              value: 'This is my first snackbar!',
-            }
-          )
+          cgpv.types.snackbarMessagePayload(cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
+            type: 'string',
+            value: 'This is my first snackbar!',
+          })
         );
 
         setInterval(() => {
           cgpv.api.event.emit(
             cgpv.types.snackbarMessagePayload(
-              cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, 'EVNT1', {
+              cgpv.api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+              'EVNT1',
+              {
                 type: 'string',
                 value: 'I can even apply a function',
               },
@@ -122,7 +122,7 @@
                 action: () => {
                   alert('You clicked me!');
                 },
-              },
+              }
             )
           );
         }, 20000);

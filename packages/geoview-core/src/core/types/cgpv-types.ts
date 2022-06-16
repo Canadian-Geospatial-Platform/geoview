@@ -609,9 +609,9 @@ export type TypeFooterbarProps = {
 
 export type TypeNorthArrowProps = TypeJsonObject;
 
-export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';
+export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow' | 'overviewMap';
 
-export type TypeMapCorePackages = 'overview-map' | 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
+export type TypeMapCorePackages = 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
 
 export type TypeExternalPackages = {
   name: string;

@@ -189,13 +189,8 @@ export class Layer {
    * @param {string} id the id of the layer to be removed
    */
   removeLayerById = (id: string): void => {
-    // return items not matching the id
-    // this.layers = this.layers.filter((item: AbstractWebLayersClass) => {
-    //   if (item.id === id) item.layer.removeFrom(this.#map);
-    //   return item.id !== id;
-    // });
+    this.layers[id].layer.dispose();
 
-    // TODO
     // this.layers[id].layer!.removeFrom(api.map(this.#mapId).map);
     delete this.layers[id];
   };

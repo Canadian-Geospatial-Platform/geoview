@@ -29,12 +29,11 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
     paddingBottom: 30,
+    marginRight: 5,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
-    height: '100%',
     overflow: 'auto',
     justifyContent: 'center',
-    width: 40,
     backgroundColor: 'transparent',
   },
   navBtnGroupContainer: {
