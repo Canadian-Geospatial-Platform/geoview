@@ -31,6 +31,13 @@ declare module '@mui/material/styles' {
       btnFocusBg?: string;
       btnHoverBg?: string;
     };
+    panel?: {
+      activeBg?: string;
+      border?: string;
+      borderLight?: string;
+      defaultBg?: string;
+      hoverBg?: string;
+    };
   }
 
   interface Theme {
@@ -51,6 +58,13 @@ declare module '@mui/material/styles' {
       btnDefaultBg: string;
       btnFocusBg: string;
       btnHoverBg: string;
+    };
+    panel: {
+      activeBg: string;
+      border: string;
+      borderLight: string;
+      defaultBg: string;
+      hoverBg: string;
     };
   }
 }

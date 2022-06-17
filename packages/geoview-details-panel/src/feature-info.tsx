@@ -20,6 +20,8 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
   // access the api calls
   const { react, ui, useTranslation } = cgpv;
 
+  const { ArrowBackIcon } = ui.elements;
+
   const { useEffect } = react;
 
   const { displayField, fieldAliases, attributes, symbol, numOfEntries } = selectedFeature;
@@ -74,7 +76,7 @@ function FeatureInfo(props: TypeFeatureInfoProps): JSX.Element {
 
   useEffect(() => {
     // add new action button that goes back to the entry / features list or layers list
-    buttonPanel.panel?.addActionButton('back', t('action_back'), '<i class="material-icons">keyboard_backspace</i>', () => {
+    buttonPanel.panel?.addActionButton('back', t('action_back'), <ArrowBackIcon />, () => {
       if (numOfEntries === 1) {
         // set panel back to layers list
         setPanel(true, false, false);

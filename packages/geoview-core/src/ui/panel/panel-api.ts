@@ -135,11 +135,11 @@ export class PanelApi {
    * @param {Function} action a function that will be triggered when clicking this action
    * @returns {Panel} the panel
    */
-  addActionButton = (id: string, title: string, icon: string | React.ReactElement | Element, action: () => void): PanelApi => {
+  addActionButton = (id: string, title: string, children: React.ReactNode, action: () => void): PanelApi => {
     const actionButton: TypeActionButton = {
       id: `${this.buttonId}_${id}`,
       title,
-      icon,
+      children,
       action,
     };
     api.event.emit(
