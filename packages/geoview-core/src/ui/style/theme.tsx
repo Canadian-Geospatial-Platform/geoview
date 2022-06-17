@@ -22,8 +22,10 @@ const themeOptions: ThemeOptions = {
     backdrop: '#3F3F3F50',
   },
   typography: {
-    fontSize: 16,
-    htmlFontSize: 16,
+    /* TODO - KenChase. Reverting to default MUI styles. To be reviewed and deleted if unused. 
+     fontSize: 16,
+     htmlFontSize: 16,
+    */
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
     h1: headingStyles,
     h2: headingStyles,
@@ -33,6 +35,7 @@ const themeOptions: ThemeOptions = {
     h6: {
       fontWeight: 400,
     },
+    /* TODO - KenChase. Reverting to default MUI styles. To be reviewed and deleted if unused. 
     subtitle1: {
       fontSize: '0.8rem',
       lineHeight: 1.25,
@@ -41,6 +44,7 @@ const themeOptions: ThemeOptions = {
       fontSize: '0.7rem',
       lineHeight: 1.25,
     },
+    */
     body1: {},
     body2: {},
     caption: {},
@@ -148,6 +152,13 @@ const themeOptions: ThemeOptions = {
     btnDefaultBg: '#2a2a2a',
     btnFocusBg: '#393939',
     btnHoverBg: '#393939',
+  },
+  panel: {
+    border: '#393939',
+    borderLight: '#4f4f4f',
+    defaultBg: '#2a2a2a',
+    hoverBg: '#393939',
+    activeBg: '#4f4f4f',
   },
 };
 
