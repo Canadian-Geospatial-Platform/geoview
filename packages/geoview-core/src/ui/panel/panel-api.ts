@@ -131,15 +131,15 @@ export class PanelApi {
    *
    * @param {string} id an id for the new action button to be used later to delete this button
    * @param {string} title the title of the action button, will display in the tooltip
-   * @param {string | ReactElement | Element} icon the icon of the action button
+   * @param {string | ReactElement | Element} children the icon of the action button
    * @param {Function} action a function that will be triggered when clicking this action
    * @returns {Panel} the panel
    */
-  addActionButton = (id: string, title: string, icon: string | React.ReactElement | Element, action: () => void): PanelApi => {
+  addActionButton = (id: string, title: string, children: string | React.ReactElement | Element, action: () => void): PanelApi => {
     const actionButton: TypeActionButton = {
       id: `${this.buttonId}_${id}`,
       title,
-      icon,
+      children,
       action,
     };
     api.event.emit(
