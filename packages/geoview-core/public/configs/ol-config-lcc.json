@@ -78,7 +78,7 @@
     }
   },
   "corePackages": ["basemap-panel"],
-  "components": ["appbar", "navbar", "overviewMap"],
+  "components": ["appbar", "navbar", "overviewMap", "northArrow"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]
 }

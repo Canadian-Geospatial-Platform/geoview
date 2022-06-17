@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState, useContext } from 'react';
 
 import OLMap from 'ol/Map';
+import Overlay from 'ol/Overlay';
 import { Coordinate } from 'ol/coordinate';
+import { toLonLat, fromLonLat } from 'ol/proj';
 
 import { useTheme } from '@mui/material/styles';
 
@@ -11,14 +13,15 @@ import { debounce } from 'lodash';
 
 import { PROJECTION_NAMES } from '../../../geo/projection/projection';
 
-import { NorthArrowIcon } from './north-arrow-icon';
+import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
-    left: '50%', // theme.shape.center,
+    left: '50%',
+    position: 'absolute',
   },
   northArrow: {
     width: theme.overrides?.northArrow?.size.width,
@@ -27,7 +30,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // The north pole position use for north arrow marker and get north arrow rotation angle
-const northPolePosition: [number, number] = [90, -95];
+// north value (set longitude to be half of Canada extent (141° W, 70° W))
+const northPolePosition: [number, number] = [90, -106];
 
 // interface used for NorthArrow props
 interface NorthArrowProps {
@@ -61,15 +65,16 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
    * https://www.movable-type.co.uk/scripts/latlong.html
    *
-   * @param {Coordinate} center Map center in lat long
+   * @param {OLMap} map the map
    * @return {string} the arrow angle
    */
-  const getNorthArrowAngle = (center: Coordinate): string => {
+  const getNorthArrowAngle = (map: OLMap): string => {
     try {
-      // north value (set longitude to be half of Canada extent (141° W, 52° W))
+      // north value (set longitude to be half of Canada extent (141° W, 70° W))
       const pointA = { x: northPolePosition[1], y: northPolePosition[0] };
 
       // map center
+      const center: Coordinate = toLonLat(map.getView().getCenter()!, api.projection.projections[api.map(mapId).currentProjection]);
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude
@@ -82,7 +87,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
       const bearing = (Math.atan2(y, x) * 180) / Math.PI;
 
-      // return angle (180 is pointiong north)
+      // return angle (180 is pointing north)
       return ((bearing + 360) % 360).toFixed(1);
     } catch (error) {
       return '180.0';
@@ -98,8 +103,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [map.getSize()![0] / 2, 1];
-
-    const pt = map.getCoordinateFromPixel(pointXY);
+    const pt = toLonLat(map.getCoordinateFromPixel(pointXY), api.projection.projections[api.map(mapId).currentProjection]);
 
     // If user is pass north, long value will start to be positive (other side of the earth).
     // This willl work only for LCC Canada.
@@ -175,8 +179,10 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
       if (!isPassNorth) {
         // set rotation angle and offset
-        const angleDegrees = 270 - parseFloat(getNorthArrowAngle(map.getView().getCenter()!));
-        setRotationAngle({ angle: 90 - angleDegrees });
+        const angleDegrees = 270 - parseFloat(getNorthArrowAngle(map));
+        const mapRotation = map.getView().getRotation() * (180 / Math.PI);
+
+        setRotationAngle({ angle: 90 - angleDegrees + mapRotation });
         setOffset(map, angleDegrees);
       }
     }
@@ -196,8 +202,6 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
   useEffect(() => {
     const { map } = api.map(mapId);
-
-    manageArrow(map);
 
     // listen to map moveend event
     map.on('moveend', onMapMoveEnd);
@@ -225,36 +229,43 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
   );
 }
 
-// /**
-//  * Create a north pole flag icon
-//  * @param {NorthArrowProps} props north arrow icon props
-//  * @return {JSX.Element} the north pole marker icon
-//  */
-// export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
-//   const { projection } = props;
-//   const [pane, setPane] = useState(false);
+/**
+ * Create a north pole flag icon
+ * @param {NorthArrowProps} props north arrow icon props
+ * @return {JSX.Element} the north pole marker icon
+ */
+export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
+  const { projection } = props;
+  const northPoleRef = useRef<HTMLDivElement>(null);
 
-//   const mapConfig = useContext(MapContext);
+  const mapConfig = useContext(MapContext);
+  const mapId = mapConfig.id;
+  const northPoleId = `${mapId}-northpole`;
 
-//   const mapId = mapConfig.id;
+  useEffect(() => {
+    const { map } = api.map(mapId);
+    const projectionPosition = fromLonLat(
+      [northPolePosition[1], northPolePosition[0]],
+      api.projection.projections[api.map(mapId).currentProjection]
+    );
 
-//   useEffect(() => {
-//     // api.map(mapId).map.createPane('NorthPolePane');
-//     setPane(true);
-//     // Create a pane for the north pole marker
-//   }, [mapId]);
+    // create overlay for northj pole icon
+    const northPoleMarker = new Overlay({
+      position: projectionPosition,
+      positioning: 'center-center',
+      element: document.getElementById(northPoleId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(northPoleMarker);
 
-//   // Create the icon
-//   const iconUrl = encodeURI(`data:image/svg+xml,${NorthPoleIcon}`).replace('#', '%23');
-//   const northPoleIcon = new Icon({
-//     iconUrl,
-//     iconSize: [24, 24],
-//     iconAnchor: [6, 18],
-//   });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-//   return projection.code === PROJECTION_NAMES.LCC && pane ? (
-//     <Marker id={generateId('')} position={northPolePosition} icon={northPoleIcon} keyboard={false} pane="NorthPolePane" />
-//   ) : (
-//     <div />
-//   );
-// }
+  return projection === PROJECTION_NAMES.LCC ? (
+    <div ref={northPoleRef} id={northPoleId}>
+      <NorthPoleIcon />
+    </div>
+  ) : (
+    <div />
+  );
+}
