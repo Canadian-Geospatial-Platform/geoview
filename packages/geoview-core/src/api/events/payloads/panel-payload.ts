@@ -24,7 +24,7 @@ const validEvents4Content: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_CHAN
 export type TypeActionButton = {
   id: string;
   title?: string;
-  icon?: string | React.ReactElement | Element;
+  children?: string | React.ReactElement | Element;
   action?: () => void;
 };
 

@@ -149,6 +149,13 @@ const themeOptions: ThemeOptions = {
     btnFocusBg: '#393939',
     btnHoverBg: '#393939',
   },
+  panel: {
+    border: '#393939',
+    borderLight: '#4f4f4f',
+    defaultBg: '#2a2a2a',
+    hoverBg: '#393939',
+    activeBg: '#4f4f4f',
+  },
 };
 
 export const cgpvTheme = createTheme(themeOptions);
