@@ -12,7 +12,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import { NorthArrow } from '../north-arrow/north-arrow';
+import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 
 import { generateId } from '../../utils/utilities';
 
@@ -98,7 +98,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // return (
   //   <MapContainer>
   //       <>
-  //         <NorthPoleFlag projection={crs} />
   //         <Crosshair id={id} />
   //         <ClickMarker />
   //       </>
@@ -224,9 +223,10 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
       {isLoaded && (
         <>
-          {/* {components !== undefined && components.indexOf('northArrow') > -1 && (
+          {components !== undefined && components.indexOf('northArrow') > -1 && (
             <NorthArrow projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
-          )} */}
+          )}
+          <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overviewMap') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar attribution={attribution!} />}
         </>
