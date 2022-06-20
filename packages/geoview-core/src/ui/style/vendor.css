@@ -7,30 +7,24 @@ Hold all third party libraries override
 }
 
 /** Overview Map Styling **/
-.ol-custom-overviewmap,
-.ol-custom-overviewmap.ol-uncollapsible {
-  bottom: auto;
-  left: auto;
-  right: 0;
-  top: 0;
-  margin: 5px;
-}
 
-.ol-custom-overviewmap:not(.ol-collapsed) {
-  border: 1px solid black;
-}
-
-.ol-custom-overviewmap .ol-overviewmap-map {
-  border: none;
-}
-
-.ol-custom-overviewmap .ol-overviewmap-box {
-  border: 2px solid red;
-}
-
-.ol-custom-overviewmap:not(.ol-collapsed) button {
+/* .ol-custom-overviewmap:not(.ol-collapsed) button {
   bottom: auto;
   left: auto;
   right: 1px;
   top: 1px;
-}
+  position: absolute;
+} */
+/* 
+.ol-overviewmap.ol-uncollapsible button {
+  display: block;
+  width: 32px;
+  height: 32px;
+  bottom: auto;
+  left: auto;
+  right: 1px;
+  top: 1px;
+  position: absolute;
+  z-index: 10000;
+  pointer-events: all;
+} */

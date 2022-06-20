@@ -1,7 +1,14 @@
 import { useContext, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+
+import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
+import { useTheme } from '@mui/material/styles';
 
 import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
+
+import { OverviewMapToggle } from './overview-map-toggle';
 
 import { EVENT_NAMES } from '../../../api/events/event';
 import { api } from '../../../app';
@@ -9,10 +16,92 @@ import { MapContext } from '../../app-start';
 
 import { payloadIsABasemapLayerArray } from '../../types/cgpv-types';
 
+import { ChevronLeftIcon } from '../../../ui';
+import { cgpvTheme } from '../../../ui/style/theme';
+
+export const MINIMAP_SIZE = {
+  width: '150px',
+  height: '150px',
+};
+
+const useStyles = makeStyles((theme) => ({
+  overviewMap: {
+    bottom: 'auto',
+    left: 'auto',
+    right: 0,
+    top: 0,
+    margin: 5,
+    padding: 0,
+    '& .ol-overviewmap-map': {
+      border: 'none',
+      display: 'block !important',
+      '-webkit-transition': '300ms linear',
+      '-moz-transition': '300ms linear',
+      '-o-transition': '300ms linear',
+      '-ms-transition': '300ms linear',
+      transition: '300ms linear',
+    },
+    '&.ol-uncollapsible': {
+      bottom: 'auto',
+      left: 'auto',
+      right: 100,
+      top: 100,
+      margin: 5,
+    },
+    '&:not(.ol-collapsed)': {
+      boxShadow: '0 1px 5px rgb(0 0 0 / 65%)',
+      borderRadius: 4,
+      border: 'none',
+    },
+    '&:is(.ol-collapsed)': {
+      boxShadow: '0 1px 5px rgb(0 0 0 / 65%)',
+      borderRadius: 4,
+      border: 'none',
+    },
+    '& button': {
+      zIndex: theme.zIndex.tooltip,
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      left: 'auto !important',
+      bottom: 'auto !important',
+      backgroundColor: 'transparent',
+      '&:hover': {
+        backgroundColor: 'transparent',
+      },
+      '&:focus': {
+        backgroundColor: 'transparent',
+      },
+    },
+    '&::before': {
+      content: '""',
+      display: 'block',
+      position: 'absolute',
+      width: 0,
+      height: 0,
+      borderTop: '32px solid rgba(0, 0, 0, 0.2)',
+      borderLeft: '32px solid rgba(0, 0, 0, 0.2)',
+      borderRadius: 4,
+      zIndex: theme.zIndex.appBar,
+      right: 0,
+      top: 0,
+    },
+    '& .ol-overviewmap-box': {
+      border: '1px solid black',
+      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    },
+    '& .ol-viewport': {
+      borderRadius: 4,
+    },
+  },
+}));
+
 export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const mapId = mapConfig.id;
+
+  const classes = useStyles();
 
   useEffect(() => {
     // listen to adding a new basemap events
@@ -74,9 +163,11 @@ export function OverviewMap(): JSX.Element {
 
     const defaultBasemap = api.map(mapId).basemap.activeBasemap;
 
-    const overviewMapContrsol = new OLOverviewMap({
+    const toggleButton = document.createElement('div');
+
+    const overviewMapControl = new OLOverviewMap({
       // see in overviewmap-custom.html to see the custom CSS used
-      className: `ol-overviewmap ol-custom-overviewmap`,
+      className: `ol-overviewmap ol-custom-overviewmap ${classes.overviewMap}`,
       layers: defaultBasemap?.layers.map((layer) => {
         // create a tile layer for this basemap layer
         const tileLayer = new TileLayer({
@@ -89,13 +180,20 @@ export function OverviewMap(): JSX.Element {
 
         return tileLayer;
       }),
-      collapseLabel: '\u00BB',
-      label: '\u00AB',
+      collapseLabel: toggleButton,
+      label: toggleButton,
       collapsed: false,
       rotateWithView: true,
     });
 
-    map.addControl(overviewMapContrsol);
+    map.addControl(overviewMapControl);
+
+    ReactDOM.render(
+      <ThemeProvider theme={cgpvTheme}>
+        <OverviewMapToggle overviewMap={overviewMapControl} />
+      </ThemeProvider>,
+      toggleButton
+    );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
