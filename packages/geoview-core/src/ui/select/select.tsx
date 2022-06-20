@@ -21,7 +21,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
 
   return (
     <FormControl fullWidth={fullWidth}>
-      <InputLabel {...inputLabel} />
+      <InputLabel {...inputLabel}>{selectProps.label}</InputLabel>
       <MaterialSelect {...selectProps}>
         {menuItems.map((menuItem: TypeMenuItemProps, index) => {
           if (menuItem) {

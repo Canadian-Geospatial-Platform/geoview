@@ -8,6 +8,7 @@ import { api } from '../../../app';
 import { MapContext } from '../../app-start';
 
 import { payloadIsABasemapLayerArray } from '../../types/cgpv-types';
+import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
 export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
@@ -67,6 +68,42 @@ export function OverviewMap(): JSX.Element {
       },
       mapId
     );
+
+    // listen to geoview-basemap-panel package change projection event
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
+      (payload) => {
+        if (payloadIsAMapViewProjection(payload)) {
+          if (payload.handlerName === mapId) {
+            const overviewMap = api
+              .map(mapId)
+              .map.getControls()
+              .getArray()
+              .filter((item) => {
+                return item instanceof OLOverviewMap;
+              })[0] as OLOverviewMap;
+
+            // collapse the overview map, if not projection throw an error
+            overviewMap.setCollapsed(true);
+            overviewMap.setMap(null);
+
+            // wait for the view change then set the amp and open the overview
+            // TODO: look for better options then Timeout
+            setTimeout(() => {
+              overviewMap.setMap(api.map(mapId).map);
+
+              setTimeout(() => overviewMap.setCollapsed(false), 500);
+            }, 2000);
+          }
+        }
+      },
+      mapId
+    );
+
+    return () => {
+      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+    };
   }, [mapId]);
 
   useEffect(() => {
@@ -74,7 +111,7 @@ export function OverviewMap(): JSX.Element {
 
     const defaultBasemap = api.map(mapId).basemap.activeBasemap;
 
-    const overviewMapContrsol = new OLOverviewMap({
+    const overviewMapControl = new OLOverviewMap({
       // see in overviewmap-custom.html to see the custom CSS used
       className: `ol-overviewmap ol-custom-overviewmap`,
       layers: defaultBasemap?.layers.map((layer) => {
@@ -95,7 +132,7 @@ export function OverviewMap(): JSX.Element {
       rotateWithView: true,
     });
 
-    map.addControl(overviewMapContrsol);
+    map.addControl(overviewMapControl);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

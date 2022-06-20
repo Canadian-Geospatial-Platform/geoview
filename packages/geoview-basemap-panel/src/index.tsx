@@ -115,7 +115,7 @@ class BasemapPanelPlugin extends AbstractPluginClass {
         // reset basemaps array
         api.map(mapId).basemap.basemaps = [];
         // reload default basemap
-        api.map(mapId).basemap.loadDefaultBasemaps(api.map(mapId).basemap.basemapOptions);
+        api.map(mapId).basemap.loadDefaultBasemaps();
       }
     }
   }

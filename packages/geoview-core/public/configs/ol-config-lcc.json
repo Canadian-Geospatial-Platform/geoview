@@ -3,7 +3,7 @@
     "interaction": "dynamic",
     "initialView": {
       "zoom": 4,
-      "center": [-100, 60]
+      "center": [-106, 60]
     },
     "projection": 3978,
     "basemapOptions": {
@@ -24,9 +24,6 @@
         },
         "layerType": "esriDynamic",
         "layerEntries": [
-          {
-            "index": 0
-          },
           {
             "index": 1
           }

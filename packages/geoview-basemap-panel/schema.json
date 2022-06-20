@@ -84,29 +84,6 @@
           "type": "number",
           "description": "the opacity of this layer",
           "default": 0
-        },
-        "options": {
-          "type": "object",
-          "description": "basemap layer options",
-          "properties": {
-            "tms": {
-              "type": "boolean",
-              "default": false
-            },
-            "tileSize": {
-              "type": "integer",
-              "default": 1
-            },
-            "noWrap": {
-              "type": "boolean",
-              "default": false
-            },
-            "attribution": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          "additionalItems": false
         }
       },
       "additionalItems": false,
@@ -118,7 +95,7 @@
         "id": {
           "type": "string",
           "description": "the basemap id",
-          "enum": ["transport", "simple", "osm", "nogeom"]
+          "enum": ["transport", "simple", "shaded", "osm", "nogeom"]
         },
         "shaded": {
           "type": "boolean",
@@ -212,6 +189,15 @@
       "type": "boolean",
       "description": "Allow the user to switch projection from the basemap switcher panel",
       "default": false
+    },
+    "supportedProjection": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "enum": [3978, 3857]
+      },
+      "minItems": 1,
+      "default": [3978, 3857]
     },
     "languages": {
       "type": "array",

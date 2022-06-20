@@ -1310,14 +1310,14 @@
                   "type": "integer",
                   "minimum": -80,
                   "maximum": 80,
-                  "default": 45,
+                  "default": 60,
                   "description": "Initial latitude value for map center."
                 },
                 {
                   "type": "integer",
                   "minimum": -160,
                   "maximum": 160,
-                  "default": 75,
+                  "default": -106,
                   "description": "Initial longitude value for map center."
                 }
               ]

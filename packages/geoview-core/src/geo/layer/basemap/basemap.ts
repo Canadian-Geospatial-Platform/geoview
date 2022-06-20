@@ -10,7 +10,6 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import {
   TypeBasemapProps,
-  TypeBasemapLayerOptions,
   TypeBasemapLayer,
   TypeBasemapOptions,
   TypeProjectionCodes,
@@ -82,7 +81,7 @@ export class Basemap {
 
     this.projection = projection;
 
-    this.attribution = this.attribbutionVal[language] as string;
+    this.attribution = this.attributionVal[language] as string;
   }
 
   /**
@@ -112,6 +111,14 @@ export class Basemap {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_CBCT_GEOM_3857/default/default028mm/{z}/{y}/{x}.jpg',
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_CBCT_GEOM_3857/MapServer?f=pjson',
       },
+      simple: {
+        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg',
+        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer?f=pjson',
+      },
+      shaded: {
+        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/tile/1.0.0/CBMT_CBCT_GEOM_3978/default/default028mm/{z}/{y}/{x}.jpg',
+        jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=pjson',
+      },
       label: {
         url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer?f=pjson',
@@ -120,22 +127,30 @@ export class Basemap {
   });
 
   /**
-   * basemap layer configuration
-   */
-  private basemapLayerOptions: TypeBasemapLayerOptions = {
-    tms: false,
-    tileSize: 256,
-    attribution: false,
-    noWrap: false,
-  };
-
-  /**
    * attribution to add the the map
    */
-  private attribbutionVal: TypeJsonObject = toJsonObject({
+  private attributionVal: TypeJsonObject = toJsonObject({
     'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
     'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
   });
+
+  /**
+   * Get projection from basemap url
+   * Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
+   * can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
+   *
+   * @param {string} url basemap url
+   * @returns {number} projection code
+   */
+  private getProjectionFromUrl = (url: string): number => {
+    let code = 0;
+    const index = url.indexOf('/MapServer');
+
+    if (url.substring(index - 6, index) === 'Simple') code = 3978;
+    else code = Number(url.substring(index - 4, index));
+
+    return code;
+  };
 
   /**
    * Get basemap thumbnail url
@@ -163,23 +178,19 @@ export class Basemap {
       }
 
       if (type === 'simple') {
+        // Only available in 3978
         if (this.basemapsList[projection].simple?.url) {
           thumbnailUrls.push(
-            (this.basemapsList[projection].simple.url as string)
-              .replace('{z}', '8')
-              .replace('{y}', projection === 3978 ? '285' : '91')
-              .replace('{x}', projection === 3978 ? '268' : '74')
+            (this.basemapsList[projection].simple.url as string).replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
           );
         }
       }
 
       if (type === 'shaded') {
+        // Only available in 3978
         if (this.basemapsList[projection].shaded?.url) {
           thumbnailUrls.push(
-            (this.basemapsList[projection].shaded.url as string)
-              .replace('{z}', '8')
-              .replace('{y}', projection === 3978 ? '285' : '91')
-              .replace('{x}', projection === 3978 ? '268' : '74')
+            (this.basemapsList[projection].shaded.url as string).replace('{z}', '8').replace('{y}', '285').replace('{x}', '268')
           );
         }
       }
@@ -208,11 +219,10 @@ export class Basemap {
    * Get basemap information (nbame and description)
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeProjectionCodes} projection basemap projection
    * @param {TypeLocalizedLanguages} language basemap language
    * @returns {string} array with information [name, description]
    */
-  private getInfo = (basemapTypes: string[], projection: TypeProjectionCodes, language: TypeLocalizedLanguages): string[] => {
+  private getInfo = (basemapTypes: string[], language: TypeLocalizedLanguages): string[] => {
     // const info = { name: '', description: '' };
 
     let name = '';
@@ -235,7 +245,7 @@ export class Basemap {
           : "Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d'applications de cartographie en ligne."
       }`;
     } else if (basemapTypes.includes('osm')) {
-      name = `${language === 'en-CA' ? 'Open Street Maps' : 'Ouvrir les cartes des rues'}`;
+      name = `${language === 'en-CA' ? 'Open Street Maps' : 'Carte - Open Street Maps'}`;
     } else if (basemapTypes.includes('nogeom')) {
       name = `${language === 'en-CA' ? 'No geometry' : 'Pas de géométrie'}`;
     }
@@ -274,6 +284,7 @@ export class Basemap {
     let maxZoom = 17;
     let extent: Extent = [0, 0, 0, 0];
     let origin: number[] = [];
+    let urlProj = 0;
 
     // should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
@@ -322,6 +333,10 @@ export class Basemap {
         if (id === 'label') {
           this.attribution = result.copyrightText as string;
         }
+
+        // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
+        // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
+        urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
       } catch (error) {
         showMessage(this.#mapId, toJsonObject(error).toString());
       }
@@ -334,7 +349,7 @@ export class Basemap {
       url: basemapLayer.url as string,
       jsonUrl: basemapLayer.jsonUrl as string,
       source: new XYZ({
-        projection: api.projection.projections[this.projection],
+        projection: api.projection.projections[urlProj],
         url: basemapLayer.url as string,
         tileGrid: new TileGrid({
           extent,
@@ -467,7 +482,7 @@ export class Basemap {
         !this.isExisting(basemaplayerTypes.join('-')) &&
         (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.id === 'nogeom'))
       ) {
-        const info = this.getInfo(basemaplayerTypes, this.projection as TypeProjectionCodes, this.language as TypeLocalizedLanguages);
+        const info = this.getInfo(basemaplayerTypes, this.language as TypeLocalizedLanguages);
 
         // id and typer are derived from the basemap type composition (shaded, label, transport, simple)
         const basemap = this.createBasemap({
@@ -494,6 +509,9 @@ export class Basemap {
         });
 
         resolve(basemap);
+      } else {
+        // if no basemap set, resolve to undefined
+        resolve(undefined);
       }
     });
   };
