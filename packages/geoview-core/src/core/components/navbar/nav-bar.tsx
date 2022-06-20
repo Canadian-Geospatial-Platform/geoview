@@ -25,14 +25,13 @@ const useStyles = makeStyles((theme) => ({
   navBarRef: {
     position: 'absolute',
     right: 0,
-    bottom: 0,
+    bottom: 30,
+    height: '600px',
     display: 'flex',
     flexDirection: 'row',
-    paddingBottom: 30,
     marginRight: 5,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
-    overflow: 'auto',
     justifyContent: 'center',
     backgroundColor: 'transparent',
   },
@@ -42,6 +41,8 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     pointerEvents: 'auto',
     justifyContent: 'end',
+    overflowY: 'hidden',
+    padding: 5,
   },
   navBtnGroup: {
     '&:not(:last-child)': {

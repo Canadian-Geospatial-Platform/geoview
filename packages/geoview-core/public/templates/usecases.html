@@ -317,11 +317,13 @@
         // call an api function to draw a polygon
         const polygon = cgpv.api.map(map).layer.vector.addPolygon(
           [
-            [-109.05, 41.0],
-            [-102.06, 40.99],
-            [-102.03, 36.99],
-            [-109.04, 36.99],
-            [-109.05, 41.0],
+            [
+              [-109.05, 41.0],
+              [-102.06, 40.99],
+              [-102.03, 36.99],
+              [-109.04, 36.99],
+              [-109.05, 41.0],
+            ],
           ],
           {
             style: {
@@ -337,7 +339,7 @@
 
       function addCircle(map) {
         // call an api function to draw a polygon
-        const circle = cgpv.api.map(map).layer.vector.addCircle([-109, 50], 50000.0, {
+        const circle = cgpv.api.map(map).layer.vector.addCircle([-109, 50], 5.0, {
           style: {
             strokeColor: 'red',
             strokeWidth: 1,

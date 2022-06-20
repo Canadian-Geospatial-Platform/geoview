@@ -205,8 +205,11 @@ export class Vector {
     const lId = generateId(id);
 
     // create a line geometry
-    const polygon = new Feature({
-      geometry: new Polygon(points, polygonOptions.geometryLayout),
+    let polygon = new Feature({
+      geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
+        'EPSG:4326',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
     });
 
     // if style is provided then set override the vector layer style for this feature
@@ -275,7 +278,10 @@ export class Vector {
 
     // create a line geometry
     const circle = new Feature({
-      geometry: new Circle(coordinate, radius, circleOptions.geometryLayout),
+      geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
+        'EPSG:4326',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
     });
 
     // if style is provided then set override the vector layer style for this feature
@@ -414,7 +420,10 @@ export class Vector {
 
     // create a line geometry
     const marker = new Feature({
-      geometry: new Point(coordinate, markerOptions.geometryLayout),
+      geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
+        'EPSG:4326',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
     });
 
     // if style is provided then set override the vector layer style for this feature
@@ -622,30 +631,6 @@ export class Vector {
 
     geometryGroup.vectorLayer.setVisible(false);
     geometryGroup.vectorLayer.changed();
-  };
-
-  /**
-   * Turn on the geometry groups that are flaged as visible. The visible flag and options
-   * remain unchanged, this allow us to turn on and off the geometry groups to temporarily
-   * hide them.
-   */
-  turnOnGeometryGroups = (): void => {
-    for (let i = 0; i < this.geometryGroups.length; i++) {
-      // TODO
-      // if (this.geometryGroups[i].visible) this.geometryGroups[i].addTo(api.map(this.#mapId).map);
-    }
-  };
-
-  /**
-   * Turn off the geometry groups that are flaged as visible. The visible flag and options
-   * remain unchanged, this allow us to turn on and off the geometry groups to temporarily
-   * hide them.
-   */
-  turnOffGeometryGroups = (): void => {
-    for (let i = 0; i < this.geometryGroups.length; i++) {
-      // TODO
-      // if (this.geometryGroups[i].visible) this.geometryGroups[i].removeFrom(api.map(this.#mapId).map);
-    }
   };
 
   /**

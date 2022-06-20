@@ -125,7 +125,7 @@ export class MapViewer {
     this.layer = new Layer(this.id, this.mapProps.map.layers);
 
     // check if geometries are provided from url
-    // this.loadGeometries();
+    this.loadGeometries();
   }
 
   /**
@@ -150,8 +150,6 @@ export class MapViewer {
               if (typeof data.geometry !== 'undefined') {
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-
-                // TODO
                 this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });

@@ -749,10 +749,12 @@
           // call an api function to draw a polygon
           const polygon = cgpv.api.map('mapWM').layer.vector.addPolygon(
             [
-              [center[1] + factor / 2, center[0] + factor],
-              [center[1] + factor / 2, center[0] - factor],
-              [center[1] - factor / 2, center[0] - factor],
-              [center[1] - factor / 2, center[0] + factor],
+              [
+                [center[1] + factor / 2, center[0] + factor],
+                [center[1] + factor / 2, center[0] - factor],
+                [center[1] - factor / 2, center[0] - factor],
+                [center[1] - factor / 2, center[0] + factor],
+              ],
             ],
             {
               style: {

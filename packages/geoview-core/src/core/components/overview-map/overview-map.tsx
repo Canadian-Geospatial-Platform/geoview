@@ -1,9 +1,8 @@
 import { useContext, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
-import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
-import { useTheme } from '@mui/material/styles';
 
 import TileLayer from 'ol/layer/Tile';
 import { OverviewMap as OLOverviewMap } from 'ol/control';
@@ -16,9 +15,11 @@ import { MapContext } from '../../app-start';
 
 import { payloadIsABasemapLayerArray } from '../../types/cgpv-types';
 
-import { ChevronLeftIcon } from '../../../ui';
 import { cgpvTheme } from '../../../ui/style/theme';
 
+/**
+ * Size of the overview map container
+ */
 export const MINIMAP_SIZE = {
   width: '150px',
   height: '150px',
@@ -96,6 +97,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Creates an overview map control and adds it to the map
+ *
+ * @returns {JSX.Element} returns empty container
+ */
 export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
 

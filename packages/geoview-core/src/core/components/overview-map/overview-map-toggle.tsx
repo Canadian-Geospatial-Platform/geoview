@@ -1,21 +1,10 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-
-import { useTranslation } from 'react-i18next';
+import { useEffect, useRef, useState } from 'react';
 
 import { OverviewMap as OLOverviewMap } from 'ol/control';
 
 import makeStyles from '@mui/styles/makeStyles';
-import { useTheme } from '@mui/material/styles';
 
-import { ChevronLeftIcon, IconButton } from '../../../ui';
-
-import { MapContext } from '../../app-start';
-
-import { api } from '../../../app';
-
-import { EVENT_NAMES } from '../../../api/events/event';
-
-import { booleanPayload } from '../../types/cgpv-types';
+import { ChevronLeftIcon } from '../../../ui';
 
 const useStyles = makeStyles((theme) => ({
   toggleBtn: {
@@ -40,10 +29,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+/**
+ * Properties for the overview map toggle
+ */
 interface OverviewMapToggleProps {
+  /**
+   * OpenLayers overview map control
+   */
   overviewMap: OLOverviewMap;
 }
 
+/**
+ * Create a toggle icon button
+ *
+ * @param {OverviewMapToggleProps} props overview map toggle properties
+ * @returns {JSX.Element} returns the toggle icon button
+ */
 export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   const { overviewMap } = props;
 
@@ -51,19 +52,9 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
   const divRef = useRef<HTMLDivElement>(null);
 
-  const { t } = useTranslation();
-
   const classes = useStyles();
 
-  const theme = useTheme();
-
-  const mapConfig = useContext(MapContext);
-
-  const mapId = mapConfig.id;
-
   useEffect(() => {
-    // listen to toggle event and change status of icon
-
     // get toggle icon element
     if (divRef && divRef.current) {
       // get toggle button
@@ -71,7 +62,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
       if (button) {
         // listen to toggle event
-        button.addEventListener('click', (e) => {
+        button.addEventListener('click', () => {
           const isCollapsed = overviewMap.getCollapsed();
 
           setStatus(!isCollapsed);
@@ -91,6 +82,7 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
