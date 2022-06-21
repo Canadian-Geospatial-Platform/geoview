@@ -1,8 +1,7 @@
 {
   "isOpen": true,
-  "defaultProjectionCode": 3978,
   "canSwichProjection": true,
-  "supportedProjection": [
+  "supportedProjections": [
     {
       "projectionCode": 3978,
       "coreBasemaps": [
@@ -34,7 +33,7 @@
         {
           "id": "nogeom",
           "shaded": false,
-          "labeled": true
+          "labeled": false
         }
       ],
       "customBasemaps": [

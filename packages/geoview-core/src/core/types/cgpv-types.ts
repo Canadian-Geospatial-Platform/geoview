@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Coordinate } from 'ol/coordinate';
 import Feature from 'ol/Feature';
 import { Extent } from 'ol/extent';
-import { Projection } from 'ol/proj';
+import { ProjectionLike } from 'ol/proj';
 import { OSM, XYZ } from 'ol/source';
 
 import { AnySchemaObject } from 'ajv';
@@ -200,7 +200,7 @@ export type TypeMapView = {
   zoom: number;
   minZoom: number;
   maxZoom: number;
-  projection?: Projection;
+  projection?: ProjectionLike;
   center?: Coordinate;
   extent?: Extent;
   resolution?: number;
