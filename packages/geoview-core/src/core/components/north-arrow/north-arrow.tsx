@@ -17,6 +17,8 @@ import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
+import { EVENT_NAMES } from '../../../api/events/event';
+import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
@@ -239,6 +241,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   const northPoleRef = useRef<HTMLDivElement>(null);
 
   const mapConfig = useContext(MapContext);
+  const [mapProjection, setMapProjection] = useState(projection);
   const mapId = mapConfig.id;
   const northPoleId = `${mapId}-northpole`;
 
@@ -258,14 +261,26 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
     });
     map.addOverlay(northPoleMarker);
 
+    // listen to geoview-basemap-panel package change projection event
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
+      (payload) => {
+        if (payload.handlerName === mapId && payloadIsAMapViewProjection(payload)) {
+          setMapProjection(`EPSG:${payload.projection}`);
+        }
+      },
+      mapId
+    );
+
+    return () => {
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return projection === PROJECTION_NAMES.LCC ? (
-    <div ref={northPoleRef} id={northPoleId}>
+  return (
+    <div ref={northPoleRef} id={northPoleId} style={{ visibility: mapProjection === PROJECTION_NAMES.LCC ? 'visible' : 'hidden' }}>
       <NorthPoleIcon />
     </div>
-  ) : (
-    <div />
   );
 }
