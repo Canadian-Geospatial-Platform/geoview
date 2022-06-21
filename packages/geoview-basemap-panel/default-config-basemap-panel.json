@@ -1,39 +1,79 @@
 {
   "isOpen": false,
-  "canSwichProjection": true,
-  "supportedProjection": [3978, 3857],
-  "coreBasemaps": [
+  "canSwichProjection": false,
+  "supportedProjections": [
     {
-      "id": "transport",
-      "shaded": true,
-      "labeled": true
+      "projectionCode": 3978,
+      "coreBasemaps": [
+        {
+          "id": "transport",
+          "shaded": true,
+          "labeled": true
+        },
+        {
+          "id": "transport",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "osm",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "simple",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "shaded",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "nogeom",
+          "shaded": false,
+          "labeled": false
+        }
+      ],
+      "customBasemaps": []
     },
     {
-      "id": "transport",
-      "shaded": true,
-      "labeled": false
-    },
-    {
-      "id": "osm",
-      "shaded": false,
-      "labeled": false
-    },
-    {
-      "id": "simple",
-      "shaded": true,
-      "labeled": false
-    },
-    {
-      "id": "shaded",
-      "shaded": true,
-      "labeled": false
-    },
-    {
-      "id": "nogeom",
-      "shaded": false,
-      "labeled": false
+      "projectionCode": 3857,
+      "coreBasemaps": [
+        {
+          "id": "transport",
+          "shaded": true,
+          "labeled": true
+        },
+        {
+          "id": "transport",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "osm",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "simple",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "shaded",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "id": "nogeom",
+          "shaded": false,
+          "labeled": false
+        }
+      ],
+      "customBasemaps": []
     }
   ],
-  "customBasemaps": [],
   "languages": ["en-CA", "fr-CA"]
 }

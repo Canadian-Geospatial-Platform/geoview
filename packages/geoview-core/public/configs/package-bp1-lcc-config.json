@@ -13,23 +13,6 @@
     },
     "layers": [
       {
-        "id": "esriDynamicLYR2",
-        "name": {
-          "en": "Senior care facilities on April 2020",
-          "fr": "Senior care facilities on April 2020"
-        },
-        "url": {
-          "en": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer",
-          "fr": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer"
-        },
-        "layerType": "esriDynamic",
-        "layerEntries": [
-          {
-            "index": 1
-          }
-        ]
-      },
-      {
         "id": "geojsonLYR1",
         "name": {
           "en": "GeoJSON Sample",
@@ -50,7 +33,7 @@
         "layerType": "geojson"
       },
       {
-        "id": "geojsonLYR1",
+        "id": "geojsonLYR2",
         "name": {
           "en": "GeoJSON Sample",
           "fr": "Exemple GeoJSON"
@@ -74,7 +57,7 @@
       "boxZoom": true
     }
   },
-  "corePackages": ["basemap-panel", "layers-panel"],
+  "corePackages": ["basemap-panel"],
   "components": ["appbar", "navbar", "overviewMap", "northArrow"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]

@@ -101,7 +101,7 @@ export const cgpv: types.TypeCGPV = {
   api: types.Cast<types.TypeApi>({
     ...api,
     ...api.event,
-    // ...api.projection,
+    // ...api.projection, TODO: Is this tilll needed?
     ...api.plugin,
   }),
   react: React,
