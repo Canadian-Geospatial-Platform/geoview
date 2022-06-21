@@ -198,11 +198,11 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
    *
-   * @param bounds layer bounds
-   * @param segment layer bounds
+   * @param {Extent} bounds layer bounds
+   * @param {number} segment layer bounds
    * @returns {L.Polygon} Polygon from bounds
    */
-  const polygonFromBounds = (bounds: L.LatLngBounds, segments = 100): L.Polygon => {
+  const polygonFromBounds = (bounds: Extent, segments = 100): L.Polygon => {
     const width = bounds.getEast() - bounds.getWest();
     const latlngs = [];
     latlngs.push(bounds.getSouthWest());

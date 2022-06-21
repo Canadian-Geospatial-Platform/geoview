@@ -77,7 +77,7 @@
       "boxZoom": true
     }
   },
-  "corePackages": ["basemap-panel"],
+  "corePackages": ["basemap-panel", "layers-panel"],
   "components": ["appbar", "navbar", "overviewMap", "northArrow"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]

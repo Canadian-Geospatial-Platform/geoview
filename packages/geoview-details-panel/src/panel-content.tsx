@@ -22,8 +22,8 @@ import {
   EsriFeature,
   EsriDynamic,
   CONST_LAYER_TYPES,
-  payloadIsALngLat,
   payloadBaseClass,
+  payloadIsALngLat,
   markerDefinitionPayload,
 } from 'geoview-core';
 
@@ -62,7 +62,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const [featureList, setFeatureList] = useState(false);
   const [featureInfo, setFeatureInfo] = useState(false);
 
-  const [clickPos, setClickPos] = useState<L.LatLng>();
+  const [clickPos, setClickPos] = useState<number[]>();
 
   // use material ui theming
   const useStyles = ui.makeStyles(() => ({
@@ -277,10 +277,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
    * Handle opening the details panel with correct panel content
    * Identify the layers that matches the selected point from a mouse click / crosshair events
    *
-   * @param {L.LatLng} latlng a LatLng object containing the latitude and longitude values from the event
+   * @param {number[]} lnglat an array containing the longitude and latitude values from the event
    */
   const handleOpenDetailsPanel = useCallback(
-    async (latlng: L.LatLng) => {
+    async (lnglat: number[]) => {
       // variable will be used later on as a counter to check which panel content should be selected
       const layersFound: TypeFoundLayers[] = [];
 
@@ -289,7 +289,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         const dataKey = Object.keys(layersData)[i];
         const data = layersData[dataKey];
 
-        const { layer, layers } = data;
+        const { layer, layers, type } = data;
 
         // loop through all layers in each map server
         for (let j = 0; j < Object.keys(layers).length; j++) {
@@ -301,29 +301,29 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             clearResults(dataKey, layerKey);
 
             // eslint-disable-next-line no-underscore-dangle
-            const layerMap = Cast<{ _map: L.Map }>(toJsonObject(layer).layer)._map;
+            const layerMap = api.map(mapId).map;
             // get map size
-            const size = layerMap.getSize();
+            const size = layerMap.getSize()!;
 
             // get extent
-            const bounds = layerMap.getBounds();
+            const bounds = layerMap.getView().calculateExtent();
 
             const extent = {
-              xmin: bounds.getSouthWest().lng,
-              ymin: bounds.getSouthWest().lat,
-              xmax: bounds.getNorthEast().lng,
-              ymax: bounds.getNorthEast().lat,
+              xmin: bounds[0],
+              ymin: bounds[1],
+              xmax: bounds[2],
+              ymax: bounds[3],
               spatialReference: {
                 wkid: 4326,
               },
             };
 
             // check layer type if WMS then use getFeatureInfo to query the data
-            if (layer!.type === CONST_LAYER_TYPES.WMS) {
+            if (type === CONST_LAYER_TYPES.WMS) {
               const ogcWMSLayer = Cast<WMS>(layer);
               let getFeatureInfoResponse: TypeJsonArray | null = null;
               // eslint-disable-next-line no-await-in-loop
-              getFeatureInfoResponse = await ogcWMSLayer.getFeatureInfo(latlng, layerMap);
+              getFeatureInfoResponse = await ogcWMSLayer.getFeatureInfo(lnglat);
 
               if (getFeatureInfoResponse && getFeatureInfoResponse!.length > 0) {
                 layersFound.push(
@@ -345,7 +345,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   } as AbstractWebLayersClass,
                 }));
               }
-            } else if (layer!.type === CONST_LAYER_TYPES.ESRI_FEATURE || layer!.type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
+            } else if (type === CONST_LAYER_TYPES.ESRI_FEATURE || type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
               const ogcEsriLayer = Cast<EsriDynamic | EsriFeature>(layer);
               // generate an identify query url
               const identifyUrl =
@@ -353,12 +353,12 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                 `f=json` +
                 `&tolerance=7` +
                 `&mapExtent=${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}` +
-                `&imageDisplay=${size.x},${size.y},96` +
+                `&imageDisplay=${size[0]},${size[1]},96` +
                 `&layers=visible:${layers[layerKey].layer.id}` +
                 `&returnFieldName=true` +
                 `&sr=4326` +
                 `&returnGeometry=true` +
-                `&geometryType=esriGeometryPoint&geometry=${latlng.lng},${latlng.lat}`;
+                `&geometryType=esriGeometryPoint&geometry=${lnglat[0]},${lnglat[1]}`;
 
               // fetch the result from the map server
               // eslint-disable-next-line no-await-in-loop
@@ -425,7 +425,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       }
 
       // save click position
-      setClickPos(latlng);
+      setClickPos(lnglat);
 
       // open the details panel
       buttonPanel.panel?.open();
@@ -437,7 +437,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       // if there is multiple layers with entries then symbology will be of the first layer
       // ...in case of multiple layers with entries, if a user selects a layer it will show the symbology of selected layer
       // if no layers contains any entry then the default symbology with crosshair will show
-      api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, latlng, symbology!));
+      api.event.emit(markerDefinitionPayload(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW, mapId, lnglat, symbology!));
 
       // set focus to the close button of the panel
       if (panelContainer) {
@@ -508,12 +508,12 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         addLayer(mapLayer, data, layerInfo, false);
       } else if (webLayerIsEsriDynamic(mapLayer)) {
         // get active layers
-        const entries = mapLayer.layer!.getLayers();
+        const { entries } = mapLayer;
 
         const activeLayers: Record<number, number> = {};
 
         // change active layers to keys so it can be compared with id in all layers
-        entries.forEach((entry: number) => {
+        (entries as number[])?.forEach((entry: number) => {
           activeLayers[entry] = entry;
         });
 
@@ -557,21 +557,28 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Event when a click happens on the map
+   *
+   * @param e map browser event
+   */
+  const mapClickEvent = (e: { originalEvent: { shiftKey: unknown }; coordinate: number[] }) => {
+    if (!e.originalEvent.shiftKey) {
+      handleOpenDetailsPanel(e.coordinate);
+    }
+  };
+
   useEffect(() => {
     // handle map click
-    mapInstance.on('click', async (e: L.LeafletMouseEvent) => {
-      if (!e.originalEvent.shiftKey) {
-        handleOpenDetailsPanel(e.latlng);
-      }
-    });
+    mapInstance.on('click', mapClickEvent);
 
     // handle crosshair enter
     api.event.on(
       EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER,
       (payload) => {
-        if (payloadIsALatLng(payload)) {
+        if (payloadIsALngLat(payload)) {
           if (payload.handlerName === mapId) {
-            handleOpenDetailsPanel(payload.latLng);
+            handleOpenDetailsPanel(payload.lnglat);
           }
         }
       },
@@ -579,7 +586,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     );
 
     return () => {
-      mapInstance.off('click');
+      mapInstance.un('click', mapClickEvent);
       api.event.off(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
