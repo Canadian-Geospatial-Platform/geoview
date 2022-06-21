@@ -89,13 +89,13 @@ export class Config {
 
   // valid basemap ids
   private _basemapId: Record<number, string[]> = {
-    3857: ['transport', 'osm', 'nogeom'],
-    3978: ['transport', 'simple', 'osm', 'nogeom'],
+    3857: ['transport', 'simple', 'osm', 'shaded', 'nogeom'],
+    3978: ['transport', 'simple', 'osm', 'shaded', 'nogeom'],
   };
 
   // valid shaded basemap values for each projection
   private _basemapShaded: Record<number, boolean[]> = {
-    3857: [false],
+    3857: [true, false],
     3978: [true, false],
   };
 

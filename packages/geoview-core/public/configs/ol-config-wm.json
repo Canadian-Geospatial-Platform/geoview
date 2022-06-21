@@ -3,35 +3,15 @@
     "interaction": "dynamic",
     "initialView": {
       "zoom": 4,
-      "center": [-100, 60]
+      "center": [-106, 60]
     },
     "projection": 3857,
     "basemapOptions": {
       "id": "transport",
-      "shaded": false,
+      "shaded": true,
       "labeled": true
     },
     "layers": [
-      {
-        "id": "esriDynamicLYR2",
-        "name": {
-          "en": "Senior care facilities on April 2020",
-          "fr": "Senior care facilities on April 2020"
-        },
-        "url": {
-          "en": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer",
-          "fr": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer"
-        },
-        "layerType": "esriDynamic",
-        "layerEntries": [
-          {
-            "index": 0
-          },
-          {
-            "index": 1
-          }
-        ]
-      },
       {
         "id": "ogcFeatureLYR7",
         "name": {

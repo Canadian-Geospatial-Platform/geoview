@@ -8,7 +8,7 @@
     "projection": 3978,
     "initialView": {
       "zoom": 12,
-      "center": [-100, 60]
+      "center": [-106, 60]
     },
     "basemapOptions": {
       "id": "transport",

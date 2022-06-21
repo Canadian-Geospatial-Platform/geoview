@@ -72,6 +72,7 @@ export * from '../../api/events/payloads/layer-config-payload';
 export * from '../../api/events/payloads/map-component-payload';
 export * from '../../api/events/payloads/map-config-payload';
 export * from '../../api/events/payloads/map-payload';
+export * from '../../api/events/payloads/map-view-projection-payload';
 export * from '../../api/events/payloads/marker-definition-payload';
 export * from '../../api/events/payloads/modal-payload';
 export * from '../../api/events/payloads/number-payload';
@@ -202,6 +203,7 @@ export type TypeMapView = {
   projection?: Projection;
   center?: Coordinate;
   extent?: Extent;
+  resolution?: number;
 };
 
 /**
@@ -648,16 +650,6 @@ export interface TypeMapConfigProps extends TypeMapSchemaProps {
   language: TypeLocalizedLanguages;
 }
 
-/**
- * interface for basemap basic properties
- */
-export type TypeBasemapLayerOptions = {
-  tms: boolean;
-  tileSize: number;
-  attribution: boolean;
-  noWrap: boolean;
-};
-
 export type TypeBasemapLayerSource = OSM | XYZ;
 
 /**
@@ -669,7 +661,6 @@ export type TypeBasemapLayer = {
   jsonUrl?: string;
   source: TypeBasemapLayerSource;
   type: string;
-  options?: TypeBasemapLayerOptions;
   opacity: number;
   resolutions: number[];
   origin: number[];

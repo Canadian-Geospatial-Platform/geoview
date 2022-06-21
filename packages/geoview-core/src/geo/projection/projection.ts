@@ -1,7 +1,7 @@
 import proj4 from 'proj4';
 
 import { register } from 'ol/proj/proj4';
-import { get as getOLProjection, Projection as OLProjection } from 'ol/proj';
+import { get as getOLProjection, Projection as OLProjection, getPointResolution } from 'ol/proj';
 
 /**
  * constant used for the available projection names
@@ -147,5 +147,16 @@ export class Projection {
    */
   wmToLcc = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
     return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LCC);
+  };
+
+  /**
+   * Get map point resolution
+   *
+   * @param {string} projection the projection code
+   * @param {Coordinate} center map center
+   * @returns the point resolution for map center
+   */
+  getResolution = (projection: string, center: number[]): number => {
+    return getPointResolution(projection, 1, center, 'm');
   };
 }

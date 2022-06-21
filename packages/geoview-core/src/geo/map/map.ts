@@ -239,10 +239,20 @@ export class MapViewer {
           ? fromLonLat([mapView.center[0], mapView.center[1]], projection)
           : fromLonLat([this.mapProps.map.initialView.center[0], this.mapProps.map.initialView.center[1]], projection),
         extent: mapView.extent,
+        resolution: mapView.resolution,
         minZoom: mapView.minZoom,
         maxZoom: mapView.maxZoom,
       })
     );
+  };
+
+  /**
+   * Get the map view
+   *
+   * @returns the map view
+   */
+  getView = (): View => {
+    return this.map.getView();
   };
 
   /**
