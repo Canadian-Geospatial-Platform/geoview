@@ -91,12 +91,12 @@ export function Scale(): JSX.Element {
 
     if (scaleMode === 'bar') {
       setScaleMode('line');
-      selectScale = new ScaleLine({ units: 'metric', target: document.getElementById('scaleControl') as HTMLElement });
+      selectScale = new ScaleLine({ units: 'metric', target: document.getElementById(`${mapId}-scaleControl`) as HTMLElement });
     } else {
       setScaleMode('bar');
       selectScale = new ScaleLine({
         units: 'metric',
-        target: document.getElementById('scaleControl') as HTMLElement,
+        target: document.getElementById(`${mapId}-scaleControl`) as HTMLElement,
         bar: true,
         text: true,
       });
@@ -109,12 +109,12 @@ export function Scale(): JSX.Element {
   useEffect(() => {
     const { map } = api.map(mapId);
 
-    const selectScale = new ScaleLine({ units: 'metric', target: document.getElementById('scaleControl') as HTMLElement });
+    const selectScale = new ScaleLine({ units: 'metric', target: document.getElementById(`${mapId}-scaleControl`) as HTMLElement });
 
     map.addControl(selectScale);
 
     setScaleControl(selectScale);
   }, [mapId]);
 
-  return <button type="button" id="scaleControl" onClick={() => switchScale()} className={classes.scaleContainer} />;
+  return <button type="button" id={`${mapId}-scaleControl`} onClick={() => switchScale()} className={classes.scaleContainer} />;
 }
