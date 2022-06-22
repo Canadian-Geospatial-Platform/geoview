@@ -36,7 +36,11 @@ export default function ZoomOut(props: ZoomOutProps): JSX.Element {
    * Causes the map to zoom out
    */
   function zoomOut() {
-    api.map(mapId).map.zoomOut();
+    const { map } = api.map(mapId);
+
+    const currentZoom = map.getView().getZoom();
+
+    if (currentZoom) map.getView().animate({ zoom: currentZoom - 0.5, duration: 500 });
   }
 
   return (

@@ -137,7 +137,7 @@
           'interaction': 'dynamic',
           'initialView': {
             'zoom': 4,
-            'center': [60, -100]
+            'center': [-100, 60]
           },
           'projection': 3978,
           'basemapOptions': {
@@ -701,13 +701,13 @@
           const coord = generateRandomCoord();
 
           // call an api function to draw a polygon
-          const circleMarker = cgpv.api.map('mapWM').layer.vector.addCircleMarker(coord[0], coord[1], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 3.0,
+          const circleMarker = cgpv.api.map('mapWM').layer.vector.addCircleMarker([coord[0], coord[1]], 1.0, {
+            style: {
+              strokeColor: 'red',
+              fillColor: '#f03',
+              fillOpacity: 0.5,
+            },
           });
-          cgpv.api.map('mapWM').layer.vector.addToGeometryGroup(circleMarker);
         }
       }
 
@@ -732,13 +732,12 @@
           line.unshift(ptStart);
 
           const polyline = cgpv.api.map('mapWM').layer.vector.addPolyline(line, {
-            stroke: true,
-            color: '#000',
-            weight: 1,
-            opacity: '0.8',
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 1,
+              strokeOpacity: 0.8,
+            },
           });
-
-          cgpv.api.map('mapWM').layer.vector.addToGeometryGroup(polyline);
         }
       }
 
@@ -750,19 +749,21 @@
           // call an api function to draw a polygon
           const polygon = cgpv.api.map('mapWM').layer.vector.addPolygon(
             [
-              [center[0] + factor / 2, center[1] + factor],
-              [center[0] + factor / 2, center[1] - factor],
-              [center[0] - factor / 2, center[1] - factor],
-              [center[0] - factor / 2, center[1] + factor],
+              [
+                [center[1] + factor / 2, center[0] + factor],
+                [center[1] + factor / 2, center[0] - factor],
+                [center[1] - factor / 2, center[0] - factor],
+                [center[1] - factor / 2, center[0] + factor],
+              ],
             ],
             {
-              stroke: true,
-              color: '#000',
-              weight: 1,
-              opacity: '0.8',
+              style: {
+                strokeColor: '#000',
+                strokeWidth: 1,
+                strokeOpacity: 0.8,
+              },
             }
           );
-          cgpv.api.map('mapWM').layer.vector.addToGeometryGroup(polygon);
         }
       }
 
@@ -770,7 +771,7 @@
         const lat = parseFloat(((Math.random() * (maxY * 100 - minY * 100 + 1) + minY * 100) / 100).toFixed(3));
         const long = parseFloat(((Math.random() * (maxX * 100 - minX * 100 + 1) + minX * 100) / 100).toFixed(3));
 
-        return [lat, -long];
+        return [-long, lat];
       }
 
       // RESULT TAB SECTION

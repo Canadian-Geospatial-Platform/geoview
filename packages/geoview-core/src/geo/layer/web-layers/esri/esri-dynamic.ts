@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import L from 'leaflet';
-
-import { DynamicMapLayer, DynamicMapLayerOptions, dynamicMapLayer, mapService as esriMapService, MapService } from 'esri-leaflet';
+import { ImageArcGISRest } from 'ol/source';
+import { Image as ImageLayer } from 'ol/layer';
+import { extend, Extent } from 'ol/extent';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import {
@@ -12,7 +12,6 @@ import {
   TypeJsonObject,
   TypeJsonArray,
   TypeLegendJsonDynamic,
-  toJsonObject,
   TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
@@ -51,11 +50,8 @@ export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractWebLayersClass):
  * @class EsriDynamic
  */
 export class EsriDynamic extends AbstractWebLayersClass {
-  // layer from leaflet
-  layer: DynamicMapLayer | null = null;
-
-  // mapService property
-  mapService: MapService;
+  // layer
+  layer!: ImageLayer<ImageArcGISRest>;
 
   /**
    * Initialize layer
@@ -67,44 +63,28 @@ export class EsriDynamic extends AbstractWebLayersClass {
 
     const entries = layerConfig.layerEntries.map((item) => item.index);
     this.entries = entries?.filter((item) => !Number.isNaN(item));
-
-    this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(this.url),
-    });
   }
 
   /**
    * Add a ESRI dynamic layer to the map.
    *
    * @param {TypeDynamicLayer} layer the layer configuration
-   * @return {Promise<DynamicMapLayer | null>} layers to add to the map
+   * @return {Promise<ImageLayer<ImageArcGISRest> | null>} layers to add to the map
    */
-  add(layer: TypeDynamicLayer): Promise<DynamicMapLayer | null> {
+  add(layer: TypeDynamicLayer): Promise<ImageLayer<ImageArcGISRest> | null> {
     const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
 
-    const geo = new Promise<DynamicMapLayer | null>((resolve) => {
+    const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
       data.then((value) => {
         if (value !== '{}') {
-          // get layers from service and parse layer entries as number
-          const { layers } = toJsonObject(JSON.parse(value));
-
-          // check if the entries are part of the service
-          if (
-            layers &&
-            (layers as TypeJsonArray).find((item) => {
-              const searchedItem = item.id as number;
-              return (this.entries as number[])?.includes(searchedItem);
-            })
-          ) {
-            const feature = dynamicMapLayer({
+          const feature = new ImageLayer({
+            source: new ImageArcGISRest({
               url: layer.url[api.map(this.mapId).getLanguageCode()],
-              layers: this.entries,
-              attribution: '',
-            } as DynamicMapLayerOptions);
-            resolve(feature);
-          } else {
-            resolve(null);
-          }
+              params: { LAYERS: `show:${this.entries}` },
+            }),
+          });
+
+          resolve(feature);
         } else {
           resolve(null);
         }
@@ -120,12 +100,6 @@ export class EsriDynamic extends AbstractWebLayersClass {
    @returns {Promise<TypeJsonValue>} a json promise containing the result of the query
    */
   getMetadata = async (): Promise<TypeJsonObject> => {
-    // const feat = featureLayer({
-    //   url: this.url,
-    // });
-    // return feat.metadata(function (error, metadata) {
-    //   return metadata;
-    // });
     const response = await fetch(`${this.url}?f=json`);
     const result: TypeJsonObject = await response.json();
 
@@ -141,19 +115,14 @@ export class EsriDynamic extends AbstractWebLayersClass {
     let queryUrl = this.url.substr(-1) === '/' ? this.url : `${this.url}/`;
     queryUrl += 'legend?f=pjson';
 
-    const feat = dynamicMapLayer({
-      url: this.url,
-      layers: this.entries,
-      attribution: '',
-    });
-
     return axios.get<TypeJsonObject>(queryUrl).then<TypeJsonArray>((res) => {
       const { data } = res;
-      const entryArray: TypeJsonArray = feat.getLayers();
 
-      if (entryArray.length > 0) {
+      if (this.entries && this.entries.length > 0) {
         const result = (data.layers as TypeJsonArray).filter((item) => {
-          return entryArray.includes(item.layerId) as TypeJsonArray;
+          const layerId = item.layerId as string;
+
+          return (this.entries as string[])?.includes(layerId) as TypeJsonArray;
         });
         return result as TypeJsonArray;
       }
@@ -166,7 +135,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    (this.layer as DynamicMapLayer).setOpacity(opacity);
+    this.layer?.setOpacity(opacity);
   };
 
   /**
@@ -185,23 +154,28 @@ export class EsriDynamic extends AbstractWebLayersClass {
   /**
    * Get bounds through external metadata
    *
-   * @returns {Promise<L.LatLngBounds>} layer bounds
+   * @returns {Promise<Extent>} layer bounds
    */
-  getBounds = async (): Promise<L.LatLngBounds> => {
-    const bounds = L.latLngBounds([]);
+  getBounds = async (): Promise<Extent> => {
+    // eslint-disable-next-line no-async-promise-executor
+    let bounds: Extent | undefined;
+
     if (this.entries) {
-      (this.entries as number[]).forEach(async (entry: number) => {
+      for (let entryIndex = 0; entryIndex < this.entries.length; entryIndex++) {
+        const entry = this.entries[entryIndex] as number;
+
+        // eslint-disable-next-line no-await-in-loop
         const meta = await this.getEntry(entry);
 
         const { xmin, xmax, ymin, ymax } = meta.extent;
-        bounds.extend([
-          [ymin, xmin],
-          [ymax, xmax],
-        ]);
-      });
+
+        if (!bounds) bounds = [xmin, ymin, xmax, ymax];
+
+        bounds = extend(bounds, [xmin, ymin, xmax, ymax]);
+      }
     }
 
-    return bounds;
+    return bounds || [];
   };
 
   /**
@@ -210,7 +184,13 @@ export class EsriDynamic extends AbstractWebLayersClass {
    * @param entries MapServer layer IDs
    */
   setEntries = (entries: number[]) => {
-    this.layer!.options.layers = entries;
-    this.layer!.redraw();
+    this.layer?.setSource(
+      new ImageArcGISRest({
+        url: this.url,
+        params: { LAYERS: `show:${entries}` },
+      })
+    );
+
+    this.layer?.changed();
   };
 }

@@ -2,10 +2,11 @@ import React, { CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import * as ReactLeaflet from 'react-leaflet';
-import * as ReactLeafletCore from '@react-leaflet/core';
-
-import L from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
+import Feature from 'ol/Feature';
+import { Extent } from 'ol/extent';
+import { Projection } from 'ol/proj';
+import { OSM, XYZ } from 'ol/source';
 
 import { AnySchemaObject } from 'ajv';
 
@@ -48,8 +49,6 @@ import { API } from '../../api/api';
 import { PanelApi } from '../../ui';
 import * as UI from '../../ui';
 
-import { LEAFLET_POSITION_CLASSES } from '../../geo/utils/constant';
-
 import { AbstractWebLayersClass } from './abstract/abstract-web-layers';
 import { AbstractPluginClass } from './abstract/abstract-plugin';
 
@@ -67,20 +66,18 @@ export * from '../../geo/layer/web-layers/ogc/wms';
 export * from '../../api/events/payloads/basemap-layers-payload';
 export * from '../../api/events/payloads/boolean-payload';
 export * from '../../api/events/payloads/button-panel-payload';
-export * from '../../api/events/payloads/cluster-element-payload';
 export * from '../../api/events/payloads/in-keyfocus-payload';
 export * from '../../api/events/payloads/lat-long-payload';
 export * from '../../api/events/payloads/layer-config-payload';
 export * from '../../api/events/payloads/map-component-payload';
 export * from '../../api/events/payloads/map-config-payload';
 export * from '../../api/events/payloads/map-payload';
-export * from '../../api/events/payloads/marker-cluster-config-payload';
+export * from '../../api/events/payloads/map-view-projection-payload';
 export * from '../../api/events/payloads/marker-definition-payload';
 export * from '../../api/events/payloads/modal-payload';
 export * from '../../api/events/payloads/number-payload';
 export * from '../../api/events/payloads/panel-payload';
 export * from '../../api/events/payloads/payload-base-class';
-export * from '../../api/events/payloads/select-box-payload';
 export * from '../../api/events/payloads/slider-payload';
 export * from '../../api/events/payloads/snackbar-message-payload';
 export * from '../../api/events/payloads/vector-config-payload';
@@ -116,6 +113,18 @@ export interface TypeWindow extends Window {
   plugins: { [pluginId: string]: ((pluginId: string, props: TypeJsonValue) => TypeJsonValue) | AbstractPluginClass | undefined };
 }
 
+export interface TypeHTMLElement extends HTMLElement {
+  webkitRequestFullscreen: () => void;
+  msRequestFullscreen: () => void;
+  mozRequestFullScreen: () => void;
+}
+
+export interface TypeDcoument extends Document {
+  webkitExitFullscreen: () => void;
+  msExitFullscreen: () => void;
+  mozCancelFullScreen: () => void;
+}
+
 /**
  * Type used for exporting UI
  */
@@ -130,7 +139,7 @@ export type TypeCGPVUI = {
  * Type used for exporting constants
  */
 export type TypeCGPVConstants = {
-  leafletPositionClasses: typeof LEAFLET_POSITION_CLASSES;
+  options: TypeJsonObject;
 };
 
 /**
@@ -140,9 +149,6 @@ export type TypeCGPV = {
   init: TypeCallback;
   api: TypeApi;
   react: typeof React;
-  leaflet: typeof L;
-  reactLeaflet: typeof ReactLeaflet;
-  reactLeafletCore: typeof ReactLeafletCore;
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
   types: typeof import('./cgpv-types');
@@ -188,6 +194,19 @@ export type TypeMapContext = {
 };
 
 /**
+ * Type used when setting map view
+ */
+export type TypeMapView = {
+  zoom: number;
+  minZoom: number;
+  maxZoom: number;
+  projection?: Projection;
+  center?: Coordinate;
+  extent?: Extent;
+  resolution?: number;
+};
+
+/**
  * Update scale event properties
  */
 export type TypeUpdateScaleEvent = {
@@ -229,18 +248,6 @@ export function toJsonObject(p: unknown): TypeJsonObject {
 
   return p as TypeJsonObject;
 }
-
-/*-----------------------------------------------------------------------------
- *
- * Marker Cluster Types
- *
- *---------------------------------------------------------------------------*/
-
-/** icon creation function prototype for stamped markers */
-export type TypeStampedIconCreationFunction = (Stamp: string) => L.DivIcon;
-
-/** icon creation function prototype for empty markers */
-export type TypeIconCreationFunction = () => L.DivIcon;
 
 /**
  * ESRI Json Legend for Dynamic Layer
@@ -382,6 +389,29 @@ export const CONST_VECTOR_TYPES: Record<TypeVectorKeys, TypeOfVector> = {
 };
 
 /**
+ * Circle and Circle marker styles
+ */
+export type TypeFeatureCircleStyle = {
+  strokeColor?: string;
+  strokeWidth?: number;
+  strokeOpacity?: number;
+  fillColor?: string;
+  fillOpacity?: number;
+  radius?: number;
+};
+
+/**
+ * Line,Polygon,Marker styles
+ */
+export type TypeFeatureStyle = {
+  strokeColor?: string;
+  strokeWidth?: number;
+  strokeOpacity?: number;
+  fillColor?: string;
+  fillOpacity?: number;
+};
+
+/**
  * Interface for panel properties
  */
 export type TypePanelAppProps = {
@@ -411,7 +441,7 @@ export type TypeSelectedFeature = {
  * interface for the layers list properties in details panel
  */
 export type TypeLayersListProps = {
-  clickPos?: L.LatLng;
+  clickPos?: Coordinate;
   getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
   layersData: Record<string, AbstractWebLayersClass>;
   mapId: string;
@@ -443,16 +473,16 @@ export type TypeMapControls = {
 
 export type TypeMapInitialView = {
   zoom: number;
-  center: L.LatLngTuple;
+  center: Coordinate;
 };
 
-export type TypeProjections = 3978 | 3857;
+export type TypeProjectionCodes = 3978 | 3857;
 
 /**
  * interface for basemap options
  */
 export type TypeBasemapOptions = {
-  id: 'transport' | 'shaded' | 'label' | 'simple';
+  id: 'transport' | 'osm' | 'simple' | 'nogeom';
   shaded: boolean;
   labeled: boolean;
 };
@@ -581,9 +611,9 @@ export type TypeFooterbarProps = {
 
 export type TypeNorthArrowProps = TypeJsonObject;
 
-export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow';
+export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow' | 'overviewMap';
 
-export type TypeMapCorePackages = 'overview-map' | 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
+export type TypeMapCorePackages = 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
 
 export type TypeExternalPackages = {
   name: string;
@@ -620,26 +650,23 @@ export interface TypeMapConfigProps extends TypeMapSchemaProps {
   language: TypeLocalizedLanguages;
 }
 
-/**
- * interface for basemap basic properties
- */
-export type TypeBasemapLayerOptions = {
-  tms: boolean;
-  tileSize: number;
-  attribution: boolean;
-  noWrap: boolean;
-};
+export type TypeBasemapLayerSource = OSM | XYZ;
 
 /**
  * interface used to define a new basemap layer
  */
 export type TypeBasemapLayer = {
   id: string;
-  url: string;
+  url?: string;
+  jsonUrl?: string;
+  source: TypeBasemapLayerSource;
   type: string;
-  options: TypeBasemapLayerOptions;
   opacity: number;
-  basemapPaneName: string;
+  resolutions: number[];
+  origin: number[];
+  minScale: number;
+  maxScale: number;
+  extent: Extent;
 };
 
 /**
@@ -672,6 +699,9 @@ export type TypeBasemapProps = {
   layers: TypeBasemapLayer[];
   attribution: string;
   zoomLevels: TypeZoomLevels;
+  defaultOrigin?: number[];
+  defaultExtent?: Extent;
+  defaultResolutions?: number[];
 };
 
 /**
@@ -1164,8 +1194,8 @@ export type TimePrecision = 'hour' | 'minute' | 'second';
  * Type for return value for feature layer like GeoJSON, OGC API, Vector
  */
 export type TypeFilterFeatures = {
-  pass: TypeJsonObject[];
-  fail: TypeJsonObject[];
+  pass: Feature[];
+  fail: Feature[];
 };
 
 /**

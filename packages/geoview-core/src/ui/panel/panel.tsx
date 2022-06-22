@@ -120,7 +120,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // put back focus on calling button
       document.getElementById(button.id!)?.focus();
     } else {
-      const mapCont = api.map(mapConfig.id).map.getContainer();
+      const mapCont = api.map(mapConfig.id).map.getTargetElement();
       mapCont.focus();
 
       // if in focus trap mode, trigger the event

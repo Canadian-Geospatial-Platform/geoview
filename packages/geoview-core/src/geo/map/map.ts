@@ -1,23 +1,21 @@
 import { i18n } from 'i18next';
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
-// import L from 'leaflet';
 
-import { LatLng, LatLngBounds } from 'leaflet';
+import OLMap from 'ol/Map';
+import View from 'ol/View';
+import { fromLonLat } from 'ol/proj';
+import { Coordinate } from 'ol/coordinate';
+import { Extent } from 'ol/extent';
 
 import queryString from 'query-string';
-import screenfull from 'screenfull';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
 
-import { MapProjection } from '../projection/map-projection';
-
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import '../../core/types/cgp-leaflet-config';
-import { generateId } from '../../core/utils/utilities';
 import { Config } from '../../core/utils/config';
 import {
   TypeMapConfigProps,
@@ -25,6 +23,9 @@ import {
   TypeLanguages,
   TypeLocalizedLanguages,
   TypeMapSchemaProps,
+  TypeHTMLElement,
+  TypeDcoument,
+  TypeMapView,
 } from '../../core/types/cgpv-types';
 
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
@@ -34,23 +35,7 @@ import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
-
-// LCC map options
-// ! Map bounds doesn't work for projection other then Web Mercator
-const lccMapOptionsParam: L.MapOptions = {
-  zoomFactor: 7,
-  minZoom: 3,
-  maxZoom: 19,
-};
-
-// Web Mercator map options
-const wmMapOptionsParam: L.MapOptions = {
-  zoomFactor: 5,
-  minZoom: 2,
-  maxZoom: 19,
-  maxBounds: new LatLngBounds({ lat: -89.999, lng: -180 }, { lat: 89.999, lng: 180 }),
-  maxBoundsViscosity: 0.0,
-};
+import { generateId } from '../../core/utils/utilities';
 
 /**
  * Class used to manage created maps
@@ -65,8 +50,8 @@ export class MapViewer {
   // the id of the map
   id!: string;
 
-  // the leaflet map
-  map!: L.Map;
+  // the openlayer map
+  map!: OLMap;
 
   // used to access button panel API to create buttons and button panels on the appbar
   appBarButtons!: AppbarButtons;
@@ -90,10 +75,7 @@ export class MapViewer {
   currentZoom: number;
 
   // store current position
-  currentPosition: LatLng;
-
-  // access projection functions for this map instance
-  projection!: MapProjection;
+  currentPosition: Coordinate;
 
   // i18n instance
   i18nInstance!: i18n;
@@ -119,12 +101,15 @@ export class MapViewer {
     this.currentProjection = mapProps.map.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapProps.map.initialView.zoom;
-    this.currentPosition = new LatLng(mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]);
+    this.currentPosition = [mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]];
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
 
     this.modal = new ModalApi(this.id);
+
+    // create basemap and pass in the map id to be able to access the map instance
+    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
   }
 
   /**
@@ -132,21 +117,15 @@ export class MapViewer {
    *
    * @param cgpMap
    */
-  initMap(cgpMap: L.Map): void {
-    this.id = cgpMap.id;
+  initMap(cgpMap: OLMap): void {
+    this.id = cgpMap.get('id');
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(this.id, this.mapProps.map.layers);
 
-    // initialize the projection
-    this.projection = new MapProjection(this.mapProps.map.projection);
-
     // check if geometries are provided from url
     this.loadGeometries();
-
-    // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
   }
 
   /**
@@ -154,7 +133,7 @@ export class MapViewer {
    */
   loadGeometries(): void {
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
-    const servEndpoint = this.map.getContainer()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
+    const servEndpoint = this.map.getTargetElement()?.closest('.llwp-map')?.getAttribute('data-geometry-endpoint') || '';
 
     // eslint-disable-next-line no-restricted-globals
     const parsed = queryString.parse(location.search);
@@ -169,15 +148,9 @@ export class MapViewer {
           if (response.status === 200) {
             response.json().then((data) => {
               if (typeof data.geometry !== 'undefined') {
-                // reverse the array because they are x, y instead of default lat long couple y, x
-                // TODO: check if we can know and set this info from outside
-                data.geometry.coordinates.forEach((r: Array<Array<number>>) => r.forEach((c: Array<number>) => c.reverse()));
-
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
-                this.layer.vector.addPolygon(data.geometry.coordinates, {
-                  id: generateId(''),
-                });
+                this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
               }
             });
           }
@@ -212,28 +185,74 @@ export class MapViewer {
   };
 
   /**
-   * Get map options configurations based on projection
+   * Toggle fullscreen / exit fullscreen function
    *
-   * @param epsgCode projection number
-   * @returns {L.MapOptions} the map options based on the projection
+   * @param status toggle fullscreen or exit fullscreen status
+   * @param {HTMLElement} element the element to toggle fullscreen on
    */
-  getMapOptions = (epsgCode: number): L.MapOptions => {
-    return epsgCode === 3978 ? lccMapOptionsParam : wmMapOptionsParam;
+  toggleFullscreen = (status: boolean, element: TypeHTMLElement): void => {
+    // enter fullscreen
+    if (status) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        /* Safari */
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        /* IE11 */
+        element.msRequestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        /* Firefox */
+        element.mozRequestFullScreen();
+      }
+    }
+
+    // exit fullscreen
+    if (!status) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as TypeDcoument).webkitExitFullscreen) {
+        /* Safari */
+        (document as TypeDcoument).webkitExitFullscreen();
+      } else if ((document as TypeDcoument).msExitFullscreen) {
+        /* IE11 */
+        (document as TypeDcoument).msExitFullscreen();
+      } else if ((document as TypeDcoument).mozCancelFullScreen) {
+        /* Firefox */
+        (document as TypeDcoument).mozCancelFullScreen();
+      }
+    }
   };
 
   /**
-   * Toggles fullscreen for the app.
+   * Update the map view
    *
-   * @memberof MapInstance
+   * @param {TypeMapView} mapView map view object
    */
-  toggleFullscreen = (element: HTMLElement): void => {
-    if (screenfull.isEnabled) {
-      // TODO: check if needed
-      // DomUtil.hasClass(mapElem, 'leaflet-pseudo-fullscreen') ? DomUtil.removeClass(mapElem, 'leaflet-pseudo-fullscreen') : DomUtil.addClass(mapElem, 'leaflet-pseudo-fullscreen');
-      // DomUtil.hasClass(mapElem, 'leaflet-fullscreen-on') ? DomUtil.removeClass(mapElem, 'leaflet-fullscreen-on') : DomUtil.addClass(mapElem, 'leaflet-fullscreen-on');
-      // toogle fullscreen
-      screenfull.toggle(element);
-    }
+  setView = (mapView: TypeMapView): void => {
+    const projection = mapView.projection ? mapView.projection : api.projection.projections[this.currentProjection];
+    this.map.setView(
+      new View({
+        projection,
+        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.initialView.zoom,
+        center: mapView.center
+          ? fromLonLat([mapView.center[0], mapView.center[1]], projection)
+          : fromLonLat([this.mapProps.map.initialView.center[0], this.mapProps.map.initialView.center[1]], projection),
+        extent: mapView.extent,
+        resolution: mapView.resolution,
+        minZoom: mapView.minZoom,
+        maxZoom: mapView.maxZoom,
+      })
+    );
+  };
+
+  /**
+   * Get the map view
+   *
+   * @returns the map view
+   */
+  getView = (): View => {
+    return this.map.getView();
   };
 
   /**
@@ -278,7 +297,7 @@ export class MapViewer {
    */
   loadMapConfig = (mapConfig: TypeMapSchemaProps) => {
     // create a new config for this map element
-    const config = new Config(this.map.getContainer());
+    const config = new Config(this.map.getTargetElement());
 
     const configObj = config.getMapConfigFromFunc(mapConfig);
 
@@ -293,33 +312,20 @@ export class MapViewer {
    */
   toggleMapInteraction = (interaction: string) => {
     if (interaction === 'dynamic' || !interaction) {
-      // dynamic map
-      this.map.dragging.enable();
-      this.map.touchZoom.enable();
-      this.map.doubleClickZoom.enable();
-      this.map.scrollWheelZoom.enable();
-      this.map.boxZoom.enable();
-      this.map.keyboard.enable();
-      if (this.map.tap) this.map.tap.enable();
-      this.map.getContainer().style.cursor = 'grab';
+      this.map.getInteractions().forEach((x) => x.setActive(true));
     } else {
-      // static map
-      this.map.dragging.disable();
-      this.map.touchZoom.disable();
-      this.map.doubleClickZoom.disable();
-      this.map.scrollWheelZoom.disable();
-      this.map.boxZoom.disable();
-      this.map.keyboard.disable();
-      if (this.map.tap) this.map.tap.disable();
-      this.map.getContainer().style.cursor = 'default';
+      this.map.getInteractions().forEach((x) => x.setActive(false));
     }
   };
 
   /**
    * Create bounds on map
    *
-   * @param {LatLng.LatLngBounds} bounds map bounds
+   * @param {Extent} bounds map bounds
    * @returns the bounds
    */
-  fitBounds = (bounds: L.LatLngBounds) => this.map.fitBounds(bounds);
+  fitBounds = (bounds: Extent) =>
+    this.map.getView().fit(bounds, {
+      size: this.map.getSize(),
+    });
 }

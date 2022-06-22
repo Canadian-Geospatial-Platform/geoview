@@ -124,22 +124,15 @@ importers:
       '@mui/icons-material': ^5.4.2
       '@mui/material': ^5.4.3
       '@mui/styles': ^5.4.2
-      '@react-leaflet/core': ^1.1.1
       '@types/create-react-class': ^15.6.3
-      '@types/esri-leaflet': ^2.1.9
       '@types/flux': ^3.1.11
       '@types/glob': ^7.2.0
       '@types/jest': ^27.4.0
-      '@types/leaflet': ^1.7.9
-      '@types/leaflet.heat': 0.2.1
-      '@types/leaflet.markercluster': ^1.0.3
       '@types/lodash': ^4.14.178
       '@types/lodash-webpack-plugin': ^0.11.6
       '@types/proj4': ^2.5.2
-      '@types/proj4leaflet': ^1.0.6
       '@types/react': ^17.0.39
       '@types/react-dom': ^17.0.11
-      '@types/react-leaflet': ^2.8.2
       '@types/react-router-dom': ^5.3.3
       '@typescript-eslint/eslint-plugin': ^5.10.2
       '@typescript-eslint/parser': ^5.10.2
@@ -162,7 +155,6 @@ importers:
       eslint-plugin-prettier: ^4.0.0
       eslint-plugin-react: ^7.28.0
       eslint-plugin-react-hooks: ^4.3.0
-      esri-leaflet: ^3.0.4
       eventemitter3: ^4.0.7
       file-loader: ^6.2.0
       focus-trap-react: ^8.9.1
@@ -174,25 +166,20 @@ importers:
       i18next-http-backend: ^1.0.21
       immutable: ^4.0.0
       jest: ^27.4.7
-      leaflet: ^1.7.1
-      leaflet.heat: 0.2.0
-      leaflet.markercluster: ^1.5.3
       lodash: ^4.17.21
       lodash-webpack-plugin: ^0.11.6
       notistack: ^2.0.3
+      ol: ^6.14.1
       prettier: ^2.6.0
       proj4: ^2.7.5
-      proj4leaflet: ^1.0.2
       prop-types: ^15.8.1
       query-string: ^7.1.0
       react: ^17.0.2
       react-dom: ^17.0.2
       react-i18next: ^11.8.0
-      react-leaflet: ^3.2.5
       react-test-renderer: ^17.0.2
       sass: ^1.49.7
       sass-loader: ^12.4.0
-      screenfull: ^6.0.1
       style-loader: ^3.3.1
       terser-webpack-plugin: ^5.3.1
       typedoc: ^0.22.17
@@ -203,41 +190,32 @@ importers:
       webpack-cli: ^4.9.2
       webpack-dev-server: ^4.7.4
       webpack-merge: ^5.8.0
-      wms-capabilities: ^0.5.1
     dependencies:
       '@emotion/react': 11.9.0_ca4a8ec32d887456a4de02f8cb6532ee
       '@emotion/styled': 11.8.1_5b9eddf49e2d7edbbb84e903dbd4c614
       '@mui/icons-material': 5.6.2_256e42df0e488ec659884b3d40e4a6de
       '@mui/material': 5.6.4_1a397cabda4e9f6398e9deafd8c60d27
       '@mui/styles': 5.6.2_c8e45b4eb687790dba17b4e1c4b4273f
-      '@react-leaflet/core': 1.1.1_f2bc606f83c617542d0a54cd51b317f0
       ajv: 8.11.0
       axios: 0.25.0
       dayjs: 1.11.2
       domhandler: 4.3.1
-      esri-leaflet: 3.0.8_leaflet@1.8.0
       eventemitter3: 4.0.7
       focus-trap-react: 8.11.0_75cb922c19ee1b7939faae9b4d1f4cf7
       html-react-parser: 1.4.12_react@17.0.2
       i18next: 19.9.2
       i18next-http-backend: 1.4.0
       immutable: 4.0.0
-      leaflet: 1.8.0
-      leaflet.heat: 0.2.0
-      leaflet.markercluster: 1.5.3_leaflet@1.8.0
       lodash: 4.17.21
       notistack: 2.0.4_a0f37b59a11b03b2b669ea83d3919577
+      ol: 6.14.1
       proj4: 2.8.0
-      proj4leaflet: 1.0.2
       prop-types: 15.8.1
       query-string: 7.1.1
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
       react-i18next: 11.16.8_8f2a12f93b34591c18c344cd829419b1
-      react-leaflet: 3.2.5_f2bc606f83c617542d0a54cd51b317f0
       react-test-renderer: 17.0.2_react@17.0.2
-      screenfull: 6.0.1
-      wms-capabilities: 0.5.1
     devDependencies:
       '@babel/cli': 7.17.10_@babel+core@7.17.10
       '@babel/core': 7.17.10
@@ -266,20 +244,14 @@ importers:
       '@babel/runtime': 7.17.9
       '@babel/runtime-corejs3': 7.17.9
       '@types/create-react-class': 15.6.3
-      '@types/esri-leaflet': 2.1.9
       '@types/flux': 3.1.11
       '@types/glob': 7.2.0
       '@types/jest': 27.5.0
-      '@types/leaflet': 1.7.9
-      '@types/leaflet.heat': 0.2.1
-      '@types/leaflet.markercluster': 1.4.6
       '@types/lodash': 4.14.182
       '@types/lodash-webpack-plugin': 0.11.6
       '@types/proj4': 2.5.2
-      '@types/proj4leaflet': 1.0.6
       '@types/react': 17.0.44
       '@types/react-dom': 17.0.16
-      '@types/react-leaflet': 2.8.2
       '@types/react-router-dom': 5.3.3
       '@typescript-eslint/eslint-plugin': 5.22.0_5b52bb1e77494a9627aef8db6adb10bc
       '@typescript-eslint/parser': 5.22.0_eslint@8.14.0+typescript@4.6.4
@@ -366,53 +338,6 @@ importers:
       typescript: 4.6.4
 
   ../../packages/geoview-layers-panel:
-    specifiers:
-      '@babel/core': ^7.17.0
-      '@babel/eslint-parser': ^7.17.0
-      '@babel/runtime': ^7.17.0
-      '@types/react': ^17.0.39
-      '@types/react-dom': ^17.0.11
-      '@typescript-eslint/eslint-plugin': ^5.10.2
-      '@typescript-eslint/parser': ^5.10.2
-      eslint: ^8.8.0
-      eslint-config-airbnb: ^19.0.4
-      eslint-config-prettier: ^8.3.0
-      eslint-plugin-import: ^2.25.4
-      eslint-plugin-jest: ^26.0.0
-      eslint-plugin-jsx-a11y: ^6.5.1
-      eslint-plugin-prettier: ^4.0.0
-      eslint-plugin-react: ^7.28.0
-      eslint-plugin-react-hooks: ^4.3.0
-      geoview-core: workspace:~0.1.0
-      prettier: ^2.6.0
-      react: ^17.0.2
-      react-dom: ^17.0.2
-      typescript: ^4.5.5
-    dependencies:
-      geoview-core: link:../geoview-core
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    devDependencies:
-      '@babel/core': 7.17.10
-      '@babel/eslint-parser': 7.17.0_7449dd49ffed0eea046851524f1e657b
-      '@babel/runtime': 7.17.9
-      '@types/react': 17.0.44
-      '@types/react-dom': 17.0.16
-      '@typescript-eslint/eslint-plugin': 5.22.0_5b52bb1e77494a9627aef8db6adb10bc
-      '@typescript-eslint/parser': 5.22.0_eslint@8.14.0+typescript@4.6.4
-      eslint: 8.14.0
-      eslint-config-airbnb: 19.0.4_6be7065ad0c1f9180c35507fc66b8efd
-      eslint-config-prettier: 8.5.0_eslint@8.14.0
-      eslint-plugin-import: 2.26.0_eslint@8.14.0
-      eslint-plugin-jest: 26.1.5_8ade0cd2c0f766b68f29c1998b6cb5df
-      eslint-plugin-jsx-a11y: 6.5.1_eslint@8.14.0
-      eslint-plugin-prettier: 4.0.0_665eb419c9d7860ca0c224f7f6dcdace
-      eslint-plugin-react: 7.29.4_eslint@8.14.0
-      eslint-plugin-react-hooks: 4.5.0_eslint@8.14.0
-      prettier: 2.6.2
-      typescript: 4.6.4
-
-  ../../packages/geoview-overview-map:
     specifiers:
       '@babel/core': ^7.17.0
       '@babel/eslint-parser': ^7.17.0
@@ -2318,6 +2243,33 @@ packages:
     resolution: {integrity: sha512-nkalE/f1RvRGChwBnEIoBfSEYOXnCRdleKuv6+lePbMDrMZXeDQnqak5XDOeBgrPPyPfAdcCu/B5z+v3VhplGg==}
     dev: true
 
+  /@mapbox/jsonlint-lines-primitives/2.0.2:
+    resolution: {integrity: sha512-rY0o9A5ECsTQRVhv7tL/OyDpGAoUB4tTvLiW1DSzQGq4bvTPhNw1VpSNjDJc5GFZ2XuyOtSWSVN05qOtcD71qQ==}
+    engines: {node: '>= 0.6'}
+    dev: false
+
+  /@mapbox/mapbox-gl-style-spec/13.24.0:
+    resolution: {integrity: sha512-9yhRSqnKX+59MrG647x2pACfR2Ewk8Ii5X75Ag8oToEKZU+PSY0+r10EirIVCTDwuHPzp/VuuN3j6n+Hv/gGpQ==}
+    hasBin: true
+    dependencies:
+      '@mapbox/jsonlint-lines-primitives': 2.0.2
+      '@mapbox/point-geometry': 0.1.0
+      '@mapbox/unitbezier': 0.0.0
+      csscolorparser: 1.0.3
+      json-stringify-pretty-compact: 2.0.0
+      minimist: 1.2.6
+      rw: 1.3.3
+      sort-object: 0.3.2
+    dev: false
+
+  /@mapbox/point-geometry/0.1.0:
+    resolution: {integrity: sha512-6j56HdLTwWGO0fJPlrZtdU/B13q8Uwmo18Ck2GnGgN9PCFyKTZ3UbXeEdRFh18i9XQ92eH2VdtpJHpBD3aripQ==}
+    dev: false
+
+  /@mapbox/unitbezier/0.0.0:
+    resolution: {integrity: sha512-HPnRdYO0WjFjRTSwO3frz1wKaU649OBFPX3Zo/2WZvuRi6zMiRGui8SnPQiQABgqCf8YikDe5t3HViTVw1WUzA==}
+    dev: false
+
   /@mui/base/5.0.0-alpha.79_b49bddbe4b905ced4713cb857cca91fa:
     resolution: {integrity: sha512-/lZLF027BkiEjM8MIYoeS/FEhTKf+41ePU9SOijMGrCin1Y0Igucw+IHa1fF8HXD7wDbFKqHuso3J1jMG8wyNw==}
     engines: {node: '>=12.0.0'}
@@ -2546,24 +2498,16 @@ packages:
       fastq: 1.13.0
     dev: true
 
+  /@petamoriken/float16/3.6.3:
+    resolution: {integrity: sha512-Yx6Z93kmz3JVPYoPPRFJXnt2/G4kfaxRROcZVVHsE4zOClJXvkOVidv/JfvP6hWn16lykbKYKVzUsId6mqXdGg==}
+    dev: false
+
   /@polka/url/1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
   /@popperjs/core/2.11.5:
     resolution: {integrity: sha512-9X2obfABZuDVLCgPK9aX0a/x4jaOEweTTWE2+9sr0Qqqevj2Uv5XorvusThmc9XGYpS9yI+fhh8RTafBtGposw==}
-    dev: false
-
-  /@react-leaflet/core/1.1.1_f2bc606f83c617542d0a54cd51b317f0:
-    resolution: {integrity: sha512-7PGLWa9MZ5x/cWy8EH2VzI4T8q5WpuHbixzCDXqixP/WyqwIrg5NDUPgYuFnB4IEIZF+6nA265mYzswFo/h1Pw==}
-    peerDependencies:
-      leaflet: ^1.7.1
-      react: ^17.0.1
-      react-dom: ^17.0.1
-    dependencies:
-      leaflet: 1.8.0
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
     dev: false
 
   /@sinonjs/commons/1.8.3:
@@ -2577,16 +2521,6 @@ packages:
     dependencies:
       '@sinonjs/commons': 1.8.3
     dev: true
-
-  /@terraformer/arcgis/2.1.0:
-    resolution: {integrity: sha512-eKTvNXze2Fo7vAEjvJFIGn5QdU0OP4aD9DuT/uTBLRM1QS+ju7KtPITbVW+xgCviHLnOVeFQ1UsIs9kjkakD4g==}
-    dependencies:
-      '@terraformer/common': 2.0.7
-    dev: false
-
-  /@terraformer/common/2.0.7:
-    resolution: {integrity: sha512-8bl+/JT0Rw6FYe2H3FfJS8uQwgzGl+UHs+8JX0TQLHgA4sMDEwObbMwo0iP3FVONwPXrPHEpC5YH7Grve0cl9A==}
-    dev: false
 
   /@tootallnate/once/1.1.2:
     resolution: {integrity: sha512-RbzJvlNzmRq5c3O09UipeuXno4tA1FE6ikOjxZK0tuxVv3412l64l5t1W5pj4+rJq9vpkm/kwiR07aZXnsKPxw==}
@@ -2668,12 +2602,6 @@ packages:
       '@types/json-schema': 7.0.11
     dev: true
 
-  /@types/esri-leaflet/2.1.9:
-    resolution: {integrity: sha512-Z3GLyJTepEsEpo2FB3eRqSRxGw1Y2Vohpuu5Qp87tc3MGbXjhSUTRYldoaACZj6JQQJuOnyK9FLMdSziq5C1Ow==}
-    dependencies:
-      '@types/leaflet': 1.7.9
-    dev: true
-
   /@types/estree/0.0.51:
     resolution: {integrity: sha512-CuPgU6f3eT/XgKKPqKd/gLZV1Xmvf1a2R5POBOGQa6uv82xpls89HU5zKeVoyR8XzHd1RGNOlQlvUe3CFkjWNQ==}
     dev: true
@@ -2704,10 +2632,6 @@ packages:
     dependencies:
       '@types/fbemitter': 2.0.32
       '@types/react': 17.0.44
-    dev: true
-
-  /@types/geojson/7946.0.8:
-    resolution: {integrity: sha512-1rkryxURpr6aWP7R786/UQOkJ3PcpQiWkAXBmdWc7ryFWqN6a4xfK7BtjXvFBKO9LjQ+MWQSWxYeZX1OApnArA==}
     dev: true
 
   /@types/glob/7.2.0:
@@ -2768,24 +2692,6 @@ packages:
     resolution: {integrity: sha1-7ihweulOEdK4J7y+UnC86n8+ce4=}
     dev: true
 
-  /@types/leaflet.heat/0.2.1:
-    resolution: {integrity: sha512-NESIrQcnaT2gONYOUMfuppWdPDNkmH69qTa5F1kHCSh2WXno84YpOzJn/U+aGSNjUFRdVnRcxn1uxJn68/GNRA==}
-    dependencies:
-      '@types/leaflet': 1.7.9
-    dev: true
-
-  /@types/leaflet.markercluster/1.4.6:
-    resolution: {integrity: sha512-MD+bUDzxHznY0zOlSBUAMNQUGB2+xpJPKrR2MNEoBAAKa3QTKJJySBtCqWyGLvYNNO+Cdyc2c64aF2IFwe4fcQ==}
-    dependencies:
-      '@types/leaflet': 1.7.9
-    dev: true
-
-  /@types/leaflet/1.7.9:
-    resolution: {integrity: sha512-H8vPgD49HKzqM41ArHGZM70g/tfhp8W+JcPxfnF+5H/Xvp+xiP+KQOUNWU8U89fqS1Jj3cpRY/+nbnaHFzwnFA==}
-    dependencies:
-      '@types/geojson': 7946.0.8
-    dev: true
-
   /@types/lodash-webpack-plugin/0.11.6:
     resolution: {integrity: sha512-ezBRc7jTgk9nCGl2E+hFcn1VBZdjppl8yXL2qsn6kVu6vs1yGKXv+9WHyHvtVznnrup5IYFieYjcHCA7ZAuzvA==}
     dependencies:
@@ -2820,14 +2726,6 @@ packages:
     resolution: {integrity: sha512-/Nmfn9p08yaYw6xo5f2b0L+2oHk2kZeOkp5v+4VCeNfq+ETlLQbmHmC97/pjDIEZy8jxwz7pdPpwNzDHM5cuJw==}
     dev: true
 
-  /@types/proj4leaflet/1.0.6:
-    resolution: {integrity: sha512-5Js2Yl+wpvOpYNVpQG5PjBSqUQUDOh7TqdDMyWQIGJKXub7AMi4B6VbHL9Sk/23JjlKy2EGsZWM2/tV7vOcn/g==}
-    dependencies:
-      '@types/geojson': 7946.0.8
-      '@types/leaflet': 1.7.9
-      '@types/proj4': 2.5.2
-    dev: true
-
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
 
@@ -2850,13 +2748,6 @@ packages:
     dependencies:
       '@types/react': 17.0.44
     dev: false
-
-  /@types/react-leaflet/2.8.2:
-    resolution: {integrity: sha512-Iel8Vd1bSCD38Yhiqcmm/+9hjPEdd39LFE3tBMbOytq3QAQsC3LDrbo6ifoh8JbpqPbCsQPo9Wx5OELHixEShg==}
-    dependencies:
-      '@types/leaflet': 1.7.9
-      '@types/react': 17.0.44
-    dev: true
 
   /@types/react-router-dom/5.3.3:
     resolution: {integrity: sha512-kpqnYK4wcdm5UaWI3fLcELopqLrHgLqNsdpHauzlQktfkHL3npOSwtj1Uz9oKBAzs7lFtVkV8j83voAz2D8fhw==}
@@ -4092,6 +3983,10 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
+  /csscolorparser/1.0.3:
+    resolution: {integrity: sha512-umPSgYwZkdFoUrH5hIq5kf0wPSXiro51nPw0j2K/c83KflkPSTBGMz6NJvMB+07VlL0y7VPo6QJcDjcgKTTm3w==}
+    dev: false
+
   /cssesc/3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
@@ -4767,16 +4662,6 @@ packages:
       estraverse: 5.3.0
     dev: true
 
-  /esri-leaflet/3.0.8_leaflet@1.8.0:
-    resolution: {integrity: sha512-mLb4pRfDAbkG1YhuajD22erLXIAtrF1R32hmgmlJNI3t47n6KjTppCb8lViia0O7+GDORXFuJ9Lj9RkpsaKhSA==}
-    peerDependencies:
-      leaflet: ^1.0.0
-    dependencies:
-      '@terraformer/arcgis': 2.1.0
-      leaflet: 1.8.0
-      tiny-binary-search: 1.0.3
-    dev: false
-
   /estraverse/4.3.0:
     resolution: {integrity: sha512-39nnKffWz8xN1BU/2c79n9nB9HDzo0niYUqx6xyqUnyoAnQyyWpOTdZEeiCch8BBu515t4wp9ZmgVfVhn9EBpw==}
     engines: {node: '>=4.0'}
@@ -5124,6 +5009,19 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
     dev: true
+
+  /geotiff/2.0.5:
+    resolution: {integrity: sha512-U5kVYm118YAmw2swiLu8rhfrYnDKOFI7VaMjuQwcq6Intuuid9Pyb4jjxYUxxkq8kOu2r7Am0Rmb52PObGp4pQ==}
+    engines: {node: '>=10.19'}
+    dependencies:
+      '@petamoriken/float16': 3.6.3
+      lerc: 3.0.0
+      pako: 2.0.4
+      parse-headers: 2.0.5
+      quick-lru: 6.1.1
+      web-worker: 1.2.0
+      xml-utils: 1.0.3
+    dev: false
 
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
@@ -5536,6 +5434,10 @@ packages:
     dependencies:
       postcss: 8.4.13
     dev: true
+
+  /ieee754/1.2.1:
+    resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
+    dev: false
 
   /ignore/5.2.0:
     resolution: {integrity: sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ==}
@@ -6379,6 +6281,10 @@ packages:
     resolution: {integrity: sha1-nbe1lJatPzz+8wp1FC0tkwrXJlE=}
     dev: true
 
+  /json-stringify-pretty-compact/2.0.0:
+    resolution: {integrity: sha512-WRitRfs6BGq4q8gTgOy4ek7iPFXjbra0H3PmDLKm2xnZ+Gh1HUhiKGgCZkSPNULlP7mvfu6FV/mOLhCarspADQ==}
+    dev: false
+
   /json5/1.0.1:
     resolution: {integrity: sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==}
     hasBin: true
@@ -6497,20 +6403,8 @@ packages:
       language-subtag-registry: 0.3.21
     dev: true
 
-  /leaflet.heat/0.2.0:
-    resolution: {integrity: sha1-EJ2M9Ybwre5B8Fr/Ax4np3/swik=}
-    dev: false
-
-  /leaflet.markercluster/1.5.3_leaflet@1.8.0:
-    resolution: {integrity: sha512-vPTw/Bndq7eQHjLBVlWpnGeLa3t+3zGiuM7fJwCkiMFq+nmRuG3RI3f7f4N4TDX7T4NpbAXpR2+NTRSEGfCSeA==}
-    peerDependencies:
-      leaflet: ^1.3.1
-    dependencies:
-      leaflet: 1.8.0
-    dev: false
-
-  /leaflet/1.8.0:
-    resolution: {integrity: sha512-gwhMjFCQiYs3x/Sf+d49f10ERXaEFCPr+nVTryhAW8DWbMGqJqt9G4XuIaHmFW08zYvhgdzqXGr8AlW8v8dQkA==}
+  /lerc/3.0.0:
+    resolution: {integrity: sha512-Rm4J/WaHhRa93nCN2mwWDZFoRVF18G1f47C+kvQWyHGEZxFpTUi73p7lMVSAndyxGt6lJ2/CFbOcf9ra5p8aww==}
     dev: false
 
   /leven/3.1.0:
@@ -6633,6 +6527,10 @@ packages:
     dependencies:
       tmpl: 1.0.5
     dev: true
+
+  /mapbox-to-css-font/2.4.1:
+    resolution: {integrity: sha512-QQ/iKiM43DM9+aujTL45Iz5o7gDeSFmy4LPl3HZmNcwCE++NxGazf+yFpY+wCb+YS23sDa1ghpo3zrNFOcHlow==}
+    dev: false
 
   /marked/4.0.16:
     resolution: {integrity: sha512-wahonIQ5Jnyatt2fn8KqF/nIqZM8mh3oRu2+l5EANGMhu6RFjiSG52QNE2eWzFMI94HqYSgN184NurgNG6CztA==}
@@ -6907,6 +6805,23 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: true
 
+  /ol-mapbox-style/7.1.1:
+    resolution: {integrity: sha512-GLTEYiH/Ec9Zn1eS4S/zXyR2sierVrUc+OLVP8Ra0FRyqRhoYbXdko0b7OIeSHWdtJfHssWYefDOGxfTRUUZ/A==}
+    dependencies:
+      '@mapbox/mapbox-gl-style-spec': 13.24.0
+      mapbox-to-css-font: 2.4.1
+      webfont-matcher: 1.1.0
+    dev: false
+
+  /ol/6.14.1:
+    resolution: {integrity: sha512-sIcUWkGud3Y2gT3TJubSHlkyMXiPVh1yxfCPHxmY8+qtm79bB9oRnei9xHVIbRRG0Ro6Ldp5E+BMVSvYCxSpaA==}
+    dependencies:
+      geotiff: 2.0.5
+      ol-mapbox-style: 7.1.1
+      pbf: 3.2.1
+      rbush: 3.0.1
+    dev: false
+
   /on-finished/2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
     engines: {node: '>= 0.8'}
@@ -7016,6 +6931,10 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /pako/2.0.4:
+    resolution: {integrity: sha512-v8tweI900AUkZN6heMU/4Uy4cXRc2AYNRggVmTR+dEncawDJgCdLMximOVA2p4qO57WMynangsfGRb5WD6L1Bg==}
+    dev: false
+
   /param-case/3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
     dependencies:
@@ -7028,6 +6947,10 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       callsites: 3.1.0
+
+  /parse-headers/2.0.5:
+    resolution: {integrity: sha512-ft3iAoLOB/MlwbNXgzy43SWGP6sQki2jQvAyBg/zDFAgr9bfNWZIUj42Kw2eJIl8kEi4PbgE6U1Zau/HwI75HA==}
+    dev: false
 
   /parse-json/5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
@@ -7084,6 +7007,14 @@ packages:
   /path-type/4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
+
+  /pbf/3.2.1:
+    resolution: {integrity: sha512-ClrV7pNOn7rtmoQVF4TS1vyU0WhYRnP92fzbfF75jAIwpnzdJXf8iTd4CMEqO4yUenH6NDqLiwjqlh6QgZzgLQ==}
+    hasBin: true
+    dependencies:
+      ieee754: 1.2.1
+      resolve-protobuf-schema: 2.1.0
+    dev: false
 
   /picocolors/1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
@@ -7240,12 +7171,6 @@ packages:
       wkt-parser: 1.3.2
     dev: false
 
-  /proj4leaflet/1.0.2:
-    resolution: {integrity: sha512-6GdDeUlhX/tHUiMEj80xQhlPjwrXcdfD0D5OBymY8WvxfbmZcdhNqQk7n7nFf53ue6QdP9ls9ZPjsAxnbZDTsw==}
-    dependencies:
-      proj4: 2.8.0
-    dev: false
-
   /prompts/2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
@@ -7260,6 +7185,10 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+
+  /protocol-buffers-schema/3.6.0:
+    resolution: {integrity: sha512-TdDRD+/QNdrCGCE7v8340QyuXd4kIWIgapsE2+n/SaGiSSbomYl4TjHlvIoCWRpE7wFt02EpB35VVA2ImcBVqw==}
+    dev: false
 
   /proxy-addr/2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
@@ -7298,6 +7227,15 @@ packages:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
     dev: true
 
+  /quick-lru/6.1.1:
+    resolution: {integrity: sha512-S27GBT+F0NTRiehtbrgaSE1idUAJ5bX8dPAQTdylEyNlrdcH5X4Lz7Edz3DYzecbsCluD5zO8ZNEe04z3D3u6Q==}
+    engines: {node: '>=12'}
+    dev: false
+
+  /quickselect/2.0.0:
+    resolution: {integrity: sha512-RKJ22hX8mHe3Y6wH/N3wCM6BWtjaxIyyUIkpHOvfFnxdI4yD4tBXEBKSbriGujF6jnSVkJrffuo6vxACiSSxIw==}
+    dev: false
+
   /randombytes/2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
     dependencies:
@@ -7318,6 +7256,12 @@ packages:
       iconv-lite: 0.4.24
       unpipe: 1.0.0
     dev: true
+
+  /rbush/3.0.1:
+    resolution: {integrity: sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==}
+    dependencies:
+      quickselect: 2.0.0
+    dev: false
 
   /react-dom/17.0.2_react@17.0.2:
     resolution: {integrity: sha512-s4h96KtLDUQlsENhMn1ar8t2bEa+q/YAtj8pPPdIjPDGBDIVNsrD9aXNWqspUe6AzKCIG0C1HZZLqLV7qpOBGA==}
@@ -7356,19 +7300,6 @@ packages:
 
   /react-is/17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
-
-  /react-leaflet/3.2.5_f2bc606f83c617542d0a54cd51b317f0:
-    resolution: {integrity: sha512-Z3KZ+4SijsRbbrt2I1a3ZDY6+V6Pm91eYTdxTN18G6IOkFRsJo1BuSPLFnyFrlF3WDjQFPEcTPkEgD1VEeAoBg==}
-    peerDependencies:
-      leaflet: ^1.7.1
-      react: ^17.0.1
-      react-dom: ^17.0.1
-    dependencies:
-      '@react-leaflet/core': 1.1.1_f2bc606f83c617542d0a54cd51b317f0
-      leaflet: 1.8.0
-      react: 17.0.2
-      react-dom: 17.0.2_react@17.0.2
-    dev: false
 
   /react-property/2.0.0:
     resolution: {integrity: sha512-kzmNjIgU32mO4mmH5+iUyrqlpFQhF8K2k7eZ4fdLSOPFrD1XgEuSBv9LDEgxRXTMBqMd8ppT0x6TIzqE5pdGdw==}
@@ -7558,6 +7489,12 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /resolve-protobuf-schema/2.1.0:
+    resolution: {integrity: sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ==}
+    dependencies:
+      protocol-buffers-schema: 3.6.0
+    dev: false
+
   /resolve.exports/1.1.0:
     resolution: {integrity: sha512-J1l+Zxxp4XK3LUDZ9m60LRJF/mAe4z6a4xyabPHk7pvK5t35dACV32iIjJDFeWZFfZlO29w6SZ67knR0tHzJtQ==}
     engines: {node: '>=10'}
@@ -7600,6 +7537,10 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
     dev: true
+
+  /rw/1.3.3:
+    resolution: {integrity: sha1-P4Yt+pGrdmsUiF700BEkv9oHT7Q=}
+    dev: false
 
   /safe-buffer/5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
@@ -7688,11 +7629,6 @@ packages:
       ajv-formats: 2.1.1
       ajv-keywords: 5.1.0_ajv@8.11.0
     dev: true
-
-  /screenfull/6.0.1:
-    resolution: {integrity: sha512-yzQW+j4zMUBQC51xxWaoDYjxOtl8Kn+xvue3p6v/fv2pIi1jH4AldgVLU8TBfFVgH2x3VXlf3+YiA/AYIPlaew==}
-    engines: {node: ^14.13.1 || >=16.0.0}
-    dev: false
 
   /select-hose/2.0.0:
     resolution: {integrity: sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=}
@@ -7858,6 +7794,24 @@ packages:
       uuid: 8.3.2
       websocket-driver: 0.7.4
     dev: true
+
+  /sort-asc/0.1.0:
+    resolution: {integrity: sha1-q3md9h/HPqCVbHnEtTHtHp53J+k=}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
+  /sort-desc/0.1.1:
+    resolution: {integrity: sha1-GYuMDN6wlcRjNBhh45JdTuNZqe4=}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
+  /sort-object/0.3.2:
+    resolution: {integrity: sha1-mODRme3kDgfGGoRAPGHWw7KQ+eI=}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      sort-asc: 0.1.0
+      sort-desc: 0.1.1
+    dev: false
 
   /source-map-js/1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
@@ -8176,10 +8130,6 @@ packages:
     resolution: {integrity: sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==}
     dev: true
 
-  /tiny-binary-search/1.0.3:
-    resolution: {integrity: sha512-STSHX/L5nI9WTLv6wrzJbAPbO7OIISX83KFBh2GVbX1Uz/vgZOU/ANn/8iV6t35yMTpoPzzO+3OQid3mifE0CA==}
-    dev: false
-
   /tiny-warning/1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
     dev: false
@@ -8462,6 +8412,14 @@ packages:
       minimalistic-assert: 1.0.1
     dev: true
 
+  /web-worker/1.2.0:
+    resolution: {integrity: sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA==}
+    dev: false
+
+  /webfont-matcher/1.1.0:
+    resolution: {integrity: sha1-mM6VCXsp4x++czBT4Q5XFkLRxsc=}
+    dev: false
+
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=}
     dev: false
@@ -8735,13 +8693,6 @@ packages:
     resolution: {integrity: sha512-A26BOOo7sHAagyxG7iuRhnKMO7Q3mEOiOT4oGUmohtN/Li5wameeU4S6f8vWw6NADTVKljBs8bzA8JPQgSEMVQ==}
     dev: false
 
-  /wms-capabilities/0.5.1:
-    resolution: {integrity: sha512-f68uyUjzLdpE/wkBNmRdSwn1BcMIM0yMUDYY0/SQF+tSPr1FIa2/EizVENC2um4boNS4QmvjvMKcA7wZRwz7Lw==}
-    hasBin: true
-    dependencies:
-      minimist: 1.2.6
-    dev: false
-
   /word-wrap/1.2.3:
     resolution: {integrity: sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==}
     engines: {node: '>=0.10.0'}
@@ -8798,6 +8749,10 @@ packages:
   /xml-name-validator/3.0.0:
     resolution: {integrity: sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==}
     dev: true
+
+  /xml-utils/1.0.3:
+    resolution: {integrity: sha512-8nKSzSUwJZw7XYcUrY6YjlicZs+lpxV2QzR53btjgq/eNqk1WK3PId5Zy3M2AHkJdpcgC+9/VJspTlH1aNZiuQ==}
+    dev: false
 
   /xmlchars/2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}

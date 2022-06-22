@@ -2,8 +2,6 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { DomEvent } from 'leaflet';
-
 import makeStyles from '@mui/styles/makeStyles';
 
 import Tooltip from '@mui/material/Tooltip';
@@ -172,8 +170,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
     // disable events on container
     const newButtonChildrenHTMLElements = Cast<HTMLElement[]>(buttonRef.current?.children);
     if (newButtonChildrenHTMLElements.length > 0) {
-      DomEvent.disableClickPropagation(newButtonChildrenHTMLElements[0]);
-      DomEvent.disableScrollPropagation(newButtonChildrenHTMLElements[0]);
+      // TODO disable map events
     }
 
     // check button type

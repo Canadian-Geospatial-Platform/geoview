@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-inferrable-types */
 import axios from 'axios';
 
-import L from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
+import ImageLayer from 'ol/layer/Image';
+import { ImageWMS } from 'ol/source';
+import { Extent } from 'ol/extent';
+import WMSCapabilities from 'ol/format/WMSCapabilities';
 
-import { mapService as esriMapService, MapService } from 'esri-leaflet';
-
-import WMSCapabilities from 'wms-capabilities';
-
-import { getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
+import { xmlToJson } from '../../../../core/utils/utilities';
 import {
   Cast,
   CONST_LAYER_TYPES,
@@ -46,8 +47,6 @@ export const webLayerIsWMS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.WMS;
 };
 
-// TODO: this needs cleaning some layer type like WMS are part of react-leaflet and can be use as a component
-
 /**
  * a class to add wms layer
  *
@@ -60,17 +59,11 @@ export class WMS extends AbstractWebLayersClass {
   // * We may have to do getCapabilites if we want to add layers not in the catalog
   // map config properties
 
-  // layer from leaflet
-  layer: L.TileLayer.WMS | null = null;
-
-  // mapService property
-  mapService: MapService;
+  // layer from openlayers
+  layer!: ImageLayer<ImageWMS>;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
-
-  // private varibale holding wms paras
-  #wmsParams?: L.WMSParams;
 
   /**
    * Initialize layer
@@ -83,105 +76,35 @@ export class WMS extends AbstractWebLayersClass {
     this.url = this.url.indexOf('?') === -1 ? `${this.url}?` : this.url;
 
     this.entries = layerConfig.layerEntries.map((item) => item.id);
-
-    this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(layerConfig.url[api.map(this.mapId).getLanguageCode()], true),
-    });
   }
 
   /**
    * Add a WMS layer to the map.
    *
    * @param {TypeWMSLayer} layer the layer configuration
-   * @return {Promise<Layer | null>} layers to add to the map
+   * @return {Promise<ImageLayer<ImageWMS> | null>} layers to add to the map
    */
-  add(layer: TypeWMSLayer): Promise<L.TileLayer.WMS | null> {
+  add(layer: TypeWMSLayer): Promise<ImageLayer<ImageWMS> | null> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
     const entries = layer.layerEntries.map((item) => item.id).toString();
 
-    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${entries}`;
+    this.getCapabilities();
 
-    const data = getXMLHttpRequest(capUrl);
+    const geo = new Promise<ImageLayer<ImageWMS> | null>((resolve) => {
+      this.name = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.Service.Name as string);
 
-    const geo = new Promise<L.TileLayer.WMS | null>((resolve) => {
-      data.then((value) => {
-        if (value !== '{}') {
-          // check if entries exist
-          let isValid = true;
-
-          // parse the xml string and convert to json
-          this.#capabilities = new WMSCapabilities(value).toJSON();
-
-          isValid = this.validateEntries(this.#capabilities.Capability.Layer, entries);
-
-          this.name = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.Service.Name as string);
-
-          if (isValid) {
-            const wms = L.tileLayer.wms(layer.url[api.map(this.mapId).getLanguageCode()], {
-              layers: entries,
-              format: 'image/png',
-              transparent: true,
-              attribution: '',
-              version: this.#capabilities.version as string,
-            });
-            this.#wmsParams = wms.wmsParams;
-
-            resolve(wms);
-          } else {
-            resolve(null);
-          }
-        } else {
-          resolve(null);
-        }
+      const wms = new ImageLayer({
+        source: new ImageWMS({
+          url: this.url,
+          params: { LAYERS: entries },
+        }),
       });
+
+      resolve(wms);
     });
     return geo;
-  }
-
-  /**
-   * Check if the entries we try to create a layer exist in the getCapabilities layer object
-   * @param {object} layer layer of capability of a WMS object
-   * @param {string} entries names(comma delimited) to check
-   * @returns {boolean} entry is valid
-   */
-  private validateEntries(layer: TypeJsonObject, entries: string): boolean {
-    let isValid = true;
-    // eslint-disable-next-line no-prototype-builtins
-
-    // Added support of multiple entries
-    const allNames = this.findAllByKey(layer, 'Name');
-
-    const entryArray = entries.split(',').map((s) => s.trim()) as TypeJsonArray;
-    for (let i = 0; i < entryArray.length; i++) {
-      isValid = isValid && allNames.includes(entryArray[i]);
-    }
-
-    return isValid;
-  }
-
-  /**
-   * Helper function. Find all values of a given key form a nested object
-   * @param {object} obj a object/nested object
-   * @param {string} keyToFind key to check
-   * @returns {any} all values found
-   */
-  private findAllByKey(obj: { [key: string]: TypeJsonObject }, keyToFind: string): TypeJsonArray {
-    const reduceFunction = (accumulator: TypeJsonArray, [key, value]: [string, TypeJsonObject]): TypeJsonArray => {
-      if (key === keyToFind) {
-        return accumulator.concat(value);
-      }
-      if (typeof value === 'object') {
-        return accumulator.concat(this.findAllByKey(value, keyToFind));
-      }
-      return accumulator;
-    };
-
-    if (obj) {
-      return Object.entries(obj).reduce(reduceFunction, []);
-    }
-    return [];
   }
 
   /**
@@ -189,30 +112,29 @@ export class WMS extends AbstractWebLayersClass {
    *
    * @returns {TypeJsonObject} WMS capabilities in json format
    */
-  getCapabilities = (): TypeJsonObject => {
-    return this.#capabilities;
+  getCapabilities = async (): Promise<TypeJsonObject> => {
+    const parser = new WMSCapabilities();
+
+    const capUrl = `${this.url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${this.entries}`;
+
+    const response = await fetch(capUrl);
+
+    const result = parser.read(await response.text());
+
+    this.#capabilities = result;
+
+    return result;
   };
 
   /**
-   * Get the legend image of a layer from the capabilities. Return null if it does not exist,,
+   * Get the legend image of a layer from the capabilities. Return undefined if it does not exist
    *
-   * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
+   * @returns {string | undefined} URL of a Legend image in png format or undefined
    */
-  getLegendUrlFromCapabilities = (): TypeJsonObject | null => {
-    const layerNames = this.layer!.options.layers!.split(',');
-    let legendUrl = null;
-    (this.#capabilities.Capability.Layer.Layer as TypeJsonArray).forEach((currentLayer) => {
-      if (layerNames.includes(currentLayer.Name as string) && currentLayer.Style) {
-        (currentLayer.Style as TypeJsonArray).forEach((currentStyle) => {
-          if (currentStyle.LegendURL) {
-            (currentStyle.LegendURL as TypeJsonArray).forEach((currentLegend) => {
-              if (currentLegend.Format === 'image/png') legendUrl = currentLegend;
-            });
-          }
-        });
-      }
+  getLegendUrl = (): string | undefined => {
+    return this.layer?.getSource()?.getLegendUrl(api.map(this.mapId).map.getView().getResolution(), {
+      LAYERS: this.entries,
     });
-    return legendUrl;
   };
 
   /**
@@ -230,27 +152,26 @@ export class WMS extends AbstractWebLayersClass {
         reader.readAsDataURL(blob);
       });
 
-    const legendUrlFromCapabilities = this.getLegendUrlFromCapabilities();
-    let legendUrl: string;
-    if (legendUrlFromCapabilities) {
-      legendUrl = legendUrlFromCapabilities.OnlineResource as string;
-    } else {
+    let legendUrl = this.getLegendUrl();
+
+    if (!legendUrl) {
       legendUrl = `${this.url}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${this.entries}`;
     }
+
     const response = await axios.get<TypeJsonObject>(legendUrl, { responseType: 'blob' });
+
     return readAsyncFile(Cast<Blob>(response.data));
   };
 
   /**
    * Get feature info given a latlng
    *
-   * @param {L.LatLng} latlng lat/lng coordinates received on any interaction with the map
-   * @param {L.Map} map the map odject
-   * @param {number} featureCount the map odject
+   * @param {Coordinate} lnglat lat/lng coordinates received on any interaction with the map
+   * @param {number} featureCount feature count to return
    *
    * @returns {Promise<TypeJsonArray | null>} a promise that returns the feature info in a json format
    */
-  getFeatureInfo = async (latlng: L.LatLng, map: L.Map, featureCount = 10): Promise<TypeJsonArray | null> => {
+  getFeatureInfo = async (lnglat: Coordinate, featureCount: number = 10): Promise<TypeJsonArray | null> => {
     let infoFormat = 'text/xml';
 
     if (this.#capabilities.Capability.Request.GetFeatureInfo) {
@@ -258,11 +179,20 @@ export class WMS extends AbstractWebLayersClass {
       if ((formatArray as string[]).includes('application/geojson')) infoFormat = 'application/geojson';
     }
 
-    const params = this.getFeatureInfoParams(latlng, map);
-    (params.info_format as string) = infoFormat;
-    (params.feature_count as number) = featureCount;
+    const featureUrl = this.layer
+      ?.getSource()
+      ?.getFeatureInfoUrl(
+        lnglat,
+        api.map(this.mapId).map.getView().getResolution()!,
+        api.projection.projections[api.map(this.mapId).currentProjection],
+        {
+          LAYERS: this.entries,
+          info_format: infoFormat,
+          feature_count: featureCount,
+        }
+      );
 
-    const response = await axios.get<TypeJsonObject>(this.url, { params });
+    const response = await axios.get<TypeJsonObject>(featureUrl!);
 
     if (infoFormat === 'application/geojson') {
       const dataFeatures = response.data.features as TypeJsonArray;
@@ -288,6 +218,7 @@ export class WMS extends AbstractWebLayersClass {
       }
       return null;
     }
+
     const featureInfoResponse = xmlToJson(response.request.responseXML).FeatureInfoResponse;
 
     if (featureInfoResponse && featureInfoResponse.FIELDS) {
@@ -327,67 +258,63 @@ export class WMS extends AbstractWebLayersClass {
     return null;
   };
 
-  /**
-   * Get the parameters used to query feature info url from a lat lng point
-   *
-   * @param {LatLng} latlng a latlng point to generate the feature url from
-   * @param {L.Map} map the map odject
-   * @returns the map service url including the feature query
-   */
-  private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): TypeJsonObject {
-    const point = map.latLngToContainerPoint(latlng);
+  // /**
+  //  * Get the parameters used to query feature info url from a lat lng point
+  //  *
+  //  * @param {LatLng} latlng a latlng point to generate the feature url from
+  //  * @param {L.Map} map the map odject
+  //  * @returns the map service url including the feature query
+  //  */
+  // private getFeatureInfoParams(latlng: L.LatLng, map: L.Map): TypeJsonObject {
+  //   const point = map.latLngToContainerPoint(latlng);
 
-    const size = map.getSize();
+  //   const size = map.getSize();
 
-    const { crs } = map.options;
+  //   const { crs } = map.options;
 
-    // these are the SouthWest and NorthEast points
-    // projected from LatLng into used crs
-    const sw = crs!.project(map.getBounds().getSouthWest());
-    const ne = crs!.project(map.getBounds().getNorthEast());
+  //   // these are the SouthWest and NorthEast points
+  //   // projected from LatLng into used crs
+  //   const sw = crs!.project(map.getBounds().getSouthWest());
+  //   const ne = crs!.project(map.getBounds().getNorthEast());
 
-    const params = toJsonObject({
-      request: 'GetFeatureInfo',
-      service: 'WMS',
-      version: this.#wmsParams!.version!,
-      layers: this.#wmsParams!.layers!,
-      query_layers: this.#wmsParams!.layers,
-      height: size.y,
-      width: size.x,
-    });
+  //   const params = toJsonObject({
+  //     request: 'GetFeatureInfo',
+  //     service: 'WMS',
+  //     version: this.#wmsParams!.version!,
+  //     layers: this.#wmsParams!.layers!,
+  //     query_layers: this.#wmsParams!.layers,
+  //     height: size.y,
+  //     width: size.x,
+  //   });
 
-    // Define version-related request parameters.
-    const version = window.parseFloat(this.#wmsParams!.version!);
-    (params[version >= 1.3 ? 'crs' : 'srs'] as string) = crs!.code!;
-    (params.bbox as string) = `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    (params.bbox as string) =
-      version >= 1.3 && crs!.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
-    (params[version >= 1.3 ? 'i' : 'x'] as number) = point.x;
-    (params[version >= 1.3 ? 'j' : 'y'] as number) = point.y;
+  //   // Define version-related request parameters.
+  //   const version = window.parseFloat(this.#wmsParams!.version!);
+  //   (params[version >= 1.3 ? 'crs' : 'srs'] as string) = crs!.code!;
+  //   (params.bbox as string) = `${sw.x},${sw.y},${ne.x},${ne.y}`;
+  //   (params.bbox as string) =
+  //     version >= 1.3 && crs!.code === 'EPSG:4326' ? `${sw.y},${sw.x},${ne.y},${ne.x}` : `${sw.x},${sw.y},${ne.x},${ne.y}`;
+  //   (params[version >= 1.3 ? 'i' : 'x'] as number) = point.x;
+  //   (params[version >= 1.3 ? 'j' : 'y'] as number) = point.y;
 
-    return params;
-  }
+  //   return params;
+  // }
 
   /**
    * Set Layer Opacity
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    this.layer!.setOpacity(opacity);
+    this.layer?.setOpacity(opacity);
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
-   * @returns {L.LatLngBounds} layer bounds
+   * @returns {Promise<Extent>} layer bounds
    */
-  getBounds = (): L.LatLngBounds => {
-    const capabilities = this.getCapabilities();
-    const bbox = Cast<[number, number, number, number]>(capabilities.Capability.Layer.EX_GeographicBoundingBox);
+  getBounds = async (): Promise<Extent> => {
+    const bbox = Cast<[number, number, number, number]>(this.#capabilities.Capability.Layer.EX_GeographicBoundingBox);
     const [xmin, ymin, xmax, ymax] = bbox;
-    return L.latLngBounds([
-      [ymin, xmin],
-      [ymax, xmax],
-    ]);
+    return [xmin, ymin, xmax, ymax];
   };
 }

@@ -683,7 +683,7 @@
           "properties": {
             "id": {
               "type": "string",
-              "enum": ["transport", "shaded", "simple"],
+              "enum": ["transport", "simple", "osm", "nogeom"],
               "default": "transport",
               "description": "Id of the basemap to use."
             },
@@ -739,9 +739,9 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["appbar", "navbar", "northArrow"]
+        "enum": ["appbar", "navbar", "northArrow", "overviewMap"]
       },
-      "default": ["appbar", "navbar", "northArrow"],
+      "default": ["appbar", "navbar", "northArrow", "overviewMap"],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },
@@ -750,9 +750,9 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["overview-map", "basemap-panel", "layers-panel", "details-panel", "geolocator"]
+        "enum": ["basemap-panel", "layers-panel", "details-panel", "geolocator"]
       },
-      "default": ["overview-map", "basemap-panel", "layers-panel", "details-panel", "geolocator"],
+      "default": ["basemap-panel", "layers-panel", "details-panel", "geolocator"],
       "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
       "minItems": 0
     },

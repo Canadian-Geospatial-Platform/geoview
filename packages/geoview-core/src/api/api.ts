@@ -1,5 +1,3 @@
-import { Map } from 'leaflet';
-
 import { Event, EVENT_NAMES } from './events/event';
 
 import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';
@@ -12,7 +10,7 @@ import { DateMgt } from '../core/utils/date-mgt';
 
 import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
-import { generateId, addUiComponent, extendLeafletFeatures } from '../core/utils/utilities';
+import { generateId, addUiComponent } from '../core/utils/utilities';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -72,9 +70,6 @@ export class API {
     this.plugin = new Plugin();
     this.geoUtilities = new GeoUtilities();
     this.dateUtilities = new DateMgt();
-
-    // call the function that extends leaflet features
-    extendLeafletFeatures();
   }
 
   /**
@@ -123,16 +118,5 @@ export class API {
    */
   map = (id: string): MapViewer => {
     return this.maps[id];
-  };
-
-  /**
-   * Get the instance of a map by a leaflet instance to access API functions
-   *
-   * @param {Map} map the leaflet map instance
-   *
-   * @returns {MapViewer | undefined} the map instance
-   */
-  mapInstance = (map: Map): MapViewer | undefined => {
-    return this.maps[map.id];
   };
 }

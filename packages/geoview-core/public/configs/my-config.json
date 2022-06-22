@@ -3,7 +3,7 @@
     "interaction": "static",
     "initialView": {
       "zoom": 4,
-      "center": [50, -110]
+      "center": [-100, 60]
     },
     "projection": 3978,
     "basemapOptions": {

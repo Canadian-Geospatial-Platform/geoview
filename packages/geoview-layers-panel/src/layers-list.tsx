@@ -32,13 +32,13 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { mapId, layers, language } = props;
 
   const { cgpv } = w;
-  const { ui, react, api, leaflet: L } = cgpv;
+  const { ui, react, api } = cgpv;
   const { useState, useEffect } = react;
 
   const [selectedLayer, setSelectedLayer] = useState<string>('');
   const [layerLegend, setLayerLegend] = useState<{ [id: string]: TypeLegend }>({});
-  const [layerBounds, setLayerBounds] = useState<Record<string, L.LatLngBounds>>({});
-  const [layerBbox, setLayerBbox] = useState(L.polygon([]));
+  const [layerBounds, setLayerBounds] = useState<Record<string, number[]>>({});
+  const [layerBbox, setLayerBbox] = useState([]);
   const [layerOpacity, setLayerOpacity] = useState<Record<string, number>>({});
   const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({});
   const [subLayerVisibility, setSubLayerVisibility] = useState<TypeSubLayerVisibility>({});
@@ -160,7 +160,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     setLayerLegend((state) => ({ ...defaultLegends, ...state }));
     setLayerLegendAll();
 
-    const defaultBounds = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: L.latLngBounds([]) }), {});
+    const defaultBounds = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
     setLayerBounds((state) => ({ ...defaultBounds, ...state }));
     setLayerBoundsAll();
 
@@ -173,7 +173,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     const defaultSubVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: curr.entries }), {});
     setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layers, L]);
+  }, [layers]);
 
   const classes = useStyles();
 
@@ -198,11 +198,11 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
    *
-   * @param bounds layer bounds
-   * @param segment layer bounds
+   * @param {Extent} bounds layer bounds
+   * @param {number} segment layer bounds
    * @returns {L.Polygon} Polygon from bounds
    */
-  const polygonFromBounds = (bounds: L.LatLngBounds, segments = 100): L.Polygon => {
+  const polygonFromBounds = (bounds: Extent, segments = 100): L.Polygon => {
     const width = bounds.getEast() - bounds.getWest();
     const latlngs = [];
     latlngs.push(bounds.getSouthWest());

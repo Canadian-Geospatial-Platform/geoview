@@ -1,57 +1,57 @@
-import L from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
 
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event';
 
-/** Valid events that can create LatLngPayload */
+/** Valid events that can create LngLatPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, EVENT_NAMES.MAP.EVENT_MAP_MOVE_END];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a LatLngPayload
+ * Type Gard function that redefines a PayloadBaseClass as a LngLatPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
  */
-export const payloadIsALatLng = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is LatLngPayload => {
+export const payloadIsALngLat = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is LngLatPayload => {
   return validEvents.includes(verifyIfPayload.event);
 };
 
 /**
- * Class definition for LatLngPayload
+ * Class definition for LngLatPayload
  *
  * @exports
- * @class LatLngPayload
+ * @class LngLatPayload
  */
-export class LatLngPayload extends PayloadBaseClass {
-  latLng: L.LatLng;
+export class LngLatPayload extends PayloadBaseClass {
+  lnglat: Coordinate;
 
   /**
    * Constructor for the class
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.LatLng} latLng the lat long values carried by the payload
+   * @param {Coordinate} lnglat the long lat values carried by the payload
    */
-  constructor(event: EventStringId, handlerName: string | null, latLng: L.LatLng) {
-    if (!validEvents.includes(event)) throw new Error(`LatLngPayload can't be instanciated for event of type ${event}`);
+  constructor(event: EventStringId, handlerName: string | null, lnglat: Coordinate) {
+    if (!validEvents.includes(event)) throw new Error(`LngLatPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.latLng = latLng;
+    this.lnglat = lnglat;
   }
 }
 
 /**
- * Helper function used to instanciate a LatLngPayload object. This function
- * avoids the "new LatLngPayload" syntax.
+ * Helper function used to instanciate a LngLatPayload object. This function
+ * avoids the "new LngLatPayload" syntax.
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {L.LatLng} latLng the lat long values carried by the payload
+ * @param {Coordinate} lnglat the long lat values carried by the payload
  *
- * @returns {LatLngPayload} the LatLngPayload object created
+ * @returns {LngLatPayload} the LngLatPayload object created
  */
-export const latLngPayload = (event: EventStringId, handlerName: string | null, latLng: L.LatLng): LatLngPayload => {
-  return new LatLngPayload(event, handlerName, latLng);
+export const lngLatPayload = (event: EventStringId, handlerName: string | null, lnglat: Coordinate): LngLatPayload => {
+  return new LngLatPayload(event, handlerName, lnglat);
 };

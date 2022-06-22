@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-import L from 'leaflet';
-
-import { mapService as esriMapService, MapService } from 'esri-leaflet';
+import VectorLayer from 'ol/layer/Vector';
+import { Vector as VectorSource } from 'ol/source';
+import { GeoJSON as GeoJSONFormat } from 'ol/format';
+import { Extent } from 'ol/extent';
+import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
+import { asArray, asString } from 'ol/color';
+import { all } from 'ol/loadingstrategy';
 
 import {
   AbstractWebLayersClass,
@@ -13,8 +17,52 @@ import {
   TypeJsonArray,
   TypeBaseWebLayersConfig,
 } from '../../../../core/types/cgpv-types';
+import { setAlphaColor } from '../../../../core/utils/utilities';
 
 import { api } from '../../../../app';
+
+// constant to define default style if not set by renderer
+// TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
+const defaultCircleMarkerStyle = new Style({
+  image: new StyleCircle({
+    radius: 5,
+    stroke: new Stroke({
+      color: asString(setAlphaColor(asArray('#333'), 1)),
+      width: 1,
+    }),
+    fill: new Fill({
+      color: asString(setAlphaColor(asArray('#FFB27F'), 0.8)),
+    }),
+  }),
+});
+
+const defaultLineStringStyle = new Style({
+  stroke: new Stroke({
+    color: asString(setAlphaColor(asArray('#000000'), 1)),
+    width: 2,
+  }),
+});
+
+const defaultLinePolygonStyle = new Style({
+  stroke: new Stroke({
+    // 1 is for opacity
+    color: asString(setAlphaColor(asArray('#000000'), 1)),
+    width: 2,
+  }),
+  fill: new Fill({
+    color: asString(setAlphaColor(asArray('#000000'), 0.5)),
+  }),
+});
+
+const defaultSelectStyle = new Style({
+  stroke: new Stroke({
+    color: asString(setAlphaColor(asArray('#0000FF'), 1)),
+    width: 3,
+  }),
+  fill: new Fill({
+    color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
+  }),
+});
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeOgcFeatureLayer
@@ -49,11 +97,8 @@ export const webLayerIsOgcFeature = (verifyIfWebLayer: AbstractWebLayersClass): 
  * @class OgcFeature
  */
 export class OgcFeature extends AbstractWebLayersClass {
-  // layer from leaflet
-  layer: L.GeoJSON | null = null;
-
-  // mapService property
-  mapService: MapService;
+  // layer
+  layer!: VectorLayer<VectorSource>;
 
   // private varibale holding wms capabilities
   #capabilities: TypeJsonObject = {};
@@ -71,10 +116,6 @@ export class OgcFeature extends AbstractWebLayersClass {
     super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
 
     this.entries = layerConfig.layerEntries.map((item) => item.id);
-
-    this.mapService = esriMapService({
-      url: api.geoUtilities.getMapServerUrl(this.url, true),
-    });
   }
 
   /**
@@ -82,9 +123,9 @@ export class OgcFeature extends AbstractWebLayersClass {
    *
    * @param {TypeOgcFeatureLayer} layer the layer configuration
    *
-   * @return {Promise<L.GeoJSON | null>} layers to add to the map
+   * @return {Promise<VectorLayer<VectorSource> | null>} layers to add to the map
    */
-  async add(layer: TypeOgcFeatureLayer): Promise<L.GeoJSON | null> {
+  async add(layer: TypeOgcFeatureLayer): Promise<VectorLayer<VectorSource> | null> {
     const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
 
     const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
@@ -96,66 +137,42 @@ export class OgcFeature extends AbstractWebLayersClass {
     const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.title as string);
     if (layerName) this.name = layerName;
 
-    const getResponse = axios.get<L.GeoJSON | string>(featureUrl);
+    const style: Record<string, Style> = {
+      Polygon: defaultLinePolygonStyle,
+      LineString: defaultLineStringStyle,
+      Point: defaultCircleMarkerStyle,
+    };
 
-    const geo = new Promise<L.GeoJSON | null>((resolve) => {
-      getResponse
-        .then((result) => {
-          const geojson = result.data;
+    const getResponse = await axios.get<VectorLayer<VectorSource> | string>(featureUrl);
 
-          if (geojson && geojson !== '{}') {
-            const featureLayer = L.geoJSON(
-              geojson as GeoJSON.GeoJsonObject,
-              {
-                pointToLayer: (feature, latlng): L.Layer | undefined => {
-                  if (feature.geometry.type === 'Point') {
-                    return L.circleMarker(latlng);
-                  }
-
-                  return undefined;
-
-                  // if need to use specific style for point
-                  // return L.circleMarker(latlng, {
-                  //  ...geojsonMarkerOptions,
-                  //  id: lId,
-                  // });
-                },
-                style: () => {
-                  return {
-                    stroke: true,
-                    color: '#333',
-                    fillColor: '#0094FF',
-                    fillOpacity: 0.8,
-                  };
-                },
-              } as L.GeoJSONOptions
-            );
-
-            resolve(featureLayer);
-          } else {
-            resolve(null);
+    const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
+      const vectorSource = new VectorSource({
+        loader: (extent, resolution, projection, success, failure) => {
+          // TODO check for failure of getResponse then call failure
+          const features = new GeoJSONFormat().readFeatures(getResponse.data, {
+            extent,
+            featureProjection: projection,
+          });
+          if (features.length > 0) {
+            vectorSource.addFeatures(features);
           }
-        })
-        .catch((error) => {
-          if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            // console.log(error.response.data);
-            // console.log(error.response.status);
-            // console.log(error.response.headers);
-          } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            // console.log(error.request);
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            // console.log("Error", error.message);
-          }
-          // console.log(error.config);
-          resolve(null);
-        });
+          if (success) success(features);
+        },
+        strategy: all,
+      });
+
+      const ogcFeatureLayer = new VectorLayer({
+        source: vectorSource,
+        style: (feature) => {
+          const geometryType = feature.getGeometry()?.getType();
+
+          return style[geometryType] ? style[geometryType] : defaultSelectStyle;
+        },
+      });
+
+      resolve(ogcFeatureLayer);
     });
+
     return geo;
   }
 
@@ -219,17 +236,13 @@ export class OgcFeature extends AbstractWebLayersClass {
    * @param {number} opacity layer opacity
    */
   setOpacity = (opacity: number) => {
-    type SetOpacityLayers = L.GridLayer | L.ImageOverlay | L.SVGOverlay | L.VideoOverlay | L.Tooltip | L.Marker;
-    this.layer!.getLayers().forEach((layer) => {
-      if ((layer as SetOpacityLayers).setOpacity) (layer as SetOpacityLayers).setOpacity(opacity);
-      else if ((layer as L.GeoJSON).setStyle) (layer as L.GeoJSON).setStyle({ opacity, fillOpacity: opacity * 0.8 });
-    });
+    this.layer?.setOpacity(opacity);
   };
 
   /**
-   * Get bounds through Leaflet built-in functions
+   * Get bounds
    *
-   * @returns {L.LatLngBounds} layer bounds
+   * @returns {Extent} layer bounds
    */
-  getBounds = (): L.LatLngBounds => this.layer!.getBounds();
+  getBounds = (): Extent => this.layer?.getSource()?.getExtent() || [];
 }

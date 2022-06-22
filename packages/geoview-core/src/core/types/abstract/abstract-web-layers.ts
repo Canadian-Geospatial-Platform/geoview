@@ -1,4 +1,6 @@
-import { Layer, TileLayer } from 'leaflet';
+import { Extent } from 'ol/extent';
+import { ImageArcGISRest, ImageWMS, Vector as VectorSource, XYZ } from 'ol/source';
+import { Vector as VectorLayer, VectorImage, Image as ImageLayer, Tile as TileLayer } from 'ol/layer';
 
 import { TypeWebLayers, TypeBaseWebLayersConfig, TypeLayersInWebLayer, DEFAULT_LAYER_NAMES } from '../cgpv-types';
 
@@ -23,7 +25,12 @@ export abstract class AbstractWebLayersClass {
   protected mapId: string;
 
   // The actual layer
-  abstract layer: Layer | TileLayer | null;
+  abstract layer:
+    | ImageLayer<ImageArcGISRest>
+    | ImageLayer<ImageWMS>
+    | VectorImage<VectorSource>
+    | VectorLayer<VectorSource>
+    | TileLayer<XYZ>;
 
   layers: TypeLayersInWebLayer = {};
 
@@ -32,7 +39,7 @@ export abstract class AbstractWebLayersClass {
 
   setEntries?(entries: number[]): void;
 
-  abstract getBounds(): L.LatLngBounds | Promise<L.LatLngBounds>;
+  abstract getBounds(): Extent | Promise<Extent>;
 
   abstract setOpacity(opacity: number): void;
 

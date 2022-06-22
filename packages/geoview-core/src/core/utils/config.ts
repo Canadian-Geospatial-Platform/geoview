@@ -1,5 +1,6 @@
 /* eslint-disable no-console, no-underscore-dangle */
-import { LatLngTuple } from 'leaflet';
+
+import { Coordinate } from 'ol/coordinate';
 
 import axios, { AxiosResponse } from 'axios';
 
@@ -62,7 +63,7 @@ export class Config {
       interaction: 'dynamic',
       initialView: {
         zoom: 4,
-        center: [60, -100],
+        center: [-100, 60],
       },
       projection: 3978,
       basemapOptions: {
@@ -77,8 +78,8 @@ export class Config {
       },
     },
     theme: 'dark',
-    components: ['appbar', 'navbar', 'northArrow'],
-    corePackages: ['overview-map'],
+    components: ['appbar', 'navbar', 'northArrow', 'overviewMap'],
+    corePackages: [],
     languages: ['en-CA', 'fr-CA'],
     extraOptions: {},
   };
@@ -88,13 +89,13 @@ export class Config {
 
   // valid basemap ids
   private _basemapId: Record<number, string[]> = {
-    3857: ['transport'],
-    3978: ['transport', 'simple', 'shaded'],
+    3857: ['transport', 'simple', 'osm', 'shaded', 'nogeom'],
+    3978: ['transport', 'simple', 'osm', 'shaded', 'nogeom'],
   };
 
   // valid shaded basemap values for each projection
   private _basemapShaded: Record<number, boolean[]> = {
-    3857: [false],
+    3857: [true, false],
     3978: [true, false],
   };
 
@@ -374,7 +375,7 @@ export class Config {
     let configObjStr = this.mapElement.getAttribute('data-config');
 
     if (configObjStr && configObjStr !== '') {
-      configObjStr = configObjStr.replace(/'/g, '"').replace(/(?<=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
+      configObjStr = configObjStr.replace(/'/g, '"').replace(/(?:[A-Za-zàâçéèêëîïôûùüÿñæœ_.])"(?=[A-Za-zàâçéèêëîïôûùüÿñæœ_.])/g, "\\\\'");
 
       if (!isJsonString(configObjStr)) {
         console.log(`- map: ${this.id} - Invalid JSON configuration object, using default -`);
@@ -605,7 +606,7 @@ export class Config {
 
     if (objStr && objStr.length) {
       // get the text in between { }
-      const objStrPropRegex = /(?<=[{_.])(.*?)(?=[}_.])/g;
+      const objStrPropRegex = /(?:[{_.])(.*?)(?=[}_.])/g;
 
       const objStrProps = objStr.match(objStrPropRegex);
 
@@ -705,7 +706,7 @@ export class Config {
 
     if (JSON.stringify(inConfig.map.initialView.center) !== JSON.stringify(validConfig.map.initialView.center)) {
       console.log(
-        `- map: ${this.id} - Invalid center ${inConfig.map.initialView.center} replaced by ${validConfig.map.initialView.center} -`
+        `- map: ${this.id} - Invalid center ${inConfig.map.initialView.center} replaced by ${validConfig.map.initialView.center}`
       );
     }
 
@@ -736,7 +737,7 @@ export class Config {
   private validateBasemap(projection: number, basemapOptions: TypeBasemapOptions): TypeBasemapOptions {
     const id = this._basemapId[projection].includes(basemapOptions.id)
       ? basemapOptions.id
-      : (this._basemapId[projection][0] as 'shaded' | 'simple' | 'transport');
+      : (this._basemapId[projection][0] as 'nogeom' | 'osm' | 'simple' | 'transport');
 
     const shaded = this._basemapShaded[projection].includes(basemapOptions.shaded)
       ? basemapOptions.shaded
@@ -751,23 +752,23 @@ export class Config {
   /**
    * Validate the center
    * @param {number} projection valid projection
-   * @param {LatLngTuple} center center of the map
-   * @returns {LatLngTuple} valid center of the map
+   * @param {Coordinate} center center of the map
+   * @returns {Coordinate} valid center of the map
    */
-  private validateCenter(projection: number, center: LatLngTuple): LatLngTuple {
-    const xVal = Number(center[1]);
-    const yVal = Number(center[0]);
+  private validateCenter(projection: number, center: Coordinate): Coordinate {
+    const xVal = Number(center[0]);
+    const yVal = Number(center[1]);
 
     const x =
       !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
         ? xVal
-        : this._config.map.initialView.center[1];
+        : this._config.map.initialView.center[0];
     const y =
       !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
         ? yVal
-        : this._config.map.initialView.center[0];
+        : this._config.map.initialView.center[1];
 
-    return [y, x];
+    return [x, y];
   }
 
   /**

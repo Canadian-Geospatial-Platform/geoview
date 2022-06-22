@@ -1,8 +1,9 @@
 import axios from 'axios';
-import WMSCapabilities from 'wms-capabilities';
+
+import { WMSCapabilities } from 'ol/format';
 
 import { Cast, TypeCSSStyleDeclaration, TypeJsonObject } from '../../core/types/cgpv-types';
-import { getXMLHttpRequest, xmlToJson } from '../../core/utils/utilities';
+import { xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
@@ -31,11 +32,13 @@ export class GeoUtilities {
    * @returns {Promise<TypeJsonObject>} a json promise containing the result of the query
    */
   getWMSServiceMetadata = async (url: string, layers: string): Promise<TypeJsonObject> => {
-    // query the WMS server
-    const response = await getXMLHttpRequest(`${url}?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0&layer=${layers}`);
+    const parser = new WMSCapabilities();
 
-    // parse the xml string and convert to json
-    const result = new WMSCapabilities(response).toJSON();
+    const capUrl = `${url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${layers}`;
+
+    const response = await fetch(capUrl);
+
+    const result = parser.read(await response.text());
 
     return result;
   };

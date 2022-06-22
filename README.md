@@ -290,6 +290,10 @@ Full example:
 </html>
 ```
 
+## Typedoc Documentation for GeoView
+
+[click here](https://yass0016.github.io/GeoView/docs/) to view generated typedoc for the GeoView core.
+
 ## Contributing to the project
 
 see our [wiki](https://github.com/Canadian-Geospatial-Platform/GeoView/wiki/Contributing-Guideline)

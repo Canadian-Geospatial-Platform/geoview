@@ -1,4 +1,4 @@
-import L from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
 
 import { PayloadBaseClass } from './payload-base-class';
 
@@ -29,7 +29,7 @@ export const payloadIsAMarkerDefinition = (verifyIfPayload: PayloadBaseClass): v
  */
 export class MarkerDefinitionPayload extends PayloadBaseClass {
   // the marker coordinate
-  latlng: L.LatLng;
+  lnglat: Coordinate;
 
   // the marker symbology
   symbology: TypeJsonObject;
@@ -39,13 +39,13 @@ export class MarkerDefinitionPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {L.LatLng} latlng the marker coordinate
+   * @param {Coordinate} lnglat the marker coordinate
    * @param {TypeJsonObject} symbology the marker symbology
    */
-  constructor(event: EventStringId, handlerName: string | null, latlng: L.LatLng, symbology: TypeJsonObject) {
+  constructor(event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology: TypeJsonObject) {
     if (!validEvents.includes(event)) throw new Error(`MarkerIconPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.latlng = latlng;
+    this.lnglat = lnglat;
     this.symbology = symbology;
   }
 }
@@ -56,7 +56,7 @@ export class MarkerDefinitionPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {L.LatLng} latlng the marker coordinate
+ * @param {Coordinate} lnglat the marker coordinate
  * @param {TypeJsonObject} symbology the marker symbology
  *
  * @returns {MarkerDefinitionPayload} the MarkerDefinitionPayload object created
@@ -64,8 +64,8 @@ export class MarkerDefinitionPayload extends PayloadBaseClass {
 export const markerDefinitionPayload = (
   event: EventStringId,
   handlerName: string | null,
-  latlng: L.LatLng,
+  lnglat: Coordinate,
   symbology: TypeJsonObject
 ): MarkerDefinitionPayload => {
-  return new MarkerDefinitionPayload(event, handlerName, latlng, symbology);
+  return new MarkerDefinitionPayload(event, handlerName, lnglat, symbology);
 };

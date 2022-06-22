@@ -1,7 +1,25 @@
 /* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';
 
-import { Cast, TypeUpdateScaleEvent, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+import { api } from '../../app';
+import { EVENT_NAMES } from '../../api/events/event';
+
+import { snackbarMessagePayload, Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+
+/**
+ * Display a message in the snackbar
+ *
+ * @param {string} mapId the map to show the message for
+ * @param {string} message the message string
+ */
+export function showMessage(mapId: string, message: string) {
+  api.event.emit(
+    snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+      type: 'string',
+      value: message,
+    })
+  );
+}
 
 /**
  * Generate a unique id if an id was not provided
@@ -12,6 +30,19 @@ export function generateId(id?: string | null): string {
   return id !== null && id !== undefined && id.length > 0
     ? id
     : (Date.now().toString(36) + Math.random().toString(36).substr(2, 5)).toUpperCase();
+}
+
+/**
+ * Set alpha for a color
+ * @param {number[]} colorArray the array of color numbers
+ * @param {number} alpha the new alpha
+ *
+ * @returns {number[]} the color with the alpha set
+ */
+export function setAlphaColor(colorArray: number[], alpha: number): number[] {
+  const color = colorArray;
+  color[3] = alpha;
+  return color;
 }
 
 /**
@@ -117,22 +148,4 @@ export function getXMLHttpRequest(url: string): Promise<string> {
  */
 export function addUiComponent(targetDivId: string, component: React.ReactElement) {
   ReactDOM.render(component, document.getElementById(targetDivId));
-}
-
-/**
- * Add any functions that will extend leaflet features
- */
-export function extendLeafletFeatures() {
-  // create a custom scale update event listener "scaleupdate"
-  L.Control.Scale.include({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    _originalUpdateScale: (L.Control.Scale.prototype as any)._updateScale,
-    _updateScale(scale: { style: { width: number } }, text: string, ratio: number) {
-      this._originalUpdateScale.call(this, scale, text, ratio);
-      this._map.fire('scaleupdate', {
-        pixels: scale.style.width,
-        distance: text,
-      } as TypeUpdateScaleEvent);
-    },
-  });
 }

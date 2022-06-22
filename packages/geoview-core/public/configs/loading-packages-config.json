@@ -3,7 +3,7 @@
     "interaction": "dynamic",
     "initialView": {
       "zoom": 4,
-      "center": [60, -100]
+      "center": [-100, 60]
     },
     "projection": 3978,
     "basemapOptions": {
@@ -148,8 +148,8 @@
       "fr": "# Un exemple de démarque"
     }
   },
-  "components": ["appbar", "navbar", "northArrow"],
-  "corePackages": ["overview-map", "basemap-panel", "details-panel", "layers-panel"],
+  "components": ["appbar", "navbar", "northArrow", "overviewMap"],
+  "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "languages": ["en-CA"]
 }

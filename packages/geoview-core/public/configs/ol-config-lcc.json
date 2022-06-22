@@ -1,0 +1,81 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "initialView": {
+      "zoom": 4,
+      "center": [-106, 60]
+    },
+    "projection": 3978,
+    "basemapOptions": {
+      "id": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "layers": [
+      {
+        "id": "esriDynamicLYR2",
+        "name": {
+          "en": "Senior care facilities on April 2020",
+          "fr": "Senior care facilities on April 2020"
+        },
+        "url": {
+          "en": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer",
+          "fr": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer"
+        },
+        "layerType": "esriDynamic",
+        "layerEntries": [
+          {
+            "index": 1
+          }
+        ]
+      },
+      {
+        "id": "geojsonLYR1",
+        "name": {
+          "en": "GeoJSON Sample",
+          "fr": "Exemple GeoJSON"
+        },
+        "url": {
+          "en": "./geojson/historical_flood_0.geojson",
+          "fr": "./geojson/historical_flood_0.geojson"
+        },
+        "renderer": {
+          "radius": 5,
+          "fillColor": "#ff7800",
+          "color": "#000",
+          "weight": 1,
+          "opacity": 1,
+          "fillOpacity": 0.8
+        },
+        "layerType": "geojson"
+      },
+      {
+        "id": "geojsonLYR1",
+        "name": {
+          "en": "GeoJSON Sample",
+          "fr": "Exemple GeoJSON"
+        },
+        "url": {
+          "en": "./geojson/polygons.json",
+          "fr": "./geojson/polygons.json"
+        },
+        "renderer": {
+          "fillColor": "#ff7800",
+          "color": "#000",
+          "weight": 1,
+          "opacity": 1,
+          "fillOpacity": 0.8
+        },
+        "layerType": "geojson"
+      }
+    ],
+    "controls": {
+      "selectBox": true,
+      "boxZoom": true
+    }
+  },
+  "corePackages": ["basemap-panel", "layers-panel"],
+  "components": ["appbar", "navbar", "overviewMap", "northArrow"],
+  "theme": "dark",
+  "languages": ["en-CA", "fr-CA"]
+}

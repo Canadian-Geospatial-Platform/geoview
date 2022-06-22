@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect, useRef, useContext } from 'react';
 
-import { LatLng } from 'leaflet';
+import { Coordinate } from 'ol/coordinate';
+import { toLonLat } from 'ol/proj';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -9,9 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { debounce } from 'lodash';
 
 import { api } from '../../../app';
+import { MapContext } from '../../app-start';
+
 import { EVENT_NAMES } from '../../../api/events/event';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
-import { MapContext } from '../../app-start';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -21,6 +23,8 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     alignItems: 'center',
+    border: 'none',
+    backgroundColor: 'transparent',
   },
   mousePositionText: {
     fontSize: theme.typography.subtitle2.fontSize,
@@ -66,7 +70,9 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   const classes = useStyles();
 
-  const [position, setPosition] = useState({ lat: '--', lng: '--' });
+  const [position, setPosition] = useState({ lng: '--', lat: '--' });
+
+  const [positionMode, setPositionMode] = useState<'simple' | 'advanced'>('simple');
 
   // keep track of crosshair status to know when update coord from keyboard navigation
   const isCrosshairsActive = useRef(false);
@@ -77,38 +83,83 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   /**
    * Format the coordinates output
-   * @param {LatLng} latlng the Lat and Lng value to format
+   * @param {Coordinate} lnglat the Lng and Lat value to format
    */
-  function formatCoord(latlng: LatLng) {
-    const lat = coordFormnat(latlng.lat, latlng.lat > 0 ? t('mapctrl.mouseposition.north') : t('mapctrl.mouseposition.south'));
-    const lng = coordFormnat(latlng.lng, latlng.lng < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east'));
-    setPosition({ lat, lng });
+  function formatCoord(lnglat: Coordinate) {
+    const lng = coordFormnat(lnglat[0], lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east'));
+    const lat = coordFormnat(lnglat[1], lnglat[1] > 0 ? t('mapctrl.mouseposition.north') : t('mapctrl.mouseposition.south'));
+    setPosition({ lng, lat });
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMouseMove = useCallback(
     debounce((e) => {
-      formatCoord(e.latlng);
-    }, 250),
-    [t]
+      const coordinate = toLonLat(e.coordinate, api.projection.projections[api.map(mapId).currentProjection]);
+
+      if (positionMode === 'simple') {
+        setPosition({
+          lng: coordinate[0].toFixed(2),
+          lat: coordinate[1].toFixed(2),
+        });
+      } else {
+        formatCoord(coordinate);
+      }
+    }, 10),
+    [t, positionMode]
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMoveEnd = useCallback(
     debounce((e) => {
+      const coordinate = toLonLat(e.map.getView().getCenter(), api.projection.projections[api.map(mapId).currentProjection]);
+
       if (isCrosshairsActive.current) {
-        formatCoord(e.target.getCenter());
+        if (positionMode === 'simple') {
+          setPosition({
+            lng: coordinate[0].toFixed(2),
+            lat: coordinate[1].toFixed(2),
+          });
+        } else {
+          formatCoord(coordinate);
+        }
       }
-    }, 500),
-    [t]
+    }, 10),
+    [t, positionMode]
   );
+
+  /**
+   * Switch position mode
+   */
+  const switchPositionMode = () => {
+    const { map } = api.map(mapId);
+
+    const coordinate = toLonLat(map.getView().getCenter()!, api.projection.projections[api.map(mapId).currentProjection]);
+
+    if (positionMode === 'simple') {
+      setPositionMode('advanced');
+      formatCoord(coordinate);
+    } else {
+      setPositionMode('simple');
+      setPosition({
+        lng: coordinate[0].toFixed(2),
+        lat: coordinate[1].toFixed(2),
+      });
+    }
+  };
 
   useEffect(() => {
     const { map } = api.map(mapId);
 
-    map.addEventListener('mousemove', onMouseMove);
-    map.addEventListener('moveend', onMoveEnd);
+    map.on('pointermove', onMouseMove);
+    map.on('moveend', onMoveEnd);
 
+    return () => {
+      map.un('pointermove', onMouseMove);
+      map.un('moveend', onMoveEnd);
+    };
+  }, [mapId, onMouseMove, onMoveEnd, positionMode]);
+
+  useEffect(() => {
     // on map crosshair enable\disable, set variable for WCAG mouse position
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
@@ -124,17 +175,15 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
-      map.removeEventListener('mousemove');
-      map.removeEventListener('moveend');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className={classes.mousePositionContainer}>
+    <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
       <span className={classes.mousePositionText}>
-        {position.lat} | {position.lng}
+        {position.lng} | {position.lat}
       </span>
-    </div>
+    </button>
   );
 }
