@@ -14,6 +14,7 @@ import Map from '@mui/icons-material/Map';
 import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
 import Apps from '@mui/icons-material/Apps';
 import Group from '@mui/icons-material/Group';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 
 export {
   Layers as LayersIcon,
@@ -32,4 +33,5 @@ export {
   OpenInBrowser as OpenInBrowserIcon,
   Apps as AppsIcon,
   Group as GroupIcon,
+  ArrowBack as ArrowBackIcon,
 };

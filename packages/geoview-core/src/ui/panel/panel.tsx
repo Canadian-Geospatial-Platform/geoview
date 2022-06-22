@@ -19,15 +19,17 @@ import { MapContext } from '../../core/app-start';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { IconButton, CloseIcon, Divider } from '..';
+import { IconButton, CloseIcon } from '..';
 import { payloadBaseClass } from '../../api/events/payloads/payload-base-class';
 import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '../../api/events/payloads/panel-payload';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
 
 const useStyles = makeStyles((theme) => ({
   panelContainer: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
     minWidth: 300,
-    width: 400,
+    width: 350,
     height: '100%',
     borderRadius: 0,
     flexDirection: 'column',
@@ -36,34 +38,40 @@ const useStyles = makeStyles((theme) => ({
       minWidth: '100%',
     },
   },
+  panelHeader: {
+    backgroundColor: theme.palette.primary.dark,
+    borderBottomColor: theme.panel.border,
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    color: theme.palette.primary.light,
+    height: 60,
+    alignItems: 'center',
+  },
+  panelHeaderTitle: {
+    fontSize: 16,
+    textTransform: 'uppercase',
+  },
+  panelHeaderAction: {
+    alignSelf: 'center',
+    '& .MuiIconButton-root': {
+      color: theme.palette.primary.light,
+      height: 44,
+      width: 44,
+      marginRight: 8,
+      transition: 'all 0.3s ease-in-out',
+      '&:last-child': {
+        marginRight: 0,
+      },
+      '&:hover': {
+        backgroundColor: theme.panel.hoverBg,
+      },
+    },
+  },
   panelContentContainer: {
     flexBasis: 'auto',
     overflow: 'hidden',
     overflowY: 'auto',
-    paddingBottom: '10px !important',
     boxSizing: 'border-box',
-  },
-  avatar: {
-    color: theme.palette.primary.contrastText,
-    height: 50,
-    padding: 0,
-    paddingLeft: 10,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  actionButton: {
-    margin: 0,
-  },
-  buttonIcon: {
-    width: '1em',
-    height: '1em',
-    display: 'inherit',
-    fontSize: theme.typography.button?.fontSize,
-    alignItems: 'inherit',
-    justifyContent: 'inherit',
-    transition: 'fill 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-    flexShrink: 0,
-    userSelect: 'none',
   },
 }));
 
@@ -200,17 +208,17 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                 id={actionButton.id}
                 aria-label={actionButton.title}
                 onClick={Cast<React.MouseEventHandler>(actionButton.action)}
-                size="large"
+                size="small"
               >
-                {typeof actionButton.icon === 'string' ? (
+                {typeof actionButton.children === 'string' ? (
                   <HtmlToReact
                     style={{
                       display: 'flex',
                     }}
-                    htmlContent={actionButton.icon}
+                    htmlContent={actionButton.children}
                   />
                 ) : (
-                  actionButton.icon
+                  actionButton.children
                 )}
               </IconButton>,
             ]);
@@ -264,7 +272,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     >
       <Card
         ref={panelRef as React.MutableRefObject<null>}
-        className={`${classes.panelContainer}`}
+        className={classes.panelContainer}
         style={{
           display: panelStatus ? 'flex' : 'none',
         }}
@@ -276,11 +284,16 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         {...{ 'data-id': button.id }}
       >
         <CardHeader
-          className={classes.avatar}
-          classes={{ action: classes.actionButton }}
+          classes={{
+            root: classes.panelHeader,
+            title: classes.panelHeaderTitle,
+            action: classes.panelHeaderAction,
+          }}
           ref={panelHeader}
-          avatar={typeof panel.icon === 'string' ? <HtmlToReact className={classes.buttonIcon} htmlContent={panel.icon} /> : panel.icon}
           title={t(panel.title)}
+          titleTypographyProps={{
+            component: 'h2',
+          }}
           action={
             panelStatus ? (
               <>
@@ -288,11 +301,11 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                 <IconButton
                   tooltip={t('general.close')}
                   tooltipPlacement="right"
-                  className="cgpv-panel-close"
                   aria-label={t('general.close')}
-                  size="large"
+                  size="small"
                   onClick={panel.close}
                   iconRef={closeBtnRef}
+                  className="cgpv-panel-close"
                 >
                   <CloseIcon />
                 </IconButton>
@@ -302,7 +315,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             )
           }
         />
-        <Divider />
+
         <CardContent className={classes.panelContentContainer}>
           {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
         </CardContent>
