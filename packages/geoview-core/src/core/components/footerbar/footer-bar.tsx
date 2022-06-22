@@ -20,7 +20,7 @@ export const useStyles = makeStyles(() => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    height: '20px',
+    // height: '20px',
     backgroundColor: '#0000008f',
     backdropFilter: 'blur(5px)',
     pointerEvents: 'all',

@@ -197,7 +197,18 @@ export class WFS extends AbstractWebLayersClass {
     const getResponse = await axios.get<VectorLayer<VectorSource> | string>(this.url, { params });
 
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
+      let attribution = '';
+
+      if (
+        this.#capabilities['ows:ServiceIdentification'] &&
+        this.#capabilities['ows:ServiceIdentification']['ows:Abstract'] &&
+        this.#capabilities['ows:ServiceIdentification']['ows:Abstract']['#text']
+      ) {
+        attribution = this.#capabilities['ows:ServiceIdentification']['ows:Abstract']['#text'] as string;
+      }
+
       const vectorSource = new VectorSource({
+        attributions: [attribution],
         loader: (extent, resolution, projection, success, failure) => {
           // TODO check for failure of getResponse then call failure
           const features = new GeoJSONFormat().readFeatures(getResponse.data, {

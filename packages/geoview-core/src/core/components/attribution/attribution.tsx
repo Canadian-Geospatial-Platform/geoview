@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+
+import OLAttribution from 'ol/control/Attribution';
 
 import makeStyles from '@mui/styles/makeStyles';
+
+import { MapContext } from '../../app-start';
+import { api } from '../../../app';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -30,13 +35,46 @@ type AttributionProps = {
  * @param {AttributionProps} props attribution properties to get the attribution text
  */
 export function Attribution(props: AttributionProps): JSX.Element {
+  const [expanded, setExpanded] = useState(false);
+
   const { attribution } = props;
 
   const classes = useStyles();
 
+  const mapConfig = useContext(MapContext);
+
+  const mapId = mapConfig.id;
+
+  const expandAttribution = () => {
+    const attributionText = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+
+    const attributionList = attributionText.querySelector('li');
+
+    console.log(attributionList);
+  };
+
+  const collapseAttribution = () => {
+    const attributionText = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+  };
+
+  useEffect(() => {
+    const { map } = api.map(mapId);
+
+    const attributionText = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+
+    const attributionControl = new OLAttribution({
+      target: attributionText,
+      collapsible: false,
+    });
+
+    map.addControl(attributionControl);
+
+    console.log(document.getElementById(`${mapId}-attribution-text`).getElementsByTagName('li'));
+  }, []);
+
   return (
     <div className={classes.attributionContainer}>
-      <span className={classes.attributionText}>{attribution}</span>
+      <span id={`${mapId}-attribution-text`} className={classes.attributionText} />
     </div>
   );
 }

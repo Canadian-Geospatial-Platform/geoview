@@ -7,6 +7,7 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { ObjectEvent } from 'ol/Object';
 import { MapEvent } from 'ol';
+import { Attribution, defaults as defaultControls } from 'ol/control';
 
 import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
@@ -94,15 +95,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // emit the moveend event to the api
     api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
   }
-
-  // return (
-  //   <MapContainer>
-  //       <>
-  //         <Crosshair id={id} />
-  //         <ClickMarker />
-  //       </>
-  //   </MapContainer>
-  // );
 
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('id', id);
@@ -221,6 +213,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   return (
     <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
+      <div id={`${id}-attribution`} />
+
       {isLoaded && (
         <>
           {components !== undefined && components.indexOf('northArrow') > -1 && (

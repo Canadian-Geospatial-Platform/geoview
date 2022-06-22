@@ -146,7 +146,10 @@ export class OgcFeature extends AbstractWebLayersClass {
     const getResponse = await axios.get<VectorLayer<VectorSource> | string>(featureUrl);
 
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
+      const attribution = (this.#capabilities && this.#capabilities.description ? this.#capabilities.description : '') as string;
+
       const vectorSource = new VectorSource({
+        attributions: [attribution],
         loader: (extent, resolution, projection, success, failure) => {
           // TODO check for failure of getResponse then call failure
           const features = new GeoJSONFormat().readFeatures(getResponse.data, {

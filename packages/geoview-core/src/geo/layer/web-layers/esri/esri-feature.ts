@@ -114,7 +114,9 @@ export class EsriFeature extends AbstractWebLayersClass {
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
       data.then(async (value) => {
         if (value !== '{}') {
-          const { type } = toJsonObject(JSON.parse(value));
+          const { type, copyrightText } = toJsonObject(JSON.parse(value));
+
+          const attribution = copyrightText ? (copyrightText as string) : '';
 
           // check if the type is define as Feature Layer. If the entrie is bad, it will request the whole service
           // if the path is bad, return will be {}
@@ -126,6 +128,7 @@ export class EsriFeature extends AbstractWebLayersClass {
             const response = (await axios.get(serviceUrl)).data;
 
             const vectorSource = new VectorSource({
+              attributions: [attribution],
               loader: (extent, resolution, projection, success, failure) => {
                 if (response.error) {
                   if (failure) failure();

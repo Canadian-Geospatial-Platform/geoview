@@ -285,6 +285,7 @@ export class Basemap {
     let extent: Extent = [0, 0, 0, 0];
     let origin: number[] = [];
     let urlProj = 0;
+    let attributions = [];
 
     // should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
@@ -331,7 +332,10 @@ export class Basemap {
         extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
         if (id === 'label') {
-          this.attribution = result.copyrightText as string;
+          if (result.copyrightText) {
+            attributions.push(result.copyrightText as string);
+            this.attribution = result.copyrightText as string;
+          }
         }
 
         // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
@@ -349,6 +353,7 @@ export class Basemap {
       url: basemapLayer.url as string,
       jsonUrl: basemapLayer.jsonUrl as string,
       source: new XYZ({
+        attributions,
         projection: api.projection.projections[urlProj],
         url: basemapLayer.url as string,
         tileGrid: new TileGrid({
