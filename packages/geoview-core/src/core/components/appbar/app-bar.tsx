@@ -24,7 +24,7 @@ export const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.primary.dark,
   },
   appBarList: {
-    width: 64,
+    width: 60,
     '& li': {
       backgroundColor: 'transparent',
       color: theme.palette.primary.light,
@@ -42,7 +42,7 @@ export const useStyles = makeStyles((theme) => ({
     borderRightColor: theme.appBar.border,
     borderRightWidth: 1,
     borderRightStyle: 'solid',
-    width: 64,
+    width: 60,
   },
   appBarButton: {
     backgroundColor: theme.appBar.btnDefaultBg,
