@@ -23,6 +23,7 @@ import { MapViewer } from '../../../geo/map/map';
 
 import { TypeMapConfigProps } from '../../types/cgpv-types';
 import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
+import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
@@ -199,8 +200,25 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       id
     );
 
+    // listen to geoview-basemap-panel package change projection event
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
+      (payload) => {
+        if (payloadIsAMapViewProjection(payload)) {
+          if (payload.handlerName === id) {
+            // on map view projection change, layer source needs to be refreshed
+            // TODO: Listen to refresh from layer abstract class
+            const mapLayers = api.map(id).layer.layers;
+            Object.entries(mapLayers).forEach((layer) => layer[1].layer.getSource()?.refresh());
+          }
+        }
+      },
+      id
+    );
+
     return () => {
       api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

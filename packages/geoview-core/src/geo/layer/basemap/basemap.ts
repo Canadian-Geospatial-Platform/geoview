@@ -120,7 +120,7 @@ export class Basemap {
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=pjson',
       },
       label: {
-        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/BaseMaps_xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
+        url: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer/WMTS/tile/1.0.0/xxxx_TXT_3857/default/default028mm/{z}/{y}/{x}.jpg',
         jsonUrl: 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/xxxx_TXT_3857/MapServer?f=pjson',
       },
     },
@@ -196,10 +196,10 @@ export class Basemap {
       }
 
       if (type === 'label') {
-        if (this.basemapsList[this.projection].label?.url) {
+        if (this.basemapsList[projection].label?.url) {
           thumbnailUrls.push(
-            (this.basemapsList[this.projection].label.url as string)
-              .replace('xxxx', language === 'en-CA' ? 'CBMT' : 'CBCT')
+            (this.basemapsList[projection].label.url as string)
+              .replaceAll('xxxx', language === 'en-CA' ? 'CBMT' : 'CBCT')
               .replace('{z}', '8')
               .replace('{y}', projection === 3978 ? '285' : '91')
               .replace('{x}', projection === 3978 ? '268' : '74')
@@ -376,7 +376,7 @@ export class Basemap {
    *
    * @param {TypeBasemapOptions} basemapOptions basemap options
    */
-  createCoreBasemap = async (basemapOptions: TypeBasemapOptions): Promise<TypeBasemapProps | undefined> => {
+  createCoreBasemap = async (basemapOptions: TypeBasemapOptions, projection?: number): Promise<TypeBasemapProps | undefined> => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       const basemapLayers: TypeBasemapLayer[] = [];
@@ -389,22 +389,26 @@ export class Basemap {
       let minZoom = 0;
       let maxZoom = 17;
 
+      // check if projection is provided for the basemap creation
+      const projectionCode = projection === undefined ? this.projection : projection;
+
+      // check if basemap options are provided for the baemao creation
       const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
 
       if (coreBasemapOptions) {
         // create shaded layer
-        if (coreBasemapOptions.shaded && this.basemapsList[this.projection].shaded) {
-          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[this.projection].shaded, defaultOpacity, true);
+        if (coreBasemapOptions.shaded && this.basemapsList[projectionCode].shaded) {
+          const shadedLayer = await this.createBasemapLayer('shaded', this.basemapsList[projectionCode].shaded, defaultOpacity, true);
 
           basemapLayers.push(shadedLayer);
           basemaplayerTypes.push('shaded');
         }
 
         // create transport layer
-        if (coreBasemapOptions.id === 'transport' && this.basemapsList[this.projection].transport) {
+        if (coreBasemapOptions.id === 'transport' && this.basemapsList[projectionCode].transport) {
           const transportLayer = await this.createBasemapLayer(
             'transport',
-            this.basemapsList[this.projection].transport,
+            this.basemapsList[projectionCode].transport,
             coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
             true
           );
@@ -421,10 +425,10 @@ export class Basemap {
         }
 
         // create simple layer
-        if (coreBasemapOptions.id === 'simple' && this.basemapsList[this.projection].simple) {
+        if (coreBasemapOptions.id === 'simple' && this.basemapsList[projectionCode].simple) {
           const simpleLayer = await this.createBasemapLayer(
             'simple',
-            this.basemapsList[this.projection].simple,
+            this.basemapsList[projectionCode].simple,
             coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
             true
           );
@@ -465,11 +469,8 @@ export class Basemap {
           const labelLayer = await this.createBasemapLayer(
             'label',
             toJsonObject({
-              url: (this.basemapsList[this.projection].label.url as string)?.replaceAll(
-                'xxxx',
-                this.language === 'en-CA' ? 'CBMT' : 'CBCT'
-              ),
-              jsonUrl: (this.basemapsList[this.projection].label.jsonUrl as string)?.replaceAll(
+              url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT'),
+              jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
                 'xxxx',
                 this.language === 'en-CA' ? 'CBMT' : 'CBCT'
               ),
@@ -500,7 +501,7 @@ export class Basemap {
           altText: info[1],
           thumbnailUrl: this.getThumbnailUrl(
             basemaplayerTypes,
-            this.projection as TypeProjectionCodes,
+            projectionCode as TypeProjectionCodes,
             this.language as TypeLocalizedLanguages
           ),
           attribution: this.attribution,

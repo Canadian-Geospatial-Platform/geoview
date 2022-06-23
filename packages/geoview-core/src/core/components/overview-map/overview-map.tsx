@@ -182,7 +182,7 @@ export function OverviewMap(): JSX.Element {
             overviewMap.setCollapsed(true);
             overviewMap.setMap(null);
 
-            // wait for the view change then set the amp and open the overview
+            // wait for the view change then set the map and open the overview
             // TODO: look for better options then Timeout
             setTimeout(() => {
               overviewMap.setMap(api.map(mapId).map);
@@ -209,7 +209,6 @@ export function OverviewMap(): JSX.Element {
     const toggleButton = document.createElement('div');
 
     const overviewMapControl = new OLOverviewMap({
-      // see in overviewmap-custom.html to see the custom CSS used
       className: `ol-overviewmap ol-custom-overviewmap ${classes.overviewMap}`,
       layers: defaultBasemap?.layers.map((layer) => {
         // create a tile layer for this basemap layer
