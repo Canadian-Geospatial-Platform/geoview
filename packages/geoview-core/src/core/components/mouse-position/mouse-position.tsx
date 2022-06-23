@@ -38,11 +38,12 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     maxHeight: '15px',
+    height: '15px',
   },
   mousePositionCheckmark: {
     paddingRight: 5,
     fontSize: `20px !important`,
-    color: theme.palette.primary.dark,
+    color: theme.palette.primary.light,
   },
   mousePositionText: {
     fontSize: theme.typography.subtitle2.fontSize,

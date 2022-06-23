@@ -18,6 +18,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack';
 import Expand from '@mui/icons-material/KeyboardDoubleArrowDown';
 import Collapse from '@mui/icons-material/KeyboardDoubleArrowUp';
 import Check from '@mui/icons-material/CheckCircle';
+import ArrowUp from '@mui/icons-material/ArrowUpward';
 
 export {
   Layers as LayersIcon,
@@ -40,4 +41,5 @@ export {
   Expand as ExpandIcon,
   Collapse as CollapseIcon,
   Check as CheckIcon,
+  ArrowUp as ArrowUpIcon,
 };

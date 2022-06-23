@@ -11,6 +11,7 @@ import { Scale } from '../scale/scale';
 
 import { MapContext } from '../../app-start';
 import { FooterbarExpandButton } from './footerbar-expand-button';
+import { FooterbarRotationButton } from './footerbar-rotation-button';
 
 export const useStyles = makeStyles((theme) => ({
   footerBarContainer: {
@@ -80,6 +81,7 @@ export function Footerbar(): JSX.Element {
         {deviceSizeMedUp && <MousePosition id={mapId} />}
         <Scale />
       </div>
+      <FooterbarRotationButton />
     </div>
   );
 }

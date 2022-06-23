@@ -11,6 +11,9 @@
     "zoomOut": "Zoom out"
   },
   "mapctrl": {
+    "rotation": {
+      "resetRotation": "Reset Rotation"
+    },
     "mouseposition": {
       "east": "E",
       "west": "W",

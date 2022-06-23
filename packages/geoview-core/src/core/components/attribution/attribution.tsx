@@ -6,7 +6,7 @@ import OLAttribution, { Options } from 'ol/control/Attribution';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
-import { api } from '../../../app';
+import { api, toJsonObject, TypeJsonObject } from '../../../app';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     width: '100%',
     '& .ol-attribution': {
-      display: 'flex',
+      display: 'flex !important',
       flexDirection: 'row',
       position: 'relative',
       backgroundColor: 'initial',
@@ -79,15 +79,19 @@ const useStyles = makeStyles((theme) => ({
 class CustomAttribution extends OLAttribution {
   attributions: string[] = [];
 
+  mapId: string;
+
   /**
    * Constructor that enables attribution text tooltip.
    *
    * @param {Options} optOptions control options
    */
-  constructor(optOptions: Options) {
+  constructor(optOptions: Options, mapId: string) {
     const options = optOptions || {};
 
     super(options);
+
+    this.mapId = mapId;
 
     /**
      * Enable attribution text tooltip.
@@ -95,8 +99,13 @@ class CustomAttribution extends OLAttribution {
      */
     setTimeout(() => {
       this.enableAttributionTextTooltip_();
-    }, 1000);
+    }, 2000);
   }
+
+  private attributionVal: TypeJsonObject = toJsonObject({
+    'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
+    'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
+  });
 
   /**
    * Return the attribution control element
@@ -108,11 +117,17 @@ class CustomAttribution extends OLAttribution {
   }
 
   /**
-   * Private function that enables attribution text tooltip.
+   * function that enables attribution text tooltip
+   * and adds nrcan copyright text if it is not already added.
+   *
+   * @private
    */
   enableAttributionTextTooltip_() {
     // find ul element in attribution control
     const ulElement = this.element.getElementsByTagName('UL')[0];
+
+    // nrcan copy right exists? If not add it
+    let nrcanCopyRightExists = false;
 
     if (ulElement) {
       // find li elements in ul element
@@ -123,6 +138,16 @@ class CustomAttribution extends OLAttribution {
         for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
           const liElement = liElements[liElementIndex] as HTMLElement;
 
+          const attributionText = liElement.innerText;
+
+          // check if nrcan copyright exists
+          if (
+            (attributionText.includes('Queen in Right of Canada') && attributionText.includes('Natural Resources')) ||
+            (attributionText.includes('Reine du Chef du Canada') && attributionText.includes('Ressources naturelles'))
+          ) {
+            nrcanCopyRightExists = true;
+          }
+
           // add tooltip title
           liElement.setAttribute('title', liElement.innerText);
 
@@ -130,6 +155,27 @@ class CustomAttribution extends OLAttribution {
             this.attributions.push(liElement.innerText);
           }
         }
+      }
+
+      // if nrcan copyright does not exist add it
+      if (!nrcanCopyRightExists) {
+        // get nrcan copyright based on language
+        const copyRightText = this.attributionVal[api.map(this.mapId).language] as string;
+
+        // create li element
+        const nrcanCopyRight = document.createElement('LI');
+
+        // add nrcan copyright text to li element
+        nrcanCopyRight.innerText = copyRightText;
+
+        // add tooltip text
+        nrcanCopyRight.setAttribute('title', copyRightText);
+
+        // add nrcan copyright li to ul element at the top
+        ulElement.prepend(nrcanCopyRight);
+
+        // add nrcan copyright text to attributions at the beginning of the array
+        this.attributions.unshift(copyRightText);
       }
     }
   }
@@ -139,7 +185,7 @@ class CustomAttribution extends OLAttribution {
    *
    * @returns {string[]} return attributions text
    */
-  getAttributions() {
+  getAttributions(): string[] {
     return this.attributions;
   }
 }
@@ -162,12 +208,16 @@ export function Attribution(): JSX.Element {
 
     const attributionText = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
 
-    const attributionControl = new CustomAttribution({
-      target: attributionText,
-      collapsible: true,
-      label: document.createElement('div'),
-      collapseLabel: document.createElement('div'),
-    });
+    const attributionControl = new CustomAttribution(
+      {
+        target: attributionText,
+        collapsible: false,
+        collapsed: false,
+        label: document.createElement('div'),
+        collapseLabel: document.createElement('div'),
+      },
+      mapId
+    );
 
     map.addControl(attributionControl);
   }, [mapId]);

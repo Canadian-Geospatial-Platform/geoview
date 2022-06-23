@@ -285,7 +285,8 @@ export class Basemap {
     let extent: Extent = [0, 0, 0, 0];
     let origin: number[] = [];
     let urlProj = 0;
-    let attributions = [];
+
+    const attributions = [];
 
     // should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
