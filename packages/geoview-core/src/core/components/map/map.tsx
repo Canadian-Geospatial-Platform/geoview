@@ -7,7 +7,6 @@ import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { ObjectEvent } from 'ol/Object';
 import { MapEvent } from 'ol';
-import { Attribution, defaults as defaultControls } from 'ol/control';
 
 import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
@@ -51,9 +50,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | null>();
-
-  // attribution used by the map
-  const [attribution, setAttribution] = useState<string | undefined>('');
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
@@ -152,8 +148,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       controls: [],
     });
 
-    setAttribution(defaultBasemap?.attribution);
-
     initCGPVMap(initialMap);
   };
 
@@ -213,8 +207,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   return (
     <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
-      <div id={`${id}-attribution`} />
-
       {isLoaded && (
         <>
           {components !== undefined && components.indexOf('northArrow') > -1 && (
@@ -222,7 +214,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           )}
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overviewMap') > -1 && <OverviewMap />}
-          {deviceSizeMedUp && <Footerbar attribution={attribution!} />}
+          {deviceSizeMedUp && <Footerbar />}
         </>
       )}
     </div>

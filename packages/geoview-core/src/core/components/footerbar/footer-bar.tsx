@@ -10,10 +10,9 @@ import { MousePosition } from '../mouse-position/mouse-position';
 import { Scale } from '../scale/scale';
 
 import { MapContext } from '../../app-start';
+import { FooterbarExpandButton } from './footerbar-expand-button';
 
-import { TypeFooterbarProps } from '../../types/cgpv-types';
-
-export const useStyles = makeStyles(() => ({
+export const useStyles = makeStyles((theme) => ({
   footerBarContainer: {
     display: 'flex',
     flexDirection: 'row',
@@ -21,12 +20,16 @@ export const useStyles = makeStyles(() => ({
     alignItems: 'center',
     width: '100%',
     // height: '20px',
+    maxHeight: '20px',
+    minHeight: '20px',
+    transition: 'max-height 2s ease-out',
     backgroundColor: '#0000008f',
     backdropFilter: 'blur(5px)',
     pointerEvents: 'all',
     position: 'absolute',
     left: 0,
     bottom: 0,
+    zIndex: theme.zIndex.tooltip,
   },
   mouseScaleControlsContainer: {
     display: 'flex',
@@ -37,14 +40,9 @@ export const useStyles = makeStyles(() => ({
 /**
  * Create a footerbar element that contains attribtuion, mouse position and scale
  *
- * @param {TypeFooterbarProps} props the footerbar properties
  * @returns {JSX.Element} the footerbar element
  */
-export function Footerbar(props: TypeFooterbarProps): JSX.Element {
-  const { attribution } = props;
-
-  // const [attribution, setAttribution] = useState<string>('');
-
+export function Footerbar(): JSX.Element {
   const classes = useStyles();
 
   const mapConfig = useContext(MapContext);
@@ -75,8 +73,9 @@ export function Footerbar(props: TypeFooterbarProps): JSX.Element {
   }, [mapId]);
 
   return (
-    <div id="footerBar" className={`${classes.footerBarContainer}`} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
-      {deviceSizeMedUp && <Attribution attribution={attribution} />}
+    <div id={`${mapId}-footerBar`} className={`${classes.footerBarContainer}`} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
+      <FooterbarExpandButton />
+      {deviceSizeMedUp && <Attribution />}
       <div id="mouseAndScaleControls" className={classes.mouseScaleControlsContainer}>
         {deviceSizeMedUp && <MousePosition id={mapId} />}
         <Scale />

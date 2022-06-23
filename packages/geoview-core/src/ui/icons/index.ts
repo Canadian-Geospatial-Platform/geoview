@@ -15,6 +15,9 @@ import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
 import Apps from '@mui/icons-material/Apps';
 import Group from '@mui/icons-material/Group';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import Expand from '@mui/icons-material/KeyboardDoubleArrowDown';
+import Collapse from '@mui/icons-material/KeyboardDoubleArrowUp';
+import Check from '@mui/icons-material/CheckCircle';
 
 export {
   Layers as LayersIcon,
@@ -34,4 +37,7 @@ export {
   Apps as AppsIcon,
   Group as GroupIcon,
   ArrowBack as ArrowBackIcon,
+  Expand as ExpandIcon,
+  Collapse as CollapseIcon,
+  Check as CheckIcon,
 };
