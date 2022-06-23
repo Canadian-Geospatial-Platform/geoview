@@ -1,4 +1,12 @@
-import { TypeBasemapProps, TypeBasemapOptions, TypeJsonObject, TypeSelectChangeEvent, TypeWindow, TypeMapView } from 'geoview-core';
+import {
+  toJsonObject,
+  TypeBasemapProps,
+  TypeBasemapOptions,
+  TypeJsonObject,
+  TypeSelectChangeEvent,
+  TypeWindow,
+  TypeMapView,
+} from 'geoview-core';
 import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads/map-view-projection-payload';
 
 const w = window as TypeWindow;
@@ -12,6 +20,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const { mapId, config } = props;
 
   const { cgpv } = w;
+  const myMap = cgpv.api.map(mapId);
 
   const { api, react, ui } = cgpv;
   const { Select } = ui.elements;
@@ -23,12 +32,14 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       marginTop: '10px',
       height: '95%',
     },
+    active: {
+      boxShadow: '0 8px 16px 0 rgba(255, 255, 255, 0.8) !important',
+    },
     card: {
-      boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
       transition: '0.3s',
       borderRadius: '5px',
       '&:hover': {
-        boxShadow: '0 8px 16px 0 rgba(0, 0, 0, 0.2)',
+        boxShadow: '0 8px 16px 0 rgba(255, 255, 255, 0.4)',
       },
       marginBottom: 10,
       height: '250px',
@@ -42,6 +53,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       height: '100%',
       width: '100%',
       opacity: 0.8,
+      objectFit: 'cover',
     },
     container: {
       background: 'rgba(0,0,0,.68)',
@@ -59,14 +71,16 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
       width: 'inherit',
     },
   }));
-
-  const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
-  const [canSwichProjection] = useState(config.canSwichProjection);
-
   const classes = useStyles();
 
-  const projections: number[] = (config.supportedProjection as number[]) || [];
-  const [mapProjection, setMapProjection] = useState(cgpv.api.map(mapId).mapProps.map.projection);
+  const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
+  const [activeBasemapId, setActiveBasemapId] = useState<string>('');
+  const [canSwichProjection] = useState(config.canSwichProjection);
+
+  // TODO: change the path for getting projection on schema refactor
+  const projections: number[] =
+    (config.supportedProjections as Array<TypeJsonObject>).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
+  const [mapProjection, setMapProjection] = useState(myMap.mapProps.map.projection);
 
   /**
    * Update the basemap with the layers on the map
@@ -74,74 +88,98 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    * @param {string} id update the basemap on the map
    */
   const setBasemap = (id: string) => {
-    api.map(mapId).basemap.setBasemap(id);
+    // set the new basemap and update the active basemap variable
+    myMap.basemap.setBasemap(id);
+    setActiveBasemapId(id);
   };
 
   /**
-   * Add basemaps from configuration
+   *  Add basemaps from configuration for selected projection
+   *
+   * @param {number} projection the projection to create basemaps for
    */
-  const addBasemaps = async () => {
+  const createBasemapArray = async (projection: number) => {
+    const basemapsArray: TypeJsonObject = toJsonObject(
+      (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection)
+    );
+    let isInit = false;
+
     // reset the basemaps array
     api.map(mapId).basemap.basemaps = [];
+    setBasemapList([]);
 
     // create the custom config basemap
-    for (let basemapIndex = 0; basemapIndex < config.customBasemaps.length; basemapIndex++) {
-      const customBasemap = config.customBasemaps[basemapIndex] as TypeJsonObject;
+    for (let basemapIndex = 0; basemapIndex < basemapsArray.customBasemaps.length; basemapIndex++) {
+      const customBasemap = basemapsArray.customBasemaps[basemapIndex] as TypeJsonObject;
       const basemap = api.map(mapId).basemap.createCustomBasemap(customBasemap as unknown as TypeBasemapProps);
       if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
 
       // custom basemap are provided set it by default (can't be set as basemap from geoview config)
-      if (basemap && basemapIndex === 0) setBasemap(basemap.id!);
+      if (basemap && basemapIndex === 0 && activeBasemapId === '') {
+        setBasemap(basemap.id!);
+        isInit = true;
+      }
     }
 
     // create the core basemap
-    for (let basemapIndex = 0; basemapIndex < config.coreBasemaps.length; basemapIndex++) {
-      const basemapOptions = config.coreBasemaps[basemapIndex] as TypeJsonObject;
+    for (let basemapIndex = 0; basemapIndex < basemapsArray.coreBasemaps.length; basemapIndex++) {
+      const basemapOptions = basemapsArray.coreBasemaps[basemapIndex] as TypeJsonObject;
       // eslint-disable-next-line no-await-in-loop
-      const basemap = await api.map(mapId).basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions);
+      const basemap = await api.map(mapId).basemap.createCoreBasemap(basemapOptions as unknown as TypeBasemapOptions, projection);
       if (basemap) setBasemapList((prevArray) => [...prevArray, basemap]);
+
+      // set basemap if previously selected in previous projection
+      const id = `${basemapOptions.shaded ? 'shaded' : ''}${basemapOptions.id}${basemapOptions.labeled ? 'label' : ''}`;
+      if (basemap && id === activeBasemapId && !isInit) {
+        setBasemap(activeBasemapId);
+        isInit = true;
+      }
     }
+
+    // if previous basemap does not exist in previous projection, init first one
+    if (!isInit) setBasemap(myMap.basemap.basemaps[0].id as string);
   };
 
   /**
-   * Set layerType from form input
+   * Set new projection view and basemap array
    *
-   * @param {TypeSelectChangeEvent} event TextField event
+   * @param {TypeSelectChangeEvent} event select change element event
    */
   const setSelectedProjection = (event: TypeSelectChangeEvent<unknown>) => {
-    setMapProjection(event.target.value as number);
-    api.event.emit(mapViewProjectionPayload(api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, event.target.value as number));
+    const projection = event.target.value as number;
 
-    // get view status
-    const currentView = api.map(mapId).getView();
+    // set basemap to no geom to clean up the view
+    setBasemap('nogeom');
+    setMapProjection(projection);
+
+    // get view status (center and projection) to calculate new center
+    const currentView = myMap.getView();
     const currentCenter = currentView.getCenter();
     const currentProjection = currentView.getProjection().getCode();
-
-    // calculate points resolution and new center (from lat long)
-    const currentPointResolution = api.projection.getResolution(currentProjection, currentCenter as number[]);
     const newCenter = api.projection.transformPoints(currentCenter, currentProjection, 'EPSG:4326')[0];
     const newProjection = `EPSG:${event.target.value as number}`;
-    const newPointResolution = api.projection.getResolution(newProjection, newCenter as number[]);
-    const newResolution = (currentView.getResolution() || 0 * currentPointResolution) / newPointResolution;
 
     const newView: TypeMapView = {
       zoom: currentView.getZoom() as number,
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
       center: newCenter as number[],
-      projection: newProjection as string,
-      resolution: newResolution,
+      projection: newProjection,
     };
 
-    api.map(mapId).setView(newView);
+    // set new view and basemaps array (with selected basemap)
+    myMap.setView(newView);
+    createBasemapArray(projection);
+
+    // emit an event to let know map view projection as changed
+    api.event.emit(mapViewProjectionPayload(api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId, projection));
   };
 
   /**
    * load existing basemaps and create new basemaps
    */
   useEffect(() => {
-    addBasemaps();
-
+    createBasemapArray(mapProjection);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -175,7 +213,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
             <div
               role="button"
               tabIndex={0}
-              className={classes.card}
+              className={`${classes.card} ${basemap.id === activeBasemapId ? classes.active : ''}`}
               onClick={() => setBasemap(basemap.id as string)}
               onKeyPress={() => setBasemap(basemap.id as string)}
               key={basemap.id}
