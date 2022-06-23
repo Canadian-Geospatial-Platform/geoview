@@ -52,9 +52,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
   // get ref to div element
   const mapElement = useRef<HTMLDivElement | null>();
 
-  // attribution used by the map
-  const [attribution, setAttribution] = useState<string | undefined>('');
-
   // create a new map viewer instance
   const viewer: MapViewer = api.map(id);
 
@@ -95,15 +92,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     // emit the moveend event to the api
     api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
   }
-
-  // return (
-  //   <MapContainer>
-  //       <>
-  //         <Crosshair id={id} />
-  //         <ClickMarker />
-  //       </>
-  //   </MapContainer>
-  // );
 
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('id', id);
@@ -160,8 +148,6 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       }),
       controls: [],
     });
-
-    setAttribution(defaultBasemap?.attribution);
 
     initCGPVMap(initialMap);
   };
@@ -246,7 +232,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           )}
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overviewMap') > -1 && <OverviewMap />}
-          {deviceSizeMedUp && <Footerbar attribution={attribution!} />}
+          {deviceSizeMedUp && <Footerbar />}
         </>
       )}
     </div>

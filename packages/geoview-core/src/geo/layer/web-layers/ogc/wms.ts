@@ -84,19 +84,26 @@ export class WMS extends AbstractWebLayersClass {
    * @param {TypeWMSLayer} layer the layer configuration
    * @return {Promise<ImageLayer<ImageWMS> | null>} layers to add to the map
    */
-  add(layer: TypeWMSLayer): Promise<ImageLayer<ImageWMS> | null> {
+  async add(layer: TypeWMSLayer): Promise<ImageLayer<ImageWMS> | null> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 
     const entries = layer.layerEntries.map((item) => item.id).toString();
 
-    this.getCapabilities();
+    this.#capabilities = await this.getCapabilities();
 
     const geo = new Promise<ImageLayer<ImageWMS> | null>((resolve) => {
+      let attribution = '';
+
+      if (this.#capabilities && this.#capabilities.Service && this.#capabilities.Service.Abstract) {
+        attribution = this.#capabilities.Service.Abstract as string;
+      }
+
       this.name = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.Service.Name as string);
 
       const wms = new ImageLayer({
         source: new ImageWMS({
+          attributions: [attribution],
           url: this.url,
           params: { LAYERS: entries },
         }),

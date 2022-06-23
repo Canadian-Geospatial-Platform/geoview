@@ -6,6 +6,7 @@ import { MAP, MapEventKey } from './constants/map';
 import { LAYER, LayerEventKey } from './constants/layer';
 import { ATTRIBUTION, AttributionEventKey } from './constants/attribution';
 import { APPBAR, AppbarEventKey } from './constants/appbar';
+import { FOOTERBAR, FooterbarEventKey } from './constants/footerbar';
 import { NAVBAR, NavbarEventKey } from './constants/navbar';
 import { SNACKBAR, SnackbarEventKey } from './constants/snackbar';
 import { BASEMAP, BasmapEventKey } from './constants/basemap';
@@ -26,6 +27,7 @@ export const EVENT_NAMES = {
   MAP,
   LAYER,
   APPBAR,
+  FOOTERBAR,
   NAVBAR,
   SNACKBAR,
   BASEMAP,
@@ -47,6 +49,7 @@ export type EventCategories =
   | 'MAP'
   | 'LAYER'
   | 'APPBAR'
+  | 'FOOTERBAR'
   | 'NAVBAR'
   | 'SNACKBAR'
   | 'BASEMAP'
@@ -67,6 +70,7 @@ export type EventKey =
   | MapEventKey
   | LayerEventKey
   | AppbarEventKey
+  | FooterbarEventKey
   | NavbarEventKey
   | SnackbarEventKey
   | BasmapEventKey
@@ -99,6 +103,7 @@ export type EventStringId =
   | 'layer/get_layers'
   | 'appbar/panel_create'
   | 'appbar/panel_remove'
+  | 'footerbar/expand_collapse'
   | 'navbar/button_panel_create'
   | 'navbar/button_panel_remove'
   | 'navbar/toggle_controls'

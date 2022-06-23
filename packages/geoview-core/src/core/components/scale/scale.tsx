@@ -1,52 +1,41 @@
 import { useContext, useEffect, useState } from 'react';
 
 import { ScaleLine } from 'ol/control';
+import { MapEvent } from 'ol';
 
 import makeStyles from '@mui/styles/makeStyles';
 
 import { api } from '../../../app';
 
 import { MapContext } from '../../app-start';
+import { EVENT_NAMES } from '../../../api/events/event';
+
+import { payloadIsABoolean } from '../../types/cgpv-types';
+import { CheckIcon } from '../../../ui';
 
 const useStyles = makeStyles((theme) => ({
+  scaleControl: {
+    display: 'none',
+  },
   scaleContainer: {
+    display: 'flex',
     backgroundColor: 'transparent',
     border: 'none',
-    '& .ol-scale-line, .ol-scale-bar': {
-      display: 'flex',
-      padding: theme.spacing(0, 4),
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      alignItems: 'center',
-      position: 'relative',
-      left: 'auto',
-      bottom: 'auto',
-    },
-    '& .ol-scale-bar-inner': {
-      width: '100% !important',
-    },
-    '& .ol-scale-line-inner, .ol-scale-text': {
-      display: 'block',
-      fontSize: theme.typography.subtitle2.fontSize,
-      color: theme.palette.primary.light,
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      border: '1px solid',
-      borderColor: theme.palette.primary.light,
-      borderTop: 'none',
-      borderLeft: 'none',
-      borderRight: 'none',
-      lineHeight: 1,
-      padding: '2px 5px 0px',
-      width: '100% !important',
-      position: 'initial',
-      textShadow: 'initial',
-    },
-    '& .ol-scale-step-marker, .ol-scale-singlebar, .ol-scale-step-text': {
-      display: 'none',
-    },
+    height: '100%',
+  },
+  scaleExpandedContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    height: '100%',
+  },
+  scaleExpandedCheckmarkText: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '18px',
+    maxHeight: '18px',
   },
   scaleText: {
     fontSize: theme.typography.subtitle2.fontSize,
@@ -59,10 +48,19 @@ const useStyles = makeStyles((theme) => ({
     borderTop: 'none',
     borderLeft: 'none',
     borderRight: 'none',
-    lineHeight: 1,
-    padding: '2px 5px 0px',
+  },
+  scaleCheckmark: {
+    paddingRight: 5,
+    fontSize: `20px !important`,
+    color: theme.palette.primary.light,
   },
 }));
+
+interface TypeScale {
+  id: string;
+  label: string;
+  borderBottom: boolean;
+}
 
 /**
  * Create an element that displays the scale
@@ -70,8 +68,20 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} created scale element
  */
 export function Scale(): JSX.Element {
-  const [scaleMode, setScaleMode] = useState<'line' | 'bar'>('line');
-  const [scaleControl, setScaleControl] = useState<ScaleLine>();
+  const [scaleMode, setScaleMode] = useState<number>(0);
+  const [scaleValues, setScaleValues] = useState<TypeScale[]>([
+    {
+      id: '0',
+      label: '',
+      borderBottom: false,
+    },
+    {
+      id: '1',
+      label: '',
+      borderBottom: false,
+    },
+  ]);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   const mapConfig = useContext(MapContext);
 
@@ -83,38 +93,97 @@ export function Scale(): JSX.Element {
    * Switch the scale mode
    */
   const switchScale = () => {
-    const { map } = api.map(mapId);
+    setScaleMode((scaleMode + 1) % 2);
+  };
 
-    map.removeControl(scaleControl!);
+  const onMoveEnd = (e: MapEvent) => {
+    const { map } = e;
 
-    let selectScale = null;
+    const id = map.get('id');
 
-    if (scaleMode === 'bar') {
-      setScaleMode('line');
-      selectScale = new ScaleLine({ units: 'metric', target: document.getElementById(`${mapId}-scaleControl`) as HTMLElement });
-    } else {
-      setScaleMode('bar');
-      selectScale = new ScaleLine({
-        units: 'metric',
-        target: document.getElementById(`${mapId}-scaleControl`) as HTMLElement,
-        bar: true,
-        text: true,
-      });
-    }
+    const scaleLineText = document.getElementById(`${id}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string;
+    const scaleBarText = document.getElementById(`${id}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string;
 
-    map.addControl(selectScale!);
-    setScaleControl(selectScale!);
+    setScaleValues([
+      { id: '0', label: scaleLineText, borderBottom: true },
+      { id: '1', label: scaleBarText, borderBottom: false },
+    ]);
   };
 
   useEffect(() => {
     const { map } = api.map(mapId);
 
-    const selectScale = new ScaleLine({ units: 'metric', target: document.getElementById(`${mapId}-scaleControl`) as HTMLElement });
+    const scaleBar = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlBar`) as HTMLElement,
+      bar: true,
+      text: true,
+    });
 
-    map.addControl(selectScale);
+    const scaleLine = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlLine`) as HTMLElement,
+    });
 
-    setScaleControl(selectScale);
+    map.addControl(scaleLine);
+    map.addControl(scaleBar);
+
+    map.on('moveend', onMoveEnd);
+
+    api.event.on(
+      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
+      (payload) => {
+        if (payloadIsABoolean(payload)) {
+          if (payload.handlerName!.includes(mapId)) {
+            setExpanded(payload.status);
+          }
+        }
+      },
+      mapId
+    );
+
+    return () => {
+      map.removeControl(scaleLine);
+      map.removeControl(scaleBar);
+      map.un('moveend', onMoveEnd);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
+    };
   }, [mapId]);
 
-  return <button type="button" id={`${mapId}-scaleControl`} onClick={() => switchScale()} className={classes.scaleContainer} />;
+  return (
+    <div>
+      <div id={`${mapId}-scaleControlBar`} className={classes.scaleControl} />
+      <div id={`${mapId}-scaleControlLine`} className={classes.scaleControl} />
+      <button type="button" onClick={() => switchScale()} className={classes.scaleContainer}>
+        {expanded ? (
+          <div className={classes.scaleExpandedContainer}>
+            {scaleValues.map((value, index) => {
+              return (
+                <div className={classes.scaleExpandedCheckmarkText} key={value.id}>
+                  {scaleMode === index && <CheckIcon className={classes.scaleCheckmark} />}
+                  <span
+                    className={classes.scaleText}
+                    style={{
+                      borderBottom: !value.borderBottom ? 'none' : '1px solid',
+                    }}
+                  >
+                    {value.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <span
+            className={classes.scaleText}
+            style={{
+              borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
+            }}
+          >
+            {scaleValues[scaleMode].label}
+          </span>
+        )}
+      </button>
+    </div>
+  );
 }

@@ -77,8 +77,13 @@ export class EsriDynamic extends AbstractWebLayersClass {
     const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
       data.then((value) => {
         if (value !== '{}') {
+          const metadata = JSON.parse(value) as TypeJsonObject;
+
+          const attribution = (metadata.copyrightText ? metadata.copyrightText : '') as string;
+
           const feature = new ImageLayer({
             source: new ImageArcGISRest({
+              attributions: [attribution],
               url: layer.url[api.map(this.mapId).getLanguageCode()],
               params: { LAYERS: `show:${this.entries}` },
             }),

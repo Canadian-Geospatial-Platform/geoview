@@ -30,7 +30,7 @@
   },
   "scripts": {
     "serve": "webpack serve --progress --color --config webpack.dev.js",
-    "build": "webpack --progress --color --config webpack.prod.js && npm run generate.d.ts && npm run doc",
+    "build": "npm run doc && webpack --progress --color --config webpack.prod.js && npm run generate.d.ts",
     "doc": "typedoc src/app.tsx --logLevel Error --out public/docs",
     "deploy": "gh-pages -d dist",
     "test": "jest",
