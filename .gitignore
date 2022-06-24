@@ -83,4 +83,4 @@ common/config/rush/pnpm-lock.yaml
 .idea/
 
 **/types
-packages/geoview-core/public/docs/
+**/packages/geoview-core/public/docs/**/*

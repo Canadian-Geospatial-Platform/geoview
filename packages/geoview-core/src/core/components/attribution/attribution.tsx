@@ -99,7 +99,7 @@ class CustomAttribution extends OLAttribution {
      */
     setTimeout(() => {
       this.enableAttributionTextTooltip_();
-    }, 2000);
+    }, 5000);
   }
 
   private attributionVal: TypeJsonObject = toJsonObject({
