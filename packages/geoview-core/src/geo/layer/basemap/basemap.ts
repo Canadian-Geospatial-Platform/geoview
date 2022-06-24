@@ -286,6 +286,9 @@ export class Basemap {
     let origin: number[] = [];
     let urlProj = 0;
 
+    // check if nrcan copyright exists
+    let nrcanCopyrightExists = false;
+
     const attributions = [];
 
     // should we do a get request to get the layer information from the server?
@@ -334,9 +337,24 @@ export class Basemap {
 
         if (id === 'label') {
           if (result.copyrightText) {
-            attributions.push(result.copyrightText as string);
+            const attributionText = result.copyrightText as string;
+
+            // check if nrcan copyright exists
+            if (
+              (attributionText.includes('Queen in Right of Canada') && attributionText.includes('Natural Resources')) ||
+              (attributionText.includes('Reine du Chef du Canada') && attributionText.includes('Ressources naturelles'))
+            ) {
+              nrcanCopyrightExists = true;
+            }
+
+            // attributions.push(result.copyrightText as string);
             this.attribution = result.copyrightText as string;
           }
+        }
+
+        // if nrcan copyright does not exist, add it
+        if (!nrcanCopyrightExists) {
+          attributions.unshift(this.attributionVal[this.language] as string);
         }
 
         // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
@@ -535,6 +553,9 @@ export class Basemap {
       fr: string;
     }
 
+    // store attributions
+    const attributions: string[] = [];
+
     // extract bilangual sections
     const name: bilingual = basemapProps.name as unknown as bilingual;
     const description: bilingual = basemapProps.description as unknown as bilingual;
@@ -551,6 +572,24 @@ export class Basemap {
       // layer.basemapPaneName = this.basemapsPaneName;
     }
 
+    let nrcanCopyrightExists = false;
+    const attributionText = this.language === 'en-CA' ? attribution.en : attribution.fr;
+
+    // check if nrcan copyright exists in attribution
+    if (
+      (attributionText.includes('Queen in Right of Canada') && attributionText.includes('Natural Resources')) ||
+      (attributionText.includes('Reine du Chef du Canada') && attributionText.includes('Ressources naturelles'))
+    ) {
+      nrcanCopyrightExists = true;
+    }
+
+    if (!nrcanCopyrightExists) {
+      attributions.push(this.attributionVal[this.language] as string);
+    }
+
+    // add the attribution from layer
+    attributions.push(attributionText);
+
     // create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
     formatProps.name = this.language === 'en-CA' ? name.en : name.fr;
@@ -559,6 +598,7 @@ export class Basemap {
         ...layer,
         url: this.language === 'en-CA' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
+          attributions,
           projection: api.projection.projections[this.projection],
           url: this.language === 'en-CA' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           tileGrid: new TileGrid({
