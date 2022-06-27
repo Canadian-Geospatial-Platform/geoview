@@ -7,6 +7,7 @@ import {
   TypeWindow,
   TypeMapView,
 } from 'geoview-core';
+
 import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads/map-view-projection-payload';
 
 const w = window as TypeWindow;
@@ -23,59 +24,93 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const myMap = cgpv.api.map(mapId);
 
   const { api, react, ui } = cgpv;
-  const { Select } = ui.elements;
+  const { Select, Card } = ui.elements;
 
   const { useState, useEffect } = react;
-
-  const useStyles = ui.makeStyles(() => ({
-    listContainer: {
-      marginTop: '10px',
-      height: '95%',
-    },
-    active: {
-      boxShadow: '0 8px 16px 0 rgba(255, 255, 255, 0.8) !important',
-    },
-    card: {
-      transition: '0.3s',
-      borderRadius: '5px',
-      '&:hover': {
-        boxShadow: '0 8px 16px 0 rgba(255, 255, 255, 0.4)',
-      },
-      marginBottom: 10,
-      height: '250px',
-      width: '100%',
-      display: 'block',
-      position: 'relative',
-    },
-    thumbnail: {
-      borderRadius: '5px',
-      position: 'absolute',
-      height: '100%',
-      width: '100%',
-      opacity: 0.8,
-      objectFit: 'cover',
-    },
-    container: {
-      background: 'rgba(0,0,0,.68)',
-      color: '#fff',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      height: '40px',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0 5px',
-      boxSizing: 'border-box',
-      position: 'absolute',
-      left: 0,
-      bottom: 0,
-      width: 'inherit',
-    },
-  }));
-  const classes = useStyles();
 
   const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
   const [activeBasemapId, setActiveBasemapId] = useState<string>('');
   const [canSwichProjection] = useState(config.canSwichProjection);
+
+  const useStyles = ui.makeStyles((theme) => ({
+    basemapCard: {
+      backgroundColor: theme.palette.primary.dark,
+      color: theme.palette.primary.light,
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundClip: 'padding-box',
+      border: `1px solid ${theme.basemapPanel.borderDefault}`,
+      borderRadius: 6,
+      boxShadow: 'none',
+      marginBottom: 16,
+      transition: 'all 0.3s ease-in-out',
+      '&:last-child': {
+        marginBottom: 0,
+      },
+      '& .MuiCardHeader-root': {
+        backgroundColor: theme.palette.primary.dark,
+        color: theme.basemapPanel.header,
+        fontSize: 14,
+        fontWeight: 400,
+        margin: 0,
+        padding: '0 12px',
+        height: 60,
+        width: '100%',
+        order: 2,
+      },
+      '& .MuiCardContent-root': {
+        order: 1,
+        height: 190,
+        position: 'relative',
+        padding: 0,
+        '&:last-child': {
+          padding: 0,
+        },
+        '& .basemapCardThumbnail': {
+          position: 'absolute',
+          height: '100%',
+          width: '100%',
+          objectFit: 'cover',
+          top: 0,
+          left: 0,
+        },
+        '& .basemapCardThumbnailOverlay': {
+          display: 'block',
+          height: '100%',
+          width: '100%',
+          position: 'absolute',
+          backgroundColor: theme.basemapPanel.overlayDefault,
+          transition: 'all 0.3s ease-in-out',
+        },
+      },
+      '&:hover': {
+        cursor: 'pointer',
+        borderColor: theme.basemapPanel.borderHover,
+        '& .MuiCardContent-root': {
+          '& .basemapCardThumbnailOverlay': {
+            backgroundColor: theme.basemapPanel.overlayHover,
+          },
+        },
+      },
+      '&.active': {
+        borderColor: theme.basemapPanel.borderActive,
+        '& .MuiCardContent-root': {
+          '& .basemapCardThumbnailOverlay': {
+            backgroundColor: theme.basemapPanel.overlayActive,
+          },
+        },
+        '&:hover': {
+          borderColor: 'rgba(255,255,255,0.75)',
+          '& .MuiCardContent-root': {
+            '& .basemapCardThumbnailOverlay': {
+              backgroundColor: 'rgba(0,0,0,0)',
+            },
+          },
+        },
+      },
+    },
+  }));
+  const classes = useStyles();
 
   // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
@@ -207,30 +242,32 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           }))}
         />
       )}
-      <div className={classes.listContainer}>
-        {basemapList.map((basemap: TypeBasemapProps) => {
-          return (
-            <div
-              role="button"
-              tabIndex={0}
-              className={`${classes.card} ${basemap.id === activeBasemapId ? classes.active : ''}`}
-              onClick={() => setBasemap(basemap.id as string)}
-              onKeyPress={() => setBasemap(basemap.id as string)}
-              key={basemap.id}
-            >
-              {typeof basemap.thumbnailUrl === 'string' && (
-                <img src={basemap.thumbnailUrl} alt={basemap.altText} className={classes.thumbnail} />
-              )}
-              {Array.isArray(basemap.thumbnailUrl) &&
-                basemap.thumbnailUrl.map((thumbnail, index) => {
-                  // eslint-disable-next-line react/no-array-index-key
-                  return <img key={index} src={thumbnail} alt={basemap.altText} className={classes.thumbnail} />;
-                })}
-              <div className={classes.container}>{basemap.name}</div>
-            </div>
-          );
-        })}
-      </div>
+      {basemapList.map((basemap: TypeBasemapProps) => {
+        return (
+          <Card
+            tabIndex={0}
+            classes={{ root: classes.basemapCard }}
+            className={`${basemap.id === activeBasemapId ? 'active' : ''}`}
+            onClick={() => setBasemap(basemap.id as string)}
+            onKeyPress={() => setBasemap(basemap.id as string)}
+            key={basemap.id}
+            title={basemap.name}
+            content={
+              <>
+                {typeof basemap.thumbnailUrl === 'string' && (
+                  <img src={basemap.thumbnailUrl} alt={basemap.altText} className="basemapCardThumbnail" />
+                )}
+                {Array.isArray(basemap.thumbnailUrl) &&
+                  basemap.thumbnailUrl.map((thumbnail, index) => {
+                    // eslint-disable-next-line react/no-array-index-key
+                    return <img key={index} src={thumbnail} alt={basemap.altText} className="basemapCardThumbnail" />;
+                  })}
+                <div className="basemapCardThumbnailOverlay" />
+              </>
+            }
+          />
+        );
+      })}
     </div>
   );
 }
