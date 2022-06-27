@@ -72,6 +72,10 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
     overflowY: 'auto',
     boxSizing: 'border-box',
+    marginBottom: 16,
+    '&:last-child': {
+      paddingBottom: 0,
+    },
   },
 }));
 

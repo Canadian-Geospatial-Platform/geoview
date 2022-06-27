@@ -11,6 +11,7 @@ import { OSM, XYZ } from 'ol/source';
 import { AnySchemaObject } from 'ajv';
 
 import {
+  CardProps,
   TooltipProps,
   ButtonProps,
   ButtonGroupProps,
@@ -727,6 +728,16 @@ export const CONST_PANEL_TYPES = {
  * UI Types
  *
  *---------------------------------------------------------------------------*/
+
+/**
+ * Properties for the BaseMap Card UI
+ */
+
+export interface TypeBasemapCardProps extends CardProps {
+  thumbnailUrl?: string | Array<string>;
+  altText?: string;
+  title?: string;
+}
 
 /**
  * Interface used to initialize a snackbar message

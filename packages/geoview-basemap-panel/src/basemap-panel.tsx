@@ -7,6 +7,7 @@ import {
   TypeWindow,
   TypeMapView,
 } from 'geoview-core';
+
 import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads/map-view-projection-payload';
 
 const w = window as TypeWindow;
@@ -23,55 +24,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   const myMap = cgpv.api.map(mapId);
 
   const { api, react, ui } = cgpv;
-  const { Select } = ui.elements;
+  const { Select, BasemapCard } = ui.elements;
 
   const { useState, useEffect } = react;
-
-  const useStyles = ui.makeStyles(() => ({
-    listContainer: {
-      marginTop: '10px',
-      height: '95%',
-    },
-    active: {
-      boxShadow: '0 8px 16px 0 rgba(255, 255, 255, 0.8) !important',
-    },
-    card: {
-      transition: '0.3s',
-      borderRadius: '5px',
-      '&:hover': {
-        boxShadow: '0 8px 16px 0 rgba(255, 255, 255, 0.4)',
-      },
-      marginBottom: 10,
-      height: '250px',
-      width: '100%',
-      display: 'block',
-      position: 'relative',
-    },
-    thumbnail: {
-      borderRadius: '5px',
-      position: 'absolute',
-      height: '100%',
-      width: '100%',
-      opacity: 0.8,
-      objectFit: 'cover',
-    },
-    container: {
-      background: 'rgba(0,0,0,.68)',
-      color: '#fff',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      height: '40px',
-      display: 'flex',
-      alignItems: 'center',
-      padding: '0 5px',
-      boxSizing: 'border-box',
-      position: 'absolute',
-      left: 0,
-      bottom: 0,
-      width: 'inherit',
-    },
-  }));
-  const classes = useStyles();
 
   const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
   const [activeBasemapId, setActiveBasemapId] = useState<string>('');
@@ -207,30 +162,20 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           }))}
         />
       )}
-      <div className={classes.listContainer}>
-        {basemapList.map((basemap: TypeBasemapProps) => {
-          return (
-            <div
-              role="button"
-              tabIndex={0}
-              className={`${classes.card} ${basemap.id === activeBasemapId ? classes.active : ''}`}
-              onClick={() => setBasemap(basemap.id as string)}
-              onKeyPress={() => setBasemap(basemap.id as string)}
-              key={basemap.id}
-            >
-              {typeof basemap.thumbnailUrl === 'string' && (
-                <img src={basemap.thumbnailUrl} alt={basemap.altText} className={classes.thumbnail} />
-              )}
-              {Array.isArray(basemap.thumbnailUrl) &&
-                basemap.thumbnailUrl.map((thumbnail, index) => {
-                  // eslint-disable-next-line react/no-array-index-key
-                  return <img key={index} src={thumbnail} alt={basemap.altText} className={classes.thumbnail} />;
-                })}
-              <div className={classes.container}>{basemap.name}</div>
-            </div>
-          );
-        })}
-      </div>
+      {basemapList.map((basemap: TypeBasemapProps) => {
+        return (
+          <BasemapCard
+            tabIndex={0}
+            className={`${basemap.id === activeBasemapId ? 'active' : ''}`}
+            onClick={() => setBasemap(basemap.id as string)}
+            onKeyPress={() => setBasemap(basemap.id as string)}
+            key={basemap.id}
+            title={basemap.name}
+            thumbnailUrl={basemap.thumbnailUrl}
+            altText={basemap.altText}
+          />
+        );
+      })}
     </div>
   );
 }
