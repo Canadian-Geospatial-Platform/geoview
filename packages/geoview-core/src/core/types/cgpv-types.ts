@@ -11,6 +11,9 @@ import { OSM, XYZ } from 'ol/source';
 import { AnySchemaObject } from 'ajv';
 
 import {
+  CardProps,
+  CardHeaderProps,
+  CardContentProps,
   TooltipProps,
   ButtonProps,
   ButtonGroupProps,
@@ -727,6 +730,16 @@ export const CONST_PANEL_TYPES = {
  * UI Types
  *
  *---------------------------------------------------------------------------*/
+
+/**
+ * Properties for the Card UI
+ */
+
+export type TypeCardProps = CardProps;
+export interface TypeCardHeaderProps extends CardHeaderProps {
+  type?: 'h3';
+}
+export type TypeCardContentProps = CardContentProps;
 
 /**
  * Interface used to initialize a snackbar message

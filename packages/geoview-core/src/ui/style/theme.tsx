@@ -156,6 +156,15 @@ const themeOptions: ThemeOptions = {
     hoverBg: '#393939',
     activeBg: '#4f4f4f',
   },
+  basemapPanel: {
+    header: '#ffffff',
+    borderDefault: 'rgba(255,255,255,0.25)',
+    borderHover: 'rgba(255,255,255,0.5)',
+    borderActive: 'rgba(255,255,255,0.75)',
+    overlayDefault: 'rgba(0,0,0,0.5)',
+    overlayHover: 'rgba(0,0,0,0.25)',
+    overlayActive: 'transparent',
+  },
 };
 
 export const cgpvTheme = createTheme(themeOptions);

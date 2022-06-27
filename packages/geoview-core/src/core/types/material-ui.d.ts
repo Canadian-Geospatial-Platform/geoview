@@ -38,6 +38,15 @@ declare module '@mui/material/styles' {
       defaultBg?: string;
       hoverBg?: string;
     };
+    basemapPanel?: {
+      header?: string;
+      borderDefault?: string;
+      borderHover?: string;
+      borderActive?: string;
+      overlayDefault?: string;
+      overlayHover?: string;
+      overlayActive?: string;
+    };
   }
 
   interface Theme {
@@ -65,6 +74,15 @@ declare module '@mui/material/styles' {
       borderLight: string;
       defaultBg: string;
       hoverBg: string;
+    };
+    basemapPanel: {
+      header: string;
+      borderDefault: string;
+      borderHover: string;
+      borderActive: string;
+      overlayDefault: string;
+      overlayHover: string;
+      overlayActive: string;
     };
   }
 }

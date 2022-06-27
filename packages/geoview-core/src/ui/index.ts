@@ -1,6 +1,7 @@
 export * from './autocomplete/autocomplete';
 export * from './button';
 export * from './button-group';
+export * from './card';
 export * from './circular-progress/circular-progress';
 export * from './checkbox/checkbox';
 export * from './divider/divider';
