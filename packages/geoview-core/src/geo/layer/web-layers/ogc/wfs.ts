@@ -7,6 +7,7 @@ import { Extent } from 'ol/extent';
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 import { all } from 'ol/loadingstrategy';
+import { transformExtent } from 'ol/proj';
 
 import {
   AbstractWebLayersClass,
@@ -301,5 +302,13 @@ export class WFS extends AbstractWebLayersClass {
    *
    * @returns {Extent} layer bounds
    */
-  getBounds = (): Extent => this.layer?.getSource()?.getExtent() || [];
+  getBounds = (): Extent => {
+    const transformedExtent = transformExtent(
+      this.layer?.getSource()?.getExtent() || [],
+      api.projection.projections[api.map(this.mapId).currentProjection],
+      'EPSG:4326'
+    );
+
+    return transformedExtent || [];
+  };
 }

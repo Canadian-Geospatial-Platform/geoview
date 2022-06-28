@@ -38,7 +38,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const [selectedLayer, setSelectedLayer] = useState<string>('');
   const [layerLegend, setLayerLegend] = useState<{ [id: string]: TypeLegend }>({});
   const [layerBounds, setLayerBounds] = useState<Record<string, number[]>>({});
-  const [layerBbox, setLayerBbox] = useState([]);
+  const [layerBbox, setLayerBbox] = useState<number[][]>([]);
   const [layerOpacity, setLayerOpacity] = useState<Record<string, number>>({});
   const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({});
   const [subLayerVisibility, setSubLayerVisibility] = useState<TypeSubLayerVisibility>({});
@@ -149,11 +149,16 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   /**
    * Calls setLayerExtent for all layers
    */
-  const setLayerBoundsAll = () =>
-    Object.values(layers).forEach(async (layer) => {
-      const bounds = await layer.getBounds();
-      setLayerBounds((state) => ({ ...state, [layer.id]: bounds }));
-    });
+  const setLayerBoundsAll = async () => {
+    for (let layerIndex = 0; layerIndex < Object.keys(layers).length; layerIndex++) {
+      const layerKey = Object.keys(layers)[layerIndex];
+      const layerValue = layers[layerKey];
+
+      // eslint-disable-next-line no-await-in-loop
+      const bounds = await layerValue.getBounds();
+      setLayerBounds((state) => ({ ...state, [layerValue.id]: bounds }));
+    }
+  };
 
   useEffect(() => {
     const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
@@ -198,28 +203,44 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
    *
-   * @param {Extent} bounds layer bounds
-   * @param {number} segment layer bounds
-   * @returns {L.Polygon} Polygon from bounds
+   * @param {number[]} bounds layer bounds
+   * @param {number} segments layer bounds
+   * @returns {number[][]} the bounding box coordinates
    */
-  const polygonFromBounds = (bounds: Extent, segments = 100): L.Polygon => {
-    const width = bounds.getEast() - bounds.getWest();
-    const latlngs = [];
-    latlngs.push(bounds.getSouthWest());
-    for (let i = 1; i <= segments; i += 1) {
-      const segmentWidth = width * (i / (segments + 1));
-      const lng = bounds.getWest() + segmentWidth;
-      latlngs.push({ lat: bounds.getSouth(), lng });
+  const polygonFromBounds = (bounds: number[], segments = 100): number[][] => {
+    // store longitude and latitude of each point of polygon
+    const lnglats: number[][] = [];
+
+    if (bounds && bounds.length > 0) {
+      const west = bounds[0];
+      const south = bounds[1];
+      const east = bounds[2];
+      const north = bounds[3];
+
+      const southEast = [east, south];
+      const southWest = [west, south];
+      const northEast = [east, north];
+      const northWest = [west, north];
+
+      const width = east - west;
+
+      lnglats.push(southWest);
+      for (let i = 1; i <= segments; i += 1) {
+        const segmentWidth = width * (i / (segments + 1));
+        const lat = west + segmentWidth;
+        lnglats.push([lat, south]);
+      }
+      lnglats.push(southEast);
+      lnglats.push(northEast);
+      for (let i = 1; i <= segments; i += 1) {
+        const segmentWidth = width * (i / (segments + 1));
+        const lat = east - segmentWidth;
+        lnglats.push([lat, north]);
+      }
+      lnglats.push(northWest);
     }
-    latlngs.push(bounds.getSouthEast());
-    latlngs.push(bounds.getNorthEast());
-    for (let i = 1; i <= segments; i += 1) {
-      const segmentWidth = width * (i / (segments + 1));
-      const lng = bounds.getEast() - segmentWidth;
-      latlngs.push({ lat: bounds.getNorth(), lng });
-    }
-    latlngs.push(bounds.getNorthWest());
-    return L.polygon(latlngs, { id: api.generateId(), color: 'red' });
+
+    return lnglats;
   };
 
   /**
@@ -229,14 +250,23 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const onBounds = (layer: AbstractWebLayersClass) => {
     const bbox = polygonFromBounds(layerBounds[layer.id]);
-    const newBbox = JSON.stringify(bbox.toGeoJSON());
-    const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
-    if (newBbox === oldBbox) {
-      layerBbox.remove();
-      setLayerBbox(L.polygon([]));
+
+    if (layerBbox.toString() === bbox.toString()) {
+      api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
+      setLayerBbox([]);
     } else {
-      layerBbox.remove();
-      bbox.addTo(api.map(mapId).map);
+      api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
+      api.map(mapId).layer.vector?.addPolygon(
+        [bbox],
+        {
+          style: {
+            strokeColor: 'red',
+            fillColor: 'red',
+            fillOpacity: 0.2,
+          },
+        },
+        'layerBoundingBox'
+      );
       setLayerBbox(bbox);
     }
   };
@@ -247,13 +277,11 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param layer layer config
    */
   const onRemove = (layer: AbstractWebLayersClass) => {
-    const bbox = polygonFromBounds(layerBounds[layer.id]);
-    const newBbox = JSON.stringify(bbox.toGeoJSON());
-    const oldBbox = JSON.stringify(layerBbox.toGeoJSON());
-    if (newBbox === oldBbox) {
-      layerBbox.remove();
-      setLayerBbox(L.polygon([]));
-    }
+    // empty bounding box
+    setLayerBbox([]);
+    // remove bounding box layer from map
+    api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
+    // remove layer from map
     api.map(mapId).layer.removeLayer(layer);
   };
 

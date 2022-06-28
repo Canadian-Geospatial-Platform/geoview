@@ -34,29 +34,28 @@
         ]
       },
       {
-        "id": "esriDynamicLYR3",
+        "id": "esriDynamicLYR2",
         "name": {
-          "en": "Energy Infrastructure of North America",
-          "fr": "Infrastructure énergétique d'Amérique du Nord"
+          "en": "The Canadian Environmental Sustainability Indicators (CESI)",
+          "fr": "The Canadian Environmental Sustainability Indicators (CESI)"
         },
         "url": {
-          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer",
-          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
         },
         "layerType": "esriDynamic",
         "layerEntries": [
           {
-            "id": "4",
-            "name": {
-              "en": "Natural Gas Processing Plants - config",
-              "fr": "Usines de traitement du gaz naturel - config"
-            }
+            "index": 1
           },
           {
-            "id": "5"
+            "index": 2
           },
           {
-            "id": "6"
+            "index": 3
+          },
+          {
+            "index": 6
           }
         ]
       },
@@ -67,16 +66,16 @@
           "fr": "Géothermie"
         },
         "url": {
-          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/19",
-          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/21"
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/5",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/5"
         },
         "layerType": "esriFeature"
       },
       {
         "id": "esriFeatureLYR5",
         "url": {
-          "en": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer/10",
-          "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer/10"
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7"
         },
         "layerType": "esriFeature"
       },

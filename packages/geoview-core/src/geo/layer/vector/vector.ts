@@ -193,7 +193,7 @@ export class Vector {
    * @returns {Feature} a geometry containing the id and the created geometry
    */
   addPolygon = (
-    points: Coordinate,
+    points: number[] | Coordinate[][],
     options?: {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
@@ -205,7 +205,7 @@ export class Vector {
     const lId = generateId(id);
 
     // create a line geometry
-    let polygon = new Feature({
+    const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
@@ -653,7 +653,10 @@ export class Vector {
     try {
       geometryGroup.vectorLayer.getSource()?.addFeature(geometry);
       geometryGroup.vectorLayer.changed();
-    } catch (error) {}
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   };
 
   /**

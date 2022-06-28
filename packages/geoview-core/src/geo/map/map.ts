@@ -4,7 +4,7 @@ import { i18n } from 'i18next';
 
 import OLMap from 'ol/Map';
 import View from 'ol/View';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, transformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 
@@ -325,7 +325,7 @@ export class MapViewer {
    * @returns the bounds
    */
   fitBounds = (bounds: Extent) =>
-    this.map.getView().fit(bounds, {
+    this.map.getView().fit(transformExtent(bounds, 'EPSG:4326', api.projection.projections[this.currentProjection]), {
       size: this.map.getSize(),
     });
 }
