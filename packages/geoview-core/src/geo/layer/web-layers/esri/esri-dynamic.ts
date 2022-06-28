@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ImageArcGISRest } from 'ol/source';
 import { Image as ImageLayer } from 'ol/layer';
 import { extend, Extent } from 'ol/extent';
+import { transformExtent } from 'ol/proj';
 
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import {
@@ -180,7 +181,7 @@ export class EsriDynamic extends AbstractWebLayersClass {
       }
     }
 
-    return bounds || [];
+    return transformExtent(bounds || [], api.projection.projections[api.map(this.mapId).currentProjection], 'EPSG:4326') || [];
   };
 
   /**

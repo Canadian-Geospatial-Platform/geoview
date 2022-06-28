@@ -6,6 +6,7 @@ import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
+import { transformExtent } from 'ol/proj';
 
 import {
   AbstractWebLayersClass,
@@ -280,5 +281,13 @@ export class GeoJSON extends AbstractWebLayersClass {
    *
    * @returns {Extent} layer bounds
    */
-  getBounds = (): Extent => this.layer?.getExtent() || [];
+  getBounds = (): Extent => {
+    const transformedExtent = transformExtent(
+      this.layer?.getSource()?.getExtent() || [],
+      api.projection.projections[api.map(this.mapId).currentProjection],
+      'EPSG:4326'
+    );
+
+    return transformedExtent || [];
+  };
 }

@@ -9,6 +9,7 @@ import { StyleLike } from 'ol/style/Style';
 import { all } from 'ol/loadingstrategy';
 import { Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
+import { transformExtent } from 'ol/proj';
 
 import {
   AbstractWebLayersClass,
@@ -246,11 +247,12 @@ export class EsriFeature extends AbstractWebLayersClass {
    * @returns {Promise<Extent>} layer bounds
    */
   getBounds = async (): Promise<Extent> => {
-    const meta = await this.getMetadata();
-    const xmin = meta.extent.xmin as number;
-    const xmax = meta.extent.xmax as number;
-    const ymin = meta.extent.ymin as number;
-    const ymax = meta.extent.ymax as number;
-    return [xmin, ymin, xmax, ymax];
+    const transformedExtent = transformExtent(
+      this.layer?.getSource()?.getExtent() || [],
+      api.projection.projections[api.map(this.mapId).currentProjection],
+      'EPSG:4326'
+    );
+
+    return transformedExtent || [];
   };
 }
