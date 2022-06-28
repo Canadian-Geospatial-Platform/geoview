@@ -280,7 +280,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     // empty bounding box
     setLayerBbox([]);
     // remove bounding box layer from map
-    api.map(mapId).layer.vector?.deleteGeometryFromGroups(`${layer.id}-layerBoundingBox`);
+    api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
     // remove layer from map
     api.map(mapId).layer.removeLayer(layer);
   };
