@@ -12,7 +12,8 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Réinitialiser la rotation"
+      "resetRotation": "Réinitialiser la rotation",
+      "fixedNorth": "Nord fixe"
     },
     "mouseposition": {
       "east": "E",

@@ -12,6 +12,7 @@ import { Scale } from '../scale/scale';
 import { MapContext } from '../../app-start';
 import { FooterbarExpandButton } from './footerbar-expand-button';
 import { FooterbarRotationButton } from './footerbar-rotation-button';
+import { FooterbarFixNorthSwitch } from './footerbar-fixnorth-switch';
 
 export const useStyles = makeStyles((theme) => ({
   footerBarContainer: {
@@ -36,6 +37,10 @@ export const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
   },
+  rotationControlsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
 }));
 
 /**
@@ -58,6 +63,7 @@ export function Footerbar(): JSX.Element {
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
 
   useEffect(() => {
+    // TODO: Is this still needed?
     // // listen to attribution update
     // api.event.on(
     //   EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE,
@@ -81,7 +87,10 @@ export function Footerbar(): JSX.Element {
         {deviceSizeMedUp && <MousePosition id={mapId} />}
         <Scale />
       </div>
-      <FooterbarRotationButton />
+      <div className={classes.rotationControlsContainer}>
+        <FooterbarRotationButton />
+        <FooterbarFixNorthSwitch />
+      </div>
     </div>
   );
 }

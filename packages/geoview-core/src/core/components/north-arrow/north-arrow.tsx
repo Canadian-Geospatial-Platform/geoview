@@ -19,6 +19,7 @@ import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
+import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
   northArrowContainer: {
@@ -32,8 +33,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // The north pole position use for north arrow marker and get north arrow rotation angle
-// north value (set longitude to be half of Canada extent (141° W, 70° W))
-const northPolePosition: [number, number] = [90, -106];
+// north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
+const northPolePosition: [number, number] = [90, -95];
 
 // interface used for NorthArrow props
 interface NorthArrowProps {
@@ -56,6 +57,12 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
   const [isNorthVisible, setIsNorthVisible] = useState(false);
   const [northOffset, setNorthOffset] = useState(0);
 
+  // keep track of rotation angle for fix north
+  let angle = 0;
+
+  // do not use useState for item used inside function only without rendering... use useRef
+  const isNorthFixedValue = useRef(false);
+
   // access transitions
   const defaultTheme = useTheme();
 
@@ -72,11 +79,15 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    */
   const getNorthArrowAngle = (map: OLMap): string => {
     try {
-      // north value (set longitude to be half of Canada extent (141° W, 70° W))
+      // north value
       const pointA = { x: northPolePosition[1], y: northPolePosition[0] };
 
-      // map center
-      const center: Coordinate = toLonLat(map.getView().getCenter()!, api.projection.projections[api.map(mapId).currentProjection]);
+      // map center (we use botton parallel to introduce less distortion)
+      const extent = map.getView().calculateExtent();
+      const center: Coordinate = toLonLat(
+        [(extent[0] + extent[2]) / 2, extent[1]],
+        api.projection.projections[api.map(mapId).currentProjection]
+      );
       const pointB = { x: center[0], y: center[1] };
 
       // set info on longitude and latitude
@@ -102,13 +113,16 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * @return {boolean} true if visible, false otherwise
    */
   function checkNorth(map: OLMap): boolean {
+    // update map size in case an appbar panel is open
+    map.updateSize();
+
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const pointXY = [map.getSize()![0] / 2, 1];
     const pt = toLonLat(map.getCoordinateFromPixel(pointXY), api.projection.projections[api.map(mapId).currentProjection]);
 
     // If user is pass north, long value will start to be positive (other side of the earth).
-    // This willl work only for LCC Canada.
+    // This will work only for LCC Canada.
     return pt ? pt[0] > 0 : true;
   }
 
@@ -119,42 +133,50 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * @param {number} angleDegrees north arrow rotation
    */
   function setOffset(map: OLMap, angleDegrees: number): void {
+    // update map size in case an appbar panel is open
+    map.updateSize();
+
     const mapWidth = map.getSize()![0] / 2;
     const arrowWidth = 24;
     const offsetX = mapWidth - arrowWidth / 2;
 
-    // hard code north pole so that arrow does not continue pointing past it
-    const screenNorthPoint = map.getPixelFromCoordinate(northPolePosition);
-    const screenY = screenNorthPoint[1];
+    if (!isNorthFixedValue.current) {
+      // hard code north pole so that arrow does not continue pointing past it
+      const screenNorthPoint = map.getPixelFromCoordinate(northPolePosition);
+      const screenY = screenNorthPoint[1];
 
-    // if the extent is near the north pole be more precise otherwise use the original math
-    // note: using the precise math would be ideal but when zooming in, the calculations make very
-    // large adjustments so reverting to the old less precise math provides a better experience.
-    const triangle = {
-      x: offsetX,
-      y: map.getPixelFromCoordinate(map.getView().getCenter()!)[1],
-      m: 1,
-    }; // original numbers
-    if (screenNorthPoint[0] < 2400 && screenNorthPoint[1] > -1300 && -screenNorthPoint[1] < 3000) {
-      // more precise
-      // eslint-disable-next-line prefer-destructuring
-      triangle.x = screenNorthPoint[0];
-      triangle.y = -screenNorthPoint[1];
-      triangle.m = -1;
+      // if the extent is near the north pole be more precise otherwise use the original math
+      // note: using the precise math would be ideal but when zooming in, the calculations make very
+      // large adjustments so reverting to the old less precise math provides a better experience.
+      const triangle = {
+        x: offsetX,
+        y: map.getPixelFromCoordinate(map.getView().getCenter()!)[1],
+        m: 1,
+      }; // original numbers
+      if (screenNorthPoint[0] < 2400 && screenNorthPoint[1] > -1300 && -screenNorthPoint[1] < 3000) {
+        // more precise
+        // eslint-disable-next-line prefer-destructuring
+        triangle.x = screenNorthPoint[0];
+        triangle.y = -screenNorthPoint[1];
+        triangle.m = -1;
+      }
+
+      // z is the hypotenuse line from center point to the top of the viewer. The triangle is always a right triangle
+      const z = triangle.y / Math.sin(angleDegrees * 0.01745329252); // 0.01745329252 is the radian conversion
+
+      // this would be the bottom of our triangle, the length from center to where the arrow should be placed
+      let screenX =
+        screenY < 0
+          ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * 0.01745329252) * z) - arrowWidth / 2
+          : screenNorthPoint[0] - arrowWidth;
+
+      // Limit the arrow to the bounds of the inner shell (+/- 25% from center)
+      screenX = Math.max(offsetX - mapWidth * 0.25, Math.min(screenX, offsetX + mapWidth * 0.25));
+
+      setNorthOffset(screenX);
+    } else {
+      setNorthOffset(offsetX);
     }
-
-    // z is the hypotenuse line from center point to the top of the viewer. The triangle is always a right triangle
-    const z = triangle.y / Math.sin(angleDegrees * 0.01745329252); // 0.01745329252 is the radian conversion
-
-    // this would be the bottom of our triangle, the length from center to where the arrow should be placed
-    let screenX =
-      screenY < 0
-        ? triangle.x + triangle.m * (Math.sin((90 - angleDegrees) * 0.01745329252) * z) - arrowWidth / 2
-        : screenNorthPoint[0] - arrowWidth;
-
-    // Limit the arrow to the bounds of the inner shell (+/- 25% from center)
-    screenX = Math.max(offsetX - mapWidth * 0.25, Math.min(screenX, offsetX + mapWidth * 0.25));
-    setNorthOffset(screenX);
   }
 
   /**
@@ -173,18 +195,37 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       //
       // Even embeded bounds.contains will not work because they work with bbox. Good in WM but terrible in LCC
       //
-      // All this happens because the arrow rotation is taken from the middle of the screen and in  LCC projection, the more you go north,
+      // All this happens because the arrow rotation is not constant accros the screen and in LCC projection, the more you go north,
       // the more distortion you have.
       // TODO: Add this to help doc, TODO: Check if it may creates problem with spatial intersect
       const isPassNorth = checkNorth(map);
       setIsNorthVisible(isPassNorth);
 
       if (!isPassNorth) {
-        // set rotation angle and offset
-        const angleDegrees = 270 - parseFloat(getNorthArrowAngle(map));
-        const mapRotation = map.getView().getRotation() * (180 / Math.PI);
+        const arrowAngle = parseFloat(getNorthArrowAngle(map));
+        const angleDegrees = 270 - arrowAngle;
 
-        setRotationAngle({ angle: 90 - angleDegrees + mapRotation });
+        // if north if fix and rotation round angle is different, apply rotation
+        // we check rotation because when zoom out, this function can run many time to adjust itself
+        if (isNorthFixedValue.current && (Math.round(angle) !== Math.round(arrowAngle) || map.getView().getZoom()! > 7)) {
+          angle = arrowAngle;
+
+          // set map rotation to keep fix north
+          api
+            .map(mapId)
+            .map.getView()
+            .animate({
+              rotation: ((180 - arrowAngle) * (2 * Math.PI)) / 360,
+            });
+
+          setRotationAngle({ angle: 0 });
+        } else {
+          // set arrow rotation
+          const mapRotation = map.getView().getRotation() * (180 / Math.PI);
+          setRotationAngle({ angle: 90 - angleDegrees + mapRotation });
+        }
+
+        // set arrow offset
         setOffset(map, angleDegrees);
       }
     }
@@ -207,8 +248,30 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
     // listen to map moveend event
     map.on('moveend', onMapMoveEnd);
+
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH,
+      (payload) => {
+        if (payloadIsABoolean(payload)) {
+          if (payload.handlerName!.includes(mapId)) {
+            isNorthFixedValue.current = payload.status;
+
+            // if north is fix, trigger the map rotation
+            if (payload.status) {
+              manageArrow(api.map(mapId).map);
+            }
+          }
+        }
+      },
+      mapId
+    );
+
+    return () => {
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH, mapId);
+      map.un('moveend', onMapMoveEnd);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mapId]);
 
   return projection === PROJECTION_NAMES.LCC ? (
     <div

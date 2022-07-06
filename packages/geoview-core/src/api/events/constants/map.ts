@@ -15,7 +15,8 @@ export type MapEventKey =
   | 'EVENT_MAP_REMOVE_COMPONENT'
   | 'EVENT_MAP_IN_KEYFOCUS'
   | 'EVENT_MAP_CROSSHAIR_ENABLE_DISABLE'
-  | 'EVENT_MAP_VIEW_PROJECTION_CHANGE';
+  | 'EVENT_MAP_VIEW_PROJECTION_CHANGE'
+  | 'EVENT_MAP_FIX_NORTH';
 
 /** Record that associates MAP's event keys to their event string id */
 export const MAP: Record<MapEventKey, EventStringId> = {
@@ -63,4 +64,9 @@ export const MAP: Record<MapEventKey, EventStringId> = {
    * Event triggered to change map view projection
    */
   EVENT_MAP_VIEW_PROJECTION_CHANGE: 'map/view_projection_change',
+
+  /**
+   * Event triggered when user fix north to stay straight
+   */
+  EVENT_MAP_FIX_NORTH: 'map/fix_north',
 };
