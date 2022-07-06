@@ -97,6 +97,7 @@ export type EventStringId =
   | 'map/inkeyfocus'
   | 'map/crosshair_enable_disable'
   | 'map/view_projection_change'
+  | 'map/fix_north'
   | 'layer/add'
   | 'layer/added'
   | 'layer/remove'

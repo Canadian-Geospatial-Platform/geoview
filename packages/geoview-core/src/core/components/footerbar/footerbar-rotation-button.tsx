@@ -11,8 +11,11 @@ import { ArrowUpIcon, IconButton } from '../../../ui';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
+import { EVENT_NAMES } from '../../../api/events/event';
+import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
+
 export const useStyles = makeStyles((theme) => ({
-  roationIcon: {
+  rotationIcon: {
     fontSize: `${theme.typography.fontSize}px !important`,
     color: `${theme.palette.primary.light}`,
   },
@@ -44,7 +47,10 @@ export function FooterbarRotationButton(): JSX.Element {
     });
   };
 
-  useEffect(() => {
+  /**
+   * Set the rotation icon on masp view rotation change
+   */
+  const setViewRotationEvent = () => {
     const { map } = api.map(mapId);
 
     map.getView().on('change:rotation', (e) => {
@@ -56,7 +62,36 @@ export function FooterbarRotationButton(): JSX.Element {
         icon.style.transform = `rotate(${rotation}rad)`;
       }
     });
-  }, [mapId]);
+  };
+
+  useEffect(() => {
+    // set rotation change event
+    setViewRotationEvent();
+
+    // listen to geoview-basemap-panel package change projection event to reset icon rotation
+    api.event.on(
+      EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
+      (payload) => {
+        if (payload.handlerName === mapId && payloadIsAMapViewProjection(payload)) {
+          // reset icon rotation to 0 because the new view rotation is 0
+          // will be set again by proper function if needed (i.e. if fix north switch is checked)
+          if (iconRef && iconRef.current) {
+            const icon = iconRef.current as HTMLElement;
+            icon.style.transform = `rotate(${0}rad)`;
+          }
+
+          // recreate the event on projection change because there is a new view
+          setViewRotationEvent();
+        }
+      },
+      mapId
+    );
+
+    return () => {
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <IconButton
@@ -65,7 +100,7 @@ export function FooterbarRotationButton(): JSX.Element {
       title={t('mapctrl.rotation.resetRotation')}
       onClick={() => resetRotation()}
     >
-      <ArrowUpIcon ref={iconRef} className={`${classes.roationIcon}`} />
+      <ArrowUpIcon ref={iconRef} className={`${classes.rotationIcon}`} />
     </IconButton>
   );
 }
