@@ -41,11 +41,12 @@
             "type": "string",
             "description": "The display field (English) of the layer. If it is not present the viewer will make an attempt to find the first valid field."
           },
-           "fr": {
+          "fr": {
             "type": "string",
             "description": "The display field (French) of the layer. If it is not present the viewer will make an attempt to find the first valid field."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "tooltipField": {
         "type": "object",
@@ -54,11 +55,12 @@
             "type": "string",
             "description": "The field (English) to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
           },
-           "fr": {
+          "fr": {
             "type": "string",
             "description": "The field (French) to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "outfields": {
         "type": "object",
@@ -68,12 +70,13 @@
             "default": "*",
             "description": "A comma separated list of attribute names (English) that should be requested on query (all by default)."
           },
-           "fr": {
+          "fr": {
             "type": "string",
             "default": "*",
             "description": "A comma separated list of attribute names (French) that should be requested on query (all by default)."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "aliasFields": {
         "type": "object",
@@ -83,15 +86,15 @@
             "default": "",
             "description": "A comma separated list of attribute names (English) that should be use for alias. If empty, no alias will be set if not found."
           },
-           "fr": {
+          "fr": {
             "type": "string",
             "default": "",
             "description": "A comma separated list of attribute names (French) that should be use for alias. If empty, no alias will be set if not found."
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
-
 
     "fillSymbolNode": {
       "type": "object",
@@ -99,22 +102,24 @@
       "properties": {
         "color": {
           "type": "string"
-          }
+        }
       },
-      "required": ["color"]
+      "required": ["color"],
+      "additionalProperties": false
     },
     "strokeSymbolNode": {
       "type": "object",
       "description": "Stroke style for vector features.",
       "properties": {
-         "color": {
+        "color": {
           "type": "string"
         },
         "width": {
           "type": "number"
         }
       },
-      "required": ["color", "width"]
+      "required": ["color", "width"],
+      "additionalProperties": false
     },
     "simpleSymbolVectorSettings": {
       "type": "object",
@@ -124,7 +129,8 @@
         "radius": {
           "type": "number"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "circleSymbolVectorSettings": {
       "type": "object",
@@ -135,7 +141,8 @@
           "type": "number"
         }
       },
-      "required": ["radius"]
+      "required": ["radius"],
+      "additionalProperties": false
     },
     "iconSymbolVectorSettings": {
       "type": "object",
@@ -157,7 +164,8 @@
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "simpleStyleNode": {
       "type": "object",
@@ -174,13 +182,14 @@
         },
         "options": {
           "oneOf": [
-            { "$ref": "simpleSymbolVectorSettings" },
-            { "$ref": "circleSymbolVectorSettings" },
-            { "$ref": "iconSymbolVectorSettings" }
+            { "$ref": "#/definitions/simpleSymbolVectorSettings" },
+            { "$ref": "#/definitions/circleSymbolVectorSettings" },
+            { "$ref": "#/definitions/iconSymbolVectorSettings" }
           ]
         }
       },
-      "required": ["styleType", "label", "options"]
+      "required": ["styleType", "label", "options"],
+      "additionalProperties": false
     },
     "uniqueValueStyleNode": {
       "type": "object",
@@ -227,7 +236,8 @@
           "required": ["label", "values", "options"]
         }
       },
-      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"]
+      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"],
+      "additionalProperties": false
     },
     "classBreakStyleNode": {
       "type": "object",
@@ -266,10 +276,11 @@
             }
           },
           "minItems": 2,
-          "required": ["label", "minValue",  "maxValue", "options"]
+          "required": ["label", "minValue", "maxValue", "options"]
         }
       },
-      "required": ["styleType", "label", "field", "classBreakStyleInfo"]
+      "required": ["styleType", "label", "field", "classBreakStyleInfo"],
+      "additionalProperties": false
     },
     "styleNode": {
       "oneOf": [
@@ -278,7 +289,36 @@
         { "$ref": "#/definitions/classBreakStyleNode" }
       ]
     },
-
+    "layerMetadataUrlNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string",
+          "default": null,
+          "description": "The metadata url of the layer service (English)."
+        },
+        "fr": {
+          "type": "string",
+          "default": null,
+          "description": "The metadata url of the layer service (French)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "layerNameNode": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string",
+          "description": "The display name of the layer (English). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "fr": {
+          "type": "string",
+          "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
+        }
+      },
+      "additionalProperties": false
+    },
     "layerBasicInfoNode": {
       "type": "object",
       "properties": {
@@ -297,7 +337,8 @@
               "type": "string",
               "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
             }
-          }
+          },
+          "additionalProperties": false
         },
         "layerMetadataUrlNode": {
           "type": "object",
@@ -312,14 +353,16 @@
               "default": null,
               "description": "The metadata url of the layer service (French)."
             }
-          }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     "layerInitialSettingsNode": {
       "type": "object",
       "properties": {
-        "layerOpacityNode":{
+        "layerOpacityNode": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
@@ -335,6 +378,9 @@
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "layerMinZoomNode": {
@@ -349,7 +395,8 @@
           "type": "string",
           "description": "A CSS class name to set to the layer element."
         }
-      }
+      },
+      "additionalProperties": false
     },
 
     "sourceUrlNode": {
@@ -363,12 +410,13 @@
           "type": "string",
           "description": "The service endpoint of the layer (French). It should match the type provided in layerType."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "sourceInitialSettingsNode": {
       "type": "object",
       "properties": {
-        "layerOpacityNode":{
+        "layerOpacityNode": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
@@ -385,14 +433,15 @@
           "default": true,
           "description": "Allow querying."
         }
-      }
+      },
+      "additionalProperties": false
     },
 
     "vectorSourceInitialSettings": {
       "type": "object",
       "properties": {
         "format": {
-          "type":"string",
+          "type": "string",
           "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI"],
           "description": "The feature format used by the XHR feature loader when url is set."
         },
@@ -413,10 +462,12 @@
               "type": "integer",
               "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
-      "required": ["format"]
+      "required": ["format"],
+      "additionalProperties": false
     },
     "esriImageSourceLayerNode": {
       "type": "object",
@@ -453,7 +504,7 @@
     "sourceImageInitialSettings": {
       "type": "object",
       "properties": {
-        "url": { "$ref": "#definitions/sourceUrlNode" },
+        "url": { "$ref": "#/definitions/sourceUrlNode" },
         "sourceType": {
           "type": "string",
           "enum": ["WMS, ESRI"],
@@ -475,7 +526,8 @@
               "default": "",
               "description": "Style to apply"
             }
-          }
+          },
+          "additionalProperties": false
         },
         "paramsESRI": {
           "type": "object",
@@ -500,7 +552,8 @@
               "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency."
             }
           },
-          "description": "ArcGIS Rest parameters. This field is optional. Service defaults will be used for any fields not specified. https://developers.arcgis.com/rest/services-reference/enterprise/export-map.htm"
+          "description": "ArcGIS Rest parameters. This field is optional. Service defaults will be used for any fields not specified. https://developers.arcgis.com/rest/services-reference/enterprise/export-map.htm",
+          "additionalProperties": false
         },
         "crossOrigin": {
           "type": "string",
@@ -516,15 +569,13 @@
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         }
       },
-      "oneOf": [
-        { "required": ["url", "sourceType", "paramsWMS"] },
-        { "required": ["url", "sourceType", "paramsESRI"] }
-      ]
+      "oneOf": [{ "required": ["url", "sourceType", "paramsWMS"] }, { "required": ["url", "sourceType", "paramsESRI"] }],
+      "additionalProperties": false
     },
     "sourceTileInitialSettings": {
       "sourceType": "object",
       "properties": {
-        "url": { "$ref": "#definitions/sourceUrlNode" },
+        "url": { "$ref": "#/definitions/sourceUrlNode" },
         "sourceType": {
           "type": "string",
           "enum": ["XYZ, GeoTIFF"],
@@ -588,17 +639,19 @@
               "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
             }
           },
-          "required": ["origin", "resolutions"]
+          "required": ["origin", "resolutions"],
+          "additionalProperties": false
         }
       },
-      "required": ["url", "sourceType"]
+      "required": ["url", "sourceType"],
+      "additionalProperties": false
     },
 
     "vectorHeatmapLayerNode": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoNode" },
-        "initialSettings": { "$ref": "#/definitions/layerinitialSettingsNode" },
+        "initialSettings": { "$ref": "#/definitions/layerInitialSettingsNode" },
         "layerType": {
           "type": "string",
           "enum": ["vectorHeatmap"],
@@ -606,7 +659,7 @@
         },
         "source": { "$ref": "#/definitions/vectorSourceInitialSettings" },
         "gradient": {
-          "type":"array",
+          "type": "array",
           "items": {
             "type": "string"
           },
@@ -628,13 +681,14 @@
           "description": "Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature."
         }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "vectorLayerNode": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoNode" },
-        "initialSettings": { "$ref": "#/definitions/layerinitialSettingsNode" },
+        "initialSettings": { "$ref": "#/definitions/layerInitialSettingsNode" },
         "layerType": {
           "type": "string",
           "enum": ["vector"],
@@ -643,14 +697,15 @@
         "sourceType": { "$ref": "#/definitions/vectorSourceInitialSettings" },
         "style": { "$ref": "#/definitions/styleNode" }
       },
-      "required": ["layerType", "sourceType"]
+      "required": ["layerType", "sourceType"],
+      "additionalProperties": false
     },
     "vectorTileLayerNode": {
       "type": "object",
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoNode" },
-        "initialSettings": { "$ref": "#/definitions/layerinitialSettingsNode" },
+        "initialSettings": { "$ref": "#/definitions/layerInitialSettingsNode" },
         "layerType": {
           "type": "string",
           "enum": ["vectorTile"],
@@ -660,14 +715,14 @@
           "type": "object",
           "description": "Layer sources providing vector data divided into a tile grid.",
           "properties": {
-            "url": { "$ref": "#definitions/sourceUrlNode" },
+            "url": { "$ref": "#/definitions/sourceUrlNode" },
             "sourceType": {
               "type": "string",
               "enum": ["vectorTile"],
               "default": "vectorTile"
             },
             "format": {
-              "type":"string",
+              "type": "string",
               "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "MVT", "featureAPI"],
               "description": "The feature format used by the XHR feature loader when url is set."
             },
@@ -731,19 +786,22 @@
                   "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
                 }
               },
-              "required": ["origin", "resolutions"]
+              "required": ["origin", "resolutions"],
+              "additionalProperties": false
             }
           },
-          "required": ["url", "sourceType"]
+          "required": ["url", "sourceType"],
+          "additionalProperties": false
         }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "imageLayerNode": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoNode" },
-        "initialSettings": { "$ref": "#/definitions/layerinitialSettingsNode" },
+        "initialSettings": { "$ref": "#/definitions/layerInitialSettingsNode" },
         "layerType": {
           "type": "string",
           "enum": ["image"],
@@ -751,13 +809,14 @@
         },
         "source": { "$ref": "#/definitions/sourceImageInitialSettings" }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "tileLayerNode": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoNode" },
-        "initialSettings": { "$ref": "#/definitions/layerinitialSettingsNode" },
+        "initialSettings": { "$ref": "#/definitions/layerInitialSettingsNode" },
         "layerType": {
           "type": "string",
           "enum": ["tile"],
@@ -765,7 +824,8 @@
         },
         "source": { "$ref": "#/definitions/sourceTileInitialSettings" }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "geoCoreLayerNode": {
       "type": "object",
@@ -787,7 +847,6 @@
       "required": ["id", "layerType"],
       "additionalProperties": false
     },
-
     "basicLayer": {
       "type": "object",
       "properties": {
@@ -799,14 +858,15 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
           "enum": ["ogcWms", "ogcWfs", "geoJson", "csv", "esriDynamic", "esriFeature", "esriImage", "esriTile"]
         }
       },
-      "required": ["id", "layerType", "url"]
+      "required": ["id", "layerType", "url"],
+      "additionalProperties": false
     },
     "basicLayerNode": {
       "type": "object",
@@ -820,7 +880,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
@@ -830,7 +890,7 @@
           "$ref": "#/definitions/layerMetadataUrlNode"
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -850,7 +910,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
@@ -873,7 +933,7 @@
           "description": "A comma separated list of attribute names that should be requested on query."
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -893,7 +953,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
@@ -910,7 +970,7 @@
           "minItems": 1
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -939,7 +999,7 @@
           "description": "A comma separated list of attribute names that should be requested on query."
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         }
       },
       "required": ["index"],
@@ -956,7 +1016,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
@@ -976,7 +1036,7 @@
           "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -996,7 +1056,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerEntries": {
           "type": "array",
@@ -1023,7 +1083,7 @@
           "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -1043,7 +1103,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         }
       },
       "required": ["id"],
@@ -1060,7 +1120,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerEntries": {
           "type": "array",
@@ -1077,7 +1137,7 @@
           "$ref": "#/definitions/layerMetadataUrlNode"
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -1097,7 +1157,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         }
       },
       "required": ["id"],
@@ -1114,7 +1174,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
@@ -1134,7 +1194,7 @@
           "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -1143,7 +1203,6 @@
       "required": ["id", "name", "layerType", "url"],
       "additionalProperties": false
     },
-
     "xyzTilesLayerNode": {
       "type": "object",
       "properties": {
@@ -1155,7 +1214,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerType": {
           "type": "string",
@@ -1178,7 +1237,7 @@
           "description": "A comma separated list of attribute names that should be requested on query."
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -1198,7 +1257,7 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "url": {
-          "$ref": "#/definitions/layerUrlNode"
+          "$ref": "#/definitions/sourceUrlNode"
         },
         "layerEntries": {
           "type": "array",
@@ -1215,7 +1274,7 @@
           "$ref": "#/definitions/layerMetadataUrlNode"
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         },
         "details": {
           "$ref": "#/definitions/detailsLayerSettings"
@@ -1235,16 +1294,15 @@
           "$ref": "#/definitions/layerNameNode"
         },
         "state": {
-          "$ref": "#/definitions/initialLayerSettings"
+          "$ref": "#/definitions/layerInitialSettingsNode"
         }
       },
       "required": ["id"],
       "additionalProperties": false
     },
-
-
     "layerNode": {
       "type": "object",
+      "additionalProperties": false,
       "oneOf": [
         { "$ref": "#/definitions/vectorHeatmapLayerNode" },
         { "$ref": "#/definitions/vectorTileLayerNode" },
@@ -1254,7 +1312,6 @@
         { "$ref": "#/definitions/geoCoreLayerNode" }
       ]
     },
-
     "layerList": {
       "type": "array",
       "items": {
@@ -1290,7 +1347,7 @@
           },
           "required": ["id", "shaded", "labeled"]
         },
-        "interactive": {
+        "interaction": {
           "type": "string",
           "enum": ["static", "dynamic"],
           "default": "dynamic",
@@ -1374,29 +1431,23 @@
               "maximum": 28,
               "default": 12,
               "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
-            },
-            "extraOptions": {
-              "type": "object",
-              "description": "Additional options used for OpenLayers view options"
             }
           },
-          "required": ["zoom", "center"]
+          "required": ["zoom", "center", "projection"]
         },
         "extraOptions": {
           "type": "object",
           "description": "Additional options used for OpenLayers map options"
         }
       },
-      "required": [ "basemapOptions", "interactive", "view"]
+      "required": ["basemapOptions", "interaction", "view"]
     },
-
     "theme": {
       "type": "string",
       "enum": ["dark", "light"],
       "default": "dark",
       "description": "Theme style the viewer."
     },
-
     "appBar": {
       "type": "object",
       "properties": {
@@ -1426,7 +1477,6 @@
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
     },
-
     "components": {
       "type": "array",
       "uniqueItems": true,
@@ -1469,7 +1519,6 @@
       "description": "List of external packages to initialize on viewer load.",
       "minItems": 0
     },
-
     "serviceUrls": {
       "type": "object",
       "description": "Service endpoint urls",
@@ -1485,7 +1534,6 @@
         }
       }
     },
-
     "languages": {
       "type": "array",
       "uniqueItems": true,

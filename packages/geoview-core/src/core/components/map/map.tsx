@@ -119,7 +119,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   const initMap = async () => {
     // create map
-    const projection = api.projection.projections[mapProps.projection];
+    const projection = api.projection.projections[mapProps.view.projection];
 
     const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
 
@@ -139,8 +139,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       }),
       view: new View({
         projection,
-        center: fromLonLat([mapProps.initialView.center[0], mapProps.initialView.center[1]], projection),
-        zoom: mapProps.initialView.zoom,
+        center: fromLonLat([mapProps.view.center[0], mapProps.view.center[1]], projection),
+        zoom: mapProps.view.zoom,
         // extent: projectionConfig.extent,
         extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
         minZoom: defaultBasemap?.zoomLevels.min || 0,
@@ -227,11 +227,11 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
       {isLoaded && (
         <>
-          {components !== undefined && components.indexOf('northArrow') > -1 && (
+          {components !== undefined && components.indexOf('north-arrow') > -1 && (
             <NorthArrow projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           )}
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
-          {deviceSizeMedUp && components !== undefined && components.indexOf('overviewMap') > -1 && <OverviewMap />}
+          {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>
       )}

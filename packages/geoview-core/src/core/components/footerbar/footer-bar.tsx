@@ -1,4 +1,4 @@
-import { MutableRefObject, useContext, useEffect, useRef } from 'react';
+import { MutableRefObject, useContext, useRef } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 

@@ -1,11 +1,11 @@
 {
   "map": {
     "interaction": "static",
-    "initialView": {
+    "view": {
       "zoom": 4,
-      "center": [-100, 60]
+      "center": [-100, 60],
+      "projection": 3978
     },
-    "projection": 3978,
     "basemapOptions": {
       "id": "transport",
       "shaded": true,
@@ -38,11 +38,7 @@
           }
         ]
       }
-    ],
-    "controls": {
-      "selectBox": true,
-      "boxZoom": true
-    }
+    ]
   },
   "components": [],
   "theme": "dark",

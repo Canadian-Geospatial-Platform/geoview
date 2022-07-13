@@ -80,7 +80,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
     (config.supportedProjections as Array<TypeJsonObject>).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
-  const [mapProjection, setMapProjection] = useState(myMap.mapProps.map.projection);
+  const [mapProjection, setMapProjection] = useState(myMap.mapProps.map.view.projection);
 
   /**
    * Update the basemap with the layers on the map

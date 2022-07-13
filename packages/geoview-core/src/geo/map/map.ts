@@ -98,10 +98,10 @@ export class MapViewer {
     this.mapProps = mapProps;
 
     this.language = mapProps.language;
-    this.currentProjection = mapProps.map.projection;
+    this.currentProjection = mapProps.map.view.projection;
     this.i18nInstance = i18instance;
-    this.currentZoom = mapProps.map.initialView.zoom;
-    this.currentPosition = [mapProps.map.initialView.center[0], mapProps.map.initialView.center[1]];
+    this.currentZoom = mapProps.map.view.zoom;
+    this.currentPosition = [mapProps.map.view.center[0], mapProps.map.view.center[1]];
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
@@ -109,7 +109,7 @@ export class MapViewer {
     this.modal = new ModalApi(this.id);
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.projection, this.id);
+    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.view.projection, this.id);
   }
 
   /**
@@ -234,10 +234,10 @@ export class MapViewer {
     this.map.setView(
       new View({
         projection,
-        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.initialView.zoom,
+        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.view.zoom,
         center: mapView.center
           ? fromLonLat([mapView.center[0], mapView.center[1]], projection)
-          : fromLonLat([this.mapProps.map.initialView.center[0], this.mapProps.map.initialView.center[1]], projection),
+          : fromLonLat([this.mapProps.map.view.center[0], this.mapProps.map.view.center[1]], projection),
         extent: mapView.extent,
         resolution: mapView.resolution,
         minZoom: mapView.minZoom,

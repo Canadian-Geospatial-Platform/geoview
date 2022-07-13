@@ -1,14 +1,10 @@
 {
   "map": {
     "interaction": "dynamic",
-    "controls": {
-      "boxZoom": true,
-      "selectBox": true
-    },
-    "projection": 3978,
-    "initialView": {
+    "view": {
       "zoom": 12,
-      "center": [-100, 60]
+      "center": [-100, 60],
+      "projection": 3978
     },
     "basemapOptions": {
       "id": "transport",
@@ -110,7 +106,7 @@
     ]
   },
   "theme": "dark",
-  "components": ["appbar", "navbar", "northArrow", "overviewMap"],
+  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "serviceUrls": {

@@ -61,27 +61,25 @@ export class Config {
   private _config: TypeMapSchemaProps = {
     map: {
       interaction: 'dynamic',
-      initialView: {
+      view: {
         zoom: 4,
         center: [-100, 60],
+        projection: 3978,
+        enableRotation: true,
+        rotation: 0,
       },
-      projection: 3978,
       basemapOptions: {
         id: 'transport',
         shaded: true,
         labeled: true,
       },
       layers: [],
-      controls: {
-        selectBox: true,
-        boxZoom: true,
-      },
+      extraOptions: {},
     },
     theme: 'dark',
-    components: ['appbar', 'navbar', 'northArrow', 'overviewMap'],
+    components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
     corePackages: [],
     languages: ['en-CA', 'fr-CA'],
-    extraOptions: {},
   };
 
   // validations values
@@ -337,17 +335,17 @@ export class Config {
       configObj = {
         map: {
           interaction: urlParams.i as TypeInteraction,
-          initialView: {
+          view: {
             zoom: parseInt(urlParams.z as TypeJsonValue as string, 10),
             center: [parseInt(center[0], 10), parseInt(center[1], 10)],
+            projection: parseInt(urlParams.p as TypeJsonValue as '3978' | '3857', 10),
           },
-          projection: parseInt(urlParams.p as TypeJsonValue as '3978' | '3857', 10),
           basemapOptions,
           layers,
+          extraOptions: {},
         },
         languages: ['en-CA', 'fr-CA'],
         corePackages,
-        extraOptions: {},
       };
 
       // update language if provided from params
@@ -650,29 +648,28 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
-    const projection = this.validateProjection(Number(tmpConfig.map.projection));
+    const projection = this.validateProjection(Number(tmpConfig.map.view.projection));
     const basemapOptions = this.validateBasemap(projection, tmpConfig.map.basemapOptions);
-    const center = this.validateCenter(projection, tmpConfig.map.initialView.center);
-    const zoom = this.validateZoom(Number(tmpConfig.map.initialView.zoom));
+    const center = this.validateCenter(projection, tmpConfig.map.view.center);
+    const zoom = this.validateZoom(Number(tmpConfig.map.view.zoom));
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapSchemaProps = {
       map: {
         basemapOptions,
-        initialView: {
+        view: {
           zoom,
           center,
+          projection,
         },
         interaction: tmpConfig.map.interaction,
-        projection,
-        controls: tmpConfig.map.controls,
         layers: tmpConfig.map.layers,
+        extraOptions: tmpConfig.map.extraOptions,
       },
       theme: tmpConfig.theme,
       components: tmpConfig.components,
       corePackages: tmpConfig.corePackages,
       languages: tmpConfig.languages,
-      extraOptions: tmpConfig.extraOptions,
       appBar: tmpConfig.appBar,
       externalPackages: tmpConfig.externalPackages,
     };
@@ -694,20 +691,18 @@ export class Config {
       }
     });
 
-    if (inConfig.map.projection !== validConfig.map.projection) {
-      console.log(`- map: ${this.id} - Invalid projection ${inConfig.map.projection} replaced by ${validConfig.map.projection} -`);
-    }
-
-    if (inConfig.map.initialView.zoom !== validConfig.map.initialView.zoom) {
+    if (inConfig.map.view.projection !== validConfig.map.view.projection) {
       console.log(
-        `- map: ${this.id} - Invalid zoom level ${inConfig.map.initialView.zoom} replaced by ${validConfig.map.initialView.zoom} -`
+        `- map: ${this.id} - Invalid projection ${inConfig.map.view.projection} replaced by ${validConfig.map.view.projection} -`
       );
     }
 
-    if (JSON.stringify(inConfig.map.initialView.center) !== JSON.stringify(validConfig.map.initialView.center)) {
-      console.log(
-        `- map: ${this.id} - Invalid center ${inConfig.map.initialView.center} replaced by ${validConfig.map.initialView.center}`
-      );
+    if (inConfig.map.view.zoom !== validConfig.map.view.zoom) {
+      console.log(`- map: ${this.id} - Invalid zoom level ${inConfig.map.view.zoom} replaced by ${validConfig.map.view.zoom} -`);
+    }
+
+    if (JSON.stringify(inConfig.map.view.center) !== JSON.stringify(validConfig.map.view.center)) {
+      console.log(`- map: ${this.id} - Invalid center ${inConfig.map.view.center} replaced by ${validConfig.map.view.center}`);
     }
 
     if (JSON.stringify(inConfig.map.basemapOptions) !== JSON.stringify(validConfig.map.basemapOptions)) {
@@ -762,11 +757,11 @@ export class Config {
     const x =
       !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
         ? xVal
-        : this._config.map.initialView.center[0];
+        : this._config.map.view.center[0];
     const y =
       !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
         ? yVal
-        : this._config.map.initialView.center[1];
+        : this._config.map.view.center[1];
 
     return [x, y];
   }
@@ -777,7 +772,7 @@ export class Config {
    * @returns {number} valid zoom level
    */
   private validateZoom(zoom: number): number {
-    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.initialView.zoom;
+    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.view.zoom;
   }
 
   /**
