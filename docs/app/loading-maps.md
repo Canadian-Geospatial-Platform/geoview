@@ -43,11 +43,11 @@ The content of the config must match the schema, an example of the object in the
 {
   "map": {
     "interaction": "dynamic",
-    "initialView": {
+    "view": {
       "zoom": 12,
-      "center": [45, 75]
+      "center": [45, 75],
+      "projection": 3978
     },
-    "projection": 3978,
     "basemapOptions": {
       "id": "transport",
       "shaded": true,
@@ -88,11 +88,11 @@ An example of this:
   data-config="{
                     'map': {
                         'interaction': 'dynamic',
-                        'initialView': {
+                        'view': {
                             'zoom': 12,
                             'center': [45,75],
+                            'projection': 3978
                         },
-                        'projection': 3978,
                         'basemapOptions': {
                             'id': 'transport',
                             'shaded': true,
@@ -163,11 +163,11 @@ cgpv.init(function() {
     cgpv.api.map('mapWM').loadConfig({
         map: {
             interaction: 'dynamic',
-            initialView: {
+            view: {
                 zoom: 12,
                 center: [45, 75],
+                projection: 3978
             },
-            projection: 3978,
             basemapOptions: {
                 id: 'transport',
                 shaded: true,
