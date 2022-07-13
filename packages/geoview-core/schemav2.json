@@ -45,7 +45,8 @@
             "type": "string",
             "description": "The display field (French) of the layer. If it is not present the viewer will make an attempt to find the first valid field."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "tooltipField": {
         "type": "object",
@@ -58,7 +59,8 @@
             "type": "string",
             "description": "The field (French) to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "outfields": {
         "type": "object",
@@ -73,7 +75,8 @@
             "default": "*",
             "description": "A comma separated list of attribute names (French) that should be requested on query (all by default)."
           }
-        }
+        },
+        "additionalProperties": false
       },
       "aliasFields": {
         "type": "object",
@@ -88,7 +91,8 @@
             "default": "",
             "description": "A comma separated list of attribute names (French) that should be use for alias. If empty, no alias will be set if not found."
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
 
@@ -100,7 +104,8 @@
           "type": "string"
         }
       },
-      "required": ["color"]
+      "required": ["color"],
+      "additionalProperties": false
     },
     "strokeSymbolNode": {
       "type": "object",
@@ -113,7 +118,8 @@
           "type": "number"
         }
       },
-      "required": ["color", "width"]
+      "required": ["color", "width"],
+      "additionalProperties": false
     },
     "simpleSymbolVectorSettings": {
       "type": "object",
@@ -123,7 +129,8 @@
         "radius": {
           "type": "number"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "circleSymbolVectorSettings": {
       "type": "object",
@@ -134,7 +141,8 @@
           "type": "number"
         }
       },
-      "required": ["radius"]
+      "required": ["radius"],
+      "additionalProperties": false
     },
     "iconSymbolVectorSettings": {
       "type": "object",
@@ -156,7 +164,8 @@
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "simpleStyleNode": {
       "type": "object",
@@ -179,7 +188,8 @@
           ]
         }
       },
-      "required": ["styleType", "label", "options"]
+      "required": ["styleType", "label", "options"],
+      "additionalProperties": false
     },
     "uniqueValueStyleNode": {
       "type": "object",
@@ -226,7 +236,8 @@
           "required": ["label", "values", "options"]
         }
       },
-      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"]
+      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"],
+      "additionalProperties": false
     },
     "classBreakStyleNode": {
       "type": "object",
@@ -268,7 +279,8 @@
           "required": ["label", "minValue", "maxValue", "options"]
         }
       },
-      "required": ["styleType", "label", "field", "classBreakStyleInfo"]
+      "required": ["styleType", "label", "field", "classBreakStyleInfo"],
+      "additionalProperties": false
     },
     "styleNode": {
       "oneOf": [
@@ -290,7 +302,8 @@
           "default": null,
           "description": "The metadata url of the layer service (French)."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "layerNameNode": {
       "type": "object",
@@ -303,7 +316,8 @@
           "type": "string",
           "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "layerBasicInfoNode": {
       "type": "object",
@@ -323,7 +337,8 @@
               "type": "string",
               "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
             }
-          }
+          },
+          "additionalProperties": false
         },
         "layerMetadataUrlNode": {
           "type": "object",
@@ -338,9 +353,11 @@
               "default": null,
               "description": "The metadata url of the layer service (French)."
             }
-          }
+          },
+          "additionalProperties": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     "layerInitialSettingsNode": {
       "type": "object",
@@ -378,7 +395,8 @@
           "type": "string",
           "description": "A CSS class name to set to the layer element."
         }
-      }
+      },
+      "additionalProperties": false
     },
 
     "sourceUrlNode": {
@@ -392,7 +410,8 @@
           "type": "string",
           "description": "The service endpoint of the layer (French). It should match the type provided in layerType."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "sourceInitialSettingsNode": {
       "type": "object",
@@ -414,7 +433,8 @@
           "default": true,
           "description": "Allow querying."
         }
-      }
+      },
+      "additionalProperties": false
     },
 
     "vectorSourceInitialSettings": {
@@ -442,10 +462,12 @@
               "type": "integer",
               "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
-      "required": ["format"]
+      "required": ["format"],
+      "additionalProperties": false
     },
     "esriImageSourceLayerNode": {
       "type": "object",
@@ -504,7 +526,8 @@
               "default": "",
               "description": "Style to apply"
             }
-          }
+          },
+          "additionalProperties": false
         },
         "paramsESRI": {
           "type": "object",
@@ -529,7 +552,8 @@
               "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency."
             }
           },
-          "description": "ArcGIS Rest parameters. This field is optional. Service defaults will be used for any fields not specified. https://developers.arcgis.com/rest/services-reference/enterprise/export-map.htm"
+          "description": "ArcGIS Rest parameters. This field is optional. Service defaults will be used for any fields not specified. https://developers.arcgis.com/rest/services-reference/enterprise/export-map.htm",
+          "additionalProperties": false
         },
         "crossOrigin": {
           "type": "string",
@@ -545,7 +569,8 @@
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         }
       },
-      "oneOf": [{ "required": ["url", "sourceType", "paramsWMS"] }, { "required": ["url", "sourceType", "paramsESRI"] }]
+      "oneOf": [{ "required": ["url", "sourceType", "paramsWMS"] }, { "required": ["url", "sourceType", "paramsESRI"] }],
+      "additionalProperties": false
     },
     "sourceTileInitialSettings": {
       "sourceType": "object",
@@ -614,10 +639,12 @@
               "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
             }
           },
-          "required": ["origin", "resolutions"]
+          "required": ["origin", "resolutions"],
+          "additionalProperties": false
         }
       },
-      "required": ["url", "sourceType"]
+      "required": ["url", "sourceType"],
+      "additionalProperties": false
     },
 
     "vectorHeatmapLayerNode": {
@@ -654,7 +681,8 @@
           "description": "Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature."
         }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "vectorLayerNode": {
       "type": "object",
@@ -669,7 +697,8 @@
         "sourceType": { "$ref": "#/definitions/vectorSourceInitialSettings" },
         "style": { "$ref": "#/definitions/styleNode" }
       },
-      "required": ["layerType", "sourceType"]
+      "required": ["layerType", "sourceType"],
+      "additionalProperties": false
     },
     "vectorTileLayerNode": {
       "type": "object",
@@ -757,13 +786,16 @@
                   "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
                 }
               },
-              "required": ["origin", "resolutions"]
+              "required": ["origin", "resolutions"],
+              "additionalProperties": false
             }
           },
-          "required": ["url", "sourceType"]
+          "required": ["url", "sourceType"],
+          "additionalProperties": false
         }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "imageLayerNode": {
       "type": "object",
@@ -777,7 +809,8 @@
         },
         "source": { "$ref": "#/definitions/sourceImageInitialSettings" }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "tileLayerNode": {
       "type": "object",
@@ -791,7 +824,8 @@
         },
         "source": { "$ref": "#/definitions/sourceTileInitialSettings" }
       },
-      "required": ["layerType", "source"]
+      "required": ["layerType", "source"],
+      "additionalProperties": false
     },
     "geoCoreLayerNode": {
       "type": "object",
@@ -831,7 +865,8 @@
           "enum": ["ogcWms", "ogcWfs", "geoJson", "csv", "esriDynamic", "esriFeature", "esriImage", "esriTile"]
         }
       },
-      "required": ["id", "layerType", "url"]
+      "required": ["id", "layerType", "url"],
+      "additionalProperties": false
     },
     "basicLayerNode": {
       "type": "object",
@@ -1267,6 +1302,7 @@
     },
     "layerNode": {
       "type": "object",
+      "additionalProperties": false,
       "oneOf": [
         { "$ref": "#/definitions/vectorHeatmapLayerNode" },
         { "$ref": "#/definitions/vectorTileLayerNode" },
