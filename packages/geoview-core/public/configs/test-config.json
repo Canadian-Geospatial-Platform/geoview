@@ -1,11 +1,11 @@
 {
   "map": {
     "interaction": "dynamic",
-    "initialView": {
+    "view": {
       "zoom": 4,
-      "center": [-110, 50]
+      "center": [-110, 50],
+      "projection": 3978
     },
-    "projection": 3978,
     "basemapOptions": {
       "id": "transport",
       "shaded": true,
@@ -38,11 +38,7 @@
           }
         ]
       }
-    ],
-    "controls": {
-      "selectBox": true,
-      "boxZoom": true
-    }
+    ]
   },
   "corePackages": ["basemap-panel"],
   "components": ["navbar", "appbar"],

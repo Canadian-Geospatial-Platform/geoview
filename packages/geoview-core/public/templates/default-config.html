@@ -73,11 +73,11 @@
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'initialView': {
+            'view': {
               'zoom': 4,
-              'center': [-100, x]
+              'center': [-100, x],
+              'projection': 1111,
             },
-            'projection': 1111,
             'basemapOptions': {
               'id': 'get',
               'shaded': nottrue,
@@ -103,11 +103,11 @@
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'initialView': {
+            'view': {
               'zoom': 40,
-              'center': ['Last', -1000]
+              'center': ['Last', -1000],
+              'projection': 3857,
             },
-            'projection': 3857,
             'basemapOptions': {
               'id': 'notdefined',
               'shaded': true,
@@ -200,11 +200,11 @@
         data-config="{
         'map': {
           'interaction': 'dynamic',
-          'initialView': {
+          'view': {
             'zoom': 40,
-            'center': ['Last', -1000]
+            'center': ['Last', -1000],
+            'projection': 3857,
           },
-          'projection': 3857,
           'basemapOptions': {
             'id': 'notdefined',
             'shaded': true,
@@ -325,11 +325,11 @@
           cgpv.api.map('CONF7').loadMapConfig({
             map: {
               interaction: 'dynamic',
-              initialView: {
+              view: {
                 zoom: 4,
                 center: [-110, 50],
+                projection: 3978,
               },
-              projection: 3978,
               basemapOptions: {
                 id: 'transport',
                 shaded: true,
@@ -369,7 +369,7 @@
               },
             },
             theme: 'dark',
-            components: ['appbar', 'navbar', 'northArrow'],
+            components: ['appbar', 'navbar', 'north-arrow'],
             corePackages: ['details-panel'],
             languages: ['en-CA', 'fr-CA'],
           });

@@ -62,7 +62,7 @@ The content of the config must match the schema, an example of the object in the
       "fr": "# Un exemple de démarque"
     }
   },
-  "components": ["appbar", "navbar", "northArrow"],
+  "components": ["appbar", "navbar", "north-arrow"],
   "corePackages": [
     "overview-map",
     "basemap-switcher",
@@ -135,7 +135,7 @@ An example of this:
                             'fr': '# Un exemple de démarque'
                         }
                     },
-                    'components': ['appbar', 'navbar', 'northArrow'],
+                    'components': ['appbar', 'navbar', 'north-arrow'],
                     'corePackages': ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
                     'languages': ['en-CA', 'fr-CA']                                    
@@ -182,7 +182,7 @@ cgpv.init(function() {
                 'fr': '# Un exemple de démarque'
             }
         },
-        components: ['appbar', 'navbar', 'northArrow'],
+        components: ['appbar', 'navbar', 'north-arrow'],
         corePackages: ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
         languages: ['en-CA', 'fr-CA'],

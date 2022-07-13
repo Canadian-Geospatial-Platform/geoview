@@ -196,7 +196,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
             'labeled': true
           }
         },
-        'components': ['appbar', 'navbar', 'northArrow'],
+        'components': ['appbar', 'navbar', 'north-arrow'],
         'corePackages': ['details-panel', 'layers-panel', 'basemap-panel', 'overview-map'],
         'theme': 'dark',
         'languages': ['en-CA']

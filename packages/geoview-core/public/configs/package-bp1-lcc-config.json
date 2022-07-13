@@ -1,11 +1,11 @@
 {
   "map": {
     "interaction": "dynamic",
-    "initialView": {
+    "view": {
       "zoom": 4,
-      "center": [-106, 60]
+      "center": [-106, 60],
+      "projection": 3978
     },
-    "projection": 3978,
     "basemapOptions": {
       "id": "transport",
       "shaded": true,
@@ -51,14 +51,10 @@
         },
         "layerType": "geojson"
       }
-    ],
-    "controls": {
-      "selectBox": true,
-      "boxZoom": true
-    }
+    ]
   },
   "corePackages": ["basemap-panel"],
-  "components": ["appbar", "navbar", "overviewMap", "northArrow"],
+  "components": ["appbar", "navbar", "overview-map", "north-arrow"],
   "theme": "dark",
   "languages": ["en-CA", "fr-CA"]
 }

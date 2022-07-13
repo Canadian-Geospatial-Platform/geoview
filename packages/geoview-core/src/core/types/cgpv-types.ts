@@ -472,8 +472,14 @@ export type TypeMapControls = {
 };
 
 export type TypeMapInitialView = {
-  zoom: number;
   center: Coordinate;
+  enableRotation?: boolean;
+  extent?: Extent;
+  minZoom?: number;
+  maxZoom?: number;
+  projection: number;
+  rotation?: number;
+  zoom: number;
 };
 
 export type TypeProjectionCodes = 3978 | 3857;
@@ -586,12 +592,11 @@ export interface TypeOgcFeatureLayer extends TypeLayerConfig {
 export type TypeInteraction = 'static' | 'dynamic';
 
 export type TypeMapConfig = {
-  interaction: TypeInteraction;
-  controls?: TypeMapControls;
-  initialView: TypeMapInitialView;
-  projection: number;
   basemapOptions: TypeBasemapOptions;
+  interaction: TypeInteraction;
   layers?: TypeLayerConfig[];
+  view: TypeMapInitialView;
+  extraOptions?: Record<string, unknown>;
 };
 
 export type TypeLangString = {
@@ -603,13 +608,13 @@ export type TypeAppBarProps = {
   about: TypeLangString;
 };
 
-export type TypeNavBarProps = TypeJsonObject;
+export type TypeNavBarProps = 'zoom' | 'fullscreen' | 'fullextent';
 
 export type TypeNorthArrowProps = TypeJsonObject;
 
-export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow' | 'overviewMap';
+export type TypeMapComponents = 'appbar' | 'navbar' | 'north-arrow' | 'overview-map';
 
-export type TypeMapCorePackages = 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
+export type TypeMapCorePackages = 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel';
 
 export type TypeExternalPackages = {
   name: string;
@@ -618,6 +623,7 @@ export type TypeExternalPackages = {
 
 export type TypeServiceUrls = {
   keys: string;
+  proxyUrl?: string;
 };
 
 export type TypeLanguages = 'en' | 'fr';
@@ -627,15 +633,13 @@ export type TypeMapSchemaProps = {
   map: TypeMapConfig;
   theme?: 'dark' | 'light';
   appBar?: TypeAppBarProps;
-  navBar?: TypeNavBarProps;
-  northArrow?: TypeNorthArrowProps;
+  navBar?: TypeNavBarProps[];
   components?: TypeMapComponents[];
   corePackages?: TypeMapCorePackages[];
   externalPackages?: TypeExternalPackages[];
   serviceUrls?: TypeServiceUrls;
   languages: TypeLocalizedLanguages[];
   version?: string;
-  extraOptions: Record<string, unknown>;
 };
 
 /**

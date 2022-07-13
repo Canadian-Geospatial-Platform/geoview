@@ -1,11 +1,11 @@
 {
   "map": {
     "interaction": "dynamic",
-    "initialView": {
+    "view": {
       "zoom": 4,
-      "center": [-100, 60]
+      "center": [-100, 60],
+      "projection": 3978
     },
-    "projection": 3978,
     "basemapOptions": {
       "id": "transport",
       "shaded": false,
@@ -139,7 +139,7 @@
       "fr": "# Un exemple de démarque"
     }
   },
-  "components": ["appbar", "navbar", "northArrow", "overviewMap"],
+  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": ["basemap-panel", "layers-panel"],
   "externalPackages": [],
   "languages": ["en-CA"]
