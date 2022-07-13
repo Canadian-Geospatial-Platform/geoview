@@ -32,6 +32,7 @@ import {
   StepLabelProps,
   StepContentProps,
   StepProps,
+  SwitchProps,
   TextFieldProps,
   SelectProps,
   MenuItemProps,
@@ -1109,6 +1110,11 @@ export interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'pref
   // Function that handles change in input
   changeHandler?: <T>(params: T) => void;
 }
+
+/**
+ * Custom Material UI Switch properties
+ */
+export type TypeSwitchProps = SwitchProps & { mapId?: string };
 
 /*-----------------------------------------------------------------------------
  *
