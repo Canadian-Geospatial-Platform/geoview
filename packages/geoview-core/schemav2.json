@@ -361,6 +361,9 @@
           "type": "array",
           "minItems": 4,
           "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "layerMinZoomNode": {
