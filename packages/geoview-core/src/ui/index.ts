@@ -15,6 +15,7 @@ export * from './select/select';
 export * from './slider/slider';
 export * from './snackbar/snackbar';
 export * from './stepper/stepper';
+export * from './switch/switch';
 export * from './text-field/text-field';
 export * from './tooltip/tooltip';
 export * from './typography/typography';
