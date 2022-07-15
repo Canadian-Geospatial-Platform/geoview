@@ -12,14 +12,14 @@ import { Pixel } from 'ol/pixel';
 import { transformExtent } from 'ol/proj';
 
 import {
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
   TypeFeatureLayer,
   TypeJsonValue,
   TypeJsonObject,
   TypeJsonArray,
   toJsonObject,
-  TypeBaseWebLayersConfig,
+  TypeBaseGeoViewLayersConfig,
 } from '../../../../core/types/cgpv-types';
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
@@ -27,28 +27,28 @@ import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeFeatureLayer
+ * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeFeatureLayer
  * if the layerType attribute of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsEsriFeature = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeFeatureLayer => {
+export const layerConfigIsEsriFeature = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeFeatureLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractWebLayersClass as an EsriFeature
+ * Type Gard function that redefines an AbstractGeoViewLayer as an EsriFeature
  * if the type attribute of the verifyIfWebLayer parameter is ESRI_FEATURE. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is EsriFeature => {
+export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is EsriFeature => {
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
@@ -58,7 +58,7 @@ export const webLayerIsEsriFeature = (verifyIfWebLayer: AbstractWebLayersClass):
  * @exports
  * @class EsriFeature
  */
-export class EsriFeature extends AbstractWebLayersClass {
+export class EsriFeature extends AbstractGeoViewLayer {
   // layer
   layer!: VectorLayer<VectorSource>;
 

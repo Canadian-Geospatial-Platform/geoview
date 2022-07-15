@@ -1,13 +1,7 @@
-import {
-  toJsonObject,
-  TypeBasemapProps,
-  TypeBasemapOptions,
-  TypeJsonObject,
-  TypeSelectChangeEvent,
-  TypeWindow,
-  TypeMapView,
-} from 'geoview-core';
+import { toJsonObject, TypeBasemapProps, TypeJsonObject, TypeSelectChangeEvent, TypeWindow, TypeMapView } from 'geoview-core';
 import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads/map-view-projection-payload';
+import { TypeBasemapOptions } from 'geoview-core/src/geo/layer/basemap/basemap-types';
+import { TypeValidProjectionCodes } from 'geoview-core/src/geo/map/map-types';
 
 const w = window as TypeWindow;
 
@@ -80,7 +74,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
     (config.supportedProjections as Array<TypeJsonObject>).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
-  const [mapProjection, setMapProjection] = useState(myMap.mapProps.map.projection);
+  const [mapProjection, setMapProjection] = useState(myMap.mapProps.map.view.projection);
 
   /**
    * Update the basemap with the layers on the map
@@ -150,7 +144,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
     // set basemap to no geom to clean up the view
     setBasemap('nogeom');
-    setMapProjection(projection);
+    setMapProjection(projection as TypeValidProjectionCodes);
 
     // get view status (center and projection) to calculate new center
     const currentView = myMap.getView();

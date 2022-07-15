@@ -5,16 +5,11 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { api } from '../../../app';
 
-import {
-  CONST_LAYER_TYPES,
-  TypeGeoCoreLayer,
-  TypeLayerConfig,
-  TypeBaseWebLayersConfig,
-  TypeJsonObject,
-} from '../../../core/types/cgpv-types';
+import { CONST_LAYER_TYPES, TypeGeoCoreLayer, TypeBaseGeoViewLayersConfig, TypeJsonObject } from '../../../core/types/cgpv-types';
 import { catalogUrl, Config } from '../../../core/utils/config';
+import { TypeLayerEntries, TypeLayerNode } from '../geoview-layers/schema-types';
 
-export const layerConfigIsGeoCore = (verifyIfLayer: Omit<TypeBaseWebLayersConfig, 'url'>): verifyIfLayer is TypeGeoCoreLayer => {
+export const layerConfigIsGeoCore = (verifyIfLayer: Omit<TypeBaseGeoViewLayersConfig, 'url'>): verifyIfLayer is TypeGeoCoreLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
@@ -41,7 +36,7 @@ export class GeoCore {
    * @param {TypeGeoCoreLayer} layer the layer configuration
    * @return {Promise<TypeLayerConfig | null>} layers to add to the map
    */
-  async add(layer: TypeGeoCoreLayer): Promise<TypeLayerConfig | null> {
+  async add(layer: TypeGeoCoreLayer): Promise<TypeLayerNode | null> {
     const url = layer.url || `${catalogUrl}/${api.map(this.#mapId).language.split('-')[0]}`;
 
     const requestUrl = `${url}/${layer.id}`;
@@ -49,7 +44,7 @@ export class GeoCore {
     try {
       const result = await axios.get<TypeJsonObject>(requestUrl);
 
-      const layers: TypeLayerConfig[] = Config.getLayerConfigFromUUID(result);
+      const layers: TypeLayerEntries = Config.getLayerConfigFromUUID(result);
 
       return layers && layers.length > 0 ? layers[0] : null;
     } catch (error: unknown) {

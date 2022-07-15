@@ -16,16 +16,10 @@ import {
   TypeOgcFeatureLayer,
   TypeGeoJSONLayer,
   TypeXYZTiles,
-  TypeMapCorePackages,
-  TypeMapSchemaProps,
   TypeMapConfigProps,
-  TypeBasemapOptions,
   TypeJsonObject,
   TypeJsonValue,
-  TypeLocalizedLanguages,
   Cast,
-  TypeInteraction,
-  TypeLayerConfig,
   CONST_LAYER_TYPES,
   TypeJsonArray,
 } from '../types/cgpv-types';
@@ -37,6 +31,15 @@ import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-messa
 import { EVENT_NAMES } from '../../api/events/event';
 
 import schema from '../../../schema.json';
+import {
+  TypeInteraction,
+  TypeLocalizedLanguages,
+  TypeMapCorePackages,
+  TypeMapSchemaProps,
+  TypeValidProjectionCodes,
+} from '../../geo/map/map-types';
+import { TypeBasemapOptions } from '../../geo/layer/basemap/basemap-types';
+import { TypeLayerEntries } from '../../geo/layer/geoview-layers/schema-types';
 
 export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 
@@ -61,26 +64,22 @@ export class Config {
   private _config: TypeMapSchemaProps = {
     map: {
       interaction: 'dynamic',
-      initialView: {
-        zoom: 4,
+      view: {
         center: [-100, 60],
+        projection: 3978,
+        zoom: 4,
       },
-      projection: 3978,
       basemapOptions: {
         id: 'transport',
         shaded: true,
         labeled: true,
       },
       layers: [],
-      controls: {
-        selectBox: true,
-        boxZoom: true,
-      },
     },
     theme: 'dark',
     components: ['appbar', 'navbar', 'northArrow', 'overviewMap'],
     corePackages: [],
-    languages: ['en-CA', 'fr-CA'],
+    languages: ['en', 'fr'],
     extraOptions: {},
   };
 
@@ -139,10 +138,10 @@ export class Config {
    * Generate layer configs from uuid request result
    *
    * @param {TypeJsonObject} result the uuid request result
-   * @returns {TypeLayerConfig[]} layers parsed from uuid result
+   * @returns {TypeLayerEntries} layers parsed from uuid result
    */
-  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeLayerConfig[] => {
-    const layers: TypeLayerConfig[] = [];
+  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeLayerEntries => {
+    const layers: TypeLayerEntries = [];
 
     if (result && result.data) {
       for (let i = 0; i < result.data.length; i++) {
@@ -168,7 +167,7 @@ export class Config {
                     index: item.index,
                   } as TypeDynamicLayerEntry;
                 }),
-                url: {
+                accessPath: {
                   en: url,
                   fr: url,
                 },
@@ -316,7 +315,7 @@ export class Config {
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
-      let layers: TypeLayerConfig[] = [];
+      let layers: TypeLayerEntries = [];
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
@@ -328,24 +327,24 @@ export class Config {
       }
 
       // get core packages if any
-      let corePackages: TypeMapCorePackages[] = [];
+      let corePackages: TypeMapCorePackages = [];
 
       if (urlParams.cp) {
-        corePackages = (urlParams.cp as string).split(',') as TypeMapCorePackages[];
+        corePackages = (urlParams.cp as string).split(',') as TypeMapCorePackages;
       }
 
       configObj = {
         map: {
           interaction: urlParams.i as TypeInteraction,
-          initialView: {
+          view: {
             zoom: parseInt(urlParams.z as TypeJsonValue as string, 10),
             center: [parseInt(center[0], 10), parseInt(center[1], 10)],
+            projection: parseInt(urlParams.p as string, 10) as TypeValidProjectionCodes,
           },
-          projection: parseInt(urlParams.p as TypeJsonValue as '3978' | '3857', 10),
           basemapOptions,
           layers,
         },
-        languages: ['en-CA', 'fr-CA'],
+        languages: ['en', 'fr'],
         corePackages,
         extraOptions: {},
       };
@@ -652,14 +651,14 @@ export class Config {
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
     const projection = this.validateProjection(Number(tmpConfig.map.projection));
     const basemapOptions = this.validateBasemap(projection, tmpConfig.map.basemapOptions);
-    const center = this.validateCenter(projection, tmpConfig.map.initialView.center);
-    const zoom = this.validateZoom(Number(tmpConfig.map.initialView.zoom));
+    const center = this.validateCenter(projection, tmpConfig.map.view.center);
+    const zoom = this.validateZoom(Number(tmpConfig.map.view.zoom));
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapSchemaProps = {
       map: {
         basemapOptions,
-        initialView: {
+        view: {
           zoom,
           center,
         },
@@ -694,20 +693,18 @@ export class Config {
       }
     });
 
-    if (inConfig.map.projection !== validConfig.map.projection) {
-      console.log(`- map: ${this.id} - Invalid projection ${inConfig.map.projection} replaced by ${validConfig.map.projection} -`);
-    }
-
-    if (inConfig.map.initialView.zoom !== validConfig.map.initialView.zoom) {
+    if (inConfig.map.view.projection !== validConfig.map.view.projection) {
       console.log(
-        `- map: ${this.id} - Invalid zoom level ${inConfig.map.initialView.zoom} replaced by ${validConfig.map.initialView.zoom} -`
+        `- map: ${this.id} - Invalid projection ${inConfig.map.view.projection} replaced by ${validConfig.map.view.projection} -`
       );
     }
 
-    if (JSON.stringify(inConfig.map.initialView.center) !== JSON.stringify(validConfig.map.initialView.center)) {
-      console.log(
-        `- map: ${this.id} - Invalid center ${inConfig.map.initialView.center} replaced by ${validConfig.map.initialView.center}`
-      );
+    if (inConfig.map.view.zoom !== validConfig.map.view.zoom) {
+      console.log(`- map: ${this.id} - Invalid zoom level ${inConfig.map.view.zoom} replaced by ${validConfig.map.view.zoom} -`);
+    }
+
+    if (JSON.stringify(inConfig.map.view.center) !== JSON.stringify(validConfig.map.view.center)) {
+      console.log(`- map: ${this.id} - Invalid center ${inConfig.map.view.center} replaced by ${validConfig.map.view.center}`);
     }
 
     if (JSON.stringify(inConfig.map.basemapOptions) !== JSON.stringify(validConfig.map.basemapOptions)) {
@@ -762,11 +759,11 @@ export class Config {
     const x =
       !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
         ? xVal
-        : this._config.map.initialView.center[0];
+        : this._config.map.view.center[0];
     const y =
       !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
         ? yVal
-        : this._config.map.initialView.center[1];
+        : this._config.map.view.center[1];
 
     return [x, y];
   }
@@ -777,7 +774,7 @@ export class Config {
    * @returns {number} valid zoom level
    */
   private validateZoom(zoom: number): number {
-    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.initialView.zoom;
+    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.view.zoom;
   }
 
   /**

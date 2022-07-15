@@ -49,10 +49,18 @@ import { API } from '../../api/api';
 import { PanelApi } from '../../ui';
 import * as UI from '../../ui';
 
-import { AbstractWebLayersClass } from './abstract/abstract-web-layers';
-import { AbstractPluginClass } from './abstract/abstract-plugin';
+import {
+  TypeGeoViewLayers,
+  TypeBaseGeoViewLayersConfig,
+  AbstractGeoViewLayer,
+} from '../../geo/layer/geoview-layers/abstract-geoview-layers';
 
-export { AbstractWebLayersClass } from './abstract/abstract-web-layers';
+import { AbstractPluginClass } from './abstract/abstract-plugin';
+import { TypeMapSchemaProps } from '../../geo/map/map-types';
+import { TypeLangString } from './global-types';
+
+export * from '../../geo/layer/geoview-layers/abstract-geoview-layers';
+
 export { AbstractPluginClass } from './abstract/abstract-plugin';
 
 export * from '../../geo/layer/web-layers/esri/esri-dynamic';
@@ -255,7 +263,7 @@ export function toJsonObject(p: unknown): TypeJsonObject {
 export type TypeLegendJsonDynamic = {
   layerId: string;
   layerName: string;
-  layerType: TypeWebLayers;
+  layerType: TypeGeoViewLayers;
   maxScale: number;
   minScale: number;
   legend: {
@@ -443,7 +451,7 @@ export type TypeSelectedFeature = {
 export type TypeLayersListProps = {
   clickPos?: Coordinate;
   getSymbol: (renderer: TypeRendererSymbol, attributes: TypeJsonObject) => TypeJsonObject | null;
-  layersData: Record<string, AbstractWebLayersClass>;
+  layersData: Record<string, AbstractGeoViewLayer>;
   mapId: string;
   selectFeature: (featureData: TypeJsonObject) => void;
   selectLayer: (layerData?: TypeLayersEntry) => void;
@@ -454,7 +462,7 @@ export type TypeLayersListProps = {
  */
 export type TypeLayersPanelListProps = {
   mapId: string;
-  layers: Record<string, AbstractWebLayersClass>;
+  layers: Record<string, AbstractGeoViewLayer>;
   language: string;
 };
 
@@ -466,31 +474,12 @@ export type TypePanelContentProps = {
   mapId: string;
 };
 
-export type TypeMapControls = {
-  boxZoom: boolean;
-  selectBox: boolean;
-};
-
-export type TypeMapInitialView = {
-  zoom: number;
-  center: Coordinate;
-};
-
 export type TypeProjectionCodes = 3978 | 3857;
-
-/**
- * interface for basemap options
- */
-export type TypeBasemapOptions = {
-  id: 'transport' | 'osm' | 'simple' | 'nogeom';
-  shaded: boolean;
-  labeled: boolean;
-};
 
 /**
  * interface used when adding a new layer
  */
-export interface TypeLayerConfig extends TypeBaseWebLayersConfig {
+export interface TypeLayerConfig extends TypeBaseGeoViewLayersConfig {
   state?: TypeLayerSettings;
 }
 
@@ -583,60 +572,8 @@ export interface TypeOgcFeatureLayer extends TypeLayerConfig {
   details?: TypeDetailsLayerSettings;
 }
 
-export type TypeInteraction = 'static' | 'dynamic';
-
-export type TypeMapConfig = {
-  interaction: TypeInteraction;
-  controls?: TypeMapControls;
-  initialView: TypeMapInitialView;
-  projection: number;
-  basemapOptions: TypeBasemapOptions;
-  layers?: TypeLayerConfig[];
-};
-
-export type TypeLangString = {
-  en: string;
-  fr: string;
-};
-
-export type TypeAppBarProps = {
-  about: TypeLangString;
-};
-
-export type TypeNavBarProps = TypeJsonObject;
-
 export type TypeNorthArrowProps = TypeJsonObject;
 
-export type TypeMapComponents = 'appbar' | 'navbar' | 'northArrow' | 'overviewMap';
-
-export type TypeMapCorePackages = 'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator';
-
-export type TypeExternalPackages = {
-  name: string;
-  configUrl?: string;
-};
-
-export type TypeServiceUrls = {
-  keys: string;
-};
-
-export type TypeLanguages = 'en' | 'fr';
-export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
-
-export type TypeMapSchemaProps = {
-  map: TypeMapConfig;
-  theme?: 'dark' | 'light';
-  appBar?: TypeAppBarProps;
-  navBar?: TypeNavBarProps;
-  northArrow?: TypeNorthArrowProps;
-  components?: TypeMapComponents[];
-  corePackages?: TypeMapCorePackages[];
-  externalPackages?: TypeExternalPackages[];
-  serviceUrls?: TypeServiceUrls;
-  languages: TypeLocalizedLanguages[];
-  version?: string;
-  extraOptions: Record<string, unknown>;
-};
 
 /**
  * Interface used when creating a map to validate configuration object
@@ -1105,59 +1042,6 @@ export interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'pref
   // Function that handles change in input
   changeHandler?: <T>(params: T) => void;
 }
-
-/*-----------------------------------------------------------------------------
- *
- * Types related to abstract class
- *
- *---------------------------------------------------------------------------*/
-
-// AbstractWebLayersClass types
-
-/**
- * interface used to define the web-layers
- */
-export type TypeWebLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
-export type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
-
-/**
- * constant contains layer types
- */
-export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeWebLayers> = {
-  ESRI_DYNAMIC: 'esriDynamic',
-  ESRI_FEATURE: 'esriFeature',
-  GEOJSON: 'geojson',
-  GEOCORE: 'geoCore',
-  XYZ_TILES: 'xyzTiles',
-  OGC_FEATURE: 'ogcFeature',
-  WFS: 'ogcWfs',
-  WMS: 'ogcWms',
-};
-
-/**
- * constant contains default layer names
- */
-export const DEFAULT_LAYER_NAMES: Record<TypeWebLayers, string> = {
-  esriDynamic: 'Esri Dynamic Layer',
-  esriFeature: 'Esri Feature Layer',
-  geojson: 'GeoJson Layer',
-  geoCore: 'GeoCore Layer',
-  xyzTiles: 'XYZ Tiles',
-  ogcFeature: 'OGC Feature Layer',
-  ogcWfs: 'WFS Layer',
-  ogcWms: 'WMS Layer',
-};
-
-/**
- * interface used by all web layers
- */
-export type TypeBaseWebLayersConfig = {
-  layerType: TypeWebLayers;
-  id?: string;
-  name?: TypeLangString;
-  url: TypeLangString;
-  layerEntries?: (TypeDynamicLayerEntry | TypeOgcLayerEntry)[];
-};
 
 /**
  * interface used by all plugins to define their options

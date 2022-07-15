@@ -10,12 +10,12 @@ import { all } from 'ol/loadingstrategy';
 import { transformExtent } from 'ol/proj';
 
 import {
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
   TypeJsonObject,
   TypeWFSLayer,
   TypeJsonArray,
-  TypeBaseWebLayersConfig,
+  TypeBaseGeoViewLayersConfig,
 } from '../../../../core/types/cgpv-types';
 import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 
@@ -96,28 +96,28 @@ const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeWFSLayer
+ * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeWFSLayer
  * if the layerType attribute of the verifyIfLayer parameter is WFS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsWFS = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeWFSLayer => {
+export const layerConfigIsWFS = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeWFSLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.WFS;
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractWebLayersClass as a WFS
+ * Type Gard function that redefines an AbstractGeoViewLayer as a WFS
  * if the type attribute of the verifyIfWebLayer parameter is WFS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsWFS = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is WFS => {
+export const webLayerIsWFS = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is WFS => {
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.WFS;
 };
 
@@ -127,7 +127,7 @@ export const webLayerIsWFS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
  * @exports
  * @class WFS
  */
-export class WFS extends AbstractWebLayersClass {
+export class WFS extends AbstractGeoViewLayer {
   // layer
   layer!: VectorLayer<VectorSource>;
 

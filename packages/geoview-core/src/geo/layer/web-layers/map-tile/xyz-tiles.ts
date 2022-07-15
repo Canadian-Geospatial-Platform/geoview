@@ -5,10 +5,10 @@ import XYZ from 'ol/source/XYZ';
 import { api } from '../../../../app';
 
 import {
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  TypeBaseWebLayersConfig,
-  TypeWebLayers,
+  TypeBaseGeoViewLayersConfig,
+  TypeGeoViewLayers,
   TypeXYZTiles,
 } from '../../../../core/types/cgpv-types';
 
@@ -21,28 +21,28 @@ import {
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeXYZTiles
+ * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeXYZTiles
  * if the layerType attribute of the verifyIfLayer parameter is XYZ_TILES. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsXYZTiles = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeXYZTiles => {
+export const layerConfigIsXYZTiles = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeXYZTiles => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractWebLayersClass as an XYZTiles
+ * Type Gard function that redefines an AbstractGeoViewLayer as an XYZTiles
  * if the type attribute of the verifyIfWebLayer parameter is XYZ_TILES. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsXYZTiles = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is XYZTiles => {
+export const webLayerIsXYZTiles = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is XYZTiles => {
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
@@ -52,7 +52,7 @@ export const webLayerIsXYZTiles = (verifyIfWebLayer: AbstractWebLayersClass): ve
  * @exports
  * @class XYZTiles
  */
-export class XYZTiles extends AbstractWebLayersClass {
+export class XYZTiles extends AbstractGeoViewLayer {
   // layer
   layer!: TileLayer<XYZ>;
 
@@ -63,7 +63,7 @@ export class XYZTiles extends AbstractWebLayersClass {
    * @param {TypeXYZTiles} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeXYZTiles) {
-    super(CONST_LAYER_TYPES.XYZ_TILES as TypeWebLayers, layerConfig, mapId);
+    super(CONST_LAYER_TYPES.XYZ_TILES as TypeGeoViewLayers, layerConfig, mapId);
   }
 
   /**

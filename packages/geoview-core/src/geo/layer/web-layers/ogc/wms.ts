@@ -11,39 +11,39 @@ import { xmlToJson } from '../../../../core/utils/utilities';
 import {
   Cast,
   CONST_LAYER_TYPES,
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   TypeJsonObject,
   TypeWMSLayer,
   TypeJsonArray,
   toJsonObject,
-  TypeBaseWebLayersConfig,
+  TypeBaseGeoViewLayersConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeWMSLayer
+ * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeWMSLayer
  * if the layerType attribute of the verifyIfLayer parameter is WMS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsWMS = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeWMSLayer => {
+export const layerConfigIsWMS = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeWMSLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.WMS;
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractWebLayersClass as a WMS
+ * Type Gard function that redefines an AbstractGeoViewLayer as a WMS
  * if the type attribute of the verifyIfWebLayer parameter is WMS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsWMS = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is WMS => {
+export const webLayerIsWMS = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is WMS => {
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.WMS;
 };
 
@@ -53,7 +53,7 @@ export const webLayerIsWMS = (verifyIfWebLayer: AbstractWebLayersClass): verifyI
  * @exports
  * @class WMS
  */
-export class WMS extends AbstractWebLayersClass {
+export class WMS extends AbstractGeoViewLayer {
   // TODO: try to avoid getCapabilities for WMS. Use Web Presence metadata return info to store, legend image link, layer name, and other needed properties.
   // ! This will maybe not happen because geoCore may not everything we need. We may have to use getCap
   // * We may have to do getCapabilites if we want to add layers not in the catalog

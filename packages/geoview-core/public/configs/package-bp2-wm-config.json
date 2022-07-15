@@ -1,7 +1,7 @@
 {
   "map": {
     "interaction": "dynamic",
-    "initialView": {
+    "view": {
       "zoom": 4,
       "center": [-106, 60]
     },

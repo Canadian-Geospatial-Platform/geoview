@@ -185,7 +185,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
   data-config="{
         'map': {
           'interaction': 'dynamic',
-          'initialView': {
+          'view': {
             'zoom': 4,
             'center': [60, -100]
           },

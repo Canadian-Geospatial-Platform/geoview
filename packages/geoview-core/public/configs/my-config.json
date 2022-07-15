@@ -1,7 +1,7 @@
 {
   "map": {
     "interaction": "static",
-    "initialView": {
+    "view": {
       "zoom": 4,
       "center": [-100, 60]
     },

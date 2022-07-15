@@ -3,7 +3,7 @@ import {
   TypeJsonValue,
   TypeRendererSymbol,
   TypeSelectedFeature,
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   TypeLayerInfo,
   TypeFieldNameAliasArray,
   TypeFieldAlias,
@@ -54,7 +54,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   const { useState, useCallback, useEffect } = react;
 
-  const [layersData, setLayersData] = useState<Record<string, AbstractWebLayersClass>>({});
+  const [layersData, setLayersData] = useState<Record<string, AbstractGeoViewLayer>>({});
   const [selectedLayer, setSelectedLayer] = useState({});
   const [selectedFeature, setSelectedFeature] = useState({});
 
@@ -208,14 +208,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   /**
    * Add a layer to the panel layer list
    *
-   * @param {AbstractWebLayersClass} mapLayer the main object that contains added layers from the api
-   * @param {Record<string, AbstractWebLayersClass>} data the data object that contains all layers
+   * @param {AbstractGeoViewLayer} mapLayer the main object that contains added layers from the api
+   * @param {Record<string, AbstractGeoViewLayer>} data the data object that contains all layers
    * @param {TypeLayerInfo} layerInfo the layer information
    * @param {boolean} isGroupLayer a boolean value to check if this layer is a group layer
    */
   const addLayer = (
-    mapLayer: AbstractWebLayersClass,
-    data: Record<string, AbstractWebLayersClass>,
+    mapLayer: AbstractGeoViewLayer,
+    data: Record<string, AbstractGeoViewLayer>,
     layerInfo: TypeLayerInfo,
     isGroupLayer: boolean
   ) => {
@@ -267,7 +267,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         [dataKey]: {
           ...prevState[dataKey],
           layers,
-        } as AbstractWebLayersClass,
+        } as AbstractGeoViewLayer,
       }));
     },
     [layersData]
@@ -342,7 +342,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   [dataKey]: {
                     ...prevState[dataKey],
                     layers,
-                  } as AbstractWebLayersClass,
+                  } as AbstractGeoViewLayer,
                 }));
               }
             } else if (type === CONST_LAYER_TYPES.ESRI_FEATURE || type === CONST_LAYER_TYPES.ESRI_DYNAMIC) {
@@ -385,7 +385,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
                   [dataKey]: {
                     ...prevState[dataKey],
                     layers,
-                  } as AbstractWebLayersClass,
+                  } as AbstractGeoViewLayer,
                 }));
               }
             }
@@ -454,14 +454,14 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     const mapLayers = api.map(mapId).layer.layers;
 
     // will be used to store the added map server layers, layers in the map server etc...
-    const data: Record<string, AbstractWebLayersClass> = {};
+    const data: Record<string, AbstractGeoViewLayer> = {};
 
     // loop through each map server layer loaded from the map config and created using the API
     const layerIds = Object.keys(mapLayers);
 
     layerIds.forEach(async (id: string) => {
       const mapLayer = mapLayers[id];
-      data[mapLayer.id] = Cast<AbstractWebLayersClass>({
+      data[mapLayer.id] = Cast<AbstractGeoViewLayer>({
         // the map server layer id
         id: mapLayer.id,
         name: mapLayer.name,

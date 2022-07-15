@@ -18,7 +18,7 @@ import { Vector } from './vector/vector';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { Cast, AbstractWebLayersClass, TypeLayerConfig, TypeJsonObject } from '../../core/types/cgpv-types';
+import { Cast, TypeLayerConfig, TypeJsonObject, AbstractGeoViewLayer } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
@@ -32,7 +32,7 @@ import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-messa
  */
 export class Layer {
   // variable used to store all added layers
-  layers: { [key: string]: AbstractWebLayersClass } = {};
+  layers: { [key: string]: AbstractGeoViewLayer } = {};
 
   // used to access vector API to create and manage geometries
   vector: Vector | undefined;
@@ -46,9 +46,9 @@ export class Layer {
    * Initialize layer types and listen to add/remove layer events from outside
    *
    * @param {string} id a reference to the map
-   * @param {TypeLayerConfig[]} layers an optional array containing layers passed within the map config
+   * @param {TypeLayerEntries} layers an optional array containing layers passed within the map config
    */
-  constructor(id: string, layers?: TypeLayerConfig[]) {
+  constructor(id: string, layers?: TypeLayerEntries) {
     this.#mapId = id;
 
     this.vector = new Vector(this.#mapId);
@@ -143,7 +143,7 @@ export class Layer {
    * Add the layer to the map if valid. If not (is a string) emit an error
    * @param {any} cgpvLayer the layer config
    */
-  private addToMap(cgpvLayer: AbstractWebLayersClass): void {
+  private addToMap(cgpvLayer: AbstractGeoViewLayer): void {
     // if the return layer object is a string, it is because path or entries are bad
     // do not add to the map
     if (typeof cgpvLayer.layer === null) {
@@ -158,7 +158,7 @@ export class Layer {
       api.map(this.#mapId).map.addLayer(cgpvLayer.layer);
 
       // this.layers.push(cgpvLayer);
-      this.layers[cgpvLayer.id] = Cast<AbstractWebLayersClass>(cgpvLayer);
+      this.layers[cgpvLayer.id] = Cast<AbstractGeoViewLayer>(cgpvLayer);
       api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
     }
   }
@@ -213,7 +213,7 @@ export class Layer {
    *
    * @param {TypeLayerConfig} layer the layer configuration to remove
    */
-  removeLayer = (cgpvLayer: AbstractWebLayersClass): string => {
+  removeLayer = (cgpvLayer: AbstractGeoViewLayer): string => {
     // eslint-disable-next-line no-param-reassign
     cgpvLayer.id = generateId(cgpvLayer.id);
     api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, cgpvLayer));
@@ -227,8 +227,8 @@ export class Layer {
    * @param {string} id the layer id to look for
    * @returns the found layer data object
    */
-  getLayerById = (id: string): AbstractWebLayersClass | null => {
-    // return this.layers.filter((layer: AbstractWebLayersClass) => layer.id === id)[0];
+  getLayerById = (id: string): AbstractGeoViewLayer | null => {
+    // return this.layers.filter((layer: AbstractGeoViewLayer) => layer.id === id)[0];
     return this.layers[id];
   };
 }

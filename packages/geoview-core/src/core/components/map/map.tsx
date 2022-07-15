@@ -139,8 +139,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       }),
       view: new View({
         projection,
-        center: fromLonLat([mapProps.initialView.center[0], mapProps.initialView.center[1]], projection),
-        zoom: mapProps.initialView.zoom,
+        center: fromLonLat([mapProps.view.center[0], mapProps.view.center[1]], projection),
+        zoom: mapProps.view.zoom,
         // extent: projectionConfig.extent,
         extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
         minZoom: defaultBasemap?.zoomLevels.min || 0,

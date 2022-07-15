@@ -10,13 +10,13 @@ import { all } from 'ol/loadingstrategy';
 import { transformExtent } from 'ol/proj';
 
 import {
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
   TypeJsonValue,
   TypeJsonObject,
   TypeOgcFeatureLayer,
   TypeJsonArray,
-  TypeBaseWebLayersConfig,
+  TypeBaseGeoViewLayersConfig,
 } from '../../../../core/types/cgpv-types';
 import { setAlphaColor } from '../../../../core/utils/utilities';
 
@@ -66,28 +66,28 @@ const defaultSelectStyle = new Style({
 });
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseWebLayersConfig as a TypeOgcFeatureLayer
+ * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeOgcFeatureLayer
  * if the layerType attribute of the verifyIfLayer parameter is OGC_FEATURE. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseWebLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsOgcFeature = (verifyIfLayer: TypeBaseWebLayersConfig): verifyIfLayer is TypeOgcFeatureLayer => {
+export const layerConfigIsOgcFeature = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeOgcFeatureLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractWebLayersClass as an OgcFeature
+ * Type Gard function that redefines an AbstractGeoViewLayer as an OgcFeature
  * if the type attribute of the verifyIfWebLayer parameter is OGC_FEATURE. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {AbstractWebLayersClass} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsOgcFeature = (verifyIfWebLayer: AbstractWebLayersClass): verifyIfWebLayer is OgcFeature => {
+export const webLayerIsOgcFeature = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is OgcFeature => {
   return verifyIfWebLayer.type === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
@@ -97,7 +97,7 @@ export const webLayerIsOgcFeature = (verifyIfWebLayer: AbstractWebLayersClass): 
  * @exports
  * @class OgcFeature
  */
-export class OgcFeature extends AbstractWebLayersClass {
+export class OgcFeature extends AbstractGeoViewLayer {
   // layer
   layer!: VectorLayer<VectorSource>;
 

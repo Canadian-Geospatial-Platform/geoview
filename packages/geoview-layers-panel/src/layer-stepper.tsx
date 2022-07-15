@@ -6,7 +6,7 @@ import {
   TypeDynamicLayerEntry,
   TypeOgcLayerEntry,
   TypeLayerConfig,
-  TypeWebLayers,
+  TypeGeoViewLayers,
   TypeSelectChangeEvent,
   snackbarMessagePayload,
 } from 'geoview-core';
@@ -46,7 +46,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
-  const [layerType, setLayerType] = useState<TypeWebLayers | ''>('');
+  const [layerType, setLayerType] = useState<TypeGeoViewLayers | ''>('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<(TypeDynamicLayerEntry | TypeOgcLayerEntry)[]>([]);
@@ -368,7 +368,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         en: name,
         fr: name,
       },
-      layerType: layerType as TypeWebLayers,
+      layerType: layerType as TypeGeoViewLayers,
       url: {
         en: url,
         fr: url,
@@ -407,7 +407,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param {TypeSelectChangeEvent} event TextField event
    */
   const handleSelectType = (event: TypeSelectChangeEvent<unknown>) => {
-    setLayerType(event.target.value as TypeWebLayers);
+    setLayerType(event.target.value as TypeGeoViewLayers);
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);

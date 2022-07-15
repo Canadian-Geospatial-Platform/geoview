@@ -167,7 +167,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
   data-config="{
       'map': {
         'interaction': 'dynamic',
-        'initialView': {
+        'view': {
           'zoom': 4,
           'center': [60, -100]
         },
@@ -202,7 +202,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
               },
               {
                 'index': 6
-              }                  
+              }
             ]
           }
         ]
@@ -238,7 +238,7 @@ Full example:
       data-config="{
 	          'map': {
 	            'interaction': 'dynamic',
-	            'initialView': {
+	            'view': {
 	              'zoom': 4,
 	              'center': [60, -100]
 	            },
@@ -273,7 +273,7 @@ Full example:
 	                  },
 	                  {
 	                    'index': 6
-	                  }                  
+	                  }
 	                ]
 	              }
 	            ]

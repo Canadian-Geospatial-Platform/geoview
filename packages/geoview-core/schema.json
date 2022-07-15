@@ -646,7 +646,7 @@
           "default": 3978,
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
-        "initialView": {
+        "view": {
           "type": "object",
           "properties": {
             "zoom": {
@@ -705,7 +705,7 @@
           "description": "Layers list in the order which they should be added to the map."
         }
       },
-      "required": ["interaction", "projection", "initialView", "basemapOptions"]
+      "required": ["interaction", "projection", "view", "basemapOptions"]
     },
 
     "theme": {

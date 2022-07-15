@@ -11,9 +11,7 @@ import { EVENT_NAMES } from '../../../api/events/event';
 import {
   TypeBasemapProps,
   TypeBasemapLayer,
-  TypeBasemapOptions,
   TypeProjectionCodes,
-  TypeLocalizedLanguages,
   TypeJsonObject,
   toJsonObject,
   TypeJsonArray,
@@ -21,6 +19,8 @@ import {
 
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
+import { TypeBasemapOptions } from './basemap-types';
+import { TypeLocalizedLanguages } from '../../map/map-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and

@@ -6,7 +6,7 @@
       "selectBox": true
     },
     "projection": 3978,
-    "initialView": {
+    "view": {
       "zoom": 12,
       "center": [-106, 60]
     },

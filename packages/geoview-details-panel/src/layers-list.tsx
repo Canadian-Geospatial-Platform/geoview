@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps, AbstractWebLayersClass, TypeWindow, toJsonObject } from 'geoview-core';
+import { TypeLayersListProps, AbstractGeoViewLayer, TypeWindow, toJsonObject } from 'geoview-core';
 import { markerDefinitionPayload } from 'geoview-core/src/api/events/payloads/marker-definition-payload';
 
 // get the window object
@@ -85,7 +85,7 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
    * @param {Object} data data object of all layers
    * @param {string} layerKey the layer object to list it's entries
    */
-  const goToFeatureList = (data: AbstractWebLayersClass, layerKey: string) => {
+  const goToFeatureList = (data: AbstractGeoViewLayer, layerKey: string) => {
     const { layerData, displayField, fieldAliases, renderer } = data.layers[layerKey];
 
     // set the layer entry data

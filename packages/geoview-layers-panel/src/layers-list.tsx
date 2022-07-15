@@ -5,7 +5,7 @@ import {
   TypeJsonArray,
   toJsonObject,
   TypeJsonObject,
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   TypeWindow,
   webLayerIsWMS,
   webLayerIsEsriDynamic,
@@ -198,7 +198,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onZoom = (layer: AbstractWebLayersClass) => api.map(mapId).fitBounds(layerBounds[layer.id]);
+  const onZoom = (layer: AbstractGeoViewLayer) => api.map(mapId).fitBounds(layerBounds[layer.id]);
 
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
@@ -248,7 +248,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onBounds = (layer: AbstractWebLayersClass) => {
+  const onBounds = (layer: AbstractGeoViewLayer) => {
     const bbox = polygonFromBounds(layerBounds[layer.id]);
 
     if (layerBbox.toString() === bbox.toString()) {
@@ -276,7 +276,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onRemove = (layer: AbstractWebLayersClass) => {
+  const onRemove = (layer: AbstractGeoViewLayer) => {
     // empty bounding box
     setLayerBbox([]);
     // remove bounding box layer from map
@@ -291,7 +291,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param value slider opacity value (0-100)
    * @param data Layer data
    */
-  const onSliderChange = (value: number, data: AbstractWebLayersClass) => {
+  const onSliderChange = (value: number, data: AbstractGeoViewLayer) => {
     setLayerOpacity((state) => ({ ...state, [data.id]: value }));
     const opacity = layerVisibility[data.id] ? value / 100 : 0;
     data.setOpacity(opacity);
@@ -303,7 +303,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param value checkbox boolean
    * @param data Layer data
    */
-  const onVisibilityChange = (value: boolean, data: AbstractWebLayersClass) => {
+  const onVisibilityChange = (value: boolean, data: AbstractGeoViewLayer) => {
     setLayerVisibility((state) => ({ ...state, [data.id]: value }));
     const opacity = value ? layerOpacity[data.id] / 100 : 0;
     data.setOpacity(opacity);
@@ -324,7 +324,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param data Layer data
    * @param id sublayer ID
    */
-  const onSubVisibilityChange = (value: boolean, data: AbstractWebLayersClass, id: number) => {
+  const onSubVisibilityChange = (value: boolean, data: AbstractGeoViewLayer, id: number) => {
     const oldEntries = subLayerVisibility[data.id];
     const entries = value ? [...new Set([...oldEntries, id])] : oldEntries.filter((x) => x !== id);
     if (oldEntries.length === 0) {
