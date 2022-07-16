@@ -2,12 +2,19 @@ import axios from 'axios';
 
 import { WMSCapabilities } from 'ol/format';
 
-import { Cast, TypeCSSStyleDeclaration, TypeJsonObject } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonObject } from '../../core/types/cgpv-types';
 import { xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+
+/**
+ * Interface used for css style declarations
+ */
+interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
+  mozTransform: string;
+}
 
 export class GeoUtilities {
   /**

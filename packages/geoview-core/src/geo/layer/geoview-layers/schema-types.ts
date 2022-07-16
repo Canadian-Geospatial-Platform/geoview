@@ -28,7 +28,7 @@ export type TypeLayerInitialSettingsNode = {
   /** Initial visibility setting. Default = true. */
   layerVisibility?: boolean;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  layerExtent?: number[];
+  layerExtent?: [number, number, number, number];
   /** The minimum view zoom level (exclusive) above which this layer will be visible. */
   layerMinZoom?: number;
   /** The maximum view zoom level (inclusive) below which this layer will be visible. */

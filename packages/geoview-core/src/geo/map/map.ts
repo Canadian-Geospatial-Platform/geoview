@@ -17,7 +17,7 @@ import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
 import { Config } from '../../core/utils/config';
-import { TypeMapConfigProps, TypeHTMLElement, TypeDcoument, TypeMapView } from '../../core/types/cgpv-types';
+import { TypeHTMLElement } from '../../core/types/cgpv-types';
 
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
@@ -30,6 +30,12 @@ import { generateId } from '../../core/utils/utilities';
 import { TypeLanguages, TypeLocalizedLanguages, TypeMapSchemaProps } from './map-types';
 import { TypeLayerEntries } from '../layer/geoview-layers/schema-types';
 
+interface TypeDcoument extends Document {
+  webkitExitFullscreen: () => void;
+  msExitFullscreen: () => void;
+  mozCancelFullScreen: () => void;
+}
+
 /**
  * Class used to manage created maps
  *
@@ -38,7 +44,7 @@ import { TypeLayerEntries } from '../layer/geoview-layers/schema-types';
  */
 export class MapViewer {
   // map config properties
-  mapProps: TypeMapConfigProps;
+  mapProps: TypeMapSchemaProps;
 
   // the id of the map
   id!: string;
@@ -79,10 +85,10 @@ export class MapViewer {
   /**
    * Add the map instance to the maps array in the api
    *
-   * @param {TypeMapConfigProps} mapProps map properties
+   * @param {TypeMapSchemaProps} mapProps map properties
    * @param {i18n} i18instance language instance
    */
-  constructor(mapProps: TypeMapConfigProps, i18instance: i18n) {
+  constructor(mapProps: TypeMapSchemaProps, i18instance: i18n) {
     this.id = mapProps.id;
 
     // add map viewer instance to api
@@ -268,7 +274,7 @@ export class MapViewer {
    * Change the language of the map
    *
    * @param {string} language the language to use (en-CA, fr-CA)
-   * @param {TypeLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
+   * @param {TypeBaseGeoViewLayersConfig} layers optional new set of layers to apply (will override origional set of layers)
    */
   changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeLayerEntries): void => {
     const updatedConfig = { ...this.mapProps };

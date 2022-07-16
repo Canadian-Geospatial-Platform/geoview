@@ -1,5 +1,6 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useState, CSSProperties } from 'react';
 
 import { SelectChangeEvent } from '@mui/material';
 
@@ -11,7 +12,46 @@ import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import MaterialSelect from '@mui/material/Select';
 
-import { TypeCustomSelectProps } from '../../core/types/cgpv-types';
+/**
+ * Properties for the Custom Select component
+ */
+interface TypeCustomSelectProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // the label for the select component
+  label: string;
+
+  // the menu items (<option>) for <select>
+  selectItems: Array<Record<string, TypeSelectItems>> | Array<Record<string, TypeItemProps>>;
+
+  // callback that is passed for the select component
+  callBack?: <T>(params: T) => void;
+
+  // helper text for the form
+  helperText?: string;
+
+  // if multiple selection of items is allowed
+  multiple?: boolean;
+}
+
+/**
+ * Required and optional properties for the items (options) of select
+ */
+interface TypeSelectItems {
+  category?: string;
+  items: Array<TypeItemProps>;
+}
+
+/**
+ * Required and optional properties for the item object
+ */
+export interface TypeItemProps {
+  id: string;
+  value: string;
+  default?: boolean;
+}
 
 const useStyles = makeStyles((theme) => ({
   formControl: {

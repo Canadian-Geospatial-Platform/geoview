@@ -1,14 +1,14 @@
 import {
   Cast,
-  AbstractPluginClass,
+  AbstractPlugin,
   TypePluginOptions,
   TypeIconButtonProps,
   TypeButtonPanel,
   TypeWindow,
   toJsonObject,
   TypePanelProps,
-  TypeSchemaObject,
   TypeJsonObject,
+  AnySchemaObject,
 } from 'geoview-core';
 
 import { BasemapPanel } from './basemap-panel';
@@ -20,7 +20,7 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class BasemapPanelPlugin extends AbstractPluginClass {
+class BasemapPanelPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
@@ -32,9 +32,9 @@ class BasemapPanelPlugin extends AbstractPluginClass {
   /**
    * Return the package schema
    *
-   * @returns {TypeSchemaObject} the package schema
+   * @returns {AnySchemaObject} the package schema
    */
-  schema = (): TypeSchemaObject => schema;
+  schema = (): AnySchemaObject => schema;
 
   /**
    * Return the default config for this package
@@ -124,4 +124,4 @@ class BasemapPanelPlugin extends AbstractPluginClass {
 export default BasemapPanelPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins['basemap-panel'] = Cast<AbstractPluginClass>(BasemapPanelPlugin);
+w.plugins['basemap-panel'] = Cast<AbstractPlugin>(BasemapPanelPlugin);

@@ -18,10 +18,10 @@ import { Vector } from './vector/vector';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { Cast, TypeLayerConfig, TypeJsonObject, AbstractGeoViewLayer } from '../../core/types/cgpv-types';
+import { Cast, TypeBaseGeoViewLayersConfig, TypeJsonObject, AbstractGeoViewLayer } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
-import { payloadIsAWebLayer, webLayerPayload } from '../../api/events/payloads/web-layer-payload';
+import { payloadIsAGeoViewLayer, geoViewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { TypeLayerEntries } from './geoview-layers/schema-types';
 
@@ -126,7 +126,7 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
-        if (payloadIsAWebLayer(payload)) {
+        if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
           this.removeLayerById(payload.webLayer.id);
         }
@@ -160,7 +160,7 @@ export class Layer {
 
       // this.layers.push(cgpvLayer);
       this.layers[cgpvLayer.id] = Cast<AbstractGeoViewLayer>(cgpvLayer);
-      api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
+      api.event.emit(geoViewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.#mapId, cgpvLayer));
     }
   }
 
@@ -199,9 +199,9 @@ export class Layer {
   /**
    * Add a layer to the map
    *
-   * @param {TypeLayerConfig} layerConfig the layer configuration to add
+   * @param {TypeBaseGeoViewLayersConfig} layerConfig the layer configuration to add
    */
-  addLayer = (layerConfig: TypeLayerConfig): string => {
+  addLayer = (layerConfig: TypeBaseGeoViewLayersConfig): string => {
     // eslint-disable-next-line no-param-reassign
     layerConfig.id = generateId(layerConfig.id);
     api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig));
@@ -212,12 +212,12 @@ export class Layer {
   /**
    * Remove a layer from the map
    *
-   * @param {TypeLayerConfig} layer the layer configuration to remove
+   * @param {TypeBaseGeoViewLayersConfig} layer the layer configuration to remove
    */
   removeLayer = (cgpvLayer: AbstractGeoViewLayer): string => {
     // eslint-disable-next-line no-param-reassign
     cgpvLayer.id = generateId(cgpvLayer.id);
-    api.event.emit(webLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, cgpvLayer));
+    api.event.emit(geoViewLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.#mapId, cgpvLayer));
 
     return cgpvLayer.id;
   };

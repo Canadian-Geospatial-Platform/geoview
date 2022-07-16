@@ -1,7 +1,17 @@
+/* eslint-disable react/require-default-props */
+import { CSSProperties } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import MaterialCircularProgress from '@mui/material/CircularProgress';
+import { CircularProgressProps } from '@mui/material';
 
-import { TypeCircularProgressProps } from '../../core/types/cgpv-types';
+/**
+ * Circular Progress Properties
+ */
+interface TypeCircularProgressProps extends CircularProgressProps {
+  className?: string;
+  style?: CSSProperties;
+  isLoaded: boolean;
+}
 
 const useStyles = makeStyles((theme) => {
   return {

@@ -16,7 +16,6 @@ import {
   TypeOgcFeatureLayer,
   TypeGeoJSONLayer,
   TypeXYZTiles,
-  TypeMapConfigProps,
   TypeJsonObject,
   TypeJsonValue,
   Cast,
@@ -80,11 +79,11 @@ export class Config {
     components: ['appbar', 'navbar', 'northArrow', 'overviewMap'],
     corePackages: [],
     languages: ['en', 'fr'],
-    extraOptions: {},
+    version: '2.0',
   };
 
   // validations values
-  private _projections: number[] = [3857, 3978];
+  private _projections: TypeValidProjectionCodes[] = [3857, 3978];
 
   // valid basemap ids
   private _basemapId: Record<number, string[]> = {
@@ -310,7 +309,7 @@ export class Config {
     if (Object.keys(urlParams).length && !urlParams.geoms) {
       // Ex: ?p=3857&z=4&c=40,-100&l=en-CA&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel,overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
-      let center = (urlParams.c as TypeJsonValue as string).split(',');
+      let center = (urlParams.c as string).split(',');
       if (!center) center = ['0', '0'];
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
@@ -346,7 +345,6 @@ export class Config {
         },
         languages: ['en', 'fr'],
         corePackages,
-        extraOptions: {},
       };
 
       // update language if provided from params
@@ -424,10 +422,10 @@ export class Config {
    * Get map config from a function call
    *
    * @param {TypeMapSchemaProps} configObj config object passed in the function
-   * @returns {TypeMapConfigProps} a valid map config
+   * @returns {TypeMapSchemaProps} a valid map config
    */
-  getMapConfigFromFunc(configObj: TypeMapSchemaProps): TypeMapConfigProps | undefined {
-    let mapConfigProps: TypeMapConfigProps | undefined;
+  getMapConfigFromFunc(configObj: TypeMapSchemaProps): TypeMapSchemaProps | undefined {
+    let mapConfigProps: TypeMapSchemaProps | undefined;
 
     // get the id from the map element
     const mapId = this.mapElement.getAttribute('id');
@@ -488,10 +486,10 @@ export class Config {
   /**
    * Initialize a map config from either inline div, url params, json file
    *
-   * @returns {TypeMapConfigProps} the initialized valid map config
+   * @returns {TypeMapSchemaProps} the initialized valid map config
    */
-  async initializeMapConfig(): Promise<TypeMapConfigProps | undefined> {
-    let mapConfigProps: TypeMapConfigProps | undefined;
+  async initializeMapConfig(): Promise<TypeMapSchemaProps | undefined> {
+    let mapConfigProps: TypeMapSchemaProps | undefined;
 
     // get the id from the map element
     const mapId = this.mapElement.getAttribute('id');
@@ -616,7 +614,7 @@ export class Config {
           for (let i = 0; i < objProps.length; i += 1) {
             const prop = objProps[i].split(':');
             if (prop && prop.length) {
-              const key = prop[0] as string;
+              const key: string = prop[0];
               const value: string = prop[1];
 
               if (prop[1] === 'true') {
@@ -649,9 +647,9 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
-    const projection = this.validateProjection(Number(tmpConfig.map.projection));
+    const projection = this.validateProjection(Number(tmpConfig.map.view.projection)) as TypeValidProjectionCodes;
     const basemapOptions = this.validateBasemap(projection, tmpConfig.map.basemapOptions);
-    const center = this.validateCenter(projection, tmpConfig.map.view.center);
+    const center = this.validateCenter(projection, tmpConfig.map.view.center) as [number, number];
     const zoom = this.validateZoom(Number(tmpConfig.map.view.zoom));
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
@@ -661,19 +659,19 @@ export class Config {
         view: {
           zoom,
           center,
+          projection,
         },
+        extraOptions: tmpConfig.map.extraOptions,
         interaction: tmpConfig.map.interaction,
-        projection,
-        controls: tmpConfig.map.controls,
         layers: tmpConfig.map.layers,
       },
       theme: tmpConfig.theme,
       components: tmpConfig.components,
       corePackages: tmpConfig.corePackages,
       languages: tmpConfig.languages,
-      extraOptions: tmpConfig.extraOptions,
       appBar: tmpConfig.appBar,
       externalPackages: tmpConfig.externalPackages,
+      version: '2.0',
     };
     this.logModifs(tmpConfig, validConfig);
 

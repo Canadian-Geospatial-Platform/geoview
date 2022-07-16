@@ -2,7 +2,7 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event';
 
-import { TypeMapConfigProps } from '../../../core/types/cgpv-types';
+import { TypeMapSchemaProps } from '../../../core/types/cgpv-types';
 
 /** Valid events that can create MapConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_RELOAD];
@@ -27,16 +27,16 @@ export const payloadIsAMapConfig = (verifyIfPayload: PayloadBaseClass): verifyIf
  */
 export class MapConfigPayload extends PayloadBaseClass {
   // the map configuration
-  config: TypeMapConfigProps;
+  config: TypeMapSchemaProps;
 
   /**
    * Constructor for the class
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {TypeMapConfigProps} config the map configuration
+   * @param {TypeMapSchemaProps} config the map configuration
    */
-  constructor(event: EventStringId, handlerName: string | null, config: TypeMapConfigProps) {
+  constructor(event: EventStringId, handlerName: string | null, config: TypeMapSchemaProps) {
     if (!validEvents.includes(event)) throw new Error(`MapConfigPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.config = config;
@@ -49,10 +49,10 @@ export class MapConfigPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {TypeMapConfigProps} config the map configuration
+ * @param {TypeMapSchemaProps} config the map configuration
  *
  * @returns {MapConfigPayload} the MapConfigPayload object created
  */
-export const mapConfigPayload = (event: EventStringId, handlerName: string | null, config: TypeMapConfigProps): MapConfigPayload => {
+export const mapConfigPayload = (event: EventStringId, handlerName: string | null, config: TypeMapSchemaProps): MapConfigPayload => {
   return new MapConfigPayload(event, handlerName, config);
 };

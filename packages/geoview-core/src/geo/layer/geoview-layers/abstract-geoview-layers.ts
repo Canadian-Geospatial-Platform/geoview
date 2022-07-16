@@ -79,7 +79,7 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer accessPath. The name attribute is optional */
   accessPath: string;
 
-  /** An array of layer identifiers and names  */
+  /** An array of layer settings. */
   layerEntries: TypeLayerEntries;
 
   /**

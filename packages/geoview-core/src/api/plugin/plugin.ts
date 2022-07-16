@@ -7,20 +7,20 @@ import Ajv from 'ajv';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { MapViewer } from '../geo/map/map';
+import { MapViewer } from '../../geo/map/map';
 
-import { api } from '../app';
+import { api } from '../../app';
 import {
-  AbstractPluginClass,
+  AbstractPlugin,
   toJsonObject,
   TypeJsonObject,
   TypeJsonValue,
   TypePluginStructure,
   TypeRecordOfPlugin,
-} from '../core/types/cgpv-types';
+} from '../../core/types/cgpv-types';
 
-import { EVENT_NAMES } from './events/event';
-import { snackbarMessagePayload } from './events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../events/event';
+import { snackbarMessagePayload } from '../events/payloads/snackbar-message-payload';
 
 /**
  * Class to manage plugins
@@ -99,7 +99,7 @@ export class Plugin {
   addPlugin = async (
     pluginId: string,
     mapId: string,
-    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
+    constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {

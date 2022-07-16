@@ -5,9 +5,9 @@ import {
   TypeJsonArray,
   TypeDynamicLayerEntry,
   TypeOgcLayerEntry,
-  TypeLayerConfig,
+  TypeBaseGeoViewLayersConfig,
   TypeGeoViewLayers,
-  TypeSelectChangeEvent,
+  SelectChangeEvent,
   snackbarMessagePayload,
 } from 'geoview-core';
 
@@ -16,12 +16,6 @@ type Event = { target: { value: string } };
 interface Props {
   mapId: string;
   setAddLayerVisible: (isVisible: boolean) => void;
-}
-
-interface ButtonProps {
-  isFirst?: boolean;
-  isLast?: boolean;
-  handleNext: () => void;
 }
 
 type EsriOptions = {
@@ -362,14 +356,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
-    const layerConfig: TypeLayerConfig = {
+    const layerConfig: TypeBaseGeoViewLayersConfig = {
       id: api.generateId(),
       name: {
         en: name,
         fr: name,
       },
       layerType: layerType as TypeGeoViewLayers,
-      url: {
+      accessPath: {
         en: url,
         fr: url,
       },
@@ -404,9 +398,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   /**
    * Set layerType from form input
    *
-   * @param {TypeSelectChangeEvent} event TextField event
+   * @param {SelectChangeEvent} event TextField event
    */
-  const handleSelectType = (event: TypeSelectChangeEvent<unknown>) => {
+  const handleSelectType = (event: SelectChangeEvent<unknown>) => {
     setLayerType(event.target.value as TypeGeoViewLayers);
     setLayerList([]);
     setLayerName('');

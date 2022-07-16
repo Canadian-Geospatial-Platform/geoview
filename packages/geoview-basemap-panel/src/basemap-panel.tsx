@@ -1,7 +1,14 @@
-import { toJsonObject, TypeBasemapProps, TypeJsonObject, TypeSelectChangeEvent, TypeWindow, TypeMapView } from 'geoview-core';
-import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads/map-view-projection-payload';
-import { TypeBasemapOptions } from 'geoview-core/src/geo/layer/basemap/basemap-types';
-import { TypeValidProjectionCodes } from 'geoview-core/src/geo/map/map-types';
+import {
+  toJsonObject,
+  TypeBasemapProps,
+  TypeJsonObject,
+  SelectChangeEvent,
+  TypeWindow,
+  TypeViewSettings,
+  mapViewProjectionPayload,
+  TypeBasemapOptions,
+  TypeValidProjectionCodes,
+} from 'geoview-core';
 
 const w = window as TypeWindow;
 
@@ -137,9 +144,9 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
   /**
    * Set new projection view and basemap array
    *
-   * @param {TypeSelectChangeEvent} event select change element event
+   * @param {SelectChangeEvent} event select change element event
    */
-  const setSelectedProjection = (event: TypeSelectChangeEvent<unknown>) => {
+  const setSelectedProjection = (event: SelectChangeEvent<unknown>) => {
     const projection = event.target.value as number;
 
     // set basemap to no geom to clean up the view
@@ -151,13 +158,13 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     const currentCenter = currentView.getCenter();
     const currentProjection = currentView.getProjection().getCode();
     const newCenter = api.projection.transformPoints(currentCenter, currentProjection, 'EPSG:4326')[0];
-    const newProjection = `EPSG:${event.target.value as number}`;
+    const newProjection = event.target.value as TypeValidProjectionCodes;
 
-    const newView: TypeMapView = {
+    const newView: TypeViewSettings = {
       zoom: currentView.getZoom() as number,
       minZoom: currentView.getMinZoom(),
       maxZoom: currentView.getMaxZoom(),
-      center: newCenter as number[],
+      center: newCenter as [number, number],
       projection: newProjection,
     };
 

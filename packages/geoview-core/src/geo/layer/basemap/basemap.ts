@@ -8,18 +8,11 @@ import { api } from '../../../app';
 
 import { EVENT_NAMES } from '../../../api/events/event';
 
-import {
-  TypeBasemapProps,
-  TypeBasemapLayer,
-  TypeProjectionCodes,
-  TypeJsonObject,
-  toJsonObject,
-  TypeJsonArray,
-} from '../../../core/types/cgpv-types';
+import { TypeValidProjectionCodes, TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types/cgpv-types';
 
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
-import { TypeBasemapOptions } from './basemap-types';
+import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
 import { TypeLocalizedLanguages } from '../../map/map-types';
 
 /**
@@ -160,7 +153,7 @@ export class Basemap {
    * @param {TypeLocalizedLanguages} language basemap language
    * @returns {string[]} array of thumbnail urls
    */
-  private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjectionCodes, language: TypeLocalizedLanguages): string[] => {
+  private getThumbnailUrl = (basemapTypes: string[], projection: TypeValidProjectionCodes, language: TypeLocalizedLanguages): string[] => {
     const thumbnailUrls: string[] = [];
 
     for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
@@ -520,7 +513,7 @@ export class Basemap {
           altText: info[1],
           thumbnailUrl: this.getThumbnailUrl(
             basemaplayerTypes,
-            projectionCode as TypeProjectionCodes,
+            projectionCode as TypeValidProjectionCodes,
             this.language as TypeLocalizedLanguages
           ),
           attribution: this.attribution,

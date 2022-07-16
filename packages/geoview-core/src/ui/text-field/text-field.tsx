@@ -1,8 +1,13 @@
 import React from 'react';
 
 import MaterialTextField from '@mui/material/TextField';
+import { TextFieldProps } from '@mui/material';
 
-import { TypeTextFieldProps } from '../../core/types/cgpv-types';
+/**
+ * Custom Material UI Textfield properties
+ */
+// eslint-disable-next-line react/require-default-props
+type TypeTextFieldProps = TextFieldProps & { mapId?: string };
 
 /**
  * Create a Material UI TextField component

@@ -4,7 +4,7 @@ import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';
 
 import { MapViewer } from '../geo/map/map';
 
-import { Plugin } from './plugin';
+import { Plugin } from './plugin/plugin';
 import { GeoUtilities } from '../geo/utils/utilities';
 import { DateMgt } from '../core/utils/date-mgt';
 

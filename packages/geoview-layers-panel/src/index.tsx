@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
   Cast,
-  AbstractPluginClass,
+  AbstractPlugin,
   toJsonObject,
   TypeJsonObject,
   TypeWindow,
@@ -9,7 +9,7 @@ import {
   TypeButtonPanel,
   TypeIconButtonProps,
   TypePanelProps,
-  TypeSchemaObject,
+  AnySchemaObject,
 } from 'geoview-core';
 import PanelContent from './panel-content';
 import schema from '../schema.json';
@@ -20,7 +20,7 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class LayersPanelPlugin extends AbstractPluginClass {
+class LayersPanelPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
@@ -32,9 +32,9 @@ class LayersPanelPlugin extends AbstractPluginClass {
   /**
    * Return the schema that is defined for this package
    *
-   * @returns {TypeSchemaObject} returns the schema for this package
+   * @returns {AnySchemaObject} returns the schema for this package
    */
-  schema = (): TypeSchemaObject => schema;
+  schema = (): AnySchemaObject => schema;
 
   /**
    * Return the default config for this package
@@ -118,4 +118,4 @@ class LayersPanelPlugin extends AbstractPluginClass {
 export default LayersPanelPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins['layers-panel'] = Cast<AbstractPluginClass>(LayersPanelPlugin);
+w.plugins['layers-panel'] = Cast<AbstractPlugin>(LayersPanelPlugin);

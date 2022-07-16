@@ -1,7 +1,10 @@
 import BaseLayer from 'ol/layer/Base';
-import { AbstractGeoViewLayer, TypeGeoViewEntry } from '../abstract-geoview-layers';
+import LayerGroup from 'ol/layer/Group';
+import Collection from 'ol/Collection';
+import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
+import { TypeLayerNode } from '../schema-types';
 
-/** ******************************************************************************************************************************
+/* *******************************************************************************************************************************
  * AbstractGeoViewVector types
  */
 
@@ -54,10 +57,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       if (this.layerEntries.length === 1) {
         this.gvVectorLayers = this.processOneLayerEntry(this.layerEntries[0]);
         this.setRenderer(this.layerEntries[0], this.gvVectorLayers);
+        this.registerToPanels(this.layerEntries[0], this.gvVectorLayers);
       } else {
-        this.layerEntries.forEach((layerEntry: TypeGeoViewEntry) => {
+        this.gvVectorLayers = new LayerGroup({
+          layers: new Collection(),
+        });
+        this.layerEntries.forEach((layerEntry: TypeLayerNode) => {
           const vectorLayer: TypeBaseVectorLayer = this.processOneLayerEntry(layerEntry);
-          this.setRenderer(vectorLayer);
+          this.setRenderer(this.layerEntries[0], vectorLayer);
+          this.registerToPanels(this.layerEntries[0], vectorLayer);
+          (this.gvVectorLayers as LayerGroup).getLayers().push(vectorLayer);
         });
       }
     }
@@ -72,17 +81,25 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * This method creates a GeoView layer using the definition provided in the layerEntry parameter.
    *
-   * @param {TypeGeoViewEntry} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeLayerNode} layerEntry Information needed to create the GeoView layer.
    *
-   * @returns The GeoView vector layer that has been created.
+   * @returns {TypeBaseVectorLayer} The GeoView vector layer that has been created.
    */
-  abstract processOneLayerEntry(layerEntry: TypeGeoViewEntry): TypeBaseVectorLayer;
+  abstract processOneLayerEntry(layerEntry: TypeLayerNode): TypeBaseVectorLayer;
 
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeGeoViewEntry} layerEntry Information needed to create the renderer.
-   * @param {TypeGeoViewEntry} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerNode} layerEntry Information needed to create the renderer.
+   * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(layerEntry: TypeGeoViewEntry, aVectorLayer: TypeBaseVectorLayer): void;
+  abstract setRenderer(layerEntry: TypeLayerNode, vectorLayer: TypeBaseVectorLayer): void;
+
+  /**
+   * This method register the GeoView layer to panels that offer this possibility.
+   *
+   * @param {TypeLayerNode} layerEntry Information needed to create the renderer.
+   * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer who wants to register.
+   */
+  abstract registerToPanels(layerEntry: TypeLayerNode, vectorLayer: TypeBaseVectorLayer): void;
 }

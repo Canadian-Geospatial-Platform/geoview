@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
 import MaterialButton from '@mui/material/Button';
 
-import { Cast, TypeChildren, TypeButtonProps } from '../../core/types/cgpv-types';
+import { Cast, TypeButtonProps } from '../../core/types/cgpv-types';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the new UI element
  */
 export function Button(props: TypeButtonProps): JSX.Element {
-  const [content, setContent] = useState<TypeChildren>();
+  const [content, setContent] = useState<React.ReactNode>();
 
   const {
     variant,
@@ -89,10 +89,10 @@ export function Button(props: TypeButtonProps): JSX.Element {
   /**
    * Get text container with provided text content
    *
-   * @returns {TypeChildren} return the text container
+   * @returns {React.ReactNode} return the text container
    */
-  const getText = useCallback((): TypeChildren => {
-    let textContent: TypeChildren;
+  const getText = useCallback((): React.ReactNode => {
+    let textContent: React.ReactNode;
 
     if (typeof children === 'undefined') {
       textContent = <div />;
@@ -118,10 +118,10 @@ export function Button(props: TypeButtonProps): JSX.Element {
   /**
    * Get icon container with provided icon content
    *
-   * @returns {TypeChildren} returns icon container
+   * @returns {React.ReactNode} returns icon container
    */
-  const getIcon = useCallback((): TypeChildren => {
-    let iconContent: TypeChildren;
+  const getIcon = useCallback((): React.ReactNode => {
+    let iconContent: React.ReactNode;
 
     if (typeof icon === 'undefined') {
       iconContent = <div />;
@@ -137,27 +137,27 @@ export function Button(props: TypeButtonProps): JSX.Element {
   /**
    * Create a text only button
    *
-   * @returns {TypeChildren} return the created text button
+   * @returns {React.ReactNode} return the created text button
    */
-  const createTextButton = useCallback((): TypeChildren => {
+  const createTextButton = useCallback((): React.ReactNode => {
     return getText();
   }, [getText]);
 
   /**
    * Create an icon only button
    *
-   * @returns {TypeChildren} return the created icon button
+   * @returns {React.ReactNode} return the created icon button
    */
-  const createIconButton = useCallback((): TypeChildren => {
+  const createIconButton = useCallback((): React.ReactNode => {
     return getIcon();
   }, [getIcon]);
 
   /**
    * Create a button with icon and text
    *
-   * @returns {TypeChildren} return a button with an icon and text
+   * @returns {React.ReactNode} return a button with an icon and text
    */
-  const createTextIconButton = useCallback((): TypeChildren => {
+  const createTextIconButton = useCallback((): React.ReactNode => {
     return (
       <div className={classes.textIconContainer}>
         {getIcon()}

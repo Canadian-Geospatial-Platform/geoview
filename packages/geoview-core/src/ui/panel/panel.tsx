@@ -12,17 +12,26 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 
-import { Cast, TypePanelAppProps } from '../../core/types/cgpv-types';
+import { Cast, TypeIconButtonProps } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 import { MapContext } from '../../core/app-start';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { IconButton, CloseIcon } from '..';
+import { IconButton, CloseIcon, PanelApi } from '..';
 import { payloadBaseClass } from '../../api/events/payloads/payload-base-class';
 import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '../../api/events/payloads/panel-payload';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+
+/**
+ * Interface for panel properties
+ */
+type TypePanelAppProps = {
+  panel: PanelApi;
+  //   panelOpen: boolean;
+  button: TypeIconButtonProps;
+};
 
 const useStyles = makeStyles((theme) => ({
   panelContainer: {

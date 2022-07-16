@@ -11,7 +11,7 @@ import { Shell } from './containers/shell';
 import { cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
 
-import { TypeMapConfigProps, TypeMapContext } from './types/cgpv-types';
+import { TypeMapSchemaProps } from './types/cgpv-types';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,10 +25,18 @@ export const MapContext = React.createContext<TypeMapContext>({
 });
 
 /**
+ * Type used for the map context
+ */
+type TypeMapContext = {
+  id: string;
+  interaction: string;
+};
+
+/**
  * interface used when passing configuration from the maps
  */
 interface AppStartProps {
-  configObj: TypeMapConfigProps;
+  configObj: TypeMapSchemaProps;
 }
 
 /**

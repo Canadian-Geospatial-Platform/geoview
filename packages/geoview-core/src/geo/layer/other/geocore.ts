@@ -5,11 +5,13 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { api } from '../../../app';
 
-import { CONST_LAYER_TYPES, TypeGeoCoreLayer, TypeBaseGeoViewLayersConfig, TypeJsonObject } from '../../../core/types/cgpv-types';
+import { CONST_LAYER_TYPES, TypeGeoCoreLayerNode, TypeBaseGeoViewLayersConfig, TypeJsonObject } from '../../../core/types/cgpv-types';
 import { catalogUrl, Config } from '../../../core/utils/config';
 import { TypeLayerEntries, TypeLayerNode } from '../geoview-layers/schema-types';
 
-export const layerConfigIsGeoCore = (verifyIfLayer: Omit<TypeBaseGeoViewLayersConfig, 'url'>): verifyIfLayer is TypeGeoCoreLayer => {
+export const layerConfigIsGeoCore = (
+  verifyIfLayer: Omit<TypeBaseGeoViewLayersConfig, 'layerEntries' | 'accessPath'>
+): verifyIfLayer is TypeGeoCoreLayerNode => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
@@ -33,11 +35,11 @@ export class GeoCore {
   /**
    * Get layer from uuid
    *
-   * @param {TypeGeoCoreLayer} layer the layer configuration
-   * @return {Promise<TypeLayerConfig | null>} layers to add to the map
+   * @param {TypeGeoCoreLayerNode} layer the layer configuration
+   * @return {Promise<TypeBaseGeoViewLayersConfig | null>} layers to add to the map
    */
-  async add(layer: TypeGeoCoreLayer): Promise<TypeLayerNode | null> {
-    const url = layer.url || `${catalogUrl}/${api.map(this.#mapId).language.split('-')[0]}`;
+  async add(layer: TypeGeoCoreLayerNode): Promise<TypeLayerNode | null> {
+    const url = layer.accessPath || `${catalogUrl}/${api.map(this.#mapId).language.split('-')[0]}`;
 
     const requestUrl = `${url}/${layer.id}`;
 

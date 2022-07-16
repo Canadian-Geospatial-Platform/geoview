@@ -14,7 +14,7 @@ import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
 
 import { FocusTrapDialog } from './focus-trap';
-import { TypeMapConfigProps } from '../types/cgpv-types';
+import { TypeMapSchemaProps } from '../types/cgpv-types';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => {
  */
 interface ShellProps {
   id: string;
-  config: TypeMapConfigProps;
+  config: TypeMapSchemaProps;
 }
 
 /**

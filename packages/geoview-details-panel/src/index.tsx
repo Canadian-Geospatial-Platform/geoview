@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
   Cast,
-  AbstractPluginClass,
+  AbstractPlugin,
   TypePluginOptions,
   TypeButtonPanel,
   toJsonObject,
@@ -17,7 +17,7 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class DetailsPlugin extends AbstractPluginClass {
+class DetailsPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
@@ -104,4 +104,4 @@ class DetailsPlugin extends AbstractPluginClass {
 export default DetailsPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins['details-panel'] = Cast<AbstractPluginClass>(DetailsPlugin);
+w.plugins['details-panel'] = Cast<AbstractPlugin>(DetailsPlugin);

@@ -21,7 +21,7 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { TypeMapConfigProps } from '../../types/cgpv-types';
+import { TypeMapSchemaProps } from '../../types/cgpv-types';
 import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
@@ -38,7 +38,7 @@ export const useStyles = makeStyles(() => ({
   },
 }));
 
-export function Map(props: TypeMapConfigProps): JSX.Element {
+export function Map(props: TypeMapSchemaProps): JSX.Element {
   const { map: mapProps, components } = props;
 
   // make sure the id is not undefined
@@ -119,7 +119,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   const initMap = async () => {
     // create map
-    const projection = api.projection.projections[mapProps.projection];
+    const projection = api.projection.projections[mapProps.view.projection];
 
     const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
 
@@ -209,7 +209,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
             // on map view projection change, layer source needs to be refreshed
             // TODO: Listen to refresh from layer abstract class
             const mapLayers = api.map(id).layer.layers;
-            Object.entries(mapLayers).forEach((layer) => layer[1].layer.getSource()?.refresh());
+            Object.entries(mapLayers).forEach((layer) => layer[1].layerEntries.getSource()?.refresh());
           }
         }
       },

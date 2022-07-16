@@ -3,10 +3,38 @@ import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
-import { DatePrecision, DEFAULT_DATE_PRECISION, TimePrecision, DEFAULT_TIME_PRECISION, TypeLocalizedLanguages } from '../types/cgpv-types';
+import { TypeLocalizedLanguages } from '../types/cgpv-types';
 
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
+
+/** ******************************************************************************************************************************
+ * constant/interface used to define the precision for date object (yyyy, mm, dd).
+ */
+const DEFAULT_DATE_PRECISION = {
+  year: 'YYYY',
+  month: 'YYYY-MM',
+  day: 'YYYY-MM-DD',
+};
+
+/** ******************************************************************************************************************************
+ * Type used to define the date precision pattern to use.
+ */
+type DatePrecision = 'year' | 'month' | 'day';
+
+/** ******************************************************************************************************************************
+ * constant/interface used to define the precision for time object (hh, mm, ss).
+ */
+const DEFAULT_TIME_PRECISION = {
+  hour: 'THHZ',
+  minute: 'THH:MMZ',
+  second: 'THH:MM:SSZ',
+};
+
+/** ******************************************************************************************************************************
+ * Type used to define the time precision pattern to use.
+ */
+type TimePrecision = 'hour' | 'minute' | 'second';
 
 dayjs.extend(utc);
 dayjs.extend(duration);

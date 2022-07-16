@@ -1,7 +1,15 @@
+/* eslint-disable react/require-default-props */
 import MaterialDivider from '@mui/material/Divider';
 import makeStyles from '@mui/styles/makeStyles';
+import { DividerProps } from '@mui/material';
 
-import { TypeDividerProps } from '../../core/types/cgpv-types';
+/**
+ * Properties for the Divider
+ */
+interface TypeDividerProps extends DividerProps {
+  orientation?: 'horizontal' | 'vertical';
+  grow?: boolean;
+}
 
 const useStyles = makeStyles((theme) => ({
   vertical: {

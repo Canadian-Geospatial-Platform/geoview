@@ -46,7 +46,7 @@ export type TypeMapConfig = {
   /** View settings. */
   view: TypeViewSettings;
   /** Additional options used for OpenLayers map options. */
-  extraOptions: Record<string, unknown>;
+  extraOptions?: Record<string, unknown>;
 };
 
 /** ******************************************************************************************************************************
