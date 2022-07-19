@@ -1,5 +1,6 @@
 import { TypeLangString } from '../../core/types/global-types';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
+import { TypeGeoViewLayers } from '../layer/geoview-layers/abstract-geoview-layers';
 import { TypeLayerEntries } from '../layer/geoview-layers/schema-types';
 
 /** ******************************************************************************************************************************
@@ -35,6 +36,22 @@ export type TypeMapSchemaProps = {
 
 /** ******************************************************************************************************************************
  *  Definition of the map configuration settings.
+ 1 * /
+export type TypeMapConfig = {
+  /** Basemap options settings for this map configuration. 1 * /
+  basemapOptions: TypeBasemapOptions;
+  /** Type of interaction. 1 * /
+  interaction: TypeInteraction;
+  /** Layers list in the order which they should be added to the map. 1 * /
+  layers?: TypeLayerEntries;
+  /** View settings. 1 * /
+  view: TypeViewSettings;
+  /** Additional options used for OpenLayers map options. 1 * /
+  extraOptions?: Record<string, unknown>;
+};
+
+/** ******************************************************************************************************************************
+ *  Definition of the map configuration settings.
  */
 export type TypeMapConfig = {
   /** Basemap options settings for this map configuration. */
@@ -42,11 +59,19 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** Layers list in the order which they should be added to the map. */
-  layers?: TypeLayerEntries;
+  layers?: TypeMapLayer[];
   /** View settings. */
   view: TypeViewSettings;
   /** Additional options used for OpenLayers map options. */
   extraOptions?: Record<string, unknown>;
+};
+
+export type TypeMapLayer = {
+  id: string;
+  name: TypeLangString;
+  accessPath: TypeLangString;
+  layerType: TypeGeoViewLayers;
+  layerEntries: TypeLayerEntries;
 };
 
 /** ******************************************************************************************************************************
@@ -154,7 +179,7 @@ export type TypeServiceUrls = {
 
 /** ******************************************************************************************************************************
  * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
- * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value. Default = ['en', 'fr'].
+ * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
  */
 export type TypeLanguages = 'en' | 'fr';
 export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';

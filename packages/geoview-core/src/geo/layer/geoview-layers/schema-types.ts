@@ -9,7 +9,7 @@ export type TypeLayerBasicInfoNode = {
    * The id of the layer for referencing within the viewer (does not relate directly to any external service).
    * The id will have the language extension (id-'lang').
    */
-  LayerId: string;
+  layerId: string;
   /** The display name of the layer (English/French). If it is not present the viewer will make an attempt to
    * scrape this information.
    */
@@ -250,7 +250,7 @@ export type TypeStyleNode = TypeSimpleStyleNode | TypeUniqueValueStyleNode | Typ
  */
 export type TypeVectorLayerNode = {
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialSettingsNode;
   /** The type of GeoView layer. */
@@ -280,7 +280,7 @@ export type TypeSourceImageEsriLayerNode = {
   /** The index of the layer in the map service. */
   index: number;
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings for the source. */
   state?: TypeSourceEntriesInitialSettingsNode;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
@@ -294,7 +294,7 @@ export type TypeSourceImageWMSLayerNode = {
   /** The id of the layer entry in the WMS. */
   id: string;
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings for the source. */
   state?: TypeSourceEntriesInitialSettingsNode;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
@@ -342,7 +342,7 @@ export type TypeImageSourceFormats = 'WMS' | 'ESRI';
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageWmsInitialSettings extends TypeBaseSourceImageInitialSettings {
-  /** The source type for the image layer. Default = WMS. */
+  /** The source type for the image layer. */
   sourceType: 'WMS';
   /** The type of the remote WMS server. */
   serverType: TypeOfServer;
@@ -354,8 +354,9 @@ export interface TypeSourceImageWmsInitialSettings extends TypeBaseSourceImageIn
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageEsriInitialSettings extends TypeBaseSourceImageInitialSettings {
-  /** The source type for the image layer. Default = WMS. */
+  /** The source type for the image layer. */
   sourceType: 'ESRI';
+  /** The format used by the image layer. */
   format?: TypeEsriFormatParameter;
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
@@ -411,7 +412,7 @@ export type TypeSourceTileInitialSettings = {
  */
 export type TypeVectorHeatmapLayerNode = {
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialSettingsNode;
   /**
@@ -459,7 +460,7 @@ export type TypeVectorTileSourceInitialSettings = {
  */
 export type TypeVectorTileLayerNode = {
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialSettingsNode;
   /** The type of GeoView layer. Layer for vector tile data that is rendered client-side. */
@@ -493,7 +494,7 @@ export type TypeImageLayerNode = {
  */
 export type TypeTileLayerNode = {
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialSettingsNode;
   /**
@@ -510,8 +511,12 @@ export type TypeTileLayerNode = {
  * configuration will handle bilangual informations.
  */
 export type TypeGeoCoreLayerNode = {
+  /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
+   * attribute. The id will have the language extension (id-'lang').
+   */
+  info: Pick<TypeLayerBasicInfoNode, 'layerId' | 'layerName'>;
   /** The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang'). */
-  id: string;
+  // id: string;
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
   accessPath?: string;
   /** The type of GeoView layer. */
