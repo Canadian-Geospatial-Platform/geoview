@@ -169,9 +169,9 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
         'interaction': 'dynamic',
         'view': {
           'zoom': 4,
-          'center': [60, -100]
+          'center': [60, -100],
+          'projection': 3978
         },
-        'projection': 3978,
         'basemapOptions': {
           'id': 'transport',
           'shaded': true,
@@ -240,9 +240,9 @@ Full example:
 	            'interaction': 'dynamic',
 	            'view': {
 	              'zoom': 4,
-	              'center': [60, -100]
+	              'center': [60, -100],
+  	            'projection': 3978
 	            },
-	            'projection': 3978,
 	            'basemapOptions': {
 	              'id': 'transport',
 	              'shaded': true,

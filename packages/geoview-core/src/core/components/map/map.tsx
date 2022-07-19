@@ -227,11 +227,11 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
     <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
       {isLoaded && (
         <>
-          {components !== undefined && components.indexOf('northArrow') > -1 && (
+          {components !== undefined && components.indexOf('north-arrow') > -1 && (
             <NorthArrow projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           )}
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
-          {deviceSizeMedUp && components !== undefined && components.indexOf('overviewMap') > -1 && <OverviewMap />}
+          {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>
       )}

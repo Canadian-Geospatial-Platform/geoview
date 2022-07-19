@@ -188,15 +188,15 @@ The viewer is bundled with core packages, you can load them by passing their id 
           'view': {
             'zoom': 4,
             'center': [60, -100]
+            'projection': 3857,
           },
-          'projection': 3857,
           'basemapOptions': {
             'id': 'transport',
             'shaded': false,
             'labeled': true
           }
         },
-        'components': ['appbar', 'navbar', 'northArrow'],
+        'components': ['appbar', 'navbar', 'north-arrow'],
         'corePackages': ['details-panel', 'layers-panel', 'basemap-panel', 'overview-map'],
         'theme': 'dark',
         'languages': ['en-CA']

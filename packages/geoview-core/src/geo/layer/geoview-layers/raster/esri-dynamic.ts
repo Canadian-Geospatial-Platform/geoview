@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { ImageArcGISRest } from 'ol/source';
+import { Options } from 'ol/source/ImageArcGISRest';
 import { Image as ImageLayer } from 'ol/layer';
 import { extend, Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
@@ -17,6 +18,7 @@ import {
   TypeImageLayerNode,
   TypeSourceImageEsriInitialSettings,
   TypeBaseRasterLayer,
+  TypeLayerNode,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
@@ -42,7 +44,7 @@ export interface TypeDynamicLayer extends Omit<TypeBaseGeoViewLayersConfig, 'lay
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeDynamicLayer => {
+export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeLayerNode): verifyIfLayer is TypeDynamicLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
@@ -82,6 +84,7 @@ export class EsriDynamic extends AbstractGeoViewLayer {
    * This method reads from the accessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): void {
+    if (this.)
     const data = getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCode()]}?f=json`);
     data.then((value) => {
       if (value !== '{}') {
@@ -98,13 +101,17 @@ export class EsriDynamic extends AbstractGeoViewLayer {
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
   processOneLayerEntry(layerEntry: TypeImageEsriLayerNode): TypeBaseRasterLayer {
-    const esriLayer = new ImageLayer({
-      source: new ImageArcGISRest({
-        attributions: [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string],
-        url: layerEntry.source.accesPath[api.map(this.mapId).getLanguageCode()],
-        params: { LAYERS: `show:${layerEntry.info.layerId}` },
-      }),
-    });
+    const sourceOptions: Options = {};
+    sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
+    sourceOptions.url = layerEntry.source.accesPath[api.map(this.mapId).getLanguageCode()];
+    sourceOptions.params = { LAYERS: `show:${layerEntry.info.layerId}` };
+    if (layerEntry.source.transparent !== undefined)
+      Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent);
+    if (layerEntry.source.format !== undefined) Object.defineProperty(sourceOptions.params, 'format', layerEntry.source.format);
+    if (layerEntry.source.crossOrigin !== undefined) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
+    if (layerEntry.source.projection !== undefined) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
+
+    const esriLayer = new ImageLayer({ source: new ImageArcGISRest(sourceOptions) });
 
     return esriLayer;
   }
