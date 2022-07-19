@@ -1,4 +1,5 @@
 export * from './global-types';
+export * from '../utils/utilities';
 export * from '../../api/events/payloads/attribution-payload';
 export * from '../../api/events/payloads/basemap-layers-payload';
 export * from '../../api/events/payloads/boolean-payload';

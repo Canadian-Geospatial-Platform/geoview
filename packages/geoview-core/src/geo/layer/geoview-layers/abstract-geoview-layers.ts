@@ -74,10 +74,10 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer name. The value of this attribute is extracted from the layerConfigOptions parameter. If its value is
    * undefined, a default value is generated.
    */
-  name: string;
+  name: TypeLangString = { en: '', fr: '' };
 
   /** The GeoView layer accessPath. The name attribute is optional */
-  accessPath: string;
+  accessPath: TypeLangString = { en: '', fr: '' };
 
   /** An array of layer settings. */
   layerEntries: TypeLayerEntries;
@@ -93,8 +93,10 @@ export abstract class AbstractGeoViewLayer {
     this.mapId = mapId;
     this.type = type;
     this.id = layerConfigOptions.id || generateId('');
-    this.name = layerConfigOptions.name ? layerConfigOptions.name[api.map(mapId).getLanguageCode()] : DEFAULT_LAYER_NAMES[type];
-    this.accessPath = layerConfigOptions.accessPath[api.map(mapId).getLanguageCode()].trim();
+    this.name.en = layerConfigOptions.name && layerConfigOptions.name.en ? layerConfigOptions.name.en : DEFAULT_LAYER_NAMES[type];
+    this.name.fr = layerConfigOptions.name && layerConfigOptions.name.fr ? layerConfigOptions.name.en : DEFAULT_LAYER_NAMES[type];
+    this.accessPath.en = layerConfigOptions.accessPath.en.trim();
+    this.accessPath.fr = layerConfigOptions.accessPath.fr.trim();
     this.layerEntries = layerConfigOptions.layerEntries;
   }
 }

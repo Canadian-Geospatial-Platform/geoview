@@ -149,8 +149,9 @@ export class Basemap {
    * Get basemap thumbnail url
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeProjectionCodes} projection basemap projection
+   * @param {TypeValidProjectionCodes} projection basemap projection
    * @param {TypeLocalizedLanguages} language basemap language
+   *
    * @returns {string[]} array of thumbnail urls
    */
   private getThumbnailUrl = (basemapTypes: string[], projection: TypeValidProjectionCodes, language: TypeLocalizedLanguages): string[] => {

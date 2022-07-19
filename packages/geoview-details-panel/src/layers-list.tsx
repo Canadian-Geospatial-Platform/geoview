@@ -1,6 +1,7 @@
 /* eslint-disable react/no-array-index-key */
-import { TypeLayersListProps, AbstractGeoViewLayer, TypeWindow, toJsonObject } from 'geoview-core';
 import { markerDefinitionPayload } from 'geoview-core/src/api/events/payloads/marker-definition-payload';
+import { AbstractGeoViewLayer, TypeWindow, toJsonObject } from 'geoview-core';
+import { TypeLayersListProps } from './details-panel-types';
 
 // get the window object
 const w = window as TypeWindow;
@@ -83,13 +84,13 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
    * Switch to the feature list / entries panel content
    *
    * @param {Object} data data object of all layers
-   * @param {string} layerKey the layer object to list it's entries
+   * @param {number} layerKey the layer object to list it's entries
    */
-  const goToFeatureList = (data: AbstractGeoViewLayer, layerKey: string) => {
-    const { layerData, displayField, fieldAliases, renderer } = data.layers[layerKey];
+  const goToFeatureList = (data: AbstractGeoViewLayer, layerKey: number) => {
+    const { layerData, displayField, fieldAliases, renderer } = data.layerEntries[layerKey];
 
     // set the layer entry data
-    selectLayer(data.layers[layerKey]);
+    selectLayer(data.layerEntries[layerKey]);
 
     // check if the layer has only one entry
     if (layerData.length === 1) {

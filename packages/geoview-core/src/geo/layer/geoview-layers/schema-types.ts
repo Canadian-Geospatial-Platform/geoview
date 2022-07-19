@@ -1,14 +1,15 @@
 import { TypeLangString } from '../../../core/types/global-types';
+import { TypeValidProjectionCodes } from '../../map/map-types';
 
 /** ******************************************************************************************************************************
- *  Basic type used to identify a GeoView layer to display on the map.
+ * Basic type used to identify a GeoView layer to display on the map.
  */
 export type TypeLayerBasicInfoNode = {
   /**
    * The id of the layer for referencing within the viewer (does not relate directly to any external service).
    * The id will have the language extension (id-'lang').
    */
-  layerId: string;
+  LayerId: string;
   /** The display name of the layer (English/French). If it is not present the viewer will make an attempt to
    * scrape this information.
    */
@@ -16,7 +17,7 @@ export type TypeLayerBasicInfoNode = {
   /**
    * The metadata url of the layer service (English/French).
    */
-  layerMetadataUrl?: TypeLangString;
+  metadataUrl?: TypeLangString;
 };
 
 /** ******************************************************************************************************************************
@@ -24,17 +25,17 @@ export type TypeLayerBasicInfoNode = {
  */
 export type TypeLayerInitialSettingsNode = {
   /** Initial opacity setting. Domain = [0..1] and default = 1. */
-  layerOpacity?: number;
+  opacity?: number;
   /** Initial visibility setting. Default = true. */
-  layerVisibility?: boolean;
+  visibility?: boolean;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  layerExtent?: [number, number, number, number];
+  extent?: [number, number, number, number];
   /** The minimum view zoom level (exclusive) above which this layer will be visible. */
-  layerMinZoom?: number;
+  minZoom?: number;
   /** The maximum view zoom level (inclusive) below which this layer will be visible. */
-  layerMaxZoom?: number;
+  maxZoom?: number;
   /** A CSS class name to set to the layer element. */
-  layerClassName?: string;
+  className?: string;
 };
 
 /** ******************************************************************************************************************************
@@ -46,7 +47,7 @@ export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | '
  * Type used to configure the cluster feature of a vector layer. Works out of the box with point geometries. If another geometry is
  * provided, it will be converted to points geometry.
  */
-export type TypeVectorSourceClusterConfig = {
+export type TypeSourceVectorClusterConfig = {
   /** Flag used to enable clustering. Default = false. */
   enable: boolean;
   /** Distance in pixels within which features will be clustered together (deafult 20px). */
@@ -72,10 +73,11 @@ export type TypeDetailsLayerSettings = {
 };
 
 /** ******************************************************************************************************************************
- * Type used to configure the cluster feature of a vector layer. Works out of the box with point geometries. If another geometry is
- * provided, it will be converted to points geometry.
+ * Type used to configure the feature info for a layer.
  */
 export type TypeFeatureInfoLayerSettings = {
+  /** Allow querying. Default = true */
+  query?: boolean;
   customParser: TypeDetailsLayerSettings;
   /**
    * The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid
@@ -94,12 +96,14 @@ export type TypeFeatureInfoLayerSettings = {
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
 export type TypeSourceVectorInitialSettings = {
+  /** Path used to access the data. */
+  accessPath: TypeLangString;
   /** The feature format used by the XHR feature loader when url is set. */
   format: TypeVectorSourceFormats;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerSettings;
   /** Vector source clustering configuration. */
-  cluster?: TypeVectorSourceClusterConfig;
+  cluster?: TypeSourceVectorClusterConfig;
 };
 
 /** ******************************************************************************************************************************
@@ -202,7 +206,7 @@ export type TypeUniqueValueStyleNode = {
   label: string;
   /** Fields used by the style. */
   fields: string[];
-  /**  Unique value style information configuration. */
+  /** Unique value style information configuration. */
   uniqueValueStyleInfo: TypeUniqueValueStyleInfo[];
 };
 
@@ -232,7 +236,7 @@ export type TypeClassBreakStyleNode = {
   label: string;
   /** Field used by the style. */
   field: string[];
-  /**  Class break style information configuration. */
+  /** Class break style information configuration. */
   classBreakStyleInfo: TypeClassBreakStyleInfo[];
 };
 
@@ -242,7 +246,7 @@ export type TypeClassBreakStyleNode = {
 export type TypeStyleNode = TypeSimpleStyleNode | TypeUniqueValueStyleNode | TypeClassBreakStyleNode;
 
 /** ******************************************************************************************************************************
- *  Type used to define a GeoView vector layer to display on the map.
+ * Type used to define a GeoView vector layer to display on the map.
  */
 export type TypeVectorLayerNode = {
   /** Basic information used to identify the GeoView layer. */
@@ -251,26 +255,26 @@ export type TypeVectorLayerNode = {
   initialSettings?: TypeLayerInitialSettingsNode;
   /** The type of GeoView layer. */
   layerType: 'vector';
-  /** Initial settings to apply to the GeoView vector layer source at creation time. */
+  /** Source settings to apply to the GeoView vector layer source at creation time. */
   source: TypeSourceVectorInitialSettings;
   /** Style to apply to the vector layer. */
   style?: TypeStyleNode;
 };
 
 /** ******************************************************************************************************************************
- *  Initial settings for the source.
+ * Setting use to initialize entries of a service (use in WMS and ESRI dynamic services).
  */
-export type TypeSourceInitialSettingsNode = {
+export type TypeSourceEntriesInitialSettingsNode = {
   /** Initial opacity setting. Domain = [0..1] and default = 1. */
-  layerOpacity?: number;
+  opacity?: number;
   /** Initial visibility setting. Default = true */
-  layerVisibility?: boolean;
+  visibility?: boolean;
   /** Allow querying. Default = true */
   query?: boolean;
 };
 
 /** ******************************************************************************************************************************
- *  Initial settings for the ESRI image source.
+ * Initial settings for the ESRI image source.
  */
 export type TypeSourceImageEsriLayerNode = {
   /** The index of the layer in the map service. */
@@ -278,13 +282,13 @@ export type TypeSourceImageEsriLayerNode = {
   /** Basic information used to identify the GeoView layer. */
   info?: TypeLayerBasicInfoNode;
   /** Initial settings for the source. */
-  state?: TypeSourceInitialSettingsNode;
+  state?: TypeSourceEntriesInitialSettingsNode;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerSettings;
 };
 
 /** ******************************************************************************************************************************
- *  Initial settings for the WMS source.
+ * Initial settings for the WMS source.
  */
 export type TypeSourceImageWMSLayerNode = {
   /** The id of the layer entry in the WMS. */
@@ -292,24 +296,9 @@ export type TypeSourceImageWMSLayerNode = {
   /** Basic information used to identify the GeoView layer. */
   info?: TypeLayerBasicInfoNode;
   /** Initial settings for the source. */
-  state?: TypeSourceInitialSettingsNode;
+  state?: TypeSourceEntriesInitialSettingsNode;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerSettings;
-};
-
-/** ******************************************************************************************************************************
- * Type that defines the image layer source formats.
- */
-export type TypeImageSourceFormats = 'WMS' | 'ESRI';
-
-/** ******************************************************************************************************************************
- *  Initial settings for the WMS source.
- */
-export type TypeWmsParameters = {
-  /** Array of layers to use for this WMS source. */
-  layers: TypeSourceImageWMSLayerNode[];
-  /** Style to apply. Default = '' */
-  style: string;
 };
 
 /** ******************************************************************************************************************************
@@ -323,59 +312,56 @@ export type TypeEsriFormatParameter = 'png' | 'jpg' | 'gif' | 'svg';
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 
 /** ******************************************************************************************************************************
- * Initial settings for the ESRI source ArcGIS Rest parameters. Service defaults will be used for any fields not specified.
- * https://developers.arcgis.com/rest/services-reference/enterprise/export-map.htm
- */
-export type TypeEsriParameters = {
-  /** Array of layers to use for this ESRI source. */
-  layers: TypeSourceImageEsriLayerNode[];
-  /** The format of the exported image. Default = png. */
-  format: TypeEsriFormatParameter;
-  /**
-   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
-   * .gif formats support transparency. Default = true.
-   */
-  transparent: boolean;
-};
-
-/** ******************************************************************************************************************************
- *  Initial settings for image sources.
+ * Initial settings for image sources.
  */
 export type TypeSourceImageInitialSettings = TypeSourceImageWmsInitialSettings | TypeSourceImageEsriInitialSettings;
 
 /** ******************************************************************************************************************************
- *  Initial settings for image sources.
+ * Initial settings for image sources.
  */
 export type TypeBaseSourceImageInitialSettings = {
   /** The service endpoint of the layer (English/French). It should match the type provided in sourceType. */
   accesPath: TypeLangString;
-  /** The source type for the image layer. Default = WMS. */
-  sourceType: TypeImageSourceFormats;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    * */
   crossOrigin?: string;
-  /** The type of the remote WMS server. Not needed for type ESRI. */
-  serverType?: TypeOfServer;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: number;
+  projection: TypeValidProjectionCodes;
+  /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
+  featureInfo?: TypeFeatureInfoLayerSettings;
 };
 
 /** ******************************************************************************************************************************
- *  Initial settings for WMS image sources.
+ * Type that defines the image layer source formats.
+ */
+export type TypeImageSourceFormats = 'WMS' | 'ESRI';
+
+/** ******************************************************************************************************************************
+ * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageWmsInitialSettings extends TypeBaseSourceImageInitialSettings {
-  /** Initial settings for the WMS source. */
-  paramsWMS: TypeWmsParameters;
+  /** The source type for the image layer. Default = WMS. */
+  sourceType: 'WMS';
+  /** The type of the remote WMS server. */
+  serverType: TypeOfServer;
+  /** Style to apply. Default = '' */
+  style: string;
 }
 
 /** ******************************************************************************************************************************
- *  Initial settings for WMS image sources.
+ * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageEsriInitialSettings extends TypeBaseSourceImageInitialSettings {
-  /** Initial settings for the ESRI source ArcGIS Rest parameters. */
-  paramsESRI: TypeEsriParameters;
+  /** The source type for the image layer. Default = WMS. */
+  sourceType: 'ESRI';
+  format?: TypeEsriFormatParameter;
+  /**
+   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
+   * .gif formats support transparency. Default = true.
+   */
+  transparent?: boolean;
 }
 
 /** ******************************************************************************************************************************
@@ -384,7 +370,7 @@ export interface TypeSourceImageEsriInitialSettings extends TypeBaseSourceImageI
 export type TypeTileSourceFormats = 'XYZ' | 'GeoTIFF';
 
 /** ******************************************************************************************************************************
- *  Definition of the tile grid structure.
+ * Definition of the tile grid structure.
  */
 export type TypeTileGrid = {
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
@@ -407,7 +393,7 @@ export type TypeTileGrid = {
 };
 
 /** ******************************************************************************************************************************
- *  Initial settings for image sources.
+ * Initial settings for image sources.
  */
 export type TypeSourceTileInitialSettings = {
   /** The service endpoint of the layer (English/French). It should match the type provided in sourceType. */
@@ -415,13 +401,13 @@ export type TypeSourceTileInitialSettings = {
   /** The source type for the tile layer. Default = XYZ. */
   sourceType: TypeTileSourceFormats;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: number;
+  projection?: TypeValidProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 };
 
 /** ******************************************************************************************************************************
- *  Type used to identify a GeoView vector heamap layer to display on the map.
+ * Type used to identify a GeoView vector heamap layer to display on the map.
  */
 export type TypeVectorHeatmapLayerNode = {
   /** Basic information used to identify the GeoView layer. */
@@ -456,20 +442,20 @@ export type TypeVectorTileSourceInitialSettings = {
   accessPath: TypeLangString;
   /** The source type for the vector tile layer. */
   sourceType: 'vectorTile';
-  /** The feature format used by the XHR feature loader when url is set. */
+  /** The feature format used by the XHR feature loader when accessPath is set. */
   format?: TypeVectorSourceFormats | 'MVT';
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerSettings;
   /** Style to apply to the vector layer. */
   style?: TypeStyleNode;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: number;
+  projection?: TypeValidProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 };
 
 /** ******************************************************************************************************************************
- *  Type used to define a GeoView vector tile layer to display on the map. The vector data is divided into a tile grid.
+ * Type used to define a GeoView vector tile layer to display on the map. The vector data is divided into a tile grid.
  */
 export type TypeVectorTileLayerNode = {
   /** Basic information used to identify the GeoView layer. */
@@ -486,11 +472,11 @@ export type TypeVectorTileLayerNode = {
 };
 
 /** ******************************************************************************************************************************
- *  Type used to define a GeoView image layer to display on the map.
+ * Type used to define a GeoView image layer to display on the map.
  */
 export type TypeImageLayerNode = {
   /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoNode;
+  info: TypeLayerBasicInfoNode;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialSettingsNode;
   /**
@@ -503,7 +489,7 @@ export type TypeImageLayerNode = {
 };
 
 /** ******************************************************************************************************************************
- *  Type used to define a GeoView image layer to display on the map.
+ * Type used to define a GeoView image layer to display on the map.
  */
 export type TypeTileLayerNode = {
   /** Basic information used to identify the GeoView layer. */
@@ -520,7 +506,8 @@ export type TypeTileLayerNode = {
 };
 
 /** ******************************************************************************************************************************
- *  Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a serve.
+ * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
+ * configuration will handle bilangual informations.
  */
 export type TypeGeoCoreLayerNode = {
   /** The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang'). */
@@ -532,7 +519,7 @@ export type TypeGeoCoreLayerNode = {
 };
 
 /** ******************************************************************************************************************************
- *  Layer node type.
+ * Layer node type.
  */
 export type TypeLayerNode =
   | TypeVectorHeatmapLayerNode
@@ -543,6 +530,6 @@ export type TypeLayerNode =
   | TypeGeoCoreLayerNode;
 
 /** ******************************************************************************************************************************
- *  List of layers. Corresponds to the layerList defined in the schema.
+ * List of layers. Corresponds to the layerList defined in the schema.
  */
 export type TypeLayerEntries = TypeLayerNode[];
