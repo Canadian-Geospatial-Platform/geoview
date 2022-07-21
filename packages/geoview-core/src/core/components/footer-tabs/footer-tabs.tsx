@@ -12,12 +12,11 @@ import { ExpandLessIcon, ExpandMoreIcon, IconButton, Tabs, TypeTabs } from '../.
 
 export const useStyles = makeStyles((theme) => ({
   tabsContainer: {
-    position: 'absolute',
-    bottom: 20,
+    position: 'relative',
     paddingBottom: '50px',
     backgroundColor: theme.palette.primary.light,
-    width: '90%',
-    height: '50%',
+    width: '100%',
+    height: '400px',
     transition: 'height 0.2s ease-out',
   },
   collapseButton: {
@@ -84,11 +83,16 @@ export function FooterTabs(): JSX.Element | null {
       if (isCollapsed) {
         tabsContaine.style.height = '50px';
       } else {
-        tabsContaine.style.height = '50%';
+        tabsContaine.style.height = '400px';
       }
     }
 
     setIsCollapsed(!isCollapsed);
+
+    // update map container size
+    setTimeout(() => {
+      api.map(mapId).map.updateSize();
+    }, 200);
   };
 
   useEffect(() => {

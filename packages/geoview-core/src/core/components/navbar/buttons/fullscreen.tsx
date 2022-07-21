@@ -45,11 +45,11 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
    */
   function setFullscreen() {
     // api.map(mapId).map.getTargetElement().requestFullscreen();
-    const { parentElement } = api.map(mapId).map.getTargetElement();
+    const element = document.getElementById(`shell-${mapId}`);
 
-    if (parentElement) {
+    if (element) {
       setFs(!fs);
-      api.map(mapId).toggleFullscreen(!fs, parentElement as TypeHTMLElement);
+      api.map(mapId).toggleFullscreen(!fs, element as TypeHTMLElement);
     }
   }
 
