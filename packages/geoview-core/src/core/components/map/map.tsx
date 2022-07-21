@@ -28,6 +28,7 @@ import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
+import { FooterTabs } from '../footer-tabs/footer-tabs';
 
 export const useStyles = makeStyles(() => ({
   mapContainer: {
@@ -233,6 +234,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
+          <FooterTabs />
         </>
       )}
     </div>

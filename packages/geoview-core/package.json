@@ -43,6 +43,7 @@
     "@mui/material": "^5.4.3",
     "@mui/styles": "^5.4.2",
     "@mui/icons-material": "^5.4.2",
+    "@mui/x-data-grid": "^5.13.1",
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "dayjs": "^1.11.1",
