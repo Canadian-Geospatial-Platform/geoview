@@ -7,9 +7,9 @@ import {
   TypeJsonObject,
   AbstractGeoViewLayer,
   TypeWindow,
-  webLayerIsWMS,
-  webLayerIsEsriDynamic,
-  webLayerIsEsriFeature,
+  geoviewLayerIsWMS,
+  geviewLayerIsEsriDynamic,
+  geoviewLayerIsEsriFeature,
 } from 'geoview-core';
 
 type TypeLegend =
@@ -134,12 +134,12 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const setLayerLegendAll = () =>
     Object.values(layers).forEach(async (layer) => {
-      if (webLayerIsWMS(layer)) {
+      if (geoviewLayerIsWMS(layer)) {
         const dataUrl = await layer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
-      } else if (webLayerIsEsriDynamic(layer) || webLayerIsEsriFeature(layer)) {
+      } else if (geviewLayerIsEsriDynamic(layer) || geoviewLayerIsEsriFeature(layer)) {
         const legend = await layer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];
         setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));

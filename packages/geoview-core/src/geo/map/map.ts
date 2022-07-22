@@ -28,7 +28,7 @@ import { mapComponentPayload } from '../../api/events/payloads/map-component-pay
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
 import { TypeLanguages, TypeLocalizedLanguages, TypeMapSchemaProps } from './map-types';
-import { TypeLayerEntries } from '../layer/geoview-layers/schema-types';
+import { TypeArrayOfLayerConfig } from '../layer/geoview-layers/schema-types';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -274,9 +274,9 @@ export class MapViewer {
    * Change the language of the map
    *
    * @param {string} language the language to use (en-CA, fr-CA)
-   * @param {TypeBaseGeoViewLayersConfig} layers optional new set of layers to apply (will override origional set of layers)
+   * @param {TypeGeoviewLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeLayerEntries): void => {
+  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeArrayOfLayerConfig): void => {
     const updatedConfig = { ...this.mapProps };
 
     updatedConfig.language = language;

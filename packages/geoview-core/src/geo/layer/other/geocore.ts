@@ -5,13 +5,13 @@ import { EVENT_NAMES } from '../../../api/events/event';
 
 import { api } from '../../../app';
 
-import { CONST_LAYER_TYPES, TypeGeoCoreLayerNode, TypeBaseGeoViewLayersConfig, TypeJsonObject } from '../../../core/types/cgpv-types';
+import { CONST_LAYER_TYPES, TypeGeoCoreLayerConfig, TypeGeoviewLayerConfig, TypeJsonObject } from '../../../core/types/cgpv-types';
 import { catalogUrl, Config } from '../../../core/utils/config';
-import { TypeLayerEntries, TypeLayerNode } from '../geoview-layers/schema-types';
+import { TypeArrayOfLayerConfig, TypeLayerConfig } from '../geoview-layers/schema-types';
 
 export const layerConfigIsGeoCore = (
-  verifyIfLayer: Omit<TypeBaseGeoViewLayersConfig, 'layerEntries' | 'accessPath'>
-): verifyIfLayer is TypeGeoCoreLayerNode => {
+  verifyIfLayer: Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'accessPath'>
+): verifyIfLayer is TypeGeoCoreLayerConfig => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
@@ -35,10 +35,10 @@ export class GeoCore {
   /**
    * Get layer from uuid
    *
-   * @param {TypeGeoCoreLayerNode} layer the layer configuration
-   * @return {Promise<TypeBaseGeoViewLayersConfig | null>} layers to add to the map
+   * @param {TypeGeoCoreLayerConfig} layer the layer configuration
+   * @return {Promise<TypeGeoviewLayerConfig | null>} layers to add to the map
    */
-  async add(layer: TypeGeoCoreLayerNode): Promise<TypeLayerNode | null> {
+  async add(layer: TypeGeoCoreLayerConfig): Promise<TypeLayerConfig | null> {
     const url = layer.accessPath || `${catalogUrl}/${api.map(this.#mapId).language.split('-')[0]}`;
 
     const requestUrl = `${url}/${layer.id}`;
@@ -46,7 +46,7 @@ export class GeoCore {
     try {
       const result = await axios.get<TypeJsonObject>(requestUrl);
 
-      const layers: TypeLayerEntries = Config.getLayerConfigFromUUID(result);
+      const layers: TypeArrayOfLayerConfig = Config.getLayerConfigFromUUID(result);
 
       return layers && layers.length > 0 ? layers[0] : null;
     } catch (error: unknown) {

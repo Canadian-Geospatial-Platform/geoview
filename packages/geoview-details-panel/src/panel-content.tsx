@@ -15,9 +15,9 @@ import {
   toJsonObject,
   TypeJsonObject,
   TypeJsonArray,
-  webLayerIsWMS,
-  webLayerIsEsriDynamic,
-  webLayerIsEsriFeature,
+  geoviewLayerIsWMS,
+  geviewLayerIsEsriDynamic,
+  geoviewLayerIsEsriFeature,
   WMS,
   EsriFeature,
   EsriDynamic,
@@ -474,7 +474,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       });
 
       // check each map server layer type and add it to the layers object of the map server in the data array
-      if (webLayerIsWMS(mapLayer)) {
+      if (geoviewLayerIsWMS(mapLayer)) {
         // get layer ids / entries from the loaded WMS layer
         const { entries } = mapLayer;
 
@@ -501,12 +501,12 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
             addLayer(mapLayer, data, layerInfo, false);
           }
-      } else if (webLayerIsEsriFeature(mapLayer)) {
+      } else if (geoviewLayerIsEsriFeature(mapLayer)) {
         // query the layer information, feature layer URL will end by a number provided in the map config
         const layerInfo = await queryServer(mapLayer.url);
 
         addLayer(mapLayer, data, layerInfo, false);
-      } else if (webLayerIsEsriDynamic(mapLayer)) {
+      } else if (geviewLayerIsEsriDynamic(mapLayer)) {
         // get active layers
         const { entries } = mapLayer;
 

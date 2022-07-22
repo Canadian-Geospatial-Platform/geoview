@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeLayerNode } from '../schema-types';
+import { TypeLayerConfig } from '../schema-types';
 
 /** ******************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -52,21 +52,25 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * details-panel.
    */
   createGeoViewRasterLayers() {
-    if (this.gvRasterLayers === null) {
+    if (this.gvRasterLayers === null && typeof this.layerEntries !== 'undefined') {
       this.getAdditionalServiceDefinition();
       if (this.layerEntries.length === 1) {
         this.gvRasterLayers = this.processOneLayerEntry(this.layerEntries[0]);
-        this.setRenderer(this.layerEntries[0], this.gvRasterLayers);
-        this.registerToPanels(this.layerEntries[0], this.gvRasterLayers);
+        if (this.gvRasterLayers) {
+          this.setRenderer(this.layerEntries[0], this.gvRasterLayers);
+          this.registerToPanels(this.layerEntries[0], this.gvRasterLayers);
+        }
       } else {
         this.gvRasterLayers = new LayerGroup({
           layers: new Collection(),
         });
-        this.layerEntries.forEach((layerEntry: TypeLayerNode) => {
+        this.layerEntries.forEach((layerEntry: TypeLayerConfig) => {
           const rasterLayer: TypeBaseRasterLayer = this.processOneLayerEntry(layerEntry);
-          this.setRenderer(this.layerEntries[0], rasterLayer);
-          this.registerToPanels(this.layerEntries[0], rasterLayer);
-          (this.gvRasterLayers as LayerGroup).getLayers().push(rasterLayer);
+          if (rasterLayer) {
+            this.setRenderer(layerEntry, rasterLayer);
+            this.registerToPanels(layerEntry, rasterLayer);
+            (this.gvRasterLayers as LayerGroup).getLayers().push(rasterLayer);
+          }
         });
       }
     }
@@ -81,25 +85,25 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
    * This method creates a GeoView layer using the definition provided in the layerEntry parameter.
    *
-   * @param {TypeLayerNode} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeLayerConfig} layerEntry Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  abstract processOneLayerEntry(layerEntry: TypeLayerNode): TypeBaseRasterLayer;
+  abstract processOneLayerEntry(layerEntry: TypeLayerConfig): TypeBaseRasterLayer;
 
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerNode} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(layerEntry: TypeLayerNode, rasterLayer: TypeBaseRasterLayer): void;
+  abstract setRenderer(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseRasterLayer): void;
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerNode} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  abstract registerToPanels(layerEntry: TypeLayerNode, rasterLayer: TypeBaseRasterLayer): void;
+  abstract registerToPanels(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseRasterLayer): void;
 }

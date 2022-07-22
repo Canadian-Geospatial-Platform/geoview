@@ -5,7 +5,7 @@ import {
   TypeJsonArray,
   TypeDynamicLayerEntry,
   TypeOgcLayerEntry,
-  TypeBaseGeoViewLayersConfig,
+  TypeGeoviewLayerConfig,
   TypeGeoViewLayers,
   SelectChangeEvent,
   snackbarMessagePayload,
@@ -356,7 +356,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
-    const layerConfig: TypeBaseGeoViewLayersConfig = {
+    const layerConfig: TypeGeoviewLayerConfig = {
       id: api.generateId(),
       name: {
         en: name,

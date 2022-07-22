@@ -1,12 +1,14 @@
 import { TypeLangString } from '../../core/types/global-types';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
 import { TypeGeoViewLayers } from '../layer/geoview-layers/abstract-geoview-layers';
-import { TypeLayerEntries } from '../layer/geoview-layers/schema-types';
+import { TypeArrayOfLayerConfig } from '../layer/geoview-layers/schema-types';
 
 /** ******************************************************************************************************************************
  *  Definition of the map properties type according to what is specified in the schema.
  */
 export type TypeMapSchemaProps = {
+  /** This attribute is not part of the schema. It is placed here to keep the mapId. */
+  mapId?: string;
   /** Map configuration */
   map: TypeMapConfig;
   /** Display theme, default = dark. */
@@ -16,7 +18,7 @@ export type TypeMapSchemaProps = {
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
   /** North arrow properties. */
-  // northArrow?: TypeNorthArrowProps; // ! Not defined in the schema
+  // components?: TypeNorthArrowProps; // ! Not defined in the schema
   /** Map components. */
   components?: TypeMapComponents;
   /** List of core packages. */
@@ -36,46 +38,49 @@ export type TypeMapSchemaProps = {
 
 /** ******************************************************************************************************************************
  *  Definition of the map configuration settings.
- 1 * /
-export type TypeMapConfig = {
-  /** Basemap options settings for this map configuration. 1 * /
-  basemapOptions: TypeBasemapOptions;
-  /** Type of interaction. 1 * /
-  interaction: TypeInteraction;
-  /** Layers list in the order which they should be added to the map. 1 * /
-  layers?: TypeLayerEntries;
-  /** View settings. 1 * /
-  view: TypeViewSettings;
-  /** Additional options used for OpenLayers map options. 1 * /
-  extraOptions?: Record<string, unknown>;
-};
-
-/** ******************************************************************************************************************************
- *  Definition of the map configuration settings.
  */
 export type TypeMapConfig = {
   /** Basemap options settings for this map configuration. */
   basemapOptions: TypeBasemapOptions;
   /** Type of interaction. */
   interaction: TypeInteraction;
-  /** Layers list in the order which they should be added to the map. */
-  layers?: TypeMapLayer[];
+  /** List of GeoView Layers in the order which they should be added to the map. */
+  geoviewLayerList?: TypeGeoviewLayerList;
   /** View settings. */
-  view: TypeViewSettings;
+  viewSettings: TypeViewSettings;
   /** Additional options used for OpenLayers map options. */
   extraOptions?: Record<string, unknown>;
 };
 
-export type TypeMapLayer = {
+/** ******************************************************************************************************************************
+ *  Definition of the Geoview layer list.
+ */
+export type TypeGeoviewLayerList = TypeGeoviewLayerConfig[];
+
+/** ******************************************************************************************************************************
+ *  Definition of a single Geoview layer configuration.
+ */
+export type TypeGeoviewLayerConfig = {
+  /**
+   * The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have
+   * the language extension (id-'lang').
+   */
   id: string;
+  /**
+   * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
+   * information.
+   */
   name: TypeLangString;
+  /** The GeoView layer access path (English/French). */
   accessPath: TypeLangString;
+  /** Type of GeoView layer. */
   layerType: TypeGeoViewLayers;
-  layerEntries: TypeLayerEntries;
+  /** The layer entries to use from the GeoView layer. */
+  layerEntries?: TypeArrayOfLayerConfig;
 };
 
 /** ******************************************************************************************************************************
- *  Definition of the valid map interactiom valuess.
+ *  Definition of the valid map interactiom valuess. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
  */
 export type TypeInteraction = 'static' | 'dynamic';
 
@@ -137,9 +142,9 @@ export type TypeAppBarProps = {
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
 
 /** ******************************************************************************************************************************
- * Core components to initialize on viewer load. Default = ['appbar', 'navbar', 'northArrow', 'overviewMap'].
+ * Core components to initialize on viewer load. Default = ['appbar', 'navbar', 'north-arrow', 'overview-map'].
  */
-export type TypeMapComponents = Array<'appbar' | 'navbar' | 'northArrow' | 'overviewMap'>;
+export type TypeMapComponents = Array<'appbar' | 'navbar' | 'north-arrow' | 'overview-map'>;
 
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in

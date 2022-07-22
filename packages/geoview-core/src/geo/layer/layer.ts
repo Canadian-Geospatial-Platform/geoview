@@ -18,12 +18,12 @@ import { Vector } from './vector/vector';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event';
 
-import { Cast, TypeBaseGeoViewLayersConfig, TypeJsonObject, AbstractGeoViewLayer } from '../../core/types/cgpv-types';
+import { Cast, TypeGeoviewLayerConfig, TypeJsonObject, AbstractGeoViewLayer } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAGeoViewLayer, geoViewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
-import { TypeLayerEntries } from './geoview-layers/schema-types';
+import { TypeArrayOfLayerConfig } from './geoview-layers/schema-types';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -47,9 +47,9 @@ export class Layer {
    * Initialize layer types and listen to add/remove layer events from outside
    *
    * @param {string} id a reference to the map
-   * @param {TypeLayerEntries} layers an optional array containing layers passed within the map config
+   * @param {TypeArrayOfLayerConfig} layers an optional array containing layers passed within the map config
    */
-  constructor(id: string, layers?: TypeLayerEntries) {
+  constructor(id: string, layers?: TypeArrayOfLayerConfig) {
     this.#mapId = id;
 
     this.vector = new Vector(this.#mapId);
@@ -128,7 +128,7 @@ export class Layer {
       (payload) => {
         if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
-          this.removeLayerById(payload.webLayer.id);
+          this.removeLayerById(payload.geoviewLayer.id);
         }
       },
       this.#mapId
@@ -199,9 +199,9 @@ export class Layer {
   /**
    * Add a layer to the map
    *
-   * @param {TypeBaseGeoViewLayersConfig} layerConfig the layer configuration to add
+   * @param {TypeGeoviewLayerConfig} layerConfig the layer configuration to add
    */
-  addLayer = (layerConfig: TypeBaseGeoViewLayersConfig): string => {
+  addLayer = (layerConfig: TypeGeoviewLayerConfig): string => {
     // eslint-disable-next-line no-param-reassign
     layerConfig.id = generateId(layerConfig.id);
     api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.#mapId, layerConfig));
@@ -212,7 +212,7 @@ export class Layer {
   /**
    * Remove a layer from the map
    *
-   * @param {TypeBaseGeoViewLayersConfig} layer the layer configuration to remove
+   * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
    */
   removeLayer = (cgpvLayer: AbstractGeoViewLayer): string => {
     // eslint-disable-next-line no-param-reassign

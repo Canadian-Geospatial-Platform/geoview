@@ -1,7 +1,7 @@
 import { generateId } from '../../../core/utils/utilities';
-import { TypeLayerEntries } from './schema-types';
+import { TypeArrayOfLayerConfig } from './schema-types';
 import { TypeLangString } from '../../../core/types/global-types';
-import { TypeMapLayer } from '../../map/map-types';
+import { TypeGeoviewLayerConfig } from '../../map/map-types';
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -41,16 +41,6 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoViewLayers> = {
   WMS: 'ogcWms',
 };
 
-/**
- * Base type used to define GeoView layer config options objects
- */
-export type TypeBaseGeoViewLayersConfig = {
-  id?: string;
-  name?: TypeLangString;
-  accessPath: TypeLangString;
-  layerEntries: TypeLayerEntries;
-};
-
 /** ******************************************************************************************************************************
  * The AbstractGeoViewLayer class is normally used for creating subclasses and is not instantiated (using the new operator) in the
  * app. It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
@@ -79,16 +69,16 @@ export abstract class AbstractGeoViewLayer {
   accessPath: TypeLangString = { en: '', fr: '' };
 
   /** An array of layer settings. */
-  layerEntries: TypeLayerEntries;
+  layerEntries?: TypeArrayOfLayerConfig;
 
   /**
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
    * @param {TypeGeoViewLayers} type The type of GeoView layer that is instantiated.
-   * @param {TypeBaseGeoViewLayersConfig} mapLayerConfig The GeoView layer configuration options.
+   * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
    * @param {string} mapId The unique identifier of the map on which the GeoView layer will be drawn.
    */
-  constructor(type: TypeGeoViewLayers, mapLayerConfig: TypeMapLayer, mapId: string) {
+  constructor(type: TypeGeoViewLayers, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
     this.mapId = mapId;
     this.type = type;
     this.id = mapLayerConfig.id || generateId('');

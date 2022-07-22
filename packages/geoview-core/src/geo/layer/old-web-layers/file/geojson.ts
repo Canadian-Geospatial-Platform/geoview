@@ -13,7 +13,7 @@ import {
   CONST_LAYER_TYPES,
   TypeGeoViewLayers,
   TypeGeoJSONLayer,
-  TypeBaseGeoViewLayersConfig,
+  TypeGeoviewLayerConfig,
   TypeFilterFeatures,
   TypeFilterQuery,
   FILTER_OPERATOR,
@@ -98,29 +98,29 @@ const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeGeoJSONLayer
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayer
  * if the layerType attribute of the verifyIfLayer parameter is GEOJSON. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsGeoJSON = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeGeoJSONLayer => {
+export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as a GeoJSON
- * if the type attribute of the verifyIfWebLayer parameter is GEOJSON. The type ascention
+ * if the type attribute of the verifyIfGeoViewLayer parameter is GEOJSON. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsGeoJSON = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is GeoJSON => {
-  return verifyIfWebLayer.type === CONST_LAYER_TYPES.GEOJSON;
+export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoJSON => {
+  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /**

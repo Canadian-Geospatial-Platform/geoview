@@ -13,35 +13,35 @@ import {
   TypeJsonObject,
   TypeJsonArray,
   TypeLegendJsonDynamic,
-  TypeBaseGeoViewLayersConfig,
+  TypeGeoviewLayerConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeDynamicLayer
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeDynamicLayer
  * if the layerType attribute of the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeDynamicLayer => {
+export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeDynamicLayer => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as an EsriDynamic
- * if the type attribute of the verifyIfWebLayer parameter is ESRI_DYNAMIC. The type ascention
+ * if the type attribute of the verifyIfGeoViewLayer parameter is ESRI_DYNAMIC. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsEsriDynamic = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is EsriDynamic => {
-  return verifyIfWebLayer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+export const geviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriDynamic => {
+  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /**

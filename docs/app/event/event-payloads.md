@@ -63,7 +63,7 @@ Below you will find a list of all available functions and payload types/interfac
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#snackbarMessagePayload">snackbarMessagePayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#vectorConfigPayload">vectorConfigPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#vectorPayload">vectorPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#webLayerPayload">webLayerPayload</a></li>
+  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#geoviewLayerPayload">geoviewLayerPayload</a></li>
 </ul>
 
 ## Event payloads

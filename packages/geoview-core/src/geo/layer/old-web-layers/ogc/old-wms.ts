@@ -13,38 +13,38 @@ import {
   CONST_LAYER_TYPES,
   AbstractGeoViewLayer,
   TypeJsonObject,
-  TypeWMSLayer,
+  TypeWMSLayerConfig,
   TypeJsonArray,
   toJsonObject,
-  TypeBaseGeoViewLayersConfig,
+  TypeGeoviewLayerConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseGeoViewLayersConfig as a TypeWMSLayer
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig
  * if the layerType attribute of the verifyIfLayer parameter is WMS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
- * @param {TypeBaseGeoViewLayersConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsWMS = (verifyIfLayer: TypeBaseGeoViewLayersConfig): verifyIfLayer is TypeWMSLayer => {
+export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.WMS;
 };
 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as a WMS
- * if the type attribute of the verifyIfWebLayer parameter is WMS. The type ascention
+ * if the type attribute of the verifyIfGeoViewLayer parameter is WMS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const webLayerIsWMS = (verifyIfWebLayer: AbstractGeoViewLayer): verifyIfWebLayer is WMS => {
-  return verifyIfWebLayer.type === CONST_LAYER_TYPES.WMS;
+export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WMS => {
+  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WMS;
 };
 
 /**
@@ -68,9 +68,9 @@ export class WMS extends AbstractGeoViewLayer {
   /**
    * Initialize layer
    * @param {string} mapId the id of the map
-   * @param {TypeWMSLayer} layerConfig the layer configuration
+   * @param {TypeWMSLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeWMSLayer) {
+  constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
 
     this.url = this.url.indexOf('?') === -1 ? `${this.url}?` : this.url;
@@ -81,10 +81,10 @@ export class WMS extends AbstractGeoViewLayer {
   /**
    * Add a WMS layer to the map.
    *
-   * @param {TypeWMSLayer} layer the layer configuration
+   * @param {TypeWMSLayerConfig} layer the layer configuration
    * @return {Promise<ImageLayer<ImageWMS> | null>} layers to add to the map
    */
-  async add(layer: TypeWMSLayer): Promise<ImageLayer<ImageWMS> | null> {
+  async add(layer: TypeWMSLayerConfig): Promise<ImageLayer<ImageWMS> | null> {
     // TODO: only work with a single layer value, parse the entries and create new layer for each of the entries
     // TODO: in the legend regroup these layers
 

@@ -12,13 +12,11 @@ import { transformExtent } from 'ol/proj';
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  TypeJsonValue,
   TypeJsonObject,
-  TypeOgcFeatureLayer,
   TypeJsonArray,
   TypeGeoviewLayerConfig,
 } from '../../../../core/types/cgpv-types';
-import { setAlphaColor } from '../../../../core/utils/utilities';
+import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 
 import { api } from '../../../../app';
 
@@ -65,39 +63,70 @@ const defaultSelectStyle = new Style({
   }),
 });
 
+/**
+ * Create a style from a renderer object
+ *
+ * @param {TypeJsonObject} renderer the render with the style properties
+ * @returns {Style} the new style with the custom renderer
+ */
+const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
+  return renderer.radius
+    ? new Style({
+        image: new StyleCircle({
+          radius: renderer.radius as number,
+          stroke: new Stroke({
+            color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
+            width: 1,
+          }),
+          fill: new Fill({
+            color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
+          }),
+        }),
+      })
+    : new Style({
+        stroke: new Stroke({
+          color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
+          width: 3,
+        }),
+        fill: new Fill({
+          color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
+        }),
+      });
+};
+
 /* ******************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayer
- * if the layerType attribute of the verifyIfLayer parameter is OGC_FEATURE. The type ascention
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayer
+ * if the layerType attribute of the verifyIfLayer parameter is WFS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayer => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.OGC_FEATURE;
+export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayer => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.WFS;
 };
 
 /* ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as an OgcFeature
- * if the type attribute of the verifyIfGeoViewLayer parameter is OGC_FEATURE. The type ascention
+ * Type Gard function that redefines an AbstractGeoViewLayer as a WFS
+ * if the type attribute of the verifyIfGeoViewLayer parameter is WFS. The type ascention
  * applies only to the the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is OgcFeature => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.OGC_FEATURE;
+export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WFS => {
+  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WFS;
 };
 
 /**
- * a class to add OGC api feature layer
+ * a class to add WFS layer
  *
  * @exports
- * @class OgcFeature
+ * @class WFS
  */
-export class OgcFeature extends AbstractGeoViewLayer {
+export class WFS extends AbstractGeoViewLayer {
   // layer
   layer!: VectorLayer<VectorSource>;
 
@@ -109,45 +138,74 @@ export class OgcFeature extends AbstractGeoViewLayer {
 
   /**
    * Initialize layer
-   *
    * @param {string} mapId the id of the map
-   * @param {TypeOgcFeatureLayer} layerConfig the layer configuration
+   * @param {TypeWFSLayer} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeOgcFeatureLayer) {
-    super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
+  constructor(mapId: string, layerConfig: TypeWFSLayer) {
+    super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
 
     this.entries = layerConfig.layerEntries.map((item) => item.id);
   }
 
   /**
-   * Add a OGC API feature layer to the map.
+   * Add a WFS layer to the map.
    *
-   * @param {TypeOgcFeatureLayer} layer the layer configuration
-   *
+   * @param {TypeWFSLayer} layer the layer configuration
    * @return {Promise<VectorLayer<VectorSource> | null>} layers to add to the map
    */
-  async add(layer: TypeOgcFeatureLayer): Promise<VectorLayer<VectorSource> | null> {
-    const rootUrl = this.url.slice(-1) === '/' ? this.url : `${this.url}/`;
+  async add(layer: TypeWFSLayer): Promise<VectorLayer<VectorSource> | null> {
+    // const resCapabilities = await axios.get<TypeJsonObject>(this.url, {
+    //   params: { request: 'getcapabilities', service: 'WFS' },
+    // });
+    const resCapabilities = await getXMLHttpRequest(`${this.url}?service=WFS&request=getcapabilities`);
 
-    const featureUrl = `${rootUrl}collections/${this.entries}/items?f=json`;
-    const metaUrl = `${rootUrl}collections/${this.entries}?f=json`;
+    // need to pass a xmldom to xmlToJson
+    const xmlDOM = new DOMParser().parseFromString(resCapabilities as string, 'text/xml');
+    const json = xmlToJson(xmlDOM);
 
-    const res = await axios.get<TypeJsonObject>(metaUrl);
-    this.#capabilities = res.data;
+    this.#capabilities = json['wfs:WFS_Capabilities'];
+    this.#version = json['wfs:WFS_Capabilities']['@attributes'].version as string;
 
-    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.title as string);
+    const featTypeInfo = this.getFeatureTypeInfo(
+      json['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
+      layer.layerEntries.map((item) => item.id).toString()
+    );
+
+    if (!featTypeInfo) {
+      return null;
+    }
+
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (featTypeInfo.Name['#text'] as string).split(':')[1];
+
     if (layerName) this.name = layerName;
 
-    const style: Record<string, Style> = {
-      Polygon: defaultLinePolygonStyle,
-      LineString: defaultLineStringStyle,
-      Point: defaultCircleMarkerStyle,
+    const params = {
+      service: 'WFS',
+      version: this.#version,
+      request: 'GetFeature',
+      typeName: layer.layerEntries.map((item) => item.id).toString(),
+      srsname: 'EPSG:4326',
+      outputFormat: 'application/json',
     };
 
-    const getResponse = await axios.get<VectorLayer<VectorSource> | string>(featureUrl);
+    const style: Record<string, Style> = {
+      Polygon: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultLinePolygonStyle,
+      LineString: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultLineStringStyle,
+      Point: layer.renderer ? createStyleFromRenderer(layer.renderer) : defaultCircleMarkerStyle,
+    };
+
+    const getResponse = await axios.get<VectorLayer<VectorSource> | string>(this.url, { params });
 
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
-      const attribution = (this.#capabilities && this.#capabilities.description ? this.#capabilities.description : '') as string;
+      let attribution = '';
+
+      if (
+        this.#capabilities['ows:ServiceIdentification'] &&
+        this.#capabilities['ows:ServiceIdentification']['ows:Abstract'] &&
+        this.#capabilities['ows:ServiceIdentification']['ows:Abstract']['#text']
+      ) {
+        attribution = this.#capabilities['ows:ServiceIdentification']['ows:Abstract']['#text'] as string;
+      }
 
       const vectorSource = new VectorSource({
         attributions: [attribution],
@@ -165,7 +223,7 @@ export class OgcFeature extends AbstractGeoViewLayer {
         strategy: all,
       });
 
-      const ogcFeatureLayer = new VectorLayer({
+      const wfsLayer = new VectorLayer({
         source: vectorSource,
         style: (feature) => {
           const geometryType = feature.getGeometry()?.getType();
@@ -174,9 +232,8 @@ export class OgcFeature extends AbstractGeoViewLayer {
         },
       });
 
-      resolve(ogcFeatureLayer);
+      resolve(wfsLayer);
     });
-
     return geo;
   }
 
@@ -190,36 +247,32 @@ export class OgcFeature extends AbstractGeoViewLayer {
     const res = null;
 
     if (Array.isArray(featureTypeList)) {
-      const featureTypeArray = featureTypeList as TypeJsonArray;
+      const featureTypeArray: TypeJsonArray = featureTypeList;
+
       for (let i = 0; i < featureTypeArray.length; i += 1) {
         let fName = featureTypeArray[i].Name['#text'] as string;
+
         const fNameSplit = fName.split(':');
         fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-        if (entries) {
-          const entrySplit = entries.split(':');
-          const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+        const entrySplit = entries!.split(':');
+        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-          if (entryName === fName) {
-            return featureTypeArray[i];
-          }
+        if (entryName === fName) {
+          return featureTypeArray[i];
         }
       }
     } else {
-      let fName = featureTypeList.Name && (featureTypeList.Name['#text'] as string);
+      let fName = featureTypeList.Name['#text'] as string;
 
-      if (fName) {
-        const fNameSplit = fName.split(':');
-        fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
+      const fNameSplit = fName.split(':');
+      fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
 
-        if (entries) {
-          const entrySplit = entries.split(':');
-          const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
+      const entrySplit = entries!.split(':');
+      const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
 
-          if (entryName === fName) {
-            return featureTypeList;
-          }
-        }
+      if (entryName === fName) {
+        return featureTypeList;
       }
     }
 
@@ -231,7 +284,7 @@ export class OgcFeature extends AbstractGeoViewLayer {
    *
    * @returns {TypeJsonObject} WFS capabilities in json format
    */
-  getMeta = (): TypeJsonValue => {
+  getCapabilities = (): TypeJsonObject => {
     return this.#capabilities;
   };
 

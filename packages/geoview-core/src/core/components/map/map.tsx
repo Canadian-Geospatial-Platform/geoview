@@ -43,7 +43,7 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
-  const id = props.id ? props.id : generateId('');
+  const id = props.mapId ? props.mapId : generateId('');
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -119,7 +119,7 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
 
   const initMap = async () => {
     // create map
-    const projection = api.projection.projections[mapProps.view.projection];
+    const projection = api.projection.projections[mapProps.viewSettings.projection];
 
     const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
 
@@ -139,8 +139,8 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
       }),
       view: new View({
         projection,
-        center: fromLonLat([mapProps.view.center[0], mapProps.view.center[1]], projection),
-        zoom: mapProps.view.zoom,
+        center: fromLonLat([mapProps.viewSettings.center[0], mapProps.viewSettings.center[1]], projection),
+        zoom: mapProps.viewSettings.zoom,
         // extent: projectionConfig.extent,
         extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
         minZoom: defaultBasemap?.zoomLevels.min || 0,
@@ -209,7 +209,10 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
             // on map view projection change, layer source needs to be refreshed
             // TODO: Listen to refresh from layer abstract class
             const mapLayers = api.map(id).layer.layers;
-            Object.entries(mapLayers).forEach((layer) => layer[1].layerEntries.getSource()?.refresh());
+            Object.entries(mapLayers).forEach((layer) => {
+              // eslint-disable-next-line no-console
+              console.log('*** ERROR *** layer[1].layerEntries.getSource()?.refresh());', layer);
+            });
           }
         }
       },

@@ -7,20 +7,25 @@ import axios, { AxiosResponse } from 'axios';
 import Ajv from 'ajv';
 
 import {
+/*
   TypeDynamicLayer,
   TypeDynamicLayerEntry,
   TypeFeatureLayer,
-  TypeWMSLayer,
+  TypeWMSLayerConfig,
   TypeOgcLayerEntry,
   TypeWFSLayer,
   TypeOgcFeatureLayer,
   TypeGeoJSONLayer,
   TypeXYZTiles,
+*/
   TypeJsonObject,
   TypeJsonValue,
   Cast,
   CONST_LAYER_TYPES,
   TypeJsonArray,
+  TypeDynamicLayerConfig,
+  TypeEsriFeatureLayerConfig,
+  TypeWMSLayerConfig,
 } from '../types/cgpv-types';
 import { generateId, isJsonString } from './utilities';
 
@@ -31,6 +36,7 @@ import { EVENT_NAMES } from '../../api/events/event';
 
 import schema from '../../../schema.json';
 import {
+  TypeGeoviewLayerConfig,
   TypeInteraction,
   TypeLocalizedLanguages,
   TypeMapCorePackages,
@@ -38,7 +44,7 @@ import {
   TypeValidProjectionCodes,
 } from '../../geo/map/map-types';
 import { TypeBasemapOptions } from '../../geo/layer/basemap/basemap-types';
-import { TypeLayerEntries } from '../../geo/layer/geoview-layers/schema-types';
+import { TypeImageLayerConfig, TypeArrayOfLayerConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageWmsInitialConfig } from '../../geo/layer/geoview-layers/schema-types';
 
 export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 
@@ -63,7 +69,7 @@ export class Config {
   private _config: TypeMapSchemaProps = {
     map: {
       interaction: 'dynamic',
-      view: {
+      viewSettings: {
         zoom: 4,
         center: [-100, 60],
         projection: 3978,
@@ -75,7 +81,7 @@ export class Config {
         shaded: true,
         labeled: true,
       },
-      layers: [],
+      geoviewLayerList: [],
       extraOptions: {},
     },
     theme: 'dark',
@@ -140,10 +146,10 @@ export class Config {
    * Generate layer configs from uuid request result
    *
    * @param {TypeJsonObject} result the uuid request result
-   * @returns {TypeLayerEntries} layers parsed from uuid result
+   * @returns {TypeArrayOfLayerConfig} layers parsed from uuid result
    */
-  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeLayerEntries => {
-    const layers: TypeLayerEntries = [];
+  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeArrayOfLayerConfig => {
+    const layers: TypeGeoviewLayerConfig[] = [];
 
     if (result && result.data) {
       for (let i = 0; i < result.data.length; i++) {
@@ -158,70 +164,80 @@ export class Config {
             const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
             if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
-              layers.push({
+              const layerConfig: TypeDynamicLayerConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
-                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
-                  return {
-                    index: item.index,
-                  } as TypeDynamicLayerEntry;
-                }),
                 accessPath: {
                   en: url,
                   fr: url,
                 },
                 layerType,
-              } as TypeDynamicLayer);
+                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                  return {
+                    geoviewLayerParent: layerConfig,
+                    info: { layerId: item.index },
+                    layerType: 'image',
+                    source: { sourceType: 'ESRI' } as TypeSourceImageEsriInitialConfig,
+                  } as TypeImageLayerConfig;
+                }),
+              } as TypeDynamicLayerConfig;
+              layers.push(layerConfig);
             } else if (isFeature) {
               for (let j = 0; j < layerEntries.length; j++) {
                 const featureUrl = `${url}/${layerEntries[j].index}`;
-                layers.push({
+                const layerConfig: TypeEsriFeatureLayerConfig = {
                   id,
                   name: {
                     en: name,
                     fr: name,
                   },
-                  url: {
+                  accessPath: {
                     en: featureUrl,
                     fr: featureUrl,
                   },
                   layerType: CONST_LAYER_TYPES.ESRI_FEATURE,
-                } as TypeFeatureLayer);
+                } as TypeEsriFeatureLayerConfig;
+                layers.push(layerConfig);
               }
             } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
-              layers.push({
+              const layerConfig: TypeEsriFeatureLayerConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
-                url: {
+                accessPath: {
                   en: url,
                   fr: url,
                 },
                 layerType,
-              } as TypeFeatureLayer);
+              } as TypeEsriFeatureLayerConfig;
+              layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.WMS) {
-              layers.push({
+              const layerConfig: TypeEsriFeatureLayerConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
-                url: {
+                accessPath: {
                   en: url,
                   fr: url,
                 },
                 layerType,
                 layerEntries: (layerEntries as TypeJsonArray).map((item) => {
                   return {
-                    id: item.id,
-                  } as TypeOgcLayerEntry;
+                    geoviewLayerParent: layerConfig,
+                    info: { layerId: item.id },
+                    layerType: 'image',
+                    source: { sourceType: 'WMS' } as TypeSourceImageWmsInitialConfig,
+                  } as TypeImageLayerConfig;
                 }),
-              } as TypeWMSLayer);
+              } as TypeWMSLayerConfig;
+              layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.WFS) {
               layers.push({
                 id,
@@ -317,7 +333,7 @@ export class Config {
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
-      let layers: TypeLayerEntries = [];
+      let layers: TypeArrayOfLayerConfig = [];
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
