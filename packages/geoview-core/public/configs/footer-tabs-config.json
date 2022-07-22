@@ -1,0 +1,71 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "view": {
+      "zoom": 4,
+      "center": [-100, 60],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "id": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "layers": [
+      {
+        "id": "wmsLYR1",
+        "name": {
+          "en": "Première Nation / First Nation",
+          "fr": "Première Nation / First Nation"
+        },
+        "url": {
+          "en": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
+          "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
+        },
+        "layerType": "ogcWms",
+        "layerEntries": [
+          {
+            "id": "0"
+          }
+        ]
+      },
+      {
+        "id": "esriDynamicLYR2",
+        "name": {
+          "en": "The Canadian Environmental Sustainability Indicators (CESI)",
+          "fr": "The Canadian Environmental Sustainability Indicators (CESI)"
+        },
+        "url": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
+        },
+        "layerType": "esriDynamic",
+        "layerEntries": [
+          {
+            "index": 1
+          },
+          {
+            "index": 2
+          },
+          {
+            "index": 3
+          },
+          {
+            "index": 6
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "appBar": {
+    "about": {
+      "en": "# An example of a markdown",
+      "fr": "# Un exemple de démarque"
+    }
+  },
+  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
+  "corePackages": [],
+  "externalPackages": [],
+  "languages": ["en-CA"]
+}
