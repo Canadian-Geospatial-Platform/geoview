@@ -81,7 +81,7 @@ export function FooterTabs(): JSX.Element | null {
 
       // check if the tabs container is collapsed
       if (isCollapsed) {
-        tabsContaine.style.height = '50px';
+        tabsContaine.style.height = '55px';
       } else {
         tabsContaine.style.height = '400px';
       }
