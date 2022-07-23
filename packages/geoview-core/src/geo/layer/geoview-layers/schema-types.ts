@@ -297,7 +297,7 @@ export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | Typ
  */
 export type TypeBaseSourceImageInitialConfig = {
   /** The service endpoint of the layer (English/French). It should match the type provided in sourceType. */
-  accesPath: TypeLangString;
+  accessPath: TypeLangString;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -323,7 +323,7 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
   /** The type of the remote WMS server. */
   serverType: TypeOfServer;
   /** Style to apply. Default = '' */
-  style: string;
+  style?: string;
 }
 
 /** ******************************************************************************************************************************
@@ -361,7 +361,7 @@ export type TypeTileGrid = {
    * Resolutions. The array index of each resolution needs to match the zoom level. This means that even if a minZoom is
    * configured, the resolutions array will have a length of maxZoom + 1.
    */
-  resolution: number[];
+  resolutions: number[];
   /**
    * The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards.
    * If not specified, extent must be provided. Default = [256, 256].
@@ -370,11 +370,15 @@ export type TypeTileGrid = {
 };
 
 /** ******************************************************************************************************************************
- * Initial settings for image sources.
+ * Initial settings for tile image sources.
  */
 export type TypeSourceTileInitialConfig = {
   /** The service endpoint of the layer (English/French). It should match the type provided in sourceType. */
   accessPath: TypeLangString;
+  /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
+   * with the Canvas renderer.
+   */
+  crossOrigin?: string;
   /** The source type for the tile layer. Default = XYZ. */
   sourceType: TypeTileSourceFormats;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */

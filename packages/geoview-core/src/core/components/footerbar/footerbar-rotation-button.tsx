@@ -14,7 +14,7 @@ import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
-export const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   rotationIcon: {
     fontSize: `${theme.typography.fontSize}px !important`,
     color: `${theme.palette.primary.light}`,

@@ -10,7 +10,7 @@ import { api } from '../../../app';
 import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
 import { EVENT_NAMES } from '../../../api/events/event';
 
-export const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   expandbuttonContainer: {
     display: 'flex',
     alignItems: 'center',

@@ -11,6 +11,8 @@ import { TypeLayerConfig } from '../schema-types';
 // Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
 export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRasterLayer;
 
+// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * The AbstractGeoViewRaster class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView raster layers. In addition to the components of the parent class, there is an attribute named
@@ -24,6 +26,7 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
  * All leaves of the structure stored in the gvRasterLayers attribute must be of type TypeRasterLayer. This is where the
  * features are placed.
  */
+// ******************************************************************************************************************************
 export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
    * The raster layer structure to be displayed for this GeoView raster class. Initial value is null indicating that the layers

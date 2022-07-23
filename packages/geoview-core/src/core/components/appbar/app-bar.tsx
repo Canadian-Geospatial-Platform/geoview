@@ -13,7 +13,7 @@ import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/p
 
 import { TypeButtonPanel } from '../../types/cgpv-types';
 
-export const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   appBar: {
     display: 'flex',
     flexDirection: 'row',

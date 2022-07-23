@@ -7,15 +7,15 @@ import axios, { AxiosResponse } from 'axios';
 import Ajv from 'ajv';
 
 import {
-/*
+  /*
   TypeDynamicLayer,
   TypeDynamicLayerEntry,
   TypeFeatureLayer,
   TypeWMSLayerConfig,
   TypeOgcLayerEntry,
-  TypeWFSLayer,
-  TypeOgcFeatureLayer,
-  TypeGeoJSONLayer,
+  TypeWFSLayerConfig,
+  TypeOgcFeatureLayerConfig,
+  TypeGeoJSONLayerConfig,
   TypeXYZTiles,
 */
   TypeJsonObject,
@@ -23,9 +23,17 @@ import {
   Cast,
   CONST_LAYER_TYPES,
   TypeJsonArray,
-  TypeDynamicLayerConfig,
+  TypeEsriDynamicLayerConfig,
   TypeEsriFeatureLayerConfig,
   TypeWMSLayerConfig,
+  TypeWFSLayerEntryConfig,
+  TypeWFSLayerConfig,
+  TypeSourceWFSVectorInitialConfig,
+  TypeOgcFeatureLayerConfig,
+  TypeOgcFeatureLayerEntryConfig,
+  TypeSourceOgcFeatureInitialConfig,
+  TypeGeoJSONLayerConfig,
+  TypeXYZTilesConfig,
 } from '../types/cgpv-types';
 import { generateId, isJsonString } from './utilities';
 
@@ -44,7 +52,11 @@ import {
   TypeValidProjectionCodes,
 } from '../../geo/map/map-types';
 import { TypeBasemapOptions } from '../../geo/layer/basemap/basemap-types';
-import { TypeImageLayerConfig, TypeArrayOfLayerConfig, TypeSourceImageEsriInitialConfig, TypeSourceImageWmsInitialConfig } from '../../geo/layer/geoview-layers/schema-types';
+import {
+  TypeImageLayerConfig,
+  TypeSourceImageEsriInitialConfig,
+  TypeSourceImageWmsInitialConfig,
+} from '../../geo/layer/geoview-layers/schema-types';
 
 export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 
@@ -87,7 +99,7 @@ export class Config {
     theme: 'dark',
     components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
     corePackages: [],
-    languages: ['en', 'fr'],
+    languages: ['en-CA', 'fr-CA'],
     version: '2.0',
   };
 
@@ -148,7 +160,7 @@ export class Config {
    * @param {TypeJsonObject} result the uuid request result
    * @returns {TypeArrayOfLayerConfig} layers parsed from uuid result
    */
-  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeArrayOfLayerConfig => {
+  static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeGeoviewLayerConfig[] => {
     const layers: TypeGeoviewLayerConfig[] = [];
 
     if (result && result.data) {
@@ -164,7 +176,7 @@ export class Config {
             const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
             if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
-              const layerConfig: TypeDynamicLayerConfig = {
+              const layerConfig: TypeEsriDynamicLayerConfig = {
                 id,
                 name: {
                   en: name,
@@ -183,7 +195,7 @@ export class Config {
                     source: { sourceType: 'ESRI' } as TypeSourceImageEsriInitialConfig,
                   } as TypeImageLayerConfig;
                 }),
-              } as TypeDynamicLayerConfig;
+              } as TypeEsriDynamicLayerConfig;
               layers.push(layerConfig);
             } else if (isFeature) {
               for (let j = 0; j < layerEntries.length; j++) {
@@ -217,7 +229,7 @@ export class Config {
               } as TypeEsriFeatureLayerConfig;
               layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.WMS) {
-              const layerConfig: TypeEsriFeatureLayerConfig = {
+              const layerConfig: TypeWMSLayerConfig = {
                 id,
                 name: {
                   en: name,
@@ -239,67 +251,77 @@ export class Config {
               } as TypeWMSLayerConfig;
               layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.WFS) {
-              layers.push({
+              const layerConfig: TypeWFSLayerConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
-                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
-                  return {
-                    id: item.id,
-                  } as TypeOgcLayerEntry;
-                }),
-                url: {
+                accessPath: {
                   en: url,
                   fr: url,
                 },
                 layerType,
-              } as TypeWFSLayer);
+                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                  return {
+                    geoviewLayerParent: layerConfig,
+                    info: { layerId: item.id },
+                    layerType: 'vector',
+                    source: { format: 'WFS' } as TypeSourceWFSVectorInitialConfig,
+                  } as TypeWFSLayerEntryConfig;
+                }),
+              } as TypeWFSLayerConfig;
+              layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
-              layers.push({
+              const layerConfig: TypeOgcFeatureLayerConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
+                accessPath: {
+                  en: url,
+                  fr: url,
+                },
+                layerType,
                 layerEntries: (layerEntries as TypeJsonArray).map((item) => {
                   return {
-                    id: item.id,
-                  } as TypeOgcLayerEntry;
+                    geoviewLayerParent: layerConfig,
+                    info: { layerId: item.id },
+                    layerType: 'vector',
+                    source: { format: 'featureAPI' } as TypeSourceOgcFeatureInitialConfig,
+                  } as TypeOgcFeatureLayerEntryConfig;
                 }),
-                url: {
-                  en: url,
-                  fr: url,
-                },
-                layerType,
-              } as TypeOgcFeatureLayer);
+              } as TypeOgcFeatureLayerConfig;
+              layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
-              layers.push({
+              const layerConfig: TypeGeoJSONLayerConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
-                url: {
+                accessPath: {
                   en: url,
                   fr: url,
                 },
                 layerType,
-              } as TypeGeoJSONLayer);
+              } as TypeGeoJSONLayerConfig;
+              layers.push(layerConfig);
             } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
-              layers.push({
+              const layerConfig: TypeXYZTilesConfig = {
                 id,
                 name: {
                   en: name,
                   fr: name,
                 },
-                url: {
+                accessPath: {
                   en: url,
                   fr: url,
                 },
                 layerType,
-              } as TypeXYZTiles);
+              } as TypeXYZTilesConfig;
+              layers.push(layerConfig);
             }
           }
         }
@@ -333,7 +355,7 @@ export class Config {
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
-      let layers: TypeArrayOfLayerConfig = [];
+      let layers: TypeGeoviewLayerConfig[] = [];
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
@@ -354,17 +376,19 @@ export class Config {
       configObj = {
         map: {
           interaction: urlParams.i as TypeInteraction,
-          view: {
+          viewSettings: {
             zoom: parseInt(urlParams.z as TypeJsonValue as string, 10),
             center: [parseInt(center[0], 10), parseInt(center[1], 10)],
             projection: parseInt(urlParams.p as string, 10) as TypeValidProjectionCodes,
           },
           basemapOptions,
-          layers,
+          geoviewLayerList: layers,
           extraOptions: {},
         },
-        languages: ['en', 'fr'],
+        languages: ['en-CA', 'fr-CA'],
         corePackages,
+        // ! TODO: Get the version from the config.
+        version: '2.0',
       };
 
       // update language if provided from params
@@ -488,16 +512,16 @@ export class Config {
           }, 2000);
         }
 
-        mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
+        mapConfigProps = { ...this.validate(configObj), mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
       } else {
         mapConfigProps = {
           ...this.validate(configObj),
-          id: this.id,
-          language: this.language as 'en-CA' | 'fr-CA',
+          mapId: this.id,
+          languages: [this.language as 'en-CA' | 'fr-CA'],
         };
       }
     } else {
-      mapConfigProps = { ...this._config, id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
+      mapConfigProps = { ...this._config, mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
     }
 
     return mapConfigProps;
@@ -571,16 +595,16 @@ export class Config {
           }, 2000);
         }
 
-        mapConfigProps = { ...this.validate(configObj), id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
+        mapConfigProps = { ...this.validate(configObj), mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
       } else {
         mapConfigProps = {
           ...this.validate(configObj),
-          id: this.id,
-          language: this.language as 'en-CA' | 'fr-CA',
+          mapId: this.id,
+          languages: [this.language as 'en-CA' | 'fr-CA'],
         };
       }
     } else {
-      mapConfigProps = { ...this._config, id: this.id, language: this.language as 'en-CA' | 'fr-CA' };
+      mapConfigProps = { ...this._config, mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
     }
 
     return mapConfigProps;
@@ -667,23 +691,24 @@ export class Config {
 
     // do validation for every pieces
     // TODO: if the config becomes too complex, need to break down.... try to maintain config simple
-    const projection = this.validateProjection(Number(tmpConfig.map.view.projection)) as TypeValidProjectionCodes;
+    const projection = this.validateProjection(
+      Number(tmpConfig.map.viewSettings.projection) as TypeValidProjectionCodes
+    ) as TypeValidProjectionCodes;
     const basemapOptions = this.validateBasemap(projection, tmpConfig.map.basemapOptions);
-    const center = this.validateCenter(projection, tmpConfig.map.view.center) as [number, number];
-    const zoom = this.validateZoom(Number(tmpConfig.map.view.zoom));
+    const center = this.validateCenter(projection, tmpConfig.map.viewSettings.center) as [number, number];
+    const zoom = this.validateZoom(Number(tmpConfig.map.viewSettings.zoom));
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validConfig: TypeMapSchemaProps = {
       map: {
         basemapOptions,
-        view: {
+        viewSettings: {
           zoom,
           center,
           projection,
         },
-        extraOptions: tmpConfig.map.extraOptions,
         interaction: tmpConfig.map.interaction,
-        layers: tmpConfig.map.layers,
+        geoviewLayerList: tmpConfig.map.geoviewLayerList,
         extraOptions: tmpConfig.map.extraOptions,
       },
       theme: tmpConfig.theme,
@@ -712,18 +737,22 @@ export class Config {
       }
     });
 
-    if (inConfig.map.view.projection !== validConfig.map.view.projection) {
+    if (inConfig.map.viewSettings.projection !== validConfig.map.viewSettings.projection) {
       console.log(
-        `- map: ${this.id} - Invalid projection ${inConfig.map.view.projection} replaced by ${validConfig.map.view.projection} -`
+        `- map: ${this.id} - Invalid projection ${inConfig.map.viewSettings.projection} replaced by ${validConfig.map.viewSettings.projection} -`
       );
     }
 
-    if (inConfig.map.view.zoom !== validConfig.map.view.zoom) {
-      console.log(`- map: ${this.id} - Invalid zoom level ${inConfig.map.view.zoom} replaced by ${validConfig.map.view.zoom} -`);
+    if (inConfig.map.viewSettings.zoom !== validConfig.map.viewSettings.zoom) {
+      console.log(
+        `- map: ${this.id} - Invalid zoom level ${inConfig.map.viewSettings.zoom} replaced by ${validConfig.map.viewSettings.zoom} -`
+      );
     }
 
-    if (JSON.stringify(inConfig.map.view.center) !== JSON.stringify(validConfig.map.view.center)) {
-      console.log(`- map: ${this.id} - Invalid center ${inConfig.map.view.center} replaced by ${validConfig.map.view.center}`);
+    if (JSON.stringify(inConfig.map.viewSettings.center) !== JSON.stringify(validConfig.map.viewSettings.center)) {
+      console.log(
+        `- map: ${this.id} - Invalid center ${inConfig.map.viewSettings.center} replaced by ${validConfig.map.viewSettings.center}`
+      );
     }
 
     if (JSON.stringify(inConfig.map.basemapOptions) !== JSON.stringify(validConfig.map.basemapOptions)) {
@@ -740,7 +769,7 @@ export class Config {
    * @param {number} projection provided projection
    * @returns {number} valid projection
    */
-  private validateProjection(projection: number): number {
+  private validateProjection(projection: TypeValidProjectionCodes): number {
     return this._projections.includes(projection) ? projection : 3978;
   }
 
@@ -778,11 +807,11 @@ export class Config {
     const x =
       !Number.isNaN(xVal) && xVal > this._center[projection].long[0] && xVal < this._center[projection].long[1]
         ? xVal
-        : this._config.map.view.center[0];
+        : this._config.map.viewSettings.center[0];
     const y =
       !Number.isNaN(yVal) && yVal > this._center[projection].lat[0] && yVal < this._center[projection].lat[1]
         ? yVal
-        : this._config.map.view.center[1];
+        : this._config.map.viewSettings.center[1];
 
     return [x, y];
   }
@@ -793,7 +822,7 @@ export class Config {
    * @returns {number} valid zoom level
    */
   private validateZoom(zoom: number): number {
-    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.view.zoom;
+    return !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._config.map.viewSettings.zoom;
   }
 
   /**

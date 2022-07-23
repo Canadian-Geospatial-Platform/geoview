@@ -23,7 +23,7 @@ import {
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTiles
  * if the layerType attribute of the verifyIfLayer parameter is XYZ_TILES. The type ascention
- * applies only to the the true block of the if clause that use this function.
+ * applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
@@ -36,7 +36,7 @@ export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): ve
 /* ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as an XYZTiles
  * if the type attribute of the verifyIfGeoViewLayer parameter is XYZ_TILES. The type ascention
- * applies only to the the true block of the if clause that use this function.
+ * applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *

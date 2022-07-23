@@ -24,7 +24,7 @@ import { api } from '../../../../app';
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig
  * if the layerType attribute of the verifyIfLayer parameter is WMS. The type ascention
- * applies only to the the true block of the if clause that use this function.
+ * applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
@@ -37,7 +37,7 @@ export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
 /* ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as a WMS
  * if the type attribute of the verifyIfGeoViewLayer parameter is WMS. The type ascention
- * applies only to the the true block of the if clause that use this function.
+ * applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *

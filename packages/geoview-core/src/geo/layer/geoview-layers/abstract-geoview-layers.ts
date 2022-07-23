@@ -41,6 +41,8 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoViewLayers> = {
   WMS: 'ogcWms',
 };
 
+// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * The AbstractGeoViewLayer class is normally used for creating subclasses and is not instantiated (using the new operator) in the
  * app. It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
@@ -48,6 +50,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoViewLayers> = {
  * mapLayerConfig that are common to all GeoView layers. The main characteristic of a GeoView layer is the presence of an
  * accessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
+// ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   protected mapId: string;
@@ -68,8 +71,11 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer accessPath. The name attribute is optional */
   accessPath: TypeLangString = { en: '', fr: '' };
 
-  /** An array of layer settings. */
-  layerEntries?: TypeArrayOfLayerConfig;
+  /**
+   * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
+   * configuration does not provide a value, we use an empty array instead of an undefined attribute.
+   */
+  layerEntries: TypeArrayOfLayerConfig = [];
 
   /**
    * The class constructor saves parameters and common configuration parameters in attributes.
@@ -86,6 +92,6 @@ export abstract class AbstractGeoViewLayer {
     this.name.fr = mapLayerConfig.name && mapLayerConfig.name.fr ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
     this.accessPath.en = mapLayerConfig.accessPath.en.trim();
     this.accessPath.fr = mapLayerConfig.accessPath.fr.trim();
-    this.layerEntries = mapLayerConfig.layerEntries;
+    if (typeof mapLayerConfig.layerEntries !== 'undefined') this.layerEntries = mapLayerConfig.layerEntries;
   }
 }

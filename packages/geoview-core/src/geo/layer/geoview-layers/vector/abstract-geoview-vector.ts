@@ -26,6 +26,8 @@ import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 // Base type used to keep the layer's hierarchical structure. It is similar to ol/layer/Base~BaseLayer.
 export type TypeBaseVectorLayer = BaseLayer; // TypeVectorLayerGroup | TypeVectorLayer;
 
+// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView vector layers. In addition to the components of the parent class, there is an attribute named
@@ -39,6 +41,7 @@ export type TypeBaseVectorLayer = BaseLayer; // TypeVectorLayerGroup | TypeVecto
  * All leaves of the structure stored in the gvVectorLayers attribute must be of type TypeVectorLayer. This is where the
  * features are placed and can be considered as a feature group.
  */
+// ******************************************************************************************************************************
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * The vector layer structure to be displayed for this GeoView vector class. Initial value is null indicating that the layers
@@ -149,7 +152,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           sourceOptions.format = new EsriJSON();
           break;
         }
-        case 'GeoJSON': {
+        case 'GeoJSON' || 'featureAPI': {
           sourceOptions.format = new GeoJSON();
           break;
         }

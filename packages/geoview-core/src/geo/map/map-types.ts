@@ -28,7 +28,7 @@ export type TypeMapSchemaProps = {
   /** Service URLs. */
   serviceUrls?: TypeServiceUrls;
   /** Display Languages. */
-  languages: TypeLanguages[];
+  languages: TypeLocalizedLanguages[];
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.

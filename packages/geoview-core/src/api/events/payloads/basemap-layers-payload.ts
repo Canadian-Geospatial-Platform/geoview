@@ -10,7 +10,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_U
 /**
  * Type Gard function that redefines a PayloadBaseClass as a BasemapLayerArrayPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid

@@ -120,7 +120,7 @@ export class Basemap {
   });
 
   /**
-   * attribution to add the the map
+   * attribution to add the map
    */
   private attributionVal: TypeJsonObject = toJsonObject({
     'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',

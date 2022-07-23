@@ -22,30 +22,30 @@ import {
 
 import { api } from '../../../../app';
 
-export interface TypeImageEsriLayerConfig extends Omit<TypeImageLayerConfig, 'source'> {
+export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;
 }
 
-export interface TypeDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
-  layerEntries?: TypeImageEsriLayerConfig[];
+export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
+  layerEntries?: TypeEsriDynamicLayerEntryConfig[];
 }
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeDynamicLayerConfig if the layerType attribute of the
- * verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the the true block of the if clause that use
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the layerType attribute of the
+ * verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeDynamicLayerConfig => {
+export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
   return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /** ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
- * parameter is ESRI_DYNAMIC. The type ascention applies only to the the true block of the if clause that use this function.
+ * parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
@@ -56,24 +56,29 @@ export const geviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLa
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerConfig as a TypeImageEsriLayerConfig if the layerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is ESRI_DYNAMIC. The type ascention applies only to the the true block of
+ * Type Gard function that redefines a TypeLayerConfig as a TypeEsriDynamicLayerEntryConfig if the layerType attribute of the
+ * verifyIfGeoViewEntry.geoviewLayerParent attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
- * @param {TypeLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewEntryIsEsriDynamic = (verifyIfGeoViewEntry: TypeLayerConfig): verifyIfGeoViewEntry is TypeImageEsriLayerConfig => {
+export const geoviewEntryIsEsriDynamic = (
+  verifyIfGeoViewEntry: TypeLayerConfig
+): verifyIfGeoViewEntry is TypeEsriDynamicLayerEntryConfig => {
   return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
+// ******************************************************************************************************************************
+// ******************************************************************************************************************************
 /** ******************************************************************************************************************************
  * A class to add esri dynamic layer.
  *
  * @exports
  * @class EsriDynamic
  */
+// ******************************************************************************************************************************
 export class EsriDynamic extends AbstractGeoViewRaster {
   /** Service metadata */
   metadata: TypeJsonObject = {};
@@ -81,9 +86,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * Initialize layer.
    * @param {string} mapId The id of the map.
-   * @param {TypeDynamicLayerConfig} layerConfig The layer configuration.
+   * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
-  constructor(mapId: string, layerConfig: TypeDynamicLayerConfig) {
+  constructor(mapId: string, layerConfig: TypeEsriDynamicLayerConfig) {
     super(CONST_LAYER_TYPES.ESRI_DYNAMIC, layerConfig, mapId);
   }
 
@@ -102,14 +107,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method creates a GeoView EsriDynamic layer using the definition provided in the layerEntry parameter.
    *
-   * @param {TypeImageEsriLayerConfig} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerEntry Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeImageEsriLayerConfig): TypeBaseRasterLayer {
+  processOneLayerEntry(layerEntry: TypeEsriDynamicLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
-    sourceOptions.url = layerEntry.source.accesPath[api.map(this.mapId).getLanguageCode()];
+    sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCode()];
     sourceOptions.params = { LAYERS: `show:${layerEntry.info.layerId}` };
     if (typeof layerEntry.source.transparent !== undefined)
       Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent!);

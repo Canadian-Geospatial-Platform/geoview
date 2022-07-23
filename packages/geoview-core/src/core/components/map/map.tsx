@@ -29,7 +29,7 @@ import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
 
-export const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(() => ({
   mapContainer: {
     display: 'flex',
     flexDirection: 'column',

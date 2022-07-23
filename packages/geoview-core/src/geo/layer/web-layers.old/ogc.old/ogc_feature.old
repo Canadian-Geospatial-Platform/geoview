@@ -68,7 +68,7 @@ const defaultSelectStyle = new Style({
 /* ******************************************************************************************************************************
  * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayer
  * if the layerType attribute of the verifyIfLayer parameter is OGC_FEATURE. The type ascention
- * applies only to the the true block of the if clause that use this function.
+ * applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} polymorphic object to test in order to determine if the type ascention is valid
  *
@@ -81,7 +81,7 @@ export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): 
 /* ******************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as an OgcFeature
  * if the type attribute of the verifyIfGeoViewLayer parameter is OGC_FEATURE. The type ascention
- * applies only to the the true block of the if clause that use this function.
+ * applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} polymorphic object to test in order to determine if the type ascention is valid
  *

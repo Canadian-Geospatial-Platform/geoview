@@ -46,16 +46,16 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { configObj } = props;
 
   const mapContextValue = useMemo(() => {
-    return { id: configObj.id, interaction: configObj.map.interaction };
-  }, [configObj.id, configObj.map.interaction]);
+    return { id: configObj.mapId as string, interaction: configObj.map.interaction };
+  }, [configObj.mapId, configObj.map.interaction]);
 
   /**
    * Create maps from inline configs with class name llwp-map in index.html
    */
   function getInlineMaps() {
     const i18nInstance = i18n.cloneInstance({
-      lng: configObj.language,
-      fallbackLng: configObj.language,
+      lng: configObj.languages[0],
+      fallbackLng: configObj.languages,
     });
 
     // create a new map instance
@@ -65,7 +65,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <Shell id={configObj.id} config={configObj} />
+          <Shell id={configObj.mapId as string} config={configObj} />
         </MapContext.Provider>
       </I18nextProvider>
     );

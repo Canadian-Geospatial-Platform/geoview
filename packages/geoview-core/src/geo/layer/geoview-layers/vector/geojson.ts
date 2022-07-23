@@ -1,23 +1,17 @@
-import VectorLayer from 'ol/layer/Vector';
-import { Vector as VectorSource } from 'ol/source';
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  TypeJsonObject,
   TypeGeoviewLayerConfig,
-  TypeVectorSourceInitialConfig,
+  TypeJsonObject,
   TypeVectorLayerConfig,
+  TypeVectorSourceInitialConfig,
   TypeLayerConfig,
-  AbstractGeoViewVector,
   TypeBaseVectorLayer,
-  TypeJsonArray,
 } from '../../../../core/types/cgpv-types';
-import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
-
-import { api } from '../../../../app';
+import { setAlphaColor } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
@@ -26,11 +20,11 @@ const defaultCircleMarkerStyle = new Style({
   image: new StyleCircle({
     radius: 5,
     stroke: new Stroke({
-      color: asString(setAlphaColor(asArray('#333'), 1)),
+      color: asString(setAlphaColor(asArray('#000000'), 1)),
       width: 1,
     }),
     fill: new Fill({
-      color: asString(setAlphaColor(asArray('#FFB27F'), 0.8)),
+      color: asString(setAlphaColor(asArray('#000000'), 0.4)),
     }),
   }),
 });
@@ -98,160 +92,81 @@ const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
       });
 };
 
-export interface TypeSourceWFSVectorInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'WFS';
+export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+  format: 'GeoJSON';
 }
 
-export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerConfig, 'source' | 'layerType'> {
-  layerType: 'vector';
-  source: TypeSourceWFSVectorInitialConfig;
+export interface TypeGeoJSONLayerEntryConfig extends Omit<TypeVectorLayerConfig, 'source'> {
+  source: TypeSourceGeoJSONInitialConfig;
 }
 
-export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
-  layerEntries?: TypeWFSLayerEntryConfig[];
+export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
+  layerEntries?: TypeGeoJSONLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the layerType attribute of theverifyIfLayer
- * parameter is WFS. The type ascention
- * applies only to the true block of the if clause that use this function.
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the layerType attribute of the
+ * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
+ * function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.WFS;
+export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
+  return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as a WFS if the type attribute of the verifyIfGeoViewLayer parameter
- * is WFS. The type ascention applies only to the true block of the if clause that use this function.
+ * Type Gard function that redefines an AbstractGeoViewLayer as a GeoJSON if the type attribute of the verifyIfGeoViewLayer
+ * parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WFS => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WFS;
+export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoJSON => {
+  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerConfig as a TypeWFSLayerEntryConfig if the layerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is WFS. The type ascention applies only to the true block of
+ * Type Gard function that redefines a TypeLayerConfig as a TypeGeoJSONLayerEntryConfig if the layerType attribute of the
+ * verifyIfGeoViewEntry.geoviewLayerParent attribute is GEOJSON. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerConfig): verifyIfGeoViewEntry is TypeWFSLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.WFS;
+export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
+  return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
- * A class to add WFS layer.
+ * Class used to add geojson layer to the map
  *
  * @exports
- * @class WFS
+ * @class GeoJSON
  */
 // ******************************************************************************************************************************
-export class WFS extends AbstractGeoViewVector {
-  // private varibale holding wfs capabilities
-  private capabilities: TypeJsonObject = {};
-
-  // private varibale holding wfs version
-  private version = '2.0.0';
-
+export class GeoJSON extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Initialize layer
+   *
    * @param {string} mapId the id of the map
-   * @param {TypeWFSLayerConfig} layerConfig the layer configuration
+   * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
    */
-  constructor(mapId: string, layerConfig: TypeWFSLayerConfig) {
-    super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
+  constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig) {
+    super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
   }
 
   /** ****************************************************************************************************************************
    * This method reads from the accessPath additional information to complete the GeoView layer configuration.
    */
-  getAdditionalServiceDefinition(): void {
-    this.getWfsCapabilities();
-    if (this.layerEntries.length !== 0) {
-      const featTypeInfo = this.getFeatureTypeInfo(
-        this.capabilities['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
-        this.layerEntries.map((item) => item.info.layerId).toString()
-      );
-      if (!featTypeInfo) {
-        return;
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const layerName = this.name[api.map(this.mapId).getLanguageCode()]
-        ? this.name[api.map(this.mapId).getLanguageCode()]
-        : (featTypeInfo.Name['#text'] as string).split(':')[1];
-      // ! To be continued
-    }
-  }
-
-  /** ****************************************************************************************************************************
-   * Query the WFS service to get the capacities.
-   */
-  private async getWfsCapabilities(): Promise<void> {
-    let xmlStringCapabilities = '';
-    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCode()]}?service=WFS&request=getcapabilities`).then((result) => {
-      xmlStringCapabilities = result;
-    });
-    // need to pass a xmldom to xmlToJson
-    const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
-    const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
-
-    this.capabilities = xmlJsonCapabilities['wfs:WFS_Capabilities'];
-    this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
-  }
-
-  /** ****************************************************************************************************************************
-   * Get feature type info of a given entry
-   * @param {TypeJsonObject} featureTypeList feature type list
-   * @param {string} entries names(comma delimited) to check
-   *
-   * @returns {TypeJsonObject | null} feature type object or null
-   */
-  private getFeatureTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
-    const res = null;
-
-    if (Array.isArray(featureTypeList)) {
-      const featureTypeArray: TypeJsonArray = featureTypeList;
-
-      for (let i = 0; i < featureTypeArray.length; i += 1) {
-        let fName = featureTypeArray[i].Name['#text'] as string;
-
-        const fNameSplit = fName.split(':');
-        fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
-
-        const entrySplit = entries!.split(':');
-        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
-
-        if (entryName === fName) {
-          return featureTypeArray[i];
-        }
-      }
-    } else {
-      let fName = featureTypeList.Name['#text'] as string;
-
-      const fNameSplit = fName.split(':');
-      fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
-
-      const entrySplit = entries!.split(':');
-      const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
-
-      if (entryName === fName) {
-        return featureTypeList;
-      }
-    }
-    return res;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  getAdditionalServiceDefinition(): void {}
 
   /**
    * This method associate a renderer to the GeoView layer.

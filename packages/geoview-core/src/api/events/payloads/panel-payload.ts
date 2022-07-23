@@ -31,7 +31,7 @@ export type TypeActionButton = {
 /**
  * Type Gard function that redefines a PayloadBaseClass as a PanelWithAButtonIdAndTypePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
@@ -54,7 +54,7 @@ export interface PanelWithAButtonIdAndTypePayload extends PanelPayload {
 /**
  * Type Gard function that redefines a PayloadBaseClass as a PanelAndActionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
@@ -77,7 +77,7 @@ export interface PanelAndActionPayload extends PanelPayload {
 /**
  * Type Gard function that redefines a PayloadBaseClass as a PanelAndContentPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
@@ -100,7 +100,7 @@ export interface PanelAndContentPayload extends PanelPayload {
 /**
  * Type Gard function that redefines a PayloadBaseClass as a PanelPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
