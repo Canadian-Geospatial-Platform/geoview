@@ -12,27 +12,28 @@ import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
   TypeJsonObject,
-  TypeImageLayerConfig,
+  TypeImageLayerEntryConfig,
   TypeSourceImageEsriInitialConfig,
   TypeBaseRasterLayer,
   TypeGeoviewLayerConfig,
   AbstractGeoViewRaster,
-  TypeLayerConfig,
+  TypeLayerEntryConfig,
 } from '../../../../core/types/cgpv-types';
 
 import { api } from '../../../../app';
 
-export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerConfig, 'source'> {
+export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;
 }
 
-export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
+export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+  geoviewLayerType: 'esriDynamic';
   layerEntries?: TypeEsriDynamicLayerEntryConfig[];
 }
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the layerType attribute of the
- * verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
+ * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
@@ -40,7 +41,7 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
  * @return {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /** ******************************************************************************************************************************
@@ -56,18 +57,18 @@ export const geviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLa
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerConfig as a TypeEsriDynamicLayerEntryConfig if the layerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute of
+ * the verifyIfGeoViewEntry.geoviewLayerParent attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
- * @param {TypeLayerConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsEsriDynamic = (
-  verifyIfGeoViewEntry: TypeLayerConfig
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriDynamicLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 // ******************************************************************************************************************************
@@ -141,10 +142,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseRasterLayer): void {
+  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console
@@ -154,10 +155,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseRasterLayer): void {
+  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console

@@ -96,7 +96,7 @@ export type TypeBaseVectorSourceInitialConfig = {
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
 };
-/* ICI */
+
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
@@ -249,12 +249,12 @@ export type TypeStyleConfig = TypeSimpleStyleConfig | TypeUniqueValueStyleConfig
 /** ******************************************************************************************************************************
  * Type of vector layer.
  */
-export type TypeOfVectorLayer = 'vector' | 'vectorHeatmap' | 'vectorTile';
+export type TypeOfVectorLayerEntry = 'vector' | 'vectorHeatmap' | 'vectorTile';
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
-export type TypeBaseVectorLayerConfig = {
+export type TypeBaseVectorLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
@@ -262,7 +262,7 @@ export type TypeBaseVectorLayerConfig = {
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialConfig;
   /** The type of GeoView layer. */
-  layerType: TypeOfVectorLayer;
+  layerEntryType: TypeOfVectorLayerEntry;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source: TypeBaseVectorSourceInitialConfig; // YC: delete this comment TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig;
 };
@@ -270,7 +270,7 @@ export type TypeBaseVectorLayerConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
-export interface TypeVectorLayerConfig extends Omit<TypeBaseVectorLayerConfig, 'source'> {
+export interface TypeVectorLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   source: TypeVectorSourceInitialConfig;
   /** Style to apply to the vector layer. */
@@ -390,7 +390,7 @@ export type TypeSourceTileInitialConfig = {
 /** ******************************************************************************************************************************
  * Type used to identify a GeoView vector heamap layer to display on the map.
  */
-export interface TypeVectorHeatmapLayerConfig extends Omit<TypeBaseVectorLayerConfig, 'source'> {
+export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   source: TypeVectorSourceInitialConfig;
   /**
@@ -405,7 +405,7 @@ export interface TypeVectorHeatmapLayerConfig extends Omit<TypeBaseVectorLayerCo
   /** Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature. */
   weight?: string;
 }
-/* ICI */
+
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
  */
@@ -423,7 +423,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceI
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector tile layer to display on the map. The vector data is divided into a tile grid.
  */
-export interface TypeVectorTileLayerConfig extends Omit<TypeBaseVectorLayerConfig, 'source'> {
+export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
   /**
    * Initial settings to apply to the GeoView vector layer source at creation time. Layer sources providing vector data divided
    * into a tile grid.
@@ -434,7 +434,7 @@ export interface TypeVectorTileLayerConfig extends Omit<TypeBaseVectorLayerConfi
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export type TypeImageLayerConfig = {
+export type TypeImageLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
@@ -445,7 +445,7 @@ export type TypeImageLayerConfig = {
    * The type of GeoView layer. Server-rendered images that are available for arbitrary extents and resolutions like OGC WMS,
    * ESRI MapServer, ESRI ImageServer, ...
    */
-  layerType: 'image';
+  layerEntryType: 'image';
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source: TypeSourceImageInitialConfig;
 };
@@ -453,7 +453,7 @@ export type TypeImageLayerConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export type TypeTileLayerConfig = {
+export type TypeTileLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
@@ -464,7 +464,7 @@ export type TypeTileLayerConfig = {
    * Layer sources that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions
    * like OGC WMTS, GeoTIFF, XYZ, ESRI TileServer, ...
    */
-  layerType: 'tile';
+  layerEntryType: 'tile';
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source: TypeSourceTileInitialConfig;
 };
@@ -473,7 +473,7 @@ export type TypeTileLayerConfig = {
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
  */
-export type TypeGeoCoreLayerConfig = {
+export type TypeGeoCoreLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
@@ -485,22 +485,22 @@ export type TypeGeoCoreLayerConfig = {
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
   accessPath?: string;
   /** The type of GeoView layer. */
-  layerType: 'geoCore';
+  layerEntryType: 'geoCore';
 };
 
 /** ******************************************************************************************************************************
  * Layer config type.
  */
-export type TypeLayerConfig =
-  | TypeBaseVectorLayerConfig
-  | TypeVectorHeatmapLayerConfig
-  | TypeVectorTileLayerConfig
-  | TypeVectorLayerConfig
-  | TypeImageLayerConfig
-  | TypeTileLayerConfig
-  | TypeGeoCoreLayerConfig;
+export type TypeLayerEntryConfig =
+  | TypeBaseVectorLayerEntryConfig
+  | TypeVectorHeatmapLayerEntryConfig
+  | TypeVectorTileLayerEntryConfig
+  | TypeVectorLayerEntryConfig
+  | TypeImageLayerEntryConfig
+  | TypeTileLayerEntryConfig
+  | TypeGeoCoreLayerEntryConfig;
 
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
  */
-export type TypeArrayOfLayerConfig = TypeLayerConfig[];
+export type TypeArrayOfLayerEntryConfig = TypeLayerEntryConfig[];

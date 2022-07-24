@@ -27,8 +27,7 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
-import { TypeLanguages, TypeLocalizedLanguages, TypeMapSchemaProps } from './map-types';
-import { TypeArrayOfLayerConfig } from '../layer/geoview-layers/schema-types';
+import { TypeGeoviewLayerConfig, TypeLanguages, TypeLocalizedLanguages, TypeMapSchemaProps, TypeViewSettings } from './map-types';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -65,7 +64,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
-  language: TypeLocalizedLanguages;
+  languages: TypeLocalizedLanguages[] = [];
 
   // get used projection
   currentProjection: number;
@@ -89,18 +88,18 @@ export class MapViewer {
    * @param {i18n} i18instance language instance
    */
   constructor(mapProps: TypeMapSchemaProps, i18instance: i18n) {
-    this.id = mapProps.id;
+    this.id = mapProps.mapId!;
 
     // add map viewer instance to api
     api.maps[this.id] = this;
 
     this.mapProps = mapProps;
 
-    this.language = mapProps.language;
-    this.currentProjection = mapProps.map.view.projection;
+    this.languages = mapProps.languages;
+    this.currentProjection = mapProps.map.viewSettings.projection;
     this.i18nInstance = i18instance;
-    this.currentZoom = mapProps.map.view.zoom;
-    this.currentPosition = [mapProps.map.view.center[0], mapProps.map.view.center[1]];
+    this.currentZoom = mapProps.map.viewSettings.zoom;
+    this.currentPosition = [mapProps.map.viewSettings.center[0], mapProps.map.viewSettings.center[1]];
 
     this.appBarButtons = new AppbarButtons(this.id);
     this.navBarButtons = new NavbarButtons(this.id);
@@ -108,7 +107,12 @@ export class MapViewer {
     this.modal = new ModalApi(this.id);
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.view.projection, this.id);
+    this.basemap = new Basemap(
+      this.mapProps.map.basemapOptions,
+      this.mapProps.languages[0],
+      this.mapProps.map.viewSettings.projection,
+      this.id
+    );
   }
 
   /**
@@ -121,7 +125,7 @@ export class MapViewer {
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.id, this.mapProps.map.layers);
+    this.layer = new Layer(this.id, this.mapProps.map.geoviewLayerList);
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -224,21 +228,21 @@ export class MapViewer {
   };
 
   /**
-   * Update the map view
+   * Update the map viewSettings
    *
-   * @param {TypeMapView} mapView map view object
+   * @param {TypeMapView} mapView map viewSettings object
    */
-  setView = (mapView: TypeMapView): void => {
+  setView = (mapView: TypeViewSettings): void => {
     const projection = mapView.projection ? mapView.projection : api.projection.projections[this.currentProjection];
     this.map.setView(
       new View({
-        projection,
-        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.view.zoom,
+        projection: `EPSG:${projection}`,
+        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.viewSettings.zoom,
         center: mapView.center
-          ? fromLonLat([mapView.center[0], mapView.center[1]], projection)
-          : fromLonLat([this.mapProps.map.view.center[0], this.mapProps.map.view.center[1]], projection),
+          ? fromLonLat([mapView.center[0], mapView.center[1]], `EPSG:${projection}`)
+          : fromLonLat([this.mapProps.map.viewSettings.center[0], this.mapProps.map.viewSettings.center[1]], `EPSG:${projection}`),
         extent: mapView.extent,
-        resolution: mapView.resolution,
+        // resolution: mapView.resolution,
         minZoom: mapView.minZoom,
         maxZoom: mapView.maxZoom,
       })
@@ -246,9 +250,9 @@ export class MapViewer {
   };
 
   /**
-   * Get the map view
+   * Get the map viewSettings
    *
-   * @returns the map view
+   * @returns the map viewSettings
    */
   getView = (): View => {
     return this.map.getView();
@@ -267,7 +271,7 @@ export class MapViewer {
    * @returns {TypeLanguages} returns the language code from localized language. Ex: en, fr
    */
   getLanguageCode = (): TypeLanguages => {
-    return this.language.split('-')[0] as TypeLanguages;
+    return this.languages[0].split('-')[0] as TypeLanguages;
   };
 
   /**
@@ -276,13 +280,13 @@ export class MapViewer {
    * @param {string} language the language to use (en-CA, fr-CA)
    * @param {TypeGeoviewLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeArrayOfLayerConfig): void => {
+  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeGeoviewLayerConfig[]): void => {
     const updatedConfig = { ...this.mapProps };
 
-    updatedConfig.language = language;
+    updatedConfig.languages = [language];
 
     if (layers && layers.length > 0) {
-      updatedConfig.map.layers = updatedConfig.map.layers?.concat(layers);
+      updatedConfig.map.geoviewLayerList = updatedConfig.map.geoviewLayerList?.concat(layers);
     }
 
     // emit an event to reload the map to change the language

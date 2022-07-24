@@ -1,7 +1,7 @@
 import { TypeLangString } from '../../core/types/global-types';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
 import { TypeGeoViewLayers } from '../layer/geoview-layers/abstract-geoview-layers';
-import { TypeArrayOfLayerConfig } from '../layer/geoview-layers/schema-types';
+import { TypeArrayOfLayerEntryConfig } from '../layer/geoview-layers/schema-types';
 
 /** ******************************************************************************************************************************
  *  Definition of the map properties type according to what is specified in the schema.
@@ -74,9 +74,9 @@ export type TypeGeoviewLayerConfig = {
   /** The GeoView layer access path (English/French). */
   accessPath: TypeLangString;
   /** Type of GeoView layer. */
-  layerType: TypeGeoViewLayers;
+  geoviewLayerType: TypeGeoViewLayers;
   /** The layer entries to use from the GeoView layer. */
-  layerEntries?: TypeArrayOfLayerConfig;
+  layerEntries?: TypeArrayOfLayerEntryConfig;
 };
 
 /** ******************************************************************************************************************************

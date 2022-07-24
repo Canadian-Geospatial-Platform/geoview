@@ -10,9 +10,10 @@ import {
   TypeBaseRasterLayer,
   TypeGeoviewLayerConfig,
   TypeGeoViewLayers,
-  TypeLayerConfig,
+  TypeLayerEntryConfig,
   TypeSourceTileInitialConfig,
-  TypeTileLayerConfig,
+  TypeTileLayerEntryConfig,
+  AbstractGeoViewRaster,
 } from '../../../../core/types/cgpv-types';
 
 // TODO: Implement method to validate XYZ tile service
@@ -27,16 +28,17 @@ export interface TypeSourceImageXYZTilesInitialConfig extends Omit<TypeSourceTil
   sourceType: 'XYZ';
 }
 
-export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerConfig, 'source'> {
+export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
   source: TypeSourceImageXYZTilesInitialConfig;
 }
 
-export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
+export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+  geoviewLayerType: 'xyzTiles';
   layerEntries?: TypeXYZTilesLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the layerType attribute of the
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -45,7 +47,7 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'layerE
  * @return {boolean} true if the type ascention is valid
  */
 export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.XYZ_TILES;
+  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 /** *****************************************************************************************************************************
@@ -62,16 +64,18 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerConfig as a TypeXYZTilesLayerEntryConfig if the layerType attribute of the
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerParent attribute is XYZ_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
- * @param {TypeLayerConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerConfig): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.XYZ_TILES;
+export const geoviewEntryIsXYZTiles = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
+  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 // ******************************************************************************************************************************
@@ -83,7 +87,7 @@ export const geoviewEntryIsXYZTiles = (verifyIfGeoViewEntry: TypeLayerConfig): v
  * @class XYZTiles
  */
 // ******************************************************************************************************************************
-export class XYZTiles extends AbstractGeoViewLayer {
+export class XYZTiles extends AbstractGeoViewRaster {
   // layer
   layer!: TileLayer<XYZ>;
 
@@ -142,10 +146,10 @@ export class XYZTiles extends AbstractGeoViewLayer {
   /** ****************************************************************************************************************************
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseRasterLayer): void {
+  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console
@@ -155,10 +159,10 @@ export class XYZTiles extends AbstractGeoViewLayer {
   /** ****************************************************************************************************************************
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseRasterLayer): void {
+  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console

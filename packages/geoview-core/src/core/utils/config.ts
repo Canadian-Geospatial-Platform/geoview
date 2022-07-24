@@ -53,7 +53,7 @@ import {
 } from '../../geo/map/map-types';
 import { TypeBasemapOptions } from '../../geo/layer/basemap/basemap-types';
 import {
-  TypeImageLayerConfig,
+  TypeImageLayerEntryConfig,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageWmsInitialConfig,
 } from '../../geo/layer/geoview-layers/schema-types';
@@ -158,7 +158,7 @@ export class Config {
    * Generate layer configs from uuid request result
    *
    * @param {TypeJsonObject} result the uuid request result
-   * @returns {TypeArrayOfLayerConfig} layers parsed from uuid result
+   * @returns {TypeArrayOfLayerEntryConfig} layers parsed from uuid result
    */
   static getLayerConfigFromUUID = (result: AxiosResponse<TypeJsonObject>): TypeGeoviewLayerConfig[] => {
     const layers: TypeGeoviewLayerConfig[] = [];
@@ -171,11 +171,11 @@ export class Config {
           const layer = data.layers[0];
 
           if (layer) {
-            const { layerType, layerEntries, name, url, id } = layer;
+            const { geoviewLayerType, layerEntries, name, url, id } = layer;
 
             const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
-            if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
+            if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
               const layerConfig: TypeEsriDynamicLayerConfig = {
                 id,
                 name: {
@@ -186,14 +186,14 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
                 layerEntries: (layerEntries as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.index },
-                    layerType: 'image',
+                    layerEntryType: 'image',
                     source: { sourceType: 'ESRI' } as TypeSourceImageEsriInitialConfig,
-                  } as TypeImageLayerConfig;
+                  } as TypeImageLayerEntryConfig;
                 }),
               } as TypeEsriDynamicLayerConfig;
               layers.push(layerConfig);
@@ -210,11 +210,11 @@ export class Config {
                     en: featureUrl,
                     fr: featureUrl,
                   },
-                  layerType: CONST_LAYER_TYPES.ESRI_FEATURE,
+                  geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
                 } as TypeEsriFeatureLayerConfig;
                 layers.push(layerConfig);
               }
-            } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            } else if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
               const layerConfig: TypeEsriFeatureLayerConfig = {
                 id,
                 name: {
@@ -225,10 +225,10 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
               } as TypeEsriFeatureLayerConfig;
               layers.push(layerConfig);
-            } else if (layerType === CONST_LAYER_TYPES.WMS) {
+            } else if (geoviewLayerType === CONST_LAYER_TYPES.WMS) {
               const layerConfig: TypeWMSLayerConfig = {
                 id,
                 name: {
@@ -239,18 +239,18 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
                 layerEntries: (layerEntries as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.id },
-                    layerType: 'image',
+                    layerEntryType: 'image',
                     source: { sourceType: 'WMS' } as TypeSourceImageWmsInitialConfig,
-                  } as TypeImageLayerConfig;
+                  } as TypeImageLayerEntryConfig;
                 }),
               } as TypeWMSLayerConfig;
               layers.push(layerConfig);
-            } else if (layerType === CONST_LAYER_TYPES.WFS) {
+            } else if (geoviewLayerType === CONST_LAYER_TYPES.WFS) {
               const layerConfig: TypeWFSLayerConfig = {
                 id,
                 name: {
@@ -261,18 +261,18 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
                 layerEntries: (layerEntries as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.id },
-                    layerType: 'vector',
+                    layerEntryType: 'vector',
                     source: { format: 'WFS' } as TypeSourceWFSVectorInitialConfig,
                   } as TypeWFSLayerEntryConfig;
                 }),
               } as TypeWFSLayerConfig;
               layers.push(layerConfig);
-            } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
+            } else if (geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE) {
               const layerConfig: TypeOgcFeatureLayerConfig = {
                 id,
                 name: {
@@ -283,18 +283,18 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
                 layerEntries: (layerEntries as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.id },
-                    layerType: 'vector',
+                    layerEntryType: 'vector',
                     source: { format: 'featureAPI' } as TypeSourceOgcFeatureInitialConfig,
                   } as TypeOgcFeatureLayerEntryConfig;
                 }),
               } as TypeOgcFeatureLayerConfig;
               layers.push(layerConfig);
-            } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
+            } else if (geoviewLayerType === CONST_LAYER_TYPES.GEOJSON) {
               const layerConfig: TypeGeoJSONLayerConfig = {
                 id,
                 name: {
@@ -305,10 +305,10 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
               } as TypeGeoJSONLayerConfig;
               layers.push(layerConfig);
-            } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
+            } else if (geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) {
               const layerConfig: TypeXYZTilesConfig = {
                 id,
                 name: {
@@ -319,7 +319,7 @@ export class Config {
                   en: url,
                   fr: url,
                 },
-                layerType,
+                geoviewLayerType,
               } as TypeXYZTilesConfig;
               layers.push(layerConfig);
             }

@@ -1,5 +1,3 @@
-import VectorLayer from 'ol/layer/Vector';
-import { Vector as VectorSource } from 'ol/source';
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
@@ -9,8 +7,8 @@ import {
   TypeJsonObject,
   TypeGeoviewLayerConfig,
   TypeVectorSourceInitialConfig,
-  TypeVectorLayerConfig,
-  TypeLayerConfig,
+  TypeVectorLayerEntryConfig,
+  TypeLayerEntryConfig,
   AbstractGeoViewVector,
   TypeBaseVectorLayer,
   TypeJsonArray,
@@ -102,26 +100,26 @@ export interface TypeSourceWFSVectorInitialConfig extends Omit<TypeVectorSourceI
   format: 'WFS';
 }
 
-export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerConfig, 'source' | 'layerType'> {
-  layerType: 'vector';
+export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source' | 'layerEntryType'> {
+  layerEntryType: 'vector';
   source: TypeSourceWFSVectorInitialConfig;
 }
 
-export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
+export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType' | 'geoviewLayerType'> {
+  geoviewLayerType: 'ogcWfs';
   layerEntries?: TypeWFSLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the layerType attribute of theverifyIfLayer
- * parameter is WFS. The type ascention
- * applies only to the true block of the if clause that use this function.
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
 export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.WFS;
+  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 /** *****************************************************************************************************************************
@@ -137,16 +135,16 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerConfig as a TypeWFSLayerEntryConfig if the layerType attribute of the
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWFSLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerParent attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
- * @param {TypeLayerConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerConfig): verifyIfGeoViewEntry is TypeWFSLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.WFS;
+export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWFSLayerEntryConfig => {
+  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 // ******************************************************************************************************************************
@@ -256,10 +254,10 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseVectorLayer): void {
+  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console
@@ -269,10 +267,10 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseVectorLayer): void {
+  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console

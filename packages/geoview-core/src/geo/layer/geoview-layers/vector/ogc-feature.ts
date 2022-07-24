@@ -8,9 +8,9 @@ import {
   CONST_LAYER_TYPES,
   TypeJsonObject,
   TypeGeoviewLayerConfig,
-  TypeVectorLayerConfig,
+  TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
-  TypeLayerConfig,
+  TypeLayerEntryConfig,
   AbstractGeoViewVector,
   TypeBaseVectorLayer,
 } from '../../../../core/types/cgpv-types';
@@ -69,16 +69,17 @@ export interface TypeSourceOgcFeatureInitialConfig extends Omit<TypeVectorSource
   format: 'featureAPI';
 }
 
-export interface TypeOgcFeatureLayerEntryConfig extends Omit<TypeVectorLayerConfig, 'source'> {
+export interface TypeOgcFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
   source: TypeSourceOgcFeatureInitialConfig;
 }
 
-export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries'> {
+export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+  geoviewLayerType: 'ogcFeature';
   layerEntries?: TypeOgcFeatureLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the layerType attribute of the
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -87,7 +88,7 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
  * @return {boolean} true if the type ascention is valid
  */
 export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.OGC_FEATURE;
+  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 /** *****************************************************************************************************************************
@@ -104,16 +105,18 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerConfig as a TypeOgcFeatureLayerEntryConfig if the layerType attribute of the
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerParent attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
- * @param {TypeLayerConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewEntryIsOgcFeature = (verifyIfGeoViewEntry: TypeLayerConfig): verifyIfGeoViewEntry is TypeOgcFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.layerType === CONST_LAYER_TYPES.OGC_FEATURE;
+export const geoviewEntryIsOgcFeature = (
+  verifyIfGeoViewEntry: TypeLayerEntryConfig
+): verifyIfGeoViewEntry is TypeOgcFeatureLayerEntryConfig => {
+  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 // ******************************************************************************************************************************
@@ -176,10 +179,10 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseVectorLayer): void {
+  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console
@@ -189,10 +192,10 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerConfig, rasterLayer: TypeBaseVectorLayer): void {
+  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
     console.log('This method needs to be coded!');
     // eslint-disable-next-line no-console

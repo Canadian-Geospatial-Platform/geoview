@@ -606,12 +606,12 @@
       "additionalProperties": false
     },
 
-    "vectorHeatmapLayerConfig": {
+    "vectorHeatmapLayerEntryConfig": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerType": {
+        "layerEntryType": {
           "enum": ["vectorHeatmap"],
           "description": "Layer for rendering vector data as a heatmap. Use points as source. If another geometry is provided, it will be converted to points geometry."
         },
@@ -659,13 +659,13 @@
       "additionalProperties": false
     },
 
-    "vectorTileLayerConfig": {
+    "vectorTileLayerEntryConfig": {
       "type": "object",
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerType": {
+        "layerEntryType": {
           "enum": ["vectorTile"],
           "description": "Layer for vector tile data that is rendered client-side."
         },
@@ -754,12 +754,12 @@
       "additionalProperties": false
     },
 
-    "imageLayerConfig": {
+    "imageLayerEntryConfig": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerType": {
+        "layerEntryType": {
           "enum": ["image"],
           "description": "Server-rendered images that are available for arbitrary extents and resolutions like OGC WMS, ESRI MapServer, ESRI ImageServer, ..."
         },
@@ -769,12 +769,12 @@
       "additionalProperties": false
     },
 
-    "tileLayerConfig": {
+    "tileLayerEntryConfig": {
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerType": {
+        "layerEntryType": {
           "enum": ["tile"],
           "description": "Layer sources that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions like OGC WMTS, GeoTIFF, XYZ, ESRI TileServer, ..."
         },
@@ -784,7 +784,7 @@
       "additionalProperties": false
     },
 
-    "geoCoreLayerConfig": {
+    "geoCoreLayerEntryConfig": {
       "type": "object",
       "description": "Layer where configration is extracted by a configuration snippet stored on a server. The server configuration will handle bilangual informations.",
       "properties": {
@@ -819,7 +819,7 @@
           "type": "string",
           "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView API)."
         },
-        "layerType": {
+        "layerEntryType": {
           "enum": ["geoCore"]
         }
       },
@@ -827,23 +827,23 @@
       "additionalProperties": false
     },
 
-    "layerConfig": {
+    "layerEntryConfig": {
       "type": "object",
       "additionalProperties": false,
       "oneOf": [
-        { "$ref": "#/definitions/vectorHeatmapLayerConfig" },
-        { "$ref": "#/definitions/vectorTileLayerConfig" },
+        { "$ref": "#/definitions/vectorHeatmapLayerEntryConfig" },
+        { "$ref": "#/definitions/vectorTileLayerEntryConfig" },
         { "$ref": "#/definitions/vectorLayerConfig" },
-        { "$ref": "#/definitions/imageLayerConfig" },
-        { "$ref": "#/definitions/tileLayerConfig" },
-        { "$ref": "#/definitions/geoCoreLayerConfig" }
+        { "$ref": "#/definitions/imageLayerEntryConfig" },
+        { "$ref": "#/definitions/tileLayerEntryConfig" },
+        { "$ref": "#/definitions/geoCoreLayerEntryConfig" }
       ]
     },
 
     "arrayOfLayerConfig": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/layerConfig"
+        "$ref": "#/definitions/layerEntryConfig"
       },
       "minItems": 0
     }
@@ -923,7 +923,7 @@
                 ],
                 "additionalProperties": false
                     },
-              "layerType": {
+              "geoviewLayerType": {
                 "type": "string",
                 "items": {
                   "enum": [

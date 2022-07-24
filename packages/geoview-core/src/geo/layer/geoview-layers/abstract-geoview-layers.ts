@@ -1,7 +1,9 @@
+import BaseLayer from 'ol/layer/Base';
+
 import { generateId } from '../../../core/utils/utilities';
-import { TypeArrayOfLayerConfig } from './schema-types';
 import { TypeLangString } from '../../../core/types/global-types';
 import { TypeGeoviewLayerConfig } from '../../map/map-types';
+import { TypeArrayOfLayerEntryConfig } from './schema-types';
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -75,7 +77,16 @@ export abstract class AbstractGeoViewLayer {
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
    * configuration does not provide a value, we use an empty array instead of an undefined attribute.
    */
-  layerEntries: TypeArrayOfLayerConfig = [];
+  layerEntries: TypeArrayOfLayerEntryConfig = [];
+
+  /** Name of layerEntries that did not load. */
+  layerLoadError: string[] = [];
+
+  /**
+   * The vector or raster layer structure to be displayed for this GeoView class. Initial value is null indicating that the layers
+   * have not been created.
+   */
+  gvLayers: BaseLayer | null = null;
 
   /**
    * The class constructor saves parameters and common configuration parameters in attributes.

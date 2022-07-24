@@ -15,7 +15,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseVectorLayerConfig, TypeLayerConfig } from '../schema-types';
+import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig } from '../schema-types';
 import { api, showMessage, TypeJsonObject } from '../../../../core/types/cgpv-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
@@ -31,24 +31,18 @@ export type TypeBaseVectorLayer = BaseLayer; // TypeVectorLayerGroup | TypeVecto
 /** ******************************************************************************************************************************
  * The AbstractGeoViewVector class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView vector layers. In addition to the components of the parent class, there is an attribute named
- * gvVectorLayers where the vector elements of the class will be kept.
+ * gvLayers where the vector elements of the class will be kept.
  *
- * The gvVectorLayers attribute has a hierarchical structure. Its data type is TypetBaseVectorLayer. Subclasses of this type
+ * The gvLayers attribute has a hierarchical structure. Its data type is TypetBaseVectorLayer. Subclasses of this type
  * are TypeVectorLayerGroup and TypeVectorLayer. The TypeVectorLayerGroup is a collection of TypetBaseVectorLayer. It is
  * important to note that a TypetBaseVectorLayer attribute can polymorphically refer to a TypeVectorLayerGroup or a
  * TypeVectorLayer. Here, we must not confuse instantiation and declaration of a polymorphic attribute.
  *
- * All leaves of the structure stored in the gvVectorLayers attribute must be of type TypeVectorLayer. This is where the
+ * All leaves of the structure stored in the gvLayers attribute must be of type TypeVectorLayer. This is where the
  * features are placed and can be considered as a feature group.
  */
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
-  /**
-   * The vector layer structure to be displayed for this GeoView vector class. Initial value is null indicating that the layers
-   * have not been created.
-   */
-  gvVectorLayers: TypeBaseVectorLayer | null = null;
-
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
 
@@ -58,7 +52,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * This method is used to create the layers specified in the entries attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
-   * Its code is the same for all child classes. It must first validate that the gvVectorLayers attribute is null indicating
+   * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
    * that the method has never been called before. If this is not the case, an error message must be sent. Then, it calls the
    * abstract method getAdditionalServiceDefinition. If the GeoView layer does not have a service definition, this method does
    * nothing. For example, when the child is a WFS service, this method executes the GetCapabilities request and saves the
@@ -76,24 +70,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * details-panel.
    */
   createGeoViewVectorLayers() {
-    if (this.gvVectorLayers === null && typeof this.layerEntries !== 'undefined') {
+    if (this.gvLayers === null && typeof this.layerEntries !== 'undefined') {
       this.getAdditionalServiceDefinition();
       if (this.layerEntries.length === 1) {
-        this.gvVectorLayers = this.processOneLayerEntry(this.layerEntries[0] as TypeBaseVectorLayerConfig);
-        if (this.gvVectorLayers) {
-          this.setRenderer(this.layerEntries[0], this.gvVectorLayers);
-          this.registerToPanels(this.layerEntries[0], this.gvVectorLayers);
+        this.gvLayers = this.processOneLayerEntry(this.layerEntries[0] as TypeBaseVectorLayerEntryConfig);
+        if (this.gvLayers) {
+          this.setRenderer(this.layerEntries[0], this.gvLayers);
+          this.registerToPanels(this.layerEntries[0], this.gvLayers);
         }
       } else {
-        this.gvVectorLayers = new LayerGroup({
+        this.gvLayers = new LayerGroup({
           layers: new Collection(),
         });
-        this.layerEntries.forEach((layerEntry: TypeLayerConfig) => {
-          const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerConfig);
+        this.layerEntries.forEach((layerEntry: TypeLayerEntryConfig) => {
+          const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig);
           if (vectorLayer) {
             this.setRenderer(layerEntry, vectorLayer);
             this.registerToPanels(layerEntry, vectorLayer);
-            (this.gvVectorLayers as LayerGroup).getLayers().push(vectorLayer);
+            (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
           }
         });
       }
@@ -109,11 +103,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * This method creates a GeoView layer using the definition provided in the layerEntry parameter.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseVectorLayer} The GeoView vector layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeBaseVectorLayerConfig): TypeBaseVectorLayer | null {
+  processOneLayerEntry(layerEntry: TypeBaseVectorLayerEntryConfig): TypeBaseVectorLayer | null {
     let vectorLayer: VectorLayer<VectorSource> | null = null;
     this.createLayer(layerEntry).then((result) => {
       vectorLayer = result;
@@ -121,7 +115,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return vectorLayer;
   }
 
-  private async createLayer(layerEntry: TypeBaseVectorLayerConfig): Promise<VectorLayer<VectorSource> | null> {
+  private async createLayer(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<VectorLayer<VectorSource> | null> {
     const promisedVectorLayer = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
       let serviceUrl = this.accessPath[api.map(this.mapId).getLanguageCode()];
       serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
@@ -138,7 +132,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return promisedVectorLayer;
   }
 
-  private createVectorSource(layerEntry: TypeBaseVectorLayerConfig, response: TypeJsonObject): VectorSource<Geometry> {
+  private createVectorSource(layerEntry: TypeBaseVectorLayerEntryConfig, response: TypeJsonObject): VectorSource<Geometry> {
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Geometry>;
     const sourceOptions: SourceOptions = {};
@@ -193,7 +187,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return vectorSource;
   }
 
-  private createVectorLayer(layerEntry: TypeBaseVectorLayerConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+  private createVectorLayer(layerEntry: TypeBaseVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig: layerEntry },
       source: vectorSource,
@@ -220,16 +214,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(layerEntry: TypeLayerConfig, vectorLayer: TypeBaseVectorLayer): void;
+  abstract setRenderer(layerEntry: TypeLayerEntryConfig, vectorLayer: TypeBaseVectorLayer): void;
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerConfig} layerEntry Information needed to create the renderer.
+   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer who wants to register.
    */
-  abstract registerToPanels(layerEntry: TypeLayerConfig, vectorLayer: TypeBaseVectorLayer): void;
+  abstract registerToPanels(layerEntry: TypeLayerEntryConfig, vectorLayer: TypeBaseVectorLayer): void;
 }
