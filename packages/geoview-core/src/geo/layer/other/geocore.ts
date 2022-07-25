@@ -49,7 +49,7 @@ export class GeoCore {
    * @return {Promise<TypeGeoviewLayerConfig | null>} layers to add to the map
    */
   async createLayer(layerConfig: TypeGeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig | null> {
-    const url = layerConfig.accessPath || `${catalogUrl}/${api.map(this.mapId).language.split('-')[0]}`;
+    const url = layerConfig.accessPath || `${catalogUrl}/${api.map(this.mapId).languages[0].split('-')[0]}`;
 
     const requestUrl = `${url}/${layerConfig.id}`;
 

@@ -18,7 +18,7 @@ export type TypeMapSchemaProps = {
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
   /** North arrow properties. */
-  // components?: TypeNorthArrowProps; // ! Not defined in the schema
+  // components?: TypeNorthArrowProps; // ! Question: is it normal that this attribute is not defined in the schema?
   /** Map components. */
   components?: TypeMapComponents;
   /** List of core packages. */
@@ -72,7 +72,7 @@ export type TypeGeoviewLayerConfig = {
    */
   name: TypeLangString;
   /** The GeoView layer access path (English/French). */
-  accessPath: TypeLangString;
+  accessPath: TypeLangString; // ! Question: Is it normal that we have an attribute accessPath here and also in the layerEntry.source?
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoViewLayers;
   /** The layer entries to use from the GeoView layer. */

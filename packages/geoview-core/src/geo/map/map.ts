@@ -64,6 +64,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
+  // ! Question: is it normal that this attribute previouly defined as language: string; is now languages: TypeLocalizedLanguages[]?
   languages: TypeLocalizedLanguages[] = [];
 
   // get used projection

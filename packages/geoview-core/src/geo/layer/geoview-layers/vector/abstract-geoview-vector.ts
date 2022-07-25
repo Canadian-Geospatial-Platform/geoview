@@ -50,7 +50,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   iconToUse: StyleIcon = blueCircleIcon;
 
   /**
-   * This method is used to create the layers specified in the entries attribute inherited from its parent.
+   * This method is used to create the layers specified in the layerEntries attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
    * that the method has never been called before. If this is not the case, an error message must be sent. Then, it calls the
@@ -58,25 +58,27 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * nothing. For example, when the child is a WFS service, this method executes the GetCapabilities request and saves the
    * result in an attribute of the class.
    *
-   * The next operation is to instantiate each layer identified by the entries attribute. This is done using the abstract method
+   * The next operation is to instantiate each layer identified by the layerEntries attribute. This is done using the abstract method
    * processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the renderers can
    * come from the configuration of the GeoView layer or from the information saved by the method getAdditionalServiceDefinition,
    * priority being given to the first of the two. This operation is done by the abstract method setRenderer.
    * Note that if field aliases are used, they will be set at the same time as the renderer.
    *
-   * Finally, the layer registers to all panels that offer this possibility. For example, if the layer is query able, it could
+   * Finally, the layer registers to all panels that offer this possibility. For example, if the layer is queryable, it could
    * subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer to return the
    * descriptive information of all the features in a tolerance radius. This information will be used to populate the
    * details-panel.
    */
   createGeoViewVectorLayers() {
-    if (this.gvLayers === null && typeof this.layerEntries !== 'undefined') {
+    if (this.gvLayers === null && this.layerEntries.length !== 0) {
       this.getAdditionalServiceDefinition();
       if (this.layerEntries.length === 1) {
         this.gvLayers = this.processOneLayerEntry(this.layerEntries[0] as TypeBaseVectorLayerEntryConfig);
-        if (this.gvLayers) {
+        if (this.gvLayers !== null) {
           this.setRenderer(this.layerEntries[0], this.gvLayers);
           this.registerToPanels(this.layerEntries[0], this.gvLayers);
+        } else {
+          this.layerLoadError.push(this.layerEntries[0].info.layerId);
         }
       } else {
         this.gvLayers = new LayerGroup({
@@ -84,10 +86,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         });
         this.layerEntries.forEach((layerEntry: TypeLayerEntryConfig) => {
           const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig);
-          if (vectorLayer) {
+          if (vectorLayer !== null) {
             this.setRenderer(layerEntry, vectorLayer);
             this.registerToPanels(layerEntry, vectorLayer);
             (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
+          } else {
+            this.layerLoadError.push(this.layerEntries[0].info.layerId);
           }
         });
       }
