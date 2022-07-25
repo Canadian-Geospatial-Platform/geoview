@@ -14,10 +14,9 @@ import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { Config } from '../../core/utils/config';
-import { TypeHTMLElement } from '../../core/types/cgpv-types';
 
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
@@ -28,6 +27,7 @@ import { mapComponentPayload } from '../../api/events/payloads/map-component-pay
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
 import { TypeGeoviewLayerConfig, TypeLanguages, TypeLocalizedLanguages, TypeMapSchemaProps, TypeViewSettings } from './map-types';
+import { TypeHTMLElement } from '../../core/types/global-types';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;

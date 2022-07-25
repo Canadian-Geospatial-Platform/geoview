@@ -1,11 +1,6 @@
-import {
-  AbstractGeoViewLayer,
-  Coordinate,
-  TypeButtonPanel,
-  TypeJsonArray,
-  TypeJsonObject,
-  TypeJsonValue,
-} from 'geoview-core/src/core/types/cgpv-types';
+import { Coordinate, TypeJsonArray, TypeJsonObject, TypeJsonValue } from 'geoview-core/src/core/types/global-types';
+import { AbstractGeoViewLayer } from 'geoview-core/src/geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeButtonPanel } from 'geoview-core/src/ui/panel/panel-types';
 
 export type TypeLayersEntry = {
   layerData: TypeJsonArray;

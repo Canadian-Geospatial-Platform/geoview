@@ -2,11 +2,11 @@ import axios from 'axios';
 
 import { WMSCapabilities } from 'ol/format';
 
-import { Cast, TypeJsonObject } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonObject } from '../../core/types/global-types';
 import { xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
 
 /**

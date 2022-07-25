@@ -1,8 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { TypeBasemapLayer } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeBasemapLayer } from '../../../geo/layer/basemap/basemap-types';
 
 /** Valid events that can create BasemapLayerArrayPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE];

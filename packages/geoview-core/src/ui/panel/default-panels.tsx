@@ -1,7 +1,6 @@
 import Typography from '@mui/material/Typography';
 import HelpIcon from '@mui/icons-material/Help';
-
-import { TypeButtonPanelProps } from '../../core/types/cgpv-types';
+import { TypeButtonPanelProps } from './panel-types';
 
 /**
  * Create a default button panel for the appbar

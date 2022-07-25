@@ -9,9 +9,9 @@ import { useSnackbar } from 'notistack';
 import { MapContext } from '../../core/app-start';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/global-types';
 import { payloadIsASnackbarMessage } from '../../api/events/payloads/snackbar-message-payload';
 
 /**

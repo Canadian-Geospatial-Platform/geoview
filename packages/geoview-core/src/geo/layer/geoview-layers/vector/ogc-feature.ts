@@ -3,20 +3,14 @@ import axios from 'axios';
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
-import {
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  TypeJsonObject,
-  TypeGeoviewLayerConfig,
-  TypeVectorLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
-  TypeLayerEntryConfig,
-  AbstractGeoViewVector,
-  TypeBaseVectorLayer,
-} from '../../../../core/types/cgpv-types';
-import { setAlphaColor } from '../../../../core/utils/utilities';
-
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
+import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig } from '../schema-types';
+import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+
+import { setAlphaColor } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice

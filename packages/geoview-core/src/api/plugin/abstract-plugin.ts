@@ -1,4 +1,4 @@
-import { TypeJsonObject } from '../../core/types/cgpv-types';
+import { TypeJsonObject } from '../../core/types/global-types';
 
 /** ******************************************************************************************************************************
  * interface used by all plugins to define their options.

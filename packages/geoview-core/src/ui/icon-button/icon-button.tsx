@@ -3,8 +3,7 @@ import React from 'react';
 import MaterialIconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
-
-import { TypeIconButtonProps } from '../../core/types/cgpv-types';
+import { TypeIconButtonProps } from './icon-button-types';
 
 /**
  * Create a customized Material UI Icon Button

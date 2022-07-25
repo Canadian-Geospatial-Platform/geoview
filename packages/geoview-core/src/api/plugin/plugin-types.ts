@@ -1,8 +1,8 @@
+import { AnySchemaObject } from 'ajv';
 import React from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { TypeJsonObject, TypeJsonValue } from '../../core/types/global-types';
 import { API } from '../api';
-import { AnySchemaObject } from '../../core/types/cgpv-types';
 
 /** ******************************************************************************************************************************
  * interface used when creating the actual plugin.

@@ -2,9 +2,8 @@ import { Feature } from 'ol';
 
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { CONST_VECTOR_TYPES, TypeOfVector } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { CONST_VECTOR_TYPES, TypeOfVector } from '../../../geo/layer/vector/vector-types';
 
 /** Valid events that can create VectorPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED];

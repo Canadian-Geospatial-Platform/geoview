@@ -16,12 +16,13 @@ import * as UI from './ui';
 import AppStart from './core/app-start';
 import * as types from './core/types/cgpv-types';
 
-import { EVENT_NAMES } from './api/events/event';
+import { EVENT_NAMES } from './api/events/event-types';
 import { API } from './api/api';
 
 import { Config } from './core/utils/config';
 import { payloadIsAMapConfig } from './api/events/payloads/map-config-payload';
 
+// ! Question: Do we need to export cgpv-types? It is accessible using cgpv.types.
 export * from './core/types/cgpv-types';
 export const api = new API();
 

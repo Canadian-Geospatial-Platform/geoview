@@ -1,8 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { TypeMapSchemaProps } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeMapSchemaProps } from '../../../geo/map/map-types';
 
 /** Valid events that can create MapConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_RELOAD];

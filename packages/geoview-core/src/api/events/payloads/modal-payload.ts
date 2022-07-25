@@ -1,6 +1,6 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
+import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create ModalPayload */
 const validEvents: EventStringId[] = [

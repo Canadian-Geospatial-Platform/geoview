@@ -1,12 +1,15 @@
 import axios from 'axios';
 
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { api } from '../../../app';
 
-import { CONST_LAYER_TYPES, TypeGeoCoreLayerEntryConfig, TypeGeoviewLayerConfig, TypeJsonObject } from '../../../core/types/cgpv-types';
+import { TypeJsonObject } from '../../../core/types/global-types';
 import { catalogUrl, Config } from '../../../core/utils/config';
+import { TypeGeoviewLayerConfig } from '../../map/map-types';
+import { TypeGeoCoreLayerEntryConfig } from '../geoview-layers/schema-types';
+import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
   geoviewLayerType: 'geoCore';

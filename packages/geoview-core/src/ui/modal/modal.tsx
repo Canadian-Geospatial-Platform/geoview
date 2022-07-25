@@ -14,10 +14,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
-import { toJsonObject } from '../../core/types/cgpv-types';
+import { toJsonObject } from '../../core/types/global-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { api } from '../../app';
 
 import { TypeModalProps } from '.';

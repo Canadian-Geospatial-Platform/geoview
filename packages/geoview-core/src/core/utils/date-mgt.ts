@@ -3,10 +3,9 @@ import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
-import { TypeLocalizedLanguages } from '../types/cgpv-types';
-
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
+import { TypeLocalizedLanguages } from '../../geo/map/map-types';
 
 /** ******************************************************************************************************************************
  * constant/interface used to define the precision for date object (yyyy, mm, dd).

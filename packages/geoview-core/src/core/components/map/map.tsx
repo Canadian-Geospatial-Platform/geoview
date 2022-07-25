@@ -17,17 +17,17 @@ import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { generateId } from '../../utils/utilities';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { TypeMapSchemaProps } from '../../types/cgpv-types';
 import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
+import { TypeMapSchemaProps } from '../../../geo/map/map-types';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {

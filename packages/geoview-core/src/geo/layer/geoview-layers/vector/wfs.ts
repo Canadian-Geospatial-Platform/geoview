@@ -1,21 +1,14 @@
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
-import {
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  TypeJsonObject,
-  TypeGeoviewLayerConfig,
-  TypeVectorSourceInitialConfig,
-  TypeVectorLayerEntryConfig,
-  TypeLayerEntryConfig,
-  AbstractGeoViewVector,
-  TypeBaseVectorLayer,
-  TypeJsonArray,
-} from '../../../../core/types/cgpv-types';
-import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
-
+import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
+import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig } from '../schema-types';
+import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+
+import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice

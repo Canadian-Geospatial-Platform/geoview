@@ -6,14 +6,14 @@ import TileGrid from 'ol/tilegrid/TileGrid';
 
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
-import { TypeValidProjectionCodes, TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types/cgpv-types';
+import { TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types/global-types';
 
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
-import { TypeLocalizedLanguages } from '../../map/map-types';
+import { TypeLocalizedLanguages, TypeValidProjectionCodes } from '../../map/map-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and

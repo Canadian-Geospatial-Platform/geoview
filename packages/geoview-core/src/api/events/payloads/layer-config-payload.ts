@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-import { TypeGeoviewLayerConfig } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeGeoviewLayerConfig } from '../../../geo/map/map-types';
 
 /** Valid events that can create LayerConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_LAYER_ADD];

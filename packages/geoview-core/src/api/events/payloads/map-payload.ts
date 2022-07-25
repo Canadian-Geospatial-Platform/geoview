@@ -2,7 +2,7 @@ import OLMap from 'ol/Map';
 
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
+import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create MapPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_LOADED];

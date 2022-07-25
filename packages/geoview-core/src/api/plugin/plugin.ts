@@ -10,16 +10,11 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapViewer } from '../../geo/map/map';
 
 import { api } from '../../app';
-import {
-  AbstractPlugin,
-  toJsonObject,
-  TypeJsonObject,
-  TypeJsonValue,
-  TypePluginStructure,
-  TypeRecordOfPlugin,
-} from '../../core/types/cgpv-types';
+import { AbstractPlugin } from './abstract-plugin';
+import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
+import { toJsonObject, TypeJsonObject, TypeJsonValue } from '../../core/types/global-types';
 
-import { EVENT_NAMES } from '../events/event';
+import { EVENT_NAMES } from '../events/event-types';
 import { snackbarMessagePayload } from '../events/payloads/snackbar-message-payload';
 
 /**

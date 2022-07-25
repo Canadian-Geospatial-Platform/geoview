@@ -2,23 +2,15 @@ import axios from 'axios';
 
 import { Icon as StyleIcon } from 'ol/style';
 
-import {
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  TypeJsonObject,
-  TypeJsonArray,
-  toJsonObject,
-  TypeGeoviewLayerConfig,
-  TypeVectorLayerEntryConfig,
-  AbstractGeoViewVector,
-  TypeBaseVectorLayer,
-  TypeLayerEntryConfig,
-  TypeVectorSourceInitialConfig,
-} from '../../../../core/types/cgpv-types';
+import { toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { api } from '../../../../app';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
+import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig } from '../schema-types';
+import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
-
-import { api } from '../../../../app';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';

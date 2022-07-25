@@ -9,7 +9,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapContext } from '../../app-start';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { payloadIsAMarkerDefinition } from '../../../api/events/payloads/marker-definition-payload';
 

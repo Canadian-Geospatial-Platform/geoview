@@ -2,9 +2,10 @@
 import ReactDOM from 'react-dom';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { snackbarMessagePayload, Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
+import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 
 /**
  * Display a message in the snackbar

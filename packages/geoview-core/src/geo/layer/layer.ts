@@ -2,31 +2,22 @@ import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
-import {
-  TypeGeoviewLayerConfig,
-  TypeJsonObject,
-  AbstractGeoViewLayer,
-  layerConfigIsGeoJSON,
-  GeoJSON,
-  layerConfigIsWMS,
-  layerConfigIsEsriDynamic,
-  WMS,
-  EsriDynamic,
-  layerConfigIsEsriFeature,
-  EsriFeature,
-  layerConfigIsWFS,
-  WFS,
-  layerConfigIsOgcFeature,
-  OgcFeature,
-  layerConfigIsXYZTiles,
-  XYZTiles,
-} from '../../core/types/cgpv-types';
+import { TypeJsonObject } from '../../core/types/global-types';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
+import { TypeGeoviewLayerConfig } from '../map/map-types';
+import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
+import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
+import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';
+import { EsriFeature, layerConfigIsEsriFeature } from './geoview-layers/vector/esri-feature';
+import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
+import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
+import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS

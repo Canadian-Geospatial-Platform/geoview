@@ -7,19 +7,12 @@ import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
-import {
-  CONST_LAYER_TYPES,
-  AbstractGeoViewLayer,
-  TypeJsonObject,
-  TypeGeoviewLayerConfig,
-  TypeImageLayerEntryConfig,
-  TypeSourceImageWmsInitialConfig,
-  TypeLayerEntryConfig,
-  TypeBaseRasterLayer,
-  AbstractGeoViewRaster,
-} from '../../../../core/types/cgpv-types';
-
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig } from '../schema-types';
+import { TypeGeoviewLayerConfig } from '../../../map/map-types';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;

@@ -6,41 +6,13 @@ import axios, { AxiosResponse } from 'axios';
 
 import Ajv from 'ajv';
 
-import {
-  /*
-  TypeDynamicLayer,
-  TypeDynamicLayerEntry,
-  TypeFeatureLayer,
-  TypeWMSLayerConfig,
-  TypeOgcLayerEntry,
-  TypeWFSLayerConfig,
-  TypeOgcFeatureLayerConfig,
-  TypeGeoJSONLayerConfig,
-  TypeXYZTiles,
-*/
-  TypeJsonObject,
-  TypeJsonValue,
-  Cast,
-  CONST_LAYER_TYPES,
-  TypeJsonArray,
-  TypeEsriDynamicLayerConfig,
-  TypeEsriFeatureLayerConfig,
-  TypeWMSLayerConfig,
-  TypeWFSLayerEntryConfig,
-  TypeWFSLayerConfig,
-  TypeSourceWFSVectorInitialConfig,
-  TypeOgcFeatureLayerConfig,
-  TypeOgcFeatureLayerEntryConfig,
-  TypeSourceOgcFeatureInitialConfig,
-  TypeGeoJSONLayerConfig,
-  TypeXYZTilesConfig,
-} from '../types/cgpv-types';
+import { TypeJsonObject, TypeJsonValue, Cast, TypeJsonArray } from '../types/global-types';
 import { generateId, isJsonString } from './utilities';
 
 import { api } from '../../app';
 
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
 import schema from '../../../schema.json';
 import {
@@ -57,6 +29,18 @@ import {
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageWmsInitialConfig,
 } from '../../geo/layer/geoview-layers/schema-types';
+import { CONST_LAYER_TYPES } from '../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeEsriDynamicLayerConfig } from '../../geo/layer/geoview-layers/raster/esri-dynamic';
+import { TypeEsriFeatureLayerConfig } from '../../geo/layer/geoview-layers/vector/esri-feature';
+import { TypeWMSLayerConfig } from '../../geo/layer/geoview-layers/raster/wms';
+import { TypeSourceWFSVectorInitialConfig, TypeWFSLayerConfig, TypeWFSLayerEntryConfig } from '../../geo/layer/geoview-layers/vector/wfs';
+import {
+  TypeOgcFeatureLayerConfig,
+  TypeOgcFeatureLayerEntryConfig,
+  TypeSourceOgcFeatureInitialConfig,
+} from '../../geo/layer/geoview-layers/vector/ogc-feature';
+import { TypeGeoJSONLayerConfig } from '../../geo/layer/geoview-layers/vector/geojson';
+import { TypeXYZTilesConfig } from '../../geo/layer/geoview-layers/raster/xyz-tiles';
 
 export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 

@@ -7,20 +7,13 @@ import { Image as ImageLayer } from 'ol/layer';
 // import { extend, Extent } from 'ol/extent';
 // import { transformExtent } from 'ol/proj';
 
-import {
-  getXMLHttpRequest,
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  TypeJsonObject,
-  TypeImageLayerEntryConfig,
-  TypeSourceImageEsriInitialConfig,
-  TypeBaseRasterLayer,
-  TypeGeoviewLayerConfig,
-  AbstractGeoViewRaster,
-  TypeLayerEntryConfig,
-} from '../../../../core/types/cgpv-types';
-
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
+import { getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageEsriInitialConfig } from '../schema-types';
+import { TypeGeoviewLayerConfig } from '../../../map/map-types';
 
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;

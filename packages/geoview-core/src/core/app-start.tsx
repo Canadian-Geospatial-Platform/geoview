@@ -10,8 +10,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Shell } from './containers/shell';
 import { cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
-
-import { TypeMapSchemaProps } from './types/cgpv-types';
+import { TypeMapSchemaProps } from '../geo/map/map-types';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface

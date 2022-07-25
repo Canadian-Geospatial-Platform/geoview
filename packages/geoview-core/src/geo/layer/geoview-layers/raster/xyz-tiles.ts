@@ -3,18 +3,11 @@ import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
-import {
-  api,
-  AbstractGeoViewLayer,
-  CONST_LAYER_TYPES,
-  TypeBaseRasterLayer,
-  TypeGeoviewLayerConfig,
-  TypeGeoViewLayers,
-  TypeLayerEntryConfig,
-  TypeSourceTileInitialConfig,
-  TypeTileLayerEntryConfig,
-  AbstractGeoViewRaster,
-} from '../../../../core/types/cgpv-types';
+import { api } from '../../../../app';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoViewLayers } from '../abstract-geoview-layers';
+import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig } from '../schema-types';
+import { TypeGeoviewLayerConfig } from '../../../map/map-types';
 
 // TODO: Implement method to validate XYZ tile service
 //

@@ -14,15 +14,15 @@ import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
 
 import { FocusTrapDialog } from './focus-trap';
-import { TypeMapSchemaProps } from '../types/cgpv-types';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { CircularProgress, Modal, Snackbar } from '../../ui';
 import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
 import { payloadIsAMap } from '../../api/events/payloads/map-payload';
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
+import { TypeMapSchemaProps } from '../../geo/map/map-types';
 
 const useStyles = makeStyles((theme) => {
   return {

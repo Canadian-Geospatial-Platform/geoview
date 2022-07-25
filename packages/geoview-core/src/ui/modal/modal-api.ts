@@ -3,7 +3,7 @@ import { ModalModel } from './modal-model';
 import { generateId } from '../../core/utils/utilities';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { modalPayload } from '../../api/events/payloads/modal-payload';
 
 /**
