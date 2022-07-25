@@ -135,7 +135,7 @@ export class OgcFeature extends AbstractGeoViewLayer {
     const res = await axios.get<TypeJsonObject>(metaUrl);
     this.#capabilities = res.data;
 
-    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.title as string);
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCodePrefix()] : (this.#capabilities.title as string);
     if (layerName) this.name = layerName;
 
     const style: Record<string, Style> = {

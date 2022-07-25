@@ -73,7 +73,7 @@ export class EsriDynamic extends AbstractGeoViewLayer {
    * @return {Promise<ImageLayer<ImageArcGISRest> | null>} layers to add to the map
    */
   add(layer: TypeDynamicLayer): Promise<ImageLayer<ImageArcGISRest> | null> {
-    const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`);
 
     const geo = new Promise<ImageLayer<ImageArcGISRest> | null>((resolve) => {
       data.then((value) => {
@@ -85,7 +85,7 @@ export class EsriDynamic extends AbstractGeoViewLayer {
           const feature = new ImageLayer({
             source: new ImageArcGISRest({
               attributions: [attribution],
-              url: layer.url[api.map(this.mapId).getLanguageCode()],
+              url: layer.url[api.map(this.mapId).getLanguageCodePrefix()],
               params: { LAYERS: `show:${this.entries}` },
             }),
           });

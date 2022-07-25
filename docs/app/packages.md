@@ -199,7 +199,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
         'components': ['appbar', 'navbar', 'north-arrow'],
         'corePackages': ['details-panel', 'layers-panel', 'basemap-panel', 'overview-map'],
         'theme': 'dark',
-        'languages': ['en-CA']
+        'suportedLanguages': ['en-CA']
       }"
 ></div>
 ```

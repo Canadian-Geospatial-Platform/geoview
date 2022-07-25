@@ -123,7 +123,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   private async createLayer(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<VectorLayer<VectorSource> | null> {
     const promisedVectorLayer = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
-      let serviceUrl = this.accessPath[api.map(this.mapId).getLanguageCode()];
+      let serviceUrl = this.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
       serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
       let data: TypeJsonObject = {};
       axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
@@ -145,7 +145,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions.strategy = all;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
     if (typeof layerEntry.source.accessPath !== undefined)
-      sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCode()];
+      sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
     if (typeof layerEntry.source.format !== undefined) {
       switch (layerEntry.source.format) {
         case 'EsriJSON': {

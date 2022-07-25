@@ -109,7 +109,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntry: TypeXYZTilesLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {
-      url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCode()],
+      url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()],
     };
     if (typeof layerEntry.source.crossOrigin !== undefined) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
     if (typeof layerEntry.source.projection !== undefined) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;

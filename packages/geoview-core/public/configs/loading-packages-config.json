@@ -142,5 +142,5 @@
   "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": ["basemap-panel", "layers-panel"],
   "externalPackages": [],
-  "languages": ["en-CA"]
+  "suportedLanguages": ["en-CA"]
 }

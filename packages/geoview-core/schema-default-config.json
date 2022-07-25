@@ -24,6 +24,6 @@
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca"
   },
-  "languages": ["en-CA", "fr-CA"],
+  "suportedLanguages": ["en-CA", "fr-CA"],
   "version": "1.0"
 }

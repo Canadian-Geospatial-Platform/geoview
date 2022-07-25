@@ -104,7 +104,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private async getCapabilities(): Promise<TypeJsonObject> {
     const parser = new WMSCapabilities();
-    const capUrl = `${this.accessPath[api.map(this.mapId).getLanguageCode()]}service=WMS&version=1.3.0&request=GetCapabilities`;
+    const capUrl = `${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}service=WMS&version=1.3.0&request=GetCapabilities`;
     const response = await fetch(capUrl);
     const result = parser.read(await response.text());
 
@@ -122,7 +122,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntry: TypeWmsLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {
-      url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCode()],
+      url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()],
       params: { LAYERS: `show:${layerEntry.info.layerId}` },
     };
     sourceOptions.attributions = '';

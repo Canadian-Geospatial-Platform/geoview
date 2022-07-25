@@ -70,11 +70,11 @@ class BasemapPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api, ui } = cgpv;
       const { MapIcon } = ui.elements;
-      const { language } = api.map(mapId);
+      const { displayLanguage } = api.map(mapId);
       // button props
       const button: TypeIconButtonProps = {
         id: 'basemapPanelButton',
-        tooltip: this.translations[language].basemapPanel as string,
+        tooltip: this.translations[displayLanguage].basemapPanel as string,
         tooltipPlacement: 'right',
         children: <MapIcon />,
         visible: true,
@@ -82,7 +82,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
 
       // panel props
       const panel: TypePanelProps = {
-        title: this.translations[language].basemapPanel,
+        title: this.translations[displayLanguage].basemapPanel,
         icon: '<i class="material-icons">map</i>',
         width: 200,
         status: configObj?.isOpen as boolean,

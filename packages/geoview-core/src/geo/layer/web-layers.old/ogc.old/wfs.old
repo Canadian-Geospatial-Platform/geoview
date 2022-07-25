@@ -176,7 +176,7 @@ export class WFS extends AbstractGeoViewLayer {
       return null;
     }
 
-    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (featTypeInfo.Name['#text'] as string).split(':')[1];
+    const layerName = layer.name ? layer.name[api.map(this.mapId).getLanguageCodePrefix()] : (featTypeInfo.Name['#text'] as string).split(':')[1];
 
     if (layerName) this.name = layerName;
 

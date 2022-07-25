@@ -90,7 +90,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * This method reads from the accessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): void {
-    const data = getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCode()]}?f=json`);
+    const data = getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`);
     data.then((value) => {
       if (value !== '{}') {
         this.metadata = JSON.parse(value) as TypeJsonObject;
@@ -108,7 +108,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   processOneLayerEntry(layerEntry: TypeEsriDynamicLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
-    sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCode()];
+    sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
     sourceOptions.params = { LAYERS: `show:${layerEntry.info.layerId}` };
     if (typeof layerEntry.source.transparent !== undefined)
       Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent!);

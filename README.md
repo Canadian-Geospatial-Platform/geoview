@@ -207,7 +207,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
           }
         ]
       },
-      'languages': ['en-CA']
+      'suportedLanguages': ['en-CA']
     }"
 ></div>
 ```
@@ -279,7 +279,7 @@ Full example:
 	            ]
 	          },
 	          'theme': 'dark',
-	          'languages': ['en-CA']
+	          'suportedLanguages': ['en-CA']
 	        }"
     ></div>
     <script>

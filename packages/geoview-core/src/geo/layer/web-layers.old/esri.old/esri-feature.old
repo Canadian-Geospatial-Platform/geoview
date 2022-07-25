@@ -110,7 +110,7 @@ export class EsriFeature extends AbstractGeoViewLayer {
       }
     }
 
-    const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCode()]}?f=json`);
+    const data = getXMLHttpRequest(`${layer.url[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`);
 
     const geo = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
       data.then(async (value) => {

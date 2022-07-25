@@ -1131,20 +1131,25 @@
         }
       }
     },
-    "languages": {
+    "suportedLanguages": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["en", "fr"]
+        "enum": ["en-CA", "fr-CA"]
       },
-      "default": ["en", "fr"],
-      "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.",
+      "default": ["en-CA", "fr-CA"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.",
       "minItems": 1
+    },
+    "displayLanguage": {
+      "description": "The language that will be used to display the GeoView layer.",
+      "type": "string",
+      "default": "en-CA"
     },
     "version": {
       "enum": ["1.0"],
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
   },
-  "required": ["map", "languages", "version"]
+  "required": ["map", "suportedLanguages"]
 }

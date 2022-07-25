@@ -151,9 +151,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Query the OGC feature service to get the capacities.
    */
   private async getCapabilities(): Promise<void> {
-    const rootUrl = this.accessPath[api.map(this.mapId).getLanguageCode()].endsWith('/')
-      ? this.accessPath[api.map(this.mapId).getLanguageCode()]
-      : `${this.accessPath[api.map(this.mapId).getLanguageCode()]}/`;
+    const rootUrl = this.accessPath[api.map(this.mapId).getLanguageCodePrefix()].endsWith('/')
+      ? this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]
+      : `${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}/`;
 
     const entries = this.layerEntries.map((item) => item.info.layerId).toString();
 
@@ -164,8 +164,8 @@ export class OgcFeature extends AbstractGeoViewVector {
     this.capabilities = (await axios.get<TypeJsonObject>(metaUrl)).data;
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const layerName = this.name[api.map(this.mapId).getLanguageCode()]
-      ? this.name[api.map(this.mapId).getLanguageCode()]
+    const layerName = this.name[api.map(this.mapId).getLanguageCodePrefix()]
+      ? this.name[api.map(this.mapId).getLanguageCodePrefix()]
       : (this.capabilities.title as string);
     // ! To be continued
   }

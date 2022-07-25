@@ -43,5 +43,5 @@
   "corePackages": ["basemap-panel"],
   "components": ["navbar", "appbar"],
   "theme": "dark",
-  "languages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en-CA", "fr-CA"]
 }

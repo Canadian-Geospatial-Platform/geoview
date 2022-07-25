@@ -17,8 +17,6 @@ export type TypeMapSchemaProps = {
   appBar?: TypeAppBarProps;
   /** Nav bar properies. */
   navBar?: TypeNavBarProps;
-  /** North arrow properties. */
-  // components?: TypeNorthArrowProps; // ! Question: is it normal that this attribute is not defined in the schema?
   /** Map components. */
   components?: TypeMapComponents;
   /** List of core packages. */
@@ -27,13 +25,18 @@ export type TypeMapSchemaProps = {
   externalPackages?: TypeExternalPackages;
   /** Service URLs. */
   serviceUrls?: TypeServiceUrls;
-  /** Display Languages. */
-  languages: TypeLocalizedLanguages[];
+  /**
+   * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
+   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value..
+   * */
+  suportedLanguages: TypeLocalizedLanguages[];
+  /** The language that will be used to display the GeoView layer. */
+  displayLanguage?: TypeLocalizedLanguages;
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.
    */
-  version: '1.0' | '2.0';
+  version?: '1.0' | '2.0';
 };
 
 /** ******************************************************************************************************************************
@@ -186,5 +189,9 @@ export type TypeServiceUrls = {
  * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
  * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
  */
-export type TypeLanguages = 'en' | 'fr';
+export type TypeLanguagesPrefix = 'en' | 'fr';
 export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
+export const VALID_LOCALIZED_LANGUAGES: TypeLocalizedLanguages[] = ['en-CA', 'fr-CA'];
+
+export type TypeValidVersions = '1.0' | '2.0';
+export const VALID_VERSIONS: TypeValidVersions[] = ['1.0', '2.0'];

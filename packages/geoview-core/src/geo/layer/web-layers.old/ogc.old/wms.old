@@ -99,7 +99,7 @@ export class WMS extends AbstractGeoViewLayer {
         attribution = this.#capabilities.Service.Abstract as string;
       }
 
-      this.name = layer.name ? layer.name[api.map(this.mapId).getLanguageCode()] : (this.#capabilities.Service.Name as string);
+      this.name = layer.name ? layer.name[api.map(this.mapId).getLanguageCodePrefix()] : (this.#capabilities.Service.Name as string);
 
       const wms = new ImageLayer({
         source: new ImageWMS({

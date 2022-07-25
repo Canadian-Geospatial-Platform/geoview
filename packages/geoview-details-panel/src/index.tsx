@@ -56,13 +56,13 @@ class DetailsPlugin extends AbstractPlugin {
     // access the api calls
     const { api, ui } = cgpv;
     const { DetailsIcon } = ui.elements;
-    const { language } = api.map(mapId);
+    const { displayLanguage } = api.map(mapId);
 
     // button props
     const button: TypeIconButtonProps = {
       // set ID to detailsPanel so that it can be accessed from the core viewer
       id: 'detailsPanelButton',
-      tooltip: this.translations[language].detailsPanel as string,
+      tooltip: this.translations[displayLanguage].detailsPanel as string,
       tooltipPlacement: 'right',
       children: <DetailsIcon />,
       visible: true,
@@ -70,7 +70,7 @@ class DetailsPlugin extends AbstractPlugin {
 
     // panel props
     const panel: TypePanelProps = {
-      title: this.translations[language].detailsPanel,
+      title: this.translations[displayLanguage].detailsPanel,
       icon: '<i class="material-icons">details</i>',
       width: 300,
     };

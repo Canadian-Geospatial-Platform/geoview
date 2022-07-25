@@ -29,7 +29,7 @@ const w = window as TypeWindow;
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
 function LayersList(props: TypeLayersPanelListProps): JSX.Element {
-  const { mapId, layers, language } = props;
+  const { mapId, layers, displayLanguage } = props;
 
   const { cgpv } = w;
   const { ui, react, api } = cgpv;
@@ -355,7 +355,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
               <div className={classes.flexGroup}>
                 <Button
                   className={classes.flexGroupButton}
-                  tooltip={translations[language].zoom as string}
+                  tooltip={translations[displayLanguage].zoom as string}
                   tooltipPlacement="top"
                   variant="contained"
                   type="icon"
@@ -364,7 +364,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
                 <Button
                   className={classes.flexGroupButton}
-                  tooltip={translations[language].bounds as string}
+                  tooltip={translations[displayLanguage].bounds as string}
                   tooltipPlacement="top"
                   variant="contained"
                   type="icon"
@@ -373,7 +373,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
                 <Button
                   className={classes.flexGroupButton}
-                  tooltip={translations[language].remove as string}
+                  tooltip={translations[displayLanguage].remove as string}
                   tooltipPlacement="top"
                   variant="contained"
                   type="icon"
@@ -382,7 +382,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
               </div>
               <div className={classes.flexGroup}>
-                <Tooltip title={translations[language].opacity}>
+                <Tooltip title={translations[displayLanguage].opacity}>
                   <i className="material-icons">contrast</i>
                 </Tooltip>
                 <div className={classes.slider}>
@@ -396,7 +396,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
                 </div>
-                <Tooltip title={translations[language].visibility}>
+                <Tooltip title={translations[displayLanguage].visibility}>
                   <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
@@ -407,7 +407,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       <div className={classes.layerItemText} title={subLayer.layerName as string}>
                         {subLayer.layerName}
                       </div>
-                      <Tooltip title={translations[language].visibility}>
+                      <Tooltip title={translations[displayLanguage].visibility}>
                         <Checkbox
                           checked={subLayerVisibility[layer.id].includes(subLayer.layerId as number)}
                           onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)}

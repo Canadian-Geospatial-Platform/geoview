@@ -21,7 +21,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const [mapLayers, setMapLayers] = useState({});
   const { Button } = ui.elements;
 
-  const { language } = api.map(mapId);
+  const { displayLanguage } = api.map(mapId);
 
   const translations: TypeJsonObject = toJsonObject({
     'en-CA': {
@@ -89,7 +89,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       <div className={classes.mainContainer}>
         <Button
           className={classes.addLayerButton}
-          tooltip={translations[language].addLayer as string}
+          tooltip={translations[displayLanguage].addLayer as string}
           tooltipPlacement="right"
           variant="contained"
           type="icon"
@@ -99,7 +99,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       </div>
       {addLayerVisible && <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />}
       <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
-        <LayersList mapId={mapId} layers={mapLayers} language={language} />
+        <LayersList mapId={mapId} layers={mapLayers} displayLanguage={displayLanguage} />
       </div>
     </>
   );

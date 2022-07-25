@@ -162,7 +162,7 @@ export class GeoJSON extends AbstractGeoViewLayer {
 
       const geojson = new VectorLayer({
         source: new VectorSource({
-          url: geoLayer.url[api.map(this.mapId).getLanguageCode()],
+          url: geoLayer.url[api.map(this.mapId).getLanguageCodePrefix()],
           format: new GeoJSONFormat(),
         }),
         style: (feature) => {

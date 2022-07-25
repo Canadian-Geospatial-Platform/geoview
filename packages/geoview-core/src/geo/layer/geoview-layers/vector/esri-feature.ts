@@ -107,7 +107,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   private async legendQuery(): Promise<void> {
-    let queryUrl = this.accessPath[api.map(this.mapId).getLanguageCode()];
+    let queryUrl = this.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
     queryUrl = queryUrl.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
 
     const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
@@ -133,7 +133,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       }
     }
 
-    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCode()]}?f=json`).then(async (value) => {
+    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`).then(async (value) => {
       if (value !== '{}') {
         const { type, copyrightText } = toJsonObject(JSON.parse(value));
         this.attribution = copyrightText ? (copyrightText as string) : '';

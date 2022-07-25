@@ -22,6 +22,9 @@ import {
   TypeMapCorePackages,
   TypeMapSchemaProps,
   TypeValidProjectionCodes,
+  TypeValidVersions,
+  VALID_LOCALIZED_LANGUAGES,
+  VALID_VERSIONS,
 } from '../../geo/map/map-types';
 import { TypeBasemapOptions } from '../../geo/layer/basemap/basemap-types';
 import {
@@ -57,9 +60,13 @@ export class Config {
 
   private mapElement: Element;
 
-  private language: string;
+  private displayLanguage: TypeLocalizedLanguages;
 
-  private defaultLanguage = 'en-CA';
+  private defaultLanguage: TypeLocalizedLanguages = 'en-CA';
+
+  private mapConfigVersion: TypeValidVersions = '2.0';
+
+  private defaultVersion = '2.0' as TypeValidVersions;
 
   // default config if provided configuration is missing or wrong
   private _config: TypeMapSchemaProps = {
@@ -83,7 +90,7 @@ export class Config {
     theme: 'dark',
     components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
     corePackages: [],
-    languages: ['en-CA', 'fr-CA'],
+    suportedLanguages: ['en-CA', 'fr-CA'],
     version: '2.0',
   };
 
@@ -114,9 +121,6 @@ export class Config {
     3978: { lat: [40, 90], long: [-140, 40] },
   };
 
-  // valid languages
-  private _languages = ['en-CA', 'fr-CA'];
-
   /**
    * Get map configuration object
    */
@@ -135,7 +139,7 @@ export class Config {
     this.id = generateId();
 
     // set default language
-    this.language = this.defaultLanguage;
+    this.displayLanguage = this.defaultLanguage;
   }
 
   /**
@@ -320,7 +324,7 @@ export class Config {
    *
    * @returns {TypeMapSchemaProps | undefined} a config object generated from url parameters
    */
-  private async getUrlParamsConfig(): Promise<TypeMapSchemaProps | undefined> {
+  private async getUrlMapConfig(): Promise<TypeMapSchemaProps | undefined> {
     // create a new config object
     let configObj: TypeMapSchemaProps | undefined;
 
@@ -343,7 +347,7 @@ export class Config {
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
-        const requestUrl = `${catalogUrl}/${this.language.split('-')[0]}/${urlParams.keys}`;
+        const requestUrl = `${catalogUrl}/${this.displayLanguage.split('-')[0]}/${urlParams.keys}`;
 
         const result = await axios.get<TypeJsonObject>(requestUrl);
 
@@ -369,15 +373,18 @@ export class Config {
           geoviewLayerList: layers,
           extraOptions: {},
         },
-        languages: ['en-CA', 'fr-CA'],
+        suportedLanguages: ['en-CA', 'fr-CA'],
         corePackages,
-        // ! TODO: Get the version from the config.
-        version: '2.0',
+        version: this.defaultVersion,
       };
 
-      // update language if provided from params
-      const language = urlParams.l as TypeJsonValue as TypeLocalizedLanguages;
-      if (language) this.language = this.validateLanguage(language);
+      // update the language if provided from the map configuration.
+      const displayLanguage = urlParams.l as TypeJsonValue as TypeLocalizedLanguages;
+      if (displayLanguage) this.displayLanguage = this.validateLanguage(displayLanguage);
+
+      // update the version if provided from the map configuration.
+      const mapConfigVersion = urlParams.l as TypeJsonValue as TypeValidVersions;
+      if (mapConfigVersion) this.mapConfigVersion = this.validateVersion(mapConfigVersion);
     }
 
     return configObj;
@@ -392,10 +399,15 @@ export class Config {
     // create a new config object
     let configObj: TypeMapSchemaProps | undefined;
 
-    const language = this.mapElement.getAttribute('data-lang');
+    const displayLanguage: TypeLocalizedLanguages = this.mapElement.getAttribute('displayLanguage') as TypeLocalizedLanguages;
 
-    // update language if provided from map element
-    if (language) this.language = this.validateLanguage(language);
+    // update the language if provided from the map configuration.
+    if (displayLanguage) this.displayLanguage = this.validateLanguage(displayLanguage);
+
+    const mapConfigVersion: TypeValidVersions = this.mapElement.getAttribute('displayLanguage') as TypeValidVersions;
+
+    // update the version if provided from the map configuration.
+    if (mapConfigVersion) this.mapConfigVersion = this.validateVersion(mapConfigVersion);
 
     let configObjStr = this.mapElement.getAttribute('data-config');
 
@@ -423,10 +435,15 @@ export class Config {
     // create a new config object
     let configObj: TypeMapSchemaProps | undefined;
 
-    const language = this.mapElement.getAttribute('data-lang');
+    const displayLanguage = this.mapElement.getAttribute('displayLanguage') as TypeLocalizedLanguages;
 
-    // update language if provided from map element
-    if (language) this.language = this.validateLanguage(language);
+    // update the language if provided from the map configuration.
+    if (displayLanguage) this.displayLanguage = this.validateLanguage(displayLanguage);
+
+    const mapConfigVersion: TypeValidVersions = this.mapElement.getAttribute('displayLanguage') as TypeValidVersions;
+
+    // update the version if provided from the map configuration.
+    if (mapConfigVersion) this.mapConfigVersion = this.validateVersion(mapConfigVersion);
 
     const configUrl = this.mapElement.getAttribute('data-config-url');
 
@@ -461,10 +478,15 @@ export class Config {
     // update map id if provided in map element
     if (mapId) this.id = mapId;
 
-    const language = this.mapElement.getAttribute('data-lang');
+    const displayLanguage = this.mapElement.getAttribute('displayLanguage') as TypeLocalizedLanguages;
 
     // update language if provided from map element
-    if (language) this.language = this.validateLanguage(language);
+    if (displayLanguage) this.displayLanguage = this.validateLanguage(displayLanguage);
+
+    const mapConfigVersion: TypeValidVersions = this.mapElement.getAttribute('displayLanguage') as TypeValidVersions;
+
+    // update the version if provided from the map configuration.
+    if (mapConfigVersion) this.mapConfigVersion = this.validateVersion(mapConfigVersion);
 
     if (configObj) {
       // create a validator object
@@ -496,16 +518,16 @@ export class Config {
           }, 2000);
         }
 
-        mapConfigProps = { ...this.validate(configObj), mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
+        mapConfigProps = { ...this.validate(configObj), mapId: this.id, displayLanguage: this.displayLanguage as TypeLocalizedLanguages };
       } else {
         mapConfigProps = {
           ...this.validate(configObj),
           mapId: this.id,
-          languages: [this.language as 'en-CA' | 'fr-CA'],
+          displayLanguage: this.displayLanguage as TypeLocalizedLanguages,
         };
       }
     } else {
-      mapConfigProps = { ...this._config, mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
+      mapConfigProps = { ...this._config, mapId: this.id, displayLanguage: this.displayLanguage as TypeLocalizedLanguages };
     }
 
     return mapConfigProps;
@@ -543,7 +565,7 @@ export class Config {
     const shared = this.mapElement.getAttribute('data-shared');
 
     // check if config params have been passed
-    const urlParamsConfig = await this.getUrlParamsConfig();
+    const urlParamsConfig = await this.getUrlMapConfig();
 
     // use the url params config if provided
     if (urlParamsConfig && shared === 'true') configObj = { ...urlParamsConfig };
@@ -579,16 +601,16 @@ export class Config {
           }, 2000);
         }
 
-        mapConfigProps = { ...this.validate(configObj), mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
+        mapConfigProps = { ...this.validate(configObj), mapId: this.id, displayLanguage: this.displayLanguage as TypeLocalizedLanguages };
       } else {
         mapConfigProps = {
           ...this.validate(configObj),
           mapId: this.id,
-          languages: [this.language as 'en-CA' | 'fr-CA'],
+          displayLanguage: this.displayLanguage as TypeLocalizedLanguages,
         };
       }
     } else {
-      mapConfigProps = { ...this._config, mapId: this.id, languages: [this.language as 'en-CA' | 'fr-CA'] };
+      mapConfigProps = { ...this._config, mapId: this.id, displayLanguage: this.displayLanguage as TypeLocalizedLanguages };
     }
 
     return mapConfigProps;
@@ -698,7 +720,7 @@ export class Config {
       theme: tmpConfig.theme,
       components: tmpConfig.components,
       corePackages: tmpConfig.corePackages,
-      languages: tmpConfig.languages,
+      suportedLanguages: tmpConfig.suportedLanguages,
       appBar: tmpConfig.appBar,
       externalPackages: tmpConfig.externalPackages,
       version: '2.0',
@@ -810,16 +832,30 @@ export class Config {
   }
 
   /**
-   * Validate map language
-   * @param {string} language provided language
-   * @returns {string} valid language
+   * Validate map config language.
+   * @param {TypeLocalizedLanguages} displayLanguage provided language
+   * @returns {TypeLocalizedLanguages} valid language
    */
-  private validateLanguage(language: string): string {
-    if (!this._languages.includes(language)) {
-      console.log(`- map: ${this.id} - Invalid language ${language} replaced by ${this.defaultLanguage} -`);
+  private validateLanguage(displayLanguage: TypeLocalizedLanguages): TypeLocalizedLanguages {
+    if (!VALID_LOCALIZED_LANGUAGES.includes(displayLanguage)) {
+      console.log(`- map: ${this.id} - Invalid display language ${displayLanguage} replaced by ${this.defaultLanguage} -`);
       return this.defaultLanguage;
     }
 
-    return language;
+    return displayLanguage;
+  }
+
+  /**
+   * Validate map version.
+   * @param {TypeValidVersions} version provided version
+   * @returns {TypeValidVersions} valid version
+   */
+  private validateVersion(version: TypeValidVersions): TypeValidVersions {
+    if (!VALID_VERSIONS.includes(version)) {
+      console.log(`- map: ${this.id} - Invalid version ${version} replaced by ${this.defaultVersion} -`);
+      return this.defaultVersion;
+    }
+
+    return version;
   }
 }

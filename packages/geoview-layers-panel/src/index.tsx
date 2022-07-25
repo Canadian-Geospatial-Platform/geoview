@@ -67,7 +67,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     // access the api calls
     const { api, ui } = cgpv;
     const { LayersOutlinedIcon } = ui.elements;
-    const { language } = api.map(mapId);
+    const { displayLanguage } = api.map(mapId);
 
     let panelStatus = false;
 
@@ -76,7 +76,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     // button props
     const button: TypeIconButtonProps = {
       id: 'layersPanelButton',
-      tooltip: this.translations[language].layersPanel as string,
+      tooltip: this.translations[displayLanguage].layersPanel as string,
       tooltipPlacement: 'right',
       children: <LayersOutlinedIcon />,
       visible: true,
@@ -84,7 +84,7 @@ class LayersPanelPlugin extends AbstractPlugin {
 
     // panel props
     const panel: TypePanelProps = {
-      title: this.translations[language].layersPanel,
+      title: this.translations[displayLanguage].layersPanel,
       icon: '<i class="material-icons">layers</i>',
       width: 200,
       status: panelStatus,

@@ -26,7 +26,7 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
-import { TypeGeoviewLayerConfig, TypeLanguages, TypeLocalizedLanguages, TypeMapSchemaProps, TypeViewSettings } from './map-types';
+import { TypeGeoviewLayerList, TypeLanguagesPrefix, TypeLocalizedLanguages, TypeMapSchemaProps, TypeViewSettings } from './map-types';
 import { TypeHTMLElement } from '../../core/types/global-types';
 
 interface TypeDcoument extends Document {
@@ -64,8 +64,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
-  // ! Question: is it normal that this attribute previouly defined as language: string; is now languages: TypeLocalizedLanguages[]?
-  languages: TypeLocalizedLanguages[] = [];
+  displayLanguage: TypeLocalizedLanguages;
 
   // get used projection
   currentProjection: number;
@@ -96,7 +95,7 @@ export class MapViewer {
 
     this.mapProps = mapProps;
 
-    this.languages = mapProps.languages;
+    this.displayLanguage = mapProps.displayLanguage!;
     this.currentProjection = mapProps.map.viewSettings.projection;
     this.i18nInstance = i18instance;
     this.currentZoom = mapProps.map.viewSettings.zoom;
@@ -110,7 +109,7 @@ export class MapViewer {
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(
       this.mapProps.map.basemapOptions,
-      this.mapProps.languages[0],
+      this.mapProps.displayLanguage!,
       this.mapProps.map.viewSettings.projection,
       this.id
     );
@@ -267,31 +266,31 @@ export class MapViewer {
   };
 
   /**
-   * Return the language code from localized language
+   * Return the language code prefix from localized language
    *
-   * @returns {TypeLanguages} returns the language code from localized language. Ex: en, fr
+   * @returns {TypeLanguagesPrefix} returns the language code prefix from localized language. Ex: en, fr
    */
-  getLanguageCode = (): TypeLanguages => {
-    return this.languages[0].split('-')[0] as TypeLanguages;
+  getLanguageCodePrefix = (): TypeLanguagesPrefix => {
+    return this.displayLanguage[0].split('-')[0] as TypeLanguagesPrefix;
   };
 
   /**
-   * Change the language of the map
+   * Change the display language of the map
    *
-   * @param {string} language the language to use (en-CA, fr-CA)
-   * @param {TypeGeoviewLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
+   * @param {TypeLocalizedLanguages} displayLanguage the language to use (en-CA, fr-CA)
+   * @param {TypeGeoviewLayerList} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeGeoviewLayerConfig[]): void => {
-    const updatedConfig = { ...this.mapProps };
+  changeLanguage = (displayLanguage: TypeLocalizedLanguages, geoviewLayerConfi?: TypeGeoviewLayerList): void => {
+    const updatedMapConfig: TypeMapSchemaProps = { ...this.mapProps };
 
-    updatedConfig.languages = [language];
+    updatedMapConfig.displayLanguage = displayLanguage;
 
-    if (layers && layers.length > 0) {
-      updatedConfig.map.geoviewLayerList = updatedConfig.map.geoviewLayerList?.concat(layers);
+    if (geoviewLayerConfi && geoviewLayerConfi.length > 0) {
+      updatedMapConfig.map.geoviewLayerList = updatedMapConfig.map.geoviewLayerList?.concat(geoviewLayerConfi);
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, updatedConfig));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, updatedMapConfig));
   };
 
   /**

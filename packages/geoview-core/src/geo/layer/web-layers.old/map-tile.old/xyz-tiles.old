@@ -76,7 +76,7 @@ export class XYZTiles extends AbstractGeoViewLayer {
     const tileLayer = new Promise<TileLayer<XYZ> | null>((resolve) => {
       const xyzTileLayer = new TileLayer({
         source: new XYZ({
-          url: layer.url[api.map(this.mapId).getLanguageCode()],
+          url: layer.url[api.map(this.mapId).getLanguageCodePrefix()],
         }),
       });
 

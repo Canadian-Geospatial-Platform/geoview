@@ -179,8 +179,8 @@ export class WFS extends AbstractGeoViewVector {
         return;
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const layerName = this.name[api.map(this.mapId).getLanguageCode()]
-        ? this.name[api.map(this.mapId).getLanguageCode()]
+      const layerName = this.name[api.map(this.mapId).getLanguageCodePrefix()]
+        ? this.name[api.map(this.mapId).getLanguageCodePrefix()]
         : (featTypeInfo.Name['#text'] as string).split(':')[1];
       // ! To be continued
     }
@@ -191,7 +191,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   private async getWfsCapabilities(): Promise<void> {
     let xmlStringCapabilities = '';
-    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCode()]}?service=WFS&request=getcapabilities`).then((result) => {
+    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?service=WFS&request=getcapabilities`).then((result) => {
       xmlStringCapabilities = result;
     });
     // need to pass a xmldom to xmlToJson

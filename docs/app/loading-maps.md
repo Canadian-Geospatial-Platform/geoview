@@ -71,7 +71,7 @@ The content of the config must match the schema, an example of the object in the
     "geolocator"
   ],
   "externalPackages": [],
-  "languages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en-CA", "fr-CA"]
 }
 ```
 
@@ -138,7 +138,7 @@ An example of this:
                     'components': ['appbar', 'navbar', 'north-arrow'],
                     'corePackages': ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
-                    'languages': ['en-CA', 'fr-CA']                                    
+                    'suportedLanguages': ['en-CA', 'fr-CA']
                 }"
 ></div>
 ```
@@ -185,7 +185,7 @@ cgpv.init(function() {
         components: ['appbar', 'navbar', 'north-arrow'],
         corePackages: ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
-        languages: ['en-CA', 'fr-CA'],
+        suportedLanguages: ['en-CA', 'fr-CA'],
     });
 });
 </script>
