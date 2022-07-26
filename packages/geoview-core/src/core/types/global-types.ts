@@ -40,7 +40,7 @@ export type TypeCGPV = {
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
   types: typeof import('./cgpv-types');
-  // ! Question: Do we realy need the constants attribute?
+  // ! Question: Do we realy need the constants attribute??
   // constants: { options: TypeJsonObject };
 };
 
