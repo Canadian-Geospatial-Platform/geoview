@@ -129,6 +129,11 @@ export type TypeViewSettings = {
 export type TypeValidProjectionCodes = 3978 | 3857;
 
 /** ******************************************************************************************************************************
+ *  Constant used to test if a TypeValidProjectionCodes variable is valid valid projection codes.
+ */
+export const VALID_PROJECTION_CODES = [3978, 3857];
+
+/** ******************************************************************************************************************************
  *  Definition of the app bar properties.
  */
 export type TypeAppBarProps = {
