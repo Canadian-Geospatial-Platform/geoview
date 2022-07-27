@@ -97,7 +97,7 @@ export class URLmapConfigReader {
    */
   static async getMapFeaturesConfig(mapId: string): Promise<TypeMapFeaturesConfig | undefined> {
     // instanciate the configValidation object used to validate map config attributes and define default values.
-    const configValidation = new ConfigValidation(mapId);
+    const configValidation = new ConfigValidation();
 
     // create a new config object
     let mapConfig: TypeMapFeaturesConfig | undefined;
