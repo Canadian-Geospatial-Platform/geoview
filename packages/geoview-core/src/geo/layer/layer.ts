@@ -64,8 +64,6 @@ export class Layer {
             } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.mapId, layerConfig);
               geoJSON.createGeoViewVectorLayers();
-              // ! Question: is the next line still needed?
-              this.removeTabindex();
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.mapId, layerConfig);
               wmsLayer.createGeoViewRasterLayers();

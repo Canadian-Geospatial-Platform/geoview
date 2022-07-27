@@ -27,7 +27,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const [mapProjection, setMapProjection] = useState(`EPSG:${api.map(mapId).currentProjection}`);
   const [switchChecked, setSwitchChecked] = useState(false);
-  const [isNorthEnable] = useState(api.map(mapId).mapProps.components!.indexOf('north-arrow') > -1);
+  const [isNorthEnable] = useState(api.map(mapId).mapFeaturesConfig.components!.indexOf('north-arrow') > -1);
 
   /**
    * Emit an event to specify the map to rotate to keep north straight

@@ -6,7 +6,7 @@ import { TypeArrayOfLayerEntryConfig } from '../layer/geoview-layers/schema-type
 /** ******************************************************************************************************************************
  *  Definition of the map properties type according to what is specified in the schema.
  */
-export type TypeMapSchemaProps = {
+export type TypeMapFeaturesConfig = {
   /** This attribute is not part of the schema. It is placed here to keep the mapId. */
   mapId?: string;
   /** Map configuration */
@@ -39,6 +39,23 @@ export type TypeMapSchemaProps = {
   version?: '1.0' | '2.0';
 };
 
+/* *******************************************************************************************************************************
+/** ISO 639-1  language code prefix. */
+export type TypeLanguagesPrefix = 'en' | 'fr';
+/** ******************************************************************************************************************************
+ * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
+ * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
+ */
+export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
+/** Constante mainly use for language code validation. */
+export const VALID_LOCALIZED_LANGUAGES: TypeLocalizedLanguages[] = ['en-CA', 'fr-CA'];
+
+/* *******************************************************************************************************************************
+/** Valid version number. */
+export type TypeValidVersions = '1.0' | '2.0';
+/** Constante mainly use for version validation. */
+export const VALID_VERSIONS: TypeValidVersions[] = ['1.0', '2.0'];
+
 /** ******************************************************************************************************************************
  *  Definition of the map configuration settings.
  */
@@ -48,7 +65,7 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** List of GeoView Layers in the order which they should be added to the map. */
-  geoviewLayerList?: TypeGeoviewLayerList;
+  geoviewLayerConfigList?: TypeGeoviewLayerConfigList;
   /** View settings. */
   viewSettings: TypeViewSettings;
   /** Additional options used for OpenLayers map options. */
@@ -56,9 +73,16 @@ export type TypeMapConfig = {
 };
 
 /** ******************************************************************************************************************************
+ *  Definition of the valid map interactiom valuess. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
+ */
+export type TypeInteraction = 'static' | 'dynamic';
+/** Constante mainly use for interaction validation. */
+export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
+
+/** ******************************************************************************************************************************
  *  Definition of the Geoview layer list.
  */
-export type TypeGeoviewLayerList = TypeGeoviewLayerConfig[];
+export type TypeGeoviewLayerConfigList = TypeGeoviewLayerConfig[];
 
 /** ******************************************************************************************************************************
  *  Definition of a single Geoview layer configuration.
@@ -81,11 +105,6 @@ export type TypeGeoviewLayerConfig = {
   /** The layer entries to use from the GeoView layer. */
   layerEntries?: TypeArrayOfLayerEntryConfig;
 };
-
-/** ******************************************************************************************************************************
- *  Definition of the valid map interactiom valuess. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
- */
-export type TypeInteraction = 'static' | 'dynamic';
 
 /** ******************************************************************************************************************************
  *  Definition of the view settings.
@@ -118,7 +137,7 @@ export type TypeViewSettings = {
    * Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.
    * Default = 3978.
    */
-  projection: TypeValidProjectionCodes;
+  projection: TypeProjectionCodes;
   /** Initial map zoom level. Zoom level are define by the basemap zoom levels. Domaine = [0..28], default = 12. */
   zoom: number;
 };
@@ -126,10 +145,10 @@ export type TypeViewSettings = {
 /** ******************************************************************************************************************************
  *  Type used to define valid projection codes.
  */
-export type TypeValidProjectionCodes = 3978 | 3857;
+export type TypeProjectionCodes = 3978 | 3857;
 
 /** ******************************************************************************************************************************
- *  Constant used to test if a TypeValidProjectionCodes variable is valid valid projection codes.
+ *  Constant mainly used to test if a TypeProjectionCodes variable is a valid projection codes.
  */
 export const VALID_PROJECTION_CODES = [3978, 3857];
 
@@ -189,14 +208,3 @@ export type TypeServiceUrls = {
    */
   proxyUrl: string;
 };
-
-/** ******************************************************************************************************************************
- * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
- * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
- */
-export type TypeLanguagesPrefix = 'en' | 'fr';
-export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
-export const VALID_LOCALIZED_LANGUAGES: TypeLocalizedLanguages[] = ['en-CA', 'fr-CA'];
-
-export type TypeValidVersions = '1.0' | '2.0';
-export const VALID_VERSIONS: TypeValidVersions[] = ['1.0', '2.0'];

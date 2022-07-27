@@ -4,7 +4,7 @@ import { ProjectionLike } from 'ol/proj';
 
 import { AnySchemaObject } from 'ajv';
 
-import { TypeGeoviewLayerConfig, TypeMapSchemaProps } from '../../geo/map/map-types';
+import { TypeGeoviewLayerConfig, TypeMapFeaturesConfig } from '../../geo/map/map-types';
 import { TypeGeoViewLayers, AbstractGeoViewLayer } from '../../geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { TypeLangString } from './global-types';

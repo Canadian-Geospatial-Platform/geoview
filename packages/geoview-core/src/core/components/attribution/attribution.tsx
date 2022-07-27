@@ -160,7 +160,7 @@ class CustomAttribution extends OLAttribution {
       // if nrcan copyright does not exist add it
       if (!nrcanCopyRightExists) {
         // get nrcan copyright based on language
-        const copyRightText = this.attributionVal[api.map(this.mapId).languages[0]] as string;
+        const copyRightText = this.attributionVal[api.map(this.mapId).displayLanguage] as string;
 
         // create li element
         const nrcanCopyRight = document.createElement('LI');

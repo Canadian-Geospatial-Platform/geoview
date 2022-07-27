@@ -191,9 +191,11 @@ export class WFS extends AbstractGeoViewVector {
    */
   private async getWfsCapabilities(): Promise<void> {
     let xmlStringCapabilities = '';
-    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?service=WFS&request=getcapabilities`).then((result) => {
-      xmlStringCapabilities = result;
-    });
+    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?service=WFS&request=getcapabilities`).then(
+      (result) => {
+        xmlStringCapabilities = result;
+      }
+    );
     // need to pass a xmldom to xmlToJson
     const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
     const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);

@@ -857,7 +857,7 @@
           "type": "object",
           "properties": {
             "id": {
-              "enum": ["transport", "simple", "osm", "nogeom"],
+              "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
               "default": "transport",
               "description": "Id of the basemap to use."
             },
@@ -879,7 +879,7 @@
           "default": "dynamic",
           "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
         },
-        "geoviewLayerList": {
+        "geoviewLayerConfigList": {
           "description": "List of GeoView Layers in the order which they should be added to the map.",
           "type": "array",
           "items": {
@@ -1017,7 +1017,7 @@
             },
             "rotation": {
               "type": "integer",
-              "minimum": 0,
+              "minimum": -360,
               "maximum": 360,
               "default": 0,
               "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
@@ -1037,7 +1037,7 @@
           "description": "Additional options used for OpenLayers map options"
         }
       },
-      "required": ["basemapOptions", "interaction", "view"]
+      "required": ["basemapOptions", "interaction", "viewSettings"]
     },
     "theme": {
       "enum": ["dark", "light"],

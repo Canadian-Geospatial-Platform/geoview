@@ -10,7 +10,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Shell } from './containers/shell';
 import { cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
-import { TypeMapSchemaProps } from '../geo/map/map-types';
+import { TypeMapFeaturesConfig } from '../geo/map/map-types';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -32,39 +32,39 @@ type TypeMapContext = {
 };
 
 /**
- * interface used when passing configuration from the maps
+ * interface used when passing map features configuration
  */
 interface AppStartProps {
-  configObj: TypeMapSchemaProps;
+  mapFeaturesConfig: TypeMapFeaturesConfig;
 }
 
 /**
  * Initialize the app with maps from inline html configs, url params
  */
 function AppStart(props: AppStartProps): JSX.Element {
-  const { configObj } = props;
+  const { mapFeaturesConfig } = props;
 
   const mapContextValue = useMemo(() => {
-    return { id: configObj.mapId as string, interaction: configObj.map.interaction };
-  }, [configObj.mapId, configObj.map.interaction]);
+    return { id: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
+  }, [mapFeaturesConfig.mapId, mapFeaturesConfig.map.interaction]);
 
   /**
    * Create maps from inline configs with class name llwp-map in index.html
    */
   function getInlineMaps() {
     const i18nInstance = i18n.cloneInstance({
-      lng: configObj.languages[0],
-      fallbackLng: configObj.languages,
+      lng: mapFeaturesConfig.displayLanguage,
+      fallbackLng: mapFeaturesConfig.displayLanguage,
     });
 
     // create a new map instance
     // eslint-disable-next-line no-new
-    new MapViewer(configObj, i18nInstance);
+    new MapViewer(mapFeaturesConfig, i18nInstance);
 
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <Shell id={configObj.mapId as string} config={configObj} />
+          <Shell id={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
         </MapContext.Provider>
       </I18nextProvider>
     );

@@ -1,5 +1,5 @@
 import { TypeLangString } from '../../../core/types/global-types';
-import { TypeGeoviewLayerConfig, TypeValidProjectionCodes } from '../../map/map-types';
+import { TypeGeoviewLayerConfig, TypeProjectionCodes } from '../../map/map-types';
 
 /** ******************************************************************************************************************************
  * Basic type used to identify the layer to display on the map.
@@ -304,7 +304,7 @@ export type TypeBaseSourceImageInitialConfig = {
    * */
   crossOrigin?: string;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: TypeValidProjectionCodes;
+  projection?: TypeProjectionCodes;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
 };
@@ -382,7 +382,7 @@ export type TypeSourceTileInitialConfig = {
   /** The source type for the tile layer. Default = XYZ. */
   sourceType: TypeTileSourceFormats;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: TypeValidProjectionCodes;
+  projection?: TypeProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 };
@@ -415,7 +415,7 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceI
   /** Style to apply to the vector layer. */
   style?: TypeStyleConfig;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: TypeValidProjectionCodes;
+  projection?: TypeProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 }

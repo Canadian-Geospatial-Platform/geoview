@@ -27,7 +27,7 @@ import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
-import { TypeMapSchemaProps } from '../../../geo/map/map-types';
+import { TypeMapFeaturesConfig } from '../../../geo/map/map-types';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {
@@ -38,12 +38,12 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function Map(props: TypeMapSchemaProps): JSX.Element {
-  const { map: mapProps, components } = props;
+export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
+  const { map: mapConfig, components } = mapFeaturesConfig;
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
-  const id = props.mapId ? props.mapId : generateId('');
+  const id = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -111,7 +111,7 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
     cgpvMap.on('moveend', mapMoveEnd);
     cgpvMap.getView().on('change:resolution', mapZoomEnd);
 
-    viewer.toggleMapInteraction(mapProps.interaction);
+    viewer.toggleMapInteraction(mapConfig.interaction);
 
     // emit the map loaded event
     setIsLoaded(true);
@@ -119,7 +119,7 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
 
   const initMap = async () => {
     // create map
-    const projection = api.projection.projections[mapProps.viewSettings.projection];
+    const projection = api.projection.projections[mapConfig.viewSettings.projection];
 
     const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
 
@@ -139,8 +139,8 @@ export function Map(props: TypeMapSchemaProps): JSX.Element {
       }),
       view: new View({
         projection,
-        center: fromLonLat([mapProps.viewSettings.center[0], mapProps.viewSettings.center[1]], projection),
-        zoom: mapProps.viewSettings.zoom,
+        center: fromLonLat([mapConfig.viewSettings.center[0], mapConfig.viewSettings.center[1]], projection),
+        zoom: mapConfig.viewSettings.zoom,
         // extent: projectionConfig.extent,
         extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
         minZoom: defaultBasemap?.zoomLevels.min || 0,

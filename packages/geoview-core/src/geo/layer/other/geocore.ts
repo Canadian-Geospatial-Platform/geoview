@@ -1,15 +1,9 @@
-import axios from 'axios';
-
-import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../api/events/event-types';
-
 import { api } from '../../../app';
-
-import { TypeJsonObject } from '../../../core/types/global-types';
-import { catalogUrl, Config } from '../../../core/utils/config';
+import { catalogUrl } from '../../../core/utils/config/config';
 import { TypeGeoviewLayerConfig } from '../../map/map-types';
 import { TypeGeoCoreLayerEntryConfig } from '../geoview-layers/schema-types';
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
+import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
   geoviewLayerType: 'geoCore';
@@ -53,25 +47,8 @@ export class GeoCore {
    */
   async createLayer(layerConfig: TypeGeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig | null> {
     const url = layerConfig.accessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage.split('-')[0]}`;
-
     const requestUrl = `${url}/${layerConfig.id}`;
-
-    try {
-      const result = await axios.get<TypeJsonObject>(requestUrl);
-
-      const layers: TypeGeoviewLayerConfig[] = Config.getLayerConfigFromUUID(result);
-
-      return layers && layers.length > 0 ? layers[0] : null;
-    } catch (error: unknown) {
-      api.event.emit(
-        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-          type: 'key',
-          value: 'validation.layer.loadfailed',
-          params: [error as TypeJsonObject, this.mapId as TypeJsonObject],
-        })
-      );
-    }
-
-    return null;
+    const geoviewLayerConfigList = await UUIDmapConfigReader.getGVlayersConfigFromUUID(this.mapId, requestUrl);
+    return geoviewLayerConfigList.length > 0 ? geoviewLayerConfigList[0] : null;
   }
 }

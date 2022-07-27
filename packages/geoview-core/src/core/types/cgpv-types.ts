@@ -33,7 +33,7 @@ export * from '../containers/focus-trap';
 export * from '../containers/html-to-react';
 export * from '../containers/shell';
 export * from '../translation/i18n';
-export * from '../utils/config';
+export * from '../utils/config/config';
 export * from '../utils/constant';
 export * from '../utils/date-mgt';
 export * from '../utils/utilities';

@@ -22,7 +22,7 @@ import { CircularProgress, Modal, Snackbar } from '../../ui';
 import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
 import { payloadIsAMap } from '../../api/events/payloads/map-payload';
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
-import { TypeMapSchemaProps } from '../../geo/map/map-types';
+import { TypeMapFeaturesConfig } from '../../geo/map/map-types';
 
 const useStyles = makeStyles((theme) => {
   return {
@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => {
  */
 interface ShellProps {
   id: string;
-  config: TypeMapSchemaProps;
+  mapFeaturesConfig: TypeMapFeaturesConfig;
 }
 
 /**
@@ -79,7 +79,7 @@ interface ShellProps {
  * @returns {JSX.Element} the shell component
  */
 export function Shell(props: ShellProps): JSX.Element {
-  const { id, config } = props;
+  const { id, mapFeaturesConfig } = props;
 
   const classes = useStyles();
   const { t } = useTranslation<string>();
@@ -188,9 +188,9 @@ export function Shell(props: ShellProps): JSX.Element {
           {t('keyboardnav.start')}
         </a>
         <div className={classes.mapContainer}>
-          {config.components !== undefined && config.components.indexOf('appbar') > -1 && <Appbar />}
-          <Map {...config} />
-          {config.components !== undefined && config.components.indexOf('navbar') > -1 && <Navbar />}
+          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('appbar') > -1 && <Appbar />}
+          <Map {...mapFeaturesConfig} />
+          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('navbar') > -1 && <Navbar />}
         </div>
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
