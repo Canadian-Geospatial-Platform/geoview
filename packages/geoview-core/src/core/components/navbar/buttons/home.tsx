@@ -4,7 +4,7 @@ import { fromLonLat } from 'ol/proj';
 
 import { MapContext } from '../../../app-start';
 
-import { Button, HomeIcon } from '../../../../ui';
+import { IconButton, HomeIcon } from '../../../../ui';
 
 import { api } from '../../../../app';
 
@@ -13,7 +13,6 @@ import { api } from '../../../../app';
  */
 interface HomeProps {
   className?: string | undefined;
-  iconClassName?: string | undefined;
 }
 
 /**
@@ -21,7 +20,6 @@ interface HomeProps {
  */
 const defaultProps = {
   className: '',
-  iconClassName: '',
 };
 
 /**
@@ -31,7 +29,7 @@ const defaultProps = {
  * @returns {JSX.Element} the created home button
  */
 export default function Home(props: HomeProps): JSX.Element {
-  const { className, iconClassName } = props;
+  const { className } = props;
 
   const mapConfig = useContext(MapContext);
 
@@ -59,16 +57,9 @@ export default function Home(props: HomeProps): JSX.Element {
   }
 
   return (
-    <Button
-      id="home"
-      type="icon"
-      tooltip="mapnav.home"
-      tooltipPlacement="left"
-      icon={<HomeIcon />}
-      onClick={() => setHome()}
-      className={className}
-      iconClassName={iconClassName}
-    />
+    <IconButton id="home" tooltip="mapnav.home" tooltipPlacement="left" onClick={() => setHome()} className={className}>
+      <HomeIcon />
+    </IconButton>
   );
 }
 

@@ -9,10 +9,17 @@ import { TypeButtonGroupProps } from '../../core/types/cgpv-types';
  * @returns {JSX.Element} the created Button Group element
  */
 export function ButtonGroup(props: TypeButtonGroupProps): JSX.Element {
-  const { className, style, children, 'aria-label': ariaLabel, variant, orientation } = props;
+  const { className, classes, style, children, 'aria-label': ariaLabel, variant, orientation } = props;
 
   return (
-    <MaterialButtonGroup aria-label={ariaLabel} variant={variant} orientation={orientation} style={style} className={className}>
+    <MaterialButtonGroup
+      aria-label={ariaLabel}
+      variant={variant}
+      orientation={orientation}
+      style={style}
+      className={className}
+      classes={classes}
+    >
       {children && children}
     </MaterialButtonGroup>
   );

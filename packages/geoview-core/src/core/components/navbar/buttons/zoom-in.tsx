@@ -4,14 +4,13 @@ import { MapContext } from '../../../app-start';
 
 import { api } from '../../../../app';
 
-import { Button, ZoomInIcon } from '../../../../ui';
+import { IconButton, ZoomInIcon } from '../../../../ui';
 
 /**
  * Zoom in button properties
  */
 interface ZoomInProps {
   className?: string;
-  iconClassName?: string;
 }
 
 /**
@@ -19,7 +18,6 @@ interface ZoomInProps {
  */
 const defaultProps = {
   className: '',
-  iconClassName: '',
 };
 
 /**
@@ -29,7 +27,7 @@ const defaultProps = {
  * @returns {JSX.Element} return the created zoom in button
  */
 export default function ZoomIn(props: ZoomInProps): JSX.Element {
-  const { className, iconClassName } = props;
+  const { className } = props;
 
   const mapConfig = useContext(MapContext);
 
@@ -47,16 +45,9 @@ export default function ZoomIn(props: ZoomInProps): JSX.Element {
   }
 
   return (
-    <Button
-      id="zoomIn"
-      type="icon"
-      tooltip="mapnav.zoomIn"
-      tooltipPlacement="left"
-      icon={<ZoomInIcon />}
-      onClick={() => zoomIn()}
-      className={className}
-      iconClassName={iconClassName}
-    />
+    <IconButton id="zoomIn" tooltip="mapnav.zoomIn" tooltipPlacement="left" onClick={() => zoomIn()} className={className}>
+      <ZoomInIcon />
+    </IconButton>
   );
 }
 
