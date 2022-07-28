@@ -21,7 +21,7 @@ export const useStyles = makeStyles((theme) => ({
     height: '100%',
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: theme.appBar.background,
   },
   appBarList: {
     width: 60,
@@ -42,7 +42,7 @@ export const useStyles = makeStyles((theme) => ({
     borderRightColor: theme.appBar.border,
     borderRightWidth: 1,
     borderRightStyle: 'solid',
-    width: 60,
+    width: 64,
   },
   appBarButton: {
     backgroundColor: theme.appBar.btnDefaultBg,
@@ -62,9 +62,13 @@ export const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.appBar.btnActiveBg,
       color: theme.palette.primary.light,
     },
-    '.active': {
+    '&.active': {
       backgroundColor: theme.appBar.btnActiveBg,
       color: theme.palette.primary.light,
+    },
+    '& .MuiSvgIcon-root': {
+      height: 20,
+      width: 20,
     },
   },
   appBarButtonIcon: {
@@ -203,7 +207,6 @@ export function Appbar(): JSX.Element {
           <div key={groupName}>
             {Object.keys(buttonPanels).map((buttonId) => {
               const buttonPanel = buttonPanels[buttonId];
-
               return buttonPanel?.panel ? <Panel key={buttonPanel.panel.id} panel={buttonPanel.panel} button={buttonPanel.button} /> : null;
             })}
           </div>

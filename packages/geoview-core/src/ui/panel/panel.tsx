@@ -26,7 +26,7 @@ import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload
 
 const useStyles = makeStyles((theme) => ({
   panelContainer: {
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: theme.panel.background,
     color: theme.palette.primary.light,
     minWidth: 300,
     width: 350,
@@ -39,31 +39,35 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   panelHeader: {
-    backgroundColor: theme.palette.primary.dark,
+    backgroundColor: theme.appBar.background,
     borderBottomColor: theme.panel.border,
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
     color: theme.palette.primary.light,
-    height: 60,
-    alignItems: 'center',
+    height: 64,
   },
   panelHeaderTitle: {
-    fontSize: 16,
+    fontSize: 15,
+    paddingTop: 8,
     textTransform: 'uppercase',
   },
   panelHeaderAction: {
-    alignSelf: 'center',
-    '& .MuiIconButton-root': {
+    '& .MuiButtonBase-root': {
+      border: `1px solid ${theme.appBar.btnDefaultBg}`,
       color: theme.palette.primary.light,
       height: 44,
       width: 44,
       marginRight: 8,
       transition: 'all 0.3s ease-in-out',
+      '& .MuiSvgIcon-root': {
+        width: 24,
+        height: 24,
+      },
       '&:last-child': {
         marginRight: 0,
       },
       '&:hover': {
-        backgroundColor: theme.panel.hoverBg,
+        backgroundColor: theme.appBar.btnHoverBg,
       },
     },
   },
