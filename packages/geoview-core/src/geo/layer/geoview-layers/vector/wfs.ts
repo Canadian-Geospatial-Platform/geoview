@@ -93,14 +93,13 @@ export interface TypeSourceWFSVectorInitialConfig extends Omit<TypeVectorSourceI
   format: 'WFS';
 }
 
-export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source' | 'layerEntryType'> {
-  layerEntryType: 'vector';
+export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
   source: TypeSourceWFSVectorInitialConfig;
 }
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWfs';
-  layerEntries?: TypeWFSLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeWFSLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -137,7 +136,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWFSLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 // ******************************************************************************************************************************
@@ -170,10 +169,10 @@ export class WFS extends AbstractGeoViewVector {
    */
   getAdditionalServiceDefinition(): void {
     this.getWfsCapabilities();
-    if (this.layerEntries.length !== 0) {
+    if (this.listOfLayerEntryConfig.length !== 0) {
       const featTypeInfo = this.getFeatureTypeInfo(
         this.capabilities['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
-        this.layerEntries.map((item) => item.info.layerId).toString()
+        this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString()
       );
       if (!featTypeInfo) {
         return;

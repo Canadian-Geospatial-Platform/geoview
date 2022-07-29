@@ -25,9 +25,9 @@ export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryCon
   source: TypeSourceImageXYZTilesInitialConfig;
 }
 
-export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'xyzTiles';
-  layerEntries?: TypeXYZTilesLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeXYZTilesLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -68,7 +68,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
 export const geoviewEntryIsXYZTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 // ******************************************************************************************************************************

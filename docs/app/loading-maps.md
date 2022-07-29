@@ -110,7 +110,7 @@ An example of this:
                               'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
                             },
                             'layerType': 'esriDynamic',
-                            'layerEntries': [
+                            'listOfLayerEntryConfig': [
                               {
                                 'index': 4,
                                 'name': {

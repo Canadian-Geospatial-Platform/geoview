@@ -1,14 +1,16 @@
 import { TypeLangString } from '../../core/types/global-types';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
 import { TypeGeoViewLayers } from '../layer/geoview-layers/abstract-geoview-layers';
-import { TypeArrayOfLayerEntryConfig } from '../layer/geoview-layers/schema-types';
+import { TypeListOfLayerEntryConfig } from '../layer/geoview-layers/schema-types';
 
 /** ******************************************************************************************************************************
  *  Definition of the map properties type according to what is specified in the schema.
  */
 export type TypeMapFeaturesConfig = {
-  /** This attribute is not part of the schema. It is placed here to keep the mapId. */
+  /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
   mapId?: string;
+  /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
+  displayLanguage?: TypeLocalizedLanguages;
   /** Map configuration */
   map: TypeMapConfig;
   /** Display theme, default = dark. */
@@ -30,13 +32,11 @@ export type TypeMapFeaturesConfig = {
    * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value..
    * */
   suportedLanguages: TypeLocalizedLanguages[];
-  /** The language that will be used to display the GeoView layer. */
-  displayLanguage?: TypeLocalizedLanguages;
   /**
    * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
    * this version of the viewer.
    */
-  version?: '1.0' | '2.0';
+  version?: '1.0';
 };
 
 /* *******************************************************************************************************************************
@@ -52,9 +52,9 @@ export const VALID_LOCALIZED_LANGUAGES: TypeLocalizedLanguages[] = ['en-CA', 'fr
 
 /* *******************************************************************************************************************************
 /** Valid version number. */
-export type TypeValidVersions = '1.0' | '2.0';
+export type TypeValidVersions = '1.0';
 /** Constante mainly use for version validation. */
-export const VALID_VERSIONS: TypeValidVersions[] = ['1.0', '2.0'];
+export const VALID_VERSIONS: TypeValidVersions[] = ['1.0'];
 
 /** ******************************************************************************************************************************
  *  Definition of the map configuration settings.
@@ -65,7 +65,7 @@ export type TypeMapConfig = {
   /** Type of interaction. */
   interaction: TypeInteraction;
   /** List of GeoView Layers in the order which they should be added to the map. */
-  geoviewLayerConfigList?: TypeGeoviewLayerConfigList;
+  listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig;
   /** View settings. */
   viewSettings: TypeViewSettings;
   /** Additional options used for OpenLayers map options. */
@@ -82,7 +82,7 @@ export const VALID_INTERACTION: TypeInteraction[] = ['static', 'dynamic'];
 /** ******************************************************************************************************************************
  *  Definition of the Geoview layer list.
  */
-export type TypeGeoviewLayerConfigList = TypeGeoviewLayerConfig[];
+export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
 
 /** ******************************************************************************************************************************
  *  Definition of a single Geoview layer configuration.
@@ -103,7 +103,7 @@ export type TypeGeoviewLayerConfig = {
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoViewLayers;
   /** The layer entries to use from the GeoView layer. */
-  layerEntries?: TypeArrayOfLayerEntryConfig;
+  listOfLayerEntryConfig?: TypeListOfLayerEntryConfig;
 };
 
 /** ******************************************************************************************************************************

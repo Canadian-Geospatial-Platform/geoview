@@ -27,7 +27,7 @@ import { mapComponentPayload } from '../../api/events/payloads/map-component-pay
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
 import {
-  TypeGeoviewLayerConfigList,
+  TypeListOfGeoviewLayerConfig,
   TypeLanguagesPrefix,
   TypeLocalizedLanguages,
   TypeMapFeaturesConfig,
@@ -131,7 +131,7 @@ export class MapViewer {
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.mapId, this.mapFeaturesConfig.map.geoviewLayerConfigList);
+    this.layer = new Layer(this.mapId, this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -287,15 +287,15 @@ export class MapViewer {
    * Change the display language of the map
    *
    * @param {TypeLocalizedLanguages} displayLanguage the language to use (en-CA, fr-CA)
-   * @param {TypeGeoviewLayerConfigList} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
+   * @param {TypeListOfGeoviewLayerConfig} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (displayLanguage: TypeLocalizedLanguages, geoviewLayerConfi?: TypeGeoviewLayerConfigList): void => {
+  changeLanguage = (displayLanguage: TypeLocalizedLanguages, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
     const updatedMapConfig: TypeMapFeaturesConfig = { ...this.mapFeaturesConfig };
 
     updatedMapConfig.displayLanguage = displayLanguage;
 
-    if (geoviewLayerConfi && geoviewLayerConfi.length > 0) {
-      updatedMapConfig.map.geoviewLayerConfigList = updatedMapConfig.map.geoviewLayerConfigList?.concat(geoviewLayerConfi);
+    if (listOfGeoviewLayerConfig && listOfGeoviewLayerConfig.length > 0) {
+      updatedMapConfig.map.listOfGeoviewLayerConfig = updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig);
     }
 
     // emit an event to reload the map to change the language

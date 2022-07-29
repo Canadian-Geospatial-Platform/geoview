@@ -189,7 +189,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
               'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
             },
             'layerType': 'esriDynamic',
-            'layerEntries': [
+            'listOfLayerEntryConfig': [
               {
                 'index': 4,
                 'name': {
@@ -260,7 +260,7 @@ Full example:
 	                  'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
 	                },
 	                'layerType': 'esriDynamic',
-	                'layerEntries': [
+	                'listOfLayerEntryConfig': [
 	                  {
 	                    'index': 4,
 	                    'name': {

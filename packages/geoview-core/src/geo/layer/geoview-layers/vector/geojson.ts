@@ -96,9 +96,9 @@ export interface TypeGeoJSONLayerEntryConfig extends Omit<TypeVectorLayerEntryCo
   source: TypeSourceGeoJSONInitialConfig;
 }
 
-export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'geojson';
-  layerEntries?: TypeGeoJSONLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeGeoJSONLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -136,7 +136,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 // ******************************************************************************************************************************

@@ -5,9 +5,9 @@ import { TypeGeoCoreLayerEntryConfig } from '../geoview-layers/schema-types';
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
 import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
 
-export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'geoCore';
-  layerEntries?: TypeGeoCoreLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeGeoCoreLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************

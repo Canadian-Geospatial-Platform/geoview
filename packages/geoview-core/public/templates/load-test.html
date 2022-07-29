@@ -634,18 +634,18 @@
           let type = layerOptionValues[document.getElementById('layerType').selectedIndex];
           type = type.indexOf('geoJSON') === -1 ? type : 'geojson';
 
-          let layerEntries = [];
+          let listOfLayerEntryConfig = [];
           let entriesValue = document.getElementById('entries').value;
 
           if (entriesValue) {
             if (type === 'esriDynamic') {
-              layerEntries = entriesValue.split(',').map((entry) => {
+              listOfLayerEntryConfig = entriesValue.split(',').map((entry) => {
                 return {
                   index: parseInt(entry),
                 };
               });
             } else {
-              layerEntries = entriesValue.split(',').map((entry) => {
+              listOfLayerEntryConfig = entriesValue.split(',').map((entry) => {
                 return {
                   id: entry,
                 };
@@ -663,7 +663,7 @@
                 fr: 'test',
               },
               layerType: type,
-              layerEntries,
+              listOfLayerEntryConfig,
               url: {
                 en: document.getElementById('url').value,
                 fr: document.getElementById('url').value,

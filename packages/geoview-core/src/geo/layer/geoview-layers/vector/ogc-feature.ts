@@ -67,9 +67,9 @@ export interface TypeOgcFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntr
   source: TypeSourceOgcFeatureInitialConfig;
 }
 
-export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcFeature';
-  layerEntries?: TypeOgcFeatureLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeOgcFeatureLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -110,7 +110,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
 export const geoviewEntryIsOgcFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeOgcFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 // ******************************************************************************************************************************
@@ -155,7 +155,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       ? this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]
       : `${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}/`;
 
-    const entries = this.layerEntries.map((item) => item.info.layerId).toString();
+    const entries = this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString();
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const featureUrl = `${rootUrl}collections/${entries}/items?f=json`;

@@ -18,9 +18,9 @@ export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig,
   source: TypeSourceImageWmsInitialConfig;
 }
 
-export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWms';
-  layerEntries?: TypeWmsLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeWmsLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -57,7 +57,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWmsLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
 // ******************************************************************************************************************************
@@ -123,7 +123,7 @@ export class WMS extends AbstractGeoViewRaster {
   processOneLayerEntry(layerEntry: TypeWmsLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {
       url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()],
-      params: { LAYERS: `show:${layerEntry.info.layerId}` },
+      params: { LAYERS: `show:${layerEntry.info!.layerId}` },
     };
     sourceOptions.attributions = '';
     if (this.capabilities && this.capabilities.Service && this.capabilities.Service.Abstract) {

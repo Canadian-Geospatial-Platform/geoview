@@ -23,7 +23,7 @@
           "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
         },
         "layerType": "ogcFeature",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "id": "lakes"
           }

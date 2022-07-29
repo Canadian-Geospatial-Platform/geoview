@@ -19,9 +19,9 @@ export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntr
   source: TypeSourceImageEsriInitialConfig;
 }
 
-export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'esriDynamic';
-  layerEntries?: TypeEsriDynamicLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeEsriDynamicLayerEntryConfig[];
 }
 
 /** ******************************************************************************************************************************
@@ -61,7 +61,7 @@ export const geviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLa
 export const geoviewEntryIsEsriDynamic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriDynamicLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 // ******************************************************************************************************************************
@@ -109,7 +109,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const sourceOptions: SourceOptions = {};
     sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
     sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
-    sourceOptions.params = { LAYERS: `show:${layerEntry.info.layerId}` };
+    sourceOptions.params = { LAYERS: `show:${layerEntry.info!.layerId}` };
     if (typeof layerEntry.source.transparent !== undefined)
       Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent!);
     if (typeof layerEntry.source.format !== undefined) Object.defineProperty(sourceOptions.params, 'format', layerEntry.source.format!);

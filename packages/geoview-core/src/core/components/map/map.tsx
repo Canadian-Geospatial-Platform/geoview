@@ -211,7 +211,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
             const mapLayers = api.map(id).layer.layers;
             Object.entries(mapLayers).forEach((layer) => {
               // eslint-disable-next-line no-console
-              console.log('*** ERROR *** layer[1].layerEntries.getSource()?.refresh());', layer);
+              console.log('*** ERROR *** layer[1].listOfLayerEntryConfig.getSource()?.refresh());', layer);
             });
           }
         }

@@ -29,7 +29,7 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   /**
-   * This method is used to create the layers specified in the layerEntries attribute inherited from its parent.
+   * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
    * that the method has never been called before. If this is not the case, an error message must be sent. Then, it calls the
@@ -37,7 +37,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * nothing. For example, when the child is a WMS service, this method executes the GetCapabilities request and saves the
    * result in an attribute of the class.
    *
-   * The next operation is to instantiate each layer identified by the layerEntries attribute. This is done using the abstract
+   * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the abstract
    * method processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the renderers can
    * come from the configuration of the GeoView layer or from the information saved by the method getAdditionalServiceDefinition,
    * priority being given to the first of the two. This operation is done by the abstract method setRenderer.
@@ -49,28 +49,28 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * details-panel.
    */
   createGeoViewRasterLayers() {
-    if (this.gvLayers === null && typeof this.layerEntries !== 'undefined') {
+    if (this.gvLayers === null && typeof this.listOfLayerEntryConfig !== 'undefined') {
       this.getAdditionalServiceDefinition();
-      if (this.layerEntries.length === 1) {
-        this.gvLayers = this.processOneLayerEntry(this.layerEntries[0]);
+      if (this.listOfLayerEntryConfig.length === 1) {
+        this.gvLayers = this.processOneLayerEntry(this.listOfLayerEntryConfig[0]);
         if (this.gvLayers) {
-          this.setRenderer(this.layerEntries[0], this.gvLayers);
-          this.registerToPanels(this.layerEntries[0], this.gvLayers);
+          this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
+          this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
         } else {
-          this.layerLoadError.push(this.layerEntries[0].info.layerId);
+          this.layerLoadError.push(this.listOfLayerEntryConfig[0].info.layerId);
         }
       } else {
         this.gvLayers = new LayerGroup({
           layers: new Collection(),
         });
-        this.layerEntries.forEach((layerEntry: TypeLayerEntryConfig) => {
+        this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
           const rasterLayer: TypeBaseRasterLayer = this.processOneLayerEntry(layerEntry);
           if (rasterLayer) {
             this.setRenderer(layerEntry, rasterLayer);
             this.registerToPanels(layerEntry, rasterLayer);
             (this.gvLayers as LayerGroup).getLayers().push(rasterLayer);
           } else {
-            this.layerLoadError.push(this.layerEntries[0].info.layerId);
+            this.layerLoadError.push(this.listOfLayerEntryConfig[0].info.layerId);
           }
         });
       }

@@ -52,7 +52,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   iconToUse: StyleIcon = blueCircleIcon;
 
   /**
-   * This method is used to create the layers specified in the layerEntries attribute inherited from its parent.
+   * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
    * that the method has never been called before. If this is not the case, an error message must be sent. Then, it calls the
@@ -60,7 +60,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * nothing. For example, when the child is a WFS service, this method executes the GetCapabilities request and saves the
    * result in an attribute of the class.
    *
-   * The next operation is to instantiate each layer identified by the layerEntries attribute. This is done using the abstract method
+   * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the abstract method
    * processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the renderers can
    * come from the configuration of the GeoView layer or from the information saved by the method getAdditionalServiceDefinition,
    * priority being given to the first of the two. This operation is done by the abstract method setRenderer.
@@ -72,28 +72,28 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * details-panel.
    */
   createGeoViewVectorLayers() {
-    if (this.gvLayers === null && this.layerEntries.length !== 0) {
+    if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
       this.getAdditionalServiceDefinition();
-      if (this.layerEntries.length === 1) {
-        this.gvLayers = this.processOneLayerEntry(this.layerEntries[0] as TypeBaseVectorLayerEntryConfig);
+      if (this.listOfLayerEntryConfig.length === 1) {
+        this.gvLayers = this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig);
         if (this.gvLayers !== null) {
-          this.setRenderer(this.layerEntries[0], this.gvLayers);
-          this.registerToPanels(this.layerEntries[0], this.gvLayers);
+          this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
+          this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
         } else {
-          this.layerLoadError.push(this.layerEntries[0].info.layerId);
+          this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
         }
       } else {
         this.gvLayers = new LayerGroup({
           layers: new Collection(),
         });
-        this.layerEntries.forEach((layerEntry: TypeLayerEntryConfig) => {
+        this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
           const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig);
           if (vectorLayer !== null) {
             this.setRenderer(layerEntry, vectorLayer);
             this.registerToPanels(layerEntry, vectorLayer);
             (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
           } else {
-            this.layerLoadError.push(this.layerEntries[0].info.layerId);
+            this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
           }
         });
       }

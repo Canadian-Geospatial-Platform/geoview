@@ -256,13 +256,11 @@ export type TypeOfVectorLayerEntry = 'vector' | 'vectorHeatmap' | 'vectorTile';
  */
 export type TypeBaseVectorLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
-  geoviewLayerParent: TypeGeoviewLayerConfig;
+  geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
-  info: TypeLayerBasicInfoConfig;
+  info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialConfig;
-  /** The type of GeoView layer. */
-  layerEntryType: TypeOfVectorLayerEntry;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source: TypeBaseVectorSourceInitialConfig; // YC: delete this comment TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig;
 };
@@ -296,7 +294,7 @@ export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | Typ
  * Initial settings for image sources.
  */
 export type TypeBaseSourceImageInitialConfig = {
-  /** The service endpoint of the layer (English/French). It should match the type provided in sourceType. */
+  /** The service endpoint of the layer (English/French). */
   accessPath: TypeLangString;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
@@ -318,8 +316,6 @@ export type TypeImageSourceFormats = 'WMS' | 'ESRI';
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInitialConfig {
-  /** The source type for the image layer. */
-  sourceType: 'WMS';
   /** The type of the remote WMS server. */
   serverType: TypeOfServer;
   /** Style to apply. Default = '' */
@@ -330,8 +326,6 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInit
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceImageInitialConfig {
-  /** The source type for the image layer. */
-  sourceType: 'ESRI';
   /** The format used by the image layer. */
   format?: TypeEsriFormatParameter;
   /**
@@ -373,15 +367,13 @@ export type TypeTileGrid = {
  * Initial settings for tile image sources.
  */
 export type TypeSourceTileInitialConfig = {
-  /** The service endpoint of the layer (English/French). It should match the type provided in sourceType. */
+  /** The service endpoint of the layer (English/French). */
   accessPath: TypeLangString;
   /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    */
   crossOrigin?: string;
   /** The source type for the tile layer. Default = XYZ. */
-  sourceType: TypeTileSourceFormats;
-  /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
   projection?: TypeProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
@@ -410,8 +402,6 @@ export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLa
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
  */
 export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
-  /** The source type for the vector tile layer. */
-  sourceType: 'vectorTile';
   /** Style to apply to the vector layer. */
   style?: TypeStyleConfig;
   /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
@@ -436,16 +426,11 @@ export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayer
  */
 export type TypeImageLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
-  geoviewLayerParent: TypeGeoviewLayerConfig;
+  geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
-  info: TypeLayerBasicInfoConfig;
+  info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialConfig;
-  /**
-   * The type of GeoView layer. Server-rendered images that are available for arbitrary extents and resolutions like OGC WMS,
-   * ESRI MapServer, ESRI ImageServer, ...
-   */
-  layerEntryType: 'image';
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source: TypeSourceImageInitialConfig;
 };
@@ -455,16 +440,11 @@ export type TypeImageLayerEntryConfig = {
  */
 export type TypeTileLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
-  geoviewLayerParent: TypeGeoviewLayerConfig;
+  geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
-  info: TypeLayerBasicInfoConfig;
+  info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialConfig;
-  /**
-   * Layer sources that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions
-   * like OGC WMTS, GeoTIFF, XYZ, ESRI TileServer, ...
-   */
-  layerEntryType: 'tile';
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source: TypeSourceTileInitialConfig;
 };
@@ -475,7 +455,7 @@ export type TypeTileLayerEntryConfig = {
  */
 export type TypeGeoCoreLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
-  geoviewLayerParent: TypeGeoviewLayerConfig;
+  geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
    * attribute. The id will have the language extension (id-'lang').
    */
@@ -484,8 +464,6 @@ export type TypeGeoCoreLayerEntryConfig = {
   // id: string;
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
   accessPath?: string;
-  /** The type of GeoView layer. */
-  layerEntryType: 'geoCore';
 };
 
 /** ******************************************************************************************************************************
@@ -503,4 +481,4 @@ export type TypeLayerEntryConfig =
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
  */
-export type TypeArrayOfLayerEntryConfig = TypeLayerEntryConfig[];
+export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];

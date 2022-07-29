@@ -8,13 +8,16 @@
 
   "definitions": {
     "detailsLayerConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
+        "additionalProperties": false,
         "parser": {
           "type": "string",
           "description": "A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is being used."
         },
         "template": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -29,15 +32,14 @@
           "required": [
             "en",
             "fr"
-          ],
-          "additionalProperties": false
+          ]
         }
       },
-      "required": ["template"],
-      "additionalProperties": false
+      "required": ["template"]
     },
 
     "featureInfoLayerConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "queryable": {
@@ -47,6 +49,7 @@
         },
         "customParser": { "$ref": "#/definitions/detailsLayerConfig" },
         "nameField": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -61,10 +64,10 @@
           "required": [
             "en",
             "fr"
-          ],
-          "additionalProperties": false
+          ]
         },
         "tooltipField": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -79,10 +82,10 @@
           "required": [
             "en",
             "fr"
-          ],
-          "additionalProperties": false
+          ]
         },
         "outfields": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -95,10 +98,10 @@
               "default": "*",
               "description": "A comma separated list of attribute names (French) that should be requested on query (all by default)."
             }
-          },
-          "additionalProperties": false
+          }
         },
         "aliasFields": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -115,25 +118,26 @@
           "required": [
             "en",
             "fr"
-          ],
-          "additionalProperties": false
+          ]
         }
       }
     },
 
     "fillSymbolConfig": {
+      "additionalProperties": false,
       "type": "object",
       "description": "Fill style for vector features.",
       "properties": {
         "color": {
+          "additionalProperties": false,
           "type": "string"
         }
       },
-      "required": ["color"],
-      "additionalProperties": false
+      "required": ["color"]
     },
 
     "strokeSymbolConfig": {
+      "additionalProperties": false,
       "type": "object",
       "description": "Stroke style for vector features.",
       "properties": {
@@ -144,32 +148,32 @@
           "type": "number"
         }
       },
-      "required": ["color", "width"],
-      "additionalProperties": false
+      "required": ["color", "width"]
     },
 
     "simpleSymbolVectorConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "fill": { "$ref": "#/definitions/fillSymbolConfig" },
         "stroke": { "$ref": "#/definitions/strokeSymbolConfig" },
         "radius": { "type": "number" }
-      },
-      "additionalProperties": false
+      }
     },
 
     "circleSymbolVectorConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "fill": { "$ref": "#/definitions/fillSymbolConfig" },
         "stroke": { "$ref": "#/definitions/strokeSymbolConfig" },
         "radius": { "type": "number" }
       },
-      "required": ["radius"],
-      "additionalProperties": false
+      "required": ["radius"]
     },
 
     "iconSymbolVectorConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "src": { "type": "string" },
@@ -187,11 +191,11 @@
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         }
-      },
-      "additionalProperties": false
+      }
     },
 
     "simpleStyleConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "id": {
@@ -204,18 +208,18 @@
           "type": "string"
         },
         "options": {
-          "oneOf": [
+          "anyOf": [
             { "$ref": "#/definitions/simpleSymbolVectorConfig" },
             { "$ref": "#/definitions/circleSymbolVectorConfig" },
             { "$ref": "#/definitions/iconSymbolVectorConfig" }
           ]
         }
       },
-      "required": ["styleType", "label", "options"],
-      "additionalProperties": false
+      "required": ["styleType", "label", "options"]
     },
 
     "uniqueValueStyleConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "id": {
@@ -237,6 +241,7 @@
         "uniqueValueStyleInfo": {
           "type": "array",
           "items": {
+            "additionalProperties": false,
             "label": {
               "type": "string"
             },
@@ -248,7 +253,7 @@
               "minItems": 1
             },
             "options": {
-              "oneOf": [
+              "anyOf": [
                 { "$ref": "#/definitions/simpleSymbolVectorConfig" },
                 { "$ref": "#/definitions/circleSymbolVectorConfig" },
                 { "$ref": "#/definitions/iconSymbolVectorConfig" }
@@ -259,11 +264,11 @@
           "required": ["label", "values", "options"]
         }
       },
-      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"],
-      "additionalProperties": false
+      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"]
     },
 
     "classBreakStyleConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "id": {
@@ -279,8 +284,10 @@
           "type": "string"
         },
         "classBreakStyleInfo": {
+          "additionalProperties": false,
           "type": "array",
           "items": {
+            "additionalProperties": false,
             "label": {
               "type": "string"
             },
@@ -291,7 +298,7 @@
               "type": "number"
             },
             "options": {
-              "oneOf": [
+              "anyOf": [
                 { "$ref": "#/definitions/simpleSymbolVectorConfig" },
                 { "$ref": "#/definitions/circleSymbolVectorConfig" },
                 { "$ref": "#/definitions/iconSymbolVectorConfig" }
@@ -302,12 +309,11 @@
           "required": ["label", "minValue", "maxValue", "options"]
         }
       },
-      "required": ["styleType", "label", "field", "classBreakStyleInfo"],
-      "additionalProperties": false
+      "required": ["styleType", "label", "field", "classBreakStyleInfo"]
     },
 
     "styleConfig": {
-      "oneOf": [
+      "anyOf": [
         { "$ref": "#/definitions/simpleStyleConfig" },
         { "$ref": "#/definitions/uniqueValueStyleConfig" },
         { "$ref": "#/definitions/classBreakStyleConfig" }
@@ -315,6 +321,7 @@
     },
 
     "layerBasicInfoConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "layerId": {
@@ -322,6 +329,7 @@
           "description": "The id of the layer to display on the map."
         },
         "layerName": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -332,10 +340,10 @@
               "type": "string",
               "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
             }
-          },
-          "additionalProperties": false
+          }
         },
         "metadataUrl": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -352,15 +360,14 @@
           "required": [
             "en",
             "fr"
-          ],
-          "additionalProperties": false
+          ]
         }
       },
-      "required": ["layerId"],
-      "additionalProperties": false
+      "required": ["layerId"]
     },
 
     "layerInitialConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "opacity": {
@@ -400,11 +407,11 @@
           "type": "string",
           "description": "A CSS class name to set to the layer element."
         }
-      },
-      "additionalProperties": false
+      }
     },
 
     "sourceAccessPathConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "en": {
@@ -419,11 +426,11 @@
       "required": [
         "en",
         "fr"
-      ],
-      "additionalProperties": false
+      ]
     },
 
     "vectorSourceInitialConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "accessPath": { "$ref": "#/definitions/sourceAccessPathConfig" },
@@ -433,6 +440,7 @@
         },
         "featureInfo": { "$ref": "#/definitions/featureInfoLayerConfig" },
         "cluster": {
+          "additionalProperties": false,
           "type": "object",
           "description": "Cluster vector data on vector layer. Works out of the box with point geometries. If another geometry is provided, it will be converted to points geometry.",
           "properties": {
@@ -448,22 +456,21 @@
               "type": "integer",
               "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
             }
-          },
-          "additionalProperties": false
+          }
         }
       },
-      "required": ["accessPath", "format"],
-      "additionalProperties": false
+      "required": ["accessPath", "format"]
     },
 
     "sourceImageInitialConfig": {
-      "oneOf": [
+      "anyOf": [
         { "$ref": "#/definitions/sourceImageWmsInitialConfig" },
         { "$ref": "#/definitions/sourceImageEsriInitialConfig" }
       ]
     },
 
     "sourceImageWmsInitialConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "accessPath": {
@@ -480,7 +487,6 @@
         "featureInfo": {
           "$ref": "#/definitions/featureInfoLayerConfig"
         },
-        "sourceType": {"enum": ["WMS"]},
         "serverType": {
           "enum": ["mapserver", "geoserver", "qgis"],
           "description": "The type of the remote WMS server. Not needed for type ESRI"
@@ -491,11 +497,11 @@
           "description": "Style to apply"
         }
       },
-      "required": ["accessPath", "sourceType", "serverType"],
-      "additionalProperties": false
+      "required": ["accessPath", "serverType"]
     },
 
     "sourceImageEsriInitialConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "accessPath": {
@@ -512,7 +518,6 @@
         "featureInfo": {
           "$ref": "#/definitions/featureInfoLayerConfig"
         },
-        "sourceType": {"enum": ["ESRI"]},
         "format": {
           "enum": ["png", "jpg", "gif", "svg"],
           "default": "png",
@@ -524,18 +529,13 @@
           "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency."
         }
       },
-      "required": ["accessPath", "sourceType"],
-      "additionalProperties": false
+      "required": ["accessPath"]
     },
 
     "sourceTileInitialConfig": {
-      "sourceType": "object",
+      "additionalProperties": false,
       "properties": {
         "accessPath": { "$ref": "#/definitions/sourceAccessPathConfig" },
-        "sourceType": {
-          "enum": ["XYZ", "GeoTIFF"],
-          "default": "XYZ"
-        },
         "crossOrigin": {
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
@@ -545,6 +545,7 @@
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
         "tileGrid": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "extent": {
@@ -598,23 +599,18 @@
               "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
             }
           },
-          "required": ["origin", "resolutions"],
-          "additionalProperties": false
+          "required": ["origin", "resolutions"]
         }
       },
-      "required": ["accessPath", "sourceType"],
-      "additionalProperties": false
+      "required": ["accessPath"]
     },
 
     "vectorHeatmapLayerEntryConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerEntryType": {
-          "enum": ["vectorHeatmap"],
-          "description": "Layer for rendering vector data as a heatmap. Use points as source. If another geometry is provided, it will be converted to points geometry."
-        },
         "source": { "$ref": "#/definitions/vectorSourceInitialConfig" },
         "gradient": {
           "type": "array",
@@ -639,45 +635,34 @@
           "description": "Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature."
         }
       },
-      "required": ["info", "layerType", "source"],
-      "additionalProperties": false
+      "required": ["source"]
     },
 
-    "vectorLayerConfig": {
+    "vectorLayerEntryConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerType": {
-          "enum": ["vector"],
-          "description": "Vector data is rendered client-side, as vectors. This layer type provides most accurate rendering even during animations. Points and labels stay upright on rotated views. For very large amounts of vector data, performance may suffer during pan and zoom animations."
-        },
         "source": { "$ref": "#/definitions/vectorSourceInitialConfig" },
         "style": { "$ref": "#/definitions/styleConfig" }
       },
-      "required": ["info", "layerType", "source"],
-      "additionalProperties": false
+      "required": ["source"]
     },
 
     "vectorTileLayerEntryConfig": {
+      "additionalProperties": false,
       "type": "object",
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerEntryType": {
-          "enum": ["vectorTile"],
-          "description": "Layer for vector tile data that is rendered client-side."
-        },
         "source": {
+          "additionalProperties": false,
           "type": "object",
           "description": "Layer sources providing vector data divided into a tile grid.",
           "properties": {
             "accessPath": { "$ref": "#/definitions/sourceAccessPathConfig" },
-            "sourceType": {
-              "enum": ["vectorTile"],
-              "default": "vectorTile"
-            },
             "format": {
               "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "MVT", "featureAPI"],
               "description": "The feature format used by the XHR feature loader when access path is set."
@@ -689,6 +674,7 @@
               "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
             },
             "tileGrid": {
+              "additionalProperties": false,
               "type": "object",
               "properties": {
                 "extent": {
@@ -742,53 +728,44 @@
                   "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
                 }
               },
-              "required": ["origin", "resolutions"],
-              "additionalProperties": false
+              "required": ["origin", "resolutions"]
             }
           },
-          "required": ["accessPath", "sourceType"],
-          "additionalProperties": false
+          "required": ["accessPath"]
         }
       },
-      "required": ["info", "layerType", "source"],
-      "additionalProperties": false
+      "required": ["source"]
     },
 
     "imageLayerEntryConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerEntryType": {
-          "enum": ["image"],
-          "description": "Server-rendered images that are available for arbitrary extents and resolutions like OGC WMS, ESRI MapServer, ESRI ImageServer, ..."
-        },
         "source": { "$ref": "#/definitions/sourceImageInitialConfig" }
       },
-      "required": ["layerType", "source"],
-      "additionalProperties": false
+      "required": ["source"]
     },
 
     "tileLayerEntryConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "info": { "$ref": "#/definitions/layerBasicInfoConfig" },
         "initialSettings": { "$ref": "#/definitions/layerInitialConfig" },
-        "layerEntryType": {
-          "enum": ["tile"],
-          "description": "Layer sources that provide pre-rendered, tiled images in grids that are organized by zoom levels for specific resolutions like OGC WMTS, GeoTIFF, XYZ, ESRI TileServer, ..."
-        },
         "source": { "$ref": "#/definitions/sourceTileInitialConfig" }
       },
-      "required": ["info", "layerType", "source"],
-      "additionalProperties": false
+      "required": ["source"]
     },
 
     "geoCoreLayerEntryConfig": {
+      "additionalProperties": false,
       "type": "object",
       "description": "Layer where configration is extracted by a configuration snippet stored on a server. The server configuration will handle bilangual informations.",
       "properties": {
         "info": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "layerId": {
@@ -796,6 +773,7 @@
               "description": "The id of the layer to display on the map."
             },
             "layerName": {
+              "additionalProperties": false,
               "type": "object",
               "properties": {
                 "en": {
@@ -810,50 +788,48 @@
               "required": [
                 "en",
                 "fr"
-              ],
-              "additionalProperties": false
-                }
-          }
+              ]
+            }
+          },
+          "required": ["layerId"]
         },
         "accessPath": {
           "type": "string",
           "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView API)."
-        },
-        "layerEntryType": {
-          "enum": ["geoCore"]
         }
       },
-      "required": ["id", "layerType"],
-      "additionalProperties": false
+      "required": ["info"]
     },
 
     "layerEntryConfig": {
-      "type": "object",
-      "additionalProperties": false,
-      "oneOf": [
+      "anyOf": [
         { "$ref": "#/definitions/vectorHeatmapLayerEntryConfig" },
         { "$ref": "#/definitions/vectorTileLayerEntryConfig" },
-        { "$ref": "#/definitions/vectorLayerConfig" },
+        { "$ref": "#/definitions/vectorLayerEntryConfig" },
         { "$ref": "#/definitions/imageLayerEntryConfig" },
         { "$ref": "#/definitions/tileLayerEntryConfig" },
         { "$ref": "#/definitions/geoCoreLayerEntryConfig" }
       ]
     },
 
-    "arrayOfLayerConfig": {
+    "listOfLayerEntryConfig": {
       "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
       "items": {
         "$ref": "#/definitions/layerEntryConfig"
-      },
-      "minItems": 0
+      }
     }
   },
 
   "properties": {
+    "additionalProperties": false,
     "map": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "basemapOptions": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "id": {
@@ -879,10 +855,11 @@
           "default": "dynamic",
           "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
         },
-        "geoviewLayerConfigList": {
+        "listOfGeoviewLayerConfig": {
           "description": "List of GeoView Layers in the order which they should be added to the map.",
           "type": "array",
-          "items": {
+            "items": {
+            "additionalProperties": false,
             "type": "object",
             "properties": {
               "id": {
@@ -890,6 +867,7 @@
                 "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
               },
               "name": {
+                "additionalProperties": false,
                 "type": "object",
                 "properties": {
                   "en": {
@@ -900,10 +878,10 @@
                     "type": "string",
                     "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
                   }
-                },
-                "additionalProperties": false
+                }
               },
               "accessPath": {
+                "additionalProperties": false,
                 "type": "object",
                 "properties": {
                   "en": {
@@ -920,9 +898,8 @@
                 "required": [
                   "en",
                   "fr"
-                ],
-                "additionalProperties": false
-                    },
+                ]
+              },
               "geoviewLayerType": {
                 "type": "string",
                 "items": {
@@ -939,20 +916,20 @@
                 },
                 "description": "Type of GeoView layer."
               },
-              "arrayOfLayerConfig": {
-                "$ref": "#/definitions/arrayOfLayerConfig",
+              "listOfLayerEntryConfig": {
+                "$ref": "#/definitions/listOfLayerEntryConfig",
                 "description": "The layer entries to use from the GeoView layer."
               }
             },
             "required": [
               "id",
-              "layerType",
-              "accessPath"
-            ],
-            "additionalProperties": false
+              "geoviewLayerType",
+              "listOfLayerEntryConfig"
+            ]
           }
         },
         "viewSettings": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "center": {
@@ -1045,9 +1022,11 @@
       "description": "Theme style the viewer."
     },
     "appBar": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "about": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
             "en": {
@@ -1061,7 +1040,6 @@
             "en",
             "fr"
           ],
-          "additionalProperties": false,
           "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel. In the basic view, this information may be added in a container above the map."
         }
       }
@@ -1099,6 +1077,7 @@
     "externalPackages": {
       "type": "array",
       "items": {
+        "additionalProperties": false,
         "type": "object",
         "properties": {
           "name": {
@@ -1117,6 +1096,7 @@
       "minItems": 0
     },
     "serviceUrls": {
+      "additionalProperties": false,
       "type": "object",
       "description": "Service endpoint urls",
       "properties": {

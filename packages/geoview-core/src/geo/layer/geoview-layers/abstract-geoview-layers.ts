@@ -3,7 +3,7 @@ import BaseLayer from 'ol/layer/Base';
 import { generateId } from '../../../core/utils/utilities';
 import { TypeLangString } from '../../../core/types/global-types';
 import { TypeGeoviewLayerConfig } from '../../map/map-types';
-import { TypeArrayOfLayerEntryConfig } from './schema-types';
+import { TypeListOfLayerEntryConfig } from './schema-types';
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -77,9 +77,9 @@ export abstract class AbstractGeoViewLayer {
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
    * configuration does not provide a value, we use an empty array instead of an undefined attribute.
    */
-  layerEntries: TypeArrayOfLayerEntryConfig = [];
+  listOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
 
-  /** Name of layerEntries that did not load. */
+  /** Name of listOfLayerEntryConfig that did not load. */
   layerLoadError: string[] = [];
 
   /**
@@ -103,6 +103,6 @@ export abstract class AbstractGeoViewLayer {
     this.name.fr = mapLayerConfig.name && mapLayerConfig.name.fr ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
     this.accessPath.en = mapLayerConfig.accessPath.en.trim();
     this.accessPath.fr = mapLayerConfig.accessPath.fr.trim();
-    if (typeof mapLayerConfig.layerEntries !== 'undefined') this.layerEntries = mapLayerConfig.layerEntries;
+    if (typeof mapLayerConfig.listOfLayerEntryConfig !== 'undefined') this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
   }
 }

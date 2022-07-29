@@ -23,7 +23,7 @@ import {
 } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
 import { TypeXYZTilesConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeGeoviewLayerConfigList } from '../../../../geo/map/map-types';
+import { TypeListOfGeoviewLayerConfig } from '../../../../geo/map/map-types';
 import { api } from '../../../../app';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
@@ -41,10 +41,10 @@ export class UUIDmapConfigReader {
    * Generate layer configs from uuid request result
    *
    * @param {TypeJsonObject} result the uuid request result
-   * @returns {TypeGeoviewLayerConfigList} layers parsed from uuid result
+   * @returns {TypeListOfGeoviewLayerConfig} layers parsed from uuid result
    */
-  private static getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>): TypeGeoviewLayerConfigList {
-    const geoviewLayerConfigList: TypeGeoviewLayerConfigList = [];
+  private static getLayerConfigFromResponse(result: AxiosResponse<TypeJsonObject>): TypeListOfGeoviewLayerConfig {
+    const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = [];
 
     if (result && result.data) {
       for (let i = 0; i < result.data.length; i++) {
@@ -54,7 +54,7 @@ export class UUIDmapConfigReader {
           const layer = data.layers[0];
 
           if (layer) {
-            const { geoviewLayerType, layerEntries, name, url, id } = layer;
+            const { geoviewLayerType, listOfLayerEntryConfig, name, url, id, serverType } = layer;
 
             const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
@@ -70,19 +70,24 @@ export class UUIDmapConfigReader {
                   fr: url,
                 },
                 geoviewLayerType,
-                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.index },
-                    layerEntryType: 'image',
-                    source: { sourceType: 'ESRI' } as TypeSourceImageEsriInitialConfig,
+                    source: {
+                      sourceType: 'ESRI',
+                      accessPath: {
+                        en: url,
+                        fr: url,
+                      },
+                    } as TypeSourceImageEsriInitialConfig,
                   } as TypeImageLayerEntryConfig;
                 }),
               } as TypeEsriDynamicLayerConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             } else if (isFeature) {
-              for (let j = 0; j < layerEntries.length; j++) {
-                const featureUrl = `${url}/${layerEntries[j].index}`;
+              for (let j = 0; j < listOfLayerEntryConfig.length; j++) {
+                const featureUrl = `${url}/${listOfLayerEntryConfig[j].index}`;
                 const layerConfig: TypeEsriFeatureLayerConfig = {
                   id,
                   name: {
@@ -95,7 +100,7 @@ export class UUIDmapConfigReader {
                   },
                   geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
                 } as TypeEsriFeatureLayerConfig;
-                geoviewLayerConfigList.push(layerConfig);
+                listOfGeoviewLayerConfig.push(layerConfig);
               }
             } else if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
               const layerConfig: TypeEsriFeatureLayerConfig = {
@@ -110,7 +115,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType,
               } as TypeEsriFeatureLayerConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.WMS) {
               const layerConfig: TypeWMSLayerConfig = {
                 id,
@@ -123,16 +128,22 @@ export class UUIDmapConfigReader {
                   fr: url,
                 },
                 geoviewLayerType,
-                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.id },
-                    layerEntryType: 'image',
-                    source: { sourceType: 'WMS' } as TypeSourceImageWmsInitialConfig,
+                    source: {
+                      sourceType: 'WMS',
+                      accessPath: {
+                        en: url,
+                        fr: url,
+                      },
+                      serverType: typeof serverType === 'undefined' ? 'mapserver' : serverType,
+                    } as TypeSourceImageWmsInitialConfig,
                   } as TypeImageLayerEntryConfig;
                 }),
               } as TypeWMSLayerConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.WFS) {
               const layerConfig: TypeWFSLayerConfig = {
                 id,
@@ -145,16 +156,15 @@ export class UUIDmapConfigReader {
                   fr: url,
                 },
                 geoviewLayerType,
-                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.id },
-                    layerEntryType: 'vector',
                     source: { format: 'WFS' } as TypeSourceWFSVectorInitialConfig,
                   } as TypeWFSLayerEntryConfig;
                 }),
               } as TypeWFSLayerConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE) {
               const layerConfig: TypeOgcFeatureLayerConfig = {
                 id,
@@ -167,16 +177,15 @@ export class UUIDmapConfigReader {
                   fr: url,
                 },
                 geoviewLayerType,
-                layerEntries: (layerEntries as TypeJsonArray).map((item) => {
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
                   return {
                     geoviewLayerParent: layerConfig,
                     info: { layerId: item.id },
-                    layerEntryType: 'vector',
                     source: { format: 'featureAPI' } as TypeSourceOgcFeatureInitialConfig,
                   } as TypeOgcFeatureLayerEntryConfig;
                 }),
               } as TypeOgcFeatureLayerConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.GEOJSON) {
               const layerConfig: TypeGeoJSONLayerConfig = {
                 id,
@@ -190,7 +199,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType,
               } as TypeGeoJSONLayerConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) {
               const layerConfig: TypeXYZTilesConfig = {
                 id,
@@ -204,14 +213,14 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType,
               } as TypeXYZTilesConfig;
-              geoviewLayerConfigList.push(layerConfig);
+              listOfGeoviewLayerConfig.push(layerConfig);
             }
           }
         }
       }
     }
 
-    return geoviewLayerConfigList;
+    return listOfGeoviewLayerConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -222,7 +231,7 @@ export class UUIDmapConfigReader {
    *
    * @returns {Promise<TypeGeoviewLayerConfig>} layers parsed from uuid result
    */
-  static async getGVlayersConfigFromUUID(mapId: string, requestUrl: string): Promise<TypeGeoviewLayerConfigList> {
+  static async getGVlayersConfigFromUUID(mapId: string, requestUrl: string): Promise<TypeListOfGeoviewLayerConfig> {
     try {
       const result = await axios.get<TypeJsonObject>(requestUrl);
 

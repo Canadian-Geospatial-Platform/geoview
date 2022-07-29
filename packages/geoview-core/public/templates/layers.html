@@ -71,21 +71,28 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
                 'id': 'wmsLYR1',
                 'name': {
                   'en': 'Topographic OSM WMS',
                   'fr': 'Topographic OSM WMS'
                 },
-                'url': {
+                'accessPath': {
                   'en': 'https://ows.mundialis.de/services/service?',
                   'fr': 'https://ows.mundialis.de/services/service?'
                 },
-                'layerType': 'ogcWms',
-                'layerEntries': [
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [
                   {
-                    'id': 'TOPO-OSM-WMS'
+                    'info': { 'layerId': 'TOPO-OSM-WMS' },
+                    'source': {
+                      'serverType': 'mapserver',
+                      'accessPath': {
+                        'en': 'https://ows.mundialis.de/services/service?',
+                        'fr': 'https://ows.mundialis.de/services/service?'
+                      }
+                    }
                   }
                 ]
               }
@@ -112,36 +119,46 @@
         class="llwp-map"
         data-lang="en-CA"
         data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'zoom': 4,
-            'center': [-100, 60],
-            'projection': 3857
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'id': 'xyzTilesLYR2',
+                'name': {
+                  'en': 'statmen toner',
+                  'fr': 'statmen toner'
+                },
+                'accessPath': {
+                  'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
+                  'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                },
+                'geoviewLayerType': 'xyzTiles',
+                'listOfLayerEntryConfig': [
+                  {
+                    'source': {
+                      'accessPath': {
+                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
+                        'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           },
-          'basemapOptions': {
-            'id': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'layers': [
-            {
-              'id': 'xyzTilesLYR2',
-              'name': {
-                'en': 'statmen toner',
-                'fr': 'statmen toner'
-              },
-              'url': {
-                'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
-                'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
-              },
-              'layerType': 'xyzTiles'
-            }
-          ]
-        },
-        'theme': 'dark',
-        'suportedLanguages': ['en-CA']
-      }"
+          'theme': 'dark',
+          'suportedLanguages': ['en-CA']
+        }"
       ></div>
 
       <p>This map has a XYZ Tiles layer added from configuration.</p>
@@ -170,24 +187,34 @@
               'shaded': true,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
                 'id': 'esriDynamicLYR3',
                 'name': {
                   'en': 'Senior care facilities on April 2020',
                   'fr': 'Senior care facilities on April 2020'
                 },
-                'url': {
+                'accessPath': {
                   'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer',
                   'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
                 },
-                'layerType': 'esriDynamic',
-                'layerEntries': [
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
                   {
-                    'index': 0
+                    'source': {
+                      'accessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
+                        'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
+                            }
+                    }
                   },
                   {
-                    'index': 1
+                    'source': {
+                      'accessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1',
+                        'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1'
+                            }
+                    }
                   }
                 ]
               }
@@ -225,18 +252,29 @@
               'shaded': true,
               'labeled': false
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
                 'id': 'esriFeatureLYR4',
                 'name': {
                   'en': 'Senior care facilities by province and territory',
                   'fr': 'Senior care facilities by province and territory'
                 },
-                'url': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
+                'accessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer',
+                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
                 },
-                'layerType': 'esriFeature'
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'source': {
+                      'format': 'EsriJSON',
+                      'accessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
+                        'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -268,18 +306,29 @@
               'shaded': true,
               'labeled': false
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
                 'id': 'geojsonLYR5',
                 'name': {
                   'en': 'GeoJSON Sample',
                   'fr': 'Exemple GeoJSON'
                 },
-                'url': {
+                'accessPath': {
                   'en': './geojson/polygons.json',
                   'fr': './geojson/polygons.json'
                 },
-                'layerType': 'geojson'
+                'geoviewLayerType': 'geojson',
+                'listOfLayerEntryConfig': [
+                  {
+                    'source': {
+                      'format': 'GeoJSON',
+                      'accessPath': {
+                        'en': './geojson/polygons.json',
+                        'fr': './geojson/polygons.json'
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -315,21 +364,27 @@
             'shaded': false,
             'labeled': true
           },
-          'layers': [
+          'listOfGeoviewLayerConfig': [
             {
               'id': 'wfsLYR6',
               'name': {
                 'en': 'Airport data',
                 'fr': 'Airport data'
               },
-              'url': {
+              'accessPath': {
                 'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
                 'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
               },
-              'layerType': 'ogcWfs',
-              'layerEntries': [
+              'geoviewLayerType': 'ogcWfs',
+              'listOfLayerEntryConfig': [
                 {
-                  'id': 'GISDATA.AIRPORTS_PT'
+                  'source': {
+                    'format': 'WFS',
+                    'accessPath': {
+                      'en': 'GISDATA.AIRPORTS_PT',
+                      'fr': 'GISDATA.AIRPORTS_PT'
+                    }
+                  }
                 }
               ]
             }
@@ -363,21 +418,27 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
                 'id': 'ogcFeatureLYR7',
                 'name': {
                   'en': 'Large Lakes',
                   'fr': 'Large Lakes'
                 },
-                'url': {
+                'accessPath': {
                   'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
                   'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
                 },
-                'layerType': 'ogcFeature',
-                'layerEntries': [
+                'geoviewLayerType': 'ogcFeature',
+                'listOfLayerEntryConfig': [
                   {
-                    'id': 'lakes'
+                    'source': {
+                      'format': 'featureAPI',
+                      'accessPath': {
+                        'en': 'lakes',
+                        'fr': 'lakes'
+                      }
+                    }
                   }
                 ]
               }
@@ -412,10 +473,15 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
-                'layerType': 'geoCore'
+                'id': 'ogcFeatureLYR7',
+                'geoviewLayerType': 'geoCore',
+                'listOfLayerEntryConfig': [
+                  {
+                    'info': { 'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9' }
+                  }
+                ]
               }
             ]
           },

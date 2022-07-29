@@ -1,6 +1,6 @@
 import { TypeBasemapOptions } from '../../../../geo/layer/basemap/basemap-types';
 import {
-  TypeGeoviewLayerConfigList,
+  TypeListOfGeoviewLayerConfig,
   TypeInteraction,
   TypeLocalizedLanguages,
   TypeMapCorePackages,
@@ -125,12 +125,12 @@ export class URLmapConfigReader {
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
-      let geoviewLayerConfigList: TypeGeoviewLayerConfigList = [];
+      let listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = [];
 
       // get layer information from catalog using their uuid's if any passed from url params
       if (urlParams.keys) {
         const requestUrl = `${catalogUrl}/${displayLanguage.split('-')[0]}/${urlParams.keys}`;
-        geoviewLayerConfigList = await UUIDmapConfigReader.getGVlayersConfigFromUUID(mapId, requestUrl);
+        listOfGeoviewLayerConfig = await UUIDmapConfigReader.getGVlayersConfigFromUUID(mapId, requestUrl);
       }
 
       // get core packages if any
@@ -149,7 +149,7 @@ export class URLmapConfigReader {
             projection: parseInt(urlParams.p as string, 10) as TypeProjectionCodes,
           },
           basemapOptions,
-          geoviewLayerConfigList,
+          listOfGeoviewLayerConfig,
           extraOptions: {},
         },
         suportedLanguages: ['en-CA', 'fr-CA'],

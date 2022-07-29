@@ -20,9 +20,9 @@ export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEnt
   source: TypeSourceEsriFeatureInitialConfig;
 }
 
-export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'layerEntries' | 'geoviewLayerType'> {
+export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'esriFeature';
-  layerEntries?: TypeEsriFeatureLayerEntryConfig[];
+  listOfLayerEntryConfig?: TypeEsriFeatureLayerEntryConfig[];
 }
 
 /** ******************************************************************************************************************************
@@ -62,7 +62,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsEsriFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 // ******************************************************************************************************************************

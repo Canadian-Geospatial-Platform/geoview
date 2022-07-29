@@ -10,8 +10,8 @@ export const catalogUrl = 'https://maps.canada.ca/geonetwork/srv/api/v2/docs';
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
- * Class to handle configuration validation. Will validate every item for structure and valid values. If error found, will replace by default values
- * and sent a message in the console for developers to know something went wrong
+ * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
+ * If error found, will replace by default values and sent a message in the console for developers to know something went wrong.
  *
  * @exports
  * @class Config
@@ -27,6 +27,8 @@ export class Config {
   /** ***************************************************************************************************************************
    * The Config class constructor used to instanciate an object of this type.
    * @param {Element} mapElement The map element.
+   *
+   * @returns {Config} An instance of the Config class.
    */
   constructor(mapElement: Element) {
     this.mapElement = mapElement;
@@ -37,6 +39,8 @@ export class Config {
 
   /** ***************************************************************************************************************************
    * Get mapId value.
+   *
+   * @returns {string} The ID of the Geoview map.
    */
   get mapId(): string {
     return this.configValidation.mapId;
@@ -44,6 +48,7 @@ export class Config {
 
   /** ***************************************************************************************************************************
    * Set mapId value.
+   * @param {string} mapId The ID of the Geoview map.
    */
   set mapId(mapId: string) {
     this.configValidation.mapId = mapId;
@@ -51,6 +56,8 @@ export class Config {
 
   /** ***************************************************************************************************************************
    * Get displayLanguage value.
+   *
+   * @returns {TypeLocalizedLanguages} The display language of the Geoview map.
    */
   get displayLanguage(): TypeLocalizedLanguages {
     return this.configValidation.displayLanguage;
@@ -58,17 +65,18 @@ export class Config {
 
   /** ***************************************************************************************************************************
    * Set displayLanguage value.
+   * @param {TypeLocalizedLanguages} displayLanguage The display language of the Geoview map.
    */
   set displayLanguage(displayLanguage: TypeLocalizedLanguages) {
     this.configValidation.displayLanguage = displayLanguage;
   }
 
   /** ***************************************************************************************************************************
-   * Get map properties configuration from a function call
+   * Get map properties configuration from a function call.
    *
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig config object passed in the function
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig Config object passed in the function.
    *
-   * @returns {TypeMapFeaturesConfig} a valid map config
+   * @returns {TypeMapFeaturesConfig} A valid map config.
    */
   getMapConfigFromFunc(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig | undefined {
     // get the id from the map element
@@ -87,9 +95,9 @@ export class Config {
   }
 
   /** ***************************************************************************************************************************
-   * Initialize a map config from either inline div, url params, json file
+   * Initialize a map config from either inline div, url params, json file.
    *
-   * @returns {TypeMapFeaturesConfig} the initialized valid map config
+   * @returns {Promise<TypeMapFeaturesConfig | undefined>} The initialized valid map config.
    */
   async initializeMapConfig(): Promise<TypeMapFeaturesConfig | undefined> {
     // get the id from the map element

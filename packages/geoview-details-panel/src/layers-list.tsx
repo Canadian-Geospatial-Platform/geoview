@@ -87,10 +87,10 @@ function LayersList(props: TypeLayersListProps): JSX.Element {
    * @param {number} layerKey the layer object to list it's entries
    */
   const goToFeatureList = (data: AbstractGeoViewLayer, layerKey: number) => {
-    const { layerData, displayField, fieldAliases, renderer } = data.layerEntries[layerKey];
+    const { layerData, displayField, fieldAliases, renderer } = data.listOfLayerEntryConfig[layerKey];
 
     // set the layer entry data
-    selectLayer(data.layerEntries[layerKey]);
+    selectLayer(data.listOfLayerEntryConfig[layerKey]);
 
     // check if the layer has only one entry
     if (layerData.length === 1) {

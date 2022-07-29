@@ -49,7 +49,7 @@ export class ConfigValidation {
         shaded: true,
         labeled: true,
       },
-      geoviewLayerConfigList: [],
+      listOfGeoviewLayerConfig: [],
       extraOptions: {},
     },
     theme: 'dark',
@@ -57,7 +57,7 @@ export class ConfigValidation {
     corePackages: [],
     displayLanguage: 'en-CA',
     suportedLanguages: ['en-CA', 'fr-CA'],
-    version: '2.0',
+    version: '1.0',
   };
 
   // valid basemap ids
@@ -97,6 +97,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Get map features configuration object.
+   *
+   * @returns {TypeMapFeaturesConfig} The map features configuration.
    */
   get defaultMapFeaturesConfig(): TypeMapFeaturesConfig {
     return this._defaultMapFeaturesConfig;
@@ -104,6 +106,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Get mapId value.
+   *
+   * @returns {string} The ID of the Geoview map.
    */
   get mapId(): string {
     return this._mapId;
@@ -111,6 +115,7 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Set mapId value.
+   * @param {string} mapId The ID of the Geoview map.
    */
   set mapId(mapId: string) {
     this._mapId = mapId;
@@ -118,6 +123,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Get displayLanguage value.
+   *
+   * @returns {TypeLocalizedLanguages} The display language of the Geoview map.
    */
   get displayLanguage(): TypeLocalizedLanguages {
     return this._displayLanguage;
@@ -125,16 +132,18 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Set displayLanguage value.
+   * @param {TypeLocalizedLanguages} displayLanguage The display language of the Geoview map.
    */
   set displayLanguage(displayLanguage: TypeLocalizedLanguages) {
     this._displayLanguage = this.validateLanguage(displayLanguage);
   }
 
   /** ***************************************************************************************************************************
-   * Validate basemap options
-   * @param {TypeProjectionCodes} projection Valid projection code
-   * @param {TypeBasemapOptions} basemapOptions basemap options
-   * @returns {TypeBasemapOptions} valid basemap options
+   * Validate basemap options.
+   * @param {TypeProjectionCodes} projection The projection code of the basemap.
+   * @param {TypeBasemapOptions} basemapOptions The basemap options to validate.
+   *
+   * @returns {TypeBasemapOptions} A valid basemap options.
    */
   validateBasemap(projection?: TypeProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions {
     if (typeof projection !== 'undefined' && basemapOptions) {
@@ -155,8 +164,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate map version.
-   * @param {TypeValidVersions} version provided version
-   * @returns {TypeValidVersions} valid version
+   * @param {TypeValidVersions} version The version to validate.
+   *
+   * @returns {TypeValidVersions} A valid version.
    */
   validateVersion(version?: TypeValidVersions): TypeValidVersions {
     return typeof version === 'undefined' || !VALID_VERSIONS.includes(version) ? this._defaultMapFeaturesConfig.version! : version;
@@ -164,8 +174,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate map config language.
-   * @param {TypeLocalizedLanguages} language provided language
-   * @returns {TypeLocalizedLanguages} valid language
+   * @param {TypeLocalizedLanguages} language The language to validate.
+   *
+   * @returns {TypeLocalizedLanguages} A valid language.
    */
   validateLanguage(language?: TypeLocalizedLanguages): TypeLocalizedLanguages {
     if (typeof language === 'undefined' || !VALID_LOCALIZED_LANGUAGES.includes(language)) {
@@ -178,9 +189,10 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Validate zoom level
-   * @param {number} zoom provided zoom level
-   * @returns {number} valid zoom level
+   * Validate zoom level.
+   * @param {number} zoom The zoom level to validate.
+   *
+   * @returns {number} A valid zoom level.
    */
   private validateZoom(zoom?: number): number {
     return typeof zoom === 'undefined' || Number.isNaN(zoom) || zoom < 0 || zoom > 18
@@ -189,10 +201,10 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Validate projection
-   * @param {TypeProjectionCodes} projection provided projection
+   * Validate projection.
+   * @param {TypeProjectionCodes} projection The projection to validate.
    *
-   * @returns {TypeProjectionCodes} valid projection
+   * @returns {TypeProjectionCodes} A valid projection.
    */
   private validateProjection(projection?: TypeProjectionCodes): TypeProjectionCodes {
     return typeof projection === 'undefined' || !VALID_PROJECTION_CODES.includes(projection)
@@ -201,10 +213,11 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Validate the center
-   * @param {TypeProjectionCodes} projection valid projection
-   * @param {Coordinate} center center of the map
-   * @returns {Coordinate} valid center of the map
+   * Validate the center.
+   * @param {TypeProjectionCodes} projection The projection used by the map.
+   * @param {Coordinate} center The map center to valdate.
+   *
+   * @returns {Coordinate} A valid map center.
    */
   private validateCenter(projection?: TypeProjectionCodes, center?: [number, number]): [number, number] {
     if (typeof projection !== 'undefined' && center) {
@@ -227,6 +240,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the map features configuration.
+   * @param {mapFeaturesConfigToValidate} projection The map features configuration to validate.
+   *
+   * @returns {Coordinate} A valid map features configuration.
    */
   validateMapConfigAgainstSchema(mapFeaturesConfigToValidate?: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     let validMapFeaturesConfig: TypeMapFeaturesConfig | undefined;
@@ -248,7 +264,8 @@ export class ConfigValidation {
       if (!valid && validate.errors && validate.errors.length) {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
-          console.log(error);
+          console.log(this.mapId, error);
+          console.log(mapFeaturesConfigToValidate);
 
           setTimeout(() => {
             const errorMessage = `Map ${this.mapId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
@@ -287,9 +304,9 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Adjust the map features configuration to make it valid.
-   * @param {TypeMapFeaturesConfig} config configuration object to validate
+   * @param {TypeMapFeaturesConfig} config The map features configuration to adjust.
    *
-   * @returns {TypeMapFeaturesConfig} valid JSON configuration object
+   * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
    */
   private adjustMapConfiguration(mapFeaturesConfigToAdjuste: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     // merge default and provided configuration in a temporary object.
@@ -315,7 +332,7 @@ export class ConfigValidation {
           projection,
         },
         interaction: tempMapFeaturesConfig.map.interaction,
-        geoviewLayerConfigList: tempMapFeaturesConfig.map.geoviewLayerConfigList,
+        listOfGeoviewLayerConfig: tempMapFeaturesConfig.map.listOfGeoviewLayerConfig,
         extraOptions: tempMapFeaturesConfig.map.extraOptions,
       },
       theme: tempMapFeaturesConfig.theme,
@@ -333,9 +350,9 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Log modifications made to configuration by the validator
-   * @param {TypeMapFeaturesConfig} inputMapFeaturesConfig input config
-   * @param {TypeMapFeaturesConfig} validMapFeaturesConfig valid config
+   * Log modifications made to configuration by the validator.
+   * @param {TypeMapFeaturesConfig} inputMapFeaturesConfig input config.
+   * @param {TypeMapFeaturesConfig} validMapFeaturesConfig valid config.
    */
   private logModifs(inputMapFeaturesConfig: TypeMapFeaturesConfig, validMapFeaturesConfig: TypeMapFeaturesConfig): void {
     // eslint-disable-next-line array-callback-return
