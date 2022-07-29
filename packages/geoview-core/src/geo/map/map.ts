@@ -280,7 +280,7 @@ export class MapViewer {
    * @returns {TypeLanguagesPrefix} returns the language code prefix from localized language. Ex: en, fr
    */
   getLanguageCodePrefix = (): TypeLanguagesPrefix => {
-    return this.displayLanguage[0].split('-')[0] as TypeLanguagesPrefix;
+    return this.displayLanguage.split('-')[0] as TypeLanguagesPrefix;
   };
 
   /**

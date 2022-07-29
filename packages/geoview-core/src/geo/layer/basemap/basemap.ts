@@ -65,12 +65,7 @@ export class Basemap {
    * @param {TypeProjectionCodes} projection projection number
    * @param {string} mapId the map id
    */
-  constructor(
-    basemapOptions: TypeBasemapOptions,
-    displayLanguage: TypeLocalizedLanguages,
-    projection: TypeProjectionCodes,
-    mapId: string
-  ) {
+  constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeLocalizedLanguages, projection: TypeProjectionCodes, mapId: string) {
     this.#mapId = mapId;
 
     this.basemapOptions = basemapOptions;

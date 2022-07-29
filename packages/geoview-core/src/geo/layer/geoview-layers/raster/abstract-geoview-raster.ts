@@ -57,7 +57,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
           this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
           this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
         } else {
-          this.layerLoadError.push(this.listOfLayerEntryConfig[0].info.layerId);
+          this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
         }
       } else {
         this.gvLayers = new LayerGroup({
@@ -70,7 +70,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
             this.registerToPanels(layerEntry, rasterLayer);
             (this.gvLayers as LayerGroup).getLayers().push(rasterLayer);
           } else {
-            this.layerLoadError.push(this.listOfLayerEntryConfig[0].info.layerId);
+            this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
           }
         });
       }
