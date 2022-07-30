@@ -13,7 +13,7 @@ import { TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
-import { TypeLocalizedLanguages, TypeProjectionCodes } from '../../map/map-types';
+import { TypeLocalizedLanguages, TypeProjectionCodes } from '../../map/map-schema-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and

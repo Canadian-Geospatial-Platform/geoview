@@ -1,8 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
 
 import { generateId } from '../../../core/utils/utilities';
-import { TypeGeoviewLayerConfig } from '../../map/map-types';
-import { TypeListOfLayerEntryConfig, TypeLocalizedString } from './schema-types';
+import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString } from '../../map/map-schema-types';
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types

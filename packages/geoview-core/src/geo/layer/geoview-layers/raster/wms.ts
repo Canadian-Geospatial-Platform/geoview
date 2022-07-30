@@ -11,8 +11,12 @@ import { TypeJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig } from '../schema-types';
-import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+import {
+  TypeImageLayerEntryConfig,
+  TypeLayerEntryConfig,
+  TypeSourceImageWmsInitialConfig,
+  TypeGeoviewLayerConfig,
+} from '../../../map/map-schema-types';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;

@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeProjectionCodes } from '../../../geo/map/map-types';
+import { TypeProjectionCodes } from '../../../geo/map/map-schema-types';
 
 /** Valid events that can create MapViewProjectionPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE];

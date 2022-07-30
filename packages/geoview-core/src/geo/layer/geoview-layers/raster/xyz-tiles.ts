@@ -6,8 +6,12 @@ import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoViewLayers } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig } from '../schema-types';
-import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+import {
+  TypeLayerEntryConfig,
+  TypeSourceTileInitialConfig,
+  TypeTileLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+} from '../../../map/map-schema-types';
 
 // TODO: Implement method to validate XYZ tile service
 //

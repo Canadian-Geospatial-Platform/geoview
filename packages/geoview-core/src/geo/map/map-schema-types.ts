@@ -257,11 +257,6 @@ export type TypeClassBreakStyleConfig = {
 export type TypeStyleConfig = TypeSimpleStyleConfig | TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig;
 
 /** ******************************************************************************************************************************
- * Type of vector layer.
- */
-export type TypeOfVectorLayerEntry = 'vector' | 'vectorHeatmap' | 'vectorTile';
-
-/** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
 export type TypeBaseVectorLayerEntryConfig = {
@@ -272,7 +267,7 @@ export type TypeBaseVectorLayerEntryConfig = {
   /** Initial settings to apply to the GeoView layer at creation time. */
   initialSettings?: TypeLayerInitialConfig;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source: TypeBaseVectorSourceInitialConfig; // YC: delete this comment TypeVectorSourceInitialConfig | TypeVectorTileSourceInitialConfig;
+  source: TypeBaseVectorSourceInitialConfig;
 };
 
 /** ******************************************************************************************************************************
@@ -318,11 +313,6 @@ export type TypeBaseSourceImageInitialConfig = {
 };
 
 /** ******************************************************************************************************************************
- * Type that defines the image layer source formats.
- */
-export type TypeImageSourceFormats = 'WMS' | 'ESRI';
-
-/** ******************************************************************************************************************************
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInitialConfig {
@@ -344,11 +334,6 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceImageIni
    */
   transparent?: boolean;
 }
-
-/** ******************************************************************************************************************************
- * Type that defines the image layer source formats.
- */
-export type TypeTileSourceFormats = 'XYZ' | 'GeoTIFF';
 
 /** ******************************************************************************************************************************
  * Definition of the tile grid structure.

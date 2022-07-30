@@ -5,7 +5,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
-import { TypeLocalizedLanguages } from '../../geo/map/map-types';
+import { TypeLocalizedLanguages } from '../../geo/map/map-schema-types';
 
 /** ******************************************************************************************************************************
  * constant/interface used to define the precision for date object (yyyy, mm, dd).

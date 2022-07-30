@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeLayerEntryConfig } from '../schema-types';
+import { TypeLayerEntryConfig } from '../../../map/map-schema-types';
 
 /** ******************************************************************************************************************************
  * AbstractGeoViewRaster types

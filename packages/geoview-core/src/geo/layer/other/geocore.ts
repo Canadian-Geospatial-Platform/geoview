@@ -1,7 +1,6 @@
 import { api } from '../../../app';
 import { catalogUrl } from '../../../core/utils/config/config';
-import { TypeGeoviewLayerConfig } from '../../map/map-types';
-import { TypeGeoCoreLayerEntryConfig } from '../geoview-layers/schema-types';
+import { TypeGeoviewLayerConfig, TypeGeoCoreLayerEntryConfig } from '../../map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
 import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
 

@@ -22,7 +22,7 @@ import { CircularProgress, Modal, Snackbar } from '../../ui';
 import { payloadIsAMapComponent } from '../../api/events/payloads/map-component-payload';
 import { payloadIsAMap } from '../../api/events/payloads/map-payload';
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
-import { TypeMapFeaturesConfig } from '../../geo/map/map-types';
+import { TypeMapFeaturesConfig } from '../../geo/map/map-schema-types';
 
 const useStyles = makeStyles((theme) => {
   return {

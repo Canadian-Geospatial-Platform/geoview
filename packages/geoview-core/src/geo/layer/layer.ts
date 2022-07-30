@@ -10,7 +10,7 @@ import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payl
 import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig } from '../map/map-types';
+import { TypeGeoviewLayerConfig } from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
 import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
 import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';

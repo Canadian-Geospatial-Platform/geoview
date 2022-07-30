@@ -6,7 +6,8 @@ import {
   TypeImageLayerEntryConfig,
   TypeSourceImageEsriInitialConfig,
   TypeSourceImageWmsInitialConfig,
-} from '../../../../geo/layer/geoview-layers/schema-types';
+  TypeListOfGeoviewLayerConfig,
+} from '../../../../geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import { TypeEsriDynamicLayerConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
@@ -23,7 +24,6 @@ import {
 } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
 import { TypeXYZTilesConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
-import { TypeListOfGeoviewLayerConfig } from '../../../../geo/map/map-types';
 import { api } from '../../../../app';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';

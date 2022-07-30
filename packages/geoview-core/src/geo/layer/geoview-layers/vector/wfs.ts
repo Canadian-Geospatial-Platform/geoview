@@ -5,8 +5,12 @@ import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-typ
 import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig } from '../schema-types';
-import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+import {
+  TypeLayerEntryConfig,
+  TypeVectorLayerEntryConfig,
+  TypeVectorSourceInitialConfig,
+  TypeGeoviewLayerConfig,
+} from '../../../map/map-schema-types';
 
 import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 

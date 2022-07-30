@@ -7,7 +7,7 @@ import {
   TypeMapFeaturesConfig,
   TypeProjectionCodes,
   TypeValidVersions,
-} from '../../../../geo/map/map-types';
+} from '../../../../geo/map/map-schema-types';
 import { Cast, TypeJsonObject, TypeJsonValue } from '../../../types/global-types';
 import { catalogUrl } from '../config';
 import { UUIDmapConfigReader } from './uuid-config-reader';
@@ -117,8 +117,8 @@ export class URLmapConfigReader {
       if (displayLanguage) displayLanguage = configValidation.validateLanguage(displayLanguage);
 
       // update the version if provided from the map configuration.
-      let version = urlParams.v as TypeJsonValue as TypeValidVersions;
-      if (version) version = configValidation.validateVersion(version);
+      let versionUsed = urlParams.v as TypeJsonValue as TypeValidVersions;
+      if (versionUsed) versionUsed = configValidation.validateVersion(versionUsed);
 
       let center = (urlParams.c as string).split(',');
       if (!center) center = ['0', '0'];
@@ -154,7 +154,7 @@ export class URLmapConfigReader {
         },
         suportedLanguages: ['en-CA', 'fr-CA'],
         corePackages,
-        version,
+        versionUsed,
       };
     }
 

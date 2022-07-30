@@ -32,7 +32,7 @@ import {
   TypeLocalizedLanguages,
   TypeMapFeaturesConfig,
   TypeViewSettings,
-} from './map-types';
+} from './map-schema-types';
 import { TypeHTMLElement } from '../../core/types/global-types';
 
 interface TypeDcoument extends Document {

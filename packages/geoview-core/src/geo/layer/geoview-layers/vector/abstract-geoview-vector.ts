@@ -15,7 +15,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig } from '../schema-types';
+import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig } from '../../../map/map-schema-types';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';

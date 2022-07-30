@@ -12,8 +12,12 @@ import { api } from '../../../../app';
 import { getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageEsriInitialConfig } from '../schema-types';
-import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+import {
+  TypeImageLayerEntryConfig,
+  TypeLayerEntryConfig,
+  TypeSourceImageEsriInitialConfig,
+  TypeGeoviewLayerConfig,
+} from '../../../map/map-schema-types';
 
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;

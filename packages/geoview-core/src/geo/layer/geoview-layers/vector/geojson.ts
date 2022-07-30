@@ -4,8 +4,12 @@ import { asArray, asString } from 'ol/color';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig } from '../schema-types';
-import { TypeGeoviewLayerConfig } from '../../../map/map-types';
+import {
+  TypeLayerEntryConfig,
+  TypeVectorLayerEntryConfig,
+  TypeVectorSourceInitialConfig,
+  TypeGeoviewLayerConfig,
+} from '../../../map/map-schema-types';
 
 import { setAlphaColor } from '../../../../core/utils/utilities';
 

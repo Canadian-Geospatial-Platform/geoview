@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { TypeLocalizedLanguages, TypeMapFeaturesConfig } from '../../../geo/map/map-types';
+import { TypeLocalizedLanguages, TypeMapFeaturesConfig } from '../../../geo/map/map-schema-types';
 import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
 import { JsonConfigReader } from './reader/json-config-reader';
