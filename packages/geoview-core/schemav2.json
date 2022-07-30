@@ -3,11 +3,11 @@
   "title": "GeoView Core Config Schema",
   "type": "object",
   "version": 1.0,
-  "comments": "Configuration for GeoView core packages, each packages manages it own schema.",
+  "comments": "Configuration for GeoView core packages, each packages manages it own schema. It correspond to the TypeMapFeaturesConfig type defined in the GeoView typescript code.",
   "additionalProperties": false,
 
   "definitions": {
-    "detailsLayerConfig": {
+    "TypeDetailsLayerConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
@@ -47,7 +47,7 @@
           "default": true,
           "description": "Allow querying. Default = true."
         },
-        "customParser": { "$ref": "#/definitions/detailsLayerConfig" },
+        "customParser": { "$ref": "#/definitions/TypeDetailsLayerConfig" },
         "nameField": {
           "additionalProperties": false,
           "type": "object",
@@ -123,7 +123,7 @@
       }
     },
 
-    "fillSymbolConfig": {
+    "TypeFillSymbolConfig": {
       "additionalProperties": false,
       "type": "object",
       "description": "Fill style for vector features.",
@@ -136,7 +136,7 @@
       "required": ["color"]
     },
 
-    "strokeSymbolConfig": {
+    "TypeStrokeSymbolConfig": {
       "additionalProperties": false,
       "type": "object",
       "description": "Stroke style for vector features.",
@@ -151,28 +151,28 @@
       "required": ["color", "width"]
     },
 
-    "simpleSymbolVectorConfig": {
+    "TypeSimpleSymbolVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "fill": { "$ref": "#/definitions/fillSymbolConfig" },
-        "stroke": { "$ref": "#/definitions/strokeSymbolConfig" },
+        "fill": { "$ref": "#/definitions/TypeFillSymbolConfig" },
+        "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" },
         "radius": { "type": "number" }
       }
     },
 
-    "circleSymbolVectorConfig": {
+    "TypeCircleSymbolVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "fill": { "$ref": "#/definitions/fillSymbolConfig" },
-        "stroke": { "$ref": "#/definitions/strokeSymbolConfig" },
+        "fill": { "$ref": "#/definitions/TypeFillSymbolConfig" },
+        "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" },
         "radius": { "type": "number" }
       },
       "required": ["radius"]
     },
 
-    "iconSymbolVectorConfig": {
+    "TypeIconSymbolVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
@@ -209,9 +209,9 @@
         },
         "options": {
           "anyOf": [
-            { "$ref": "#/definitions/simpleSymbolVectorConfig" },
-            { "$ref": "#/definitions/circleSymbolVectorConfig" },
-            { "$ref": "#/definitions/iconSymbolVectorConfig" }
+            { "$ref": "#/definitions/TypeSimpleSymbolVectorConfig" },
+            { "$ref": "#/definitions/TypeCircleSymbolVectorConfig" },
+            { "$ref": "#/definitions/TypeIconSymbolVectorConfig" }
           ]
         }
       },
@@ -254,9 +254,9 @@
             },
             "options": {
               "anyOf": [
-                { "$ref": "#/definitions/simpleSymbolVectorConfig" },
-                { "$ref": "#/definitions/circleSymbolVectorConfig" },
-                { "$ref": "#/definitions/iconSymbolVectorConfig" }
+                { "$ref": "#/definitions/TypeSimpleSymbolVectorConfig" },
+                { "$ref": "#/definitions/TypeCircleSymbolVectorConfig" },
+                { "$ref": "#/definitions/TypeIconSymbolVectorConfig" }
               ]
             }
           },
@@ -299,9 +299,9 @@
             },
             "options": {
               "anyOf": [
-                { "$ref": "#/definitions/simpleSymbolVectorConfig" },
-                { "$ref": "#/definitions/circleSymbolVectorConfig" },
-                { "$ref": "#/definitions/iconSymbolVectorConfig" }
+                { "$ref": "#/definitions/TypeSimpleSymbolVectorConfig" },
+                { "$ref": "#/definitions/TypeCircleSymbolVectorConfig" },
+                { "$ref": "#/definitions/TypeIconSymbolVectorConfig" }
               ]
             }
           },
@@ -819,196 +819,16 @@
       "items": {
         "$ref": "#/definitions/layerEntryConfig"
       }
-    }
-  },
+    },
 
-  "properties": {
-    "additionalProperties": false,
-    "map": {
+    "TypeMapConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "basemapOptions": {
-          "additionalProperties": false,
-          "type": "object",
-          "properties": {
-            "id": {
-              "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
-              "default": "transport",
-              "description": "Id of the basemap to use."
-            },
-            "shaded": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
-            },
-            "labeled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable or disable basemap labels"
-            }
-          },
-          "required": ["id", "shaded", "labeled"]
-        },
-        "interaction": {
-          "enum": ["static", "dynamic"],
-          "default": "dynamic",
-          "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
-        },
-        "listOfGeoviewLayerConfig": {
-          "description": "List of GeoView Layers in the order which they should be added to the map.",
-          "type": "array",
-            "items": {
-            "additionalProperties": false,
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-              },
-              "name": {
-                "additionalProperties": false,
-                "type": "object",
-                "properties": {
-                  "en": {
-                    "type": "string",
-                    "description": "The display name of the layer (English). If it is not present the viewer will make an attempt to scrape this information."
-                  },
-                  "fr": {
-                    "type": "string",
-                    "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
-                  }
-                }
-              },
-              "accessPath": {
-                "additionalProperties": false,
-                "type": "object",
-                "properties": {
-                  "en": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The GeoView layer access path (English)."
-                  },
-                  "fr": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The GeoView layer access path (French)."
-                  }
-                },
-                "required": [
-                  "en",
-                  "fr"
-                ]
-              },
-              "geoviewLayerType": {
-                "type": "string",
-                "items": {
-                  "enum": [
-                    "esriDynamic",
-                    "esriFeature",
-                    "geojson",
-                    "geoCore",
-                    "xyzTiles",
-                    "ogcFeature",
-                    "ogcWfs",
-                    "ogcWms"
-                  ]
-                },
-                "description": "Type of GeoView layer."
-              },
-              "listOfLayerEntryConfig": {
-                "$ref": "#/definitions/listOfLayerEntryConfig",
-                "description": "The layer entries to use from the GeoView layer."
-              }
-            },
-            "required": [
-              "id",
-              "geoviewLayerType",
-              "listOfLayerEntryConfig"
-            ]
-          }
-        },
-        "viewSettings": {
-          "additionalProperties": false,
-          "type": "object",
-          "properties": {
-            "center": {
-              "type": "array",
-              "prefixItems": [
-                {
-                  "type": "number",
-                  "minimum": -160,
-                  "maximum": 160,
-                  "default": -106,
-                  "description": "Initial longitude value for map center."
-                },
-                {
-                  "type": "number",
-                  "minimum": -80,
-                  "maximum": 80,
-                  "default": 60,
-                  "description": "Initial latitude value for map center."
-                }
-              ],
-              "default": [-106, 60]
-            },
-            "enableRotation": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
-            },
-            "extent": {
-              "type": "array",
-              "prefixItems": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ],
-              "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
-            },
-            "minZoom": {
-              "type": "integer",
-              "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
-              "minimum": 0,
-              "maximum": 50
-            },
-            "maxZoom": {
-              "type": "integer",
-              "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
-              "minimum": 0,
-              "maximum": 50
-            },
-            "projection": {
-              "enum": [3978, 3857],
-              "default": 3978,
-              "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
-            },
-            "rotation": {
-              "type": "integer",
-              "minimum": -360,
-              "maximum": 360,
-              "default": 0,
-              "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
-            },
-            "zoom": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 28,
-              "default": 12,
-              "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
-            }
-          },
-          "required": ["zoom", "center"]
-        },
+        "basemapOptions": { "$ref": "#/definitions/TypeBasemapOptions" },
+        "interaction": { "$ref": "#/definitions/TypeInteraction" },
+        "listOfGeoviewLayerConfig": { "$ref": "#/definitions/TypeListOfGeoviewLayerConfig" },
+        "viewSettings": { "$ref": "#/definitions/TypeViewSettings" },
         "extraOptions": {
           "type": "object",
           "description": "Additional options used for OpenLayers map options"
@@ -1016,12 +836,202 @@
       },
       "required": ["basemapOptions", "interaction", "viewSettings"]
     },
-    "theme": {
-      "enum": ["dark", "light"],
-      "default": "dark",
-      "description": "Theme style the viewer."
+
+    "TypeBasemapOptions": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/definitions/TypeBasemapId" },
+        "shaded": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
+        },
+        "labeled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable basemap labels"
+        }
+      },
+      "required": ["id", "shaded", "labeled"]
     },
-    "appBar": {
+
+    "TypeBasemapId": {
+      "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
+      "default": "transport",
+      "description": "Id of the basemap to use."
+    },
+
+    "TypeInteraction": {
+      "enum": ["static", "dynamic"],
+      "default": "dynamic",
+      "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
+    },
+
+    "TypeListOfGeoviewLayerConfig": {
+      "description": "List of GeoView Layers in the order which they should be added to the map.",
+      "type": "array",
+      "additionalProperties": false,
+      "items": {
+        "$ref": "#/definitions/TypeGeoviewLayerConfig"
+      }
+    },
+
+    "TypeGeoviewLayerConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        },
+        "name": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "en": {
+              "type": "string",
+              "description": "The display name of the layer (English). If it is not present the viewer will make an attempt to scrape this information."
+            },
+            "fr": {
+              "type": "string",
+              "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
+            }
+          }
+        },
+        "accessPath": {
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "en": {
+              "type": "string",
+              "default": null,
+              "description": "The GeoView layer access path (English)."
+            },
+            "fr": {
+              "type": "string",
+              "default": null,
+              "description": "The GeoView layer access path (French)."
+            }
+          },
+          "required": [
+            "en",
+            "fr"
+          ]
+        },
+        "geoviewLayerType": {
+          "type": "string",
+          "items": {
+            "enum": [
+              "esriDynamic",
+              "esriFeature",
+              "geojson",
+              "geoCore",
+              "xyzTiles",
+              "ogcFeature",
+              "ogcWfs",
+              "ogcWms"
+            ]
+          },
+          "description": "Type of GeoView layer."
+        },
+        "listOfLayerEntryConfig": {
+          "$ref": "#/definitions/listOfLayerEntryConfig",
+          "description": "The layer entries to use from the GeoView layer."
+        }
+      },
+      "required": [
+        "id",
+        "geoviewLayerType",
+        "listOfLayerEntryConfig"
+      ]
+    },
+
+    "TypeViewSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "center": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "minimum": -160,
+              "maximum": 160,
+              "default": -106,
+              "description": "Initial longitude value for map center."
+            },
+            {
+              "type": "number",
+              "minimum": -80,
+              "maximum": 80,
+              "default": 60,
+              "description": "Initial latitude value for map center."
+            }
+          ],
+          "default": [-106, 60]
+        },
+        "enableRotation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
+        },
+        "extent": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
+        },
+        "minZoom": {
+          "type": "integer",
+          "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "maxZoom": {
+          "type": "integer",
+          "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "projection": { "$ref": "#/definitions/TypeProjectionCodes" },
+        "rotation": {
+          "type": "integer",
+          "minimum": -360,
+          "maximum": 360,
+          "default": 0,
+          "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
+        },
+        "zoom": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 28,
+          "default": 12,
+          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
+        }
+      },
+      "required": ["zoom", "center"]
+    },
+
+    "TypeProjectionCodes": {
+      "enum": [3978, 3857],
+      "default": 3978,
+      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+    },
+
+    "TypeAppBarProps": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
@@ -1044,7 +1054,8 @@
         }
       }
     },
-    "navBar": {
+
+    "TypeNavBarProps": {
       "type": "array",
       "uniqueItems": true,
       "items": {
@@ -1054,7 +1065,8 @@
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
     },
-    "components": {
+
+    "TypeMapComponents": {
       "type": "array",
       "uniqueItems": true,
       "items": {
@@ -1064,7 +1076,8 @@
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },
-    "corePackages": {
+
+    "TypeMapCorePackages": {
       "type": "array",
       "uniqueItems": true,
       "items": {
@@ -1074,7 +1087,8 @@
       "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
       "minItems": 0
     },
-    "externalPackages": {
+
+    "TypeExternalPackages": {
       "type": "array",
       "items": {
         "additionalProperties": false,
@@ -1095,7 +1109,8 @@
       "description": "List of external packages to initialize on viewer load.",
       "minItems": 0
     },
-    "serviceUrls": {
+
+    "TypeServiceUrls": {
       "additionalProperties": false,
       "type": "object",
       "description": "Service endpoint urls",
@@ -1111,25 +1126,43 @@
         }
       }
     },
-    "suportedLanguages": {
+
+    "TypeLocalizedLanguages": {
+      "enum": ["en-CA", "fr-CA"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file."
+    },
+
+    "TypeListOfLocalizedLanguages": {
       "type": "array",
       "uniqueItems": true,
-      "items": {
-        "enum": ["en-CA", "fr-CA"]
-      },
+      "items": { "$ref": "#/definitions/TypeLocalizedLanguages" },
       "default": ["en-CA", "fr-CA"],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.",
       "minItems": 1
     },
-    "displayLanguage": {
-      "description": "The language that will be used to display the GeoView layer.",
-      "type": "string",
-      "default": "en-CA"
-    },
-    "version": {
+
+    "TypeValidVersions": {
       "enum": ["1.0"],
-      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+      "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
+  },
+
+  "properties": {
+    "additionalProperties": false,
+    "map": { "$ref": "#/definitions/TypeMapConfig" },
+    "theme": {
+      "enum": ["dark", "light"],
+      "default": "dark",
+      "description": "Theme style the viewer."
+    },
+    "appBar": { "$ref": "#/definitions/TypeAppBarProps" },
+    "navBar": { "$ref": "#/definitions/TypeNavBarProps" },
+    "components": { "$ref": "#/definitions/TypeMapComponents" },
+    "corePackages": { "$ref": "#/definitions/TypeMapCorePackages" },
+    "externalPackages": { "$ref": "#/definitions/TypeServiceUrls" },
+    "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
+    "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
+    "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
   },
   "required": ["map", "suportedLanguages"]
 }

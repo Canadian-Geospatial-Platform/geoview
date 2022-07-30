@@ -57,7 +57,7 @@ export class ConfigValidation {
     corePackages: [],
     displayLanguage: 'en-CA',
     suportedLanguages: ['en-CA', 'fr-CA'],
-    version: '1.0',
+    versionUsed: '1.0',
   };
 
   // valid basemap ids
@@ -169,7 +169,7 @@ export class ConfigValidation {
    * @returns {TypeValidVersions} A valid version.
    */
   validateVersion(version?: TypeValidVersions): TypeValidVersions {
-    return typeof version === 'undefined' || !VALID_VERSIONS.includes(version) ? this._defaultMapFeaturesConfig.version! : version;
+    return typeof version === 'undefined' || !VALID_VERSIONS.includes(version) ? this._defaultMapFeaturesConfig.versionUsed! : version;
   }
 
   /** ***************************************************************************************************************************
@@ -320,7 +320,7 @@ export class ConfigValidation {
     const center = this.validateCenter(projection, tempMapFeaturesConfig?.map?.viewSettings?.center);
     const zoom = this.validateZoom(tempMapFeaturesConfig?.map?.viewSettings?.zoom);
     const basemapOptions = this.validateBasemap(projection, tempMapFeaturesConfig?.map?.basemapOptions);
-    const version = this.validateVersion(tempMapFeaturesConfig.version);
+    const versionUsed = this.validateVersion(tempMapFeaturesConfig.versionUsed);
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validMapFeaturesConfig: TypeMapFeaturesConfig = {
@@ -342,7 +342,7 @@ export class ConfigValidation {
       displayLanguage: this._displayLanguage,
       appBar: tempMapFeaturesConfig.appBar,
       externalPackages: tempMapFeaturesConfig.externalPackages,
-      version,
+      versionUsed,
     };
     this.logModifs(tempMapFeaturesConfig, validMapFeaturesConfig);
 

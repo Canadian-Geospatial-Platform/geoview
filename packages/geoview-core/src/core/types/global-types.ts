@@ -65,16 +65,6 @@ export type TypeCGPVUI = {
 };
 
 /** ******************************************************************************************************************************
- *  Definition of a bilingual string.
- */
-export type TypeLangString = {
-  /** English value. */
-  en: string;
-  /** French value. */
-  fr: string;
-};
-
-/** ******************************************************************************************************************************
  * Cast a variable to a different type
  *
  * @param {unkown} p a variable to cast to

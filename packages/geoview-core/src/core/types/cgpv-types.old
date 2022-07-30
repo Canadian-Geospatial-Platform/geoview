@@ -7,7 +7,7 @@ import { AnySchemaObject } from 'ajv';
 import { TypeGeoviewLayerConfig, TypeMapFeaturesConfig } from '../../geo/map/map-types';
 import { TypeGeoViewLayers, AbstractGeoViewLayer } from '../../geo/layer/geoview-layers/abstract-geoview-layers';
 
-import { TypeLangString } from './global-types';
+import { TypeLocalizedString } from './global-types';
 
 export * from '../../geo/layer/geoview-layers/abstract-geoview-layers';
 
@@ -109,16 +109,16 @@ export type TypePanelContentProps = {
 
 export type TypeDetailsLayerSettings = {
   parser?: string;
-  template: TypeLangString;
+  template: TypeLocalizedString;
 };
 
 export interface TypeBasicLayer extends TypeGeoviewLayerConfig {
-  metadataUrl?: TypeLangString;
+  metadataUrl?: TypeLocalizedString;
   details?: TypeDetailsLayerSettings;
 }
 
 export interface TypeFeatureLayer extends TypeGeoviewLayerConfig {
-  metadataUrl?: TypeLangString;
+  metadataUrl?: TypeLocalizedString;
   details?: TypeDetailsLayerSettings;
   nameField?: string;
   tooltipField?: string;
@@ -127,7 +127,7 @@ export interface TypeFeatureLayer extends TypeGeoviewLayerConfig {
 
 export type TypeDynamicLayerEntry = {
   index: number;
-  name?: TypeLangString;
+  name?: TypeLocalizedString;
   nameField?: string;
   outfields?: string;
 };
@@ -141,7 +141,7 @@ export interface TypeGeoJSONLayer extends TypeGeoviewLayerConfig {
 
 export type TypeOgcLayerEntry = {
   id: string;
-  name?: TypeLangString;
+  name?: TypeLocalizedString;
   state?: TypeSourceInitialSettingsNode;
 };
 
@@ -154,13 +154,13 @@ export interface TypeWFSLayer extends TypeGeoviewLayerConfig {
 }
 
 export interface TypeWMSLayerConfig extends TypeGeoviewLayerConfig {
-  metadataUrl?: TypeLangString;
+  metadataUrl?: TypeLocalizedString;
   layerEntries: TypeOgcLayerEntry[];
   details?: TypeDetailsLayerSettings;
 }
 
 export interface TypeGeometryEndpointLayer extends TypeGeoviewLayerConfig {
-  name: TypeLangString;
+  name: TypeLocalizedString;
   nameField?: string;
   tooltipField?: string;
   renderer?: TypeJsonObject;
@@ -178,7 +178,7 @@ export interface TypeXYZTiles extends TypeGeoviewLayerConfig {
 }
 
 export interface TypeOgcFeatureLayer extends TypeGeoviewLayerConfig {
-  metadataUrl?: TypeLangString;
+  metadataUrl?: TypeLocalizedString;
   layerEntries: TypeOgcLayerEntry[];
   details?: TypeDetailsLayerSettings;
 }

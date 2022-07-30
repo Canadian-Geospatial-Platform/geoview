@@ -1,5 +1,14 @@
-import { TypeLangString } from '../../../core/types/global-types';
 import { TypeGeoviewLayerConfig, TypeProjectionCodes } from '../../map/map-types';
+
+/** ******************************************************************************************************************************
+ *  Definition of a bilingual string.
+ */
+export type TypeLocalizedString = {
+  /** English value. */
+  en: string;
+  /** French value. */
+  fr: string;
+};
 
 /** ******************************************************************************************************************************
  * Basic type used to identify the layer to display on the map.
@@ -8,9 +17,9 @@ export type TypeLayerBasicInfoConfig = {
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
-  layerName?: TypeLangString;
+  layerName?: TypeLocalizedString;
   /** The metadata url of the layer service (English/French). */
-  metadataUrl?: TypeLangString;
+  metadataUrl?: TypeLocalizedString;
 };
 
 /** ******************************************************************************************************************************
@@ -62,7 +71,7 @@ export type TypeDetailsLayerConfig = {
    */
   parser?: string;
   /** A path to an html template (English/French) that will override default identify output. */
-  template: TypeLangString;
+  template: TypeLocalizedString;
 };
 
 /** ******************************************************************************************************************************
@@ -76,13 +85,13 @@ export type TypeFeatureInfoLayerConfig = {
    * The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.
    */
-  nameField: TypeLangString;
+  nameField: TypeLocalizedString;
   /** The field (English/French) to be used for tooltips. If it is not present the viewer will use nameField (if provided). */
-  tooltipField: TypeLangString;
+  tooltipField: TypeLocalizedString;
   /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
-  outfields: TypeLangString;
+  outfields: TypeLocalizedString;
   /** A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set */
-  aliasFields: TypeLangString;
+  aliasFields: TypeLocalizedString;
 };
 
 /** ******************************************************************************************************************************
@@ -90,7 +99,7 @@ export type TypeFeatureInfoLayerConfig = {
  */
 export type TypeBaseVectorSourceInitialConfig = {
   /** Path used to access the data. */
-  accessPath: TypeLangString;
+  accessPath: TypeLocalizedString;
   /** The feature format used by the XHR feature loader when url is set. */
   format: TypeVectorSourceFormats | 'MVT';
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
@@ -295,7 +304,7 @@ export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | Typ
  */
 export type TypeBaseSourceImageInitialConfig = {
   /** The service endpoint of the layer (English/French). */
-  accessPath: TypeLangString;
+  accessPath: TypeLocalizedString;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -368,7 +377,7 @@ export type TypeTileGrid = {
  */
 export type TypeSourceTileInitialConfig = {
   /** The service endpoint of the layer (English/French). */
-  accessPath: TypeLangString;
+  accessPath: TypeLocalizedString;
   /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    */

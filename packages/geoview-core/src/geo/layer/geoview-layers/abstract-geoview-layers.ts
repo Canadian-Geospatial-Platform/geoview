@@ -1,9 +1,8 @@
 import BaseLayer from 'ol/layer/Base';
 
 import { generateId } from '../../../core/utils/utilities';
-import { TypeLangString } from '../../../core/types/global-types';
 import { TypeGeoviewLayerConfig } from '../../map/map-types';
-import { TypeListOfLayerEntryConfig } from './schema-types';
+import { TypeListOfLayerEntryConfig, TypeLocalizedString } from './schema-types';
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -68,10 +67,10 @@ export abstract class AbstractGeoViewLayer {
   /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
    * undefined, a default value is generated.
    */
-  name: TypeLangString = { en: '', fr: '' };
+  name: TypeLocalizedString = { en: '', fr: '' };
 
   /** The GeoView layer accessPath. The name attribute is optional */
-  accessPath: TypeLangString = { en: '', fr: '' };
+  accessPath: TypeLocalizedString = { en: '', fr: '' };
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
