@@ -11,7 +11,7 @@ import { transformExtent } from 'ol/proj';
 import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
-  TypeGeoViewLayers,
+  TypeGeoviewLayerType,
   TypeGeoJSONLayer,
   TypeGeoviewLayerConfig,
   TypeFilterFeatures,

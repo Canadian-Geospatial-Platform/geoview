@@ -27,7 +27,7 @@ import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
-import { TypeMapFeaturesConfig } from '../../../geo/map/map-schema-types';
+import { TypeMapFeaturesConfig } from '../../types/global-types';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {

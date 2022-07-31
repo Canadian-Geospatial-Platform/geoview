@@ -4,11 +4,10 @@ import {
   TypeInteraction,
   TypeLocalizedLanguages,
   TypeMapCorePackages,
-  TypeMapFeaturesConfig,
   TypeProjectionCodes,
   TypeValidVersions,
 } from '../../../../geo/map/map-schema-types';
-import { Cast, TypeJsonObject, TypeJsonValue } from '../../../types/global-types';
+import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '../../../types/global-types';
 import { catalogUrl } from '../config';
 import { UUIDmapConfigReader } from './uuid-config-reader';
 import { ConfigValidation } from '../config-validation';

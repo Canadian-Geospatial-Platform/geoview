@@ -65,7 +65,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },
@@ -76,7 +76,7 @@ export class UUIDmapConfigReader {
                     info: { layerId: item.index },
                     source: {
                       sourceType: 'ESRI',
-                      accessPath: {
+                      metadataAccessPath: {
                         en: url,
                         fr: url,
                       },
@@ -94,7 +94,7 @@ export class UUIDmapConfigReader {
                     en: name,
                     fr: name,
                   },
-                  accessPath: {
+                  metadataAccessPath: {
                     en: featureUrl,
                     fr: featureUrl,
                   },
@@ -109,7 +109,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },
@@ -123,7 +123,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },
@@ -134,7 +134,7 @@ export class UUIDmapConfigReader {
                     info: { layerId: item.id },
                     source: {
                       sourceType: 'WMS',
-                      accessPath: {
+                      metadataAccessPath: {
                         en: url,
                         fr: url,
                       },
@@ -151,7 +151,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },
@@ -172,7 +172,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },
@@ -193,7 +193,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },
@@ -207,7 +207,7 @@ export class UUIDmapConfigReader {
                   en: name,
                   fr: name,
                 },
-                accessPath: {
+                metadataAccessPath: {
                   en: url,
                   fr: url,
                 },

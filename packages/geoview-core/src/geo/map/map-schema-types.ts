@@ -1,5 +1,5 @@
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
-import { TypeGeoViewLayers } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-layers';
 
 /** ******************************************************************************************************************************
  *  Definition of a bilingual string.
@@ -19,8 +19,6 @@ export type TypeLayerBasicInfoConfig = {
   layerId: string;
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
-  /** The metadata url of the layer service (English/French). */
-  metadataUrl?: TypeLocalizedString;
 };
 
 /** ******************************************************************************************************************************
@@ -100,7 +98,7 @@ export type TypeFeatureInfoLayerConfig = {
  */
 export type TypeBaseVectorSourceInitialConfig = {
   /** Path used to access the data. */
-  accessPath: TypeLocalizedString;
+  dataAccessPath: TypeLocalizedString;
   /** The feature format used by the XHR feature loader when url is set. */
   format: TypeVectorSourceFormats | 'MVT';
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
@@ -257,9 +255,57 @@ export type TypeClassBreakStyleConfig = {
 export type TypeStyleConfig = TypeSimpleStyleConfig | TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig;
 
 /** ******************************************************************************************************************************
+ * Type of Style to apply to the GeoView vector layer source at creation time.
+ */
+export type TypeLayerEntryType = 'vector' | 'raster' | 'geocore';
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeBaseVectorLayerEntryConfig if the entryType attribute of
+ * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeBaseVectorLayerEntryConfig => {
+  return verifyIfLayer.entryType === 'vector';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeBaseVectorLayerEntryConfig if the entryType attribute of
+ * the verifyIfLayer parameter is 'raster'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsRaster = (
+  verifyIfLayer: TypeLayerEntryConfig
+): verifyIfLayer is TypeImageLayerEntryConfig | TypeTileLayerEntryConfig => {
+  return verifyIfLayer.entryType === 'raster';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the entryType attribute of
+ * the verifyIfLayer parameter is 'geocore'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeGeocoreLayerEntryConfig => {
+  return verifyIfLayer.entryType === 'geocore';
+};
+
+/** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
 export type TypeBaseVectorLayerEntryConfig = {
+  /** Layer entry data type. */
+  entryType: TypeLayerEntryType;
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
@@ -300,7 +346,7 @@ export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | Typ
  */
 export type TypeBaseSourceImageInitialConfig = {
   /** The service endpoint of the layer (English/French). */
-  accessPath: TypeLocalizedString;
+  dataAccessPath: TypeLocalizedString;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -363,7 +409,7 @@ export type TypeTileGrid = {
  */
 export type TypeSourceTileInitialConfig = {
   /** The service endpoint of the layer (English/French). */
-  accessPath: TypeLocalizedString;
+  dataAccessPath: TypeLocalizedString;
   /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    */
@@ -422,6 +468,8 @@ export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayer
 export type TypeImageLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** Layer entry data type. */
+  entryType: TypeLayerEntryType;
   /** Basic information used to identify the GeoView layer. */
   info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
@@ -436,6 +484,8 @@ export type TypeImageLayerEntryConfig = {
 export type TypeTileLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** Layer entry data type. */
+  entryType: TypeLayerEntryType;
   /** Basic information used to identify the GeoView layer. */
   info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
@@ -448,17 +498,27 @@ export type TypeTileLayerEntryConfig = {
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
  */
-export type TypeGeoCoreLayerEntryConfig = {
+export type TypeGeocoreLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** Layer entry data type. */
+  entryType: TypeLayerEntryType;
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
    * attribute. The id will have the language extension (id-'lang').
    */
-  info: Pick<TypeLayerBasicInfoConfig, 'layerId' | 'layerName'>;
+  info: TypeLayerBasicInfoConfig;
   /** The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang'). */
   // id: string;
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
-  accessPath?: string;
+  source?: TypeSourceGeocoreConfig;
+};
+
+/** ******************************************************************************************************************************
+ * Initial settings to apply to the GeoView vector layer source at creation time.
+ */
+export type TypeSourceGeocoreConfig = {
+  /** Path used to access the data. */
+  dataAccessPath: TypeLocalizedString;
 };
 
 /** ******************************************************************************************************************************
@@ -471,7 +531,7 @@ export type TypeLayerEntryConfig =
   | TypeVectorLayerEntryConfig
   | TypeImageLayerEntryConfig
   | TypeTileLayerEntryConfig
-  | TypeGeoCoreLayerEntryConfig;
+  | TypeGeocoreLayerEntryConfig;
 
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
@@ -479,14 +539,9 @@ export type TypeLayerEntryConfig =
 export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
 
 /** ******************************************************************************************************************************
- *  Definition of the map properties type according to what is specified in the schema.
+ *  Definition of the map feature configuration according to what is specified in the schema.
  */
-export type TypeMapFeaturesConfig = {
-  /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
-  mapId?: string;
-  /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
-  displayLanguage?: TypeLocalizedLanguages;
-  /** Map configuration */
+export type TypeMapFeaturesInstance = {
   map: TypeMapConfig;
   /** Display theme, default = dark. */
   theme?: 'dark' | 'light';
@@ -574,13 +629,13 @@ export type TypeGeoviewLayerConfig = {
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  name: TypeLocalizedString;
+  name?: TypeLocalizedString;
   /** The GeoView layer access path (English/French). */
-  accessPath: TypeLocalizedString; // ! Question: Is it normal that we have an attribute accessPath here and also in the layerEntry.source?
+  metadataAccessPath?: TypeLocalizedString;
   /** Type of GeoView layer. */
-  geoviewLayerType: TypeGeoViewLayers;
+  geoviewLayerType: TypeGeoviewLayerType;
   /** The layer entries to use from the GeoView layer. */
-  listOfLayerEntryConfig?: TypeListOfLayerEntryConfig;
+  listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
 };
 
 /** ******************************************************************************************************************************

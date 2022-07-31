@@ -102,7 +102,7 @@ export interface TypeGeoJSONLayerEntryConfig extends Omit<TypeVectorLayerEntryCo
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'geojson';
-  listOfLayerEntryConfig?: TypeGeoJSONLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeGeoJSONLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -164,7 +164,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /** ****************************************************************************************************************************
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   getAdditionalServiceDefinition(): void {}

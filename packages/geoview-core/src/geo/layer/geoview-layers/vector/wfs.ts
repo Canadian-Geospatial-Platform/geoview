@@ -103,7 +103,7 @@ export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWfs';
-  listOfLayerEntryConfig?: TypeWFSLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeWFSLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -169,7 +169,7 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /** ****************************************************************************************************************************
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): void {
     this.getWfsCapabilities();
@@ -194,7 +194,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   private async getWfsCapabilities(): Promise<void> {
     let xmlStringCapabilities = '';
-    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?service=WFS&request=getcapabilities`).then(
+    getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?service=WFS&request=getcapabilities`).then(
       (result) => {
         xmlStringCapabilities = result;
       }

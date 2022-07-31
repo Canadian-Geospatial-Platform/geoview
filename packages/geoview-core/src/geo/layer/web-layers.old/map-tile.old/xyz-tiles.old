@@ -8,7 +8,7 @@ import {
   AbstractGeoViewLayer,
   CONST_LAYER_TYPES,
   TypeGeoviewLayerConfig,
-  TypeGeoViewLayers,
+  TypeGeoviewLayers,
   TypeXYZTiles,
 } from '../../../../core/types/cgpv-types';
 
@@ -63,7 +63,7 @@ export class XYZTiles extends AbstractGeoViewLayer {
    * @param {TypeXYZTiles} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeXYZTiles) {
-    super(CONST_LAYER_TYPES.XYZ_TILES as TypeGeoViewLayers, layerConfig, mapId);
+    super(CONST_LAYER_TYPES.XYZ_TILES as TypeGeoviewLayers, layerConfig, mapId);
   }
 
   /**

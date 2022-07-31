@@ -78,7 +78,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   }
 
   /**
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   abstract getAdditionalServiceDefinition(): void;

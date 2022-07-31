@@ -9,14 +9,19 @@ import schema from '../../../../schemav2.json';
 import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import {
+  layerEntryIsGeocore,
+  layerEntryIsVector,
+  TypeGeoviewLayerConfig,
+  TypeLanguagesPrefix,
+  TypeLayerEntryConfig,
   TypeLocalizedLanguages,
-  TypeMapFeaturesConfig,
   TypeProjectionCodes,
   TypeValidVersions,
   VALID_LOCALIZED_LANGUAGES,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
 } from '../../../geo/map/map-schema-types';
+import { TypeMapFeaturesConfig } from '../../types/global-types';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -86,9 +91,8 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * The ConfigValidation class constructor used to instanciate an object of this type.
-   * @param {string} mapId The map ID associated to the configuration. If it is undefined, a unique value will be generated and
-   * assign to it.
-   * @param {TypeLocalizedLanguages} displayLanguage  The language that will be used to display the GeoView layer.
+   *
+   * @returns {ConfigValidation} An ConfigValidation instance.
    */
   constructor() {
     this._mapId = generateId();
@@ -215,9 +219,9 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Validate the center.
    * @param {TypeProjectionCodes} projection The projection used by the map.
-   * @param {Coordinate} center The map center to valdate.
+   * @param {[number, number]} center The map center to valdate.
    *
-   * @returns {Coordinate} A valid map center.
+   * @returns {[number, number]} A valid map center.
    */
   private validateCenter(projection?: TypeProjectionCodes, center?: [number, number]): [number, number] {
     if (typeof projection !== 'undefined' && center) {
@@ -240,12 +244,12 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the map features configuration.
-   * @param {mapFeaturesConfigToValidate} projection The map features configuration to validate.
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfigToValidate The map features configuration to validate.
    *
-   * @returns {Coordinate} A valid map features configuration.
+   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
    */
   validateMapConfigAgainstSchema(mapFeaturesConfigToValidate?: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
-    let validMapFeaturesConfig: TypeMapFeaturesConfig | undefined;
+    let validMapFeaturesConfig: TypeMapFeaturesConfig;
 
     // if config has been provided by user then validate it
     if (mapFeaturesConfigToValidate) {
@@ -265,7 +269,7 @@ export class ConfigValidation {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
           console.log(this.mapId, error);
-          console.log(mapFeaturesConfigToValidate);
+          console.log(this.mapId, mapFeaturesConfigToValidate);
 
           setTimeout(() => {
             const errorMessage = `Map ${this.mapId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
@@ -299,7 +303,63 @@ export class ConfigValidation {
       };
     }
 
-    return validMapFeaturesConfig;
+    return this.processLocalizedString(validMapFeaturesConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Adjust the map features configuration localized strings according to the suported languages array content.
+   * @param {TypeMapFeaturesConfig} featuresConfig The map features configuration to adjust according to the suported languages
+   * array content.
+   *
+   * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
+   */
+  private processLocalizedString(featuresConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
+    if (featuresConfig.suportedLanguages.includes('en-CA') && featuresConfig.suportedLanguages.includes('fr-CA')) return featuresConfig;
+
+    let sourceKey: TypeLanguagesPrefix = 'fr';
+    let destinationKey: TypeLanguagesPrefix = 'en';
+
+    if (featuresConfig.suportedLanguages.includes('en-CA')) {
+      sourceKey = 'en';
+      destinationKey = 'fr';
+    }
+    if (typeof featuresConfig.map.listOfGeoviewLayerConfig !== 'undefined') {
+      featuresConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
+        // eslint-disable-next-line no-param-reassign
+        if (typeof geoviewLayerConfig.name !== 'undefined') geoviewLayerConfig.name[destinationKey] = geoviewLayerConfig.name[sourceKey];
+        if (typeof geoviewLayerConfig.metadataAccessPath !== 'undefined')
+          // eslint-disable-next-line no-param-reassign
+          geoviewLayerConfig.metadataAccessPath[destinationKey] = geoviewLayerConfig.metadataAccessPath[sourceKey];
+        geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+          if (typeof layerEntryConfig.info !== 'undefined') {
+            if (typeof layerEntryConfig.info.layerName !== 'undefined') {
+              // eslint-disable-next-line no-param-reassign
+              layerEntryConfig.info.layerName[destinationKey] = layerEntryConfig.info.layerName[sourceKey];
+            }
+            if (typeof layerEntryConfig.source !== 'undefined') {
+              // eslint-disable-next-line no-param-reassign
+              layerEntryConfig.source.dataAccessPath[destinationKey] = layerEntryConfig.source.dataAccessPath[sourceKey];
+              if (layerEntryIsVector(layerEntryConfig)) {
+                if (typeof layerEntryConfig.source.featureInfo !== 'undefined') {
+                  // eslint-disable-next-line no-param-reassign
+                  layerEntryConfig.source.featureInfo.aliasFields[destinationKey] =
+                    layerEntryConfig.source.featureInfo.aliasFields[sourceKey];
+                  // eslint-disable-next-line no-param-reassign
+                  layerEntryConfig.source.featureInfo.nameField[destinationKey] = layerEntryConfig.source.featureInfo.nameField[sourceKey];
+                  // eslint-disable-next-line no-param-reassign
+                  layerEntryConfig.source.featureInfo.outfields[destinationKey] = layerEntryConfig.source.featureInfo.outfields[sourceKey];
+                  // eslint-disable-next-line no-param-reassign
+                  layerEntryConfig.source.featureInfo.tooltipField[destinationKey] =
+                    layerEntryConfig.source.featureInfo.outfields[sourceKey];
+                }
+              }
+            }
+          }
+        });
+      });
+    }
+
+    return featuresConfig;
   }
 
   /** ***************************************************************************************************************************

@@ -1,12 +1,12 @@
 import { api } from '../../../app';
 import { catalogUrl } from '../../../core/utils/config/config';
-import { TypeGeoviewLayerConfig, TypeGeoCoreLayerEntryConfig } from '../../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeGeocoreLayerEntryConfig } from '../../map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
 import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'geoCore';
-  listOfLayerEntryConfig?: TypeGeoCoreLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeGeocoreLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -41,11 +41,11 @@ export class GeoCore {
   /**
    * Get layer from uuid
    *
-   * @param {TypeGeoCoreLayerEntryConfig} layerConfig the layer configuration
+   * @param {TypeGeocoreLayerEntryConfig} layerConfig the layer configuration
    * @return {Promise<TypeGeoviewLayerConfig | null>} layers to add to the map
    */
   async createLayer(layerConfig: TypeGeoCoreLayerConfig): Promise<TypeGeoviewLayerConfig | null> {
-    const url = layerConfig.accessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage.split('-')[0]}`;
+    const url = layerConfig.metadataAccessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage.split('-')[0]}`;
     const requestUrl = `${url}/${layerConfig.id}`;
     const geoviewLayerConfigList = await UUIDmapConfigReader.getGVlayersConfigFromUUID(this.mapId, requestUrl);
     return geoviewLayerConfigList.length > 0 ? geoviewLayerConfigList[0] : null;

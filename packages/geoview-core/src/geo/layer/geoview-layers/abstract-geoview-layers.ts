@@ -8,10 +8,10 @@ import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString
  */
 
 // Constant used to define the default layer names
-const DEFAULT_LAYER_NAMES: Record<TypeGeoViewLayers, string> = {
+const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriDynamic: 'Esri Dynamic Layer',
   esriFeature: 'Esri Feature Layer',
-  geojson: 'GeoJson Layer',
+  GeoJSON: 'GeoJson Layer',
   geoCore: 'GeoCore Layer',
   xyzTiles: 'XYZ Tiles',
   ogcFeature: 'OGC Feature Layer',
@@ -25,15 +25,15 @@ type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | '
 /**
  * Type of GeoView layers
  */
-export type TypeGeoViewLayers = 'esriDynamic' | 'esriFeature' | 'geojson' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 
 /**
  * Definition of the GeoView layer constants
  */
-export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoViewLayers> = {
+export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_DYNAMIC: 'esriDynamic',
   ESRI_FEATURE: 'esriFeature',
-  GEOJSON: 'geojson',
+  GEOJSON: 'GeoJSON',
   GEOCORE: 'geoCore',
   XYZ_TILES: 'xyzTiles',
   OGC_FEATURE: 'ogcFeature',
@@ -48,7 +48,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoViewLayers> = {
  * app. It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
  * three parameters: mapId, type and mapLayerConfig. Its role is to save in attributes the mapId, type and elements of the
  * mapLayerConfig that are common to all GeoView layers. The main characteristic of a GeoView layer is the presence of an
- * accessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
+ * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
@@ -56,7 +56,7 @@ export abstract class AbstractGeoViewLayer {
   protected mapId: string;
 
   /** The type of GeoView layer that is instantiated. */
-  type: TypeGeoViewLayers;
+  type: TypeGeoviewLayerType;
 
   /** The unique identifier for the GeoView layer. The value of this attribute is extracted from the mapLayerConfig parameter.
    * If its value is undefined, a unique value is generated.
@@ -68,8 +68,8 @@ export abstract class AbstractGeoViewLayer {
    */
   name: TypeLocalizedString = { en: '', fr: '' };
 
-  /** The GeoView layer accessPath. The name attribute is optional */
-  accessPath: TypeLocalizedString = { en: '', fr: '' };
+  /** The GeoView layer metadataAccessPath. The name attribute is optional */
+  metadataAccessPath: TypeLocalizedString = { en: '', fr: '' };
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -89,18 +89,18 @@ export abstract class AbstractGeoViewLayer {
   /**
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
-   * @param {TypeGeoViewLayers} type The type of GeoView layer that is instantiated.
+   * @param {TypeGeoviewLayerType} type The type of GeoView layer that is instantiated.
    * @param {TypeGeoviewLayer} mapLayerConfig The GeoView layer configuration options.
    * @param {string} mapId The unique identifier of the map on which the GeoView layer will be drawn.
    */
-  constructor(type: TypeGeoViewLayers, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
+  constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
     this.mapId = mapId;
     this.type = type;
     this.id = mapLayerConfig.id || generateId('');
     this.name.en = mapLayerConfig.name && mapLayerConfig.name.en ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
     this.name.fr = mapLayerConfig.name && mapLayerConfig.name.fr ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
-    this.accessPath.en = mapLayerConfig.accessPath.en.trim();
-    this.accessPath.fr = mapLayerConfig.accessPath.fr.trim();
+    if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
+    if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (typeof mapLayerConfig.listOfLayerEntryConfig !== 'undefined') this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
   }
 }

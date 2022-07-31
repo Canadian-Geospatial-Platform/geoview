@@ -26,14 +26,8 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
-import {
-  TypeListOfGeoviewLayerConfig,
-  TypeLanguagesPrefix,
-  TypeLocalizedLanguages,
-  TypeMapFeaturesConfig,
-  TypeViewSettings,
-} from './map-schema-types';
-import { TypeHTMLElement } from '../../core/types/global-types';
+import { TypeListOfGeoviewLayerConfig, TypeLanguagesPrefix, TypeLocalizedLanguages, TypeViewSettings } from './map-schema-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;

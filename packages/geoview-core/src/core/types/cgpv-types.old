@@ -5,7 +5,7 @@ import { ProjectionLike } from 'ol/proj';
 import { AnySchemaObject } from 'ajv';
 
 import { TypeGeoviewLayerConfig, TypeMapFeaturesConfig } from '../../geo/map/map-types';
-import { TypeGeoViewLayers, AbstractGeoViewLayer } from '../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeGeoviewLayers, AbstractGeoViewLayer } from '../../geo/layer/geoview-layers/abstract-geoview-layers';
 
 import { TypeLocalizedString } from './global-types';
 
@@ -58,7 +58,7 @@ export type TypeUpdateScaleEvent = {
 export type TypeLegendJsonDynamic = {
   layerId: string;
   layerName: string;
-  layerType: TypeGeoViewLayers;
+  layerType: TypeGeoviewLayers;
   maxScale: number;
   minScale: number;
   legend: {

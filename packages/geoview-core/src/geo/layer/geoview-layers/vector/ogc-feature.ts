@@ -73,7 +73,7 @@ export interface TypeOgcFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntr
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcFeature';
-  listOfLayerEntryConfig?: TypeOgcFeatureLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeOgcFeatureLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -144,7 +144,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /** ****************************************************************************************************************************
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): void {
     this.getCapabilities();
@@ -155,9 +155,9 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Query the OGC feature service to get the capacities.
    */
   private async getCapabilities(): Promise<void> {
-    const rootUrl = this.accessPath[api.map(this.mapId).getLanguageCodePrefix()].endsWith('/')
-      ? this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]
-      : `${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}/`;
+    const rootUrl = this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()].endsWith('/')
+      ? this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]
+      : `${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}/`;
 
     const entries = this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString();
 

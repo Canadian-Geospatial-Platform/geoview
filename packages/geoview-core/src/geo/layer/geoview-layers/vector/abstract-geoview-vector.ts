@@ -101,7 +101,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /**
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   abstract getAdditionalServiceDefinition(): void;
@@ -123,7 +123,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   private async createLayer(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<VectorLayer<VectorSource> | null> {
     const promisedVectorLayer = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
-      let serviceUrl = this.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
+      let serviceUrl = this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
       serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
       let data: TypeJsonObject = {};
       axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
@@ -144,8 +144,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const sourceOptions: SourceOptions = {};
     sourceOptions.strategy = all;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    if (typeof layerEntry.source.accessPath !== undefined)
-      sourceOptions.url = layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
+    if (typeof layerEntry.source.metadataAccessPath !== undefined)
+      sourceOptions.url = layerEntry.source.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
     if (typeof layerEntry.source.format !== undefined) {
       switch (layerEntry.source.format) {
         case 'EsriJSON': {

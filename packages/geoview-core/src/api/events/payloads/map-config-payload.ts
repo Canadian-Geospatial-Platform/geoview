@@ -1,7 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
-import { TypeMapFeaturesConfig } from '../../../geo/map/map-schema-types';
+import { TypeMapFeaturesConfig } from '../../../core/types/global-types';
 
 /** Valid events that can create MapFeaturesPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_RELOAD];

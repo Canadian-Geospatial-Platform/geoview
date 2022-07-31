@@ -26,7 +26,7 @@ export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEnt
 
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'esriFeature';
-  listOfLayerEntryConfig?: TypeEsriFeatureLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeEsriFeatureLayerEntryConfig[];
 }
 
 /** ******************************************************************************************************************************
@@ -103,7 +103,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /** ****************************************************************************************************************************
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): void {
     // ! NOTE: This method is not realy the implementation expected. The way it is right now is the old code reformatted to have no error.
@@ -111,7 +111,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   private async legendQuery(): Promise<void> {
-    let queryUrl = this.accessPath[api.map(this.mapId).getLanguageCodePrefix()];
+    let queryUrl = this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
     queryUrl = queryUrl.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
 
     const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
@@ -137,9 +137,10 @@ export class EsriFeature extends AbstractGeoViewVector {
       }
     }
 
-    getXMLHttpRequest(`${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`).then(async (value) => {
+    getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`).then(async (value) => {
       if (value !== '{}') {
-        const { type, copyrightText } = toJsonObject(JSON.parse(value));
+        const jsonObject = toJsonObject(JSON.parse(value));
+        const { type, copyrightText } = jsonObject;
         this.attribution = copyrightText ? (copyrightText as string) : '';
         // check if the type is define as Feature Layer.
         this.isFeatureLayer = typeof type !== 'undefined' && type === 'Feature Layer';

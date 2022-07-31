@@ -74,24 +74,16 @@
             'listOfGeoviewLayerConfig': [
               {
                 'id': 'wmsLYR1',
-                'name': {
-                  'en': 'Topographic OSM WMS',
-                  'fr': 'Topographic OSM WMS'
-                },
-                'accessPath': {
-                  'en': 'https://ows.mundialis.de/services/service?',
-                  'fr': 'https://ows.mundialis.de/services/service?'
-                },
+                'name': { 'en': 'Topographic OSM WMS' },
+                'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service?' },
                 'geoviewLayerType': 'ogcWms',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'raster',
                     'info': { 'layerId': 'TOPO-OSM-WMS' },
                     'source': {
                       'serverType': 'mapserver',
-                      'accessPath': {
-                        'en': 'https://ows.mundialis.de/services/service?',
-                        'fr': 'https://ows.mundialis.de/services/service?'
-                      }
+                      'dataAccessPath': { 'en': 'https://ows.mundialis.de/services/service?' }
                     }
                   }
                 ]
@@ -135,20 +127,18 @@
               {
                 'id': 'xyzTilesLYR2',
                 'name': {
-                  'en': 'statmen toner',
-                  'fr': 'statmen toner'
+                  'en': 'statmen toner'
                 },
-                'accessPath': {
-                  'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
-                  'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                'metadataAccessPath': {
+                  'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
                 },
                 'geoviewLayerType': 'xyzTiles',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'raster',
                     'source': {
-                      'accessPath': {
-                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
-                        'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                      'dataAccessPath': {
+                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
                       }
                     }
                   }
@@ -191,28 +181,26 @@
               {
                 'id': 'esriDynamicLYR3',
                 'name': {
-                  'en': 'Senior care facilities on April 2020',
-                  'fr': 'Senior care facilities on April 2020'
+                  'en': 'Senior care facilities on April 2020'
                 },
-                'accessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
                 },
                 'geoviewLayerType': 'esriDynamic',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'raster',
                     'source': {
-                      'accessPath': {
-                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
-                        'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
+                      'dataAccessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
                             }
                     }
                   },
                   {
+                    'entryType': 'raster',
                     'source': {
-                      'accessPath': {
-                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1',
-                        'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1'
+                      'dataAccessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1'
                             }
                     }
                   }
@@ -256,21 +244,19 @@
               {
                 'id': 'esriFeatureLYR4',
                 'name': {
-                  'en': 'Senior care facilities by province and territory',
-                  'fr': 'Senior care facilities by province and territory'
+                  'en': 'Senior care facilities by province and territory'
                 },
-                'accessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'vector',
                     'source': {
                       'format': 'EsriJSON',
-                      'accessPath': {
-                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
-                        'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
+                      'dataAccessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
                       }
                     }
                   }
@@ -310,21 +296,19 @@
               {
                 'id': 'geojsonLYR5',
                 'name': {
-                  'en': 'GeoJSON Sample',
-                  'fr': 'Exemple GeoJSON'
+                  'en': 'GeoJSON Sample'
                 },
-                'accessPath': {
-                  'en': './geojson/polygons.json',
-                  'fr': './geojson/polygons.json'
+                'metadataAccessPath': {
+                  'en': './geojson/polygons.json'
                 },
-                'geoviewLayerType': 'geojson',
+                'geoviewLayerType': 'GeoJSON',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'vector',
                     'source': {
                       'format': 'GeoJSON',
-                      'accessPath': {
-                        'en': './geojson/polygons.json',
-                        'fr': './geojson/polygons.json'
+                      'dataAccessPath': {
+                        'en': './geojson/polygons.json'
                       }
                     }
                   }
@@ -371,16 +355,17 @@
                 'en': 'Airport data',
                 'fr': 'Airport data'
               },
-              'accessPath': {
+              'metadataAccessPath': {
                 'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
                 'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
               },
               'geoviewLayerType': 'ogcWfs',
               'listOfLayerEntryConfig': [
                 {
+                  'entryType': 'vector',
                   'source': {
                     'format': 'WFS',
-                    'accessPath': {
+                    'dataAccessPath': {
                       'en': 'GISDATA.AIRPORTS_PT',
                       'fr': 'GISDATA.AIRPORTS_PT'
                     }
@@ -425,16 +410,17 @@
                   'en': 'Large Lakes',
                   'fr': 'Large Lakes'
                 },
-                'accessPath': {
+                'metadataAccessPath': {
                   'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
                   'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
                 },
                 'geoviewLayerType': 'ogcFeature',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'vector',
                     'source': {
                       'format': 'featureAPI',
-                      'accessPath': {
+                      'dataAccessPath': {
                         'en': 'lakes',
                         'fr': 'lakes'
                       }
@@ -479,6 +465,7 @@
                 'geoviewLayerType': 'geoCore',
                 'listOfLayerEntryConfig': [
                   {
+                    'entryType': 'geocore',
                     'info': { 'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9' }
                   }
                 ]
@@ -521,7 +508,7 @@
             en: 'geojson sample',
             fr: 'exemple geojson',
           },
-          layerType: 'geojson',
+          layerType: 'GeoJSON',
           url: {
             en: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
             fr: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',

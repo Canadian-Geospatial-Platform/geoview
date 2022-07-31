@@ -4,7 +4,7 @@ import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
 import { api } from '../../../../app';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoViewLayers } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -31,7 +31,7 @@ export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryCon
 
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'xyzTiles';
-  listOfLayerEntryConfig?: TypeXYZTilesLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeXYZTilesLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -95,7 +95,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {TypeXYZTilesConfig} layerConfig the layer configuration
    */
   constructor(mapId: string, layerConfig: TypeXYZTilesConfig) {
-    super(CONST_LAYER_TYPES.XYZ_TILES as TypeGeoViewLayers, layerConfig, mapId);
+    super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig, mapId);
   }
 
   /** ****************************************************************************************************************************
@@ -113,7 +113,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntry: TypeXYZTilesLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {
-      url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()],
+      url: layerEntry.source.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()],
     };
     if (typeof layerEntry.source.crossOrigin !== undefined) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
     if (typeof layerEntry.source.projection !== undefined) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;

@@ -24,7 +24,7 @@ export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig,
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWms';
-  listOfLayerEntryConfig?: TypeWmsLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeWmsLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -88,12 +88,12 @@ export class WMS extends AbstractGeoViewRaster {
   constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
 
-    if (this.accessPath.en.indexOf('?') === -1) this.accessPath.en = `${this.accessPath.en}?`;
-    if (this.accessPath.fr.indexOf('?') === -1) this.accessPath.fr = `${this.accessPath.fr}?`;
+    if (this.metadataAccessPath.en.indexOf('?') === -1) this.metadataAccessPath.en = `${this.metadataAccessPath.en}?`;
+    if (this.metadataAccessPath.fr.indexOf('?') === -1) this.metadataAccessPath.fr = `${this.metadataAccessPath.fr}?`;
   }
 
   /** ****************************************************************************************************************************
-   * This method reads from the accessPath additional information to complete the GeoView layer configuration.
+   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): void {
     this.getCapabilities().then((capabilities) => {
@@ -108,7 +108,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private async getCapabilities(): Promise<TypeJsonObject> {
     const parser = new WMSCapabilities();
-    const capUrl = `${this.accessPath[api.map(this.mapId).getLanguageCodePrefix()]}service=WMS&version=1.3.0&request=GetCapabilities`;
+    const capUrl = `${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}service=WMS&version=1.3.0&request=GetCapabilities`;
     const response = await fetch(capUrl);
     const result = parser.read(await response.text());
 
@@ -126,7 +126,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntry: TypeWmsLayerEntryConfig): TypeBaseRasterLayer {
     const sourceOptions: SourceOptions = {
-      url: layerEntry.source.accessPath[api.map(this.mapId).getLanguageCodePrefix()],
+      url: layerEntry.source.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()],
       params: { LAYERS: `show:${layerEntry.info!.layerId}` },
     };
     sourceOptions.attributions = '';
