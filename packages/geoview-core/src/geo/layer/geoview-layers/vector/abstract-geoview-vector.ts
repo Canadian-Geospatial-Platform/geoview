@@ -144,8 +144,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const sourceOptions: SourceOptions = {};
     sourceOptions.strategy = all;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    if (typeof layerEntry.source.metadataAccessPath !== undefined)
-      sourceOptions.url = layerEntry.source.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
+    if (typeof layerEntry.source.dataAccessPath !== undefined)
+      sourceOptions.url = layerEntry.source.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
     if (typeof layerEntry.source.format !== undefined) {
       switch (layerEntry.source.format) {
         case 'EsriJSON': {
