@@ -73,7 +73,6 @@ export class Layer {
             } else if (layerConfigIsEsriFeature(layerConfig)) {
               const esriFeature = new EsriFeature(this.mapId, layerConfig);
               esriFeature.createGeoViewVectorLayers();
-              this.removeTabindex();
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.mapId, layerConfig);
               wfsLayer.createGeoViewVectorLayers();

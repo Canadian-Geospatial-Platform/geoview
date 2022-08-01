@@ -73,30 +73,31 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   createGeoViewVectorLayers() {
     if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
-      this.getAdditionalServiceDefinition();
-      if (this.listOfLayerEntryConfig.length === 1) {
-        this.gvLayers = this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig);
-        if (this.gvLayers !== null) {
-          this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
-          this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
-        } else {
-          this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-        }
-      } else {
-        this.gvLayers = new LayerGroup({
-          layers: new Collection(),
-        });
-        this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-          const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig);
-          if (vectorLayer !== null) {
-            this.setRenderer(layerEntry, vectorLayer);
-            this.registerToPanels(layerEntry, vectorLayer);
-            (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
+      this.getAdditionalServiceDefinition().then(() => {
+        if (this.listOfLayerEntryConfig.length === 1) {
+          this.gvLayers = this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig);
+          if (this.gvLayers !== null) {
+            this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
+            this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
           } else {
             this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
           }
-        });
-      }
+        } else {
+          this.gvLayers = new LayerGroup({
+            layers: new Collection(),
+          });
+          this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+            const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig);
+            if (vectorLayer !== null) {
+              this.setRenderer(layerEntry, vectorLayer);
+              this.registerToPanels(layerEntry, vectorLayer);
+              (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
+            } else {
+              this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+            }
+          });
+        }
+      });
     }
   }
 
@@ -104,7 +105,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
-  abstract getAdditionalServiceDefinition(): void;
+  abstract getAdditionalServiceDefinition(): Promise<void>;
 
   /**
    * This method creates a GeoView layer using the definition provided in the layerEntry parameter.

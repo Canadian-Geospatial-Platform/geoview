@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import axios from 'axios';
 
 import { Icon as StyleIcon } from 'ol/style';
@@ -79,8 +80,8 @@ export const geoviewEntryIsEsriFeature = (
  */
 // ******************************************************************************************************************************
 export class EsriFeature extends AbstractGeoViewVector {
-  // layer
-  // layer!: VectorLayer<VectorSource>;
+  // The service metadata.
+  metadata: TypeJsonObject | null = null;
 
   // define a default blue icon
   iconSymbols: { field: string | null; valueAndSymbol: Record<string, StyleIcon> } = {
@@ -105,9 +106,49 @@ export class EsriFeature extends AbstractGeoViewVector {
   /** ****************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
-  getAdditionalServiceDefinition(): void {
-    // ! NOTE: This method is not realy the implementation expected. The way it is right now is the old code reformatted to have no error.
-    this.legendQuery();
+  getAdditionalServiceDefinition(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      this.getMetadata().then(() => {
+        if (this.metadata) {
+          // if layerEntry.info is not defined, use the dataAccessPath ending as value for layerEntry.info.layerId.
+          this.listOfLayerEntryConfig.forEach((layerEntry) => {
+            const pathElements = layerEntry.source!.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()].split('/');
+            const layerId = pathElements[pathElements.length - 1];
+            if (Number.isNaN(layerId) || !this.metadata!.layers[Number(layerId)]) this.layerLoadError.push(layerId);
+            else {
+              const esriIndex = Number(layerId);
+              if (!layerEntry.info) layerEntry.info = { layerId };
+              else if (!layerEntry.info.layerId) layerEntry.info.layerId = layerId;
+              if (!layerEntry.info.layerName) {
+                layerEntry.info.layerName = {
+                  en: this.metadata!.layers[esriIndex].name as string,
+                  fr: this.metadata!.layers[esriIndex].name as string,
+                };
+              }
+            }
+          });
+        }
+        resolve();
+      });
+    });
+    return promisedExecution;
+  }
+
+  private async getMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      const promisedMetadataString = getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`);
+      promisedMetadataString.then((metadataString) => {
+        if (metadataString !== '{}') {
+          this.metadata = toJsonObject(JSON.parse(metadataString));
+          const { type, copyrightText } = this.metadata;
+          this.attribution = copyrightText ? (copyrightText as string) : '';
+          // check if the type is define as Feature Layer.
+          this.isFeatureLayer = typeof type !== 'undefined' && type === 'Feature Layer';
+          resolve();
+        }
+      });
+    });
+    return promisedExecution;
   }
 
   private async legendQuery(): Promise<void> {
