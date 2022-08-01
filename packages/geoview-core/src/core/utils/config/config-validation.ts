@@ -9,7 +9,6 @@ import schema from '../../../../schemav2.json';
 import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import {
-  layerEntryIsGeocore,
   layerEntryIsVector,
   TypeGeoviewLayerConfig,
   TypeLanguagesPrefix,
@@ -150,7 +149,7 @@ export class ConfigValidation {
    * @returns {TypeBasemapOptions} A valid basemap options.
    */
   validateBasemap(projection?: TypeProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions {
-    if (typeof projection !== 'undefined' && basemapOptions) {
+    if (projection && basemapOptions) {
       const id = this._basemapId[projection].includes(basemapOptions.id)
         ? basemapOptions.id
         : this._defaultMapFeaturesConfig.map.basemapOptions.id;
@@ -173,7 +172,7 @@ export class ConfigValidation {
    * @returns {TypeValidVersions} A valid version.
    */
   validateVersion(version?: TypeValidVersions): TypeValidVersions {
-    return typeof version === 'undefined' || !VALID_VERSIONS.includes(version) ? this._defaultMapFeaturesConfig.versionUsed! : version;
+    return version && VALID_VERSIONS.includes(version) ? version : this._defaultMapFeaturesConfig.versionUsed!;
   }
 
   /** ***************************************************************************************************************************
@@ -183,13 +182,12 @@ export class ConfigValidation {
    * @returns {TypeLocalizedLanguages} A valid language.
    */
   validateLanguage(language?: TypeLocalizedLanguages): TypeLocalizedLanguages {
-    if (typeof language === 'undefined' || !VALID_LOCALIZED_LANGUAGES.includes(language)) {
-      console.log(
-        `- map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
-      );
-      return this._defaultMapFeaturesConfig.displayLanguage!;
-    }
-    return language;
+    if (language && VALID_LOCALIZED_LANGUAGES.includes(language)) return language;
+
+    console.log(
+      `- map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
+    );
+    return this._defaultMapFeaturesConfig.displayLanguage!;
   }
 
   /** ***************************************************************************************************************************
@@ -199,9 +197,7 @@ export class ConfigValidation {
    * @returns {number} A valid zoom level.
    */
   private validateZoom(zoom?: number): number {
-    return typeof zoom === 'undefined' || Number.isNaN(zoom) || zoom < 0 || zoom > 18
-      ? this._defaultMapFeaturesConfig.map.viewSettings.zoom
-      : zoom;
+    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : this._defaultMapFeaturesConfig.map.viewSettings.zoom;
   }
 
   /** ***************************************************************************************************************************
@@ -211,9 +207,9 @@ export class ConfigValidation {
    * @returns {TypeProjectionCodes} A valid projection.
    */
   private validateProjection(projection?: TypeProjectionCodes): TypeProjectionCodes {
-    return typeof projection === 'undefined' || !VALID_PROJECTION_CODES.includes(projection)
-      ? this._defaultMapFeaturesConfig.map.viewSettings.projection
-      : projection;
+    return projection && VALID_PROJECTION_CODES.includes(projection)
+      ? projection
+      : this._defaultMapFeaturesConfig.map.viewSettings.projection;
   }
 
   /** ***************************************************************************************************************************
@@ -224,7 +220,7 @@ export class ConfigValidation {
    * @returns {[number, number]} A valid map center.
    */
   private validateCenter(projection?: TypeProjectionCodes, center?: [number, number]): [number, number] {
-    if (typeof projection !== 'undefined' && center) {
+    if (projection && center) {
       const xVal = Number(center[0]);
       const yVal = Number(center[1]);
 
@@ -323,24 +319,24 @@ export class ConfigValidation {
       sourceKey = 'en';
       destinationKey = 'fr';
     }
-    if (typeof featuresConfig.map.listOfGeoviewLayerConfig !== 'undefined') {
+    if (featuresConfig.map.listOfGeoviewLayerConfig) {
       featuresConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
         // eslint-disable-next-line no-param-reassign
-        if (typeof geoviewLayerConfig.name !== 'undefined') geoviewLayerConfig.name[destinationKey] = geoviewLayerConfig.name[sourceKey];
-        if (typeof geoviewLayerConfig.metadataAccessPath !== 'undefined')
+        if (geoviewLayerConfig.name) geoviewLayerConfig.name[destinationKey] = geoviewLayerConfig.name[sourceKey];
+        if (geoviewLayerConfig.metadataAccessPath)
           // eslint-disable-next-line no-param-reassign
           geoviewLayerConfig.metadataAccessPath[destinationKey] = geoviewLayerConfig.metadataAccessPath[sourceKey];
         geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-          if (typeof layerEntryConfig.info !== 'undefined') {
-            if (typeof layerEntryConfig.info.layerName !== 'undefined') {
+          if (layerEntryConfig.info) {
+            if (layerEntryConfig.info.layerName) {
               // eslint-disable-next-line no-param-reassign
               layerEntryConfig.info.layerName[destinationKey] = layerEntryConfig.info.layerName[sourceKey];
             }
-            if (typeof layerEntryConfig.source !== 'undefined') {
+            if (layerEntryConfig.source) {
               // eslint-disable-next-line no-param-reassign
               layerEntryConfig.source.dataAccessPath[destinationKey] = layerEntryConfig.source.dataAccessPath[sourceKey];
               if (layerEntryIsVector(layerEntryConfig)) {
-                if (typeof layerEntryConfig.source.featureInfo !== 'undefined') {
+                if (layerEntryConfig.source.featureInfo) {
                   // eslint-disable-next-line no-param-reassign
                   layerEntryConfig.source.featureInfo.aliasFields[destinationKey] =
                     layerEntryConfig.source.featureInfo.aliasFields[sourceKey];
