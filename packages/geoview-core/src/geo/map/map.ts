@@ -26,7 +26,7 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
-import { TypeListOfGeoviewLayerConfig, TypeLanguagesPrefix, TypeLocalizedLanguages, TypeViewSettings } from './map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
 
 interface TypeDcoument extends Document {
@@ -64,7 +64,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
-  displayLanguage: TypeLocalizedLanguages;
+  displayLanguage: TypeDisplayLanguage;
 
   // get used projection
   currentProjection: number;
@@ -271,19 +271,19 @@ export class MapViewer {
   /**
    * Return the language code prefix from localized language
    *
-   * @returns {TypeLanguagesPrefix} returns the language code prefix from localized language. Ex: en, fr
+   * @returns {TypeDisplayLanguage} returns the language code prefix from localized language. Ex: en, fr
    */
-  getLanguageCodePrefix = (): TypeLanguagesPrefix => {
-    return this.displayLanguage.split('-')[0] as TypeLanguagesPrefix;
+  getLanguageCodePrefix = (): TypeDisplayLanguage => {
+    return this.displayLanguage.split('-')[0] as TypeDisplayLanguage;
   };
 
   /**
    * Change the display language of the map
    *
-   * @param {TypeLocalizedLanguages} displayLanguage the language to use (en-CA, fr-CA)
+   * @param {TypeDisplayLanguage} displayLanguage the language to use (en-CA, fr-CA)
    * @param {TypeListOfGeoviewLayerConfig} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (displayLanguage: TypeLocalizedLanguages, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
+  changeLanguage = (displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
     const updatedMapConfig: TypeMapFeaturesConfig = { ...this.mapFeaturesConfig };
 
     updatedMapConfig.displayLanguage = displayLanguage;

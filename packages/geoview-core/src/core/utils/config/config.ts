@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { TypeLocalizedLanguages } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { ConfigValidation } from './config-validation';
 import { InlineDivConfigReader } from './reader/div-config-reader';
@@ -58,17 +58,17 @@ export class Config {
   /** ***************************************************************************************************************************
    * Get displayLanguage value.
    *
-   * @returns {TypeLocalizedLanguages} The display language of the Geoview map.
+   * @returns {TypeDisplayLanguage} The display language of the Geoview map.
    */
-  get displayLanguage(): TypeLocalizedLanguages {
+  get displayLanguage(): TypeDisplayLanguage {
     return this.configValidation.displayLanguage;
   }
 
   /** ***************************************************************************************************************************
    * Set displayLanguage value.
-   * @param {TypeLocalizedLanguages} displayLanguage The display language of the Geoview map.
+   * @param {TypeDisplayLanguage} displayLanguage The display language of the Geoview map.
    */
-  set displayLanguage(displayLanguage: TypeLocalizedLanguages) {
+  set displayLanguage(displayLanguage: TypeDisplayLanguage) {
     this.configValidation.displayLanguage = displayLanguage;
   }
 
@@ -90,7 +90,7 @@ export class Config {
     const displayLanguage = this.mapElement.getAttribute('data-lang');
 
     // update display language if provided in map element
-    if (displayLanguage) this.displayLanguage = displayLanguage as TypeLocalizedLanguages;
+    if (displayLanguage) this.displayLanguage = displayLanguage as TypeDisplayLanguage;
 
     return this.configValidation.validateMapConfigAgainstSchema(mapFeaturesConfig);
   }
@@ -111,7 +111,7 @@ export class Config {
     const displayLanguage = this.mapElement.getAttribute('data-lang');
 
     // update display language if provided in map element
-    if (displayLanguage) this.displayLanguage = displayLanguage as TypeLocalizedLanguages;
+    if (displayLanguage) this.displayLanguage = displayLanguage as TypeDisplayLanguage;
 
     // create a new config object to store provided config by user
     let mapFeaturesConfig: TypeMapFeaturesConfig | undefined;

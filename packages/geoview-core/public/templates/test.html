@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Layers</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HLYR1">1. WMS Layer</a><br />
+              <a href="#HLYR2">2. XYZ Tiles Layer</a><br />
+              <a href="#HLYR3">3. Esri Dynamic Servive Layer</a><br />
+              <a href="#HLYR4">4. Esri Feature Servive Layer</a><br />
+              <a href="#HLYR5">5. GeoJSON Layer</a><br />
+              <a href="#HLYR6">6. WFS Layer</a><br />
+              <a href="#HLYR7">7. OGC API Feature Layer</a><br />
+              <a href="#HLYR8">8. GeoCore UUID Layer</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase how the viewer may show different layer types</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3 id="HLYR1">1.WMS Layer</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div
+        id="LYR1"
+        class="llwp-map"
+        data-lang="en-CA"
+        data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'id': 'wmsLYR1',
+                'name': { 'en': 'Topographic OSM WMS' },
+                'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [
+                  {
+                    'entryType': 'raster',
+                    'info': { 'layerId': 'OSM-WMS' },
+                    'source': {
+                      'serverType': 'mapserver',
+                      'dataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' }
+                    }
+                  },
+                  {
+                    'entryType': 'raster',
+                    'info': { 'layerId': 'TOPO-OSM-WMS' },
+                    'source': {
+                      'serverType': 'mapserver',
+                      'dataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' }
+                    }
+                  }
+                ]
+              },
+              {
+                'id': 'wmsLYR2',
+                'name': { 'en': 'MSI' },
+                'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [
+                  {
+                    'entryType': 'raster',
+                    'info': { 'layerId': 'msi-94-or-more' },
+                    'source': {
+                      'serverType': 'mapserver',
+                      'dataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'suportedLanguages': ['en-CA']
+        }"
+      ></div>
+
+      <div>
+        <h3>Legend</h3>
+        <img id="wmsLegend" />
+      </div>
+      <p>This map has a wms layer added from configuration.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="LYR1CS" class="panel"></div>
+    </div>
+      <p>This map requests a layer from the catalog using uuid added from configuration.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="LYR8CS" class="panel"></div>
+    </div>
+    <p><strong>Code Snippet:</strong></p>
+    <div id="codeSnippet" class="panel"></div>
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

@@ -6,7 +6,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { API } from '../../api/api';
 import * as UI from '../../ui';
 import { AbstractPlugin } from '../../api/plugin/abstract-plugin';
-import { TypeLocalizedLanguages, TypeMapFeaturesInstance } from '../../geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '../../geo/map/map-schema-types';
 
 export type { SelectChangeEvent } from '@mui/material';
 export type { Coordinate } from 'ol/coordinate';
@@ -18,7 +18,7 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
   mapId?: string;
   /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
-  displayLanguage?: TypeLocalizedLanguages;
+  displayLanguage?: TypeDisplayLanguage;
 }
 
 /** ******************************************************************************************************************************

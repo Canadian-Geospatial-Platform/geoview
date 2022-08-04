@@ -19,7 +19,9 @@ import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig } from '../../../m
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
-import { showMessage } from '../../../../core/utils/utilities';
+import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../../../../api/events/event-types';
+import { getLocalisezValue, showMessage } from '../../../../core/utils/utilities';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -71,34 +73,55 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * descriptive information of all the features in a tolerance radius. This information will be used to populate the
    * details-panel.
    */
-  createGeoViewVectorLayers() {
-    if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
-      this.getAdditionalServiceDefinition().then(() => {
-        if (this.listOfLayerEntryConfig.length === 1) {
-          this.gvLayers = this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig);
-          if (this.gvLayers !== null) {
-            this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
-            this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
+  createGeoViewVectorLayers(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
+        this.getAdditionalServiceDefinition().then(() => {
+          if (this.listOfLayerEntryConfig.length === 1) {
+            this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig).then((vectorLayer) => {
+              this.gvLayers = vectorLayer;
+              if (this.gvLayers) {
+                this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
+                this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
+              } else {
+                this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+              }
+            });
           } else {
-            this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+            this.gvLayers = new LayerGroup({
+              layers: new Collection(),
+            });
+            this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+              this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig).then((vectorLayer) => {
+                if (vectorLayer) {
+                  this.setRenderer(layerEntry, vectorLayer);
+                  this.registerToPanels(layerEntry, vectorLayer);
+                  (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
+                } else {
+                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+                }
+              });
+            });
           }
-        } else {
-          this.gvLayers = new LayerGroup({
-            layers: new Collection(),
-          });
-          this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-            const vectorLayer = this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig);
-            if (vectorLayer !== null) {
-              this.setRenderer(layerEntry, vectorLayer);
-              this.registerToPanels(layerEntry, vectorLayer);
-              (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
-            } else {
-              this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-            }
-          });
-        }
-      });
-    }
+          // if the return layer object is a string, it is because path or entries are bad
+          // do not add to the map
+          if (this.layerLoadError.length !== 0) {
+            const names = this.layerLoadError.toString();
+            api.event.emit(
+              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+                type: 'key',
+                value: 'validation.layer.loadfailed',
+                params: [names, this.mapId],
+              })
+            );
+            // eslint-disable-next-line no-console
+            console.log(`Layer [${names}] failed to load on map ${this.mapId}`);
+          }
+          resolve();
+        });
+      }
+    });
+    return promisedExecution;
   }
 
   /**
@@ -114,27 +137,32 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {TypeBaseVectorLayer} The GeoView vector layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeBaseVectorLayerEntryConfig): TypeBaseVectorLayer | null {
-    let vectorLayer: VectorLayer<VectorSource> | null = null;
-    this.createLayer(layerEntry).then((result) => {
-      vectorLayer = result;
+  processOneLayerEntry(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<TypeBaseVectorLayer | null> {
+    const promisedVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
+      let serviceUrl = getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId)!;
+      serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
+      axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
+        const vectorSource = this.createVectorSource(layerEntry, queryResponse.data);
+        const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
+        resolve(vectorLayer);
+      });
     });
-    return vectorLayer;
+    return promisedVectorLayer;
   }
 
-  private async createLayer(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<VectorLayer<VectorSource> | null> {
+  private createLayer(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<VectorLayer<VectorSource> | null> {
     const promisedVectorLayer = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
-      let serviceUrl = this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
+      let serviceUrl = getLocalisezValue(this.metadataAccessPath, this.mapId)!;
       serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
       let data: TypeJsonObject = {};
       axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
         data = queryResponse.data;
+
+        const vectorSource = this.createVectorSource(layerEntry, data);
+
+        const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
+        resolve(vectorLayer);
       });
-
-      const vectorSource = this.createVectorSource(layerEntry, data);
-
-      const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
-      resolve(vectorLayer);
     });
     return promisedVectorLayer;
   }
@@ -145,9 +173,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const sourceOptions: SourceOptions = {};
     sourceOptions.strategy = all;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    if (typeof layerEntry.source.dataAccessPath !== undefined)
-      sourceOptions.url = layerEntry.source.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
-    if (typeof layerEntry.source.format !== undefined) {
+    if (layerEntry.source.dataAccessPath) sourceOptions.url = getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId);
+    if (layerEntry.source.format) {
       switch (layerEntry.source.format) {
         case 'EsriJSON': {
           sourceOptions.format = new EsriJSON();

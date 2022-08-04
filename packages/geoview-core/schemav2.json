@@ -998,6 +998,11 @@
       }
     },
 
+    "TypeDisplayLanguage": {
+      "enum": ["en", "fr"],
+      "description": "Display languages supported."
+    },
+
     "TypeLocalizedLanguages": {
       "enum": ["en-CA", "fr-CA"],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file."

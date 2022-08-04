@@ -8,7 +8,6 @@ import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
 
 import { TypeJsonObject } from '../../../../core/types/global-types';
-import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -17,6 +16,10 @@ import {
   TypeSourceImageWmsInitialConfig,
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
+import { getLocalisezValue } from '../../../../core/utils/utilities';
+import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../../../../api/events/event-types';
+import { api } from '../../../../app';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;
@@ -74,11 +77,11 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WMS extends AbstractGeoViewRaster {
-  // layer from openlayers
-  // layer!: ImageLayer<ImageWMS>;
-
   // private varibale holding wms capabilities
   private capabilities: TypeJsonObject = {};
+
+  // private varibale holding wms capabilities
+  private attributions: string[] = [];
 
   /** ***************************************************************************************************************************
    * Initialize layer
@@ -87,34 +90,27 @@ export class WMS extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
-
-    if (this.metadataAccessPath.en.indexOf('?') === -1) this.metadataAccessPath.en = `${this.metadataAccessPath.en}?`;
-    if (this.metadataAccessPath.fr.indexOf('?') === -1) this.metadataAccessPath.fr = `${this.metadataAccessPath.fr}?`;
   }
 
   /** ****************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
-  getAdditionalServiceDefinition(): void {
-    this.getCapabilities().then((capabilities) => {
-      this.capabilities = capabilities;
+  getAdditionalServiceDefinition(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      const parser = new WMSCapabilities();
+      const getCapabilitiesUrl = `${getLocalisezValue(
+        this.metadataAccessPath,
+        this.mapId
+      )}?service=WMS&version=1.3.0&request=GetCapabilities`;
+      fetch(getCapabilitiesUrl).then((response) => {
+        response.text().then((capabilitiesString) => {
+          this.capabilities = parser.read(capabilitiesString);
+          if (this.capabilities?.Service?.Abstract) this.attributions.push(this.capabilities.Service.Abstract as string);
+          resolve();
+        });
+      });
     });
-  }
-
-  /** ****************************************************************************************************************************
-   * Get capabilities of the current WMS service.
-   *
-   * @returns {TypeJsonObject} WMS capabilities in json format
-   */
-  private async getCapabilities(): Promise<TypeJsonObject> {
-    const parser = new WMSCapabilities();
-    const capUrl = `${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}service=WMS&version=1.3.0&request=GetCapabilities`;
-    const response = await fetch(capUrl);
-    const result = parser.read(await response.text());
-
-    this.capabilities = result;
-
-    return result;
+    return promisedExecution;
   }
 
   /** ****************************************************************************************************************************
@@ -124,54 +120,91 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeWmsLayerEntryConfig): TypeBaseRasterLayer {
-    const sourceOptions: SourceOptions = {
-      url: layerEntry.source.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()],
-      params: { LAYERS: `show:${layerEntry.info!.layerId}` },
-    };
-    sourceOptions.attributions = '';
-    if (this.capabilities && this.capabilities.Service && this.capabilities.Service.Abstract) {
-      sourceOptions.attributions = this.capabilities.Service.Abstract as string;
+  processOneLayerEntry(layerEntryConfig: TypeWmsLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.info!.layerId, this.capabilities.Capability.Layer);
+      if (layerCapabilities) {
+        const dataAccessPath = getLocalisezValue(layerEntryConfig.source.dataAccessPath, this.mapId)!;
+        const sourceOptions: SourceOptions = {
+          url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
+          params: { LAYERS: layerEntryConfig.info!.layerId },
+        };
+        sourceOptions.attributions = this.attributions;
+        sourceOptions.serverType = layerEntryConfig.source.serverType;
+        if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+        if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
+
+        const imageLayerOptions: ImageOptions<ImageWMS> = {
+          source: new ImageWMS(sourceOptions),
+          properties: { layerCapabilities, layerEntryConfig },
+        };
+        if (layerEntryConfig.initialSettings?.className) imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
+        if (layerEntryConfig.initialSettings?.extent) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
+        if (layerEntryConfig.initialSettings?.maxZoom) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
+        if (layerEntryConfig.initialSettings?.minZoom) imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
+        if (layerEntryConfig.initialSettings?.opacity) imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+        if (layerEntryConfig.initialSettings?.visible) imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+
+        resolve(new ImageLayer(imageLayerOptions));
+      } else {
+        api.event.emit(
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+            type: 'key',
+            value: 'validation.layer.notfound',
+            params: [layerEntryConfig.info!.layerId, this.id],
+          })
+        );
+        resolve(null);
+      }
+    });
+    return promisedVectorLayer;
+  }
+
+  /**
+   * This method search recursively the layerId in the layer entry of the capabilities.
+   *
+   * @param {string} layerId The layer identifier that must exists on the server.
+   * @param {TypeJsonObject} layerFromCapabilities The layer entry found in the capabilities.
+   */
+  findLayerCapabilities(layerId: string, layerFromCapabilities: TypeJsonObject): TypeJsonObject | null {
+    if (!layerId) return null;
+    if (Array.isArray(layerFromCapabilities)) {
+      for (let i = 0; i < layerFromCapabilities.length; i++) {
+        if (layerFromCapabilities[i]?.Name === layerId) return layerFromCapabilities[i];
+      }
+      for (let i = 0; i < layerFromCapabilities.length; i++) {
+        if (layerFromCapabilities[i]?.Layer) {
+          const layerFound = this.findLayerCapabilities(layerId, layerFromCapabilities[i]?.Layer);
+          if (layerFound) return layerFound;
+        }
+      }
+    } else {
+      if (layerFromCapabilities?.Name === layerId) return layerFromCapabilities;
+      if (layerFromCapabilities?.Layer) {
+        const layerFound = this.findLayerCapabilities(layerId, layerFromCapabilities?.Layer);
+        if (layerFound) return layerFound;
+      }
     }
-    if (typeof layerEntry.source.crossOrigin !== undefined) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
-    if (typeof layerEntry.source.projection !== undefined) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
-
-    const imageLayerOptions: ImageOptions<ImageWMS> = { source: new ImageWMS(sourceOptions) };
-    if (typeof layerEntry.initialSettings?.className !== undefined) imageLayerOptions.className = layerEntry.initialSettings?.className;
-    if (typeof layerEntry.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntry.initialSettings?.extent;
-    if (typeof layerEntry.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
-    if (typeof layerEntry.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
-    if (typeof layerEntry.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerEntry.initialSettings?.opacity;
-    if (typeof layerEntry.initialSettings?.visible !== undefined) imageLayerOptions.visible = layerEntry.initialSettings?.visible;
-
-    const wmsLayer = new ImageLayer(imageLayerOptions);
-
-    return wmsLayer;
+    return null;
   }
 
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
+  setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
+  registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }

@@ -4,7 +4,6 @@ import { Vector } from './vector/vector';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { TypeJsonObject } from '../../core/types/global-types';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
@@ -66,7 +65,9 @@ export class Layer {
               geoJSON.createGeoViewVectorLayers();
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.mapId, layerConfig);
-              wmsLayer.createGeoViewRasterLayers();
+              wmsLayer.createGeoViewRasterLayers().then(() => {
+                this.addToMap(wmsLayer);
+              });
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
               const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
               esriDynamic.createGeoViewRasterLayers();
@@ -114,7 +115,7 @@ export class Layer {
    * @param {any} geoviewLayer the layer config
    */
   private addToMap(geoviewLayer: AbstractGeoViewLayer): void {
-    // if the return layer object is a string, it is because path or entries are bad
+    // if the returned layer object has something in the layerLoadError, it is because an error was detected
     // do not add to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
       const names = geoviewLayer.layerLoadError.toString();
@@ -122,9 +123,11 @@ export class Layer {
         snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
           type: 'key',
           value: 'validation.layer.loadfailed',
-          params: [names as TypeJsonObject, this.mapId as TypeJsonObject],
+          params: [names, this.mapId],
         })
       );
+      // eslint-disable-next-line no-console
+      console.log(`Layer [${names}] failed to load on map ${this.mapId}`);
     } else {
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
 

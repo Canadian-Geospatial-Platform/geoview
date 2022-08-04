@@ -3,6 +3,9 @@ import LayerGroup from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeLayerEntryConfig } from '../../../map/map-schema-types';
+import { api } from '../../../../app';
+import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../../../../api/events/event-types';
 
 /** ******************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -48,40 +51,64 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * descriptive information of all the features in a tolerance radius. This information will be used to populate the
    * details-panel.
    */
-  createGeoViewRasterLayers() {
-    if (this.gvLayers === null && typeof this.listOfLayerEntryConfig !== 'undefined') {
-      this.getAdditionalServiceDefinition();
-      if (this.listOfLayerEntryConfig.length === 1) {
-        this.gvLayers = this.processOneLayerEntry(this.listOfLayerEntryConfig[0]);
-        if (this.gvLayers) {
-          this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
-          this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
-        } else {
-          this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-        }
-      } else {
-        this.gvLayers = new LayerGroup({
-          layers: new Collection(),
-        });
-        this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-          const rasterLayer: TypeBaseRasterLayer = this.processOneLayerEntry(layerEntry);
-          if (rasterLayer) {
-            this.setRenderer(layerEntry, rasterLayer);
-            this.registerToPanels(layerEntry, rasterLayer);
-            (this.gvLayers as LayerGroup).getLayers().push(rasterLayer);
+  createGeoViewRasterLayers(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
+        this.getAdditionalServiceDefinition().then(() => {
+          if (this.listOfLayerEntryConfig.length === 1) {
+            this.processOneLayerEntry(this.listOfLayerEntryConfig[0]).then((rasterLayer) => {
+              this.gvLayers = rasterLayer;
+              if (this.gvLayers) {
+                this.setRenderer(this.gvLayers);
+                this.registerToPanels(this.gvLayers);
+              } else {
+                this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+              }
+              resolve();
+            });
           } else {
-            this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+            this.gvLayers = new LayerGroup({
+              layers: new Collection(),
+            });
+            const promiseOfLayerCreated: Promise<BaseLayer | null>[] = [];
+            this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+              promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntry));
+            });
+            Promise.all(promiseOfLayerCreated).then((listOfLayerCreated) => {
+              listOfLayerCreated.forEach((rasterLayer) => {
+                if (rasterLayer) {
+                  this.setRenderer(rasterLayer);
+                  this.registerToPanels(rasterLayer);
+                  (this.gvLayers as LayerGroup).getLayers().push(rasterLayer);
+                } else {
+                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
+                }
+              });
+              resolve();
+            });
           }
         });
+      } else {
+        api.event.emit(
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+            type: 'key',
+            value: 'validation.layer.createtwice',
+            params: [this.mapId],
+          })
+        );
+        // eslint-disable-next-line no-console
+        console.log(`Can not execute twice the createGeoViewRasterLayers method for the map ${this.mapId}`);
+        resolve();
       }
-    }
+    });
+    return promisedExecution;
   }
 
   /**
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
-  abstract getAdditionalServiceDefinition(): void;
+  abstract getAdditionalServiceDefinition(): Promise<void>;
 
   /**
    * This method creates a GeoView layer using the definition provided in the layerEntry parameter.
@@ -90,21 +117,19 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  abstract processOneLayerEntry(layerEntry: TypeLayerEntryConfig): TypeBaseRasterLayer;
+  abstract processOneLayerEntry(layerEntry: TypeLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
 
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void;
+  abstract setRenderer(rasterLayer: TypeBaseRasterLayer): void;
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  abstract registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void;
+  abstract registerToPanels(rasterLayer: TypeBaseRasterLayer): void;
 }

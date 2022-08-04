@@ -12,7 +12,7 @@ import {
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
 
-import { getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
+import { getLocalisezValue, getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
@@ -93,7 +93,7 @@ const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
       });
 };
 
-export interface TypeSourceWFSVectorInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
 }
 
@@ -171,40 +171,44 @@ export class WFS extends AbstractGeoViewVector {
   /** ****************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
-  getAdditionalServiceDefinition(): void {
-    this.getWfsCapabilities();
-    if (this.listOfLayerEntryConfig.length !== 0) {
-      const featTypeInfo = this.getFeatureTypeInfo(
-        this.capabilities['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
-        this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString()
-      );
-      if (!featTypeInfo) {
-        return;
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const layerName = this.name[api.map(this.mapId).getLanguageCodePrefix()]
-        ? this.name[api.map(this.mapId).getLanguageCodePrefix()]
-        : (featTypeInfo.Name['#text'] as string).split(':')[1];
-      // ! To be continued
-    }
+  getAdditionalServiceDefinition(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      this.getWfsCapabilities().then(() => {
+        if (this.listOfLayerEntryConfig.length !== 0) {
+          const featTypeInfo = this.getFeatureTypeInfo(
+            this.capabilities['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
+            this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString()
+          );
+          if (!featTypeInfo) {
+            return;
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const layerName = this.name ? getLocalisezValue(this.name, this.mapId) : (featTypeInfo.Name['#text'] as string).split(':')[1];
+          // ! To be continued
+        }
+        resolve();
+      });
+    });
+    return promisedExecution;
   }
 
   /** ****************************************************************************************************************************
    * Query the WFS service to get the capacities.
    */
   private async getWfsCapabilities(): Promise<void> {
-    let xmlStringCapabilities = '';
-    getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?service=WFS&request=getcapabilities`).then(
-      (result) => {
-        xmlStringCapabilities = result;
-      }
-    );
-    // need to pass a xmldom to xmlToJson
-    const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
-    const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
+    const promisedExecution = new Promise<void>((resolve) => {
+      const requestUrl = `${getLocalisezValue(this.metadataAccessPath, this.mapId)}?service=WFS&request=getcapabilities`;
+      getXMLHttpRequest(requestUrl).then((xmlStringCapabilities) => {
+        // need to pass a xmldom to xmlToJson
+        const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
+        const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
 
-    this.capabilities = xmlJsonCapabilities['wfs:WFS_Capabilities'];
-    this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
+        this.capabilities = xmlJsonCapabilities['wfs:WFS_Capabilities'];
+        this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
+        resolve();
+      });
+    });
+    return promisedExecution;
   }
 
   /** ****************************************************************************************************************************

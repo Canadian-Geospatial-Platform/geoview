@@ -100,7 +100,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    * @param {number} projection the projection to create basemaps for
    */
   const createBasemapArray = async (projection: TypeProjectionCodes) => {
-    const basemapsArray: TypeJsonObject = toJsonObject(
+    const basemapsArray = toJsonObject(
       (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection)
     );
     let isInit = false;

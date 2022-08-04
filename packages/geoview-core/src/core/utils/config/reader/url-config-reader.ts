@@ -2,10 +2,10 @@ import { TypeBasemapOptions } from '../../../../geo/layer/basemap/basemap-types'
 import {
   TypeListOfGeoviewLayerConfig,
   TypeInteraction,
-  TypeLocalizedLanguages,
   TypeMapCorePackages,
   TypeProjectionCodes,
   TypeValidVersions,
+  TypeDisplayLanguage,
 } from '../../../../geo/map/map-schema-types';
 import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '../../../types/global-types';
 import { catalogUrl } from '../config';
@@ -112,11 +112,11 @@ export class URLmapConfigReader {
       // Ex: ?p=3857&z=4&c=40,-100&l=en-CA&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel,overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
       // update the language if provided from the map configuration.
-      let displayLanguage = urlParams.l as TypeJsonValue as TypeLocalizedLanguages;
-      if (displayLanguage) displayLanguage = configValidation.validateLanguage(displayLanguage);
+      let displayLanguage = urlParams.l as TypeDisplayLanguage;
+      if (displayLanguage) displayLanguage = configValidation.validateDisplayLanguage(displayLanguage);
 
       // update the version if provided from the map configuration.
-      let versionUsed = urlParams.v as TypeJsonValue as TypeValidVersions;
+      let versionUsed = urlParams.v as TypeValidVersions;
       if (versionUsed) versionUsed = configValidation.validateVersion(versionUsed);
 
       let center = (urlParams.c as string).split(',');

@@ -4,7 +4,6 @@ import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
 import { TypeJsonObject } from '../../../../core/types/global-types';
-import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
 import {
@@ -14,7 +13,7 @@ import {
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
 
-import { setAlphaColor } from '../../../../core/utils/utilities';
+import { getLocalisezValue, setAlphaColor } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
@@ -63,7 +62,7 @@ const defaultSelectStyle = new Style({
   }),
 });
 
-export interface TypeSourceOgcFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
+export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
 }
 
@@ -127,7 +126,7 @@ export const geoviewEntryIsOgcFeature = (
  */
 // ******************************************************************************************************************************
 export class OgcFeature extends AbstractGeoViewVector {
-  // private varibale holding wfs capabilities
+  // private varibale holding OGC feature capabilities.
   private capabilities: TypeJsonObject = {};
 
   // private varibale holding wfs version
@@ -146,32 +145,34 @@ export class OgcFeature extends AbstractGeoViewVector {
   /** ****************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
-  getAdditionalServiceDefinition(): void {
-    this.getCapabilities();
-    if (this.capabilities && this.capabilities.description) this.attributions.push(this.capabilities.description as string);
+  getAdditionalServiceDefinition(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      this.getCapabilities().then(() => {
+        if (this.capabilities?.description) this.attributions.push(this.capabilities.description as string);
+        resolve();
+      });
+    });
+    return promisedExecution;
   }
 
   /** ****************************************************************************************************************************
    * Query the OGC feature service to get the capacities.
    */
-  private async getCapabilities(): Promise<void> {
-    const rootUrl = this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()].endsWith('/')
-      ? this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]
-      : `${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}/`;
+  private getCapabilities(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      const rootUrl = getLocalisezValue(this.metadataAccessPath, this.mapId);
+      const capabilitiesUrl = rootUrl.endsWith('/') ? `${rootUrl}collections?f=json` : `${rootUrl}/collections?f=json`;
 
-    const entries = this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString();
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const featureUrl = `${rootUrl}collections/${entries}/items?f=json`;
-    const metaUrl = `${rootUrl}collections/${entries}?f=json`;
-
-    this.capabilities = (await axios.get<TypeJsonObject>(metaUrl)).data;
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const layerName = this.name[api.map(this.mapId).getLanguageCodePrefix()]
-      ? this.name[api.map(this.mapId).getLanguageCodePrefix()]
-      : (this.capabilities.title as string);
-    // ! To be continued
+      axios.get<TypeJsonObject>(capabilitiesUrl).then((response) => {
+        this.capabilities = response.data;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const layerName = getLocalisezValue(this.name, this.mapId) || (this.capabilities.title as string);
+        // ! To be continued
+        // const featureUrl = `${rootUrl}collections/${entries}/items?f=json`;
+        resolve();
+      });
+    });
+    return promisedExecution;
   }
 
   /**

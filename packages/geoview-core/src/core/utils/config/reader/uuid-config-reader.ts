@@ -1,29 +1,16 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { TypeJsonObject, TypeJsonArray } from '../../../types/global-types';
+import { TypeJsonObject, TypeJsonArray, TypeJsonValue } from '../../../types/global-types';
 
-import {
-  TypeImageLayerEntryConfig,
-  TypeSourceImageEsriInitialConfig,
-  TypeSourceImageWmsInitialConfig,
-  TypeListOfGeoviewLayerConfig,
-} from '../../../../geo/map/map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeOfServer } from '../../../../geo/map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { TypeEsriDynamicLayerConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
-import { TypeEsriFeatureLayerConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
-import { TypeWMSLayerConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
-import {
-  TypeSourceWFSVectorInitialConfig,
-  TypeWFSLayerConfig,
-  TypeWFSLayerEntryConfig,
-} from '../../../../geo/layer/geoview-layers/vector/wfs';
-import {
-  TypeOgcFeatureLayerConfig,
-  TypeOgcFeatureLayerEntryConfig,
-  TypeSourceOgcFeatureInitialConfig,
-} from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
-import { TypeGeoJSONLayerConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
-import { TypeXYZTilesConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
+import { TypeEsriDynamicLayerConfig, TypeEsriDynamicLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
+import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
+import { TypeWMSLayerConfig, TypeWmsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
+import { TypeWFSLayerConfig, TypeWFSLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
+import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
+import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
+import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
 import { api } from '../../../../app';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
@@ -60,159 +47,228 @@ export class UUIDmapConfigReader {
 
             if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
               const layerConfig: TypeEsriDynamicLayerConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
+                geoviewLayerType: 'esriDynamic',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
                   return {
                     geoviewLayerParent: layerConfig,
-                    info: { layerId: item.index },
+                    entryType: 'raster',
+                    info: { layerId: item.index as string },
                     source: {
-                      sourceType: 'ESRI',
-                      metadataAccessPath: {
-                        en: url,
-                        fr: url,
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
                       },
-                    } as TypeSourceImageEsriInitialConfig,
-                  } as TypeImageLayerEntryConfig;
+                    },
+                  };
                 }),
-              } as TypeEsriDynamicLayerConfig;
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (isFeature) {
               for (let j = 0; j < listOfLayerEntryConfig.length; j++) {
                 const featureUrl = `${url}/${listOfLayerEntryConfig[j].index}`;
                 const layerConfig: TypeEsriFeatureLayerConfig = {
-                  id,
+                  id: id as string,
                   name: {
-                    en: name,
-                    fr: name,
+                    en: name as string,
+                    fr: name as string,
                   },
                   metadataAccessPath: {
                     en: featureUrl,
                     fr: featureUrl,
                   },
-                  geoviewLayerType: CONST_LAYER_TYPES.ESRI_FEATURE,
-                } as TypeEsriFeatureLayerConfig;
+                  geoviewLayerType: 'esriFeature',
+                  listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
+                    return {
+                      geoviewLayerParent: layerConfig,
+                      entryType: 'vector',
+                      info: { layerId: item.index as string },
+                      source: {
+                        format: 'EsriJSON',
+                        dataAccessPath: {
+                          en: url as string,
+                          fr: url as string,
+                        },
+                      },
+                    };
+                  }),
+                };
                 listOfGeoviewLayerConfig.push(layerConfig);
               }
             } else if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
               const layerConfig: TypeEsriFeatureLayerConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-              } as TypeEsriFeatureLayerConfig;
+                geoviewLayerType: 'esriFeature',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
+                  return {
+                    geoviewLayerParent: layerConfig,
+                    entryType: 'vector',
+                    info: { layerId: item.index as string },
+                    source: {
+                      format: 'EsriJSON',
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
+                }),
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.WMS) {
               const layerConfig: TypeWMSLayerConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
+                geoviewLayerType: 'ogcWms',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWmsLayerEntryConfig => {
                   return {
+                    entryType: 'raster',
                     geoviewLayerParent: layerConfig,
-                    info: { layerId: item.id },
+                    info: { layerId: item.id as string },
                     source: {
-                      sourceType: 'WMS',
-                      metadataAccessPath: {
-                        en: url,
-                        fr: url,
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
                       },
-                      serverType: typeof serverType === 'undefined' ? 'mapserver' : serverType,
-                    } as TypeSourceImageWmsInitialConfig,
-                  } as TypeImageLayerEntryConfig;
+                      serverType: (typeof serverType === 'undefined' ? 'mapserver' : serverType) as TypeOfServer,
+                    },
+                  };
                 }),
-              } as TypeWMSLayerConfig;
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.WFS) {
               const layerConfig: TypeWFSLayerConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
+                geoviewLayerType: 'ogcWfs',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWFSLayerEntryConfig => {
                   return {
                     geoviewLayerParent: layerConfig,
-                    info: { layerId: item.id },
-                    source: { format: 'WFS' } as TypeSourceWFSVectorInitialConfig,
-                  } as TypeWFSLayerEntryConfig;
+                    entryType: 'vector',
+                    info: { layerId: item.id as string },
+                    source: {
+                      format: 'WFS',
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
                 }),
-              } as TypeWFSLayerConfig;
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE) {
               const layerConfig: TypeOgcFeatureLayerConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item) => {
+                geoviewLayerType: 'ogcFeature',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
                   return {
                     geoviewLayerParent: layerConfig,
-                    info: { layerId: item.id },
-                    source: { format: 'featureAPI' } as TypeSourceOgcFeatureInitialConfig,
-                  } as TypeOgcFeatureLayerEntryConfig;
+                    entryType: 'vector',
+                    info: { layerId: item.id as string },
+                    source: {
+                      format: 'featureAPI',
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
                 }),
-              } as TypeOgcFeatureLayerConfig;
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.GEOJSON) {
               const layerConfig: TypeGeoJSONLayerConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-              } as TypeGeoJSONLayerConfig;
+                geoviewLayerType: 'GeoJSON',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
+                  return {
+                    geoviewLayerParent: layerConfig,
+                    entryType: 'vector',
+                    info: { layerId: item.id as string },
+                    source: {
+                      format: 'GeoJSON',
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
+                }),
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) {
               const layerConfig: TypeXYZTilesConfig = {
-                id,
+                id: id as string,
                 name: {
-                  en: name,
-                  fr: name,
+                  en: name as string,
+                  fr: name as string,
                 },
                 metadataAccessPath: {
-                  en: url,
-                  fr: url,
+                  en: url as string,
+                  fr: url as string,
                 },
-                geoviewLayerType,
-              } as TypeXYZTilesConfig;
+                geoviewLayerType: 'xyzTiles',
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
+                  return {
+                    geoviewLayerParent: layerConfig,
+                    entryType: 'raster',
+                    info: { layerId: item.id as string },
+                    source: {
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
+                }),
+              };
               listOfGeoviewLayerConfig.push(layerConfig);
             }
           }
@@ -241,7 +297,7 @@ export class UUIDmapConfigReader {
         snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
           type: 'key',
           value: 'validation.layer.loadfailed',
-          params: [error as TypeJsonObject, mapId as TypeJsonObject],
+          params: [error as TypeJsonValue, mapId],
         })
       );
     }

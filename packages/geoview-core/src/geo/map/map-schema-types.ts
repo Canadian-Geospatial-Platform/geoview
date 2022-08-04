@@ -4,12 +4,22 @@ import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-l
 /** ******************************************************************************************************************************
  *  Definition of a bilingual string.
  */
-export type TypeLocalizedString = {
-  /** English value. */
-  en: string;
-  /** French value. */
-  fr: string;
-};
+export type TypeLocalizedString = TypeLocalizedStringEnAndFr | TypeLocalizedStringFr | TypeLocalizedStringEn;
+
+/** ******************************************************************************************************************************
+ *  Definition of a bilingual string, only English provided.
+ */
+export type TypeLocalizedStringEn = Pick<TypeLocalizedStringEnAndFr, 'en'> & Partial<Pick<TypeLocalizedStringEnAndFr, 'fr'>>;
+
+/** ******************************************************************************************************************************
+ *  Definition of a bilingual string, only French provided.
+ */
+export type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr'> & Partial<Pick<TypeLocalizedStringEnAndFr, 'en'>>;
+
+/** ******************************************************************************************************************************
+ *  Definition of a bilingual string, both English and French provided.
+ */
+export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
 
 /** ******************************************************************************************************************************
  * Basic type used to identify the layer to display on the map.
@@ -108,7 +118,7 @@ export type TypeBaseVectorSourceInitialConfig = {
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
-export interface TypeVectorSourceInitialConfig extends Omit<TypeBaseVectorSourceInitialConfig, 'format'> {
+export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
   /** The feature format used by the XHR feature loader when url is set. */
   format: TypeVectorSourceFormats;
   /** Vector source clustering configuration. */
@@ -305,7 +315,7 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
  */
 export type TypeBaseVectorLayerEntryConfig = {
   /** Layer entry data type. */
-  entryType: TypeLayerEntryType;
+  entryType: 'vector';
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Basic information used to identify the GeoView layer. */
@@ -469,7 +479,7 @@ export type TypeImageLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Layer entry data type. */
-  entryType: TypeLayerEntryType;
+  entryType: 'raster';
   /** Basic information used to identify the GeoView layer. */
   info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
@@ -485,7 +495,7 @@ export type TypeTileLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
   /** Layer entry data type. */
-  entryType: TypeLayerEntryType;
+  entryType: 'raster';
   /** Basic information used to identify the GeoView layer. */
   info?: TypeLayerBasicInfoConfig;
   /** Initial settings to apply to the GeoView layer at creation time. */
@@ -571,7 +581,9 @@ export type TypeMapFeaturesInstance = {
 
 /* *******************************************************************************************************************************
 /** ISO 639-1  language code prefix. */
-export type TypeLanguagesPrefix = 'en' | 'fr';
+export type TypeDisplayLanguage = 'en' | 'fr';
+/** Constante mainly use for language prefix validation. */
+export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
 /** ******************************************************************************************************************************
  * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
  * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.

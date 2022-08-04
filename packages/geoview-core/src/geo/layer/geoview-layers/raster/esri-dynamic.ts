@@ -1,15 +1,10 @@
-// import axios from 'axios';
-
 import { ImageArcGISRest } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
-// import { extend, Extent } from 'ol/extent';
-// import { transformExtent } from 'ol/proj';
 
 import { TypeJsonObject } from '../../../../core/types/global-types';
-import { api } from '../../../../app';
-import { getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getLocalisezValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -23,7 +18,7 @@ export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntr
   source: TypeSourceImageEsriInitialConfig;
 }
 
-export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
+export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriDynamic';
   listOfLayerEntryConfig: TypeEsriDynamicLayerEntryConfig[];
 }
@@ -93,13 +88,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
-  getAdditionalServiceDefinition(): void {
-    const data = getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`);
-    data.then((value) => {
-      if (value !== '{}') {
-        this.metadata = JSON.parse(value) as TypeJsonObject;
-      }
+  getAdditionalServiceDefinition(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      const data = getXMLHttpRequest(`${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`);
+      data.then((value) => {
+        if (value !== '{}') {
+          this.metadata = JSON.parse(value) as TypeJsonObject;
+        }
+        resolve();
+      });
     });
+    return promisedExecution;
   }
 
   /** ****************************************************************************************************************************
@@ -109,31 +108,33 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeEsriDynamicLayerEntryConfig): TypeBaseRasterLayer {
-    const sourceOptions: SourceOptions = {};
-    sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
-    sourceOptions.url = layerEntry.source.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
-    sourceOptions.params = { LAYERS: `show:${layerEntry.info!.layerId}` };
-    if (typeof layerEntry.source.transparent !== undefined)
-      Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent!);
-    if (typeof layerEntry.source.format !== undefined) Object.defineProperty(sourceOptions.params, 'format', layerEntry.source.format!);
-    if (typeof layerEntry.source.crossOrigin !== undefined) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
-    if (typeof layerEntry.source.projection !== undefined) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
+  processOneLayerEntry(layerEntry: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      const sourceOptions: SourceOptions = {};
+      sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
+      sourceOptions.url = getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId);
+      sourceOptions.params = { LAYERS: `show:${layerEntry.info!.layerId}` };
+      if (layerEntry.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent!);
+      if (layerEntry.source.format) Object.defineProperty(sourceOptions.params, 'format', layerEntry.source.format!);
+      if (layerEntry.source.crossOrigin) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
+      if (layerEntry.source.projection) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
 
-    const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
-      source: new ImageArcGISRest(sourceOptions),
-      properties: { layerConfig: layerEntry },
-    };
-    if (typeof layerEntry.initialSettings?.className !== undefined) imageLayerOptions.className = layerEntry.initialSettings?.className;
-    if (typeof layerEntry.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntry.initialSettings?.extent;
-    if (typeof layerEntry.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
-    if (typeof layerEntry.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
-    if (typeof layerEntry.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerEntry.initialSettings?.opacity;
-    if (typeof layerEntry.initialSettings?.visible !== undefined) imageLayerOptions.visible = layerEntry.initialSettings?.visible;
+      const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
+        source: new ImageArcGISRest(sourceOptions),
+        properties: { layerConfig: layerEntry },
+      };
+      if (layerEntry.initialSettings?.className) imageLayerOptions.className = layerEntry.initialSettings?.className;
+      if (layerEntry.initialSettings?.extent) imageLayerOptions.extent = layerEntry.initialSettings?.extent;
+      if (layerEntry.initialSettings?.maxZoom) imageLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
+      if (layerEntry.initialSettings?.minZoom) imageLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
+      if (layerEntry.initialSettings?.opacity) imageLayerOptions.opacity = layerEntry.initialSettings?.opacity;
+      if (layerEntry.initialSettings?.visible) imageLayerOptions.visible = layerEntry.initialSettings?.visible;
 
-    const esriLayer = new ImageLayer(imageLayerOptions);
+      const esriLayer = new ImageLayer(imageLayerOptions);
 
-    return esriLayer;
+      resolve(esriLayer);
+    });
+    return promisedVectorLayer;
   }
 
   /**

@@ -97,10 +97,10 @@ export abstract class AbstractGeoViewLayer {
     this.mapId = mapId;
     this.type = type;
     this.id = mapLayerConfig.id || generateId('');
-    this.name.en = mapLayerConfig.name && mapLayerConfig.name.en ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
-    this.name.fr = mapLayerConfig.name && mapLayerConfig.name.fr ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
+    this.name.en = mapLayerConfig?.name?.en ? mapLayerConfig.name.en : DEFAULT_LAYER_NAMES[type];
+    this.name.fr = mapLayerConfig?.name?.fr ? mapLayerConfig.name.fr : DEFAULT_LAYER_NAMES[type];
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
-    if (typeof mapLayerConfig.listOfLayerEntryConfig !== 'undefined') this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
+    if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
   }
 }

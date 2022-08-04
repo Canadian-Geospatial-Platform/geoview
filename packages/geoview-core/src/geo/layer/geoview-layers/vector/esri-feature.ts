@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Icon as StyleIcon } from 'ol/style';
 
 import { toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
-import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
 import {
@@ -14,7 +13,7 @@ import {
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
 
-import { getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getLocalisezValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
@@ -25,7 +24,7 @@ export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEnt
   source: TypeSourceEsriFeatureInitialConfig;
 }
 
-export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
+export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'esriFeature';
   listOfLayerEntryConfig: TypeEsriFeatureLayerEntryConfig[];
 }
@@ -80,8 +79,8 @@ export const geoviewEntryIsEsriFeature = (
  */
 // ******************************************************************************************************************************
 export class EsriFeature extends AbstractGeoViewVector {
-  // The service metadata.
-  metadata: TypeJsonObject | null = null;
+  // The service capabilities.
+  capabilities: TypeJsonObject | null = null;
 
   // define a default blue icon
   iconSymbols: { field: string | null; valueAndSymbol: Record<string, StyleIcon> } = {
@@ -108,21 +107,21 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      this.getMetadata().then(() => {
-        if (this.metadata) {
+      this.getCapabilities().then(() => {
+        if (this.capabilities) {
           // if layerEntry.info is not defined, use the dataAccessPath ending as value for layerEntry.info.layerId.
           this.listOfLayerEntryConfig.forEach((layerEntry) => {
-            const pathElements = layerEntry.source!.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()].split('/');
+            const pathElements = getLocalisezValue(layerEntry.source!.dataAccessPath, this.mapId);
             const layerId = pathElements[pathElements.length - 1];
-            if (Number.isNaN(layerId) || !this.metadata!.layers[Number(layerId)]) this.layerLoadError.push(layerId);
+            if (Number.isNaN(layerId) || !this.capabilities!.layers[Number(layerId)]) this.layerLoadError.push(layerId);
             else {
               const esriIndex = Number(layerId);
               if (!layerEntry.info) layerEntry.info = { layerId };
               else if (!layerEntry.info.layerId) layerEntry.info.layerId = layerId;
               if (!layerEntry.info.layerName) {
                 layerEntry.info.layerName = {
-                  en: this.metadata!.layers[esriIndex].name as string,
-                  fr: this.metadata!.layers[esriIndex].name as string,
+                  en: this.capabilities!.layers[esriIndex].name as string,
+                  fr: this.capabilities!.layers[esriIndex].name as string,
                 };
               }
             }
@@ -134,16 +133,17 @@ export class EsriFeature extends AbstractGeoViewVector {
     return promisedExecution;
   }
 
-  private async getMetadata(): Promise<void> {
+  private async getCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const promisedMetadataString = getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`);
-      promisedMetadataString.then((metadataString) => {
-        if (metadataString !== '{}') {
-          this.metadata = toJsonObject(JSON.parse(metadataString));
-          const { type, copyrightText } = this.metadata;
+      const capabilitiesUrl = `${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`;
+      const promisedCapabilitiesString = getXMLHttpRequest(capabilitiesUrl);
+      promisedCapabilitiesString.then((capabilitiesString) => {
+        if (capabilitiesString !== '{}') {
+          this.capabilities = toJsonObject(JSON.parse(capabilitiesString));
+          const { type, copyrightText } = this.capabilities;
           this.attribution = copyrightText ? (copyrightText as string) : '';
           // check if the type is define as Feature Layer.
-          this.isFeatureLayer = typeof type !== 'undefined' && type === 'Feature Layer';
+          this.isFeatureLayer = type && type === 'Feature Layer';
           resolve();
         }
       });
@@ -152,7 +152,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   private async legendQuery(): Promise<void> {
-    let queryUrl = this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()];
+    let queryUrl = getLocalisezValue(this.metadataAccessPath, this.mapId);
     queryUrl = queryUrl.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
 
     const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
@@ -178,13 +178,13 @@ export class EsriFeature extends AbstractGeoViewVector {
       }
     }
 
-    getXMLHttpRequest(`${this.metadataAccessPath[api.map(this.mapId).getLanguageCodePrefix()]}?f=json`).then(async (value) => {
+    getXMLHttpRequest(`${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`).then(async (value) => {
       if (value !== '{}') {
         const jsonObject = toJsonObject(JSON.parse(value));
         const { type, copyrightText } = jsonObject;
         this.attribution = copyrightText ? (copyrightText as string) : '';
         // check if the type is define as Feature Layer.
-        this.isFeatureLayer = typeof type !== 'undefined' && type === 'Feature Layer';
+        this.isFeatureLayer = type && type === 'Feature Layer';
       }
     });
   }

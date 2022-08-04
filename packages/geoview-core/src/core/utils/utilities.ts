@@ -3,10 +3,23 @@
 import ReactDOM from 'react-dom';
 
 import { api } from '../../app';
+import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+
+/**
+ * Display a message in the snackbar
+ *
+ * @param {TypeLocalizedString} localizedString the localized string to process.
+ * @param {string} mapId the map identifier that holds the localized string.
+ *
+ * @returns {string} The string value according to the map display language,
+ */
+export function getLocalisezValue(localizedString: TypeLocalizedString, mapId: string): string | undefined {
+  return localizedString[api.map(mapId).displayLanguage];
+}
 
 /**
  * Display a message in the snackbar

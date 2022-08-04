@@ -3,8 +3,7 @@ import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
-import { api } from '../../../../app';
-import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeGeoviewLayerType } from '../abstract-geoview-layers';
+import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
   TypeLayerEntryConfig,
@@ -12,6 +11,7 @@ import {
   TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
+import { getLocalisezValue } from '../../../../core/utils/utilities';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -21,9 +21,7 @@ import {
 
 // TODO: Add more customization (minZoom, maxZoom, TMS)
 
-export interface TypeSourceImageXYZTilesInitialConfig extends Omit<TypeSourceTileInitialConfig, 'sourceType'> {
-  sourceType: 'XYZ';
-}
+export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 
 export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
   source: TypeSourceImageXYZTilesInitialConfig;
@@ -102,7 +100,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This method is not used by XYZTiles.
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  getAdditionalServiceDefinition(): void {}
+  getAdditionalServiceDefinition(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      resolve();
+    });
+    return promisedExecution;
+  }
 
   /** ****************************************************************************************************************************
    * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntry parameter.
@@ -111,33 +114,36 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeXYZTilesLayerEntryConfig): TypeBaseRasterLayer {
-    const sourceOptions: SourceOptions = {
-      url: layerEntry.source.dataAccessPath[api.map(this.mapId).getLanguageCodePrefix()],
-    };
-    if (typeof layerEntry.source.crossOrigin !== undefined) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
-    if (typeof layerEntry.source.projection !== undefined) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
-    if (typeof layerEntry.source.tileGrid !== undefined) {
-      const tileGridOptions: TileGridOptions = {
-        origin: layerEntry.source.tileGrid?.origin,
-        resolutions: layerEntry.source.tileGrid?.resolutions as number[],
+  processOneLayerEntry(layerEntry: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+    const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
+      const sourceOptions: SourceOptions = {
+        url: getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId),
       };
-      if (typeof layerEntry.source.tileGrid?.tileSize !== undefined) tileGridOptions.tileSize = layerEntry.source.tileGrid?.tileSize;
-      if (typeof layerEntry.source.tileGrid?.extent !== undefined) tileGridOptions.extent = layerEntry.source.tileGrid?.extent;
-      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-    }
+      if (layerEntry.source.crossOrigin) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
+      if (layerEntry.source.projection) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
+      if (layerEntry.source.tileGrid) {
+        const tileGridOptions: TileGridOptions = {
+          origin: layerEntry.source.tileGrid?.origin,
+          resolutions: layerEntry.source.tileGrid?.resolutions as number[],
+        };
+        if (layerEntry.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerEntry.source.tileGrid?.tileSize;
+        if (layerEntry.source.tileGrid?.extent) tileGridOptions.extent = layerEntry.source.tileGrid?.extent;
+        sourceOptions.tileGrid = new TileGrid(tileGridOptions);
+      }
 
-    const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-    if (typeof layerEntry.initialSettings?.className !== undefined) tileLayerOptions.className = layerEntry.initialSettings?.className;
-    if (typeof layerEntry.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntry.initialSettings?.extent;
-    if (typeof layerEntry.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
-    if (typeof layerEntry.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
-    if (typeof layerEntry.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntry.initialSettings?.opacity;
-    if (typeof layerEntry.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntry.initialSettings?.visible;
+      const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
+      if (layerEntry.initialSettings?.className) tileLayerOptions.className = layerEntry.initialSettings?.className;
+      if (layerEntry.initialSettings?.extent) tileLayerOptions.extent = layerEntry.initialSettings?.extent;
+      if (layerEntry.initialSettings?.maxZoom) tileLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
+      if (layerEntry.initialSettings?.minZoom) tileLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
+      if (layerEntry.initialSettings?.opacity) tileLayerOptions.opacity = layerEntry.initialSettings?.opacity;
+      if (layerEntry.initialSettings?.visible) tileLayerOptions.visible = layerEntry.initialSettings?.visible;
 
-    const xyzLayer = new TileLayer(tileLayerOptions);
+      const xyzLayer = new TileLayer(tileLayerOptions);
 
-    return xyzLayer;
+      resolve(xyzLayer);
+    });
+    return promisedVectorLayer;
   }
 
   /** ****************************************************************************************************************************

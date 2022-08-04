@@ -11,12 +11,12 @@ import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../ge
 import {
   layerEntryIsVector,
   TypeGeoviewLayerConfig,
-  TypeLanguagesPrefix,
+  TypeDisplayLanguage,
   TypeLayerEntryConfig,
-  TypeLocalizedLanguages,
+  TypeLocalizedString,
   TypeProjectionCodes,
   TypeValidVersions,
-  VALID_LOCALIZED_LANGUAGES,
+  VALID_DISPLAY_LANGUAGE,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
 } from '../../../geo/map/map-schema-types';
@@ -35,7 +35,7 @@ export class ConfigValidation {
   private _mapId: string;
 
   /** The language that will be used to display the GeoView layer. */
-  private _displayLanguage: TypeLocalizedLanguages;
+  private _displayLanguage: TypeDisplayLanguage;
 
   /** default configuration if provided configuration is missing or wrong */
   private _defaultMapFeaturesConfig: TypeMapFeaturesConfig = {
@@ -59,7 +59,7 @@ export class ConfigValidation {
     theme: 'dark',
     components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
     corePackages: [],
-    displayLanguage: 'en-CA',
+    displayLanguage: 'en',
     suportedLanguages: ['en-CA', 'fr-CA'],
     versionUsed: '1.0',
   };
@@ -127,18 +127,18 @@ export class ConfigValidation {
   /** ***************************************************************************************************************************
    * Get displayLanguage value.
    *
-   * @returns {TypeLocalizedLanguages} The display language of the Geoview map.
+   * @returns {TypeDisplayLanguage} The display language of the Geoview map.
    */
-  get displayLanguage(): TypeLocalizedLanguages {
+  get displayLanguage(): TypeDisplayLanguage {
     return this._displayLanguage;
   }
 
   /** ***************************************************************************************************************************
    * Set displayLanguage value.
-   * @param {TypeLocalizedLanguages} displayLanguage The display language of the Geoview map.
+   * @param {TypeDisplayLanguage} displayLanguage The display language of the Geoview map.
    */
-  set displayLanguage(displayLanguage: TypeLocalizedLanguages) {
-    this._displayLanguage = this.validateLanguage(displayLanguage);
+  set displayLanguage(displayLanguage: TypeDisplayLanguage) {
+    this._displayLanguage = this.validateDisplayLanguage(displayLanguage);
   }
 
   /** ***************************************************************************************************************************
@@ -177,12 +177,12 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate map config language.
-   * @param {TypeLocalizedLanguages} language The language to validate.
+   * @param {TypeDisplayLanguage} language The language to validate.
    *
-   * @returns {TypeLocalizedLanguages} A valid language.
+   * @returns {TypeDisplayLanguage} A valid language.
    */
-  validateLanguage(language?: TypeLocalizedLanguages): TypeLocalizedLanguages {
-    if (language && VALID_LOCALIZED_LANGUAGES.includes(language)) return language;
+  validateDisplayLanguage(language?: TypeDisplayLanguage): TypeDisplayLanguage {
+    if (language && VALID_DISPLAY_LANGUAGE.includes(language)) return language;
 
     console.log(
       `- map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
@@ -282,24 +282,41 @@ export class ConfigValidation {
         validMapFeaturesConfig = {
           ...this.adjustMapConfiguration(mapFeaturesConfigToValidate),
           mapId: this.mapId,
-          displayLanguage: this._displayLanguage as TypeLocalizedLanguages,
+          displayLanguage: this._displayLanguage as TypeDisplayLanguage,
         };
       } else {
         validMapFeaturesConfig = {
           ...this.adjustMapConfiguration(mapFeaturesConfigToValidate),
           mapId: this.mapId,
-          displayLanguage: this._displayLanguage as TypeLocalizedLanguages,
+          displayLanguage: this._displayLanguage as TypeDisplayLanguage,
         };
       }
     } else {
       validMapFeaturesConfig = {
         ...this._defaultMapFeaturesConfig,
         mapId: this.mapId,
-        displayLanguage: this._displayLanguage as TypeLocalizedLanguages,
+        displayLanguage: this._displayLanguage as TypeDisplayLanguage,
       };
     }
 
     return this.processLocalizedString(validMapFeaturesConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Synchronize the English and French strings.
+   * @param {TypeLocalizedString} localizedString The localized string to synchronize the en and fr string.
+   * @param {TypeDisplayLanguage} sourceKey The source's key.
+   * @param {TypeDisplayLanguage} destinationKey The destination's key.
+   *
+   * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
+   */
+  private SynchronizeLocalizedString(
+    localizedString: TypeLocalizedString,
+    sourceKey: TypeDisplayLanguage,
+    destinationKey: TypeDisplayLanguage
+  ) {
+    // eslint-disable-next-line no-param-reassign
+    localizedString[destinationKey] = localizedString[sourceKey];
   }
 
   /** ***************************************************************************************************************************
@@ -312,49 +329,38 @@ export class ConfigValidation {
   private processLocalizedString(featuresConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
     if (featuresConfig.suportedLanguages.includes('en-CA') && featuresConfig.suportedLanguages.includes('fr-CA')) return featuresConfig;
 
-    let sourceKey: TypeLanguagesPrefix = 'fr';
-    let destinationKey: TypeLanguagesPrefix = 'en';
-
+    let sourceKey: TypeDisplayLanguage;
+    let destinationKey: TypeDisplayLanguage;
     if (featuresConfig.suportedLanguages.includes('en-CA')) {
       sourceKey = 'en';
       destinationKey = 'fr';
+    } else {
+      sourceKey = 'fr';
+      destinationKey = 'en';
     }
-    if (featuresConfig.map.listOfGeoviewLayerConfig) {
+
+    if (featuresConfig?.map?.listOfGeoviewLayerConfig) {
       featuresConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
-        // eslint-disable-next-line no-param-reassign
-        if (geoviewLayerConfig.name) geoviewLayerConfig.name[destinationKey] = geoviewLayerConfig.name[sourceKey];
-        if (geoviewLayerConfig.metadataAccessPath)
-          // eslint-disable-next-line no-param-reassign
-          geoviewLayerConfig.metadataAccessPath[destinationKey] = geoviewLayerConfig.metadataAccessPath[sourceKey];
+        if (geoviewLayerConfig?.name) this.SynchronizeLocalizedString(geoviewLayerConfig.name, sourceKey, destinationKey);
+        if (geoviewLayerConfig?.metadataAccessPath)
+          this.SynchronizeLocalizedString(geoviewLayerConfig.metadataAccessPath, sourceKey, destinationKey);
+
         geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-          if (layerEntryConfig.info) {
-            if (layerEntryConfig.info.layerName) {
-              // eslint-disable-next-line no-param-reassign
-              layerEntryConfig.info.layerName[destinationKey] = layerEntryConfig.info.layerName[sourceKey];
-            }
-            if (layerEntryConfig.source) {
-              // eslint-disable-next-line no-param-reassign
-              layerEntryConfig.source.dataAccessPath[destinationKey] = layerEntryConfig.source.dataAccessPath[sourceKey];
-              if (layerEntryIsVector(layerEntryConfig)) {
-                if (layerEntryConfig.source.featureInfo) {
-                  // eslint-disable-next-line no-param-reassign
-                  layerEntryConfig.source.featureInfo.aliasFields[destinationKey] =
-                    layerEntryConfig.source.featureInfo.aliasFields[sourceKey];
-                  // eslint-disable-next-line no-param-reassign
-                  layerEntryConfig.source.featureInfo.nameField[destinationKey] = layerEntryConfig.source.featureInfo.nameField[sourceKey];
-                  // eslint-disable-next-line no-param-reassign
-                  layerEntryConfig.source.featureInfo.outfields[destinationKey] = layerEntryConfig.source.featureInfo.outfields[sourceKey];
-                  // eslint-disable-next-line no-param-reassign
-                  layerEntryConfig.source.featureInfo.tooltipField[destinationKey] =
-                    layerEntryConfig.source.featureInfo.outfields[sourceKey];
-                }
-              }
+          if (layerEntryConfig?.info?.layerName)
+            this.SynchronizeLocalizedString(layerEntryConfig.info.layerName, sourceKey, destinationKey);
+          if (layerEntryConfig?.source?.dataAccessPath)
+            this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
+          if (layerEntryIsVector(layerEntryConfig)) {
+            if (layerEntryConfig?.source?.featureInfo) {
+              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
+              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
+              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
+              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
             }
           }
         });
       });
     }
-
     return featuresConfig;
   }
 
