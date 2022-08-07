@@ -109,21 +109,14 @@ export class EsriFeature extends AbstractGeoViewVector {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getCapabilities().then(() => {
         if (this.capabilities) {
-          // if layerEntry.info is not defined, use the dataAccessPath ending as value for layerEntry.info.layerId.
+          // if layerEntry.layerId is not defined, use the dataAccessPath ending as value for layerEntry.layerId.
           this.listOfLayerEntryConfig.forEach((layerEntry) => {
-            const pathElements = getLocalisezValue(layerEntry.source!.dataAccessPath, this.mapId);
-            const layerId = pathElements[pathElements.length - 1];
-            if (Number.isNaN(layerId) || !this.capabilities!.layers[Number(layerId)]) this.layerLoadError.push(layerId);
-            else {
-              const esriIndex = Number(layerId);
-              if (!layerEntry.info) layerEntry.info = { layerId };
-              else if (!layerEntry.info.layerId) layerEntry.info.layerId = layerId;
-              if (!layerEntry.info.layerName) {
-                layerEntry.info.layerName = {
-                  en: this.capabilities!.layers[esriIndex].name as string,
-                  fr: this.capabilities!.layers[esriIndex].name as string,
-                };
-              }
+            const esriIndex = Number(layerEntry.layerId);
+            if (!layerEntry.layerName) {
+              layerEntry.layerName = {
+                en: this.capabilities!.layers[esriIndex].name as string,
+                fr: this.capabilities!.layers[esriIndex].name as string,
+              };
             }
           });
         }
@@ -153,7 +146,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   private async legendQuery(): Promise<void> {
     let queryUrl = getLocalisezValue(this.metadataAccessPath, this.mapId);
-    queryUrl = queryUrl.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
+    queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
 
     const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
 
@@ -192,26 +185,20 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
+   * @param {TypeBaseVectorLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  setRenderer(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+   * @param {TypeBaseVectorLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }

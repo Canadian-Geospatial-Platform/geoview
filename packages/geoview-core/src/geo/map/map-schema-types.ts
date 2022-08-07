@@ -108,9 +108,9 @@ export type TypeFeatureInfoLayerConfig = {
  */
 export type TypeBaseVectorSourceInitialConfig = {
   /** Path used to access the data. */
-  dataAccessPath: TypeLocalizedString;
+  dataAccessPath?: TypeLocalizedString;
   /** The feature format used by the XHR feature loader when url is set. */
-  format: TypeVectorSourceFormats | 'MVT';
+  format?: TypeVectorSourceFormats | 'MVT';
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
 };
@@ -120,7 +120,7 @@ export type TypeBaseVectorSourceInitialConfig = {
  */
 export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
   /** The feature format used by the XHR feature loader when url is set. */
-  format: TypeVectorSourceFormats;
+  format?: TypeVectorSourceFormats;
   /** Vector source clustering configuration. */
   cluster?: TypeSourceVectorClusterConfig;
 }
@@ -270,6 +270,18 @@ export type TypeStyleConfig = TypeSimpleStyleConfig | TypeUniqueValueStyleConfig
 export type TypeLayerEntryType = 'vector' | 'raster' | 'geocore';
 
 /** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntry if the entryType attribute of verifyIfLayer
+ * is 'group'. The type ascention applies only to the true block of the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntry => {
+  return verifyIfLayer.entryType === 'group';
+};
+
+/** ******************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeBaseVectorLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use
  * this function.
@@ -315,15 +327,21 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
  */
 export type TypeBaseVectorLayerEntryConfig = {
   /** Layer entry data type. */
-  entryType: 'vector';
-  /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
+  entryType?: 'vector';
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
-  /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoConfig;
-  /** Initial settings to apply to the GeoView layer at creation time. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  /** The id of the layer to display on the map. */
+  layerId: string;
+  /** The display name of the layer (English/French). */
+  layerName?: TypeLocalizedString;
+  /** Initial settings to apply to the GeoView layer entry at creation time. */
   initialSettings?: TypeLayerInitialConfig;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source: TypeBaseVectorSourceInitialConfig;
+  source?: TypeBaseVectorSourceInitialConfig;
+  /** The listOfLayerEntryConfig attribute is used only on group entry. */
+  listOfLayerEntryConfig: never;
 };
 
 /** ******************************************************************************************************************************
@@ -331,7 +349,7 @@ export type TypeBaseVectorLayerEntryConfig = {
  */
 export interface TypeVectorLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
-  source: TypeVectorSourceInitialConfig;
+  source?: TypeVectorSourceInitialConfig;
   /** Style to apply to the vector layer. */
   style?: TypeStyleConfig;
 }
@@ -355,8 +373,11 @@ export type TypeSourceImageInitialConfig = TypeSourceImageWmsInitialConfig | Typ
  * Initial settings for image sources.
  */
 export type TypeBaseSourceImageInitialConfig = {
-  /** The service endpoint of the layer (English/French). */
-  dataAccessPath: TypeLocalizedString;
+  /**
+   * The service endpoint of the layer (English/French). If not specified, the metadataAccessPath of the GeoView parent
+   * layer is used
+   */
+  dataAccessPath?: TypeLocalizedString;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -372,8 +393,8 @@ export type TypeBaseSourceImageInitialConfig = {
  * Initial settings for WMS image sources.
  */
 export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceImageInitialConfig {
-  /** The type of the remote WMS server. */
-  serverType: TypeOfServer;
+  /** The type of the remote WMS server. The default value is mapserver. */
+  serverType?: TypeOfServer;
   /** Style to apply. Default = '' */
   style?: string;
 }
@@ -435,7 +456,7 @@ export type TypeSourceTileInitialConfig = {
  */
 export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
-  source: TypeVectorSourceInitialConfig;
+  source?: TypeVectorSourceInitialConfig;
   /**
    * Color gradient of the heatmap, specified as an array of CSS color strings.
    * Default = ["#00f", "#0ff", "#0f0", "#ff0", "#f00"].
@@ -469,39 +490,49 @@ export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayer
    * Initial settings to apply to the GeoView vector layer source at creation time. Layer sources providing vector data divided
    * into a tile grid.
    */
-  source: TypeVectorTileSourceInitialConfig;
+  source?: TypeVectorTileSourceInitialConfig;
 }
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
 export type TypeImageLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
   /** Layer entry data type. */
-  entryType: 'raster';
-  /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoConfig;
-  /** Initial settings to apply to the GeoView layer at creation time. */
+  entryType?: 'raster';
+  /** The id of the layer to display on the map. */
+  layerId: string;
+  /** The display name of the layer (English/French). */
+  layerName?: TypeLocalizedString;
+  /** Initial settings to apply to the GeoView layer entry at creation time. */
   initialSettings?: TypeLayerInitialConfig;
   /** Initial settings to apply to the GeoView image layer source at creation time. */
-  source: TypeSourceImageInitialConfig;
+  source?: TypeSourceImageInitialConfig;
+  /** The listOfLayerEntryConfig attribute is used only on group entry. */
+  listOfLayerEntryConfig: never;
 };
 
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
 export type TypeTileLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
   /** Layer entry data type. */
-  entryType: 'raster';
-  /** Basic information used to identify the GeoView layer. */
-  info?: TypeLayerBasicInfoConfig;
-  /** Initial settings to apply to the GeoView layer at creation time. */
+  entryType?: 'raster';
+  /** The id of the layer to display on the map. */
+  layerId: string;
+  /** The display name of the layer (English/French). */
+  layerName?: TypeLocalizedString;
+  /** Initial settings to apply to the GeoView layer entry at creation time. */
   initialSettings?: TypeLayerInitialConfig;
   /** Initial settings to apply to the GeoView image layer source at creation time. */
-  source: TypeSourceTileInitialConfig;
+  source?: TypeSourceTileInitialConfig;
 };
 
 /** ******************************************************************************************************************************
@@ -509,14 +540,18 @@ export type TypeTileLayerEntryConfig = {
  * configuration will handle bilangual informations.
  */
 export type TypeGeocoreLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
   geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
   /** Layer entry data type. */
-  entryType: TypeLayerEntryType;
+  entryType?: 'geocore';
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
    * attribute. The id will have the language extension (id-'lang').
    */
-  info: TypeLayerBasicInfoConfig;
+  layerId: string;
+  /** The display name of the layer (English/French). */
+  layerName?: TypeLocalizedString;
   /** The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang'). */
   // id: string;
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
@@ -532,9 +567,30 @@ export type TypeSourceGeocoreConfig = {
 };
 
 /** ******************************************************************************************************************************
+ * Type used to define a layer group.
+ */
+export type TypeLayerGroupEntry = {
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
+  geoviewLayerParent?: TypeGeoviewLayerConfig;
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  /** Layer entry data type. */
+  entryType?: 'group';
+  /** The id of the layer group to display on the map. */
+  layerId: string;
+  /** The display name of the layer group (English/French). */
+  layerName: TypeLocalizedString;
+  /** The source attribute does not exists on the layer group entry. */
+  source: never;
+  /** The list of layer entry configurations to use from the GeoView layer group. */
+  listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
+};
+
+/** ******************************************************************************************************************************
  * Layer config type.
  */
 export type TypeLayerEntryConfig =
+  | TypeLayerGroupEntry
   | TypeBaseVectorLayerEntryConfig
   | TypeVectorHeatmapLayerEntryConfig
   | TypeVectorTileLayerEntryConfig
@@ -636,16 +692,21 @@ export type TypeGeoviewLayerConfig = {
    * The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have
    * the language extension (id-'lang').
    */
-  id: string;
+  layerId: string;
   /**
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  name?: TypeLocalizedString;
+  layerName?: TypeLocalizedString;
   /** The GeoView layer access path (English/French). */
   metadataAccessPath?: TypeLocalizedString;
   /** Type of GeoView layer. */
   geoviewLayerType: TypeGeoviewLayerType;
+  /**
+   * Initial settings to apply to the GeoView layer at creation time.
+   * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
+   */
+  initialSettings?: TypeLayerInitialConfig;
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
 };

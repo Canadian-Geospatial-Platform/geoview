@@ -1,4 +1,4 @@
-/* eslint-disable no-console, no-underscore-dangle */
+/* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
 import Ajv from 'ajv';
 
 import { generateId } from '../utilities';
@@ -8,14 +8,20 @@ import { EVENT_NAMES } from '../../../api/events/event-types';
 import schema from '../../../../schemav2.json';
 import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
+import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
+import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
 import {
   layerEntryIsVector,
+  layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
   TypeDisplayLanguage,
   TypeLayerEntryConfig,
   TypeLocalizedString,
   TypeProjectionCodes,
   TypeValidVersions,
+  TypeLayerInitialConfig,
+  TypeListOfLayerEntryConfig,
+  TypeLayerGroupEntry,
   VALID_DISPLAY_LANGUAGE,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
@@ -298,8 +304,142 @@ export class ConfigValidation {
         displayLanguage: this._displayLanguage as TypeDisplayLanguage,
       };
     }
+    this.processLocalizedString(validMapFeaturesConfig);
+    this.doExtraValidation(validMapFeaturesConfig);
 
-    return this.processLocalizedString(validMapFeaturesConfig);
+    return validMapFeaturesConfig;
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do.
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig The map features configuration to adjust and validate.
+   */
+  private doExtraValidation(mapFeaturesConfig: TypeMapFeaturesConfig) {
+    if (mapFeaturesConfig.map.listOfGeoviewLayerConfig) {
+      mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+        switch (geoviewLayerConfig.geoviewLayerType) {
+          case 'GeoJSON':
+            console.log('Code doExtraValidation for GeoJSON');
+            break;
+          case 'esriDynamic':
+            console.log('Code doExtraValidation for esriDynamic');
+            break;
+          case 'esriFeature':
+            this.doEsriFeatureExtraValidation(geoviewLayerConfig);
+            break;
+          case 'geoCore':
+            console.log('Code doExtraValidation for geoCore');
+            break;
+          case 'xyzTiles':
+            console.log('Code doExtraValidation for xyzTiles');
+            break;
+          case 'ogcFeature':
+            console.log('Code doExtraValidation for ogcFeature');
+            break;
+          case 'ogcWfs':
+            console.log('Code doExtraValidation for ogcWfs');
+            break;
+          case 'ogcWms':
+            this.doWmsExtraValidation(geoviewLayerConfig);
+            break;
+          default:
+            throw new Error('Your not supposed to end here. There is a problem with the schema validator.');
+            break;
+        }
+      });
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on esriFeature configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
+  private doEsriFeatureExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    if (!geoviewLayerConfig.metadataAccessPath) {
+      throw new Error(
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}`
+      );
+    }
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on ogcWms configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
+  private doWmsExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    if (!geoviewLayerConfig.metadataAccessPath) {
+      throw new Error(
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}`
+      );
+    }
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the layer entries to create layers and layer groups.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
+  private processLayerEntryConfig(
+    geoviewLayerConfig: TypeGeoviewLayerConfig,
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
+    parentNode: TypeGeoviewLayerConfig | TypeLayerGroupEntry
+  ) {
+    listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+      // links the entry to its parent GeoView layer.
+      layerEntryConfig.geoviewLayerParent = geoviewLayerConfig;
+      layerEntryConfig.parentNode = parentNode;
+      if (layerEntryIsGroupLayer(layerEntryConfig))
+        this.processLayerEntryConfig(geoviewLayerConfig, layerEntryConfig.listOfLayerEntryConfig, layerEntryConfig);
+      else if (geoviewEntryIsWMS(layerEntryConfig)) {
+        // Value for layerEntryConfig.entryType can only be raster
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
+        // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
+        if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+          this.inheritInitialSettings(layerEntryConfig.geoviewLayerParent.initialSettings, layerEntryConfig.initialSettings);
+        }
+        if (!layerEntryConfig.source) layerEntryConfig.source = {};
+        if (!layerEntryConfig.source.dataAccessPath) layerEntryConfig.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
+        if (!layerEntryConfig.source.serverType) layerEntryConfig.source.serverType = 'mapserver';
+      } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
+        // Value for layerEntryConfig.entryType can only be raster
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
+        if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+          this.inheritInitialSettings(layerEntryConfig.geoviewLayerParent.initialSettings, layerEntryConfig.initialSettings);
+        }
+        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'EsriJSON' };
+        if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'EsriJSON';
+        if (!layerEntryConfig.source.dataAccessPath)
+          layerEntryConfig.source.dataAccessPath = { ...geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
+          ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
+          : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
+        layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
+          ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
+          : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+      }
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Inherit the settings defined in the source if the corresponding setting of the destination is undefine.
+   * @param {TypeLayerInitialConfig} sourceSettings The initial settings to copy from.
+   * @param {TypeLayerInitialConfig} destinationSettings The initial settings to copy to.
+   */
+  private inheritInitialSettings(sourceSettings: TypeLayerInitialConfig, destinationSettings: TypeLayerInitialConfig) {
+    const canInherit = (settingsKey: 'className' | 'extent' | 'maxZoom' | 'minZoom' | 'opacity' | 'visible') => {
+      return typeof sourceSettings[settingsKey] !== 'undefined' && typeof destinationSettings[settingsKey] === 'undefined';
+    };
+
+    if (canInherit('className')) destinationSettings.className = sourceSettings.className;
+    if (canInherit('extent')) destinationSettings.extent = sourceSettings.extent;
+    if (canInherit('maxZoom')) destinationSettings.maxZoom = sourceSettings.maxZoom;
+    if (canInherit('minZoom')) destinationSettings.minZoom = sourceSettings.minZoom;
+    if (canInherit('opacity')) destinationSettings.opacity = sourceSettings.opacity;
+    if (canInherit('visible')) destinationSettings.visible = sourceSettings.visible;
   }
 
   /** ***************************************************************************************************************************
@@ -315,23 +455,23 @@ export class ConfigValidation {
     sourceKey: TypeDisplayLanguage,
     destinationKey: TypeDisplayLanguage
   ) {
-    // eslint-disable-next-line no-param-reassign
     localizedString[destinationKey] = localizedString[sourceKey];
   }
 
   /** ***************************************************************************************************************************
    * Adjust the map features configuration localized strings according to the suported languages array content.
-   * @param {TypeMapFeaturesConfig} featuresConfig The map features configuration to adjust according to the suported languages
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig The map features configuration to adjust according to the suported languages
    * array content.
    *
    * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
    */
-  private processLocalizedString(featuresConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
-    if (featuresConfig.suportedLanguages.includes('en-CA') && featuresConfig.suportedLanguages.includes('fr-CA')) return featuresConfig;
+  private processLocalizedString(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
+    if (mapFeaturesConfig.suportedLanguages.includes('en-CA') && mapFeaturesConfig.suportedLanguages.includes('fr-CA'))
+      return mapFeaturesConfig;
 
     let sourceKey: TypeDisplayLanguage;
     let destinationKey: TypeDisplayLanguage;
-    if (featuresConfig.suportedLanguages.includes('en-CA')) {
+    if (mapFeaturesConfig.suportedLanguages.includes('en-CA')) {
       sourceKey = 'en';
       destinationKey = 'fr';
     } else {
@@ -339,15 +479,14 @@ export class ConfigValidation {
       destinationKey = 'en';
     }
 
-    if (featuresConfig?.map?.listOfGeoviewLayerConfig) {
-      featuresConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
-        if (geoviewLayerConfig?.name) this.SynchronizeLocalizedString(geoviewLayerConfig.name, sourceKey, destinationKey);
+    if (mapFeaturesConfig?.map?.listOfGeoviewLayerConfig) {
+      mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
+        if (geoviewLayerConfig?.layerName) this.SynchronizeLocalizedString(geoviewLayerConfig.layerName, sourceKey, destinationKey);
         if (geoviewLayerConfig?.metadataAccessPath)
           this.SynchronizeLocalizedString(geoviewLayerConfig.metadataAccessPath, sourceKey, destinationKey);
 
         geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-          if (layerEntryConfig?.info?.layerName)
-            this.SynchronizeLocalizedString(layerEntryConfig.info.layerName, sourceKey, destinationKey);
+          if (layerEntryConfig?.layerName) this.SynchronizeLocalizedString(layerEntryConfig.layerName!, sourceKey, destinationKey);
           if (layerEntryConfig?.source?.dataAccessPath)
             this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
           if (layerEntryIsVector(layerEntryConfig)) {
@@ -361,7 +500,7 @@ export class ConfigValidation {
         });
       });
     }
-    return featuresConfig;
+    return mapFeaturesConfig;
   }
 
   /** ***************************************************************************************************************************

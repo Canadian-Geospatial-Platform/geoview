@@ -8,20 +8,20 @@ import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { EsriJSON, GeoJSON, KML, WFS } from 'ol/format';
-import { Icon as StyleIcon, Style } from 'ol/style';
-import { StyleLike } from 'ol/style/Style';
+import { Icon as StyleIcon, Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
+// import { StyleLike } from 'ol/style/Style';
+import { asArray, asString } from 'ol/color';
 
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
-import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { getLocalisezValue, showMessage } from '../../../../core/utils/utilities';
+import { getLocalisezValue, showMessage, setAlphaColor } from '../../../../core/utils/utilities';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -77,51 +77,85 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
         this.getAdditionalServiceDefinition().then(() => {
-          if (this.listOfLayerEntryConfig.length === 1) {
-            this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig).then((vectorLayer) => {
-              this.gvLayers = vectorLayer;
-              if (this.gvLayers) {
-                this.setRenderer(this.listOfLayerEntryConfig[0], this.gvLayers);
-                this.registerToPanels(this.listOfLayerEntryConfig[0], this.gvLayers);
-              } else {
-                this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-              }
-            });
-          } else {
-            this.gvLayers = new LayerGroup({
-              layers: new Collection(),
-            });
-            this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-              this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig).then((vectorLayer) => {
-                if (vectorLayer) {
-                  this.setRenderer(layerEntry, vectorLayer);
-                  this.registerToPanels(layerEntry, vectorLayer);
-                  (this.gvLayers as LayerGroup).getLayers().push(vectorLayer);
-                } else {
-                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-                }
-              });
-            });
-          }
-          // if the return layer object is a string, it is because path or entries are bad
-          // do not add to the map
-          if (this.layerLoadError.length !== 0) {
-            const names = this.layerLoadError.toString();
-            api.event.emit(
-              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-                type: 'key',
-                value: 'validation.layer.loadfailed',
-                params: [names, this.mapId],
-              })
-            );
-            // eslint-disable-next-line no-console
-            console.log(`Layer [${names}] failed to load on map ${this.mapId}`);
-          }
-          resolve();
+          this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
+            this.gvLayers = layersCreated;
+            resolve();
+          });
         });
+      } else {
+        api.event.emit(
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+            type: 'key',
+            value: 'validation.layer.createtwice',
+            params: [this.mapId],
+          })
+        );
+        // eslint-disable-next-line no-console
+        console.log(`Can not execute twice the createGeoViewvectorLayers method for the map ${this.mapId}`);
+        resolve();
       }
     });
     return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer Entries to create the layers and the layer groups.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   *
+   * @returns {Promise<BaseLayer | null>} The promise that the layers were created.
+   */
+  private processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<BaseLayer | null> {
+    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
+      if (listOfLayerEntryConfig.length === 1) {
+        if (listOfLayerEntryConfig[0].entryType === 'group') {
+          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig).then((groupCreated) => {
+            resolve(groupCreated);
+          });
+        } else {
+          this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig).then((vectorLayer) => {
+            if (vectorLayer) {
+              this.setRenderer(vectorLayer);
+              this.registerToPanels(vectorLayer);
+            } else {
+              this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+            }
+            resolve(vectorLayer);
+          });
+        }
+      } else {
+        const promiseOfLayerCreated: Promise<BaseLayer | null>[] = [];
+        listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+          if (layerEntry.entryType === 'group') {
+            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntry.listOfLayerEntryConfig));
+          } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntry as TypeBaseVectorLayerEntryConfig));
+        });
+        Promise.all(promiseOfLayerCreated)
+          .then((listOfLayerCreated) => {
+            if (listOfLayerCreated && listOfLayerCreated.length !== 0) {
+              // We use the first element of the array to retrieve the parent node.
+              const { parentNode } = listOfLayerCreated[0]!.get('layerEntryConfig');
+              const layerGroup = this.createLayerGroup(parentNode);
+              listOfLayerCreated.forEach((vectorLayer) => {
+                if (vectorLayer) {
+                  this.setRenderer(vectorLayer);
+                  this.registerToPanels(vectorLayer);
+                  (layerGroup as LayerGroup).getLayers().push(vectorLayer);
+                } else {
+                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+                }
+              });
+              resolve(layerGroup);
+            } else resolve(null);
+          })
+          .catch((reason) => {
+            // eslint-disable-next-line no-console
+            console.log(reason);
+            resolve(null);
+          });
+      }
+    });
+    return promisedListOfLayerEntryProcessed;
   }
 
   /**
@@ -139,7 +173,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   processOneLayerEntry(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<TypeBaseVectorLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
-      let serviceUrl = getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId)!;
+      let serviceUrl = getLocalisezValue(layerEntry.source!.dataAccessPath!, this.mapId)!;
       serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
       axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
         const vectorSource = this.createVectorSource(layerEntry, queryResponse.data);
@@ -159,7 +193,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         data = queryResponse.data;
 
         const vectorSource = this.createVectorSource(layerEntry, data);
-
         const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
         resolve(vectorLayer);
       });
@@ -170,12 +203,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   private createVectorSource(layerEntry: TypeBaseVectorLayerEntryConfig, response: TypeJsonObject): VectorSource<Geometry> {
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Geometry>;
-    const sourceOptions: SourceOptions = {};
-    sourceOptions.strategy = all;
+    const sourceOptions: SourceOptions = { strategy: all };
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    if (layerEntry.source.dataAccessPath) sourceOptions.url = getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId);
-    if (layerEntry.source.format) {
-      switch (layerEntry.source.format) {
+    if (layerEntry.source!.dataAccessPath) sourceOptions.url = getLocalisezValue(layerEntry.source!.dataAccessPath, this.mapId);
+    if (layerEntry.source!.format) {
+      switch (layerEntry.source!.format) {
         case 'EsriJSON': {
           sourceOptions.format = new EsriJSON();
           break;
@@ -193,7 +225,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           break;
         }
         default: {
-          showMessage(this.mapId, `createVectorSource error using ${layerEntry.source.format} format.`);
+          showMessage(this.mapId, `createVectorSource error using ${layerEntry.source!.format} format.`);
           break;
         }
       }
@@ -222,24 +254,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   private createVectorLayer(layerEntry: TypeBaseVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+    const defaultCircleMarkerStyle = new Style({
+      image: new StyleCircle({
+        radius: 5,
+        stroke: new Stroke({
+          color: asString(setAlphaColor(asArray('#000000'), 1)),
+          width: 1,
+        }),
+        fill: new Fill({
+          color: asString(setAlphaColor(asArray('#000000'), 0.4)),
+        }),
+      }),
+    });
+
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig: layerEntry },
       source: vectorSource,
-      style: ((feature: Feature) => {
-        // ! TODO: feature properties will be use when the renderer part of the object will be coded.
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const featureProperties = feature.getProperties();
-        const { iconToUse } = this;
-
-        const style = new Style({
-          image: iconToUse,
-        });
-
-        // add style to feature
-        feature.setStyle(style);
-
-        return style;
-      }) as StyleLike,
+      // ! TODO: feature properties will be use when the renderer part of the object will be coded.
+      style: defaultCircleMarkerStyle,
     };
 
     return new VectorLayer(layerOptions);
@@ -248,16 +280,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(layerEntry: TypeLayerEntryConfig, vectorLayer: TypeBaseVectorLayer): void;
+  abstract setRenderer(vectorLayer: TypeBaseVectorLayer): void;
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer who wants to register.
    */
-  abstract registerToPanels(layerEntry: TypeLayerEntryConfig, vectorLayer: TypeBaseVectorLayer): void;
+  abstract registerToPanels(vectorLayer: TypeBaseVectorLayer): void;
 }

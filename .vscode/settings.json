@@ -1,5 +1,6 @@
 {
   "editor.detectIndentation": false,
   "editor.renderWhitespace": "all",
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "editor.hover.delay": 1000
 }

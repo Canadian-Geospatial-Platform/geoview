@@ -1,13 +1,13 @@
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
+import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeListOfLayerEntryConfig, TypeLayerEntryConfig } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
  */
 
@@ -16,7 +16,7 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * The AbstractGeoViewRaster class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView raster layers. In addition to the components of the parent class, there is an attribute named
  * gvLayers where the raster elements of the class will be kept.
@@ -40,53 +40,27 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * nothing. For example, when the child is a WMS service, this method executes the GetCapabilities request and saves the
    * result in an attribute of the class.
    *
-   * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the abstract
-   * method processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the renderers can
-   * come from the configuration of the GeoView layer or from the information saved by the method getAdditionalServiceDefinition,
-   * priority being given to the first of the two. This operation is done by the abstract method setRenderer.
-   * Note that if field aliases are used, they will be set at the same time as the renderer.
+   * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the
+   * abstract method processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the
+   * renderers can come from the configuration of the GeoView layer or from the information saved by the method
+   * getAdditionalServiceDefinition, priority being given to the first of the two. This operation is done by the abstract
+   * method setRenderer. Note that if field aliases are used, they will be set at the same time as the renderer.
    *
    * Finally, the layer registers to all panels that offer this possibility. For example, if the layer is query able, it could
    * subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer to return the
    * descriptive information of all the features in a tolerance radius. This information will be used to populate the
    * details-panel.
+   *
+   * @returns {Promise<void>} The promise that the code was executed.
    */
   createGeoViewRasterLayers(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       if (this.gvLayers === null && this.listOfLayerEntryConfig.length !== 0) {
         this.getAdditionalServiceDefinition().then(() => {
-          if (this.listOfLayerEntryConfig.length === 1) {
-            this.processOneLayerEntry(this.listOfLayerEntryConfig[0]).then((rasterLayer) => {
-              this.gvLayers = rasterLayer;
-              if (this.gvLayers) {
-                this.setRenderer(this.gvLayers);
-                this.registerToPanels(this.gvLayers);
-              } else {
-                this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-              }
-              resolve();
-            });
-          } else {
-            this.gvLayers = new LayerGroup({
-              layers: new Collection(),
-            });
-            const promiseOfLayerCreated: Promise<BaseLayer | null>[] = [];
-            this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-              promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntry));
-            });
-            Promise.all(promiseOfLayerCreated).then((listOfLayerCreated) => {
-              listOfLayerCreated.forEach((rasterLayer) => {
-                if (rasterLayer) {
-                  this.setRenderer(rasterLayer);
-                  this.registerToPanels(rasterLayer);
-                  (this.gvLayers as LayerGroup).getLayers().push(rasterLayer);
-                } else {
-                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].info!.layerId);
-                }
-              });
-              resolve();
-            });
-          }
+          this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
+            this.gvLayers = layersCreated;
+            resolve();
+          });
         });
       } else {
         api.event.emit(
@@ -102,6 +76,66 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
       }
     });
     return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * Process recursively the list of layer Entries to create the layers and the layer groups.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
+   *
+   * @returns {Promise<BaseLayer | null>} The promise that the layers were created.
+   */
+  private processListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<BaseLayer | null> {
+    const promisedListOfLayerEntryProcessed = new Promise<BaseLayer | null>((resolve) => {
+      if (listOfLayerEntryConfig.length === 1) {
+        if (listOfLayerEntryConfig[0].entryType === 'group') {
+          this.processListOfLayerEntryConfig(listOfLayerEntryConfig[0].listOfLayerEntryConfig).then((groupCreated) => {
+            resolve(groupCreated);
+          });
+        } else {
+          this.processOneLayerEntry(this.listOfLayerEntryConfig[0]).then((rasterLayer) => {
+            if (rasterLayer) {
+              this.setRenderer(rasterLayer);
+              this.registerToPanels(rasterLayer);
+            } else {
+              this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+            }
+            resolve(rasterLayer);
+          });
+        }
+      } else {
+        const promiseOfLayerCreated: Promise<BaseLayer | null>[] = [];
+        listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+          if (layerEntry.entryType === 'group') {
+            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntry.listOfLayerEntryConfig));
+          } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntry));
+        });
+        Promise.all(promiseOfLayerCreated)
+          .then((listOfLayerCreated) => {
+            if (listOfLayerCreated && listOfLayerCreated.length !== 0) {
+              // We use the first element of the array to retrieve the parent node.
+              const { parentNode } = listOfLayerCreated[0]!.get('layerEntryConfig');
+              const layerGroup = this.createLayerGroup(parentNode);
+              listOfLayerCreated.forEach((rasterLayer) => {
+                if (rasterLayer) {
+                  this.setRenderer(rasterLayer);
+                  this.registerToPanels(rasterLayer);
+                  (layerGroup as LayerGroup).getLayers().push(rasterLayer);
+                } else {
+                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+                }
+              });
+              resolve(layerGroup);
+            } else resolve(null);
+          })
+          .catch((reason) => {
+            // eslint-disable-next-line no-console
+            console.log(reason);
+            resolve(null);
+          });
+      }
+    });
+    return promisedListOfLayerEntryProcessed;
   }
 
   /**

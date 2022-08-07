@@ -73,7 +73,9 @@ export class Layer {
               esriDynamic.createGeoViewRasterLayers();
             } else if (layerConfigIsEsriFeature(layerConfig)) {
               const esriFeature = new EsriFeature(this.mapId, layerConfig);
-              esriFeature.createGeoViewVectorLayers();
+              esriFeature.createGeoViewVectorLayers().then(() => {
+                this.addToMap(esriFeature);
+              });
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.mapId, layerConfig);
               wfsLayer.createGeoViewVectorLayers();
@@ -96,7 +98,7 @@ export class Layer {
       (payload) => {
         if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
-          this.removeLayerById(payload.geoviewLayer.id);
+          this.removeLayerById(payload.geoviewLayer.layerId);
         }
       },
       this.mapId
@@ -132,7 +134,7 @@ export class Layer {
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
 
       // this.layers.push(geoviewLayer);
-      this.layers[geoviewLayer.id] = geoviewLayer;
+      this.layers[geoviewLayer.layerId] = geoviewLayer;
       api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
     }
   }
@@ -176,10 +178,10 @@ export class Layer {
    */
   addLayer = (layerConfig: TypeGeoviewLayerConfig): string => {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.id = generateId(layerConfig.id);
+    layerConfig.layerId = generateId(layerConfig.layerId);
     api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.mapId, layerConfig));
 
-    return layerConfig.id;
+    return layerConfig.layerId;
   };
 
   /**
@@ -189,10 +191,10 @@ export class Layer {
    */
   removeLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
     // eslint-disable-next-line no-param-reassign
-    geoviewLayer.id = generateId(geoviewLayer.id);
+    geoviewLayer.layerId = generateId(geoviewLayer.layerId);
     api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, geoviewLayer));
 
-    return geoviewLayer.id;
+    return geoviewLayer.layerId;
   };
 
   /**
@@ -202,7 +204,7 @@ export class Layer {
    * @returns the found layer data object
    */
   getLayerById = (id: string): AbstractGeoViewLayer | null => {
-    // return this.layers.filter((layer: AbstractGeoViewLayer) => layer.id === id)[0];
+    // return this.layers.filter((layer: AbstractGeoViewLayer) => layer.layerId === id)[0];
     return this.layers[id];
   };
 }

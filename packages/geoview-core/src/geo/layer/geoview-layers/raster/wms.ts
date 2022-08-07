@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-// import axios from 'axios';
-
 import ImageLayer from 'ol/layer/Image';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
@@ -25,7 +23,7 @@ export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig,
   source: TypeSourceImageWmsInitialConfig;
 }
 
-export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
+export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'ogcWms';
   listOfLayerEntryConfig: TypeWmsLayerEntryConfig[];
 }
@@ -122,12 +120,12 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeWmsLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.info!.layerId, this.capabilities.Capability.Layer);
+      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.layerId, this.capabilities.Capability.Layer);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalisezValue(layerEntryConfig.source.dataAccessPath, this.mapId)!;
+        const dataAccessPath = getLocalisezValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
         const sourceOptions: SourceOptions = {
           url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-          params: { LAYERS: layerEntryConfig.info!.layerId },
+          params: { LAYERS: layerEntryConfig.layerId },
         };
         sourceOptions.attributions = this.attributions;
         sourceOptions.serverType = layerEntryConfig.source.serverType;
@@ -138,12 +136,21 @@ export class WMS extends AbstractGeoViewRaster {
           source: new ImageWMS(sourceOptions),
           properties: { layerCapabilities, layerEntryConfig },
         };
-        if (layerEntryConfig.initialSettings?.className) imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
-        if (layerEntryConfig.initialSettings?.extent) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-        if (layerEntryConfig.initialSettings?.maxZoom) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-        if (layerEntryConfig.initialSettings?.minZoom) imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-        if (layerEntryConfig.initialSettings?.opacity) imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-        if (layerEntryConfig.initialSettings?.visible) imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+        if (!layerEntryConfig.initialSettings && layerEntryConfig.geoviewLayerParent?.initialSettings)
+          // eslint-disable-next-line no-param-reassign
+          layerEntryConfig.initialSettings = layerEntryConfig.geoviewLayerParent?.initialSettings;
+        if (layerEntryConfig.initialSettings?.className !== 'undefined')
+          imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
+        if (typeof layerEntryConfig.initialSettings?.extent !== 'undefined')
+          imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
+        if (typeof layerEntryConfig.initialSettings?.maxZoom !== 'undefined')
+          imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
+        if (typeof layerEntryConfig.initialSettings?.minZoom !== 'undefined')
+          imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
+        if (typeof layerEntryConfig.initialSettings?.opacity !== 'undefined')
+          imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+        if (typeof layerEntryConfig.initialSettings?.visible !== 'undefined')
+          imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
         resolve(new ImageLayer(imageLayerOptions));
       } else {
@@ -151,7 +158,7 @@ export class WMS extends AbstractGeoViewRaster {
           snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
             type: 'key',
             value: 'validation.layer.notfound',
-            params: [layerEntryConfig.info!.layerId, this.id],
+            params: [layerEntryConfig.layerId, this.layerId],
           })
         );
         resolve(null);
@@ -195,7 +202,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('The method setRenderer needs to be coded!', rasterLayer);
   }
 
   /**
@@ -205,6 +212,6 @@ export class WMS extends AbstractGeoViewRaster {
    */
   registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('The method registerToPanels needs to be coded!', rasterLayer);
   }
 }

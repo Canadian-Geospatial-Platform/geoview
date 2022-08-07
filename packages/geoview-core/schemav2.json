@@ -260,22 +260,6 @@
       ]
     },
 
-    "TypeLayerBasicInfoConfig": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "layerId": {
-          "type": "string",
-          "description": "The id of the layer to display on the map."
-        },
-        "layerName": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
-        }
-      },
-      "required": ["layerId"]
-    },
-
     "TypeLayerInitialConfig": {
       "additionalProperties": false,
       "type": "object",
@@ -330,14 +314,13 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The data acces path of the layer (English/French)."
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "format": { "$ref": "#/definitions/TypeVectorSourceFormats" },
         "featureInfo": { "$ref": "#/definitions/TypeFeatureInfoLayerConfig" },
         "cluster": { "$ref": "#/definitions/TypeSourceVectorClusterConfig" }
-      },
-      "required": ["dataAccessPath", "format"]
+      }
     },
 
     "TypeSourceVectorClusterConfig": {
@@ -372,8 +355,8 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The data acces path of the layer (English/French)."
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "crossOrigin": {
           "type": "string",
@@ -387,20 +370,20 @@
           "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
         },
         "serverType": {
-          "$ref": "#/definitions/TypeOfServer"
+          "$ref": "#/definitions/TypeOfServer",
+          "description": "The type of the remote WMS server. The default value is mapserver."
         },
         "style": {
           "type": "string",
           "default": "",
           "description": "Style to apply"
         }
-      },
-      "required": ["dataAccessPath", "serverType"]
+      }
     },
 
     "TypeOfServer": {
       "enum": ["mapserver", "geoserver", "qgis"],
-      "description": "The type of the remote WMS server. Not needed for type ESRI"
+      "description": "The type of the remote WMS server. The default value is mapserver."
     },
 
     "TypeSourceImageEsriInitialConfig": {
@@ -408,8 +391,8 @@
       "type": "object",
       "properties": {
         "dataAccessPath": {
-          "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The data acces path of the layer (English/French)."
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "crossOrigin": {
           "type": "string",
@@ -430,8 +413,7 @@
           "default": true,
           "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency."
         }
-      },
-      "required": ["dataAccessPath"]
+      }
     },
 
     "TypeEsriFormatParameter": {
@@ -443,7 +425,10 @@
     "TypeSourceTileInitialConfig": {
       "additionalProperties": false,
       "properties": {
-        "dataAccessPath": { "$ref": "#/definitions/TypeTileGrid" },
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+        },
         "crossOrigin": {
           "type": "string",
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
@@ -453,8 +438,7 @@
           "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
         "tileGrid": { "$ref": "#/definitions/TypeTileGrid" }
-      },
-      "required": ["dataAccessPath"]
+      }
     },
 
     "TypeTileGrid": {
@@ -520,7 +504,14 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["vector"] },
-        "info": { "$ref": "#/definitions/TypeLayerBasicInfoConfig" },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
         "source": { "$ref": "#/definitions/TypeVectorSourceInitialConfig" },
         "gradient": {
@@ -546,7 +537,7 @@
           "description": "Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature."
         }
       },
-      "required": ["entryType", "source"]
+      "required": ["layerId"]
     },
 
     "TypeVectorLayerEntryConfig": {
@@ -554,12 +545,19 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["vector"] },
-        "info": { "$ref": "#/definitions/TypeLayerBasicInfoConfig" },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
         "source": { "$ref": "#/definitions/TypeVectorSourceInitialConfig" },
         "style": { "$ref": "#/definitions/TypeStyleConfig" }
       },
-      "required": ["entryType", "source"]
+      "required": ["layerId"]
     },
 
     "TypeVectorTileLayerEntryConfig": {
@@ -568,7 +566,14 @@
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "entryType": { "enum": ["vector"] },
-        "info": { "$ref": "#/definitions/TypeLayerBasicInfoConfig" },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
         "source": {
           "additionalProperties": false,
@@ -576,8 +581,8 @@
           "description": "Layer sources providing vector data divided into a tile grid.",
           "properties": {
             "dataAccessPath": {
-              "$ref": "#/definitions/TypeLocalizedString",
-              "description": "The data acces path of the layer (English/French)."
+              "$ref": "#/definitions/TypeTileGrid",
+              "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
             },
             "format": {
               "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "MVT", "featureAPI"],
@@ -646,11 +651,10 @@
               },
               "required": ["origin", "resolutions"]
             }
-          },
-          "required": ["format", "dataAccessPath"]
+          }
         }
       },
-      "required": ["entryType", "source"]
+      "required": ["layerId"]
     },
 
     "TypeImageLayerEntryConfig": {
@@ -658,11 +662,18 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["raster"] },
-        "info": { "$ref": "#/definitions/TypeLayerBasicInfoConfig" },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
         "source": { "$ref": "#/definitions/TypeSourceImageInitialConfig" }
       },
-      "required": ["entryType", "source"]
+      "required": ["layerId"]
     },
 
     "TypeTileLayerEntryConfig": {
@@ -670,11 +681,18 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["raster"] },
-        "info": { "$ref": "#/definitions/TypeLayerBasicInfoConfig" },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
         "source": { "$ref": "#/definitions/TypeSourceTileInitialConfig" }
       },
-      "required": ["entryType", "source"]
+      "required": ["layerId"]
     },
 
     "TypeGeocoreLayerEntryConfig": {
@@ -683,10 +701,17 @@
       "description": "Layer where configration is extracted by a configuration snippet stored on a server. The server configuration will handle bilangual informations.",
       "properties": {
         "entryType": { "enum": ["geocore"] },
-        "info": { "$ref": "#/definitions/TypeLayerBasicInfoConfig" },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
         "source": { "$ref": "#/definitions/TypeSourceGeocoreConfig" }
       },
-      "required": ["entryType", "info"]
+      "required": ["layerId"]
     },
 
     "TypeSourceGeocoreConfig": {
@@ -706,8 +731,31 @@
       "description": "Layer entry data type."
     },
 
+    "TypeLayerGroupEntry": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Entry used to define a layer Group.",
+      "properties": {
+        "entryType": { "enum": ["group"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer group to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer group (English/French)."
+        },
+        "listOfLayerEntryConfig": {
+          "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+          "description": "The list of layer entry configurations to use from the GeoView layer group."
+        }
+      },
+      "required": ["entryType", "layerId", "layerName", "listOfLayerEntryConfig"]
+    },
+
     "TypeLayerEntryConfig": {
       "anyOf": [
+        { "$ref": "#/definitions/TypeLayerGroupEntry" },
         { "$ref": "#/definitions/TypeVectorHeatmapLayerEntryConfig" },
         { "$ref": "#/definitions/TypeVectorTileLayerEntryConfig" },
         { "$ref": "#/definitions/TypeVectorLayerEntryConfig" },
@@ -786,11 +834,11 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "id": {
+        "layerId": {
           "type": "string",
           "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
         },
-        "name": {
+        "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
@@ -802,13 +850,17 @@
           "$ref": "#/definitions/TypeGeoviewLayerType",
           "description": "Type of GeoView layer."
         },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialConfig",
+          "description": "Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1"
+        },
         "listOfLayerEntryConfig": {
           "$ref": "#/definitions/TypeListOfLayerEntryConfig",
           "description": "The layer entries to use from the GeoView layer."
         }
       },
       "required": [
-        "id",
+        "layerId",
         "geoviewLayerType",
         "listOfLayerEntryConfig"
       ]

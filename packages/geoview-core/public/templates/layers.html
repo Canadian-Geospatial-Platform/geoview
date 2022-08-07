@@ -52,48 +52,84 @@
       </table>
     </div>
     <div>
-      <h3 id="HLYR1">1.WMS Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR1"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'id': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'id': 'wmsLYR1',
-                'name': { 'en': 'Topographic OSM WMS' },
-                'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
-                'geoviewLayerType': 'ogcWms',
-                'listOfLayerEntryConfig': [
-                  {
-                    'entryType': 'raster',
-                    'info': { 'layerId': 'TOPO-OSM-WMS' },
-                    'source': {
-                      'serverType': 'mapserver',
-                      'dataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' }
+      <div>
+        <h3 id="HLYR1">1.WMS Layer</h3>
+        <h3><a href="#top">Top of the page</a></h3>
+        <div
+          id="LYR1"
+          class="llwp-map"
+          data-lang="en"
+          data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'id': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'layerId': 'wmsLYR1-Root',
+                  'layerName': { 'en': 'Root' },
+                  'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'entryType': 'group',
+                      'layerId': 'wmsLYR1-Group',
+                      'layerName': { 'en': 'Group' },
+                      'listOfLayerEntryConfig': [
+                        {
+                          'layerId': 'OSM-WMS'
+                        },
+                        {
+                          'layerId': 'TOPO-OSM-WMS',
+                          'initialSettings': { 'visible': false }
+                        }
+                      ]
                     }
-                  }
-                ]
-              }
-            ]
-          },
-          'theme': 'dark',
-          'suportedLanguages': ['en-CA']
-        }"
-      ></div>
+                  ]
+                },
+                {
+                  'layerId': 'wmsLYR2-Root',
+                  'layerName': { 'en': 'Topographic OSM WMS' },
+                  'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'OSM-WMS'
+                    },
+                    {
+                      'layerId': 'TOPO-OSM-WMS',
+                      'initialSettings': { 'visible': false }
+                    }
+                  ]
+                },
+                {
+                  'layerId': 'wmsLYR3',
+                  'layerName': { 'en': 'MSI' },
+                  'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'msi-94-or-more'
+                    }
+                  ]
+                }
+              ]
+            },
+            'theme': 'dark',
+            'suportedLanguages': ['en-CA']
+          }"
+        ></div>
 
       <div>
         <h3>Legend</h3>
