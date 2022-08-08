@@ -95,7 +95,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const getText = useCallback((): React.ReactNode => {
     let textContent: React.ReactNode;
 
-    if (typeof children === 'undefined') {
+    if (children === undefined) {
       textContent = <div />;
     } else if (typeof children === 'string') {
       textContent = (
@@ -124,7 +124,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const getIcon = useCallback((): React.ReactNode => {
     let iconContent: React.ReactNode;
 
-    if (typeof icon === 'undefined') {
+    if (icon === undefined) {
       iconContent = <div />;
     } else if (typeof icon === 'string') {
       iconContent = <HtmlToReact className={`${classes.icon} ${iconClassName}`} htmlContent={icon} />;

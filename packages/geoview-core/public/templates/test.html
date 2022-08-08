@@ -16,12 +16,12 @@
   </head>
   <body>
     <div>
-      <h3 id="HLYR4">4. Esri feature layer</h3>
+      <h3 id="HLYR3">3. Esri dynamic layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
-        id="LYR4"
+        id="LYR3"
         class="llwp-map"
-        data-lang="en"
+        data-lang="en-CA"
         data-config="{
           'map': {
             'interaction': 'dynamic',
@@ -32,19 +32,36 @@
             },
             'basemapOptions': {
               'id': 'transport',
-              'shaded': false,
+              'shaded': true,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'esriFeatureLYR4',
-                'layerName': { 'en': 'Water quality at monitoring sites' },
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                'id': 'esriDynamicLYR3',
+                'name': {
+                  'en': 'Senior care facilities on April 2020'
                 },
-                'geoviewLayerType': 'esriFeature',
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '9' }
+                  {
+                    'entryType': 'raster',
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
+                            }
+                    }
+                  },
+                  {
+                    'entryType': 'raster',
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1'
+                            }
+                    }
+                  }
                 ]
               }
             ]
@@ -53,9 +70,13 @@
           'suportedLanguages': ['en-CA']
         }"
       ></div>
-      <p>This map has a Esri feature layer added from configuration.</p>
+
+      <div id="esriDynamicLayerLegend">
+        <h3>Legend</h3>
+      </div>
+      <p>This map has a Esri dynamic layer added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR4CS" class="panel"></div>
+      <div id="LYR3CS" class="panel"></div>
     </div>
     <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>

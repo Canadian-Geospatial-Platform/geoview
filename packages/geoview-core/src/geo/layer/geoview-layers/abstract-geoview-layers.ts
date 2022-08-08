@@ -129,11 +129,11 @@ export abstract class AbstractGeoViewLayer {
       layers: new Collection(),
       properties: { layerEntryConfig },
     };
-    if (typeof this.initialSettings?.extent !== 'undefined') layerGroupOptions.extent = this.initialSettings?.extent;
-    if (typeof this.initialSettings?.maxZoom !== 'undefined') layerGroupOptions.maxZoom = this.initialSettings?.maxZoom;
-    if (typeof this.initialSettings?.minZoom !== 'undefined') layerGroupOptions.minZoom = this.initialSettings?.minZoom;
-    if (typeof this.initialSettings?.opacity !== 'undefined') layerGroupOptions.opacity = this.initialSettings?.opacity;
-    if (typeof this.initialSettings?.visible !== 'undefined') layerGroupOptions.visible = this.initialSettings?.visible;
+    if (this.initialSettings?.extent !== undefined) layerGroupOptions.extent = this.initialSettings?.extent;
+    if (this.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = this.initialSettings?.maxZoom;
+    if (this.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = this.initialSettings?.minZoom;
+    if (this.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = this.initialSettings?.opacity;
+    if (this.initialSettings?.visible !== undefined) layerGroupOptions.visible = this.initialSettings?.visible;
     return new LayerGroup(layerGroupOptions);
   }
 }

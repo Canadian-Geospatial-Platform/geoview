@@ -102,6 +102,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
+      // ! TODO: Implement a stac reader or a JSON reader to get additionalServiceDefinition
       resolve();
     });
     return promisedExecution;
@@ -132,12 +133,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
 
       const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-      if (layerEntry.initialSettings?.className) tileLayerOptions.className = layerEntry.initialSettings?.className;
-      if (layerEntry.initialSettings?.extent) tileLayerOptions.extent = layerEntry.initialSettings?.extent;
-      if (layerEntry.initialSettings?.maxZoom) tileLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
-      if (layerEntry.initialSettings?.minZoom) tileLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
-      if (layerEntry.initialSettings?.opacity) tileLayerOptions.opacity = layerEntry.initialSettings?.opacity;
-      if (layerEntry.initialSettings?.visible) tileLayerOptions.visible = layerEntry.initialSettings?.visible;
+      if (layerEntry.initialSettings?.className !== undefined) tileLayerOptions.className = layerEntry.initialSettings?.className;
+      if (layerEntry.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntry.initialSettings?.extent;
+      if (layerEntry.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
+      if (layerEntry.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
+      if (layerEntry.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntry.initialSettings?.opacity;
+      if (layerEntry.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntry.initialSettings?.visible;
 
       const xyzLayer = new TileLayer(tileLayerOptions);
 
@@ -149,26 +150,20 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /** ****************************************************************************************************************************
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
+  setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /** ****************************************************************************************************************************
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
+  registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }

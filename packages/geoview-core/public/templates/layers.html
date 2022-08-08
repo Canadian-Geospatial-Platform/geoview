@@ -78,7 +78,6 @@
                   'layerName': { 'en': 'Root' },
                   'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
                   'geoviewLayerType': 'ogcWms',
-                  'initialSettings': { 'visible': false },
                   'listOfLayerEntryConfig': [
                     {
                       'entryType': 'group',
@@ -89,8 +88,7 @@
                           'layerId': 'OSM-WMS'
                         },
                         {
-                          'layerId': 'TOPO-OSM-WMS',
-                          'initialSettings': { 'visible': false }
+                          'layerId': 'TOPO-OSM-WMS'
                         }
                       ]
                     }
@@ -101,14 +99,12 @@
                   'layerName': { 'en': 'Topographic OSM WMS' },
                   'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
                   'geoviewLayerType': 'ogcWms',
-                  'initialSettings': { 'visible': false },
                   'listOfLayerEntryConfig': [
                     {
                       'layerId': 'OSM-WMS'
                     },
                     {
-                      'layerId': 'TOPO-OSM-WMS',
-                      'initialSettings': { 'visible': false }
+                      'layerId': 'TOPO-OSM-WMS'
                     }
                   ]
                 },
@@ -117,7 +113,6 @@
                   'layerName': { 'en': 'MSI' },
                   'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
                   'geoviewLayerType': 'ogcWms',
-                  'initialSettings': { 'visible': false },
                   'listOfLayerEntryConfig': [
                     {
                       'layerId': 'msi-94-or-more'
@@ -141,11 +136,10 @@
     </div>
     <div>
       <h3 id="HLYR2">2. XYZ Tiles Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
       <div
         id="LYR2"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
@@ -161,17 +155,15 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'id': 'xyzTilesLYR2',
-                'name': {
+                'layerId': 'xyzTilesLYR2',
+                'layerName': {
                   'en': 'statmen toner'
                 },
-                'metadataAccessPath': {
-                  'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
-                },
                 'geoviewLayerType': 'xyzTiles',
+                'initialSettings': { 'visible': false },
                 'listOfLayerEntryConfig': [
                   {
-                    'entryType': 'raster',
+                    'layerId': 'toner',
                     'source': {
                       'dataAccessPath': {
                         'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
@@ -262,7 +254,7 @@
       <div
         id="LYR4"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
@@ -272,30 +264,20 @@
               'projection': 3978
             },
             'basemapOptions': {
-              'id': 'nogeom',
-              'shaded': true,
-              'labeled': false
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'id': 'esriFeatureLYR4',
-                'name': {
-                  'en': 'Senior care facilities by province and territory'
-                },
+                'layerId': 'esriFeatureLYR4',
+                'layerName': { 'en': 'Water quality at monitoring sites' },
                 'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
-                  {
-                    'entryType': 'vector',
-                    'source': {
-                      'format': 'EsriJSON',
-                      'dataAccessPath': {
-                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
-                      }
-                    }
-                  }
+                  { 'layerId': '9' }
                 ]
               }
             ]

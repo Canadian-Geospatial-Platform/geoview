@@ -116,10 +116,10 @@ export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
       const jsonObject = obj;
-      if (typeof jsonObject[nodeName] === 'undefined') {
+      if (jsonObject[nodeName] === undefined) {
         jsonObject[nodeName] = xmlToJson(item);
       } else {
-        if (typeof jsonObject[nodeName].push === 'undefined') {
+        if (jsonObject[nodeName].push === undefined) {
           (jsonObject[nodeName] as TypeJsonArray) = [jsonObject[nodeName]];
         }
         (jsonObject[nodeName] as TypeJsonArray).push(xmlToJson(item));

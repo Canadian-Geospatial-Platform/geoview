@@ -9,6 +9,7 @@ import schema from '../../../../schemav2.json';
 import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
+import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
 import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
 import {
   layerEntryIsVector,
@@ -331,7 +332,7 @@ export class ConfigValidation {
             console.log('Code doExtraValidation for geoCore');
             break;
           case 'xyzTiles':
-            console.log('Code doExtraValidation for xyzTiles');
+            this.doXYZtileExtraValidation(geoviewLayerConfig);
             break;
           case 'ogcFeature':
             console.log('Code doExtraValidation for ogcFeature');
@@ -354,10 +355,18 @@ export class ConfigValidation {
    * Do extra validation that schema can not do on esriFeature configuration.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    */
+  private doXYZtileExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on esriFeature configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
   private doEsriFeatureExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}`
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
     }
     this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
@@ -370,7 +379,7 @@ export class ConfigValidation {
   private doWmsExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}`
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
     }
     this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
@@ -402,8 +411,26 @@ export class ConfigValidation {
         if (!layerEntryConfig.source) layerEntryConfig.source = {};
         if (!layerEntryConfig.source.dataAccessPath) layerEntryConfig.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
         if (!layerEntryConfig.source.serverType) layerEntryConfig.source.serverType = 'mapserver';
-      } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
+      } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {
         // Value for layerEntryConfig.entryType can only be raster
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
+        // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
+        if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+          this.inheritInitialSettings(layerEntryConfig.geoviewLayerParent.initialSettings, layerEntryConfig.initialSettings);
+        }
+        if (!layerEntryConfig.source.dataAccessPath) {
+          throw new Error(
+            `source.dataAccessPath on layer entry ${layerEntryConfig.layerId} is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}`
+          );
+        }
+      } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
+        if (!layerEntryConfig.geoviewLayerParent.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
+          throw new Error(
+            `dataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+          );
+        }
+        // Value for layerEntryConfig.entryType can only be vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
         if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
@@ -431,7 +458,7 @@ export class ConfigValidation {
    */
   private inheritInitialSettings(sourceSettings: TypeLayerInitialConfig, destinationSettings: TypeLayerInitialConfig) {
     const canInherit = (settingsKey: 'className' | 'extent' | 'maxZoom' | 'minZoom' | 'opacity' | 'visible') => {
-      return typeof sourceSettings[settingsKey] !== 'undefined' && typeof destinationSettings[settingsKey] === 'undefined';
+      return sourceSettings[settingsKey] !== undefined && destinationSettings[settingsKey] === undefined;
     };
 
     if (canInherit('className')) destinationSettings.className = sourceSettings.className;

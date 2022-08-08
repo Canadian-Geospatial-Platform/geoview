@@ -150,7 +150,7 @@ export class MapViewer {
           // only process valid response
           if (response.status === 200) {
             response.json().then((data) => {
-              if (typeof data.geometry !== 'undefined') {
+              if (data.geometry !== undefined) {
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
                 this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));

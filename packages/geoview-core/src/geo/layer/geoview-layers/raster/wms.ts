@@ -139,18 +139,13 @@ export class WMS extends AbstractGeoViewRaster {
         if (!layerEntryConfig.initialSettings && layerEntryConfig.geoviewLayerParent?.initialSettings)
           // eslint-disable-next-line no-param-reassign
           layerEntryConfig.initialSettings = layerEntryConfig.geoviewLayerParent?.initialSettings;
-        if (layerEntryConfig.initialSettings?.className !== 'undefined')
+        if (layerEntryConfig.initialSettings?.className !== undefined)
           imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
-        if (typeof layerEntryConfig.initialSettings?.extent !== 'undefined')
-          imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-        if (typeof layerEntryConfig.initialSettings?.maxZoom !== 'undefined')
-          imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-        if (typeof layerEntryConfig.initialSettings?.minZoom !== 'undefined')
-          imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-        if (typeof layerEntryConfig.initialSettings?.opacity !== 'undefined')
-          imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-        if (typeof layerEntryConfig.initialSettings?.visible !== 'undefined')
-          imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+        if (layerEntryConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
+        if (layerEntryConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
+        if (layerEntryConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
+        if (layerEntryConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+        if (layerEntryConfig.initialSettings?.visible !== undefined) imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
         resolve(new ImageLayer(imageLayerOptions));
       } else {

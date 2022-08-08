@@ -112,8 +112,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const sourceOptions: SourceOptions = {};
       sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
-      sourceOptions.url = getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId);
-      sourceOptions.params = { LAYERS: `show:${layerEntry.info!.layerId}` };
+      sourceOptions.url = getLocalisezValue(layerEntry.source.dataAccessPath!, this.mapId);
+      sourceOptions.params = { LAYERS: `show:${layerEntry.layerId}` };
       if (layerEntry.source.transparent) Object.defineProperty(sourceOptions.params, 'transparent', layerEntry.source.transparent!);
       if (layerEntry.source.format) Object.defineProperty(sourceOptions.params, 'format', layerEntry.source.format!);
       if (layerEntry.source.crossOrigin) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
@@ -140,26 +140,20 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
+  setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseRasterLayer): void {
+  registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }

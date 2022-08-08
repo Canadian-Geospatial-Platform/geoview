@@ -97,13 +97,13 @@ export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitia
   format: 'WFS';
 }
 
-export interface TypeWFSLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
+export interface TypeWfsLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
   source: TypeSourceWFSVectorInitialConfig;
 }
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType' | 'geoviewLayerType'> {
   geoviewLayerType: 'ogcWfs';
-  listOfLayerEntryConfig: TypeWFSLayerEntryConfig[];
+  listOfLayerEntryConfig: TypeWfsLayerEntryConfig[];
 }
 
 /** *****************************************************************************************************************************
@@ -131,7 +131,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWFSLayerEntryConfig if the geoviewLayerType attribute of the
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewLayerParent attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -139,7 +139,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  *
  * @return {boolean} true if the type ascention is valid
  */
-export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWFSLayerEntryConfig => {
+export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWfsLayerEntryConfig => {
   return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 

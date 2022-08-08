@@ -151,7 +151,7 @@ export class GeoUtilities {
     const values = { x: 0, y: 0, z: 0 };
 
     // No transform property. Simply return 0 values.
-    if (matrix === 'none' || typeof matrix === 'undefined') return values;
+    if (matrix === 'none' || matrix === undefined) return values;
 
     // Can either be 2d or 3d transform
     const matrixType = matrix.includes('3d') ? '3d' : '2d';

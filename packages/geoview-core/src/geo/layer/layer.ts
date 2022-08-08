@@ -62,7 +62,9 @@ export class Layer {
               });
             } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.mapId, layerConfig);
-              geoJSON.createGeoViewVectorLayers();
+              geoJSON.createGeoViewVectorLayers().then(() => {
+                this.addToMap(geoJSON);
+              });
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.mapId, layerConfig);
               wmsLayer.createGeoViewRasterLayers().then(() => {
@@ -70,7 +72,9 @@ export class Layer {
               });
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
               const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
-              esriDynamic.createGeoViewRasterLayers();
+              esriDynamic.createGeoViewRasterLayers().then(() => {
+                this.addToMap(esriDynamic);
+              });
             } else if (layerConfigIsEsriFeature(layerConfig)) {
               const esriFeature = new EsriFeature(this.mapId, layerConfig);
               esriFeature.createGeoViewVectorLayers().then(() => {
@@ -78,13 +82,19 @@ export class Layer {
               });
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.mapId, layerConfig);
-              wfsLayer.createGeoViewVectorLayers();
+              wfsLayer.createGeoViewVectorLayers().then(() => {
+                this.addToMap(wfsLayer);
+              });
             } else if (layerConfigIsOgcFeature(layerConfig)) {
               const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
-              ogcFeatureLayer.createGeoViewVectorLayers();
+              ogcFeatureLayer.createGeoViewVectorLayers().then(() => {
+                this.addToMap(ogcFeatureLayer);
+              });
             } else if (layerConfigIsXYZTiles(layerConfig)) {
               const xyzTiles = new XYZTiles(this.mapId, layerConfig);
-              xyzTiles.createGeoViewRasterLayers();
+              xyzTiles.createGeoViewRasterLayers().then(() => {
+                this.addToMap(xyzTiles);
+              });
             }
           }
         }

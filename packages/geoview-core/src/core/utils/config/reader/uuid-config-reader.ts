@@ -7,7 +7,7 @@ import { CONST_LAYER_TYPES } from '../../../../geo/layer/geoview-layers/abstract
 import { TypeEsriDynamicLayerConfig, TypeEsriDynamicLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { TypeEsriFeatureLayerConfig, TypeEsriFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/esri-feature';
 import { TypeWMSLayerConfig, TypeWmsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/wms';
-import { TypeWFSLayerConfig, TypeWFSLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
+import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
 import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
@@ -48,7 +48,7 @@ export class UUIDmapConfigReader {
             if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
               const layerConfig: TypeEsriDynamicLayerConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -58,7 +58,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType: 'esriDynamic',
                 listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
-                  return {
+                  const esriDynamicLayerEntryConfig: TypeEsriDynamicLayerEntryConfig = {
                     entryType: 'raster',
                     layerId: item.index as string,
                     source: {
@@ -68,6 +68,7 @@ export class UUIDmapConfigReader {
                       },
                     },
                   };
+                  return esriDynamicLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
@@ -76,7 +77,7 @@ export class UUIDmapConfigReader {
                 const featureUrl = `${url}/${listOfLayerEntryConfig[j].index}`;
                 const layerConfig: TypeEsriFeatureLayerConfig = {
                   layerId: id as string,
-                  name: {
+                  layerName: {
                     en: name as string,
                     fr: name as string,
                   },
@@ -86,7 +87,7 @@ export class UUIDmapConfigReader {
                   },
                   geoviewLayerType: 'esriFeature',
                   listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
-                    return {
+                    const esriFeatureLayerEntryConfig: TypeEsriFeatureLayerEntryConfig = {
                       entryType: 'vector',
                       layerId: item.index as string,
                       source: {
@@ -97,6 +98,7 @@ export class UUIDmapConfigReader {
                         },
                       },
                     };
+                    return esriFeatureLayerEntryConfig;
                   }),
                 };
                 listOfGeoviewLayerConfig.push(layerConfig);
@@ -104,7 +106,7 @@ export class UUIDmapConfigReader {
             } else if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
               const layerConfig: TypeEsriFeatureLayerConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -114,7 +116,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType: 'esriFeature',
                 listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
-                  return {
+                  const esriFeatureLayerEntryConfig: TypeEsriFeatureLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.index as string,
                     source: {
@@ -125,13 +127,14 @@ export class UUIDmapConfigReader {
                       },
                     },
                   };
+                  return esriFeatureLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.WMS) {
               const layerConfig: TypeWMSLayerConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -141,7 +144,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType: 'ogcWms',
                 listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWmsLayerEntryConfig => {
-                  return {
+                  const wmsLayerEntryConfig: TypeWmsLayerEntryConfig = {
                     entryType: 'raster',
                     layerId: item.id as string,
                     source: {
@@ -149,16 +152,17 @@ export class UUIDmapConfigReader {
                         en: url as string,
                         fr: url as string,
                       },
-                      serverType: (typeof serverType === 'undefined' ? 'mapserver' : serverType) as TypeOfServer,
+                      serverType: (serverType === undefined ? 'mapserver' : serverType) as TypeOfServer,
                     },
                   };
+                  return wmsLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.WFS) {
               const layerConfig: TypeWFSLayerConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -167,8 +171,8 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'ogcWfs',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWFSLayerEntryConfig => {
-                  return {
+                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWfsLayerEntryConfig => {
+                  const wfsLayerEntryConfig: TypeWfsLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.id as string,
                     source: {
@@ -179,13 +183,14 @@ export class UUIDmapConfigReader {
                       },
                     },
                   };
+                  return wfsLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE) {
               const layerConfig: TypeOgcFeatureLayerConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -195,7 +200,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType: 'ogcFeature',
                 listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
-                  return {
+                  const ogcFeatureLayerEntryConfig: TypeOgcFeatureLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.id as string,
                     source: {
@@ -206,13 +211,14 @@ export class UUIDmapConfigReader {
                       },
                     },
                   };
+                  return ogcFeatureLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.GEOJSON) {
               const layerConfig: TypeGeoJSONLayerConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -222,7 +228,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType: 'GeoJSON',
                 listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
-                  return {
+                  const geoJSONLayerEntryConfig: TypeGeoJSONLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.id as string,
                     source: {
@@ -233,13 +239,14 @@ export class UUIDmapConfigReader {
                       },
                     },
                   };
+                  return geoJSONLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) {
               const layerConfig: TypeXYZTilesConfig = {
                 layerId: id as string,
-                name: {
+                layerName: {
                   en: name as string,
                   fr: name as string,
                 },
@@ -249,7 +256,7 @@ export class UUIDmapConfigReader {
                 },
                 geoviewLayerType: 'xyzTiles',
                 listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
-                  return {
+                  const xyzTilesLayerEntryConfig: TypeXYZTilesLayerEntryConfig = {
                     entryType: 'raster',
                     layerId: item.id as string,
                     source: {
@@ -259,6 +266,7 @@ export class UUIDmapConfigReader {
                       },
                     },
                   };
+                  return xyzTilesLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
