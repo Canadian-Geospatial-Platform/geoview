@@ -60,7 +60,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
 
 /** *****************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is XYZ_TILES. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is XYZ_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
@@ -70,7 +70,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
 export const geoviewEntryIsXYZTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 // ******************************************************************************************************************************

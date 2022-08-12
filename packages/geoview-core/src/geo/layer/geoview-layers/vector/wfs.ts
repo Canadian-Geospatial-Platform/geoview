@@ -2,7 +2,6 @@ import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
-import { api } from '../../../../app';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
 import {
@@ -132,7 +131,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 
 /** *****************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is WFS. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
@@ -140,7 +139,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWfsLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 // ******************************************************************************************************************************
@@ -154,7 +153,7 @@ export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
 // ******************************************************************************************************************************
 export class WFS extends AbstractGeoViewVector {
   // private varibale holding wfs capabilities
-  private capabilities: TypeJsonObject = {};
+  private metadata: TypeJsonObject = {};
 
   // private varibale holding wfs version
   private version = '2.0.0';
@@ -176,14 +175,16 @@ export class WFS extends AbstractGeoViewVector {
       this.getWfsCapabilities().then(() => {
         if (this.listOfLayerEntryConfig.length !== 0) {
           const featTypeInfo = this.getFeatureTypeInfo(
-            this.capabilities['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
-            this.listOfLayerEntryConfig.map((item) => item.info!.layerId).toString()
+            this.metadata['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
+            this.listOfLayerEntryConfig.map((item) => item.layerId).toString()
           );
           if (!featTypeInfo) {
             return;
           }
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const layerName = this.name ? getLocalisezValue(this.name, this.mapId) : (featTypeInfo.Name['#text'] as string).split(':')[1];
+          const layerName = this.layerName
+            ? getLocalisezValue(this.layerName, this.mapId)
+            : (featTypeInfo.Name['#text'] as string).split(':')[1];
           // ! To be continued
         }
         resolve();
@@ -203,7 +204,7 @@ export class WFS extends AbstractGeoViewVector {
         const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
         const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
 
-        this.capabilities = xmlJsonCapabilities['wfs:WFS_Capabilities'];
+        this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
         this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
         resolve();
       });
@@ -256,26 +257,20 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  setRenderer(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }

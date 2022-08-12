@@ -260,7 +260,7 @@
       ]
     },
 
-    "TypeLayerInitialConfig": {
+    "TypeLayerInitialSettings": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
@@ -318,6 +318,10 @@
           "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
         "format": { "$ref": "#/definitions/TypeVectorSourceFormats" },
+        "dataProjection": {
+          "type": "string",
+          "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326. "
+        },
         "featureInfo": { "$ref": "#/definitions/TypeFeatureInfoLayerConfig" },
         "cluster": { "$ref": "#/definitions/TypeSourceVectorClusterConfig" }
       }
@@ -512,7 +516,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
         "source": { "$ref": "#/definitions/TypeVectorSourceInitialConfig" },
         "gradient": {
           "type": "array",
@@ -553,7 +560,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
         "source": { "$ref": "#/definitions/TypeVectorSourceInitialConfig" },
         "style": { "$ref": "#/definitions/TypeStyleConfig" }
       },
@@ -574,7 +584,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
         "source": {
           "additionalProperties": false,
           "type": "object",
@@ -670,7 +683,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
         "source": { "$ref": "#/definitions/TypeSourceImageInitialConfig" }
       },
       "required": ["layerId"]
@@ -689,7 +705,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "initialSettings": { "$ref": "#/definitions/TypeLayerInitialConfig" },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
         "source": { "$ref": "#/definitions/TypeSourceTileInitialConfig" }
       },
       "required": ["layerId"]
@@ -731,7 +750,7 @@
       "description": "Layer entry data type."
     },
 
-    "TypeLayerGroupEntry": {
+    "TypeLayerGroupEntryConfig": {
       "additionalProperties": false,
       "type": "object",
       "description": "Entry used to define a layer Group.",
@@ -745,6 +764,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer group (English/French)."
         },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer group entries at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
         "listOfLayerEntryConfig": {
           "$ref": "#/definitions/TypeListOfLayerEntryConfig",
           "description": "The list of layer entry configurations to use from the GeoView layer group."
@@ -755,7 +778,7 @@
 
     "TypeLayerEntryConfig": {
       "anyOf": [
-        { "$ref": "#/definitions/TypeLayerGroupEntry" },
+        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
         { "$ref": "#/definitions/TypeVectorHeatmapLayerEntryConfig" },
         { "$ref": "#/definitions/TypeVectorTileLayerEntryConfig" },
         { "$ref": "#/definitions/TypeVectorLayerEntryConfig" },
@@ -851,8 +874,8 @@
           "description": "Type of GeoView layer."
         },
         "initialSettings": {
-          "$ref": "#/definitions/TypeLayerInitialConfig",
-          "description": "Initial settings to apply to the GeoView layer at creation time. This attribute is allowed only if listOfLayerEntryConfig.length > 1"
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the GeoView layer at creation time."
         },
         "listOfLayerEntryConfig": {
           "$ref": "#/definitions/TypeListOfLayerEntryConfig",

@@ -34,7 +34,7 @@ export type TypeLayerBasicInfoConfig = {
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
  */
-export type TypeLayerInitialConfig = {
+export type TypeLayerInitialSettings = {
   /** Initial opacity setting. Domain = [0..1] and default = 1. */
   opacity?: number;
   /** Initial visibility setting. Default = true. */
@@ -111,6 +111,8 @@ export type TypeBaseVectorSourceInitialConfig = {
   dataAccessPath?: TypeLocalizedString;
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats | 'MVT';
+  /** The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326. */
+  dataProjection?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
 };
@@ -270,14 +272,14 @@ export type TypeStyleConfig = TypeSimpleStyleConfig | TypeUniqueValueStyleConfig
 export type TypeLayerEntryType = 'vector' | 'raster' | 'geocore';
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntry if the entryType attribute of verifyIfLayer
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of verifyIfLayer
  * is 'group'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntry => {
+export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntryConfig => {
   return verifyIfLayer.entryType === 'group';
 };
 
@@ -329,15 +331,18 @@ export type TypeBaseVectorLayerEntryConfig = {
   /** Layer entry data type. */
   entryType?: 'vector';
   /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
-  geoviewLayerParent?: TypeGeoviewLayerConfig;
+  geoviewRootLayer?: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
-  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
-  /** Initial settings to apply to the GeoView layer entry at creation time. */
-  initialSettings?: TypeLayerInitialConfig;
+  /**
+   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+   * configuration tree.
+   */
+  initialSettings?: TypeLayerInitialSettings;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source?: TypeBaseVectorSourceInitialConfig;
   /** The listOfLayerEntryConfig attribute is used only on group entry. */
@@ -498,17 +503,20 @@ export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayer
  */
 export type TypeImageLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
-  geoviewLayerParent?: TypeGeoviewLayerConfig;
+  geoviewRootLayer?: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
-  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** Layer entry data type. */
   entryType?: 'raster';
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
-  /** Initial settings to apply to the GeoView layer entry at creation time. */
-  initialSettings?: TypeLayerInitialConfig;
+  /**
+   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+   * configuration tree.
+   */
+  initialSettings?: TypeLayerInitialSettings;
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source?: TypeSourceImageInitialConfig;
   /** The listOfLayerEntryConfig attribute is used only on group entry. */
@@ -520,17 +528,20 @@ export type TypeImageLayerEntryConfig = {
  */
 export type TypeTileLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
-  geoviewLayerParent?: TypeGeoviewLayerConfig;
+  geoviewRootLayer?: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
-  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** Layer entry data type. */
   entryType?: 'raster';
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
-  /** Initial settings to apply to the GeoView layer entry at creation time. */
-  initialSettings?: TypeLayerInitialConfig;
+  /**
+   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+   * configuration tree.
+   */
+  initialSettings?: TypeLayerInitialSettings;
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source?: TypeSourceTileInitialConfig;
   /** The listOfLayerEntryConfig attribute is used only on group entry. */
@@ -543,9 +554,9 @@ export type TypeTileLayerEntryConfig = {
  */
 export type TypeGeocoreLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
-  geoviewLayerParent?: TypeGeoviewLayerConfig;
+  geoviewRootLayer?: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
-  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** Layer entry data type. */
   entryType?: 'geocore';
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
@@ -558,6 +569,8 @@ export type TypeGeocoreLayerEntryConfig = {
   // id: string;
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
   source?: TypeSourceGeocoreConfig;
+  /** Attribute initialSettings is never used by GeoCore layer entry. */
+  initialSettings?: never;
   /** The listOfLayerEntryConfig attribute is used only on group entry. */
   listOfLayerEntryConfig?: never;
 };
@@ -573,19 +586,24 @@ export type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export type TypeLayerGroupEntry = {
+export type TypeLayerGroupEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
-  geoviewLayerParent?: TypeGeoviewLayerConfig;
+  geoviewRootLayer: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
-  parentNode?: TypeGeoviewLayerConfig | TypeLayerGroupEntry;
+  parentLayerConfig: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** Layer entry data type. */
-  entryType?: 'group';
+  entryType: 'group';
   /** The id of the layer group to display on the map. */
   layerId: string;
   /** The display name of the layer group (English/French). */
   layerName: TypeLocalizedString;
   /** The source attribute does not exists on the layer group entry. */
   source: never;
+  /**
+   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+   * configuration tree.
+   */
+  initialSettings?: TypeLayerInitialSettings;
   /** The list of layer entry configurations to use from the GeoView layer group. */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
 };
@@ -594,7 +612,7 @@ export type TypeLayerGroupEntry = {
  * Layer config type.
  */
 export type TypeLayerEntryConfig =
-  | TypeLayerGroupEntry
+  | TypeLayerGroupEntryConfig
   | TypeBaseVectorLayerEntryConfig
   | TypeVectorHeatmapLayerEntryConfig
   | TypeVectorTileLayerEntryConfig
@@ -710,7 +728,7 @@ export type TypeGeoviewLayerConfig = {
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
    */
-  initialSettings?: TypeLayerInitialConfig;
+  initialSettings?: TypeLayerInitialSettings;
   /** The layer entries to use from the GeoView layer. */
   listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
 };

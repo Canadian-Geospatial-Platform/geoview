@@ -207,8 +207,8 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'id': 'esriDynamicLYR3',
-                'name': {
+                'layerId': 'esriDynamicLYR3',
+                'layerName': {
                   'en': 'Senior care facilities on April 2020'
                 },
                 'metadataAccessPath': {
@@ -217,20 +217,10 @@
                 'geoviewLayerType': 'esriDynamic',
                 'listOfLayerEntryConfig': [
                   {
-                    'entryType': 'raster',
-                    'source': {
-                      'dataAccessPath': {
-                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
-                            }
-                    }
+                    'layerId': '0'
                   },
                   {
-                    'entryType': 'raster',
-                    'source': {
-                      'dataAccessPath': {
-                        'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/1'
-                            }
-                    }
+                    'layerId': '1'
                   }
                 ]
               }
@@ -294,50 +284,44 @@
       <h3 id="HLYR5">5. GeoJSON Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
-        id="LYR5"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'id': 'nogeom',
-              'shaded': true,
-              'labeled': false
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'id': 'geojsonLYR5',
-                'name': {
-                  'en': 'GeoJSON Sample'
-                },
-                'metadataAccessPath': {
-                  'en': './geojson/polygons.json'
-                },
-                'geoviewLayerType': 'GeoJSON',
-                'listOfLayerEntryConfig': [
-                  {
-                    'entryType': 'vector',
-                    'source': {
-                      'format': 'GeoJSON',
-                      'dataAccessPath': {
-                        'en': './geojson/polygons.json'
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
+      id="LYR5"
+      class="llwp-map"
+      data-lang="en-CA"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
           },
-          'theme': 'dark',
-          'suportedLanguages': ['en-CA']
-        }"
-      ></div>
+          'basemapOptions': {
+            'id': 'nogeom',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'layerId': 'geojsonLYR5',
+              'layerName': {
+                'en': 'GeoJSON Sample'
+              },
+              'metadataAccessPath': {
+                'en': './geojson/metadata.json'
+              },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json'
+                }
+              ]
+            }
+          ]
+        },
+        'theme': 'dark',
+        'suportedLanguages': ['en-CA']
+      }"
+    ></div>
 
       <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking the buttons</p>
       <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
@@ -371,23 +355,14 @@
               'id': 'wfsLYR6',
               'name': {
                 'en': 'Airport data',
-                'fr': 'Airport data'
               },
               'metadataAccessPath': {
                 'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
-                'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
               },
               'geoviewLayerType': 'ogcWfs',
               'listOfLayerEntryConfig': [
                 {
-                  'entryType': 'vector',
-                  'source': {
-                    'format': 'WFS',
-                    'dataAccessPath': {
-                      'en': 'GISDATA.AIRPORTS_PT',
-                      'fr': 'GISDATA.AIRPORTS_PT'
-                    }
-                  }
+                  'layerId': 'GISDATA.AIRPORTS_PT'
                 }
               ]
             }
@@ -426,23 +401,14 @@
                 'id': 'ogcFeatureLYR7',
                 'name': {
                   'en': 'Large Lakes',
-                  'fr': 'Large Lakes'
                 },
                 'metadataAccessPath': {
                   'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-                  'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
                 },
                 'geoviewLayerType': 'ogcFeature',
                 'listOfLayerEntryConfig': [
                   {
-                    'entryType': 'vector',
-                    'source': {
-                      'format': 'featureAPI',
-                      'dataAccessPath': {
-                        'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/lakes',
-                        'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/lakes'
-                      }
-                    }
+                    'layerId': 'lakes'
                   }
                 ]
               }

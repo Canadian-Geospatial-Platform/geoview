@@ -54,7 +54,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
 
 /** *****************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWmsLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is WMS. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is WMS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
@@ -62,7 +62,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWmsLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
 // ******************************************************************************************************************************
@@ -136,9 +136,9 @@ export class WMS extends AbstractGeoViewRaster {
           source: new ImageWMS(sourceOptions),
           properties: { layerCapabilities, layerEntryConfig },
         };
-        if (!layerEntryConfig.initialSettings && layerEntryConfig.geoviewLayerParent?.initialSettings)
+        if (!layerEntryConfig.initialSettings && layerEntryConfig.geoviewRootLayer?.initialSettings)
           // eslint-disable-next-line no-param-reassign
-          layerEntryConfig.initialSettings = layerEntryConfig.geoviewLayerParent?.initialSettings;
+          layerEntryConfig.initialSettings = layerEntryConfig.geoviewRootLayer?.initialSettings;
         if (layerEntryConfig.initialSettings?.className !== undefined)
           imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
         if (layerEntryConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;

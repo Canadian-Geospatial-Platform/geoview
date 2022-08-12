@@ -10,7 +10,9 @@ import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
+import { geoviewEntryIsEsriDynamic } from '../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
+import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
 import {
   layerEntryIsVector,
   layerEntryIsGroupLayer,
@@ -20,9 +22,9 @@ import {
   TypeLocalizedString,
   TypeProjectionCodes,
   TypeValidVersions,
-  TypeLayerInitialConfig,
+  TypeLayerInitialSettings,
   TypeListOfLayerEntryConfig,
-  TypeLayerGroupEntry,
+  TypeLayerGroupEntryConfig,
   VALID_DISPLAY_LANGUAGE,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
@@ -320,10 +322,10 @@ export class ConfigValidation {
       mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
-            console.log('Code doExtraValidation for GeoJSON');
+            this.doGeoJSONExtraValidation(geoviewLayerConfig);
             break;
           case 'esriDynamic':
-            console.log('Code doExtraValidation for esriDynamic');
+            this.doEsriDynamicExtraValidation(geoviewLayerConfig);
             break;
           case 'esriFeature':
             this.doEsriFeatureExtraValidation(geoviewLayerConfig);
@@ -355,8 +357,16 @@ export class ConfigValidation {
    * Do extra validation that schema can not do on esriFeature configuration.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    */
+  private doGeoJSONExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on esriFeature configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
   private doXYZtileExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -369,7 +379,7 @@ export class ConfigValidation {
         `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
     }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -382,65 +392,117 @@ export class ConfigValidation {
         `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
     }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig, geoviewLayerConfig);
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on ogcWms configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
+  private doEsriDynamicExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    if (!geoviewLayerConfig.metadataAccessPath) {
+      throw new Error(
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
+      );
+    }
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************
    * Process recursively the layer entries to create layers and layer groups.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   * @param {TypeGeoviewLayerConfig} rootLayerConfig The GeoView layer configuration to adjust and validate.
+   * @param {TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the
+   * layer entry configurations found in the list of layer entries.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entry configurations to process.
    */
   private processLayerEntryConfig(
-    geoviewLayerConfig: TypeGeoviewLayerConfig,
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig,
-    parentNode: TypeGeoviewLayerConfig | TypeLayerGroupEntry
+    rootLayerConfig: TypeGeoviewLayerConfig,
+    parentLayerConfig: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig,
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig
   ) {
     listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-      // links the entry to its parent GeoView layer.
-      layerEntryConfig.geoviewLayerParent = geoviewLayerConfig;
-      layerEntryConfig.parentNode = parentNode;
+      // links the entry to its root GeoView layer.
+      layerEntryConfig.geoviewRootLayer = rootLayerConfig;
+      // links the entry to its parent layer configuration.
+      layerEntryConfig.parentLayerConfig = parentLayerConfig;
+      // layerEntryConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
+      if (layerEntryConfig.parentLayerConfig?.initialSettings) {
+        if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+        this.inheritInitialSettings(layerEntryConfig.parentLayerConfig.initialSettings, layerEntryConfig.initialSettings);
+      }
       if (layerEntryIsGroupLayer(layerEntryConfig))
-        this.processLayerEntryConfig(geoviewLayerConfig, layerEntryConfig.listOfLayerEntryConfig, layerEntryConfig);
+        this.processLayerEntryConfig(rootLayerConfig, layerEntryConfig, layerEntryConfig.listOfLayerEntryConfig);
       else if (geoviewEntryIsWMS(layerEntryConfig)) {
         // Value for layerEntryConfig.entryType can only be raster
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
-        // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
-        if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          this.inheritInitialSettings(layerEntryConfig.geoviewLayerParent.initialSettings, layerEntryConfig.initialSettings);
-        }
+        // if layerEntryConfig.source.dataAccessPath is undefined, the metadataAccessPath defined on the root is used.
         if (!layerEntryConfig.source) layerEntryConfig.source = {};
-        if (!layerEntryConfig.source.dataAccessPath) layerEntryConfig.source.dataAccessPath = geoviewLayerConfig.metadataAccessPath;
+        if (!layerEntryConfig.source.dataAccessPath)
+          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        // Default value for layerEntryConfig.source.serverType is 'mapserver'.
         if (!layerEntryConfig.source.serverType) layerEntryConfig.source.serverType = 'mapserver';
       } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {
         // Value for layerEntryConfig.entryType can only be raster
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
-        // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
-        if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          this.inheritInitialSettings(layerEntryConfig.geoviewLayerParent.initialSettings, layerEntryConfig.initialSettings);
-        }
+        /** layerEntryConfig.source.dataAccessPath is mandatory. */
         if (!layerEntryConfig.source.dataAccessPath) {
           throw new Error(
-            `source.dataAccessPath on layer entry ${layerEntryConfig.layerId} is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}`
+            `source.dataAccessPath on layer entry ${layerEntryConfig.layerId} is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType}`
           );
         }
-      } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
-        if (!layerEntryConfig.geoviewLayerParent.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
+      } else if (geoviewEntryIsEsriDynamic(layerEntryConfig)) {
+        if (Number.isNaN(layerEntryConfig.layerId)) {
           throw new Error(
-            `dataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+            `The layer entry with layerId equal to ${layerEntryConfig.layerId} on GeoView layer ${rootLayerConfig.layerId} must be an integer`
+          );
+        }
+        // Value for layerEntryConfig.entryType can only be raster
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
+        // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+        if (!layerEntryConfig.source) layerEntryConfig.source = {};
+        if (!layerEntryConfig.source.dataAccessPath)
+          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+      } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
+        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
+          throw new Error(
+            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
           );
         }
         // Value for layerEntryConfig.entryType can only be vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
-        // layerEntryConfig.initialSettings attributes that are not defined inherits GeoView parent layer settings that are defined.
-        if (layerEntryConfig.geoviewLayerParent?.initialSettings) {
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          this.inheritInitialSettings(layerEntryConfig.geoviewLayerParent.initialSettings, layerEntryConfig.initialSettings);
-        }
+        // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
+        // and place the layerId at the end of it.
+        // Value for layerEntryConfig.source.format can only be EsriJSON.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'EsriJSON' };
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'EsriJSON';
         if (!layerEntryConfig.source.dataAccessPath)
-          layerEntryConfig.source.dataAccessPath = { ...geoviewLayerConfig.metadataAccessPath } as TypeLocalizedString;
+          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
+          ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
+          : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
+        layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
+          ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
+          : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+      } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
+        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
+          throw new Error(
+            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+          );
+        }
+        // Value for layerEntryConfig.entryType can only be vector
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
+        // and place the layerId at the end of it.
+        // Value for layerEntryConfig.source.format can only be EsriJSON.
+        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'GeoJSON' };
+        if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
+
+        if (!layerEntryConfig.source.dataAccessPath) {
+          let { en, fr } = rootLayerConfig.metadataAccessPath!;
+          en = en && en.split('/').length > 1 ? en.split('/').slice(0, -1).join('/') : './';
+          fr = fr && en.split('/').length > 1 ? fr.split('/').slice(0, -1).join('/') : './';
+          layerEntryConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
+        }
         layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
           ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
           : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
@@ -453,10 +515,10 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Inherit the settings defined in the source if the corresponding setting of the destination is undefine.
-   * @param {TypeLayerInitialConfig} sourceSettings The initial settings to copy from.
-   * @param {TypeLayerInitialConfig} destinationSettings The initial settings to copy to.
+   * @param {TypeLayerInitialSettings} sourceSettings The initial settings to copy from.
+   * @param {TypeLayerInitialSettings} destinationSettings The initial settings to copy to.
    */
-  private inheritInitialSettings(sourceSettings: TypeLayerInitialConfig, destinationSettings: TypeLayerInitialConfig) {
+  private inheritInitialSettings(sourceSettings: TypeLayerInitialSettings, destinationSettings: TypeLayerInitialSettings) {
     const canInherit = (settingsKey: 'className' | 'extent' | 'maxZoom' | 'minZoom' | 'opacity' | 'visible') => {
       return sourceSettings[settingsKey] !== undefined && destinationSettings[settingsKey] === undefined;
     };

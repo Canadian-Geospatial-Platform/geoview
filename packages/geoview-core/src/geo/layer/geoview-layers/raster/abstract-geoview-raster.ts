@@ -1,6 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
-import Collection from 'ol/Collection';
+// ! DELETE ME: import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
+import LayerGroup from 'ol/layer/Group';
+// ! DELETE ME: import Collection from 'ol/Collection';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeListOfLayerEntryConfig, TypeLayerEntryConfig } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
@@ -114,8 +115,8 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
           .then((listOfLayerCreated) => {
             if (listOfLayerCreated && listOfLayerCreated.length !== 0) {
               // We use the first element of the array to retrieve the parent node.
-              const { parentNode } = listOfLayerCreated[0]!.get('layerEntryConfig');
-              const layerGroup = this.createLayerGroup(parentNode);
+              const { parentLayerConfig } = listOfLayerCreated[0]!.get('layerEntryConfig');
+              const layerGroup = this.createLayerGroup(parentLayerConfig);
               listOfLayerCreated.forEach((rasterLayer) => {
                 if (rasterLayer) {
                   this.setRenderer(rasterLayer);

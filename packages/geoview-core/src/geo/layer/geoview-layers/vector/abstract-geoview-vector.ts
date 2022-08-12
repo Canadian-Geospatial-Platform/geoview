@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
@@ -9,6 +7,7 @@ import { Geometry } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { EsriJSON, GeoJSON, KML, WFS } from 'ol/format';
 import { Icon as StyleIcon, Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
+import { ReadOptions } from 'ol/format/Feature';
 // import { StyleLike } from 'ol/style/Style';
 import { asArray, asString } from 'ol/color';
 
@@ -16,7 +15,6 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeJsonObject } from '../../../../core/types/global-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
@@ -134,8 +132,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           .then((listOfLayerCreated) => {
             if (listOfLayerCreated && listOfLayerCreated.length !== 0) {
               // We use the first element of the array to retrieve the parent node.
-              const { parentNode } = listOfLayerCreated[0]!.get('layerEntryConfig');
-              const layerGroup = this.createLayerGroup(parentNode);
+              const { parentLayerConfig } = listOfLayerCreated[0]!.get('layerEntryConfig');
+              const layerGroup = this.createLayerGroup(parentLayerConfig);
               listOfLayerCreated.forEach((vectorLayer) => {
                 if (vectorLayer) {
                   this.setRenderer(vectorLayer);
@@ -173,6 +171,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   processOneLayerEntry(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<TypeBaseVectorLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
+      /*
       let serviceUrl = getLocalisezValue(layerEntry.source!.dataAccessPath!, this.mapId)!;
       serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
       axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
@@ -180,39 +179,33 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
         resolve(vectorLayer);
       });
+      */
+      const vectorSource = this.createVectorSource(layerEntry);
+      const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
+      resolve(vectorLayer);
     });
     return promisedVectorLayer;
   }
 
-  private createLayer(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<VectorLayer<VectorSource> | null> {
-    const promisedVectorLayer = new Promise<VectorLayer<VectorSource> | null>((resolve) => {
-      let serviceUrl = getLocalisezValue(this.metadataAccessPath, this.mapId)!;
-      serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
-      let data: TypeJsonObject = {};
-      axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
-        data = queryResponse.data;
-
-        const vectorSource = this.createVectorSource(layerEntry, data);
-        const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
-        resolve(vectorLayer);
-      });
-    });
-    return promisedVectorLayer;
-  }
-
-  private createVectorSource(layerEntry: TypeBaseVectorLayerEntryConfig, response: TypeJsonObject): VectorSource<Geometry> {
+  private createVectorSource(layerEntry: TypeBaseVectorLayerEntryConfig): VectorSource<Geometry> {
     // eslint-disable-next-line no-var
     var vectorSource: VectorSource<Geometry>;
+    let readOptions: ReadOptions = {};
     const sourceOptions: SourceOptions = { strategy: all };
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    if (layerEntry.source!.dataAccessPath) sourceOptions.url = getLocalisezValue(layerEntry.source!.dataAccessPath, this.mapId);
+    sourceOptions.url = getLocalisezValue(layerEntry.source!.dataAccessPath!, this.mapId);
+
     if (layerEntry.source!.format) {
       switch (layerEntry.source!.format) {
         case 'EsriJSON': {
+          sourceOptions.url = (sourceOptions.url as string).endsWith('/')
+            ? sourceOptions.url
+            : `${sourceOptions.url}/query?f=pjson&outfields=*&where=1%3D1`;
           sourceOptions.format = new EsriJSON();
           break;
         }
         case 'GeoJSON' || 'featureAPI': {
+          readOptions = { dataProjection: layerEntry.source!.dataProjection };
           sourceOptions.format = new GeoJSON();
           break;
         }
@@ -232,21 +225,26 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
-      if (response.error) {
+      const url = vectorSource.getUrl();
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url as string);
+      const onError = () => {
+        vectorSource.removeLoadedExtent(extent);
         if (failure) failure();
-      } else {
-        // dataProjection will be read from document
-        const features = sourceOptions.format!.readFeatures(response, {
-          extent,
-          featureProjection: projection,
-        }) as Feature<Geometry>[];
-
-        if (features.length > 0) {
+      };
+      xhr.onerror = onError;
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const features = vectorSource
+            .getFormat()!
+            .readFeatures(xhr.responseText, { ...readOptions, featureProjection: projection.getCode() }) as Feature<Geometry>[];
           vectorSource.addFeatures(features);
+          if (success) success(features);
+        } else {
+          onError();
         }
-
-        if (success) success(features);
-      }
+      };
+      xhr.send();
     };
 
     vectorSource = new VectorSource(sourceOptions);
@@ -267,11 +265,49 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       }),
     });
 
+    const defaultLineStringStyle = new Style({
+      stroke: new Stroke({
+        color: asString(setAlphaColor(asArray('#000000'), 1)),
+        width: 2,
+      }),
+    });
+
+    const defaultLinePolygonStyle = new Style({
+      stroke: new Stroke({
+        // 1 is for opacity
+        color: asString(setAlphaColor(asArray('#FF0000'), 1)),
+        width: 2,
+      }),
+      fill: new Fill({
+        color: asString(setAlphaColor(asArray('#FF0000'), 0.5)),
+      }),
+    });
+
+    const defaultSelectStyle = new Style({
+      stroke: new Stroke({
+        color: asString(setAlphaColor(asArray('#0000FF'), 1)),
+        width: 3,
+      }),
+      fill: new Fill({
+        color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
+      }),
+    });
+
+    const style: Record<string, Style> = {
+      Polygon: defaultLinePolygonStyle,
+      LineString: defaultLineStringStyle,
+      Point: defaultCircleMarkerStyle,
+    };
+
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerConfig: layerEntry },
       source: vectorSource,
       // ! TODO: feature properties will be use when the renderer part of the object will be coded.
-      style: defaultCircleMarkerStyle,
+      style: (feature) => {
+        const geometryType = feature.getGeometry()?.getType();
+
+        return style[geometryType] ? style[geometryType] : defaultSelectStyle;
+      },
     };
 
     return new VectorLayer(layerOptions);

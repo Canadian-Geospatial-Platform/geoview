@@ -7,7 +7,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
-  TypeLayerInitialConfig,
+  TypeLayerInitialSettings,
   TypeLayerEntryConfig,
 } from '../../map/map-schema-types';
 
@@ -92,7 +92,7 @@ export abstract class AbstractGeoViewLayer {
    * Initial settings to apply to the GeoView layer at creation time.
    * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
    */
-  initialSettings?: TypeLayerInitialConfig;
+  initialSettings?: TypeLayerInitialSettings;
 
   /**
    * The vector or raster layer structure to be displayed for this GeoView class. Initial value is null indicating that the layers

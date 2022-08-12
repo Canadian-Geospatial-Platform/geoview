@@ -103,7 +103,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
 
 /** *****************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is OGC_FEATURE. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
@@ -113,7 +113,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
 export const geoviewEntryIsOgcFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeOgcFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
+  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 // ******************************************************************************************************************************

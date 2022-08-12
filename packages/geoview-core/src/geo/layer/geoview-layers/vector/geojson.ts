@@ -100,7 +100,7 @@ export interface TypeGeoJSONLayerEntryConfig extends Omit<TypeVectorLayerEntryCo
   source: TypeSourceGeoJSONInitialConfig;
 }
 
-export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
+export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'GeoJSON';
   listOfLayerEntryConfig: TypeGeoJSONLayerEntryConfig[];
 }
@@ -132,7 +132,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
 
 /** *****************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeGeoJSONLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewLayerParent attribute is GEOJSON. The type ascention applies only to the true block of
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOJSON. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
@@ -140,7 +140,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  * @return {boolean} true if the type ascention is valid
  */
 export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewLayerParent!.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 // ******************************************************************************************************************************
@@ -169,6 +169,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
+      // ! Todo: Allow reading of metadata from a JSON file and maybe a STAC catalog.
       resolve();
     });
     return promisedExecution;
@@ -177,26 +178,20 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  setRenderer(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }
