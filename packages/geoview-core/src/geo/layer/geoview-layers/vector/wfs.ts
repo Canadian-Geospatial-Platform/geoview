@@ -1,7 +1,7 @@
 import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { asArray, asString } from 'ol/color';
 
-import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
 import {
@@ -152,10 +152,13 @@ export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WFS extends AbstractGeoViewVector {
-  // private varibale holding wfs capabilities
+  /** private varibale holding the wfs capabilities. */
   private metadata: TypeJsonObject = {};
 
-  // private varibale holding wfs version
+  /** Feature type description obtained fy the DescribeFeatureType service call. */
+  featureTypeDescripion: Record<string, TypeJsonObject> = {};
+
+  /** private varibale holding wfs version. */
   private version = '2.0.0';
 
   /** ***************************************************************************************************************************
@@ -174,20 +177,19 @@ export class WFS extends AbstractGeoViewVector {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getWfsCapabilities().then(() => {
         if (this.listOfLayerEntryConfig.length !== 0) {
-          const featTypeInfo = this.getFeatureTypeInfo(
-            this.metadata['wfs:WFS_Capabilities'].FeatureTypeList.FeatureType,
-            this.listOfLayerEntryConfig.map((item) => item.layerId).toString()
-          );
-          if (!featTypeInfo) {
-            return;
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const layerName = this.layerName
-            ? getLocalisezValue(this.layerName, this.mapId)
-            : (featTypeInfo.Name['#text'] as string).split(':')[1];
-          // ! To be continued
-        }
-        resolve();
+          const promiseOfFeatureDescriptions: Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>[] = [];
+          this.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+            promiseOfFeatureDescriptions.push(this.describeFeatureType(layerEntryConfig.layerId));
+          });
+          Promise.all(promiseOfFeatureDescriptions).then((listOfDescriptions) => {
+            listOfDescriptions.forEach((description) => {
+              if (!description.layerMetadata) this.layerLoadError.push(description.layerId);
+              else this.featureTypeDescripion[description.layerId] = description.layerMetadata;
+            });
+            // ! To be continued???
+            resolve();
+          });
+        } else resolve();
       });
     });
     return promisedExecution;
@@ -198,60 +200,48 @@ export class WFS extends AbstractGeoViewVector {
    */
   private async getWfsCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const requestUrl = `${getLocalisezValue(this.metadataAccessPath, this.mapId)}?service=WFS&request=getcapabilities`;
-      getXMLHttpRequest(requestUrl).then((xmlStringCapabilities) => {
-        // need to pass a xmldom to xmlToJson
-        const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
-        const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
+      const getcapabilitiesUrl = `${getLocalisezValue(this.metadataAccessPath, this.mapId)}?service=WFS&request=getcapabilities`;
+      getXMLHttpRequest(getcapabilitiesUrl).then((xmlStringCapabilities) => {
+        if (xmlStringCapabilities !== '{}') {
+          // need to pass a xmldom to xmlToJson
+          const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
+          const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
 
-        this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
-        this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
-        resolve();
+          this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
+          this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
+          resolve();
+        } else {
+          throw new Error(`Cant't read capabilities for layer ${this.layerId} of map ${this.mapId}.`);
+        }
       });
     });
     return promisedExecution;
   }
 
   /** ****************************************************************************************************************************
-   * Get feature type info of a given entry
-   * @param {TypeJsonObject} featureTypeList feature type list
-   * @param {string} entries names(comma delimited) to check
+   * Get the feature type description.
+   * @param {string} layerId The layer identifier.
    *
-   * @returns {TypeJsonObject | null} feature type object or null
+   * @returns {Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>} The feature type description or null.
    */
-  private getFeatureTypeInfo(featureTypeList: TypeJsonObject, entries?: string): TypeJsonObject | null {
-    const res = null;
-
-    if (Array.isArray(featureTypeList)) {
-      const featureTypeArray: TypeJsonArray = featureTypeList;
-
-      for (let i = 0; i < featureTypeArray.length; i += 1) {
-        let fName = featureTypeArray[i].Name['#text'] as string;
-
-        const fNameSplit = fName.split(':');
-        fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
-
-        const entrySplit = entries!.split(':');
-        const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
-
-        if (entryName === fName) {
-          return featureTypeArray[i];
-        }
-      }
-    } else {
-      let fName = featureTypeList.Name['#text'] as string;
-
-      const fNameSplit = fName.split(':');
-      fName = fNameSplit.length > 1 ? fNameSplit[1] : fNameSplit[0];
-
-      const entrySplit = entries!.split(':');
-      const entryName = entrySplit.length > 1 ? entrySplit[1] : entrySplit[0];
-
-      if (entryName === fName) {
-        return featureTypeList;
-      }
-    }
-    return res;
+  private describeFeatureType(layerId: string): Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }> {
+    const promisedExecution = new Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>((resolve) => {
+      const describeFeatureTypeUrl = `${getLocalisezValue(
+        this.metadataAccessPath,
+        this.mapId
+      )}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerId}`;
+      fetch(describeFeatureTypeUrl)
+        .then<TypeJsonObject>((fetchResponse): Promise<TypeJsonObject> => {
+          return fetchResponse.json();
+        })
+        .then((jsonFeatureDescription) => {
+          resolve({ layerId, layerMetadata: jsonFeatureDescription });
+        })
+        .catch(() => {
+          resolve({ layerId, layerMetadata: null });
+        });
+    });
+    return promisedExecution;
   }
 
   /**

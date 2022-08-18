@@ -74,7 +74,7 @@ export const geoviewEntryIsEsriDynamic = (
 // ******************************************************************************************************************************
 export class EsriDynamic extends AbstractGeoViewRaster {
   /** Service metadata */
-  capabilities: TypeJsonObject = {};
+  metadata: TypeJsonObject = {};
 
   /** ****************************************************************************************************************************
    * Initialize layer.
@@ -93,7 +93,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const data = getXMLHttpRequest(`${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`);
       data.then((value) => {
         if (value !== '{}') {
-          this.capabilities = JSON.parse(value) as TypeJsonObject;
+          this.metadata = JSON.parse(value) as TypeJsonObject;
         }
         resolve();
       });
@@ -111,7 +111,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   processOneLayerEntry(layerEntryConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const sourceOptions: SourceOptions = {};
-      sourceOptions.attributions = [(this.capabilities.copyrightText ? this.capabilities.copyrightText : '') as string];
+      sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
       sourceOptions.url = getLocalisezValue(layerEntryConfig.source.dataAccessPath!, this.mapId);
       sourceOptions.params = { LAYERS: `show:${[Number(layerEntryConfig.layerId)]}` };
       if (layerEntryConfig.source.transparent)

@@ -16,19 +16,19 @@
   </head>
   <body>
     <div>
-      <h3 id="HLYR4">4. Esri feature layer</h3>
+      <h3 id="HLYR7">7. OGC API Feature Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
-        id="LYR4"
+        id="LYR7"
         class="llwp-map"
         data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3978
+              'zoom': 3,
+              'center': [0, 20],
+              'projection': 3857
             },
             'basemapOptions': {
               'id': 'transport',
@@ -37,14 +37,18 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'esriFeatureLYR4',
-                'layerName': { 'en': 'Water quality at monitoring sites' },
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                'layerId': 'ogcFeatureLYR7',
+                'layerName': {
+                  'en': 'Large Lakes'
                 },
-                'geoviewLayerType': 'esriFeature',
+                'metadataAccessPath': {
+                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
+                },
+                'geoviewLayerType': 'ogcFeature',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '9' }
+                  {
+                    'layerId': 'lakes'
+                  }
                 ]
               }
             ]
@@ -53,9 +57,10 @@
           'suportedLanguages': ['en-CA']
         }"
       ></div>
-      <p>This map has a Esri feature layer added from configuration.</p>
+
+      <p>This map has an OGC API feature layer added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR4CS" class="panel"></div>
+      <div id="LYR7CS" class="panel"></div>
     </div>
     <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>

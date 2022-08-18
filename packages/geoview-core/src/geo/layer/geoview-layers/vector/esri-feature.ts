@@ -80,7 +80,7 @@ export const geoviewEntryIsEsriFeature = (
 // ******************************************************************************************************************************
 export class EsriFeature extends AbstractGeoViewVector {
   // The service capabilities.
-  capabilities: TypeJsonObject | null = null;
+  metadata: TypeJsonObject | null = null;
 
   // define a default blue icon
   iconSymbols: { field: string | null; valueAndSymbol: Record<string, StyleIcon> } = {
@@ -108,14 +108,14 @@ export class EsriFeature extends AbstractGeoViewVector {
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getCapabilities().then(() => {
-        if (this.capabilities) {
+        if (this.metadata) {
           // if layerEntry.layerId is not defined, use the dataAccessPath ending as value for layerEntry.layerId.
           this.listOfLayerEntryConfig.forEach((layerEntry) => {
             const esriIndex = Number(layerEntry.layerId);
             if (!layerEntry.layerName) {
               layerEntry.layerName = {
-                en: this.capabilities!.layers[esriIndex].name as string,
-                fr: this.capabilities!.layers[esriIndex].name as string,
+                en: this.metadata!.layers[esriIndex].name as string,
+                fr: this.metadata!.layers[esriIndex].name as string,
               };
             }
           });
@@ -132,8 +132,8 @@ export class EsriFeature extends AbstractGeoViewVector {
       const promisedCapabilitiesString = getXMLHttpRequest(capabilitiesUrl);
       promisedCapabilitiesString.then((capabilitiesString) => {
         if (capabilitiesString !== '{}') {
-          this.capabilities = toJsonObject(JSON.parse(capabilitiesString));
-          const { type, copyrightText } = this.capabilities;
+          this.metadata = toJsonObject(JSON.parse(capabilitiesString));
+          const { type, copyrightText } = this.metadata;
           this.attribution = copyrightText ? (copyrightText as string) : '';
           // check if the type is define as Feature Layer.
           this.isFeatureLayer = type && type === 'Feature Layer';

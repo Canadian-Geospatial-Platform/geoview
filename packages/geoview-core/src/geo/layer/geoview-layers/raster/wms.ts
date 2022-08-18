@@ -75,10 +75,10 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WMS extends AbstractGeoViewRaster {
-  // private varibale holding wms capabilities
-  private capabilities: TypeJsonObject = {};
+  // private varibale holding wms capabilities.
+  private metadata: TypeJsonObject = {};
 
-  // private varibale holding wms capabilities
+  // private varibale holding attributions string.
   private attributions: string[] = [];
 
   /** ***************************************************************************************************************************
@@ -102,8 +102,8 @@ export class WMS extends AbstractGeoViewRaster {
       )}?service=WMS&version=1.3.0&request=GetCapabilities`;
       fetch(getCapabilitiesUrl).then((response) => {
         response.text().then((capabilitiesString) => {
-          this.capabilities = parser.read(capabilitiesString);
-          if (this.capabilities?.Service?.Abstract) this.attributions.push(this.capabilities.Service.Abstract as string);
+          this.metadata = parser.read(capabilitiesString);
+          if (this.metadata?.Service?.Abstract) this.attributions.push(this.metadata.Service.Abstract as string);
           resolve();
         });
       });
@@ -120,7 +120,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeWmsLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.layerId, this.capabilities.Capability.Layer);
+      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.layerId, this.metadata.Capability.Layer);
       if (layerCapabilities) {
         const dataAccessPath = getLocalisezValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
         const sourceOptions: SourceOptions = {

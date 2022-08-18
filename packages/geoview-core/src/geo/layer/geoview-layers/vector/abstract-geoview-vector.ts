@@ -5,14 +5,13 @@ import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
-import { EsriJSON, GeoJSON, KML, WFS } from 'ol/format';
+import { EsriJSON, GeoJSON, KML } from 'ol/format';
 import { Icon as StyleIcon, Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
 import { ReadOptions } from 'ol/format/Feature';
-// import { StyleLike } from 'ol/style/Style';
 import { asArray, asString } from 'ol/color';
-
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
+
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
@@ -171,15 +170,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   processOneLayerEntry(layerEntry: TypeBaseVectorLayerEntryConfig): Promise<TypeBaseVectorLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
-      /*
-      let serviceUrl = getLocalisezValue(layerEntry.source!.dataAccessPath!, this.mapId)!;
-      serviceUrl = serviceUrl.endsWith('/') ? serviceUrl : `${serviceUrl}/query?f=pjson&outfields=*&where=1%3D1`;
-      axios.get<TypeJsonObject>(serviceUrl).then((queryResponse) => {
-        const vectorSource = this.createVectorSource(layerEntry, queryResponse.data);
-        const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
-        resolve(vectorLayer);
-      });
-      */
       const vectorSource = this.createVectorSource(layerEntry);
       const vectorLayer = this.createVectorLayer(layerEntry, vectorSource);
       resolve(vectorLayer);
@@ -198,14 +188,18 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     if (layerEntry.source!.format) {
       switch (layerEntry.source!.format) {
         case 'EsriJSON': {
-          sourceOptions.url = (sourceOptions.url as string).endsWith('/')
-            ? sourceOptions.url
-            : `${sourceOptions.url}/query?f=pjson&outfields=*&where=1%3D1`;
+          sourceOptions.url = `${sourceOptions.url}/query?f=pjson&outfields=*&where=1%3D1`;
           sourceOptions.format = new EsriJSON();
           break;
         }
-        case 'GeoJSON' || 'featureAPI': {
+        case 'GeoJSON': {
           readOptions = { dataProjection: layerEntry.source!.dataProjection };
+          sourceOptions.format = new GeoJSON();
+          break;
+        }
+        case 'featureAPI': {
+          readOptions = { dataProjection: layerEntry.source!.dataProjection };
+          sourceOptions.url = `${sourceOptions.url}/collections/${layerEntry.layerId}/items?f=json`;
           sourceOptions.format = new GeoJSON();
           break;
         }
@@ -214,7 +208,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           break;
         }
         case 'WFS': {
-          sourceOptions.format = new WFS();
+          readOptions = { dataProjection: layerEntry.source!.dataProjection };
+          sourceOptions.format = new GeoJSON();
+          sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&outputFormat=application/json&version=2.0.0&srsname=${
+            layerEntry.source!.dataProjection
+          }&typeName=${layerEntry.layerId}`;
           break;
         }
         default: {
@@ -235,9 +233,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       xhr.onerror = onError;
       xhr.onload = () => {
         if (xhr.status === 200) {
-          const features = vectorSource
-            .getFormat()!
-            .readFeatures(xhr.responseText, { ...readOptions, featureProjection: projection.getCode() }) as Feature<Geometry>[];
+          const features = vectorSource.getFormat()!.readFeatures(xhr.responseText, {
+            ...readOptions,
+            featureProjection: projection,
+            extent,
+          }) as Feature<Geometry>[];
           vectorSource.addFeatures(features);
           if (success) success(features);
         } else {
@@ -300,7 +300,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     const layerOptions: VectorLayerOptions<VectorSource> = {
-      properties: { layerConfig: layerEntry },
+      properties: { layerEntryConfig: layerEntry },
       source: vectorSource,
       // ! TODO: feature properties will be use when the renderer part of the object will be coded.
       style: (feature) => {

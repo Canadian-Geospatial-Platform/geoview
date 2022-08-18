@@ -191,7 +191,7 @@
       <div
         id="LYR3"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
@@ -286,7 +286,7 @@
       <div
       id="LYR5"
       class="llwp-map"
-      data-lang="en-CA"
+      data-lang="en"
       data-config="{
         'map': {
           'interaction': 'dynamic',
@@ -313,6 +313,12 @@
               'listOfLayerEntryConfig': [
                 {
                   'layerId': 'polygons.json'
+                },
+                {
+                  'layerId': 'lines.json'
+                },
+                {
+                  'layerId': 'points.json'
                 }
               ]
             }
@@ -333,46 +339,54 @@
       <h3 id="HLYR6">6. WFS Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
 
-      <div
-        id="LYR6"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'zoom': 8,
-            'center': [-71.370748, 42.001058],
-            'projection': 3857
+      <div>
+        <h3 id="HLYR6">6. WFS Layer</h3>
+        <h3><a href="#top">Top of the page</a></h3>
+
+        <div
+          id="LYR6"
+          class="llwp-map"
+          data-lang="en"
+          data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 8,
+              'center': [-71.370748, 42.001058],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'layerId': 'wfsLYR6',
+                'layerName': {
+                  'en': 'Airport data'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+                },
+                'geoviewLayerType': 'ogcWfs',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'GISDATA.AIRPORTS_PT'
+                  }
+                ]
+              }
+            ]
           },
-          'basemapOptions': {
-            'id': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'id': 'wfsLYR6',
-              'name': {
-                'en': 'Airport data',
-              },
-              'metadataAccessPath': {
-                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
-              },
-              'geoviewLayerType': 'ogcWfs',
-              'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'GISDATA.AIRPORTS_PT'
-                }
-              ]
-            }
-          ]
-        },
-        'theme': 'dark',
-        'suportedLanguages': ['en-CA']
-      }"
-      ></div>
-      <p>This map has a WFS layer added from configuration.</p>
+          'theme': 'dark',
+          'suportedLanguages': ['en-CA']
+        }"
+        ></div>
+        <p>This map has a WFS layer added from configuration.</p>
+        <p><strong>Configuration Snippet:</strong></p>
+        <div id="LYR6CS" class="panel"></div>
+      </div>
+        <p>This map has a WFS layer added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
       <div id="LYR6CS" class="panel"></div>
     </div>
@@ -382,7 +396,7 @@
       <div
         id="LYR7"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
@@ -429,7 +443,7 @@
       <div
         id="LYR8"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',

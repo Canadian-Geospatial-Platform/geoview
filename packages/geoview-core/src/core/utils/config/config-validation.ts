@@ -12,6 +12,8 @@ import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms'
 import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
 import { geoviewEntryIsEsriDynamic } from '../../../geo/layer/geoview-layers/raster/esri-dynamic';
 import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vector/esri-feature';
+import { geoviewEntryIsWFS } from '../../../geo/layer/geoview-layers/vector/wfs';
+import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
 import {
   layerEntryIsVector,
@@ -337,10 +339,10 @@ export class ConfigValidation {
             this.doXYZtileExtraValidation(geoviewLayerConfig);
             break;
           case 'ogcFeature':
-            console.log('Code doExtraValidation for ogcFeature');
+            this.doOgcFeatureExtraValidation(geoviewLayerConfig);
             break;
           case 'ogcWfs':
-            console.log('Code doExtraValidation for ogcWfs');
+            this.doWfsExtraValidation(geoviewLayerConfig);
             break;
           case 'ogcWms':
             this.doWmsExtraValidation(geoviewLayerConfig);
@@ -354,7 +356,33 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on esriFeature configuration.
+   * Do extra validation that schema can not do on ogcWfs configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
+  private doWfsExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    if (!geoviewLayerConfig.metadataAccessPath) {
+      throw new Error(
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
+      );
+    }
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on ogcFeature configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   */
+  private doOgcFeatureExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    if (!geoviewLayerConfig.metadataAccessPath) {
+      throw new Error(
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
+      );
+    }
+    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do on GeoJSON configuration.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    */
   private doGeoJSONExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
@@ -362,7 +390,7 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on esriFeature configuration.
+   * Do extra validation that schema can not do on xyzTiles configuration.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
    */
   private doXYZtileExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
@@ -463,11 +491,6 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
       } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
-        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
-          throw new Error(
-            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
-          );
-        }
         // Value for layerEntryConfig.entryType can only be vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
@@ -483,6 +506,26 @@ export class ConfigValidation {
         layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
           ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
           : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+      } else if (geoviewEntryIsWFS(layerEntryConfig)) {
+        // Value for layerEntryConfig.entryType can only be vector
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+        // Value for layerEntryConfig.source.format can only be WFS.
+        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'WFS' };
+        if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'WFS';
+        if (!layerEntryConfig.source.dataAccessPath)
+          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
+      } else if (geoviewEntryIsOgcFeature(layerEntryConfig)) {
+        // Value for layerEntryConfig.entryType can only be vector
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+        // Value for layerEntryConfig.source.format can only be WFS.
+        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'featureAPI' };
+        if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'featureAPI';
+        if (!layerEntryConfig.source.dataAccessPath)
+          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
         if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
           throw new Error(
@@ -495,8 +538,7 @@ export class ConfigValidation {
         // and place the layerId at the end of it.
         // Value for layerEntryConfig.source.format can only be EsriJSON.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'GeoJSON' };
-        if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
-
+        if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'GeoJSON';
         if (!layerEntryConfig.source.dataAccessPath) {
           let { en, fr } = rootLayerConfig.metadataAccessPath!;
           en = en && en.split('/').length > 1 ? en.split('/').slice(0, -1).join('/') : './';
@@ -509,6 +551,7 @@ export class ConfigValidation {
         layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
           ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
           : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+        if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       }
     });
   }

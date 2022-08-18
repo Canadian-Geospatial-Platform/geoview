@@ -127,7 +127,7 @@ export const geoviewEntryIsOgcFeature = (
 // ******************************************************************************************************************************
 export class OgcFeature extends AbstractGeoViewVector {
   // private varibale holding OGC feature capabilities.
-  private capabilities: TypeJsonObject = {};
+  private metadata: TypeJsonObject = {};
 
   // private varibale holding wfs version
   private version = '2.0.0';
@@ -148,7 +148,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getCapabilities().then(() => {
-        if (this.capabilities?.description) this.attributions.push(this.capabilities.description as string);
+        if (this.metadata?.description) this.attributions.push(this.metadata.description as string);
         resolve();
       });
     });
@@ -160,13 +160,13 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   private getCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const rootUrl = getLocalisezValue(this.metadataAccessPath, this.mapId);
+      const rootUrl = getLocalisezValue(this.metadataAccessPath, this.mapId)!;
       const capabilitiesUrl = rootUrl.endsWith('/') ? `${rootUrl}collections?f=json` : `${rootUrl}/collections?f=json`;
 
       axios.get<TypeJsonObject>(capabilitiesUrl).then((response) => {
-        this.capabilities = response.data;
+        this.metadata = response.data;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const layerName = getLocalisezValue(this.name, this.mapId) || (this.capabilities.title as string);
+        const layerName = getLocalisezValue(this.layerName, this.mapId) || (this.metadata.title as string);
         // ! To be continued
         // const featureUrl = `${rootUrl}collections/${entries}/items?f=json`;
         resolve();
@@ -178,26 +178,20 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  setRenderer(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the renderer.
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
    */
-  registerToPanels(layerEntry: TypeLayerEntryConfig, rasterLayer: TypeBaseVectorLayer): void {
+  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!');
-    // eslint-disable-next-line no-console
-    console.log(layerEntry, rasterLayer);
+    console.log('This method needs to be coded!', rasterLayer);
   }
 }
