@@ -15,6 +15,7 @@ import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vec
 import { geoviewEntryIsWFS } from '../../../geo/layer/geoview-layers/vector/wfs';
 import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
+import { geoviewEntryIsGeocore } from '../../../geo/layer/other/geocore';
 import {
   layerEntryIsVector,
   layerEntryIsGroupLayer,
@@ -324,28 +325,33 @@ export class ConfigValidation {
       mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
-            this.doGeoJSONExtraValidation(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'esriDynamic':
-            this.doEsriDynamicExtraValidation(geoviewLayerConfig);
+            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'esriFeature':
-            this.doEsriFeatureExtraValidation(geoviewLayerConfig);
+            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'geoCore':
-            console.log('Code doExtraValidation for geoCore');
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'xyzTiles':
-            this.doXYZtileExtraValidation(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'ogcFeature':
-            this.doOgcFeatureExtraValidation(geoviewLayerConfig);
+            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'ogcWfs':
-            this.doWfsExtraValidation(geoviewLayerConfig);
+            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'ogcWms':
-            this.doWmsExtraValidation(geoviewLayerConfig);
+            this.metadataAccessPathIsMandatory(geoviewLayerConfig);
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           default:
             throw new Error('Your not supposed to end here. There is a problem with the schema validator.');
@@ -356,84 +362,15 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on ogcWfs configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
+   * Verify that the metadataAccessPath has a value.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
    */
-  private doWfsExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+  private metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
         `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
     }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on ogcFeature configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   */
-  private doOgcFeatureExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
-      );
-    }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on GeoJSON configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   */
-  private doGeoJSONExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on xyzTiles configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   */
-  private doXYZtileExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on esriFeature configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   */
-  private doEsriFeatureExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
-      );
-    }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on ogcWms configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   */
-  private doWmsExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
-      );
-    }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
-  }
-
-  /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do on ogcWms configuration.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to adjust and validate.
-   */
-  private doEsriDynamicExtraValidation(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
-      );
-    }
-    this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -526,6 +463,9 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
+      } else if (geoviewEntryIsGeocore(layerEntryConfig)) {
+        // Value for layerEntryConfig.entryType can only be vector
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'geocore';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
         if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
           throw new Error(

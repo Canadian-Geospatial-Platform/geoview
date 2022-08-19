@@ -41,11 +41,11 @@ export class UUIDmapConfigReader {
           const layer = data.layers[0];
 
           if (layer) {
-            const { geoviewLayerType, listOfLayerEntryConfig, name, url, id, serverType } = layer;
+            const { layerType, layerEntries, name, url, id, serverType } = layer;
 
             const isFeature = (url as string).indexOf('FeatureServer') > -1;
 
-            if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
+            if (layerType === CONST_LAYER_TYPES.ESRI_DYNAMIC && !isFeature) {
               const layerConfig: TypeEsriDynamicLayerConfig = {
                 layerId: id as string,
                 layerName: {
@@ -57,7 +57,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'esriDynamic',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeEsriDynamicLayerEntryConfig => {
                   const esriDynamicLayerEntryConfig: TypeEsriDynamicLayerEntryConfig = {
                     entryType: 'raster',
                     layerId: item.index as string,
@@ -73,8 +73,8 @@ export class UUIDmapConfigReader {
               };
               listOfGeoviewLayerConfig.push(layerConfig);
             } else if (isFeature) {
-              for (let j = 0; j < listOfLayerEntryConfig.length; j++) {
-                const featureUrl = `${url}/${listOfLayerEntryConfig[j].index}`;
+              for (let j = 0; j < layerEntries.length; j++) {
+                const featureUrl = `${url}/${layerEntries[j].index}`;
                 const layerConfig: TypeEsriFeatureLayerConfig = {
                   layerId: id as string,
                   layerName: {
@@ -86,7 +86,7 @@ export class UUIDmapConfigReader {
                     fr: featureUrl,
                   },
                   geoviewLayerType: 'esriFeature',
-                  listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
+                  listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
                     const esriFeatureLayerEntryConfig: TypeEsriFeatureLayerEntryConfig = {
                       entryType: 'vector',
                       layerId: item.index as string,
@@ -103,7 +103,7 @@ export class UUIDmapConfigReader {
                 };
                 listOfGeoviewLayerConfig.push(layerConfig);
               }
-            } else if (geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
+            } else if (layerType === CONST_LAYER_TYPES.ESRI_FEATURE) {
               const layerConfig: TypeEsriFeatureLayerConfig = {
                 layerId: id as string,
                 layerName: {
@@ -115,7 +115,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'esriFeature',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeEsriFeatureLayerEntryConfig => {
                   const esriFeatureLayerEntryConfig: TypeEsriFeatureLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.index as string,
@@ -131,7 +131,7 @@ export class UUIDmapConfigReader {
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
-            } else if (geoviewLayerType === CONST_LAYER_TYPES.WMS) {
+            } else if (layerType === CONST_LAYER_TYPES.WMS) {
               const layerConfig: TypeWMSLayerConfig = {
                 layerId: id as string,
                 layerName: {
@@ -143,7 +143,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'ogcWms',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWmsLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeWmsLayerEntryConfig => {
                   const wmsLayerEntryConfig: TypeWmsLayerEntryConfig = {
                     entryType: 'raster',
                     layerId: item.id as string,
@@ -159,7 +159,7 @@ export class UUIDmapConfigReader {
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
-            } else if (geoviewLayerType === CONST_LAYER_TYPES.WFS) {
+            } else if (layerType === CONST_LAYER_TYPES.WFS) {
               const layerConfig: TypeWFSLayerConfig = {
                 layerId: id as string,
                 layerName: {
@@ -171,7 +171,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'ogcWfs',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeWfsLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeWfsLayerEntryConfig => {
                   const wfsLayerEntryConfig: TypeWfsLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.id as string,
@@ -187,7 +187,7 @@ export class UUIDmapConfigReader {
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
-            } else if (geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE) {
+            } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
               const layerConfig: TypeOgcFeatureLayerConfig = {
                 layerId: id as string,
                 layerName: {
@@ -199,7 +199,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'ogcFeature',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
                   const ogcFeatureLayerEntryConfig: TypeOgcFeatureLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.id as string,
@@ -215,7 +215,7 @@ export class UUIDmapConfigReader {
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
-            } else if (geoviewLayerType === CONST_LAYER_TYPES.GEOJSON) {
+            } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
               const layerConfig: TypeGeoJSONLayerConfig = {
                 layerId: id as string,
                 layerName: {
@@ -227,7 +227,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'GeoJSON',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
                   const geoJSONLayerEntryConfig: TypeGeoJSONLayerEntryConfig = {
                     entryType: 'vector',
                     layerId: item.id as string,
@@ -243,7 +243,7 @@ export class UUIDmapConfigReader {
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);
-            } else if (geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) {
+            } else if (layerType === CONST_LAYER_TYPES.XYZ_TILES) {
               const layerConfig: TypeXYZTilesConfig = {
                 layerId: id as string,
                 layerName: {
@@ -255,7 +255,7 @@ export class UUIDmapConfigReader {
                   fr: url as string,
                 },
                 geoviewLayerType: 'xyzTiles',
-                listOfLayerEntryConfig: (listOfLayerEntryConfig as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
                   const xyzTilesLayerEntryConfig: TypeXYZTilesLayerEntryConfig = {
                     entryType: 'raster',
                     layerId: item.id as string,

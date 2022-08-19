@@ -565,8 +565,6 @@ export type TypeGeocoreLayerEntryConfig = {
   layerId: string;
   /** The display name of the layer (English/French). */
   layerName?: TypeLocalizedString;
-  /** The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang'). */
-  // id: string;
   /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
   source?: TypeSourceGeocoreConfig;
   /** Attribute initialSettings is never used by GeoCore layer entry. */

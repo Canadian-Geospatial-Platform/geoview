@@ -57,8 +57,16 @@ export class Layer {
 
             if (layerConfigIsGeoCore(layerConfig)) {
               const geoCore = new GeoCore(this.mapId);
-              geoCore.createLayer(layerConfig).then((uuidLayerConfig) => {
-                if (uuidLayerConfig) this.addLayer(uuidLayerConfig);
+              geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
+                if (arrayOfListOfGeoviewLayerConfig.length > 0) {
+                  arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
+                    if (listOfGeoviewLayerConfig.length > 0) {
+                      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+                        this.addLayer(geoviewLayerConfig);
+                      });
+                    }
+                  });
+                }
               });
             } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.mapId, layerConfig);

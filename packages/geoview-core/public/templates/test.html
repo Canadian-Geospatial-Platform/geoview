@@ -16,18 +16,18 @@
   </head>
   <body>
     <div>
-      <h3 id="HLYR7">7. OGC API Feature Layer</h3>
+      <h3 id="HLYR8">8. GeoCore UUID Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
-        id="LYR7"
+        id="LYR8"
         class="llwp-map"
         data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 3,
-              'center': [0, 20],
+              'zoom': 4,
+              'center': [-100, 60],
               'projection': 3857
             },
             'basemapOptions': {
@@ -38,16 +38,10 @@
             'listOfGeoviewLayerConfig': [
               {
                 'layerId': 'ogcFeatureLYR7',
-                'layerName': {
-                  'en': 'Large Lakes'
-                },
-                'metadataAccessPath': {
-                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
-                },
-                'geoviewLayerType': 'ogcFeature',
+                'geoviewLayerType': 'geoCore',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': 'lakes'
+                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
                   }
                 ]
               }
@@ -58,9 +52,9 @@
         }"
       ></div>
 
-      <p>This map has an OGC API feature layer added from configuration.</p>
+      <p>This map requests a layer from the catalog using uuid added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR7CS" class="panel"></div>
+      <div id="LYR8CS" class="panel"></div>
     </div>
     <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
