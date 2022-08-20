@@ -8,6 +8,7 @@ import {
 } from '../../map/map-schema-types';
 import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
 import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
+import { ConfigValidation } from '../../../core/utils/config/config-validation';
 
 export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'geoCore';
@@ -48,6 +49,9 @@ export const layerConfigIsGeoCore = (verifyIfLayer: TypeGeoviewLayerConfig): ver
 export class GeoCore {
   private mapId: string;
 
+  /** Config validation object used to validate the configuration and define default values */
+  private configValidation = new ConfigValidation();
+
   /**
    * Initialize layer
    * @param {string} mapId the id of the map
@@ -59,21 +63,27 @@ export class GeoCore {
   /**
    * Get GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    *
-   * @param {TypeGeocoreLayerEntryConfig} layerConfig the layer configuration
+   * @param {TypeGeocoreLayerEntryConfig} geocoreLayerConfig the layer configuration
    * @return {Promise<TypeListOfGeoviewLayerConfig>} list of layer configurations to add to the map
    */
-  createLayers(layerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
-    const listOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
-      const url = layerConfig.metadataAccessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage}`;
+  createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
+    const arrayOfListOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
+      const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage}`;
       const promiseOfLayerConfigs: Promise<TypeListOfGeoviewLayerConfig>[] = [];
-      layerConfig.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+      geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
         const requestUrl = `${url}/${layerEntry.layerId}`;
         promiseOfLayerConfigs.push(UUIDmapConfigReader.getGVlayersConfigFromUUID(this.mapId, requestUrl));
       });
       Promise.all(promiseOfLayerConfigs).then((listOfLayerCreated) => {
+        listOfLayerCreated.forEach((listeOfGeoviewLayerConfig) => {
+          this.configValidation.validateUUIDConfigAgainstSchema(
+            api.map(this.mapId).mapFeaturesConfig.suportedLanguages,
+            listeOfGeoviewLayerConfig
+          );
+        });
         resolve(listOfLayerCreated);
       });
     });
-    return listOfGeoviewLayerConfig;
+    return arrayOfListOfGeoviewLayerConfig;
   }
 }

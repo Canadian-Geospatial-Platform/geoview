@@ -34,7 +34,7 @@ export class Config {
   constructor(mapElement: Element) {
     this.mapElement = mapElement;
 
-    // set default display language
+    // Instanciate the configuration validator.
     this.configValidation = new ConfigValidation();
   }
 

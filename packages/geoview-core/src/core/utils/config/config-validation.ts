@@ -31,6 +31,8 @@ import {
   VALID_DISPLAY_LANGUAGE,
   VALID_PROJECTION_CODES,
   VALID_VERSIONS,
+  TypeListOfGeoviewLayerConfig,
+  TypeListOfLocalizedLanguages,
 } from '../../../geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 
@@ -310,19 +312,34 @@ export class ConfigValidation {
         displayLanguage: this._displayLanguage as TypeDisplayLanguage,
       };
     }
-    this.processLocalizedString(validMapFeaturesConfig);
-    this.doExtraValidation(validMapFeaturesConfig);
+    this.processLocalizedString(validMapFeaturesConfig.suportedLanguages, validMapFeaturesConfig.map.listOfGeoviewLayerConfig);
+    this.doExtraValidation(validMapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     return validMapFeaturesConfig;
   }
 
   /** ***************************************************************************************************************************
-   * Do extra validation that schema can not do.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig The map features configuration to adjust and validate.
+   * Validate and adjust the list of GeoView layer configuration.
+   * @param {TypeListOfLocalizedLanguages} suportedLanguages The list of supported languages.
+   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and
+   * validate.
    */
-  private doExtraValidation(mapFeaturesConfig: TypeMapFeaturesConfig) {
-    if (mapFeaturesConfig.map.listOfGeoviewLayerConfig) {
-      mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+  validateUUIDConfigAgainstSchema(
+    suportedLanguages: TypeListOfLocalizedLanguages,
+    listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
+  ): void {
+    this.processLocalizedString(suportedLanguages, listOfGeoviewLayerConfig);
+    this.doExtraValidation(listOfGeoviewLayerConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Do extra validation that schema can not do.
+   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and
+   * validate.
+   */
+  private doExtraValidation(listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig) {
+    if (listOfGeoviewLayerConfig) {
+      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
@@ -532,18 +549,19 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Adjust the map features configuration localized strings according to the suported languages array content.
-   * @param {TypeMapFeaturesConfig} mapFeaturesConfig The map features configuration to adjust according to the suported languages
-   * array content.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid JSON configuration object.
+   * @param {TypeListOfLocalizedLanguages} suportedLanguages The list of supported languages.
+   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust according
+   * to the suported languages array content.
    */
-  private processLocalizedString(mapFeaturesConfig: TypeMapFeaturesConfig): TypeMapFeaturesConfig {
-    if (mapFeaturesConfig.suportedLanguages.includes('en-CA') && mapFeaturesConfig.suportedLanguages.includes('fr-CA'))
-      return mapFeaturesConfig;
+  private processLocalizedString(
+    suportedLanguages: TypeListOfLocalizedLanguages,
+    listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
+  ): void {
+    if (suportedLanguages.includes('en-CA') && suportedLanguages.includes('fr-CA')) return;
 
     let sourceKey: TypeDisplayLanguage;
     let destinationKey: TypeDisplayLanguage;
-    if (mapFeaturesConfig.suportedLanguages.includes('en-CA')) {
+    if (suportedLanguages.includes('en-CA')) {
       sourceKey = 'en';
       destinationKey = 'fr';
     } else {
@@ -551,8 +569,8 @@ export class ConfigValidation {
       destinationKey = 'en';
     }
 
-    if (mapFeaturesConfig?.map?.listOfGeoviewLayerConfig) {
-      mapFeaturesConfig.map.listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
+    if (listOfGeoviewLayerConfig) {
+      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
         if (geoviewLayerConfig?.layerName) this.SynchronizeLocalizedString(geoviewLayerConfig.layerName, sourceKey, destinationKey);
         if (geoviewLayerConfig?.metadataAccessPath)
           this.SynchronizeLocalizedString(geoviewLayerConfig.metadataAccessPath, sourceKey, destinationKey);
@@ -572,7 +590,6 @@ export class ConfigValidation {
         });
       });
     }
-    return mapFeaturesConfig;
   }
 
   /** ***************************************************************************************************************************
