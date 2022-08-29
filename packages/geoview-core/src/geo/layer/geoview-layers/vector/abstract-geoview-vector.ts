@@ -18,7 +18,7 @@ import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { getLocalisezValue, showMessage, setAlphaColor } from '../../../../core/utils/utilities';
+import { getLocalizedValue, showMessage, setAlphaColor } from '../../../../core/utils/utilities';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -183,7 +183,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     let readOptions: ReadOptions = {};
     const sourceOptions: SourceOptions = { strategy: all };
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
-    sourceOptions.url = getLocalisezValue(layerEntry.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = getLocalizedValue(layerEntry.source!.dataAccessPath!, this.mapId);
 
     if (layerEntry.source!.format) {
       switch (layerEntry.source!.format) {

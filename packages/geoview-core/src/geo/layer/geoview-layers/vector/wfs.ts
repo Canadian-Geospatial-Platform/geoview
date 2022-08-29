@@ -11,7 +11,7 @@ import {
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalisezValue, getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
@@ -200,7 +200,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   private async getWfsCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const getcapabilitiesUrl = `${getLocalisezValue(this.metadataAccessPath, this.mapId)}?service=WFS&request=getcapabilities`;
+      const getcapabilitiesUrl = `${getLocalizedValue(this.metadataAccessPath, this.mapId)}?service=WFS&request=getcapabilities`;
       getXMLHttpRequest(getcapabilitiesUrl).then((xmlStringCapabilities) => {
         if (xmlStringCapabilities !== '{}') {
           // need to pass a xmldom to xmlToJson
@@ -226,7 +226,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   private describeFeatureType(layerId: string): Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }> {
     const promisedExecution = new Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>((resolve) => {
-      const describeFeatureTypeUrl = `${getLocalisezValue(
+      const describeFeatureTypeUrl = `${getLocalizedValue(
         this.metadataAccessPath,
         this.mapId
       )}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerId}`;

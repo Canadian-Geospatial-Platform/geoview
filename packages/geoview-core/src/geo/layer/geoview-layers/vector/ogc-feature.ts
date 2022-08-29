@@ -13,7 +13,7 @@ import {
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalisezValue, setAlphaColor } from '../../../../core/utils/utilities';
+import { getLocalizedValue, setAlphaColor } from '../../../../core/utils/utilities';
 
 // constant to define default style if not set by renderer
 // TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
@@ -160,13 +160,13 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   private getCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const rootUrl = getLocalisezValue(this.metadataAccessPath, this.mapId)!;
+      const rootUrl = getLocalizedValue(this.metadataAccessPath, this.mapId)!;
       const capabilitiesUrl = rootUrl.endsWith('/') ? `${rootUrl}collections?f=json` : `${rootUrl}/collections?f=json`;
 
       axios.get<TypeJsonObject>(capabilitiesUrl).then((response) => {
         this.metadata = response.data;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const layerName = getLocalisezValue(this.layerName, this.mapId) || (this.metadata.title as string);
+        const layerName = getLocalizedValue(this.layerName, this.mapId) || (this.metadata.title as string);
         // ! To be continued
         // const featureUrl = `${rootUrl}collections/${entries}/items?f=json`;
         resolve();

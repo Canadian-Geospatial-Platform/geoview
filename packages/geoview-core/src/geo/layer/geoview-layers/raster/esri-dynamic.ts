@@ -4,7 +4,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 
 import { TypeJsonObject } from '../../../../core/types/global-types';
-import { getLocalisezValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -90,7 +90,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const data = getXMLHttpRequest(`${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`);
+      const data = getXMLHttpRequest(`${getLocalizedValue(this.metadataAccessPath, this.mapId)}?f=json`);
       data.then((value) => {
         if (value !== '{}') {
           this.metadata = JSON.parse(value) as TypeJsonObject;
@@ -112,7 +112,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const sourceOptions: SourceOptions = {};
       sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
-      sourceOptions.url = getLocalisezValue(layerEntryConfig.source.dataAccessPath!, this.mapId);
+      sourceOptions.url = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId);
       sourceOptions.params = { LAYERS: `show:${[Number(layerEntryConfig.layerId)]}` };
       if (layerEntryConfig.source.transparent)
         Object.defineProperty(sourceOptions.params, 'transparent', layerEntryConfig.source.transparent!);

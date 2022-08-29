@@ -14,7 +14,7 @@ import {
   TypeSourceImageWmsInitialConfig,
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
-import { getLocalisezValue } from '../../../../core/utils/utilities';
+import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 import { api } from '../../../../app';
@@ -96,7 +96,7 @@ export class WMS extends AbstractGeoViewRaster {
   getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const parser = new WMSCapabilities();
-      const getCapabilitiesUrl = `${getLocalisezValue(
+      const getCapabilitiesUrl = `${getLocalizedValue(
         this.metadataAccessPath,
         this.mapId
       )}?service=WMS&version=1.3.0&request=GetCapabilities`;
@@ -122,7 +122,7 @@ export class WMS extends AbstractGeoViewRaster {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.layerId, this.metadata.Capability.Layer);
       if (layerCapabilities) {
-        const dataAccessPath = getLocalisezValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
+        const dataAccessPath = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
         const sourceOptions: SourceOptions = {
           url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
           params: { LAYERS: layerEntryConfig.layerId },

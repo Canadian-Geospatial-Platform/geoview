@@ -13,7 +13,7 @@ import {
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalisezValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
@@ -128,7 +128,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   private async getCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const capabilitiesUrl = `${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`;
+      const capabilitiesUrl = `${getLocalizedValue(this.metadataAccessPath, this.mapId)}?f=json`;
       const promisedCapabilitiesString = getXMLHttpRequest(capabilitiesUrl);
       promisedCapabilitiesString.then((capabilitiesString) => {
         if (capabilitiesString !== '{}') {
@@ -145,7 +145,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   private async legendQuery(): Promise<void> {
-    let queryUrl = getLocalisezValue(this.metadataAccessPath, this.mapId);
+    let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
     queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
 
     const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
@@ -171,7 +171,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       }
     }
 
-    getXMLHttpRequest(`${getLocalisezValue(this.metadataAccessPath, this.mapId)}?f=json`).then(async (value) => {
+    getXMLHttpRequest(`${getLocalizedValue(this.metadataAccessPath, this.mapId)}?f=json`).then(async (value) => {
       if (value !== '{}') {
         const jsonObject = toJsonObject(JSON.parse(value));
         const { type, copyrightText } = jsonObject;

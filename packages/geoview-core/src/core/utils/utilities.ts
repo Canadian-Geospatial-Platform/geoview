@@ -17,7 +17,7 @@ import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-messa
  *
  * @returns {string} The string value according to the map display language,
  */
-export function getLocalisezValue(localizedString: TypeLocalizedString, mapId: string): string | undefined {
+export function getLocalizedValue(localizedString: TypeLocalizedString, mapId: string): string | undefined {
   return localizedString[api.map(mapId).displayLanguage];
 }
 

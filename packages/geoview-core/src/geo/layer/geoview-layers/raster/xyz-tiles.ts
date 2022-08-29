@@ -11,7 +11,7 @@ import {
   TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
 } from '../../../map/map-schema-types';
-import { getLocalisezValue } from '../../../../core/utils/utilities';
+import { getLocalizedValue } from '../../../../core/utils/utilities';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -118,7 +118,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   processOneLayerEntry(layerEntry: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const sourceOptions: SourceOptions = {
-        url: getLocalisezValue(layerEntry.source.dataAccessPath, this.mapId),
+        url: getLocalizedValue(layerEntry.source.dataAccessPath, this.mapId),
       };
       if (layerEntry.source.crossOrigin) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
       if (layerEntry.source.projection) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
