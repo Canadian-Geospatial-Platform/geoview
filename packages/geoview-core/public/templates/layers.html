@@ -160,7 +160,7 @@
                   'en': 'statmen toner'
                 },
                 'geoviewLayerType': 'xyzTiles',
-                'initialSettings': { 'visible': false },
+                'initialSettings': { 'visible': true },
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': 'toner',
@@ -489,8 +489,8 @@
         //create snippets
         createCodeSnippet();
         createConfigSnippet();
-        addWMSLegend();
-        addEsriDynamicLegend();
+        // addWMSLegend();
+        // addEsriDynamicLegend();
       });
 
       // find the button element by ID
@@ -525,6 +525,7 @@
         document.getElementById('new-layer-id').innerText = '';
       });
 
+      /*
       //add legend to WMS layer
       function addWMSLegend() {
         cgpv.api
@@ -571,6 +572,7 @@
             });
           });
       }
+      */
     </script>
   </body>
 </html>

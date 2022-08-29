@@ -16,59 +16,58 @@
   </head>
   <body>
     <div>
-      <h3 id="HLYR1">1.WMS Layer</h3>
+      <h3 id="HLYR3">3. Esri dynamic layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR1"
-        class="llwp-map"
-        data-lang="en"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3857
+      <div>
+        <h3 id="HLYR4">4. Esri feature layer</h3>
+        <h3><a href="#top">Top of the page</a></h3>
+        <div
+          id="LYR4"
+          class="llwp-map"
+          data-lang="en"
+          data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3978
+              },
+              'basemapOptions': {
+                'id': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'layerId': 'esriFeatureLYR4',
+                  'layerName': { 'en': 'Water quality at monitoring sites' },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                  },
+                  'geoviewLayerType': 'esriFeature',
+                  'listOfLayerEntryConfig': [
+                    { 'layerId': '9' }
+                  ]
+                }
+              ]
             },
-            'basemapOptions': {
-              'id': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'layerId': 'wmsLYR1-Root',
-                'layerName': { 'en': 'Root' },
-                'metadataAccessPath': { 'en': 'https://openmaps.gov.bc.ca/geo/pub/WHSE_FOREST_VEGETATION.BEC_NATURAL_DISTURBANCE_SV/ows' },
-                'geoviewLayerType': 'ogcWms',
-                'listOfLayerEntryConfig': [
-                  {
-                    'entryType': 'group',
-                    'layerId': 'wmsLYR1-Group',
-                    'layerName': { 'en': 'Group' },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': 'pub:WHSE_FOREST_VEGETATION.BEC_NATURAL_DISTURBANCE_SV'
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          'theme': 'dark',
-          'suportedLanguages': ['en-CA']
-        }"
-      ></div>
+            'theme': 'dark',
+            'suportedLanguages': ['en-CA']
+          }"
+        ></div>
+        <p>This map has a Esri feature layer added from configuration.</p>
+        <p><strong>Configuration Snippet:</strong></p>
+        <div id="LYR4CS" class="panel"></div>
+      </div>
 
-    <div>
-      <h3>Legend</h3>
-      <img id="wmsLegend" />
+      <div id="esriDynamicLayerLegend">
+        <h3>Legend</h3>
+      </div>
+      <p>This map has a Esri dynamic layer added from configuration.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="LYR3CS" class="panel"></div>
     </div>
-    <p>This map has a wms layer added from configuration.</p>
-    <p><strong>Configuration Snippet:</strong></p>
-    <div id="LYR1CS" class="panel"></div>
-  </div>
   <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>

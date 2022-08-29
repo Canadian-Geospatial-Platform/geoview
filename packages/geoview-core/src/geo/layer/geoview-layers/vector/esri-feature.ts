@@ -118,6 +118,7 @@ export class EsriFeature extends AbstractGeoViewVector {
                 fr: this.metadata!.layers[esriIndex].name as string,
               };
             }
+            this.getDrawingInfo(esriIndex);
           });
         }
         resolve();
@@ -144,13 +145,13 @@ export class EsriFeature extends AbstractGeoViewVector {
     return promisedExecution;
   }
 
-  private async legendQuery(): Promise<void> {
+  private async getDrawingInfo(esriIndex: number): Promise<void> {
     let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-    queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}legend?f=pjson` : `${queryUrl}/legend?f=pjson`;
+    queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}${esriIndex}?f=pjson` : `${queryUrl}/${esriIndex}?f=pjson`;
 
     const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
 
-    const renderer = queryResult.drawingInfo && queryResult.drawingInfo.renderer;
+    const renderer = queryResult.drawingInfo?.renderer;
     if (renderer) {
       if (renderer.type === 'uniqueValue') {
         this.iconSymbols.field = renderer.field1 as string;
@@ -170,16 +171,6 @@ export class EsriFeature extends AbstractGeoViewVector {
         });
       }
     }
-
-    getXMLHttpRequest(`${getLocalizedValue(this.metadataAccessPath, this.mapId)}?f=json`).then(async (value) => {
-      if (value !== '{}') {
-        const jsonObject = toJsonObject(JSON.parse(value));
-        const { type, copyrightText } = jsonObject;
-        this.attribution = copyrightText ? (copyrightText as string) : '';
-        // check if the type is define as Feature Layer.
-        this.isFeatureLayer = type && type === 'Feature Layer';
-      }
-    });
   }
 
   /**
