@@ -62,7 +62,7 @@ export function Snackbar(props: SnackBarProps): null {
    * @param {string} message original message
    * @returns {string} message with values replaced
    */
-  function replaceParams(params: TypeJsonArray | string[], message: string) {
+  function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string) {
     let tmpMess = message;
     (params as string[]).forEach((item: string) => {
       tmpMess = tmpMess.replace('__param__', item);
