@@ -16,10 +16,10 @@
   </head>
   <body>
     <div>
-      <h3 id="HLYR8">8. GeoCore UUID Layer</h3>
+      <h3 id="HLYR1">1.WMS Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
-        id="LYR8"
+        id="LYR1"
         class="llwp-map"
         data-lang="en"
         data-config="{
@@ -37,11 +37,20 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'ogcFeatureLYR7',
-                'geoviewLayerType': 'geoCore',
+                'layerId': 'wmsLYR1-Root',
+                'layerName': { 'en': 'Root' },
+                'metadataAccessPath': { 'en': 'https://openmaps.gov.bc.ca/geo/pub/WHSE_FOREST_VEGETATION.BEC_NATURAL_DISTURBANCE_SV/ows' },
+                'geoviewLayerType': 'ogcWms',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+                    'entryType': 'group',
+                    'layerId': 'wmsLYR1-Group',
+                    'layerName': { 'en': 'Group' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'pub:WHSE_FOREST_VEGETATION.BEC_NATURAL_DISTURBANCE_SV'
+                      }
+                    ]
                   }
                 ]
               }
@@ -52,11 +61,15 @@
         }"
       ></div>
 
-      <p>This map requests a layer from the catalog using uuid added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR8CS" class="panel"></div>
+    <div>
+      <h3>Legend</h3>
+      <img id="wmsLegend" />
     </div>
-    <p><strong>Code Snippet:</strong></p>
+    <p>This map has a wms layer added from configuration.</p>
+    <p><strong>Configuration Snippet:</strong></p>
+    <div id="LYR1CS" class="panel"></div>
+  </div>
+  <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>

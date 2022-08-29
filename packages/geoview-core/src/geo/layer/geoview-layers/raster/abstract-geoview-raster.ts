@@ -94,12 +94,12 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
             resolve(groupCreated);
           });
         } else {
-          this.processOneLayerEntry(this.listOfLayerEntryConfig[0]).then((rasterLayer) => {
+          this.processOneLayerEntry(listOfLayerEntryConfig[0]).then((rasterLayer) => {
             if (rasterLayer) {
               this.setRenderer(rasterLayer);
               this.registerToPanels(rasterLayer);
             } else {
-              this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+              this.layerLoadError.push(listOfLayerEntryConfig[0].layerId);
             }
             resolve(rasterLayer);
           });
@@ -123,7 +123,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
                   this.registerToPanels(rasterLayer);
                   (layerGroup as LayerGroup).getLayers().push(rasterLayer);
                 } else {
-                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+                  this.layerLoadError.push(listOfLayerEntryConfig[0].layerId);
                 }
               });
               resolve(layerGroup);
