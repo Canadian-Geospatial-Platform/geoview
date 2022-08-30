@@ -179,14 +179,19 @@ export type TypeCircleSymbolVectorConfig = {
 export type TypeIconSymbolVectorConfig = {
   /** Icon source. */
   src: string;
-  /** Icon size in pixel. */
-  size: number;
+  /** Icon width in pixel. */
+  width: number;
+  /** Icon height in pixel. */
+  height: number;
+  /** Icon rotation in radians. */
+  rotation: number;
   /** Icon opacity. */
   opacity: number;
-  /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
+  /**
+   * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    */
-  crossOrigin: string;
+  crossOrigin?: string;
 };
 
 /** ******************************************************************************************************************************
@@ -208,7 +213,7 @@ export type TypeSimpleStyleConfig = {
  */
 export type TypeUniqueValueStyleInfo = {
   /** Label used by the style. */
-  lable: string;
+  label: string;
   /** Values associated to the style. */
   values: string[];
   /** options associated to the style. */
@@ -236,7 +241,7 @@ export type TypeUniqueValueStyleConfig = {
  */
 export type TypeClassBreakStyleInfo = {
   /** Label used by the style. */
-  lable: string;
+  label: string;
   /** Minimum values associated to the style. */
   minValues: number;
   /** Maximum values associated to the style. */
@@ -297,9 +302,9 @@ export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyI
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeBaseVectorLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is 'raster'. The type ascention applies only to the true block of the if clause that use
- * this function.
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeImageLayerEntryConfig | TypeTileLayerEntryConfig if the
+ * entryType attribute of the verifyIfLayer parameter is 'raster'. The type ascention applies only to the true block of the if
+ * clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
@@ -328,12 +333,12 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
  * Type used to define a GeoView vector layer to display on the map.
  */
 export type TypeBaseVectorLayerEntryConfig = {
-  /** Layer entry data type. */
-  entryType?: 'vector';
   /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
   geoviewRootLayer?: TypeGeoviewLayerConfig;
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+  /** Layer entry data type. */
+  entryType?: 'vector';
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
@@ -345,7 +350,7 @@ export type TypeBaseVectorLayerEntryConfig = {
   initialSettings?: TypeLayerInitialSettings;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
   source?: TypeBaseVectorSourceInitialConfig;
-  /** The listOfLayerEntryConfig attribute is used only on group entry. */
+  /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
   listOfLayerEntryConfig?: never;
 };
 
@@ -481,8 +486,6 @@ export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLa
 export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
   /** Style to apply to the vector layer. */
   style?: TypeStyleConfig;
-  /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
-  projection?: TypeProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 }
@@ -519,7 +522,7 @@ export type TypeImageLayerEntryConfig = {
   initialSettings?: TypeLayerInitialSettings;
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source?: TypeSourceImageInitialConfig;
-  /** The listOfLayerEntryConfig attribute is used only on group entry. */
+  /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
   listOfLayerEntryConfig?: never;
 };
 
@@ -544,7 +547,7 @@ export type TypeTileLayerEntryConfig = {
   initialSettings?: TypeLayerInitialSettings;
   /** Initial settings to apply to the GeoView image layer source at creation time. */
   source?: TypeSourceTileInitialConfig;
-  /** The listOfLayerEntryConfig attribute is used only on group entry. */
+  /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
   listOfLayerEntryConfig?: never;
 };
 
@@ -569,7 +572,7 @@ export type TypeGeocoreLayerEntryConfig = {
   source?: TypeSourceGeocoreConfig;
   /** Attribute initialSettings is never used by GeoCore layer entry. */
   initialSettings?: never;
-  /** The listOfLayerEntryConfig attribute is used only on group entry. */
+  /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
   listOfLayerEntryConfig?: never;
 };
 

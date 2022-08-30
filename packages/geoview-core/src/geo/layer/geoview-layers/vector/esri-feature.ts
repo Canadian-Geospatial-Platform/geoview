@@ -11,6 +11,8 @@ import {
   TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
+  TypeUniqueValueStyleInfo,
+  TypeIconSymbolVectorConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
@@ -118,7 +120,7 @@ export class EsriFeature extends AbstractGeoViewVector {
                 fr: this.metadata!.layers[esriIndex].name as string,
               };
             }
-            this.getDrawingInfo(esriIndex);
+            this.getDrawingInfo(esriIndex, layerEntry as TypeVectorLayerEntryConfig);
           });
         }
         resolve();
@@ -145,30 +147,46 @@ export class EsriFeature extends AbstractGeoViewVector {
     return promisedExecution;
   }
 
-  private async getDrawingInfo(esriIndex: number): Promise<void> {
-    let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-    queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}${esriIndex}?f=pjson` : `${queryUrl}/${esriIndex}?f=pjson`;
+  private async getDrawingInfo(esriIndex: number, layerEntry: TypeVectorLayerEntryConfig): Promise<void> {
+    if (!layerEntry.style) {
+      let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}${esriIndex}?f=pjson` : `${queryUrl}/${esriIndex}?f=pjson`;
 
-    const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
+      const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
 
-    const renderer = queryResult.drawingInfo?.renderer;
-    if (renderer) {
-      if (renderer.type === 'uniqueValue') {
-        this.iconSymbols.field = renderer.field1 as string;
-        (renderer.uniqueValueInfos as TypeJsonArray).forEach((symbolInfo) => {
-          this.iconSymbols.valueAndSymbol[symbolInfo.value as string] = new StyleIcon({
-            src: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
-            scale: (symbolInfo.symbol.height as number) / (symbolInfo.symbol.width as number),
-            // anchor: [Math.round((symbolInfo.symbol.width as number) / 2), Math.round((symbolInfo.symbol.height as number) / 2)],
+      const renderer = queryResult.drawingInfo?.renderer;
+      if (renderer) {
+        if (renderer.type === 'uniqueValue') {
+          const id = `${esriIndex}`;
+          const styleType = 'uniqueValue';
+          const label = renderer.defaultLabel ? (renderer.defaultLabel as string) : '';
+          const fields = [renderer.field1 as string];
+          if (renderer.field2) fields.push(renderer.field2 as string);
+          if (renderer.field3) fields.push(renderer.field3 as string);
+          const uniqueValueStyleInfo: TypeUniqueValueStyleInfo[] = [];
+          (renderer.uniqueValueInfos as TypeJsonArray).forEach((symbolInfo) => {
+            const options: TypeIconSymbolVectorConfig = {
+              src: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
+              height: symbolInfo.symbol.height as number,
+              width: symbolInfo.symbol.width as number,
+              rotation: ((symbolInfo.symbol.angle as number) * Math.PI) / 180.0, // convert to dadians
+              opacity: 1,
+            };
+            uniqueValueStyleInfo.push({
+              label: symbolInfo.label as string,
+              values: (symbolInfo.value as string).split(renderer.fieldDelimiter as string),
+              options,
+            });
           });
-        });
-      } else if (renderer.symbol) {
-        const symbolInfo = renderer.symbol;
-        this.iconSymbols.valueAndSymbol.default = new StyleIcon({
-          src: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
-          scale: (symbolInfo.height as number) / (symbolInfo.width as number),
-          // anchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
-        });
+          layerEntry.style = { id, styleType, label, fields, uniqueValueStyleInfo };
+        } else if (renderer.symbol) {
+          const symbolInfo = renderer.symbol;
+          this.iconSymbols.valueAndSymbol.default = new StyleIcon({
+            src: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
+            scale: (symbolInfo.height as number) / (symbolInfo.width as number),
+            // anchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
+          });
+        }
       }
     }
   }
