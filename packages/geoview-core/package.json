@@ -40,6 +40,7 @@
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
+    "@mui/system": "^5.4.1",
     "@mui/material": "^5.4.3",
     "@mui/styles": "^5.4.2",
     "@mui/icons-material": "^5.4.2",

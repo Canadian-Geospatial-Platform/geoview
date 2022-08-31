@@ -4,7 +4,7 @@ import { MapContext } from '../../../app-start';
 
 import { api } from '../../../../app';
 
-import { Button, FullscreenIcon, FullscreenExitIcon } from '../../../../ui';
+import { IconButton, FullscreenIcon, FullscreenExitIcon } from '../../../../ui';
 import { TypeHTMLElement } from '../../../types/global-types';
 
 /**

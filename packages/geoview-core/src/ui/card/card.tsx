@@ -1,8 +1,13 @@
+/* eslint-disable react/require-default-props */
+import { CardProps } from '@mui/material';
 import MaterialCard from '@mui/material/Card';
 import MaterialCardHeader from '@mui/material/CardHeader';
 import MaterialCardContent from '@mui/material/CardContent';
 
-import { TypeCardProps } from '../../core/types/cgpv-types';
+export interface TypeCardProps extends CardProps {
+  title?: string;
+  content?: React.ReactNode | Element;
+}
 
 /**
  * Create a customized Material UI Card
