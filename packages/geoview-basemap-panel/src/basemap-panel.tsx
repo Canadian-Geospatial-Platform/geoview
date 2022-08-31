@@ -10,8 +10,6 @@ import {
   TypeProjectionCodes,
 } from 'geoview-core';
 
-import { mapViewProjectionPayload } from 'geoview-core/src/api/events/payloads/map-view-projection-payload';
-
 const w = window as TypeWindow;
 
 interface BaseMapPanelProps {

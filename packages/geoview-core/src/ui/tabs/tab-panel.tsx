@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import MaterialBox from '@mui/material/Box';
 
-import { TypeChildren } from '../../core/types/cgpv-types';
+type TypeChildren = React.ReactNode;
 
 /**
  * Interface used for the tab panel properties
