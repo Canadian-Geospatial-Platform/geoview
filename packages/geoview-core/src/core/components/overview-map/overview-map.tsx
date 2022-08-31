@@ -30,8 +30,8 @@ const useStyles = makeStyles((theme) => ({
   overviewMap: {
     bottom: 'auto',
     left: 'auto',
-    right: 0,
-    top: 0,
+    right: theme.spacing(5),
+    top: theme.spacing(5),
     margin: 5,
     padding: 0,
     '& .ol-overviewmap-map': {

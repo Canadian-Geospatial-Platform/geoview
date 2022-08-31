@@ -6,9 +6,9 @@ The Canadian Geospatial Platform intends to deploy new infrastructure, tools and
 
 ## Solution
 
-GeoView mapping capabilites are based on [Leafet](https://github.com/Leaflet/Leaflet) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
+GeoView mapping capabilities are based on [Leaflet](https://github.com/Leaflet/Leaflet) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
 
-- [react-leaflet](https://react-leaflet.js.org/) version 3+ to make the link between Leafelt and React
+- [react-leaflet](https://react-leaflet.js.org/) version 3+ to make the link between Leaflet and React
 
 - [i18next](https://www.i18next.com/) to do localization in English and French
 
@@ -28,9 +28,9 @@ This project is now a monorepo and contains the following packages under the `pa
 
 - [geoview-overview-map](packages/geoview-overview-map) a package that displays an overview map (mini-map)
 
-## Developpement
+## Development
 
-Developement is made with [Visual Studio Code](https://code.visualstudio.com/) and uses few extentions to help linting and formating
+Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a few extentions to help linting and formatting
 
 - Prettier - Code formatter
 

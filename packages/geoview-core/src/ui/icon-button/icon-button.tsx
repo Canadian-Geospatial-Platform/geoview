@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { useTranslation } from 'react-i18next';
 import MaterialIconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
@@ -13,9 +13,9 @@ import { TypeIconButtonProps } from './icon-button-types';
  */
 export function IconButton(props: TypeIconButtonProps): JSX.Element {
   const { className, style, children, onClick, 'aria-label': ariaLabel, tooltip, tooltipPlacement, id, tabIndex, iconRef, size } = props;
-
+  const { t } = useTranslation<string>();
   return (
-    <Tooltip title={tooltip || ''} placement={tooltipPlacement} TransitionComponent={Fade}>
+    <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade}>
       <MaterialIconButton
         id={id}
         aria-label={ariaLabel}

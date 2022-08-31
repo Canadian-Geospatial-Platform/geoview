@@ -12,7 +12,6 @@ import { TypeHTMLElement } from '../../../types/global-types';
  */
 interface FullscreenProps {
   className?: string;
-  iconClassName?: string;
 }
 
 /**
@@ -20,7 +19,6 @@ interface FullscreenProps {
  */
 const defaultProps = {
   className: '',
-  iconClassName: '',
 };
 
 /**
@@ -30,7 +28,7 @@ const defaultProps = {
  * @returns {JSX.Element} the fullscreen toggle button
  */
 export default function Fullscreen(props: FullscreenProps): JSX.Element {
-  const { className, iconClassName } = props;
+  const { className } = props;
 
   const [fs, setFs] = useState(false);
 
@@ -44,25 +42,18 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
    */
   function setFullscreen() {
     // api.map(mapId).map.getTargetElement().requestFullscreen();
-    const { parentElement } = api.map(mapId).map.getTargetElement();
+    const element = document.getElementById(`shell-${mapId}`);
 
-    if (parentElement) {
+    if (element) {
       setFs(!fs);
-      api.map(mapId).toggleFullscreen(!fs, parentElement as TypeHTMLElement);
+      api.map(mapId).toggleFullscreen(!fs, element as TypeHTMLElement);
     }
   }
 
   return (
-    <Button
-      id="fullscreen"
-      type="icon"
-      tooltip="mapnav.fullscreen"
-      tooltipPlacement="left"
-      icon={!fs ? <FullscreenIcon /> : <FullscreenExitIcon />}
-      onClick={() => setFullscreen()}
-      className={className}
-      iconClassName={iconClassName}
-    />
+    <IconButton id="fullscreen" tooltip="mapnav.fullscreen" tooltipPlacement="left" onClick={() => setFullscreen()} className={className}>
+      {!fs ? <FullscreenIcon /> : <FullscreenExitIcon />}
+    </IconButton>
   );
 }
 

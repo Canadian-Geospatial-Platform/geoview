@@ -23,12 +23,12 @@ const navBtnHeight = '44px';
 const useStyles = makeStyles((theme) => ({
   navBarRef: {
     position: 'absolute',
-    right: 0,
-    bottom: 30,
+    right: theme.spacing(5),
+    bottom: 32,
     height: '600px',
     display: 'flex',
     flexDirection: 'row',
-    marginRight: 5,
+    marginRight: 0,
     zIndex: theme.zIndex.appBar,
     pointerEvents: 'all',
     justifyContent: 'center',
@@ -44,33 +44,44 @@ const useStyles = makeStyles((theme) => ({
     padding: 5,
   },
   navBtnGroup: {
+    borderRadius: theme.spacing(5),
     '&:not(:last-child)': {
-      marginBottom: theme.spacing(2),
+      marginBottom: theme.spacing(11),
     },
-    borderTopLeftRadius: theme.spacing(5),
-    borderTopRightRadius: theme.spacing(5),
-    borderBottomLeftRadius: theme.spacing(5),
-    borderBottomRightRadius: theme.spacing(5),
+    '& .MuiButtonGroup-grouped:not(:last-child)': {
+      borderColor: theme.navBar.borderColor,
+    },
   },
   navBarButton: {
-    backgroundColor: theme.palette.primary.light,
-    color: theme.palette.primary.dark,
+    backgroundColor: theme.navBar.btnDefaultBg,
+    color: theme.navBar.btnDefaultColor,
     borderRadius: theme.spacing(5),
     width: navBtnWidth,
     height: navBtnHeight,
     maxWidth: navBtnWidth,
     minWidth: navBtnWidth,
     padding: 'initial',
-    '&:hover': {
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.dark,
+    transition: 'background-color 0.3s ease-in-out',
+    '&:not(:last-of-type)': {
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      borderBottom: `1px solid ${theme.navBar.borderColor}`,
     },
-  },
-  navBarButtonIcon: {
-    backgroundColor: theme.palette.primary.light,
-    color: theme.palette.primary.dark,
-    '&:hover *': {
-      fontSize: '1.8rem',
+    '&:not(:first-of-type)': {
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+    },
+    '&:hover': {
+      backgroundColor: theme.navBar.btnHoverBg,
+      color: theme.navBar.btnHoverColor,
+    },
+    '&:focus': {
+      backgroundColor: theme.navBar.btnFocusBg,
+      color: theme.navBar.btnFocusColor,
+    },
+    '&:active': {
+      backgroundColor: theme.navBar.btnFocusBg,
+      color: theme.navBar.btnActiveColor,
     },
   },
 }));
@@ -153,6 +164,7 @@ export function Navbar(): JSX.Element {
   }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
+    /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
     <div ref={navBarRef} className={`${classes.navBarRef}`}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttons = buttonPanelGroups[groupName];
@@ -169,6 +181,7 @@ export function Navbar(): JSX.Element {
         }
         return null;
       })}
+
       <div className={classes.navBtnGroupContainer}>
         {Object.keys(buttonPanelGroups).map((groupName) => {
           const buttons = buttonPanelGroups[groupName];
@@ -181,7 +194,7 @@ export function Navbar(): JSX.Element {
                 orientation="vertical"
                 aria-label={t('mapnav.arianavbar')}
                 variant="contained"
-                className={classes.navBtnGroup}
+                classes={{ root: classes.navBtnGroup }}
               >
                 {Object.keys(buttons).map((buttonId) => {
                   const buttonPanel: TypeButtonPanel = buttons[buttonId];
@@ -223,13 +236,13 @@ export function Navbar(): JSX.Element {
           }
           return null;
         })}
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" className={classes.navBtnGroup}>
-          <ZoomIn className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
-          <ZoomOut className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" classes={{ root: classes.navBtnGroup }}>
+          <ZoomIn className={classes.navBarButton} />
+          <ZoomOut className={classes.navBarButton} />
         </ButtonGroup>
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar', '')} variant="contained" className={classes.navBtnGroup}>
-          <Fullscreen className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
-          <Home className={classes.navBarButton} iconClassName={classes.navBarButtonIcon} />
+        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" classes={{ root: classes.navBtnGroup }}>
+          <Fullscreen className={classes.navBarButton} />
+          <Home className={classes.navBarButton} />
         </ButtonGroup>
       </div>
     </div>

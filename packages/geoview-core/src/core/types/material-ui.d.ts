@@ -25,18 +25,40 @@ declare module '@mui/material/styles' {
       };
     };
     appBar?: {
+      background?: string;
       border?: string;
       btnActiveBg?: string;
       btnDefaultBg?: string;
       btnFocusBg?: string;
       btnHoverBg?: string;
     };
+    navBar: {
+      borderColor?: string;
+      btnActiveBg?: string;
+      btnDefaultBg?: string;
+      btnFocusBg?: string;
+      btnHoverBg?: string;
+      btnActiveColor?: string;
+      btnDefaultColor?: string;
+      btnFocusColor?: string;
+      btnHoverColor?: string;
+    };
     panel?: {
+      background?: string;
       activeBg?: string;
       border?: string;
       borderLight?: string;
       defaultBg?: string;
       hoverBg?: string;
+    };
+    basemapPanel?: {
+      header?: string;
+      borderDefault?: string;
+      borderHover?: string;
+      borderActive?: string;
+      overlayDefault?: string;
+      overlayHover?: string;
+      overlayActive?: string;
     };
   }
 
@@ -53,18 +75,40 @@ declare module '@mui/material/styles' {
       };
     };
     appBar: {
+      background: string;
       border: string;
       btnActiveBg: string;
       btnDefaultBg: string;
       btnFocusBg: string;
       btnHoverBg: string;
     };
+    navBar: {
+      borderColor: string;
+      btnActiveBg: string;
+      btnDefaultBg: string;
+      btnFocusBg: string;
+      btnHoverBg: string;
+      btnActiveColor: string;
+      btnDefaultColor: string;
+      btnFocusColor: string;
+      btnHoverColor: string;
+    };
     panel: {
       activeBg: string;
+      background?: string;
       border: string;
       borderLight: string;
       defaultBg: string;
       hoverBg: string;
+    };
+    basemapPanel: {
+      header: string;
+      borderDefault: string;
+      borderHover: string;
+      borderActive: string;
+      overlayDefault: string;
+      overlayHover: string;
+      overlayActive: string;
     };
   }
 }

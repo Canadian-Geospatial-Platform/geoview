@@ -20,6 +20,7 @@ import { Config } from '../../core/utils/config/config';
 
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
+import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
 
 import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
@@ -56,6 +57,9 @@ export class MapViewer {
 
   // used to access button panel API to create buttons and button panels on the navbar
   navBarButtons!: NavbarButtons;
+
+  // used to access the footer tabs api
+  footerTabs!: FooterTabsApi;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -103,6 +107,7 @@ export class MapViewer {
 
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
+    this.footerTabs = new FooterTabsApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 

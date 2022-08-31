@@ -30,18 +30,39 @@ interface TypeMenuItemProps {
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
+    fontSize: 14,
     width: '100%',
-    color: '#fff',
+    marginBottom: 16,
+    color: theme.palette.primary.light,
+    '& .MuiOutlinedInput-notchedOutline': {
+      border: `1px solid ${theme.basemapPanel.borderDefault}`,
+      padding: '0 12px 0 8px',
+      '&[aria-hidden="true"]': {
+        border: `1px solid ${theme.basemapPanel.borderDefault}`,
+      },
+    },
+    '&:hover': {
+      '& .MuiOutlinedInput-notchedOutline': {
+        border: `1px solid ${theme.basemapPanel.borderDefault}`,
+      },
+    },
     '& .MuiFormLabel-root.Mui-focused': {
       color: theme.palette.primary.contrastText,
       background: theme.palette.primary.light,
     },
-    '& .MuiOutlinedInput-root.Mui-focused': {
-      border: `1px solid ${theme.palette.primary.contrastText}`,
+    '& .MuiSelect-select': {
+      padding: '16px 12px',
+    },
+    '& .MuiSvgIcon-root': {
+      color: theme.palette.primary.light,
     },
   },
   label: {
-    color: '#fff',
+    color: theme.palette.primary.light,
+    fontSize: 16,
+  },
+  menuItem: {
+    fontSize: 14,
   },
 }));
 /**
@@ -68,7 +89,7 @@ export function Select(props: TypeSelectProps): JSX.Element {
             }
 
             // eslint-disable-next-line react/no-array-index-key
-            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} />;
+            return <MenuItem key={index} {...(menuItem.item as MenuItemProps)} className={classes.menuItem} />;
           }
 
           return null;
