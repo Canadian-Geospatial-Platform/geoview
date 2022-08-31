@@ -14,6 +14,7 @@ import { MODAL, ModalEventKey } from './constants/modal';
 import { PANEL, PanelEventKey } from './constants/panel';
 import { SLIDER, SliderEventKey } from './constants/slider';
 import { VECTOR, VectorEventKey } from './constants/vector';
+import { FOOTER_TABS, FooterTabsEventKey } from './constants/footer-tabs';
 
 /**
  * constant contains event names
@@ -35,6 +36,7 @@ export const EVENT_NAMES = {
   SLIDER,
   VECTOR,
   ATTRIBUTION,
+  FOOTER_TABS,
 };
 
 /**
@@ -56,7 +58,8 @@ export type EventCategories =
   | 'PANEL'
   | 'SLIDER'
   | 'VECTOR'
-  | 'ATTRIBUTION';
+  | 'ATTRIBUTION'
+  | 'FOOTER_TABS';
 
 /**
  * Event keys
@@ -77,7 +80,8 @@ export type EventKey =
   | PanelEventKey
   | SliderEventKey
   | VectorEventKey
-  | AttributionEventKey;
+  | AttributionEventKey
+  | FooterTabsEventKey;
 
 /**
  * Event names
@@ -127,4 +131,6 @@ export type EventStringId =
   | 'vector/added'
   | 'vector/off'
   | 'vector/on'
-  | 'attribution/update';
+  | 'attribution/update'
+  | 'footer_tabs/tab_create'
+  | 'footer_tabs/tab_remove';
