@@ -12,6 +12,7 @@ import { SnackbarProvider } from 'notistack';
 import { Map } from '../components/map/map';
 import { Appbar } from '../components/appbar/app-bar';
 import { Navbar } from '../components/navbar/nav-bar';
+import { FooterTabs } from '../components/footer-tabs/footer-tabs';
 
 import { FocusTrapDialog } from './focus-trap';
 
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme) => {
       display: 'flex',
       flexDirection: 'row',
       height: '100%',
+      position: 'relative',
     },
     skip: {
       position: 'absolute',
@@ -182,7 +184,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-      <div className={classes.shell}>
+      <div id={`shell-${id}`} className={classes.shell}>
         <CircularProgress isLoaded={isLoaded} />
         <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
@@ -192,6 +194,7 @@ export function Shell(props: ShellProps): JSX.Element {
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('navbar') > -1 && <Navbar />}
         </div>
+        <FooterTabs />
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}

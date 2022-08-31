@@ -25,9 +25,6 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     color: theme.palette.primary.dark,
-    '&:hover *': {
-      fontSize: '1.6rem',
-    },
   },
   text: {
     width: '100%',
