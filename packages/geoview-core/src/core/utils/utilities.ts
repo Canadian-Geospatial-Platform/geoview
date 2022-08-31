@@ -1,10 +1,25 @@
+/* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { TypeLocalizedString } from '../../geo/map/map-schema-types';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { snackbarMessagePayload, Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/cgpv-types';
+import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
+import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+
+/**
+ * Display a message in the snackbar
+ *
+ * @param {TypeLocalizedString} localizedString the localized string to process.
+ * @param {string} mapId the map identifier that holds the localized string.
+ *
+ * @returns {string} The string value according to the map display language,
+ */
+export function getLocalizedValue(localizedString: TypeLocalizedString, mapId: string): string | undefined {
+  return localizedString[api.map(mapId).displayLanguage];
+}
 
 /**
  * Display a message in the snackbar
@@ -58,6 +73,10 @@ export function isJsonString(str: string): boolean {
       return false;
     }
   } catch (e) {
+    console.log('- String passed to the JSON parser:');
+    console.log(str);
+    console.log('- JSON Parser error:', (e as { message: string }).message);
+    console.log('- See text above.');
     return false;
   }
   return true;
@@ -97,10 +116,10 @@ export function xmlToJson(xml: Document | Node | Element): TypeJsonObject {
       const item = xml.childNodes.item(i);
       const { nodeName } = item;
       const jsonObject = obj;
-      if (typeof jsonObject[nodeName] === 'undefined') {
+      if (jsonObject[nodeName] === undefined) {
         jsonObject[nodeName] = xmlToJson(item);
       } else {
-        if (typeof jsonObject[nodeName].push === 'undefined') {
+        if (jsonObject[nodeName].push === undefined) {
           (jsonObject[nodeName] as TypeJsonArray) = [jsonObject[nodeName]];
         }
         (jsonObject[nodeName] as TypeJsonArray).push(xmlToJson(item));

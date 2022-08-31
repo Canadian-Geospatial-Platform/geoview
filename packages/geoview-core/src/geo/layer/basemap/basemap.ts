@@ -6,21 +6,14 @@ import TileGrid from 'ol/tilegrid/TileGrid';
 
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
-import {
-  TypeBasemapProps,
-  TypeBasemapLayer,
-  TypeBasemapOptions,
-  TypeProjectionCodes,
-  TypeLocalizedLanguages,
-  TypeJsonObject,
-  toJsonObject,
-  TypeJsonArray,
-} from '../../../core/types/cgpv-types';
+import { TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types/global-types';
 
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
+import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
+import { TypeDisplayLanguage, TypeProjectionCodes } from '../../map/map-schema-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -50,13 +43,13 @@ export class Basemap {
   attribution: string;
 
   // the language to use
-  language: string;
+  displayLanguage: TypeDisplayLanguage;
 
   // the basemap options passed from the map config
   basemapOptions: TypeBasemapOptions;
 
   // the projection number
-  private projection: number;
+  private projection: TypeProjectionCodes;
 
   // the map id to be used in events
   #mapId: string;
@@ -68,20 +61,20 @@ export class Basemap {
    * initialize basemap
    *
    * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
-   * @param {string} language language to be used either en-CA or fr-CA
-   * @param {number} projection projection number
+   * @param {TypeDisplayLanguage} displayLanguage language to be used, either en or fr
+   * @param {TypeProjectionCodes} projection projection number
    * @param {string} mapId the map id
    */
-  constructor(basemapOptions: TypeBasemapOptions, language: string, projection: number, mapId: string) {
+  constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeProjectionCodes, mapId: string) {
     this.#mapId = mapId;
 
     this.basemapOptions = basemapOptions;
 
-    this.language = language;
+    this.displayLanguage = displayLanguage;
 
     this.projection = projection;
 
-    this.attribution = this.attributionVal[language] as string;
+    this.attribution = this.attributionVal[displayLanguage] as string;
   }
 
   /**
@@ -127,11 +120,11 @@ export class Basemap {
   });
 
   /**
-   * attribution to add the the map
+   * attribution to add the map
    */
   private attributionVal: TypeJsonObject = toJsonObject({
-    'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
-    'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
+    en: '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
+    fr: '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
   });
 
   /**
@@ -157,10 +150,11 @@ export class Basemap {
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
    * @param {TypeProjectionCodes} projection basemap projection
-   * @param {TypeLocalizedLanguages} language basemap language
+   * @param {TypeDisplayLanguage} displayLanguage basemap language
+   *
    * @returns {string[]} array of thumbnail urls
    */
-  private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjectionCodes, language: TypeLocalizedLanguages): string[] => {
+  private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjectionCodes, displayLanguage: TypeDisplayLanguage): string[] => {
     const thumbnailUrls: string[] = [];
 
     for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
@@ -199,7 +193,7 @@ export class Basemap {
         if (this.basemapsList[projection].label?.url) {
           thumbnailUrls.push(
             (this.basemapsList[projection].label.url as string)
-              .replaceAll('xxxx', language === 'en-CA' ? 'CBMT' : 'CBCT')
+              .replaceAll('xxxx', displayLanguage === 'en' ? 'CBMT' : 'CBCT')
               .replace('{z}', '8')
               .replace('{y}', projection === 3978 ? '285' : '91')
               .replace('{x}', projection === 3978 ? '268' : '74')
@@ -219,10 +213,10 @@ export class Basemap {
    * Get basemap information (nbame and description)
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeLocalizedLanguages} language basemap language
+   * @param {TypeDisplayLanguage} displayLanguage basemap language
    * @returns {string} array with information [name, description]
    */
-  private getInfo = (basemapTypes: string[], language: TypeLocalizedLanguages): string[] => {
+  private getInfo = (basemapTypes: string[], displayLanguage: TypeDisplayLanguage): string[] => {
     // const info = { name: '', description: '' };
 
     let name = '';
@@ -231,26 +225,26 @@ export class Basemap {
     if (basemapTypes.includes('transport')) {
       name = 'Transport';
       description = `${
-        language === 'en-CA'
+        displayLanguage === 'en'
           ? 'The Canada Base Map - Transportation (CBMT). This web mapping service provides spatial reference context with an emphasis on transportation networks. It is designed especially for use as a background map in a web mapping application or geographic information system (GIS).'
           : "Carte de base du Canada - Transport (CBCT). Ce service de cartographie Web offre un contexte de référence spatiale axé sur les réseaux de transport. Il est particulièrement conçu pour être utilisé comme fond de carte dans une application cartographique Web ou un système d'information géographique (SIG)."
       }`;
     } else if (basemapTypes.includes('simple')) {
       name = 'Simple';
     } else if (basemapTypes.includes('shaded')) {
-      name = `${language === 'en-CA' ? 'Shaded relief' : 'Relief ombré'}`;
+      name = `${displayLanguage === 'en' ? 'Shaded relief' : 'Relief ombré'}`;
       description = `${
-        language === 'en-CA'
+        displayLanguage === 'en'
           ? 'The Canada Base Map - Elevation (CBME) web mapping services of the Earth Sciences Sector at Natural Resources Canada, is intended primarily for online mapping application users and developers'
           : "Les services de cartographie Web de la carte de base du Canada - élévation (CBCE) du Secteur des sciences de la Terre de Ressources naturelles Canada sont destinés principalement aux utilisateurs et aux développeurs d'applications de cartographie en ligne."
       }`;
     } else if (basemapTypes.includes('osm')) {
-      name = `${language === 'en-CA' ? 'Open Street Maps' : 'Carte - Open Street Maps'}`;
+      name = `${displayLanguage === 'en' ? 'Open Street Maps' : 'Carte - Open Street Maps'}`;
     } else if (basemapTypes.includes('nogeom')) {
-      name = `${language === 'en-CA' ? 'No geometry' : 'Pas de géométrie'}`;
+      name = `${displayLanguage === 'en' ? 'No geometry' : 'Pas de géométrie'}`;
     }
 
-    if (basemapTypes.includes('label')) name = `${name} ${language === 'en-CA' ? 'with labels' : 'avec étiquettes'}`;
+    if (basemapTypes.includes('label')) name = `${name} ${displayLanguage === 'en' ? 'with labels' : 'avec étiquettes'}`;
 
     return [name, description];
   };
@@ -354,7 +348,7 @@ export class Basemap {
 
         // if nrcan copyright does not exist, add it
         if (!nrcanCopyrightExists) {
-          attributions.unshift(this.attributionVal[this.language] as string);
+          attributions.unshift(this.attributionVal[this.displayLanguage] as string);
         }
 
         // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
@@ -488,10 +482,13 @@ export class Basemap {
           const labelLayer = await this.createBasemapLayer(
             'label',
             toJsonObject({
-              url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll('xxxx', this.language === 'en-CA' ? 'CBMT' : 'CBCT'),
+              url: (this.basemapsList[projectionCode].label.url as string)?.replaceAll(
+                'xxxx',
+                this.displayLanguage === 'en' ? 'CBMT' : 'CBCT'
+              ),
               jsonUrl: (this.basemapsList[projectionCode].label.jsonUrl as string)?.replaceAll(
                 'xxxx',
-                this.language === 'en-CA' ? 'CBMT' : 'CBCT'
+                this.displayLanguage === 'en' ? 'CBMT' : 'CBCT'
               ),
             }),
             0.8,
@@ -507,7 +504,7 @@ export class Basemap {
         !this.isExisting(basemaplayerTypes.join('-')) &&
         (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.id === 'nogeom'))
       ) {
-        const info = this.getInfo(basemaplayerTypes, this.language as TypeLocalizedLanguages);
+        const info = this.getInfo(basemaplayerTypes, this.displayLanguage as TypeDisplayLanguage);
 
         // id and typer are derived from the basemap type composition (shaded, label, transport, simple)
         const basemap = this.createBasemap({
@@ -521,7 +518,7 @@ export class Basemap {
           thumbnailUrl: this.getThumbnailUrl(
             basemaplayerTypes,
             projectionCode as TypeProjectionCodes,
-            this.language as TypeLocalizedLanguages
+            this.displayLanguage as TypeDisplayLanguage
           ),
           attribution: this.attribution,
           zoomLevels: {
@@ -568,12 +565,12 @@ export class Basemap {
     for (let layerIndex = 0; layerIndex < formattedLayers.length; layerIndex++) {
       // const layer = formattedLayers[layerIndex];
       // const urls = layer.url as unknown as bilingual;
-      // layer.url = this.language === 'en-CA' ? urls.en : urls.fr;
+      // layer.url = this.displayLanguage === 'en' ? urls.en : urls.fr;
       // layer.basemapPaneName = this.basemapsPaneName;
     }
 
     let nrcanCopyrightExists = false;
-    const attributionText = this.language === 'en-CA' ? attribution.en : attribution.fr;
+    const attributionText = this.displayLanguage === 'en' ? attribution.en : attribution.fr;
 
     // check if nrcan copyright exists in attribution
     if (
@@ -584,7 +581,7 @@ export class Basemap {
     }
 
     if (!nrcanCopyrightExists) {
-      attributions.push(this.attributionVal[this.language] as string);
+      attributions.push(this.attributionVal[this.displayLanguage] as string);
     }
 
     // add the attribution from layer
@@ -592,15 +589,15 @@ export class Basemap {
 
     // create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
-    formatProps.name = this.language === 'en-CA' ? name.en : name.fr;
+    formatProps.name = this.displayLanguage === 'en' ? name.en : name.fr;
     formatProps.layers = basemapProps.layers.map((layer) => {
       return {
         ...layer,
-        url: this.language === 'en-CA' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+        url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
           attributions,
           projection: api.projection.projections[this.projection],
-          url: this.language === 'en-CA' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+          url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           tileGrid: new TileGrid({
             extent: this.defaultExtent,
             origin: this.defaultOrigin,
@@ -610,10 +607,10 @@ export class Basemap {
       };
     });
     formatProps.type = 'test';
-    formatProps.description = this.language === 'en-CA' ? description.en : description.fr;
-    formatProps.altText = this.language === 'en-CA' ? description.en : description.fr;
-    formatProps.thumbnailUrl = this.language === 'en-CA' ? thumbnailUrl.en : thumbnailUrl.fr;
-    formatProps.attribution = this.language === 'en-CA' ? attribution.en : attribution.fr;
+    formatProps.description = this.displayLanguage === 'en' ? description.en : description.fr;
+    formatProps.altText = this.displayLanguage === 'en' ? description.en : description.fr;
+    formatProps.thumbnailUrl = this.displayLanguage === 'en' ? thumbnailUrl.en : thumbnailUrl.fr;
+    formatProps.attribution = this.displayLanguage === 'en' ? attribution.en : attribution.fr;
 
     return this.createBasemap(formatProps);
   };

@@ -1,6 +1,5 @@
 import React, { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 
-import { Coordinate } from 'ol/coordinate';
 import { Overlay } from 'ol';
 
 import { Theme } from '@mui/material/styles';
@@ -10,9 +9,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapContext } from '../../app-start';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
-import { Cast } from '../../types/cgpv-types';
 import { payloadIsAMarkerDefinition } from '../../../api/events/payloads/marker-definition-payload';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -41,7 +39,7 @@ const useStyles = makeStyles((theme: Theme) => ({
  */
 export function ClickMarker(): JSX.Element {
   const [showMarker, setShowMarker] = useState(false);
-  const [markerPos, setMarkerPos] = useState<Coordinate>();
+  // const [markerPos, setMarkerPos] = useState<Coordinate>(); // ! markerPos is never used. this line probably needs to be deleted.
   const [markerIcon, setMarkerIcon] = useState<ReactElement>();
 
   const classes = useStyles();
@@ -118,7 +116,7 @@ export function ClickMarker(): JSX.Element {
             hideMarker();
 
             // update the click location
-            setMarkerPos(Cast<Coordinate>(payload.lnglat));
+            // setMarkerPos(Cast<Coordinate>(payload.lnglat)); // ! markerPos is never used. this line probably needs to be deleted.
 
             if (payload.symbology) {
               const theSymbology = payload.symbology;

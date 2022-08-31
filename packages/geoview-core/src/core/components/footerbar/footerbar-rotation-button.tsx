@@ -11,10 +11,10 @@ import { ArrowUpIcon, IconButton } from '../../../ui';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
-export const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   rotationIcon: {
     fontSize: `${theme.typography.fontSize}px !important`,
     color: `${theme.palette.primary.light}`,

@@ -7,20 +7,15 @@ import Ajv from 'ajv';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { MapViewer } from '../geo/map/map';
+import { MapViewer } from '../../geo/map/map';
 
-import { api } from '../app';
-import {
-  AbstractPluginClass,
-  toJsonObject,
-  TypeJsonObject,
-  TypeJsonValue,
-  TypePluginStructure,
-  TypeRecordOfPlugin,
-} from '../core/types/cgpv-types';
+import { api } from '../../app';
+import { AbstractPlugin } from './abstract-plugin';
+import { TypePluginStructure, TypeRecordOfPlugin } from './plugin-types';
+import { toJsonObject, TypeJsonObject, TypeJsonValue } from '../../core/types/global-types';
 
-import { EVENT_NAMES } from './events/event';
-import { snackbarMessagePayload } from './events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../events/event-types';
+import { snackbarMessagePayload } from '../events/payloads/snackbar-message-payload';
 
 /**
  * Class to manage plugins
@@ -99,7 +94,7 @@ export class Plugin {
   addPlugin = async (
     pluginId: string,
     mapId: string,
-    constructor?: AbstractPluginClass | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
+    constructor?: AbstractPlugin | ((pluginId: string, props: TypeJsonObject) => TypeJsonValue),
     props?: TypeJsonObject
   ): Promise<void> => {
     if ((this.plugins[mapId] && !this.plugins[mapId][pluginId]) || !(mapId in this.plugins)) {
@@ -296,8 +291,8 @@ export class Plugin {
     const map = api.maps[mapId] as MapViewer;
 
     // check if the map at this index have core packages and if there is a package at the plugin index
-    if (map.mapProps.corePackages && map.mapProps.corePackages[pluginIndex]) {
-      const pluginId = map.mapProps.corePackages[pluginIndex];
+    if (map.mapFeaturesConfig.corePackages && map.mapFeaturesConfig.corePackages[pluginIndex]) {
+      const pluginId = map.mapFeaturesConfig.corePackages[pluginIndex];
 
       // load the plugin from the script tag or create it
       this.loadScript(pluginId).then((constructor) => {
@@ -312,7 +307,7 @@ export class Plugin {
         );
 
         // check if there is a next plugin at the current map index
-        if (map.mapProps.corePackages && map.mapProps.corePackages[pluginIndex + 1]) {
+        if (map.mapFeaturesConfig.corePackages && map.mapFeaturesConfig.corePackages[pluginIndex + 1]) {
           // load next plugin at the same map index
           this.loadPlugin(mapIndex, pluginIndex + 1);
           // if no more plugins at current map index then check if there is another map

@@ -14,19 +14,9 @@ import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { Config } from '../../core/utils/config';
-import {
-  TypeMapConfigProps,
-  TypeLayerConfig,
-  TypeLanguages,
-  TypeLocalizedLanguages,
-  TypeMapSchemaProps,
-  TypeHTMLElement,
-  TypeDcoument,
-  TypeMapView,
-} from '../../core/types/cgpv-types';
+import { Config } from '../../core/utils/config/config';
 
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
@@ -37,6 +27,14 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
+import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
+
+interface TypeDcoument extends Document {
+  webkitExitFullscreen: () => void;
+  msExitFullscreen: () => void;
+  mozCancelFullScreen: () => void;
+}
 
 /**
  * Class used to manage created maps
@@ -46,10 +44,10 @@ import { generateId } from '../../core/utils/utilities';
  */
 export class MapViewer {
   // map config properties
-  mapProps: TypeMapConfigProps;
+  mapFeaturesConfig: TypeMapFeaturesConfig;
 
   // the id of the map
-  id!: string;
+  mapId!: string;
 
   // the openlayer map
   map!: OLMap;
@@ -70,7 +68,7 @@ export class MapViewer {
   layer!: Layer;
 
   // get used language
-  language: TypeLocalizedLanguages;
+  displayLanguage: TypeDisplayLanguage;
 
   // get used projection
   currentProjection: number;
@@ -90,31 +88,36 @@ export class MapViewer {
   /**
    * Add the map instance to the maps array in the api
    *
-   * @param {TypeMapConfigProps} mapProps map properties
+   * @param {TypeMapFeaturesConfig} mapFeaturesConfig map properties
    * @param {i18n} i18instance language instance
    */
-  constructor(mapProps: TypeMapConfigProps, i18instance: i18n) {
-    this.id = mapProps.id;
+  constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n) {
+    this.mapId = mapFeaturesConfig.mapId!;
 
     // add map viewer instance to api
-    api.maps[this.id] = this;
+    api.maps[this.mapId] = this;
 
-    this.mapProps = mapProps;
+    this.mapFeaturesConfig = mapFeaturesConfig;
 
-    this.language = mapProps.language;
-    this.currentProjection = mapProps.map.view.projection;
+    this.displayLanguage = mapFeaturesConfig.displayLanguage!;
+    this.currentProjection = mapFeaturesConfig.map.viewSettings.projection;
     this.i18nInstance = i18instance;
-    this.currentZoom = mapProps.map.view.zoom;
-    this.currentPosition = [mapProps.map.view.center[0], mapProps.map.view.center[1]];
+    this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
+    this.currentPosition = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
 
-    this.appBarButtons = new AppbarButtons(this.id);
-    this.navBarButtons = new NavbarButtons(this.id);
-    this.footerTabs = new FooterTabsApi(this.id);
+    this.appBarButtons = new AppbarButtons(this.mapId);
+    this.navBarButtons = new NavbarButtons(this.mapId);
+    this.footerTabs = new FooterTabsApi(this.mapId);
 
-    this.modal = new ModalApi(this.id);
+    this.modal = new ModalApi(this.mapId);
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new Basemap(this.mapProps.map.basemapOptions, this.mapProps.language, this.mapProps.map.view.projection, this.id);
+    this.basemap = new Basemap(
+      this.mapFeaturesConfig.map.basemapOptions,
+      this.mapFeaturesConfig.displayLanguage!,
+      this.mapFeaturesConfig.map.viewSettings.projection,
+      this.mapId
+    );
   }
 
   /**
@@ -123,11 +126,11 @@ export class MapViewer {
    * @param cgpMap
    */
   initMap(cgpMap: OLMap): void {
-    this.id = cgpMap.get('id');
+    this.mapId = cgpMap.get('id');
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
-    this.layer = new Layer(this.id, this.mapProps.map.layers);
+    this.layer = new Layer(this.mapId, this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // check if geometries are provided from url
     this.loadGeometries();
@@ -152,7 +155,7 @@ export class MapViewer {
           // only process valid response
           if (response.status === 200) {
             response.json().then((data) => {
-              if (typeof data.geometry !== 'undefined') {
+              if (data.geometry !== undefined) {
                 // add the geometry
                 // TODO: use the vector as GeoJSON and add properties to by queried by the details panel
                 this.layer.vector?.addPolygon(data.geometry.coordinates, undefined, generateId(null));
@@ -173,7 +176,7 @@ export class MapViewer {
   addComponent = (id: string, component: JSX.Element): void => {
     if (id && component) {
       // emit an event to add the component
-      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.id, id, component));
+      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.mapId, id, component));
     }
   };
 
@@ -185,7 +188,7 @@ export class MapViewer {
   removeComponent = (id: string): void => {
     if (id) {
       // emit an event to add the component
-      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.id, id));
+      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, id));
     }
   };
 
@@ -230,21 +233,24 @@ export class MapViewer {
   };
 
   /**
-   * Update the map view
+   * Update the map viewSettings
    *
-   * @param {TypeMapView} mapView map view object
+   * @param {TypeMapView} mapView map viewSettings object
    */
-  setView = (mapView: TypeMapView): void => {
+  setView = (mapView: TypeViewSettings): void => {
     const projection = mapView.projection ? mapView.projection : api.projection.projections[this.currentProjection];
     this.map.setView(
       new View({
-        projection,
-        zoom: mapView.zoom ? mapView.zoom : this.mapProps.map.view.zoom,
+        projection: `EPSG:${projection}`,
+        zoom: mapView.zoom ? mapView.zoom : this.mapFeaturesConfig.map.viewSettings.zoom,
         center: mapView.center
-          ? fromLonLat([mapView.center[0], mapView.center[1]], projection)
-          : fromLonLat([this.mapProps.map.view.center[0], this.mapProps.map.view.center[1]], projection),
+          ? fromLonLat([mapView.center[0], mapView.center[1]], `EPSG:${projection}`)
+          : fromLonLat(
+              [this.mapFeaturesConfig.map.viewSettings.center[0], this.mapFeaturesConfig.map.viewSettings.center[1]],
+              `EPSG:${projection}`
+            ),
         extent: mapView.extent,
-        resolution: mapView.resolution,
+        // resolution: mapView.resolution,
         minZoom: mapView.minZoom,
         maxZoom: mapView.maxZoom,
       })
@@ -252,9 +258,9 @@ export class MapViewer {
   };
 
   /**
-   * Get the map view
+   * Get the map viewSettings
    *
-   * @returns the map view
+   * @returns the map viewSettings
    */
   getView = (): View => {
     return this.map.getView();
@@ -264,50 +270,50 @@ export class MapViewer {
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady = (): void => {
-    api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.id, this.map));
+    api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
   };
 
   /**
-   * Return the language code from localized language
+   * Return the language code prefix from localized language
    *
-   * @returns {TypeLanguages} returns the language code from localized language. Ex: en, fr
+   * @returns {TypeDisplayLanguage} returns the language code prefix from localized language. Ex: en, fr
    */
-  getLanguageCode = (): TypeLanguages => {
-    return this.language.split('-')[0] as TypeLanguages;
+  getLanguageCodePrefix = (): TypeDisplayLanguage => {
+    return this.displayLanguage.split('-')[0] as TypeDisplayLanguage;
   };
 
   /**
-   * Change the language of the map
+   * Change the display language of the map
    *
-   * @param {string} language the language to use (en-CA, fr-CA)
-   * @param {TypeLayerConfig} layers optional new set of layers to apply (will override origional set of layers)
+   * @param {TypeDisplayLanguage} displayLanguage the language to use (en-CA, fr-CA)
+   * @param {TypeListOfGeoviewLayerConfig} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
    */
-  changeLanguage = (language: 'en-CA' | 'fr-CA', layers?: TypeLayerConfig[]): void => {
-    const updatedConfig = { ...this.mapProps };
+  changeLanguage = (displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
+    const updatedMapConfig: TypeMapFeaturesConfig = { ...this.mapFeaturesConfig };
 
-    updatedConfig.language = language;
+    updatedMapConfig.displayLanguage = displayLanguage;
 
-    if (layers && layers.length > 0) {
-      updatedConfig.map.layers = updatedConfig.map.layers?.concat(layers);
+    if (listOfGeoviewLayerConfig && listOfGeoviewLayerConfig.length > 0) {
+      updatedMapConfig.map.listOfGeoviewLayerConfig = updatedMapConfig.map.listOfGeoviewLayerConfig?.concat(listOfGeoviewLayerConfig);
     }
 
     // emit an event to reload the map to change the language
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, updatedConfig));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, null, updatedMapConfig));
   };
 
   /**
    * Load a new map config from a function call
    *
-   * @param {TypeMapSchemaProps} mapConfig a new config passed in from the function call
+   * @param {TypeMapFeaturesConfig} mapConfig a new config passed in from the function call
    */
-  loadMapConfig = (mapConfig: TypeMapSchemaProps) => {
+  loadMapConfig = (mapConfig: TypeMapFeaturesConfig) => {
     // create a new config for this map element
     const config = new Config(this.map.getTargetElement());
 
     const configObj = config.getMapConfigFromFunc(mapConfig);
 
     // emit an event to reload the map with the new config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.id, configObj!));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, configObj!));
   };
 
   /**

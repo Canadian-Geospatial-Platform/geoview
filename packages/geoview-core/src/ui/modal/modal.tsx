@@ -1,5 +1,6 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect, useCallback, Fragment } from 'react';
+import React, { useState, useEffect, useCallback, Fragment, CSSProperties } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,19 +9,51 @@ import withStyles from '@mui/styles/withStyles';
 import makeStyles from '@mui/styles/makeStyles';
 
 import Dialog from '@mui/material/Dialog';
+import { DialogProps } from '@mui/material';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
-import { toJsonObject, TypeDialogProps } from '../../core/types/cgpv-types';
+import { toJsonObject } from '../../core/types/global-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { api } from '../../app';
 
 import { TypeModalProps } from '.';
 import { CloseIcon, IconButton } from '..';
 import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
+
+/**
+ * Customized Material UI Dialog Properties
+ */
+interface TypeDialogProps extends Omit<DialogProps, 'title'> {
+  id?: string;
+
+  // custom dialog classes and styles
+  className?: string;
+  style?: CSSProperties;
+
+  // custom title
+  title?: React.ReactNode;
+  titleId?: string;
+
+  // dialog content and content styling
+  content?: React.ReactNode;
+  contentClassName?: string;
+  contentStyle?: CSSProperties;
+
+  // dialog text content container styling
+  contentTextId?: string;
+  contentTextClassName?: string;
+  contentTextStyle?: CSSProperties;
+
+  // action elements / buttons
+  actions?: React.ReactNode;
+
+  // id of the map that is using this modal
+  mapId: string;
+}
 
 const useStyles = makeStyles((theme) => ({
   dialog: {

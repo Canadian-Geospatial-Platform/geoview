@@ -1,21 +1,43 @@
-import axios from 'axios';
-
-import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../api/events/event';
-
 import { api } from '../../../app';
-
+import { catalogUrl } from '../../../core/utils/config/config';
 import {
-  CONST_LAYER_TYPES,
-  TypeGeoCoreLayer,
-  TypeLayerConfig,
-  TypeBaseWebLayersConfig,
-  TypeJsonObject,
-} from '../../../core/types/cgpv-types';
-import { catalogUrl, Config } from '../../../core/utils/config';
+  TypeLayerEntryConfig,
+  TypeGeoviewLayerConfig,
+  TypeGeocoreLayerEntryConfig,
+  TypeListOfGeoviewLayerConfig,
+} from '../../map/map-schema-types';
+import { CONST_LAYER_TYPES } from '../geoview-layers/abstract-geoview-layers';
+import { UUIDmapConfigReader } from '../../../core/utils/config/reader/uuid-config-reader';
+import { ConfigValidation } from '../../../core/utils/config/config-validation';
 
-export const layerConfigIsGeoCore = (verifyIfLayer: Omit<TypeBaseWebLayersConfig, 'url'>): verifyIfLayer is TypeGeoCoreLayer => {
-  return verifyIfLayer.layerType === CONST_LAYER_TYPES.GEOCORE;
+export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
+  geoviewLayerType: 'geoCore';
+  listOfLayerEntryConfig: TypeGeocoreLayerEntryConfig[];
+}
+
+/** *****************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the geoviewLayerType attribute of the
+ * verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOCORE. The type ascention applies only to the true block of
+ * the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
+export const geoviewEntryIsGeocore = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeocoreLayerEntryConfig => {
+  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
+};
+
+/** *****************************************************************************************************************************
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeGeoCoreLayerConfig if the geoviewLayerType attribute of the
+ * verifyIfLayer parameter is GEOCORE. The type ascention applies only to the true block of the if clause that use this function.
+ *
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid
+ *
+ * @return {boolean} true if the type ascention is valid
+ */
+export const layerConfigIsGeoCore = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoCoreLayerConfig => {
+  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
 /**
@@ -25,43 +47,43 @@ export const layerConfigIsGeoCore = (verifyIfLayer: Omit<TypeBaseWebLayersConfig
  * @class GeoCore
  */
 export class GeoCore {
-  #mapId: string;
+  private mapId: string;
+
+  /** Config validation object used to validate the configuration and define default values */
+  private configValidation = new ConfigValidation();
 
   /**
    * Initialize layer
    * @param {string} mapId the id of the map
    */
   constructor(mapId: string) {
-    this.#mapId = mapId;
+    this.mapId = mapId;
   }
 
   /**
-   * Get layer from uuid
+   * Get GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    *
-   * @param {TypeGeoCoreLayer} layer the layer configuration
-   * @return {Promise<TypeLayerConfig | null>} layers to add to the map
+   * @param {TypeGeocoreLayerEntryConfig} geocoreLayerConfig the layer configuration
+   * @return {Promise<TypeListOfGeoviewLayerConfig>} list of layer configurations to add to the map
    */
-  async add(layer: TypeGeoCoreLayer): Promise<TypeLayerConfig | null> {
-    const url = layer.url || `${catalogUrl}/${api.map(this.#mapId).language.split('-')[0]}`;
-
-    const requestUrl = `${url}/${layer.id}`;
-
-    try {
-      const result = await axios.get<TypeJsonObject>(requestUrl);
-
-      const layers: TypeLayerConfig[] = Config.getLayerConfigFromUUID(result);
-
-      return layers && layers.length > 0 ? layers[0] : null;
-    } catch (error: unknown) {
-      api.event.emit(
-        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.#mapId, {
-          type: 'key',
-          value: 'validation.layer.loadfailed',
-          params: [error as TypeJsonObject, this.#mapId as TypeJsonObject],
-        })
-      );
-    }
-
-    return null;
+  createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
+    const arrayOfListOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
+      const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage}`;
+      const promiseOfLayerConfigs: Promise<TypeListOfGeoviewLayerConfig>[] = [];
+      geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+        const requestUrl = `${url}/${layerEntry.layerId}`;
+        promiseOfLayerConfigs.push(UUIDmapConfigReader.getGVlayersConfigFromUUID(this.mapId, requestUrl));
+      });
+      Promise.all(promiseOfLayerConfigs).then((listOfLayerCreated) => {
+        listOfLayerCreated.forEach((listeOfGeoviewLayerConfig) => {
+          this.configValidation.validateUUIDConfigAgainstSchema(
+            api.map(this.mapId).mapFeaturesConfig.suportedLanguages,
+            listeOfGeoviewLayerConfig
+          );
+        });
+        resolve(listOfLayerCreated);
+      });
+    });
+    return arrayOfListOfGeoviewLayerConfig;
   }
 }

@@ -31,7 +31,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-100, 45]
+        "coordinates": [100, 54]
       }
     }
   ]

@@ -2,12 +2,19 @@ import axios from 'axios';
 
 import { WMSCapabilities } from 'ol/format';
 
-import { Cast, TypeCSSStyleDeclaration, TypeJsonObject } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonObject } from '../../core/types/global-types';
 import { xmlToJson } from '../../core/utils/utilities';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
+
+/**
+ * Interface used for css style declarations
+ */
+interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
+  mozTransform: string;
+}
 
 export class GeoUtilities {
   /**
@@ -144,7 +151,7 @@ export class GeoUtilities {
     const values = { x: 0, y: 0, z: 0 };
 
     // No transform property. Simply return 0 values.
-    if (matrix === 'none' || typeof matrix === 'undefined') return values;
+    if (matrix === 'none' || matrix === undefined) return values;
 
     // Can either be 2d or 3d transform
     const matrixType = matrix.includes('3d') ? '3d' : '2d';

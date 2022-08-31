@@ -7,10 +7,10 @@ import { CollapseIcon, ExpandIcon, IconButton } from '../../../ui';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
-import { booleanPayload } from '../../types/cgpv-types';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
-export const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   expandbuttonContainer: {
     display: 'flex',
     alignItems: 'center',

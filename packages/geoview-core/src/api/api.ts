@@ -1,14 +1,15 @@
-import { Event, EVENT_NAMES } from './events/event';
+import { EVENT_NAMES } from './events/event-types';
+import { Event } from './events/event';
 
 import { Projection, PROJECTION_NAMES } from '../geo/projection/projection';
 
 import { MapViewer } from '../geo/map/map';
 
-import { Plugin } from './plugin';
+import { Plugin } from './plugin/plugin';
 import { GeoUtilities } from '../geo/utils/utilities';
 import { DateMgt } from '../core/utils/date-mgt';
 
-import { CONST_LAYER_TYPES } from '../core/types/cgpv-types';
+import { CONST_LAYER_TYPES } from '../geo/layer/geoview-layers/abstract-geoview-layers';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
 

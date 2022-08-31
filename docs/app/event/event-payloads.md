@@ -28,7 +28,7 @@ Below you will find a list of all available functions and payload types/interfac
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsALayerConfig">payloadIsALayerConfig</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMap">payloadIsAMap</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMapComponent">payloadIsAMapComponent</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMapConfig">payloadIsAMapConfig</a></li>
+  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAmapFeaturesConfig">payloadIsAmapFeaturesConfig</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarker">payloadIsAMarker</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarkerClusterConfig">payloadIsAMarkerClusterConfig</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarkerConfig">payloadIsAMarkerConfig</a></li>
@@ -63,7 +63,7 @@ Below you will find a list of all available functions and payload types/interfac
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#snackbarMessagePayload">snackbarMessagePayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#vectorConfigPayload">vectorConfigPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#vectorPayload">vectorPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#webLayerPayload">webLayerPayload</a></li>
+  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#geoviewLayerPayload">geoviewLayerPayload</a></li>
 </ul>
 
 ## Event payloads
@@ -77,7 +77,7 @@ Below you will find a list of all available functions and payload types/interfac
   <li><a href="https://yass0016.github.io/GeoView/docs/classes/LatLngPayload.html">LatLngPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/classes/LayerConfigPayload.html">LayerConfigPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapComponentPayload.html">MapComponentPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapConfigPayload.html">MapConfigPayload</a></li>
+  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapFeaturesPayload.html">MapFeaturesPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapPayload.html">MapPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/classes/MarkerClusterConfigPayload.html">MarkerClusterConfigPayload</a></li>
   <li><a href="https://yass0016.github.io/GeoView/docs/classes/MarkerDefinitionPayload.html">MarkerDefinitionPayload</a></li>

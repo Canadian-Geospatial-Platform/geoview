@@ -23,7 +23,7 @@
           "fr": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer"
         },
         "layerType": "esriDynamic",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "index": 1
           },
@@ -43,5 +43,5 @@
   "corePackages": ["basemap-panel"],
   "components": ["navbar", "appbar"],
   "theme": "dark",
-  "languages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en-CA", "fr-CA"]
 }

@@ -1,5 +1,6 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react';
+import { useState, CSSProperties } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 import Box from '@mui/material/Box';
@@ -13,7 +14,54 @@ import Typography from '@mui/material/Typography';
 import { Button } from '../button';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
-import { TypeCustomStepperProps } from '../../core/types/cgpv-types';
+
+/**
+ * Properties for the Custom Stepper
+ */
+interface TypeCustomStepperProps {
+  id: string;
+  className?: string;
+  style?: CSSProperties;
+
+  // orientaion of the Stepper component. By default, its horizontal
+  orientation?: 'horizontal' | 'vertical';
+
+  // alternative label for the steps. Alternative labels appear at the bottom of step icons
+  alternativeLabel?: boolean;
+
+  // allows the user to enter a multi-step flow at any point
+  // i.e. previous step needs to be completed to move on to the next one
+  nonLinear?: boolean;
+
+  // to be able to switch to another step by clicking on the step's button label
+  buttonedLabels?: boolean;
+
+  // the steps that will be involved in the component
+  steps?: Array<Record<string, TypeStepperSteps>>;
+
+  // text for the back (previous) button that goes to the previous step
+  backButtonText?: string;
+
+  // text for the next button that goes to the next step
+  nextButtonText?: string;
+
+  // text for the reset button that resets the step count
+  resetButtonText?: string;
+}
+
+/**
+ * Properties for the Steps of Stepper
+ */
+export interface TypeStepperSteps {
+  // the text label for the step
+  label?: string;
+
+  // the body of the step
+  description: JSX.Element | HTMLElement | string;
+
+  // whether the user is allowed to move to the next step or not
+  disableStepMovement?: boolean;
+}
 
 const useStyles = makeStyles((theme) => ({
   stepperContainer: {

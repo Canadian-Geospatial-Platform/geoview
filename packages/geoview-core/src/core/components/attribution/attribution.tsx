@@ -6,7 +6,8 @@ import OLAttribution, { Options } from 'ol/control/Attribution';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
-import { api, toJsonObject, TypeJsonObject } from '../../../app';
+import { api } from '../../../app';
+import { toJsonObject, TypeJsonObject } from '../../types/global-types';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -160,7 +161,7 @@ class CustomAttribution extends OLAttribution {
       // if nrcan copyright does not exist add it
       if (!nrcanCopyRightExists) {
         // get nrcan copyright based on language
-        const copyRightText = this.attributionVal[api.map(this.mapId).language] as string;
+        const copyRightText = this.attributionVal[api.map(this.mapId).displayLanguage.substring(0, 2)] as string;
 
         // create li element
         const nrcanCopyRight = document.createElement('LI');

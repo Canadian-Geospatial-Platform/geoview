@@ -1,0 +1,90 @@
+import { TooltipProps, ButtonProps } from '@mui/material';
+import { TypeJsonValue } from '../../core/types/global-types';
+import { TypeIconButtonProps } from '../icon-button/icon-button-types';
+import { PanelApi } from './panel-api';
+
+/** ******************************************************************************************************************************
+ * Interface used to initialize a button panel.
+ */
+export type TypeButtonPanelProps = {
+  /** Panel properties. */
+  panel: TypePanelProps;
+  /** Button properties. */
+  button: TypeButtonProps;
+};
+
+/** ******************************************************************************************************************************
+ * type for the panel properties used when creating a new panel.
+ */
+export type TypePanelProps = {
+  /** Panel id. */
+  id?: string;
+  /** Panel type (appbar, navbar). */
+  type?: string;
+  /** Panel open status (open/closed). */
+  status?: boolean;
+  /** Width of the panel. */
+  width: string | number;
+  /** Panel header icon. */
+  icon: React.ReactNode | Element;
+  /** Panel header title. */
+  title: string | TypeJsonValue;
+  /** Panel body content. */
+  content?: React.ReactNode | Element;
+};
+
+/** ******************************************************************************************************************************
+ * Interface for the button properties used when creating a new button.
+ */
+export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
+  /** Generated button id. */
+  id?: string;
+  /** Button tooltip. */
+  tooltip?: string;
+  /** Location for tooltip. */
+  tooltipPlacement?: TooltipProps['placement'];
+  /** Button icon. */
+  icon?: React.ReactNode;
+  /** Optional class names */
+  iconClassName?: string;
+  /** Optional class names. */
+  textClassName?: string;
+  /** Button state. */
+  state?: 'expanded' | 'collapsed';
+  /** Button type. */
+  type: 'text' | 'textWithIcon' | 'icon';
+  /** Button visibility. */
+  visible?: boolean;
+}
+
+// ! Check if it must be deleted.
+/** ******************************************************************************************************************************
+ * Interface for the button properties used when creating a new button.
+ * /
+interface ButtonProps {
+  isFirst?: boolean;
+  isLast?: boolean;
+  handleNext: () => void;
+}
+
+/** ******************************************************************************************************************************
+ * Interface used when creating a new button panel.
+ */
+export type TypeButtonPanel = {
+  /** Panel identifier. */
+  id: string;
+  /** Pasnel API. */
+  panel?: PanelApi;
+  /** Button used by the panel. */
+  button: TypeIconButtonProps;
+  /** Group name. */
+  groupName?: string;
+};
+
+/** ******************************************************************************************************************************
+ * constant that defines the panel types.
+ */
+export const CONST_PANEL_TYPES = {
+  APPBAR: 'appbar',
+  NAVBAR: 'navbar',
+};

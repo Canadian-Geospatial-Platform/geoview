@@ -5,11 +5,11 @@ import {
   TypeJsonArray,
   toJsonObject,
   TypeJsonObject,
-  AbstractWebLayersClass,
+  AbstractGeoViewLayer,
   TypeWindow,
-  webLayerIsWMS,
-  webLayerIsEsriDynamic,
-  webLayerIsEsriFeature,
+  geoviewLayerIsWMS,
+  geviewLayerIsEsriDynamic,
+  geoviewLayerIsEsriFeature,
 } from 'geoview-core';
 
 type TypeLegend =
@@ -29,7 +29,7 @@ const w = window as TypeWindow;
  * @returns {JSX.Element} a React JSX Element containing map server layers
  */
 function LayersList(props: TypeLayersPanelListProps): JSX.Element {
-  const { mapId, layers, language } = props;
+  const { mapId, layers, displayLanguage } = props;
 
   const { cgpv } = w;
   const { ui, react, api } = cgpv;
@@ -134,12 +134,12 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    */
   const setLayerLegendAll = () =>
     Object.values(layers).forEach(async (layer) => {
-      if (webLayerIsWMS(layer)) {
+      if (geoviewLayerIsWMS(layer)) {
         const dataUrl = await layer.getLegendGraphic();
         const name = layer.url.includes('/MapServer') ? layer.name : '';
         const legend = [{ name, dataUrl }];
         setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
-      } else if (webLayerIsEsriDynamic(layer) || webLayerIsEsriFeature(layer)) {
+      } else if (geviewLayerIsEsriDynamic(layer) || geoviewLayerIsEsriFeature(layer)) {
         const legend = await layer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];
         setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
@@ -198,7 +198,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onZoom = (layer: AbstractWebLayersClass) => api.map(mapId).fitBounds(layerBounds[layer.id]);
+  const onZoom = (layer: AbstractGeoViewLayer) => api.map(mapId).fitBounds(layerBounds[layer.id]);
 
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
@@ -248,7 +248,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onBounds = (layer: AbstractWebLayersClass) => {
+  const onBounds = (layer: AbstractGeoViewLayer) => {
     const bbox = polygonFromBounds(layerBounds[layer.id]);
 
     if (layerBbox.toString() === bbox.toString()) {
@@ -276,7 +276,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onRemove = (layer: AbstractWebLayersClass) => {
+  const onRemove = (layer: AbstractGeoViewLayer) => {
     // empty bounding box
     setLayerBbox([]);
     // remove bounding box layer from map
@@ -291,7 +291,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param value slider opacity value (0-100)
    * @param data Layer data
    */
-  const onSliderChange = (value: number, data: AbstractWebLayersClass) => {
+  const onSliderChange = (value: number, data: AbstractGeoViewLayer) => {
     setLayerOpacity((state) => ({ ...state, [data.id]: value }));
     const opacity = layerVisibility[data.id] ? value / 100 : 0;
     data.setOpacity(opacity);
@@ -303,7 +303,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param value checkbox boolean
    * @param data Layer data
    */
-  const onVisibilityChange = (value: boolean, data: AbstractWebLayersClass) => {
+  const onVisibilityChange = (value: boolean, data: AbstractGeoViewLayer) => {
     setLayerVisibility((state) => ({ ...state, [data.id]: value }));
     const opacity = value ? layerOpacity[data.id] / 100 : 0;
     data.setOpacity(opacity);
@@ -324,7 +324,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param data Layer data
    * @param id sublayer ID
    */
-  const onSubVisibilityChange = (value: boolean, data: AbstractWebLayersClass, id: number) => {
+  const onSubVisibilityChange = (value: boolean, data: AbstractGeoViewLayer, id: number) => {
     const oldEntries = subLayerVisibility[data.id];
     const entries = value ? [...new Set([...oldEntries, id])] : oldEntries.filter((x) => x !== id);
     if (oldEntries.length === 0) {
@@ -355,7 +355,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
               <div className={classes.flexGroup}>
                 <Button
                   className={classes.flexGroupButton}
-                  tooltip={translations[language].zoom as string}
+                  tooltip={translations[displayLanguage].zoom as string}
                   tooltipPlacement="top"
                   variant="contained"
                   type="icon"
@@ -364,7 +364,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
                 <Button
                   className={classes.flexGroupButton}
-                  tooltip={translations[language].bounds as string}
+                  tooltip={translations[displayLanguage].bounds as string}
                   tooltipPlacement="top"
                   variant="contained"
                   type="icon"
@@ -373,7 +373,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
                 <Button
                   className={classes.flexGroupButton}
-                  tooltip={translations[language].remove as string}
+                  tooltip={translations[displayLanguage].remove as string}
                   tooltipPlacement="top"
                   variant="contained"
                   type="icon"
@@ -382,7 +382,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                 />
               </div>
               <div className={classes.flexGroup}>
-                <Tooltip title={translations[language].opacity}>
+                <Tooltip title={translations[displayLanguage].opacity}>
                   <i className="material-icons">contrast</i>
                 </Tooltip>
                 <div className={classes.slider}>
@@ -396,7 +396,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
                 </div>
-                <Tooltip title={translations[language].visibility}>
+                <Tooltip title={translations[displayLanguage].visibility}>
                   <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
@@ -407,7 +407,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       <div className={classes.layerItemText} title={subLayer.layerName as string}>
                         {subLayer.layerName}
                       </div>
-                      <Tooltip title={translations[language].visibility}>
+                      <Tooltip title={translations[displayLanguage].visibility}>
                         <Checkbox
                           checked={subLayerVisibility[layer.id].includes(subLayer.layerId as number)}
                           onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)}

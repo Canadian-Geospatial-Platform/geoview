@@ -4,14 +4,22 @@ import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 import MaterialDrawer from '@mui/material/Drawer';
+import { DrawerProps } from '@mui/material';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { IconButton, ChevronLeftIcon, ChevronRightIcon } from '..';
 import { MapContext } from '../../core/app-start';
-import { TypeDrawerProps } from '../../core/types/cgpv-types';
 import { booleanPayload, payloadIsABoolean } from '../../api/events/payloads/boolean-payload';
+
+/**
+ * Drawer Properties
+ */
+export interface TypeDrawerProps extends DrawerProps {
+  // eslint-disable-next-line react/require-default-props
+  status?: boolean;
+}
 
 const drawerWidth = 200;
 const useStyles = makeStyles((theme) => ({

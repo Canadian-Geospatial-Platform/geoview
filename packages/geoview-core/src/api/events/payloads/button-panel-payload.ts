@@ -1,8 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { TypeButtonPanel } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
 /** Valid events that can create ButtonPanelPayload */
 const validEvents: EventStringId[] = [
@@ -15,7 +14,7 @@ const validEvents: EventStringId[] = [
 /**
  * Type Gard function that redefines a PayloadBaseClass as a ButtonPanelPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
@@ -45,8 +44,8 @@ export class ButtonPanelPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {string} id the the appbar panel identifier carried by the payload
-   * @param {string} groupName the the appbar panel group name carried by the payload
+   * @param {string} id the appbar panel identifier carried by the payload
+   * @param {string} groupName the appbar panel group name carried by the payload
    * @param {TypeButtonPanel} buttonPanel optional button panel configuration carried by the payload
    *
    */
@@ -65,8 +64,8 @@ export class ButtonPanelPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {string} id the the appbar panel identifier carried by the payload
- * @param {string} groupName the the appbar panel group name carried by the payload
+ * @param {string} id the appbar panel identifier carried by the payload
+ * @param {string} groupName the appbar panel group name carried by the payload
  * @param {TypeButtonPanel} buttonPanel optional button panel configuration carried by the payload
  *
  * @returns {ButtonPanelPayload} the ButtonPanelPayload object created

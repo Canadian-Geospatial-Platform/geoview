@@ -23,7 +23,7 @@
           "fr": "https://ows.mundialis.de/services/service?"
         },
         "layerType": "ogcWMS",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "id": "TOPO-OSM-WMS"
           }
@@ -40,7 +40,7 @@
           "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
         },
         "layerType": "esriDynamic",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "index": 1
           },
@@ -112,6 +112,6 @@
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca"
   },
-  "languages": ["en-CA", "fr-CA"],
+  "suportedLanguages": ["en-CA", "fr-CA"],
   "version": "1.0"
 }

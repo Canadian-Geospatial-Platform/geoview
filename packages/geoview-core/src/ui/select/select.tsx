@@ -1,6 +1,7 @@
+/* eslint-disable react/require-default-props */
 import React from 'react';
 
-import { MenuItemProps, ListSubheaderProps } from '@mui/material';
+import { MenuItemProps, ListSubheaderProps, SelectProps, InputLabelProps } from '@mui/material';
 
 import makeStyles from '@mui/styles/makeStyles';
 import ListSubheader from '@mui/material/ListSubheader';
@@ -9,7 +10,23 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 
-import { TypeSelectProps, TypeMenuItemProps } from '../../core/types/cgpv-types';
+/**
+ * Custom MUI Select properties
+ */
+interface TypeSelectProps extends SelectProps {
+  mapId?: string;
+  fullWidth?: boolean;
+  menuItems: TypeMenuItemProps[];
+  inputLabel: InputLabelProps;
+}
+
+/**
+ * Menu Item properties
+ */
+interface TypeMenuItemProps {
+  type?: 'item' | 'header';
+  item: MenuItemProps | ListSubheaderProps | null;
+}
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
