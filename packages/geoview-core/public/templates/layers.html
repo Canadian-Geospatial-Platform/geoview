@@ -51,6 +51,9 @@
         </tbody>
       </table>
     </div>
+    <div class="toolbar">
+      <button class="test-btn">Test Refresh</button>
+    </div>
     <div>
       <div>
         <h3 id="HLYR1">1.WMS Layer</h3>
@@ -78,6 +81,7 @@
                   'layerName': { 'en': 'Root' },
                   'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
                   'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
                   'listOfLayerEntryConfig': [
                     {
                       'entryType': 'group',
@@ -99,6 +103,7 @@
                   'layerName': { 'en': 'Topographic OSM WMS' },
                   'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
                   'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
                   'listOfLayerEntryConfig': [
                     {
                       'layerId': 'OSM-WMS'
@@ -339,58 +344,50 @@
       <h3 id="HLYR6">6. WFS Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
 
-      <div>
-        <h3 id="HLYR6">6. WFS Layer</h3>
-        <h3><a href="#top">Top of the page</a></h3>
-
-        <div
-          id="LYR6"
-          class="llwp-map"
-          data-lang="en"
-          data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 8,
-              'center': [-71.370748, 42.001058],
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'id': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'layerId': 'wfsLYR6',
-                'layerName': {
-                  'en': 'Airport data'
-                },
-                'metadataAccessPath': {
-                  'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
-                },
-                'geoviewLayerType': 'ogcWfs',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'GISDATA.AIRPORTS_PT'
-                  }
-                ]
-              }
-            ]
+      <div
+        id="LYR6"
+        class="llwp-map"
+        data-lang="en"
+        data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 8,
+            'center': [-71.370748, 42.001058],
+            'projection': 3857
           },
-          'theme': 'dark',
-          'suportedLanguages': ['en-CA']
-        }"
-        ></div>
-        <p>This map has a WFS layer added from configuration.</p>
-        <p><strong>Configuration Snippet:</strong></p>
-        <div id="LYR6CS" class="panel"></div>
-      </div>
-        <p>This map has a WFS layer added from configuration.</p>
+          'basemapOptions': {
+            'id': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'layerId': 'wfsLYR6',
+              'layerName': {
+                'en': 'Airport data'
+              },
+              'metadataAccessPath': {
+                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+              },
+              'geoviewLayerType': 'ogcWfs',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'GISDATA.AIRPORTS_PT'
+                }
+              ]
+            }
+          ]
+        },
+        'theme': 'dark',
+        'suportedLanguages': ['en-CA']
+      }"
+      ></div>
+      <p>This map has a WFS layer added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
       <div id="LYR6CS" class="panel"></div>
     </div>
-    <div>
+  <div>
       <h3 id="HLYR7">7. OGC API Feature Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
@@ -524,6 +521,14 @@
         cgpv.api.map('LYR5').layer.removeLayerById(document.getElementById('new-layer-id').innerText);
         document.getElementById('new-layer-id').innerText = '';
       });
+
+        // get addPolyline button element for WM map
+        var testBtn = document.getElementsByClassName('test-btn')[0];
+
+        // add event handler to the add polyline button
+        testBtn.addEventListener('click', function (e) {
+          cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+        });
 
       /*
       //add legend to WMS layer

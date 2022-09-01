@@ -31,9 +31,9 @@ export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig,
   listOfLayerEntryConfig: TypeEsriFeatureLayerEntryConfig[];
 }
 
-/** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
+/** *****************************************************************************************************************************
+ * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
+ * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid
@@ -44,11 +44,12 @@ export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig):
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * Type Gard function that redefines an AbstractGeoViewLayer as an EsriFeature if the type attribute of the verifyIfGeoViewLayer
  * parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use this function.
  *
- * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
+ * is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
@@ -56,12 +57,13 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
-/** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType attribute of
- * the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_FEATURE. The type ascention applies only to the true block of
- * the if clause that use this function.
+/** *****************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType
+ * attribute of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_FEATURE. The type ascention applies only to the true
+ * block of the if clause that use this function.
  *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
+ * is valid
  *
  * @return {boolean} true if the type ascention is valid
  */
@@ -73,7 +75,7 @@ export const geoviewEntryIsEsriFeature = (
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
-/** ******************************************************************************************************************************
+/** *****************************************************************************************************************************
  * A class to add esri feature layer.
  *
  * @exports
@@ -94,7 +96,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   isFeatureLayer = true;
 
-  /** ****************************************************************************************************************************
+  /** ***************************************************************************************************************************
    * Initialize layer.
    *
    * @param {string} mapId The id of the map.
@@ -104,7 +106,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.ESRI_FEATURE, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
+  /** ***************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    */
   getAdditionalServiceDefinition(): Promise<void> {
@@ -129,6 +131,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     return promisedExecution;
   }
 
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   */
   private async getCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const capabilitiesUrl = `${getLocalizedValue(this.metadataAccessPath, this.mapId)}?f=json`;
@@ -147,6 +152,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     return promisedExecution;
   }
 
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   */
   private async getDrawingInfo(esriIndex: number, layerEntry: TypeVectorLayerEntryConfig): Promise<void> {
     if (!layerEntry.style) {
       let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
@@ -169,7 +177,7 @@ export class EsriFeature extends AbstractGeoViewVector {
               src: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
               height: symbolInfo.symbol.height as number,
               width: symbolInfo.symbol.width as number,
-              rotation: ((symbolInfo.symbol.angle as number) * Math.PI) / 180.0, // convert to dadians
+              rotation: ((symbolInfo.symbol.angle as number) * Math.PI) / 180.0, // convert to radians
               opacity: 1,
             };
             uniqueValueStyleInfo.push({
@@ -184,14 +192,13 @@ export class EsriFeature extends AbstractGeoViewVector {
           this.iconSymbols.valueAndSymbol.default = new StyleIcon({
             src: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
             scale: (symbolInfo.height as number) / (symbolInfo.width as number),
-            // anchor: [Math.round((symbolInfo.width as number) / 2), Math.round((symbolInfo.height as number) / 2)],
           });
         }
       }
     }
   }
 
-  /**
+  /** ***************************************************************************************************************************
    * This method associate a renderer to the GeoView layer.
    *
    * @param {TypeBaseVectorLayer} rasterLayer The GeoView layer associated to the renderer.
@@ -201,7 +208,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     console.log('This method needs to be coded!', rasterLayer);
   }
 
-  /**
+  /** ***************************************************************************************************************************
    * This method register the GeoView layer to panels that offer this possibility.
    *
    * @param {TypeBaseVectorLayer} rasterLayer The GeoView layer who wants to register.

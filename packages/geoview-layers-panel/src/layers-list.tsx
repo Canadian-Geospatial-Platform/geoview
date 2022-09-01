@@ -1,6 +1,5 @@
 /* eslint-disable react/no-array-index-key */
 import {
-  TypeLayersPanelListProps,
   TypeJsonValue,
   TypeJsonArray,
   toJsonObject,
@@ -8,9 +7,19 @@ import {
   AbstractGeoViewLayer,
   TypeWindow,
   geoviewLayerIsWMS,
-  geviewLayerIsEsriDynamic,
+  geoviewLayerIsEsriDynamic,
   geoviewLayerIsEsriFeature,
+  getLocalizedValue,
 } from 'geoview-core';
+
+/**
+ * interface for the layers list properties in layers panel
+ */
+type TypeLayersPanelListProps = {
+  mapId: string;
+  layers: Record<string, AbstractGeoViewLayer>;
+  displayLanguage: string;
+};
 
 type TypeLegend =
   | TypeJsonValue[]
@@ -136,13 +145,13 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     Object.values(layers).forEach(async (layer) => {
       if (geoviewLayerIsWMS(layer)) {
         const dataUrl = await layer.getLegendGraphic();
-        const name = layer.url.includes('/MapServer') ? layer.name : '';
+        const name = getLocalizedValue(layer.metadataAccessPath, layer.mapId)!.includes('/MapServer') ? layer.layerName : '';
         const legend = [{ name, dataUrl }];
-        setLayerLegend((state) => ({ ...state, [layer.id]: legend }));
-      } else if (geviewLayerIsEsriDynamic(layer) || geoviewLayerIsEsriFeature(layer)) {
+        setLayerLegend((state) => ({ ...state, [layer.layerId]: legend }));
+      } else if (geoviewLayerIsEsriDynamic(layer) || geoviewLayerIsEsriFeature(layer)) {
         const legend = await layer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];
-        setLayerLegend((state) => ({ ...state, [layer.id]: legendArray }));
+        setLayerLegend((state) => ({ ...state, [layer.layerId]: legendArray }));
       }
     });
 

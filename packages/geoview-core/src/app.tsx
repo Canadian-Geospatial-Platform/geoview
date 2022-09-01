@@ -114,7 +114,7 @@ export const cgpv: types.TypeCGPV = {
   },
   useTranslation,
   types,
-  // ! Question: Do we realy need the constants attribute?
+  // ? Do we realy need the constants attribute?
   // constants: {
   //   options: {},
   // },

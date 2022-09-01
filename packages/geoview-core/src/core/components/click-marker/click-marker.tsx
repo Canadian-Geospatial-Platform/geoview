@@ -13,6 +13,8 @@ import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { payloadIsAMarkerDefinition } from '../../../api/events/payloads/marker-definition-payload';
 
+// ? Is this use to show click location when mouse is clicked on the map? If so, we should keep it or make it work another way.
+
 const useStyles = makeStyles((theme: Theme) => ({
   markerIcon: {
     display: 'flex',

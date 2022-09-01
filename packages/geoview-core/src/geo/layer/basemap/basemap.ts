@@ -559,16 +559,6 @@ export class Basemap {
     const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
     const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
 
-    // extract url from luanguage
-    const formattedLayers: TypeBasemapLayer[] = [...basemapProps.layers];
-
-    for (let layerIndex = 0; layerIndex < formattedLayers.length; layerIndex++) {
-      // const layer = formattedLayers[layerIndex];
-      // const urls = layer.url as unknown as bilingual;
-      // layer.url = this.displayLanguage === 'en' ? urls.en : urls.fr;
-      // layer.basemapPaneName = this.basemapsPaneName;
-    }
-
     let nrcanCopyrightExists = false;
     const attributionText = this.displayLanguage === 'en' ? attribution.en : attribution.fr;
 

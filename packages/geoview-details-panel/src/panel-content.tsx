@@ -16,7 +16,7 @@ import {
   TypeJsonObject,
   TypeJsonArray,
   geoviewLayerIsWMS,
-  geviewLayerIsEsriDynamic,
+  geoviewLayerIsEsriDynamic,
   geoviewLayerIsEsriFeature,
   WMS,
   EsriFeature,
@@ -506,7 +506,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
         const layerInfo = await queryServer(mapLayer.url);
 
         addLayer(mapLayer, data, layerInfo, false);
-      } else if (geviewLayerIsEsriDynamic(mapLayer)) {
+      } else if (geoviewLayerIsEsriDynamic(mapLayer)) {
         // get active layers
         const { entries } = mapLayer;
 

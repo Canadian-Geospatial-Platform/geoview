@@ -50,7 +50,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** Icon to use for point features. At creation time, a default value is provided. The icon can be changed. */
   iconToUse: StyleIcon = blueCircleIcon;
 
-  /**
+  /** ***************************************************************************************************************************
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
@@ -59,11 +59,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * nothing. For example, when the child is a WFS service, this method executes the GetCapabilities request and saves the
    * result in an attribute of the class.
    *
-   * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the abstract method
-   * processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the renderers can
-   * come from the configuration of the GeoView layer or from the information saved by the method getAdditionalServiceDefinition,
-   * priority being given to the first of the two. This operation is done by the abstract method setRenderer.
-   * Note that if field aliases are used, they will be set at the same time as the renderer.
+   * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the
+   * abstract method processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the
+   * renderers can come from the configuration of the GeoView layer or from the information saved by the method
+   * getAdditionalServiceDefinition, priority being given to the first of the two. This operation is done by the abstract method
+   * setRenderer. Note that if field aliases are used, they will be set at the same time as the renderer.
    *
    * Finally, the layer registers to all panels that offer this possibility. For example, if the layer is queryable, it could
    * subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer to return the
@@ -155,13 +155,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return promisedListOfLayerEntryProcessed;
   }
 
-  /**
+  /** ***************************************************************************************************************************
    * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
    * If the GeoView layer does not have a service definition, this method does nothing.
    */
   abstract getAdditionalServiceDefinition(): Promise<void>;
 
-  /**
+  /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerEntry parameter.
    *
    * @param {TypeLayerEntryConfig} layerEntry Information needed to create the GeoView layer.

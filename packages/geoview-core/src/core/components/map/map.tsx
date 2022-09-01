@@ -1,12 +1,14 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState, useRef, MutableRefObject } from 'react';
 
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { ObjectEvent } from 'ol/Object';
-import { MapEvent } from 'ol';
+import { Collection, MapEvent } from 'ol';
+import BaseLayer from 'ol/layer/Base';
+import Source from 'ol/source/Source';
 
 import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
@@ -207,11 +209,29 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         if (payloadIsAMapViewProjection(payload)) {
           if (payload.handlerName === id) {
             // on map view projection change, layer source needs to be refreshed
-            // TODO: Listen to refresh from layer abstract class
+            const currentView = api.map(id).getView();
+            const centerCoordinate = toLonLat(currentView.getCenter()!, currentView.getProjection());
+            api.map(id).setView({
+              projection: 3978,
+              zoom: currentView.getZoom()!,
+              center: [centerCoordinate[0], centerCoordinate[1]],
+            });
             const mapLayers = api.map(id).layer.layers;
-            Object.entries(mapLayers).forEach((layer) => {
-              // eslint-disable-next-line no-console
-              console.log('*** ERROR *** layer[1].listOfLayerEntryConfig.getSource()?.refresh());', layer);
+            Object.entries(mapLayers).forEach((layerEntry) => {
+              const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
+                if (baseLayer) {
+                  const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
+                  if (layerGroup) {
+                    layerGroup.forEach((baseLayerEntry) => {
+                      refreshBaseLayer(baseLayerEntry);
+                    });
+                  } else {
+                    const layerSource: Source = baseLayer.get('source');
+                    layerSource.refresh();
+                  }
+                }
+              };
+              refreshBaseLayer(layerEntry[1].gvLayers);
             });
           }
         }

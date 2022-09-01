@@ -61,7 +61,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
 // ******************************************************************************************************************************
 export abstract class AbstractGeoViewLayer {
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
-  protected mapId: string;
+  mapId: string;
 
   /** The type of GeoView layer that is instantiated. */
   type: TypeGeoviewLayerType;

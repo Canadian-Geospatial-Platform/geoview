@@ -3,8 +3,8 @@ import { i18n } from 'i18next';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import OLMap from 'ol/Map';
-import View from 'ol/View';
-import { fromLonLat, transformExtent } from 'ol/proj';
+import View, { ViewOptions } from 'ol/View';
+import { fromLonLat, toLonLat, transformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 
@@ -238,23 +238,18 @@ export class MapViewer {
    * @param {TypeMapView} mapView map viewSettings object
    */
   setView = (mapView: TypeViewSettings): void => {
-    const projection = mapView.projection ? mapView.projection : api.projection.projections[this.currentProjection];
-    this.map.setView(
-      new View({
-        projection: `EPSG:${projection}`,
-        zoom: mapView.zoom ? mapView.zoom : this.mapFeaturesConfig.map.viewSettings.zoom,
-        center: mapView.center
-          ? fromLonLat([mapView.center[0], mapView.center[1]], `EPSG:${projection}`)
-          : fromLonLat(
-              [this.mapFeaturesConfig.map.viewSettings.center[0], this.mapFeaturesConfig.map.viewSettings.center[1]],
-              `EPSG:${projection}`
-            ),
-        extent: mapView.extent,
-        // resolution: mapView.resolution,
-        minZoom: mapView.minZoom,
-        maxZoom: mapView.maxZoom,
-      })
-    );
+    const currentView = this.map.getView();
+    const viewOptions: ViewOptions = {};
+    viewOptions.projection = mapView.projection ? `EPSG:${mapView.projection}` : currentView.getProjection();
+    viewOptions.zoom = mapView.zoom ? mapView.zoom : currentView.getZoom();
+    viewOptions.center = mapView.center
+      ? fromLonLat([mapView.center[0], mapView.center[1]], viewOptions.projection)
+      : fromLonLat(toLonLat(currentView.getCenter()!, currentView.getProjection()), viewOptions.projection);
+    viewOptions.minZoom = mapView.minZoom ? mapView.minZoom : currentView.getMinZoom();
+    viewOptions.maxZoom = mapView.maxZoom ? mapView.maxZoom : currentView.getMaxZoom();
+    if (mapView.extent) viewOptions.extent = mapView.extent;
+
+    this.map.setView(new View(viewOptions));
   };
 
   /**
