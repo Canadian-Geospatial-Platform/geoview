@@ -5,7 +5,7 @@ import { generateId } from '../utilities';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 
-import schema from '../../../../schemav2.json';
+import schema from '../../../../schema.json';
 import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';

@@ -3,683 +3,631 @@
   "title": "GeoView Core Config Schema",
   "type": "object",
   "version": 1.0,
-  "comments": "Configuration for GeoView core packages, each packages manages it own schema.",
+  "comments": "Configuration for GeoView core packages, each packages manages it own schema. It correspond to the TypeMapFeaturesInstance type.",
   "additionalProperties": false,
 
   "definitions": {
-    "detailsLayerConfig": {
+    "TypeLocalizedString": {
+      "additionalProperties": false,
+      "minProperties": 1,
       "type": "object",
       "properties": {
+        "en": {
+          "type": "string",
+          "description": "The English version of the string."
+        },
+        "fr": {
+          "type": "string",
+          "description": "The French version of the string. "
+        }
+      }
+    },
+
+    "TypeDetailsLayerConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "additionalProperties": false,
         "parser": {
           "type": "string",
           "description": "A path to a javascript file with a function for parsing the layers identify output. Only needed if a custom template is being used."
         },
         "template": {
-          "type": "array",
-          "uniqueItems": true,
-          "items": {
-            "en": {
-              "type": "string",
-              "description": "A path to an html template (English) that will override default identify output."
-            },
-            "fr": {
-              "type": "string",
-              "description": "A path to an html template (French) that will override default identify output."
-            }
-          }
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "A path to an html template (English/French) that will override default identify output."
         }
       },
-      "required": ["template"],
-      "additionalProperties": false
+      "required": ["template"]
     },
 
-    "initialLayerSettings": {
+    "TypeFeatureInfoLayerConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "queryable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow querying. Default = true."
+        },
+        "customParser": { "$ref": "#/definitions/TypeDetailsLayerConfig" },
+        "nameField": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid field."
+        },
+        "tooltipField": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The field (English/French) to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
+        },
+        "outfields": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "A comma separated list of attribute names (English/French) that should be requested on query (all by default)."
+        },
+        "aliasFields": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set if not found."
+        }
+      }
+    },
+
+    "TypeFillSymbolConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Fill style for vector features.",
+      "properties": {
+        "color": {
+          "additionalProperties": false,
+          "type": "string"
+        }
+      },
+      "required": ["color"]
+    },
+
+    "TypeStrokeSymbolConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Stroke style for vector features.",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number"
+        }
+      },
+      "required": ["color", "width"]
+    },
+
+    "TypeSimpleSymbolVectorConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "fill": { "$ref": "#/definitions/TypeFillSymbolConfig" },
+        "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" },
+        "radius": { "type": "number" }
+      }
+    },
+
+    "TypeCircleSymbolVectorConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "fill": { "$ref": "#/definitions/TypeFillSymbolConfig" },
+        "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" },
+        "radius": { "type": "number" }
+      },
+      "required": ["radius"]
+    },
+
+    "TypeIconSymbolVectorConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "src": { "type": "string" },
+        "width": {
+          "type": "integer",
+          "description": "Icon width in pixel."
+        },
+        "height": {
+          "type": "integer",
+          "description": "Icon height in pixel."
+        },
+        "rotation": {
+          "type": "number",
+          "description": "Icon rotation in radians."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "crossOrigin": {
+          "type": "string",
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
+        }
+      },
+      "required": ["src", "width", "height", "rotation", "opacity"]
+    },
+
+    "TypeSimpleStyleConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "styleType": {
+          "enum": ["simple"]
+        },
+        "label": {
+          "type": "string"
+        },
+        "options": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
+      },
+      "required": ["styleType", "label", "options"]
+    },
+
+    "TypeUniqueValueStyleConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "styleType": {
+          "enum": ["uniqueValue"]
+        },
+        "label": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "uniqueValueStyleInfo": { "$ref": "#/definitions/TypeUniqueValueStyleInfo" }
+      },
+      "required": ["styleType", "label", "fields", "uniqueValueStyleInfo"]
+    },
+
+    "TypeUniqueValueStyleInfo": {
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "label": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "options": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
+      },
+      "minItems": 2,
+      "required": ["label", "values", "options"]
+    },
+
+    "TypeClassBreakStyleConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "styleType": {
+          "enum": ["classBreak"]
+        },
+        "label": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        },
+        "classBreakStyleInfo": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
+      },
+      "required": ["styleType", "label", "field", "classBreakStyleInfo"]
+    },
+
+    "TypeClassBreakStyleInfo": {
+      "additionalProperties": false,
+      "type": "array",
+      "items": {
+        "additionalProperties": false,
+        "label": {
+          "type": "string"
+        },
+        "minValues": {
+          "type": "number"
+        },
+        "maxValues": {
+          "type": "number"
+        },
+        "options": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
+      },
+      "minItems": 2,
+      "required": ["label", "minValue", "maxValue", "options"]
+    },
+
+    "TypeKinfOfSymbolVectorSettings": {
+      "anyOf": [
+        { "$ref": "#/definitions/TypeSimpleSymbolVectorConfig" },
+        { "$ref": "#/definitions/TypeCircleSymbolVectorConfig" },
+        { "$ref": "#/definitions/TypeIconSymbolVectorConfig" }
+      ]
+    },
+
+    "TypeStyleConfig": {
+      "anyOf": [
+        { "$ref": "#/definitions/TypeSimpleStyleConfig" },
+        { "$ref": "#/definitions/TypeUniqueValueStyleConfig" },
+        { "$ref": "#/definitions/TypeClassBreakStyleConfig" }
+      ]
+    },
+
+    "TypeLayerInitialSettings": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "opacity": {
           "type": "number",
+          "minimum": 0,
+          "maximum": 1,
           "default": 1,
           "description": "Initial opacity setting."
         },
-        "visibility": {
+        "visible": {
           "type": "boolean",
           "default": true,
           "description": "Initial visibility setting."
         },
-        "boundingBox": {
-          "type": "boolean",
-          "default": false,
-          "description": "Display bounding box."
+        "extent": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
-        "query": {
-          "type": "boolean",
-          "default": true,
-          "description": "Allow querying."
-        }
-      },
-      "additionalProperties": false
-    },
-
-    "layerNameNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string",
-          "description": "The display name of the layer (English). If it is not present the viewer will make an attempt to scrape this information."
+        "minZoom": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "The minimum view zoom level (exclusive) above which this layer will be visible."
         },
-        "fr": {
-          "type": "string",
-          "description": "The display name of the layer (French). If it is not present the viewer will make an attempt to scrape this information."
-        }
-      }
-    },
-    "layerUrlNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string",
-          "description": "The service endpoint of the layer (English). It should match the type provided in layerType."
+        "maxZoom": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "The maximum view zoom level (inclusive) above which this layer will be visible."
         },
-        "fr": {
+        "className": {
           "type": "string",
-          "description": "The service endpoint of the layer (French). It should match the type provided in layerType."
-        }
-      }
-    },
-    "layerMetadataUrlNode": {
-      "type": "object",
-      "properties": {
-        "en": {
-          "type": "string",
-          "default": null,
-          "description": "The metadata url of the layer service (English)."
-        },
-        "fr": {
-          "type": "string",
-          "default": null,
-          "description": "The metadata url of the layer service (French)."
+          "description": "A CSS class name to set to the layer element."
         }
       }
     },
 
-    "basicLayer": {
+    "TypeVectorSourceFormats": {
+      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI"],
+      "description": "The feature format used by the XHR feature loader when access path is set."
+    },
+
+    "TypeVectorSourceInitialConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
-        "id": {
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+        },
+        "format": { "$ref": "#/definitions/TypeVectorSourceFormats" },
+        "dataProjection": {
           "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+          "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326. "
         },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["ogcWms", "ogcWfs", "geoJson", "csv", "esriDynamic", "esriFeature", "esriImage", "esriTile"]
-        }
-      },
-      "required": ["id", "layerType", "url"]
+        "featureInfo": { "$ref": "#/definitions/TypeFeatureInfoLayerConfig" },
+        "cluster": { "$ref": "#/definitions/TypeSourceVectorClusterConfig" }
+      }
     },
-    "basicLayerConfig": {
+
+    "TypeSourceVectorClusterConfig": {
+      "additionalProperties": false,
       "type": "object",
+      "description": "Cluster vector data on vector layer. Works out of the box with point geometries. If another geometry is provided, it will be converted to points geometry.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        "enable": {
+          "type": "boolean",
+          "default": false
         },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
+        "distance": {
+          "type": "integer",
+          "description": "Distance in pixels within which features will be clustered together (deafult 20px)."
         },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["esriImage", "esriTile"]
-        },
-        "metadataUrl": {
-          "$ref": "#/definitions/layerMetadataUrlNode"
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
+        "minDistance": {
+          "type": "integer",
+          "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
         }
-      },
-      "required": ["id", "layerType", "url"],
-      "additionalProperties": false
+      }
     },
-    "featureLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["esriFeature"]
-        },
-        "metadataUrl": {
-          "$ref": "#/definitions/layerMetadataUrlNode"
-        },
-        "nameField": {
-          "type": "string",
-          "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
-        },
-        "tooltipField": {
-          "type": "string",
-          "description": "The field to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
-        },
-        "outfields": {
-          "type": "string",
-          "default": "*",
-          "description": "A comma separated list of attribute names that should be requested on query."
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "layerType", "url"],
-      "additionalProperties": false
-    },
-    "dynamicLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["esriDynamic"]
-        },
-        "metadataUrl": {
-          "$ref": "#/definitions/layerMetadataUrlNode"
-        },
-        "layerEntries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/dynamicLayerEntryNode"
-          },
-          "minItems": 1
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "layerType", "layerEntries", "url"],
-      "additionalProperties": false
-    },
-    "dynamicLayerEntryNode": {
-      "type": "object",
-      "properties": {
-        "index": {
-          "type": "number",
-          "description": "The index of the layer in the map service."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "nameField": {
-          "type": "string",
-          "description": "The display field of the layer.  If it is not present the viewer will make an attempt to scrape this information."
-        },
-        "outfields": {
-          "type": "string",
-          "default": "*",
-          "description": "A comma separated list of attribute names that should be requested on query."
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        }
-      },
-      "required": ["index"],
-      "additionalProperties": false
-    },
-    "geoJsonLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["geojson"]
-        },
-        "nameField": {
-          "type": "string",
-          "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field."
-        },
-        "tooltipField": {
-          "type": "string",
-          "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
-        },
-        "renderer": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "name", "layerType", "url"],
-      "additionalProperties": false
-    },
-    "wfsLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerEntries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/wfsLayerEntryNode"
-          },
-          "minItems": 1
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["ogcWfs"]
-        },
-        "nameField": {
-          "type": "string",
-          "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
-        },
-        "tooltipField": {
-          "type": "string",
-          "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
-        },
-        "renderer": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "layerType", "layerEntries", "url"],
-      "additionalProperties": false
-    },
-    "wfsLayerEntryNode": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer entry in the WFS."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        }
-      },
-      "required": ["id"],
-      "additionalProperties": false
-    },
-    "wmsLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerEntries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/wmsLayerEntryNode"
-          },
-          "minItems": 1
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["ogcWms"]
-        },
-        "metadataUrl": {
-          "$ref": "#/definitions/layerMetadataUrlNode"
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "layerType", "layerEntries", "url"],
-      "additionalProperties": false
-    },
-    "wmsLayerEntryNode": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer entry in the WMS."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        }
-      },
-      "required": ["id"],
-      "additionalProperties": false
-    },
-    "geometryEndpointLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["geojsonEndpoint"]
-        },
-        "nameField": {
-          "type": "string",
-          "description": "The display field of the layer. If it is not present the viewer will make an attempt to find the first valid field."
-        },
-        "tooltipField": {
-          "type": "string",
-          "description": "The field to be used for tooltips.  If it is not present the viewer will use nameField (if provided)."
-        },
-        "renderer": {
-          "type": "object",
-          "additionalProperties": true,
-          "description": "Optional renderer object to apply to the layer. Follows Leaflet Path json convention."
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "name", "layerType", "url"],
-      "additionalProperties": false
-    },
-    "geoCoreLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The GeoCore catalog uuid of the layer. The id will have the language extension (id-'lang')."
-        },
-        "url": {
-          "type": "string",
-          "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView)."
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["geoCore"]
-        }
-      },
-      "required": ["id", "layerType"],
-      "additionalProperties": false
-    },
-    "xyzTilesLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["xyzTiles"]
-        },
-        "metadataUrl": {
-          "$ref": "#/definitions/layerMetadataUrlNode"
-        },
-        "nameField": {
-          "type": "string",
-          "description": "The display field of the layer. If it is not present the viewer will make an attempt to scrape this information."
-        },
-        "tooltipField": {
-          "type": "string",
-          "description": "The field to be used for tooltips. If it is not present the viewer will use nameField (if provided)."
-        },
-        "outfields": {
-          "type": "string",
-          "default": "*",
-          "description": "A comma separated list of attribute names that should be requested on query."
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "layerType", "url"],
-      "additionalProperties": false
-    },
-    "ogcFeatureLayerConfig": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "url": {
-          "$ref": "#/definitions/layerUrlNode"
-        },
-        "layerEntries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ogcFeatureLayerEntryNode"
-          },
-          "minItems": 1
-        },
-        "layerType": {
-          "type": "string",
-          "enum": ["ogcFeature"]
-        },
-        "metadataUrl": {
-          "$ref": "#/definitions/layerMetadataUrlNode"
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        },
-        "details": {
-          "$ref": "#/definitions/detailsLayerConfig"
-        }
-      },
-      "required": ["id", "layerType", "layerEntries", "url"],
-      "additionalProperties": false
-    },
-    "ogcFeatureLayerEntryNode": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The id of the layer entry in the WMS."
-        },
-        "name": {
-          "$ref": "#/definitions/layerNameNode"
-        },
-        "state": {
-          "$ref": "#/definitions/initialLayerSettings"
-        }
-      },
-      "required": ["id"],
-      "additionalProperties": false
-    },
-    "layerConfig": {
-      "type": "object",
-      "oneOf": [
-        {
-          "$ref": "#/definitions/basicLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/featureLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/dynamicLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/geoJsonLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/wfsLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/wmsLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/xyzTilesLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/ogcFeatureLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/geometryEndpointLayerConfig"
-        },
-        {
-          "$ref": "#/definitions/geoCoreLayerConfig"
-        }
+
+    "TypeSourceImageInitialConfig": {
+      "anyOf": [
+        { "$ref": "#/definitions/TypeSourceImageWmsInitialConfig" },
+        { "$ref": "#/definitions/TypeSourceImageEsriInitialConfig" }
       ]
     },
 
-    "layerList": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/layerConfig"
-      },
-      "minItems": 0
-    }
-  },
-
-  "properties": {
-    "map": {
+    "TypeSourceImageWmsInitialConfig": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
-        "basemapOptions": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "enum": ["transport", "simple", "osm", "nogeom"],
-              "default": "transport",
-              "description": "Id of the basemap to use."
-            },
-            "shaded": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
-            },
-            "labeled": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable or disable basemap labels"
-            }
-          },
-          "required": ["id", "shaded", "labeled"]
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
         },
-        "interaction": {
+        "crossOrigin": {
           "type": "string",
-          "enum": ["static", "dynamic"],
-          "default": "dynamic",
-          "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         },
-        "layers": {
-          "$ref": "#/definitions/layerList",
-          "description": "Layers list in the order which they should be added to the map."
+        "projection": {
+          "type": "integer",
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
         },
-        "view": {
+        "featureInfo": {
+          "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
+        },
+        "serverType": {
+          "$ref": "#/definitions/TypeOfServer",
+          "description": "The type of the remote WMS server. The default value is mapserver."
+        },
+        "style": {
+          "type": "string",
+          "default": "",
+          "description": "Style to apply"
+        }
+      }
+    },
+
+    "TypeOfServer": {
+      "enum": ["mapserver", "geoserver", "qgis"],
+      "description": "The type of the remote WMS server. The default value is mapserver."
+    },
+
+    "TypeSourceImageEsriInitialConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+        },
+        "crossOrigin": {
+          "type": "string",
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
+        },
+        "projection": {
+          "type": "integer",
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+        },
+        "featureInfo": {
+          "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
+        },
+        "format": {
+          "$ref": "#/definitions/TypeEsriFormatParameter"
+        },
+        "transparent": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and .gif formats support transparency."
+        }
+      }
+    },
+
+    "TypeEsriFormatParameter": {
+      "enum": ["png", "jpg", "gif", "svg"],
+      "default": "png",
+      "description": "The format of the exported image. The default format is png."
+    },
+
+    "TypeSourceTileInitialConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+        },
+        "crossOrigin": {
+          "type": "string",
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
+        },
+        "projection": {
+          "type": "integer",
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+        },
+        "tileGrid": { "$ref": "#/definitions/TypeTileGrid" }
+      }
+    },
+
+    "TypeTileGrid": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "extent": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
+        },
+        "origin": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
+        },
+        "resolutions": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Resolutions. The array index of each resolution needs to match the zoom level. This means that even if a minZoom is configured, the resolutions array will have a length of maxZoom + 1."
+        },
+        "tileSize": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "default": [256, 256],
+          "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
+        }
+      },
+      "required": ["origin", "resolutions"]
+    },
+
+    "TypeVectorHeatmapLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "entryType": { "enum": ["vector"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": { "$ref": "#/definitions/TypeVectorSourceInitialConfig" },
+        "gradient": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "minItems": 2,
+          "default": ["#00f", "#0ff", "#0f0", "#ff0", "#f00"],
+          "description": "Color gradient of the heatmap, specified as an array of CSS color strings."
+        },
+        "radius": {
+          "type": "number",
+          "description": "Radius size in pixels (default 8px)."
+        },
+        "blur": {
+          "type": "number",
+          "description": "Blur size in pixels (default 15px)."
+        },
+        "weight": {
+          "type": "string",
+          "description": "Feature attribute to use for the weight or a function (ADD FORMAT) that returns a weight from a feature."
+        }
+      },
+      "required": ["layerId"]
+    },
+
+    "TypeVectorLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "entryType": { "enum": ["vector"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": { "$ref": "#/definitions/TypeVectorSourceInitialConfig" },
+        "style": { "$ref": "#/definitions/TypeStyleConfig" }
+      },
+      "required": ["layerId"]
+    },
+
+    "TypeVectorTileLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Layer sources providing vector data divided into a tile grid.",
+      "properties": {
+        "entryType": { "enum": ["vector"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": {
+          "$ref": "#/definitions/TypeVectorTileSourceInitialConfig",
+          "description": "Information used to configure the source of a vector tile layer."
+        }
+      },
+      "required": ["layerId"]
+    },
+
+    "TypeVectorTileSourceInitialConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Layer sources providing vector data divided into a tile grid.",
+      "properties": {
+        "dataAccessPath": {
+          "$ref": "#/definitions/TypeTileGrid",
+          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+        },
+        "format": {
+          "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "MVT", "featureAPI"],
+          "description": "The feature format used by the XHR feature loader when access path is set."
+        },
+        "dataProjection": {
+          "type": "string",
+          "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326."
+        },
+        "featureInfo": { "$ref": "#/definitions/TypeFeatureInfoLayerConfig" },
+        "style": { "$ref": "#/definitions/TypeStyleConfig" },
+        "tileGrid": {
+          "additionalProperties": false,
           "type": "object",
           "properties": {
-            "center": {
-              "type": "array",
-              "prefixItems": [
-                {
-                  "type": "integer",
-                  "minimum": -80,
-                  "maximum": 80,
-                  "default": 60,
-                  "description": "Initial latitude value for map center."
-                },
-                {
-                  "type": "integer",
-                  "minimum": -160,
-                  "maximum": 160,
-                  "default": -106,
-                  "description": "Initial longitude value for map center."
-                }
-              ]
-            },
-            "enableRotation": {
-              "type": "boolean",
-              "default": true,
-              "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
-            },
             "extent": {
               "type": "array",
               "prefixItems": [
@@ -698,106 +646,412 @@
               ],
               "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
             },
-            "minZoom": {
-              "type": "integer",
-              "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap."
+            "origin": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
             },
-            "maxZoom": {
-              "minZoom": {
-                "type": "integer",
-                "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap."
-              }
+            "resolutions": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "description": "Resolutions. The array index of each resolution needs to match the zoom level. This means that even if a minZoom is configured, the resolutions array will have a length of maxZoom + 1."
             },
-            "projection": {
-              "type": "integer",
-              "enum": [3978, 3857],
-              "default": 3978,
-              "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
-            },
-            "rotation": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 360,
-              "default": 0,
-              "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
-            },
-            "zoom": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 28,
-              "default": 12,
-              "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
+            "tileSize": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "default": [256, 256],
+              "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
             }
           },
-          "required": ["zoom", "center", "projection"]
+          "required": ["origin", "resolutions"]
+        }
+      }
+    },
+
+    "TypeImageLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "entryType": { "enum": ["raster"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
         },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": { "$ref": "#/definitions/TypeSourceImageInitialConfig" }
+      },
+      "required": ["layerId"]
+    },
+
+    "TypeTileLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "entryType": { "enum": ["raster"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": { "$ref": "#/definitions/TypeSourceTileInitialConfig" }
+      },
+      "required": ["layerId"]
+    },
+
+    "TypeGeocoreLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Layer where configration is extracted by a configuration snippet stored on a server. The server configuration will handle bilangual informations.",
+      "properties": {
+        "entryType": { "enum": ["geocore"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "source": { "$ref": "#/definitions/TypeSourceGeocoreConfig" }
+      },
+      "required": ["layerId"]
+    },
+
+    "TypeSourceGeocoreConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Layer source providing geocore data.",
+      "properties": {
+        "dataAccessPath":  {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView API)."
+        }
+      }
+    },
+
+    "TypeLayerEntryType": {
+      "enum": ["vector", "raster", "geocore"],
+      "description": "Layer entry data type."
+    },
+
+    "TypeLayerGroupEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Entry used to define a layer Group.",
+      "properties": {
+        "entryType": { "enum": ["group"] },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer group to display on the map."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer group (English/French)."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer group entries at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "listOfLayerEntryConfig": {
+          "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+          "description": "The list of layer entry configurations to use from the GeoView layer group."
+        }
+      },
+      "required": ["entryType", "layerId", "layerName", "listOfLayerEntryConfig"]
+    },
+
+    "TypeLayerEntryConfig": {
+      "anyOf": [
+        { "$ref": "#/definitions/TypeLayerGroupEntryConfig" },
+        { "$ref": "#/definitions/TypeVectorHeatmapLayerEntryConfig" },
+        { "$ref": "#/definitions/TypeVectorTileLayerEntryConfig" },
+        { "$ref": "#/definitions/TypeVectorLayerEntryConfig" },
+        { "$ref": "#/definitions/TypeImageLayerEntryConfig" },
+        { "$ref": "#/definitions/TypeTileLayerEntryConfig" },
+        { "$ref": "#/definitions/TypeGeocoreLayerEntryConfig" }
+      ]
+    },
+
+    "TypeListOfLayerEntryConfig": {
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "$ref": "#/definitions/TypeLayerEntryConfig"
+      }
+    },
+
+    "TypeMapConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "basemapOptions": { "$ref": "#/definitions/TypeBasemapOptions" },
+        "interaction": { "$ref": "#/definitions/TypeInteraction" },
+        "listOfGeoviewLayerConfig": { "$ref": "#/definitions/TypeListOfGeoviewLayerConfig" },
+        "viewSettings": { "$ref": "#/definitions/TypeViewSettings" },
         "extraOptions": {
           "type": "object",
           "description": "Additional options used for OpenLayers map options"
         }
       },
-      "required": ["basemapOptions", "interaction", "view"]
+      "required": ["basemapOptions", "interaction", "viewSettings"]
     },
-    "theme": {
+
+    "TypeBasemapOptions": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/definitions/TypeBasemapId" },
+        "shaded": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable shaded basemap (if basemap id is set to shaded then this should be false)."
+        },
+        "labeled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable basemap labels"
+        }
+      },
+      "required": ["id", "shaded", "labeled"]
+    },
+
+    "TypeBasemapId": {
+      "enum": ["transport", "osm", "simple", "nogeom", "shaded"],
+      "default": "transport",
+      "description": "Id of the basemap to use."
+    },
+
+    "TypeInteraction": {
+      "enum": ["static", "dynamic"],
+      "default": "dynamic",
+      "description": "If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar)."
+    },
+
+    "TypeListOfGeoviewLayerConfig": {
+      "description": "List of GeoView Layers in the order which they should be added to the map.",
+      "type": "array",
+      "additionalProperties": false,
+      "items": {
+        "$ref": "#/definitions/TypeGeoviewLayerConfig"
+      }
+    },
+
+    "TypeGeoviewLayerConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
+        },
+        "layerName": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "metadataAccessPath": {
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The GeoView layer access path (English/French)."
+        },
+        "geoviewLayerType":  {
+          "$ref": "#/definitions/TypeGeoviewLayerType",
+          "description": "Type of GeoView layer."
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the GeoView layer at creation time."
+        },
+        "listOfLayerEntryConfig": {
+          "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+          "description": "The layer entries to use from the GeoView layer."
+        }
+      },
+      "required": [
+        "layerId",
+        "geoviewLayerType",
+        "listOfLayerEntryConfig"
+      ]
+    },
+
+    "TypeGeoviewLayerType": {
       "type": "string",
-      "enum": ["dark", "light"],
-      "default": "dark",
-      "description": "Theme style the viewer."
+      "items": {
+        "enum": [
+          "esriDynamic",
+          "esriFeature",
+          "GeoJSON",
+          "geoCore",
+          "xyzTiles",
+          "ogcFeature",
+          "ogcWfs",
+          "ogcWms"
+        ]
+      },
+      "description": "Type of GeoView layer."
     },
-    "appBar": {
+
+    "TypeViewSettings": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "center": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number",
+              "minimum": -160,
+              "maximum": 160,
+              "default": -106,
+              "description": "Initial longitude value for map center."
+            },
+            {
+              "type": "number",
+              "minimum": -80,
+              "maximum": 80,
+              "default": 60,
+              "description": "Initial latitude value for map center."
+            }
+          ],
+          "default": [-106, 60]
+        },
+        "enableRotation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used."
+        },
+        "extent": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
+        },
+        "minZoom": {
+          "type": "integer",
+          "description": "The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "maxZoom": {
+          "type": "integer",
+          "description": "The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.",
+          "minimum": 0,
+          "maximum": 50
+        },
+        "projection": { "$ref": "#/definitions/TypeProjectionCodes" },
+        "rotation": {
+          "type": "integer",
+          "minimum": -360,
+          "maximum": 360,
+          "default": 0,
+          "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
+        },
+        "zoom": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 28,
+          "default": 12,
+          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
+        }
+      },
+      "required": ["zoom", "center"]
+    },
+
+    "TypeProjectionCodes": {
+      "enum": [3978, 3857],
+      "default": 3978,
+      "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+    },
+
+    "TypeAppBarProps": {
+      "additionalProperties": false,
       "type": "object",
       "properties": {
         "about": {
-          "type": "object",
-          "properties": {
-            "en": {
-              "type": "string"
-            },
-            "fr": {
-              "type": "string"
-            }
-          },
-          "required": ["en", "fr"],
-          "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel."
+          "$ref": "#/definitions/TypeLocalizedString",
+          "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel. In the basic view, this information may be added in a container above the map."
         }
       }
     },
-    "navBar": {
+
+    "TypeNavBarProps": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "type": "string",
         "enum": ["zoom", "fullscreen", "fullextent"]
       },
       "default": ["zoom", "fullscreen", "fullextent"],
       "description": "Controls availalbe on the navigation bar.",
       "minItems": 0
     },
-    "components": {
+
+    "TypeMapComponents": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "type": "string",
         "enum": ["appbar", "navbar", "overview-map", "north-arrow"]
       },
       "default": ["appbar", "navbar", "overview-map", "north-arrow"],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },
-    "corePackages": {
+
+    "TypeMapCorePackages": {
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "type": "string",
         "enum": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel"]
       },
       "default": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel"],
       "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",
       "minItems": 0
     },
-    "externalPackages": {
+
+    "TypeExternalPackages": {
       "type": "array",
       "items": {
+        "additionalProperties": false,
         "type": "object",
         "properties": {
           "name": {
@@ -815,7 +1069,9 @@
       "description": "List of external packages to initialize on viewer load.",
       "minItems": 0
     },
-    "serviceUrls": {
+
+    "TypeServiceUrls": {
+      "additionalProperties": false,
       "type": "object",
       "description": "Service endpoint urls",
       "properties": {
@@ -830,22 +1086,70 @@
         }
       }
     },
-    "languages": {
+
+    "TypeDisplayLanguage": {
+      "enum": ["en", "fr"],
+      "description": "Display languages supported."
+    },
+
+    "TypeLocalizedLanguages": {
+      "enum": ["en-CA", "fr-CA"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file."
+    },
+
+    "TypeListOfLocalizedLanguages": {
       "type": "array",
       "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "enum": ["en-CA", "fr-CA"]
-      },
+      "items": { "$ref": "#/definitions/TypeLocalizedLanguages" },
       "default": ["en-CA", "fr-CA"],
-      "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.",
       "minItems": 1
     },
-    "version": {
-      "type": "string",
+
+    "TypeValidVersions": {
       "enum": ["1.0"],
-      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+      "description": "The schema version that can be used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    },
+
+    "TypeMapFeaturesInstance": {
+      "description": "The map feature configuration.",
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "map": { "$ref": "#/definitions/TypeMapConfig" },
+        "theme": {
+          "enum": ["dark", "light"],
+          "default": "dark",
+          "description": "Theme style the viewer."
+        },
+        "appBar": { "$ref": "#/definitions/TypeAppBarProps" },
+        "navBar": { "$ref": "#/definitions/TypeNavBarProps" },
+        "components": { "$ref": "#/definitions/TypeMapComponents" },
+        "corePackages": { "$ref": "#/definitions/TypeMapCorePackages" },
+        "externalPackages": { "$ref": "#/definitions/TypeServiceUrls" },
+        "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
+        "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
+        "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
+      },
+      "required": ["map", "suportedLanguages"]
     }
   },
-  "required": ["map", "languages"]
+
+  "properties": {
+    "map": { "$ref": "#/definitions/TypeMapConfig" },
+    "theme": {
+      "enum": ["dark", "light"],
+      "default": "dark",
+      "description": "Theme style the viewer."
+    },
+    "appBar": { "$ref": "#/definitions/TypeAppBarProps" },
+    "navBar": { "$ref": "#/definitions/TypeNavBarProps" },
+    "components": { "$ref": "#/definitions/TypeMapComponents" },
+    "corePackages": { "$ref": "#/definitions/TypeMapCorePackages" },
+    "externalPackages": { "$ref": "#/definitions/TypeServiceUrls" },
+    "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
+    "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
+    "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
+  },
+  "required": ["map", "suportedLanguages"]
 }
