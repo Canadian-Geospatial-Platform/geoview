@@ -23,7 +23,7 @@
           "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
         },
         "layerType": "esriDynamic",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "index": 1
           },
@@ -42,5 +42,5 @@
   },
   "components": [],
   "theme": "dark",
-  "languages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en-CA", "fr-CA"]
 }

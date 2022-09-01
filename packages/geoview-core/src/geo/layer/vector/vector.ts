@@ -8,7 +8,7 @@ import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { generateId, setAlphaColor } from '../../../core/utils/utilities';
 import {
@@ -20,7 +20,8 @@ import {
   payloadIsAVectorConfig,
 } from '../../../api/events/payloads/vector-config-payload';
 import { VectorPayload } from '../../../api/events/payloads/vector-payload';
-import { TypeFeatureStyle, TypeFeatureCircleStyle } from '../../../core/types/cgpv-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle } from './vector-types';
+
 /**
  * Store a group of features
  */

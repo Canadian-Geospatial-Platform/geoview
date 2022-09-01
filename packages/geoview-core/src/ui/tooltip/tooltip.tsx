@@ -1,6 +1,14 @@
 import MaterialTooltip from '@mui/material/Tooltip';
 
-import { TypeTooltipProps } from '../../core/types/cgpv-types';
+import { TooltipProps } from '@mui/material';
+
+/**
+ * Custom MUI Tooltip properties
+ */
+interface TypeTooltipProps extends TooltipProps {
+  // eslint-disable-next-line react/require-default-props
+  mapId?: string;
+}
 
 /**
  * Create a Material UI Tooltip component

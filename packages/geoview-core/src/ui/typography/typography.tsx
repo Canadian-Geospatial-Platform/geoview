@@ -1,6 +1,13 @@
 import MaterialTypography from '@mui/material/Typography';
+import { TypographyProps } from '@mui/material';
 
-import { TypeTypographyProps } from '../../core/types/cgpv-types';
+/**
+ * Custom Material UI Typography properties
+ */
+interface TypeTypographyProps extends TypographyProps {
+  // eslint-disable-next-line react/require-default-props
+  mapId?: string;
+}
 
 /**
  * Create a Material UI Typography component

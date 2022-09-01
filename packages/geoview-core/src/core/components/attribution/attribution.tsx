@@ -6,7 +6,9 @@ import OLAttribution, { Options } from 'ol/control/Attribution';
 import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
-import { api, toJsonObject, TypeJsonObject } from '../../../app';
+import { api } from '../../../app';
+import { getLocalizedValue } from '../../utils/utilities';
+import { TypeLocalizedString } from '../../../geo/map/map-schema-types';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -102,10 +104,10 @@ class CustomAttribution extends OLAttribution {
     }, 5000);
   }
 
-  private attributionVal: TypeJsonObject = toJsonObject({
-    'en-CA': '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
-    'fr-CA': '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
-  });
+  private attributionVal: TypeLocalizedString = {
+    en: '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
+    fr: '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
+  };
 
   /**
    * Return the attribution control element
@@ -160,7 +162,7 @@ class CustomAttribution extends OLAttribution {
       // if nrcan copyright does not exist add it
       if (!nrcanCopyRightExists) {
         // get nrcan copyright based on language
-        const copyRightText = this.attributionVal[api.map(this.mapId).language] as string;
+        const copyRightText = getLocalizedValue(this.attributionVal, this.mapId)!;
 
         // create li element
         const nrcanCopyRight = document.createElement('LI');

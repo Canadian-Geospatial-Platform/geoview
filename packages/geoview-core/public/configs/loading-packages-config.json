@@ -23,7 +23,7 @@
           "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
         },
         "layerType": "ogcWms",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "id": "0"
           }
@@ -40,7 +40,7 @@
           "fr": "https://datacube.services.geo.ca/ows/msi"
         },
         "layerType": "ogcWms",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "id": "msi-94-or-more"
           }
@@ -57,7 +57,7 @@
           "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
         },
         "layerType": "esriDynamic",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "index": 1
           },
@@ -107,7 +107,7 @@
           "fr": "https://giswebservices.massgis.state.ma.us/geoserver/wfs"
         },
         "layerType": "ogcWfs",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "id": "GISDATA.AIRPORTS_PT"
           }
@@ -124,7 +124,7 @@
           "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
         },
         "layerType": "ogcFeature",
-        "layerEntries": [
+        "listOfLayerEntryConfig": [
           {
             "id": "lakes"
           }
@@ -142,5 +142,5 @@
   "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": ["basemap-panel", "layers-panel"],
   "externalPackages": [],
-  "languages": ["en-CA"]
+  "suportedLanguages": ["en-CA"]
 }

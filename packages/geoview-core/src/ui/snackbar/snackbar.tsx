@@ -9,9 +9,9 @@ import { useSnackbar } from 'notistack';
 import { MapContext } from '../../core/app-start';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/cgpv-types';
+import { Cast, TypeJsonArray, TypeJsonValue } from '../../core/types/global-types';
 import { payloadIsASnackbarMessage } from '../../api/events/payloads/snackbar-message-payload';
 
 /**
@@ -62,7 +62,7 @@ export function Snackbar(props: SnackBarProps): null {
    * @param {string} message original message
    * @returns {string} message with values replaced
    */
-  function replaceParams(params: TypeJsonArray | string[], message: string) {
+  function replaceParams(params: TypeJsonValue[] | TypeJsonArray | string[], message: string) {
     let tmpMess = message;
     (params as string[]).forEach((item: string) => {
       tmpMess = tmpMess.replace('__param__', item);

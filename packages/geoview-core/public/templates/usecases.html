@@ -56,12 +56,12 @@
       <div>
         <div
           id="UC1"
+          data-lang="fr-CA"
           class="llwp-map"
-          data-lang="en-CA"
           data-config="{
             'map': {
               'interaction': 'dynamic',
-              'view': {
+              'viewSettings': {
                 'zoom': 4,
                 'center': [-100, 60],
                 'projection': 3978
@@ -75,7 +75,7 @@
             'components': ['overview-map'],
             'corePackages': ['basemap-panel'],
             'theme': 'dark',
-            'languages': ['en-CA']
+            'suportedLanguages': ['en-CA']
           }"
         ></div>
       </div>
@@ -94,7 +94,7 @@
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3857
@@ -116,7 +116,7 @@
                   'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
                 },
                 'layerType': 'ogcWms',
-                'layerEntries': [
+                'listOfLayerEntryConfig': [
                   {
                     'id': '0'
                   }
@@ -133,7 +133,7 @@
                   'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/Investing_Energy_Canada_en/MapServer'
                 },
                 'layerType': 'esriDynamic',
-                'layerEntries': [
+                'listOfLayerEntryConfig': [
                   {
                     'index': 0
                   },
@@ -153,7 +153,7 @@
                   'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/GSCC/Geochronology/MapServer'
                 },
                 'layerType': 'esriDynamic',
-                'layerEntries': [
+                'listOfLayerEntryConfig': [
                   {
                     'index': 0
                   }
@@ -206,7 +206,7 @@
                   'fr': 'https://geo.weather.gc.ca/geomet'
                 },
                 'layerType': 'ogcWms',
-                'layerEntries': [
+                'listOfLayerEntryConfig': [
                   {
                     'id': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg'
                   }
@@ -223,7 +223,7 @@
           },
           'components': ['overview-map'],
           'corePackages': ['basemap-panel'],
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
       <p>Use to display a map like a thumbnail with minimun functions.</p>
@@ -240,7 +240,7 @@
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
@@ -254,7 +254,7 @@
           'components': ['overview-map'],
           'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
       <p>Description</p>
@@ -271,7 +271,7 @@
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
@@ -285,7 +285,7 @@
           'components': ['overview-map'],
           'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
       <p>Description</p>

@@ -1,4 +1,4 @@
-import { EventStringId } from '../event';
+import { EventStringId } from '../event-types';
 
 /**
  * This file defines the constants of the ATTRIBUTION category. The constants are placed

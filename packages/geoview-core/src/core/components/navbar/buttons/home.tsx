@@ -40,7 +40,7 @@ export default function Home(props: HomeProps): JSX.Element {
    */
   function setHome() {
     // get map and set initial bounds to use in zoom home
-    const { center, zoom } = api.map(mapId).mapProps.map.view;
+    const { center, zoom } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
 
     const { currentProjection } = api.map(mapId);
 

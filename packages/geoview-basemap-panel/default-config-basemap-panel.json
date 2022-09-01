@@ -75,5 +75,5 @@
       "customBasemaps": []
     }
   ],
-  "languages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en-CA", "fr-CA"]
 }

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div>
+      <h3 id="HLYR3">3. Esri dynamic layer</h3>
+      <h3><a href="#top">Top of the page</a></h3>
+      <div>
+        <h3 id="HLYR4">4. Esri feature layer</h3>
+        <h3><a href="#top">Top of the page</a></h3>
+        <div
+          id="LYR4"
+          class="llwp-map"
+          data-lang="en"
+          data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3978
+              },
+              'basemapOptions': {
+                'id': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'layerId': 'esriFeatureLYR4',
+                  'layerName': { 'en': 'Water quality at monitoring sites' },
+                  'metadataAccessPath': {
+                    'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                  },
+                  'geoviewLayerType': 'esriFeature',
+                  'listOfLayerEntryConfig': [
+                    { 'layerId': '9' }
+                  ]
+                }
+              ]
+            },
+            'theme': 'dark',
+            'suportedLanguages': ['en-CA']
+          }"
+        ></div>
+        <p>This map has a Esri feature layer added from configuration.</p>
+        <p><strong>Configuration Snippet:</strong></p>
+        <div id="LYR4CS" class="panel"></div>
+      </div>
+
+      <div id="esriDynamicLayerLegend">
+        <h3>Legend</h3>
+      </div>
+      <p>This map has a Esri dynamic layer added from configuration.</p>
+      <p><strong>Configuration Snippet:</strong></p>
+      <div id="LYR3CS" class="panel"></div>
+    </div>
+  <p><strong>Code Snippet:</strong></p>
+    <div id="codeSnippet" class="panel"></div>
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      });
+    </script>
+  </body>
+</html>

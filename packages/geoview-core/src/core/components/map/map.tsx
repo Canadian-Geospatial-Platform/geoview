@@ -1,12 +1,14 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { useEffect, useState, useRef, MutableRefObject } from 'react';
 
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { ObjectEvent } from 'ol/Object';
-import { MapEvent } from 'ol';
+import { Collection, MapEvent } from 'ol';
+import BaseLayer from 'ol/layer/Base';
+import Source from 'ol/source/Source';
 
 import makeStyles from '@mui/styles/makeStyles';
 import { useMediaQuery } from '@mui/material';
@@ -17,19 +19,19 @@ import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { generateId } from '../../utils/utilities';
 
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { MapViewer } from '../../../geo/map/map';
 
-import { TypeMapConfigProps } from '../../types/cgpv-types';
 import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basemap-layers-payload';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { Footerbar } from '../footerbar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
+import { TypeMapFeaturesConfig } from '../../types/global-types';
 
-export const useStyles = makeStyles(() => ({
+const useStyles = makeStyles(() => ({
   mapContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -38,12 +40,12 @@ export const useStyles = makeStyles(() => ({
   },
 }));
 
-export function Map(props: TypeMapConfigProps): JSX.Element {
-  const { map: mapProps, components } = props;
+export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
+  const { map: mapConfig, components } = mapFeaturesConfig;
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
-  const id = props.id ? props.id : generateId('');
+  const id = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -111,7 +113,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
     cgpvMap.on('moveend', mapMoveEnd);
     cgpvMap.getView().on('change:resolution', mapZoomEnd);
 
-    viewer.toggleMapInteraction(mapProps.interaction);
+    viewer.toggleMapInteraction(mapConfig.interaction);
 
     // emit the map loaded event
     setIsLoaded(true);
@@ -119,7 +121,7 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
 
   const initMap = async () => {
     // create map
-    const projection = api.projection.projections[mapProps.view.projection];
+    const projection = api.projection.projections[mapConfig.viewSettings.projection];
 
     const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
 
@@ -139,8 +141,8 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
       }),
       view: new View({
         projection,
-        center: fromLonLat([mapProps.view.center[0], mapProps.view.center[1]], projection),
-        zoom: mapProps.view.zoom,
+        center: fromLonLat([mapConfig.viewSettings.center[0], mapConfig.viewSettings.center[1]], projection),
+        zoom: mapConfig.viewSettings.zoom,
         // extent: projectionConfig.extent,
         extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
         minZoom: defaultBasemap?.zoomLevels.min || 0,
@@ -207,9 +209,30 @@ export function Map(props: TypeMapConfigProps): JSX.Element {
         if (payloadIsAMapViewProjection(payload)) {
           if (payload.handlerName === id) {
             // on map view projection change, layer source needs to be refreshed
-            // TODO: Listen to refresh from layer abstract class
+            const currentView = api.map(id).getView();
+            const centerCoordinate = toLonLat(currentView.getCenter()!, currentView.getProjection());
+            api.map(id).setView({
+              projection: 3978,
+              zoom: currentView.getZoom()!,
+              center: [centerCoordinate[0], centerCoordinate[1]],
+            });
             const mapLayers = api.map(id).layer.layers;
-            Object.entries(mapLayers).forEach((layer) => layer[1].layer.getSource()?.refresh());
+            Object.entries(mapLayers).forEach((layerEntry) => {
+              const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
+                if (baseLayer) {
+                  const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
+                  if (layerGroup) {
+                    layerGroup.forEach((baseLayerEntry) => {
+                      refreshBaseLayer(baseLayerEntry);
+                    });
+                  } else {
+                    const layerSource: Source = baseLayer.get('source');
+                    layerSource.refresh();
+                  }
+                }
+              };
+              refreshBaseLayer(layerEntry[1].gvLayers);
+            });
           }
         }
       },

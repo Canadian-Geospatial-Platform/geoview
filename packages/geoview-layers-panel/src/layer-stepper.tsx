@@ -5,9 +5,9 @@ import {
   TypeJsonArray,
   TypeDynamicLayerEntry,
   TypeOgcLayerEntry,
-  TypeLayerConfig,
-  TypeWebLayers,
-  TypeSelectChangeEvent,
+  TypeGeoviewLayerConfig,
+  TypeGeoviewLayerType,
+  SelectChangeEvent,
   snackbarMessagePayload,
 } from 'geoview-core';
 
@@ -16,12 +16,6 @@ type Event = { target: { value: string } };
 interface Props {
   mapId: string;
   setAddLayerVisible: (isVisible: boolean) => void;
-}
-
-interface ButtonProps {
-  isFirst?: boolean;
-  isLast?: boolean;
-  handleNext: () => void;
 }
 
 type EsriOptions = {
@@ -46,7 +40,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
-  const [layerType, setLayerType] = useState<TypeWebLayers | ''>('');
+  const [layerType, setLayerType] = useState<TypeGeoviewLayerType | ''>('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<(TypeDynamicLayerEntry | TypeOgcLayerEntry)[]>([]);
@@ -362,14 +356,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
-    const layerConfig: TypeLayerConfig = {
+    const layerConfig: TypeGeoviewLayerConfig = {
       id: api.generateId(),
       name: {
         en: name,
         fr: name,
       },
-      layerType: layerType as TypeWebLayers,
-      url: {
+      layerType: layerType as TypeGeoviewLayerType,
+      metadataAccessPath: {
         en: url,
         fr: url,
       },
@@ -404,10 +398,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   /**
    * Set layerType from form input
    *
-   * @param {TypeSelectChangeEvent} event TextField event
+   * @param {SelectChangeEvent} event TextField event
    */
-  const handleSelectType = (event: TypeSelectChangeEvent<unknown>) => {
-    setLayerType(event.target.value as TypeWebLayers);
+  const handleSelectType = (event: SelectChangeEvent<unknown>) => {
+    setLayerType(event.target.value as TypeGeoviewLayerType);
     setLayerList([]);
     setLayerName('');
     setLayerEntries([]);

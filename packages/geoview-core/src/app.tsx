@@ -16,12 +16,13 @@ import * as UI from './ui';
 import AppStart from './core/app-start';
 import * as types from './core/types/cgpv-types';
 
-import { EVENT_NAMES } from './api/events/event';
+import { EVENT_NAMES } from './api/events/event-types';
 import { API } from './api/api';
 
-import { Config } from './core/utils/config';
-import { payloadIsAMapConfig } from './api/events/payloads/map-config-payload';
+import { Config } from './core/utils/config/config';
+import { payloadIsAmapFeaturesConfig } from './api/events/payloads/map-config-payload';
 
+// The next export allow to import the cgpv-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/cgpv-types';
 export const api = new API();
 
@@ -29,32 +30,32 @@ export const api = new API();
 
 // listen to map reload event
 api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
-  if (payloadIsAMapConfig(payload)) {
-    if (payload.config && payload.config.id) {
+  if (payloadIsAmapFeaturesConfig(payload)) {
+    if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
       // unsubscribe from all events registered on this map
-      api.event.offAll(payload.config.id);
+      api.event.offAll(payload.mapFeaturesConfig.mapId);
 
       // unload all loaded plugins on the map
-      api.plugin.removePlugins(payload.config.id);
+      api.plugin.removePlugins(payload.mapFeaturesConfig.mapId);
 
       // get the map container
-      const map = document.getElementById(payload.config.id);
+      const map = document.getElementById(payload.mapFeaturesConfig.mapId);
 
       if (map) {
         // remove the dom element (remove rendered map)
         ReactDOM.unmountComponentAtNode(map);
 
         // delete the map instance from the maps array
-        delete api.maps[payload.config.id];
+        delete api.maps[payload.mapFeaturesConfig.mapId];
 
         // delete plugins that were loaded on the map
-        delete api.plugin.plugins[payload.config.id];
+        delete api.plugin.plugins[payload.mapFeaturesConfig.mapId];
 
         // set plugin's loaded to false
         api.plugin.pluginsLoaded = false;
 
         // re-render map with updated config keeping previous values if unchanged
-        ReactDOM.render(<AppStart configObj={payload.config} />, map);
+        ReactDOM.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />, map);
       }
     }
   }
@@ -87,7 +88,7 @@ async function init(callback: () => void) {
     // if valid config was provided
     if (configObj) {
       // render the map with the config
-      ReactDOM.render(<AppStart configObj={configObj} />, mapElement);
+      ReactDOM.render(<AppStart mapFeaturesConfig={configObj} />, mapElement);
     }
   }
 
@@ -113,9 +114,10 @@ export const cgpv: types.TypeCGPV = {
   },
   useTranslation,
   types,
-  constants: {
-    options: {},
-  },
+  // ? Do we realy need the constants attribute?
+  // constants: {
+  //   options: {},
+  // },
 };
 
 // freeze variable name so a variable with same name can't be defined from outside

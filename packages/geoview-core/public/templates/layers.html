@@ -51,50 +51,85 @@
         </tbody>
       </table>
     </div>
+    <div class="toolbar">
+      <button class="test-btn">Test Refresh</button>
+    </div>
     <div>
-      <h3 id="HLYR1">1.WMS Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR1"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'view': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'id': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'layers': [
-              {
-                'id': 'wmsLYR1',
-                'name': {
-                  'en': 'Topographic OSM WMS',
-                  'fr': 'Topographic OSM WMS'
+      <div>
+        <h3 id="HLYR1">1.WMS Layer</h3>
+        <h3><a href="#top">Top of the page</a></h3>
+        <div
+          id="LYR1"
+          class="llwp-map"
+          data-lang="en"
+          data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'id': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'layerId': 'wmsLYR1-Root',
+                  'layerName': { 'en': 'Root' },
+                  'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'entryType': 'group',
+                      'layerId': 'wmsLYR1-Group',
+                      'layerName': { 'en': 'Group' },
+                      'listOfLayerEntryConfig': [
+                        {
+                          'layerId': 'OSM-WMS'
+                        },
+                        {
+                          'layerId': 'TOPO-OSM-WMS'
+                        }
+                      ]
+                    }
+                  ]
                 },
-                'url': {
-                  'en': 'https://ows.mundialis.de/services/service?',
-                  'fr': 'https://ows.mundialis.de/services/service?'
+                {
+                  'layerId': 'wmsLYR2-Root',
+                  'layerName': { 'en': 'Topographic OSM WMS' },
+                  'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'OSM-WMS'
+                    },
+                    {
+                      'layerId': 'TOPO-OSM-WMS'
+                    }
+                  ]
                 },
-                'layerType': 'ogcWms',
-                'layerEntries': [
-                  {
-                    'id': 'TOPO-OSM-WMS'
-                  }
-                ]
-              }
-            ]
-          },
-          'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+                {
+                  'layerId': 'wmsLYR3',
+                  'layerName': { 'en': 'MSI' },
+                  'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'msi-94-or-more'
+                    }
+                  ]
+                }
+              ]
+            },
+            'theme': 'dark',
+            'suportedLanguages': ['en-CA']
+          }"
+        ></div>
 
       <div>
         <h3>Legend</h3>
@@ -106,42 +141,47 @@
     </div>
     <div>
       <h3 id="HLYR2">2. XYZ Tiles Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
       <div
         id="LYR2"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'view': {
-            'zoom': 4,
-            'center': [-100, 60],
-            'projection': 3857
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'layerId': 'xyzTilesLYR2',
+                'layerName': {
+                  'en': 'statmen toner'
+                },
+                'geoviewLayerType': 'xyzTiles',
+                'initialSettings': { 'visible': true },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'toner',
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
           },
-          'basemapOptions': {
-            'id': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'layers': [
-            {
-              'id': 'xyzTilesLYR2',
-              'name': {
-                'en': 'statmen toner',
-                'fr': 'statmen toner'
-              },
-              'url': {
-                'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
-                'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
-              },
-              'layerType': 'xyzTiles'
-            }
-          ]
-        },
-        'theme': 'dark',
-        'languages': ['en-CA']
-      }"
+          'theme': 'dark',
+          'suportedLanguages': ['en-CA']
+        }"
       ></div>
 
       <p>This map has a XYZ Tiles layer added from configuration.</p>
@@ -156,11 +196,11 @@
       <div
         id="LYR3"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
@@ -170,31 +210,29 @@
               'shaded': true,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'esriDynamicLYR3',
-                'name': {
-                  'en': 'Senior care facilities on April 2020',
-                  'fr': 'Senior care facilities on April 2020'
+                'layerId': 'esriDynamicLYR3',
+                'layerName': {
+                  'en': 'Senior care facilities on April 2020'
                 },
-                'url': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
                 },
-                'layerType': 'esriDynamic',
-                'layerEntries': [
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
                   {
-                    'index': 0
+                    'layerId': '0'
                   },
                   {
-                    'index': 1
+                    'layerId': '1'
                   }
                 ]
               }
             ]
           },
           'theme': 'dark',
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
 
@@ -211,37 +249,36 @@
       <div
         id="LYR4"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
             },
             'basemapOptions': {
-              'id': 'nogeom',
-              'shaded': true,
-              'labeled': false
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'esriFeatureLYR4',
-                'name': {
-                  'en': 'Senior care facilities by province and territory',
-                  'fr': 'Senior care facilities by province and territory'
+                'layerId': 'esriFeatureLYR4',
+                'layerName': { 'en': 'Water quality at monitoring sites' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
                 },
-                'url': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
-                },
-                'layerType': 'esriFeature'
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '9' }
+                ]
               }
             ]
           },
           'theme': 'dark',
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
       <p>This map has a Esri feature layer added from configuration.</p>
@@ -252,41 +289,50 @@
       <h3 id="HLYR5">5. GeoJSON Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
-        id="LYR5"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'view': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'id': 'nogeom',
-              'shaded': true,
-              'labeled': false
-            },
-            'layers': [
-              {
-                'id': 'geojsonLYR5',
-                'name': {
-                  'en': 'GeoJSON Sample',
-                  'fr': 'Exemple GeoJSON'
-                },
-                'url': {
-                  'en': './geojson/polygons.json',
-                  'fr': './geojson/polygons.json'
-                },
-                'layerType': 'geojson'
-              }
-            ]
+      id="LYR5"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
           },
-          'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+          'basemapOptions': {
+            'id': 'nogeom',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'layerId': 'geojsonLYR5',
+              'layerName': {
+                'en': 'GeoJSON Sample'
+              },
+              'metadataAccessPath': {
+                'en': './geojson/metadata.json'
+              },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json'
+                },
+                {
+                  'layerId': 'lines.json'
+                },
+                {
+                  'layerId': 'points.json'
+                }
+              ]
+            }
+          ]
+        },
+        'theme': 'dark',
+        'suportedLanguages': ['en-CA']
+      }"
+    ></div>
 
       <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking the buttons</p>
       <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
@@ -301,11 +347,11 @@
       <div
         id="LYR6"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
         'map': {
           'interaction': 'dynamic',
-          'view': {
+          'viewSettings': {
             'zoom': 8,
             'center': [-71.370748, 42.001058],
             'projection': 3857
@@ -315,45 +361,43 @@
             'shaded': false,
             'labeled': true
           },
-          'layers': [
+          'listOfGeoviewLayerConfig': [
             {
-              'id': 'wfsLYR6',
-              'name': {
-                'en': 'Airport data',
-                'fr': 'Airport data'
+              'layerId': 'wfsLYR6',
+              'layerName': {
+                'en': 'Airport data'
               },
-              'url': {
-                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
-                'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+              'metadataAccessPath': {
+                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
               },
-              'layerType': 'ogcWfs',
-              'layerEntries': [
+              'geoviewLayerType': 'ogcWfs',
+              'listOfLayerEntryConfig': [
                 {
-                  'id': 'GISDATA.AIRPORTS_PT'
+                  'layerId': 'GISDATA.AIRPORTS_PT'
                 }
               ]
             }
           ]
         },
         'theme': 'dark',
-        'languages': ['en-CA']
+        'suportedLanguages': ['en-CA']
       }"
       ></div>
       <p>This map has a WFS layer added from configuration.</p>
       <p><strong>Configuration Snippet:</strong></p>
       <div id="LYR6CS" class="panel"></div>
     </div>
-    <div>
+  <div>
       <h3 id="HLYR7">7. OGC API Feature Layer</h3>
       <h3><a href="#top">Top of the page</a></h3>
       <div
         id="LYR7"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 3,
               'center': [0, 20],
               'projection': 3857
@@ -363,28 +407,26 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'ogcFeatureLYR7',
-                'name': {
-                  'en': 'Large Lakes',
-                  'fr': 'Large Lakes'
+                'layerId': 'ogcFeatureLYR7',
+                'layerName': {
+                  'en': 'Large Lakes'
                 },
-                'url': {
-                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-                  'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
+                'metadataAccessPath': {
+                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
                 },
-                'layerType': 'ogcFeature',
-                'layerEntries': [
+                'geoviewLayerType': 'ogcFeature',
+                'listOfLayerEntryConfig': [
                   {
-                    'id': 'lakes'
+                    'layerId': 'lakes'
                   }
                 ]
               }
             ]
           },
           'theme': 'dark',
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
 
@@ -398,11 +440,11 @@
       <div
         id="LYR8"
         class="llwp-map"
-        data-lang="en-CA"
+        data-lang="en"
         data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3857
@@ -412,15 +454,20 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
-                'layerType': 'geoCore'
+                'layerId': 'ogcFeatureLYR7',
+                'geoviewLayerType': 'geoCore',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+                  }
+                ]
               }
             ]
           },
           'theme': 'dark',
-          'languages': ['en-CA']
+          'suportedLanguages': ['en-CA']
         }"
       ></div>
 
@@ -439,8 +486,8 @@
         //create snippets
         createCodeSnippet();
         createConfigSnippet();
-        addWMSLegend();
-        addEsriDynamicLegend();
+        // addWMSLegend();
+        // addEsriDynamicLegend();
       });
 
       // find the button element by ID
@@ -455,7 +502,7 @@
             en: 'geojson sample',
             fr: 'exemple geojson',
           },
-          layerType: 'geojson',
+          layerType: 'GeoJSON',
           url: {
             en: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
             fr: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
@@ -475,6 +522,15 @@
         document.getElementById('new-layer-id').innerText = '';
       });
 
+        // get addPolyline button element for WM map
+        var testBtn = document.getElementsByClassName('test-btn')[0];
+
+        // add event handler to the add polyline button
+        testBtn.addEventListener('click', function (e) {
+          cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+        });
+
+      /*
       //add legend to WMS layer
       function addWMSLegend() {
         cgpv.api
@@ -521,6 +577,7 @@
             });
           });
       }
+      */
     </script>
   </body>
 </html>

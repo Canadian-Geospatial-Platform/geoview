@@ -1,58 +1,57 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeMapFeaturesConfig } from '../../../core/types/global-types';
 
-import { TypeMapConfigProps } from '../../../core/types/cgpv-types';
-
-/** Valid events that can create MapConfigPayload */
+/** Valid events that can create MapFeaturesPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_RELOAD];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MapConfigPayload
+ * Type Gard function that redefines a PayloadBaseClass as a MapFeaturesPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
  */
-export const payloadIsAMapConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapConfigPayload => {
+export const payloadIsAmapFeaturesConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapFeaturesPayload => {
   return validEvents.includes(verifyIfPayload.event);
 };
 
 /**
- * Class definition for MapConfigPayload
+ * Class definition for MapFeaturesPayload
  *
  * @exports
- * @class MapConfigPayload
+ * @class MapFeaturesPayload
  */
-export class MapConfigPayload extends PayloadBaseClass {
+export class MapFeaturesPayload extends PayloadBaseClass {
   // the map configuration
-  config: TypeMapConfigProps;
+  mapFeaturesConfig: TypeMapFeaturesConfig;
 
   /**
    * Constructor for the class
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {TypeMapConfigProps} config the map configuration
+   * @param {TypeMapFeaturesConfig} mapFeatures the map features configuration
    */
-  constructor(event: EventStringId, handlerName: string | null, config: TypeMapConfigProps) {
-    if (!validEvents.includes(event)) throw new Error(`MapConfigPayload can't be instanciated for event of type ${event}`);
+  constructor(event: EventStringId, handlerName: string | null, mapFeaturesConfig: TypeMapFeaturesConfig) {
+    if (!validEvents.includes(event)) throw new Error(`MapFeaturesPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.config = config;
+    this.mapFeaturesConfig = mapFeaturesConfig;
   }
 }
 
 /**
- * Helper function used to instanciate a MapConfigPayload object. This function
- * avoids the "new MapConfigPayload" syntax.
+ * Helper function used to instanciate a MapFeaturesPayload object. This function
+ * avoids the "new MapFeaturesPayload" syntax.
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {TypeMapConfigProps} config the map configuration
+ * @param {TypeMapFeaturesConfig} config the map configuration
  *
- * @returns {MapConfigPayload} the MapConfigPayload object created
+ * @returns {MapFeaturesPayload} the MapFeaturesPayload object created
  */
-export const mapConfigPayload = (event: EventStringId, handlerName: string | null, config: TypeMapConfigProps): MapConfigPayload => {
-  return new MapConfigPayload(event, handlerName, config);
+export const mapConfigPayload = (event: EventStringId, handlerName: string | null, config: TypeMapFeaturesConfig): MapFeaturesPayload => {
+  return new MapFeaturesPayload(event, handlerName, config);
 };

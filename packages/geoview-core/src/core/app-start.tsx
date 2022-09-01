@@ -10,8 +10,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Shell } from './containers/shell';
 import { cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
-
-import { TypeMapConfigProps, TypeMapContext } from './types/cgpv-types';
+import { TypeMapFeaturesConfig } from './types/global-types';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,39 +24,47 @@ export const MapContext = React.createContext<TypeMapContext>({
 });
 
 /**
- * interface used when passing configuration from the maps
+ * Type used for the map context
+ */
+type TypeMapContext = {
+  id: string;
+  interaction: string;
+};
+
+/**
+ * interface used when passing map features configuration
  */
 interface AppStartProps {
-  configObj: TypeMapConfigProps;
+  mapFeaturesConfig: TypeMapFeaturesConfig;
 }
 
 /**
  * Initialize the app with maps from inline html configs, url params
  */
 function AppStart(props: AppStartProps): JSX.Element {
-  const { configObj } = props;
+  const { mapFeaturesConfig } = props;
 
   const mapContextValue = useMemo(() => {
-    return { id: configObj.id, interaction: configObj.map.interaction };
-  }, [configObj.id, configObj.map.interaction]);
+    return { id: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
+  }, [mapFeaturesConfig.mapId, mapFeaturesConfig.map.interaction]);
 
   /**
    * Create maps from inline configs with class name llwp-map in index.html
    */
   function getInlineMaps() {
     const i18nInstance = i18n.cloneInstance({
-      lng: configObj.language,
-      fallbackLng: configObj.language,
+      lng: mapFeaturesConfig.displayLanguage,
+      fallbackLng: mapFeaturesConfig.displayLanguage,
     });
 
     // create a new map instance
     // eslint-disable-next-line no-new
-    new MapViewer(configObj, i18nInstance);
+    new MapViewer(mapFeaturesConfig, i18nInstance);
 
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <Shell id={configObj.id} config={configObj} />
+          <Shell id={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
         </MapContext.Provider>
       </I18nextProvider>
     );
