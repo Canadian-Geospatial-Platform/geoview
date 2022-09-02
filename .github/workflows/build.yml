@@ -1,0 +1,39 @@
+on:
+  workflow_call:
+    inputs:
+      cache_sha:
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: '16.15.0'
+
+jobs:
+  build:
+    name: build-geoview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.push.head.ref || github.ref.name }}
+          repository: ${{ github.event.push.repo.full_name || github.repository }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Run rush install and build on our code
+      - name: Install Rush
+        run: node common/scripts/install-run-rush.js install
+
+      - name: Persist build output for other workflows
+        uses: actions/cache@v3
+        with:
+          path: packages/geoview-core/dist
+          key: dist-${{ inputs.cache_sha }}
+
+      - name: Rush Build
+        run: node common/scripts/install-run-rush.js build
