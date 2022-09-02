@@ -14,6 +14,9 @@
     "postRushBuild": []
   },
   "telemetryEnabled": false,
+  "repository": {
+    "url": "https://github.com/Canadian-Geospatial-Platform/GeoView"
+  },
   "projects": [
     {
       "packageName": "geoview-core",
