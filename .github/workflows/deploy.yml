@@ -25,15 +25,16 @@ jobs:
         with:
           branch: gh-pages
           folder: packages/geoview-core/dist
-
+      # && github.event.action == 'opened'
+      # https://${{github.repository_owner}}.github.io/GeoView/${{github.head_ref}}
       - uses: actions/github-script@v6
         name: Post link to demo for PR's
-        if: github.event_name == 'pull_request_target' && github.event.action == 'opened'
+        if: github.event_name == 'pull_request_target'
         with:
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Your demo site is ready! 🚀 Visit it here: https://${{github.repository_owner}}.github.io/ramp4-pcar4/${{github.head_ref}}/`
+              body: `Your demo site is ready! 🚀 Visit it here: https://jolevesq.github.io/GeoView/`
             })
