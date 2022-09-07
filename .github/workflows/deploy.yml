@@ -29,10 +29,11 @@ jobs:
           branch: gh-pages
           folder: packages/geoview-core/dist
           target-folder: ${{inputs.folder}}
-  
+
+      ##  && github.event.action == 'opened' 
       - uses: actions/github-script@v6
         name: Post link to demo for PR's
-        if: github.event_name == 'pull_request_target' && github.event.action == 'opened'
+        if: github.event_name == 'pull_request_target'
         with:
           script: |
             github.rest.issues.createComment({
