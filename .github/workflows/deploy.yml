@@ -25,6 +25,7 @@ jobs:
         with:
           branch: gh-pages
           folder: packages/geoview-core/dist
+          target-folder: ${{github.head_ref}}
   
       # && github.event.action == 'opened'
       # https://${{github.repository_owner}}.github.io/GeoView/${{github.head_ref}}
