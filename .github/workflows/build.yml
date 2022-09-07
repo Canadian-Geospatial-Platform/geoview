@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Check if contributor is an org member
         id: is_organization_member
-        uses: Jamessingleton/is-organization-member@v1
+        uses: jamessingleton/is-organization-member@v1
         with:
             organization: Canadian-Geospatial-Platform
             username: ${{ github.event.pull_request.head.user.login }}
