@@ -17,14 +17,14 @@ jobs:
       - name: Get dist files
         uses: actions/cache@v3
         with:
-          path: packages/geoview-core/dist
+          path: dist
           key: dist-${{ inputs.cache_sha }}
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages
-          folder: packages/geoview-core/dist
+          folder: dist
           target-folder: testrepo
   
       # && github.event.action == 'opened'
