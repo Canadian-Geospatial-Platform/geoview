@@ -16,34 +16,6 @@ jobs:
     name: build-geoview
     runs-on: ubuntu-latest
     steps:
-      - name: Check if contributor is an org member
-        id: is_organization_member
-        uses: jamessingleton/is-organization-member@v1
-        with:
-            organization: Canadian-Geospatial-Platform
-            username: ${{ github.event.pull_request.head.user.login }}
-            token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Output comment and end build if not org member
-        run: |
-            result=${{ steps.is_organization_member.outputs.result }}
-            if [ $result == false ]; then
-              user=${{ github.event.pull_request.head.user.login }}
-              echo Either ${user} is not part of the ramp4-pcar4 organization
-              echo or ${user} has its Organization Visibility set to Private at
-              echo https://github.com/orgs/ramp4-pcar4/people?query=${user}
-              exit 1
-            fi
-
-      - name: Check if contributor is an org member
-        uses: TheModdingInquisition/actions-team-membership@v1.0
-        with:
-          organization: ${{ github.repository_owner }} 
-          team: 'GeoView'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          comment: '${{ github.event.pull_request.head.user.login }} is not part of the Canadian-Geospatial-Platform GeoView team.'
-          exit: true
-  
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
