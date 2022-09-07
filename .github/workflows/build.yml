@@ -21,7 +21,7 @@ jobs:
         with:
           organization: ${{ github.repository_owner }} 
           team: 'GeoView'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.IS_TEAM_MEMBER }}
           comment: '${{ github.event.pull_request.head.user.login }} is not part of the Canadian-Geospatial-Platform GeoView team.'
           exit: true
   
