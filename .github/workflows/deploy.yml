@@ -27,11 +27,9 @@ jobs:
           folder: packages/geoview-core/dist
           target-folder: ${{github.head_ref}}
   
-      # && github.event.action == 'opened'
-      # https://${{github.repository_owner}}.github.io/GeoView/${{github.head_ref}}
       - uses: actions/github-script@v6
         name: Post link to demo for PR's
-        if: github.event_name == 'pull_request_target'
+        if: github.event_name == 'pull_request_target' && github.event.action == 'opened'
         with:
           script: |
             github.rest.issues.createComment({
