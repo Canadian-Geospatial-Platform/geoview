@@ -23,7 +23,7 @@ jobs:
 
       - name: test
         run:
-          echo '${{ github.event.push.head.ref }} - ${{ github.ref.name }} - ${{ github.event.push.repo.full_name }} - ${{ github.repository }}
+          echo '${{ github.event.push.head.ref }} - ${{ github.ref.name }} - ${{ github.event.push.repo.full_name }} - ${{ github.repository }}'
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
