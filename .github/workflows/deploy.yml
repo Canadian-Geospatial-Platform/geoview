@@ -38,5 +38,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `Your demo site is ready! 🚀 Visit it here: https:///${{github.repository_owner}}.github.io/GeoView/${{github.head_ref}}`
+              body: `${{deployment-status}} Your demo site is ready! 🚀 Visit it here: https:///${{github.repository_owner}}.github.io/GeoView/${{github.head_ref}}`
             })
