@@ -5,6 +5,7 @@
       "type": "LineString",
       "coordinates": [
         [-108, 53],
+        [-108, 44],
         [-120, 59]
       ]
     },
