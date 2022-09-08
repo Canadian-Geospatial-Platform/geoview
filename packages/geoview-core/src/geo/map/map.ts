@@ -21,6 +21,7 @@ import { Config } from '../../core/utils/config/config';
 import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
+import { GeoviewRenderer } from '../renderer/geoview-renderer';
 
 import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
@@ -85,6 +86,9 @@ export class MapViewer {
   // modals creation
   modal!: ModalApi;
 
+  // GeoView renderer
+  geoviewRenderer: GeoviewRenderer;
+
   /**
    * Add the map instance to the maps array in the api
    *
@@ -110,6 +114,8 @@ export class MapViewer {
     this.footerTabs = new FooterTabsApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
+
+    this.geoviewRenderer = new GeoviewRenderer(this.mapId);
 
     // create basemap and pass in the map id to be able to access the map instance
     this.basemap = new Basemap(

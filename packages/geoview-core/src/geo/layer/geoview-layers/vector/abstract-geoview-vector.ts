@@ -6,19 +6,23 @@ import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { EsriJSON, GeoJSON, KML } from 'ol/format';
-import { Icon as StyleIcon, Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
+import { Icon as StyleIcon } from 'ol/style';
 import { ReadOptions } from 'ol/format/Feature';
-import { asArray, asString } from 'ol/color';
 import BaseLayer from 'ol/layer/Base';
-import LayerGroup from 'ol/layer/Group';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import {
+  layerEntryIsVectorStyled,
+  TypeBaseVectorLayerEntryConfig,
+  TypeLayerEntryConfig,
+  TypeListOfLayerEntryConfig,
+  TypeStyleConfigKey,
+} from '../../../map/map-schema-types';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { getLocalizedValue, showMessage, setAlphaColor } from '../../../../core/utils/utilities';
+import { getLocalizedValue, showMessage } from '../../../../core/utils/utilities';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -112,12 +116,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         } else {
           this.processOneLayerEntry(this.listOfLayerEntryConfig[0] as TypeBaseVectorLayerEntryConfig).then((vectorLayer) => {
             if (vectorLayer) {
-              this.setRenderer(vectorLayer);
-              this.registerToPanels(vectorLayer);
+              this.setRenderer(vectorLayer).then(() => {
+                this.registerToPanels(vectorLayer);
+                resolve(vectorLayer);
+              });
             } else {
               this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+              resolve(vectorLayer);
             }
-            resolve(vectorLayer);
           });
         }
       } else {
@@ -133,16 +139,21 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
               // We use the first element of the array to retrieve the parent node.
               const { parentLayerConfig } = listOfLayerCreated[0]!.get('layerEntryConfig');
               const layerGroup = this.createLayerGroup(parentLayerConfig);
+              const promiseOfRendererSet: Promise<BaseLayer | null>[] = [];
               listOfLayerCreated.forEach((vectorLayer) => {
-                if (vectorLayer) {
-                  this.setRenderer(vectorLayer);
-                  this.registerToPanels(vectorLayer);
-                  (layerGroup as LayerGroup).getLayers().push(vectorLayer);
-                } else {
-                  this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
-                }
+                promiseOfRendererSet.push(this.setRenderer(vectorLayer));
               });
-              resolve(layerGroup);
+              Promise.all(promiseOfRendererSet).then((listOfLayerWithRenderer) => {
+                listOfLayerWithRenderer.forEach((vectorLayer) => {
+                  if (vectorLayer) {
+                    this.registerToPanels(vectorLayer);
+                    layerGroup.getLayers().push(vectorLayer);
+                  } else {
+                    this.layerLoadError.push(this.listOfLayerEntryConfig[0].layerId);
+                  }
+                });
+                resolve(layerGroup);
+              });
             } else resolve(null);
           })
           .catch((reason) => {
@@ -252,61 +263,24 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   private createVectorLayer(layerEntry: TypeBaseVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
-    const defaultCircleMarkerStyle = new Style({
-      image: new StyleCircle({
-        radius: 5,
-        stroke: new Stroke({
-          color: asString(setAlphaColor(asArray('#000000'), 1)),
-          width: 1,
-        }),
-        fill: new Fill({
-          color: asString(setAlphaColor(asArray('#000000'), 0.4)),
-        }),
-      }),
-    });
-
-    const defaultLineStringStyle = new Style({
-      stroke: new Stroke({
-        color: asString(setAlphaColor(asArray('#000000'), 1)),
-        width: 2,
-      }),
-    });
-
-    const defaultLinePolygonStyle = new Style({
-      stroke: new Stroke({
-        // 1 is for opacity
-        color: asString(setAlphaColor(asArray('#FF0000'), 1)),
-        width: 2,
-      }),
-      fill: new Fill({
-        color: asString(setAlphaColor(asArray('#FF0000'), 0.5)),
-      }),
-    });
-
-    const defaultSelectStyle = new Style({
-      stroke: new Stroke({
-        color: asString(setAlphaColor(asArray('#0000FF'), 1)),
-        width: 3,
-      }),
-      fill: new Fill({
-        color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
-      }),
-    });
-
-    const style: Record<string, Style> = {
-      Polygon: defaultLinePolygonStyle,
-      LineString: defaultLineStringStyle,
-      Point: defaultCircleMarkerStyle,
-    };
-
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerEntryConfig: layerEntry },
       source: vectorSource,
-      // ! TODO: feature properties will be use when the renderer part of the object will be coded.
       style: (feature) => {
-        const geometryType = feature.getGeometry()?.getType();
-
-        return style[geometryType] ? style[geometryType] : defaultSelectStyle;
+        if (layerEntryIsVectorStyled(layerEntry)) {
+          const { geoviewRenderer } = api.map(this.mapId);
+          const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
+          // If style does not exist, create it.
+          if (layerEntry.style === undefined || layerEntry.style[geometryType] === undefined)
+            geoviewRenderer.useDefaultStyle(geometryType, layerEntry);
+          // Get the style accordingly to its type and geometry.
+          if (layerEntry.style![geometryType] !== undefined) {
+            const styleSettings = layerEntry.style![geometryType]!;
+            const { styleType } = styleSettings;
+            return geoviewRenderer.getStyle[styleType][geometryType](styleSettings, feature);
+          }
+        }
+        return undefined;
       },
     };
 
@@ -318,7 +292,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(vectorLayer: TypeBaseVectorLayer): void;
+  abstract setRenderer(vectorLayer: TypeBaseVectorLayer | null): Promise<TypeBaseVectorLayer | null>;
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.

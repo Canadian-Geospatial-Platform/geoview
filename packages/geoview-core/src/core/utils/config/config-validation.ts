@@ -33,8 +33,9 @@ import {
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
+  TypeBaseVectorLayerEntryConfig,
 } from '../../../geo/map/map-schema-types';
-import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { Cast, TypeMapFeaturesConfig } from '../../types/global-types';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -579,13 +580,12 @@ export class ConfigValidation {
           if (layerEntryConfig?.layerName) this.SynchronizeLocalizedString(layerEntryConfig.layerName!, sourceKey, destinationKey);
           if (layerEntryConfig?.source?.dataAccessPath)
             this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
-          if (layerEntryIsVector(layerEntryConfig)) {
-            if (layerEntryConfig?.source?.featureInfo) {
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
-            }
+          const baseVectorLayerEntryConfig = Cast<TypeBaseVectorLayerEntryConfig>(layerEntryConfig);
+          if (baseVectorLayerEntryConfig?.source?.featureInfo) {
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
           }
         });
       });

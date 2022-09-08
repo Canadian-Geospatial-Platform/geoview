@@ -130,15 +130,88 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceIniti
 /** ******************************************************************************************************************************
  * Kind of symbol vector settings.
  */
-export type TypeKinfOfSymbolVectorSettings = TypeSimpleSymbolVectorConfig | TypeCircleSymbolVectorConfig | TypeIconSymbolVectorConfig;
+export type TypeKinfOfSymbolVectorSettings =
+  | TypeBaseVectorConfig
+  | TypeLineSymbolVectorConfig
+  | TypeFillSymbolVectorConfig
+  | TypeSimpleSymbolVectorConfig
+  | TypeIconSymbolVectorConfig;
 
 /** ******************************************************************************************************************************
- * Fill style for vector features.
+ * Definition of the line symbol vector settings type.
  */
-export type TypeFillSymbolConfig = {
-  /** Color to use for vector features. */
-  color: string;
+export type TypeBaseVectorConfig = {
+  /** Type of vector config */
+  type: 'lineSymbol' | 'fillSymbol' | 'simpleSymbol' | 'iconSymbol';
 };
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseVectorConfig as a TypeLineSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'lineSymbol'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isLineSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineSymbolVectorConfig => {
+  return verifyIfConfig.type === 'lineSymbol';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseVectorConfig as a TypeFillSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'fillSymbol'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isFillSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeFillSymbolVectorConfig => {
+  return verifyIfConfig.type === 'fillSymbol';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseVectorConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'simpleSymbol'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
+  return verifyIfConfig.type === 'simpleSymbol';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseVectorConfig as a TypeIconSymbolVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'iconSymbol'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
+  return verifyIfConfig.type === 'iconSymbol';
+};
+
+/** ******************************************************************************************************************************
+ * Valid values to specify line styles.
+ */
+export type TypeLineStyle =
+  | 'dash'
+  | 'dash-dot'
+  | 'dash-dot-dot'
+  | 'dot'
+  | 'longDash'
+  | 'longDash-dot'
+  | 'null'
+  | 'shortDash'
+  | 'shortDash-dot'
+  | 'shortDash-dot-dot'
+  | 'solid';
 
 /** ******************************************************************************************************************************
  * Stroke style for vector features.
@@ -146,37 +219,74 @@ export type TypeFillSymbolConfig = {
 export type TypeStrokeSymbolConfig = {
   /** Color to use for vector features. */
   color: string;
+  /** Line style to use for the feature. */
+  lineStyle: TypeLineStyle;
   /** Width to use for the stroke */
   width: number;
 };
 
 /** ******************************************************************************************************************************
- * Definition of the simple symbol vector settings type.
+ * Definition of the line symbol vector settings type.
  */
-export type TypeSimpleSymbolVectorConfig = {
-  /** Fill style for vector features. */
-  fill: TypeFillSymbolConfig;
-  /** Symbol stroke symbology */
+export interface TypeLineSymbolVectorConfig extends TypeBaseVectorConfig {
+  /** Type of vector config */
+  type: 'lineSymbol';
+  /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
-  /** Radius of the symbol. */
-  radius: number;
-};
+}
+
+/** ******************************************************************************************************************************
+ * Valid values to specify fill styles.
+ */
+export type TypeFillStyle = 'solid';
+
+/** ******************************************************************************************************************************
+ * Definition of the line symbol vector settings type.
+ */
+export interface TypeFillSymbolVectorConfig extends TypeBaseVectorConfig {
+  /** Type of vector config */
+  type: 'fillSymbol';
+  /** Fill color for vector features. */
+  color?: string;
+  /** Line stroke symbology */
+  stroke: TypeStrokeSymbolConfig;
+  /** Kind of filling  for vector features. */
+  fillStyle: TypeFillStyle;
+}
+
+/** ******************************************************************************************************************************
+ * Valid values to specify symbol shapes.
+ */
+export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X';
 
 /** ******************************************************************************************************************************
  * Definition of the circle symbol vector settings type.
  */
-export type TypeCircleSymbolVectorConfig = {
-  /** Fill style for vector features. */
-  fill?: TypeFillSymbolConfig;
+export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorConfig {
+  /** Type of vector config */
+  type: 'simpleSymbol';
+  /** Symbol rotation in radians. */
+  rotation?: number;
+  /** Fill color for vector features. */
+  color?: string;
   /** Symbol stroke symbology */
   stroke?: TypeStrokeSymbolConfig;
-  /** Radius of the circle symbol. */
-  radius: number;
-};
+  /** size of the symbol. */
+  size?: number;
+  /** Ofset of the symbol. */
+  offset?: [number, number];
+  /** Symbol to draw. */
+  symbol: TypeSymbol;
+}
+
 /** ******************************************************************************************************************************
  * Definition of the icon symbol vector settings type.
  */
-export type TypeIconSymbolVectorConfig = {
+export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
+  /** Type of vector config */
+  type: 'iconSymbol';
+  /** Mime type of the icon. */
+  mimeType: string;
   /** Icon source. */
   src: string;
   /** Icon width in pixel. */
@@ -184,20 +294,48 @@ export type TypeIconSymbolVectorConfig = {
   /** Icon height in pixel. */
   height: number;
   /** Icon rotation in radians. */
-  rotation: number;
+  rotation?: number;
   /** Icon opacity. */
-  opacity: number;
+  opacity?: number;
+  /** Ofset of the icon. */
+  offset?: [number, number];
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    */
   crossOrigin?: string;
+}
+
+/** ******************************************************************************************************************************
+ * Base style configuration.
+ */
+export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreak';
+
+/** ******************************************************************************************************************************
+ * Base style configuration.
+ */
+export type TypeBaseStyleConfig = {
+  /** Type of style. */
+  styleType: TypeBaseStyleType;
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseStyleConfig as a TypeSimpleStyleConfig if the type attribute of the
+ * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isSimpleStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeSimpleStyleConfig => {
+  return verifyIfConfig.styleType === 'simple';
 };
 
 /** ******************************************************************************************************************************
  * Simple style configuration.
  */
-export type TypeSimpleStyleConfig = {
+export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
   id?: string;
   /** Type of style. */
@@ -205,8 +343,8 @@ export type TypeSimpleStyleConfig = {
   /** Label associated to the style */
   label: string;
   /** options associated to the style. */
-  options: TypeKinfOfSymbolVectorSettings;
-};
+  settings: TypeKinfOfSymbolVectorSettings;
+}
 
 /** ******************************************************************************************************************************
  * Unique value style information configuration.
@@ -217,24 +355,39 @@ export type TypeUniqueValueStyleInfo = {
   /** Values associated to the style. */
   values: string[];
   /** options associated to the style. */
-  options: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKinfOfSymbolVectorSettings;
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseStyleConfig as a TypeUniqueValueStyleConfig if the type attribute of the
+ * verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isUniqueValueStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeUniqueValueStyleConfig => {
+  return verifyIfConfig.styleType === 'uniqueValue';
 };
 
 /** ******************************************************************************************************************************
  * Unique value style configuration.
  */
-export type TypeUniqueValueStyleConfig = {
+export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
   id?: string;
   /** Type of style. */
   styleType: 'uniqueValue';
-  /** Label associated to the style */
-  label: string;
+  /** Label used if field/value association is not found. */
+  defaultLabel?: string;
+  /** Options used if field/value association is not found. */
+  defaultSettings?: TypeKinfOfSymbolVectorSettings;
   /** Fields used by the style. */
   fields: string[];
   /** Unique value style information configuration. */
   uniqueValueStyleInfo: TypeUniqueValueStyleInfo[];
-};
+}
 
 /** ******************************************************************************************************************************
  * Class break style information configuration.
@@ -247,13 +400,26 @@ export type TypeClassBreakStyleInfo = {
   /** Maximum values associated to the style. */
   maxValues: number;
   /** options associated to the style. */
-  options: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKinfOfSymbolVectorSettings;
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeBaseStyleConfig as a TypeClassBreakStyleConfig if the type attribute of the
+ * verifyIfConfig parameter is 'classBreak'. The type ascention applies only to the true block of the if clause that use
+ * this function.
+ *
+ * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeClassBreakStyleConfig => {
+  return verifyIfConfig.styleType === 'classBreak';
 };
 
 /** ******************************************************************************************************************************
  * Class break style configuration.
  */
-export type TypeClassBreakStyleConfig = {
+export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
   id?: string;
   /** Type of style. */
@@ -264,21 +430,31 @@ export type TypeClassBreakStyleConfig = {
   field: string;
   /** Class break style information configuration. */
   classBreakStyleInfo: TypeClassBreakStyleInfo[];
-};
+}
 
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
-export type TypeStyleConfig = TypeSimpleStyleConfig | TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig;
+export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig;
+
+/** ******************************************************************************************************************************
+ * Valid keys for the TypeStyleConfig object.
+ */
+export type TypeStyleConfigKey = 'Point' | 'LineString' | 'Polygon';
+
+/** ******************************************************************************************************************************
+ * Type of Style to apply to the GeoView vector layer based on geometry types.
+ */
+export type TypeStyleConfig = Partial<Record<TypeStyleConfigKey, TypeStyleSettings>>;
 
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
  */
-export type TypeLayerEntryType = 'vector' | 'raster' | 'geocore';
+export type TypeLayerEntryType = 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'geocore';
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of verifyIfLayer
- * is 'group'. The type ascention applies only to the true block of the if clause that use this function.
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of the
+ * verifyIfLayer parameter is 'group'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
@@ -290,15 +466,43 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): ver
 
 /** ******************************************************************************************************************************
  * Type Gard function that redefines a TypeLayerEntryConfig as a TypeBaseVectorLayerEntryConfig if the entryType attribute of
- * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use
- * this function.
+ * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use this
+ * function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @return {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeBaseVectorLayerEntryConfig => {
-  return verifyIfLayer.entryType === 'vector';
+  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType!.startsWith('vector');
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorHeatmapLayerEntryConfig if the entryType attribute of
+ * the verifyIfLayer parameter is 'vectorHeatmap'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorHeatmapLayerEntryConfig => {
+  return verifyIfLayer.entryType! === 'vectorHeatmap';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig if
+ * the entryType attribute of the verifyIfLayer parameter is 'vector' and the object has a style attribute. The type ascention
+ * applies only to the true block of the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const layerEntryIsVectorStyled = (
+  verifyIfLayer: TypeLayerEntryConfig
+): verifyIfLayer is TypeVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig => {
+  return 'entryType' in verifyIfLayer && 'style' in verifyIfLayer && verifyIfLayer.entryType!.startsWith('vector');
 };
 
 /** ******************************************************************************************************************************
@@ -338,7 +542,7 @@ export type TypeBaseVectorLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** Layer entry data type. */
-  entryType?: 'vector';
+  entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap';
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
@@ -358,6 +562,8 @@ export type TypeBaseVectorLayerEntryConfig = {
  * Type used to define a GeoView vector layer to display on the map.
  */
 export interface TypeVectorLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
+  /** Layer entry data type. */
+  entryType?: 'vector';
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   source?: TypeVectorSourceInitialConfig;
   /** Style to apply to the vector layer. */
@@ -465,6 +671,8 @@ export type TypeSourceTileInitialConfig = {
  * Type used to identify a GeoView vector heamap layer to display on the map.
  */
 export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
+  /** Layer entry data type. */
+  entryType?: 'vectorHeatmap';
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
   source?: TypeVectorSourceInitialConfig;
   /**
@@ -494,11 +702,15 @@ export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceI
  * Type used to define a GeoView vector tile layer to display on the map. The vector data is divided into a tile grid.
  */
 export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
+  /** Layer entry data type. */
+  entryType?: 'vectorTile';
   /**
    * Initial settings to apply to the GeoView vector layer source at creation time. Layer sources providing vector data divided
    * into a tile grid.
    */
   source?: TypeVectorTileSourceInitialConfig;
+  /** Style to apply to the vector layer. */
+  style?: TypeStyleConfig;
 }
 
 /** ******************************************************************************************************************************
