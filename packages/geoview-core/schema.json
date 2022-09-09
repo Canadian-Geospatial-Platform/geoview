@@ -311,7 +311,7 @@
 
     "TypeStyleConfig": {
       "additionalProperties": false,
-      "minProperties": 2,
+      "minProperties": 1,
       "type": "object",
       "properties": {
         "Point":  { "$ref": "#/definitions/TypeStyleSettings" },
