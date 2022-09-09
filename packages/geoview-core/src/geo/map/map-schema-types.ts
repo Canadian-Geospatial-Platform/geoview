@@ -461,11 +461,11 @@ export type TypeLayerEntryType = 'vector' | 'vectorTile' | 'vectorHeatmap' | 'ra
  * @return {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntryConfig => {
-  return verifyIfLayer.entryType === 'group';
+  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType === 'group';
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeBaseVectorLayerEntryConfig if the entryType attribute of
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -473,8 +473,8 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): ver
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeBaseVectorLayerEntryConfig => {
-  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType!.startsWith('vector');
+export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorLayerEntryConfig => {
+  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType === 'vector';
 };
 
 /** ******************************************************************************************************************************
@@ -487,22 +487,35 @@ export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyI
  * @return {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorHeatmapLayerEntryConfig => {
-  return verifyIfLayer.entryType! === 'vectorHeatmap';
+  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorHeatmap';
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig if
- * the entryType attribute of the verifyIfLayer parameter is 'vector' and the object has a style attribute. The type ascention
- * applies only to the true block of the if clause that use this function.
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig if the entryType attribute of the
+ * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type ascention applies only to the true block
+ * of the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsVectorStyled = (
+export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorLayerEntryConfig => {
+  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorTile';
+};
+
+/** ******************************************************************************************************************************
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig if
+ * the entryType attribute of the verifyIfLayer parameter is 'vector' or 'vectorTile'. The type ascention applies only to the true
+ * block of the if clause that use this function.
+ *
+ * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const vectorLayerEntryHasAstyle = (
   verifyIfLayer: TypeLayerEntryConfig
 ): verifyIfLayer is TypeVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig => {
-  return 'entryType' in verifyIfLayer && 'style' in verifyIfLayer && verifyIfLayer.entryType!.startsWith('vector');
+  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorTile';
 };
 
 /** ******************************************************************************************************************************

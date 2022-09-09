@@ -12,7 +12,8 @@ import BaseLayer from 'ol/layer/Base';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
-  layerEntryIsVectorStyled,
+  layerEntryIsVector,
+  layerEntryIsVectorTile,
   TypeBaseVectorLayerEntryConfig,
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
@@ -267,7 +268,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       properties: { layerEntryConfig: layerEntry },
       source: vectorSource,
       style: (feature) => {
-        if (layerEntryIsVectorStyled(layerEntry)) {
+        if (layerEntryIsVector(layerEntry) || layerEntryIsVectorTile(layerEntry)) {
           const { geoviewRenderer } = api.map(this.mapId);
           const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
           // If style does not exist, create it.

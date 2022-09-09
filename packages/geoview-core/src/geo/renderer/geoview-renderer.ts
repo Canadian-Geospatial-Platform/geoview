@@ -242,7 +242,7 @@ export class GeoviewRenderer {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
         rotation: 0,
-        color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 0.5)),
+        color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 0.25)),
         stroke: {
           color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 1)),
           lineStyle: 'solid',
@@ -274,7 +274,7 @@ export class GeoviewRenderer {
     if (geometryType === 'Polygon') {
       const settings: TypeFillSymbolVectorConfig = {
         type: 'fillSymbol',
-        color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 1)),
+        color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 0.25)),
         stroke: {
           color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 1)),
           lineStyle: 'solid',
