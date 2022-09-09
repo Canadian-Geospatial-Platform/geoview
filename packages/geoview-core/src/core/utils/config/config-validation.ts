@@ -17,7 +17,6 @@ import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vect
 import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
 import { geoviewEntryIsGeocore } from '../../../geo/layer/other/geocore';
 import {
-  layerEntryIsVector,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
   TypeDisplayLanguage,
