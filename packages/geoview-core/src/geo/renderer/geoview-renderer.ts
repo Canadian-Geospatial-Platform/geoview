@@ -89,13 +89,14 @@ function processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | un
 }
 
 function processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
-  const src = `data:${settings.mimeType};base64,${settings.src}`;
-  const size = [settings.width, settings.height];
-  const offset = settings.offset !== undefined ? settings.offset : [0, 0];
-  const rotation = settings.rotation !== undefined ? settings.rotation : 0;
-  const opacity = settings.opacity !== undefined ? settings.opacity : 1;
   return new Style({
-    image: new StyleIcon({ src, size, offset, rotation, opacity }),
+    image: new StyleIcon({
+      src: `data:${settings.mimeType};base64,${settings.src}`,
+      size: [settings.width, settings.height],
+      offset: settings.offset !== undefined ? settings.offset : [0, 0],
+      rotation: settings.rotation !== undefined ? settings.rotation : 0,
+      opacity: settings.opacity !== undefined ? settings.opacity : 1,
+    }),
   });
 }
 
