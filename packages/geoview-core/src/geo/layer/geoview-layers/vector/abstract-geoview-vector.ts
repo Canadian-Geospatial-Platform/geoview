@@ -6,7 +6,6 @@ import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
 import { Geometry } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { EsriJSON, GeoJSON, KML } from 'ol/format';
-import { Icon as StyleIcon } from 'ol/style';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 
@@ -19,7 +18,6 @@ import {
   TypeListOfLayerEntryConfig,
   TypeStyleConfigKey,
 } from '../../../map/map-schema-types';
-import { blueCircleIcon } from '../../../../core/types/marker-definitions';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
@@ -51,9 +49,6 @@ export type TypeBaseVectorLayer = BaseLayer; // TypeVectorLayerGroup | TypeVecto
 export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
-
-  /** Icon to use for point features. At creation time, a default value is provided. The icon can be changed. */
-  iconToUse: StyleIcon = blueCircleIcon;
 
   /** ***************************************************************************************************************************
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
