@@ -132,8 +132,8 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceIniti
  */
 export type TypeKinfOfSymbolVectorSettings =
   | TypeBaseVectorConfig
-  | TypeLineSymbolVectorConfig
-  | TypeFillSymbolVectorConfig
+  | TypeLineStringVectorConfig
+  | TypePolygonVectorConfig
   | TypeSimpleSymbolVectorConfig
   | TypeIconSymbolVectorConfig;
 
@@ -142,33 +142,33 @@ export type TypeKinfOfSymbolVectorSettings =
  */
 export type TypeBaseVectorConfig = {
   /** Type of vector config */
-  type: 'lineSymbol' | 'fillSymbol' | 'simpleSymbol' | 'iconSymbol';
+  type: 'lineString' | 'filledPolygon' | 'simpleSymbol' | 'iconSymbol';
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseVectorConfig as a TypeLineSymbolVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'lineSymbol'. The type ascention applies only to the true block of the if clause that use
+ * Type Gard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'lineString'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const isLineSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineSymbolVectorConfig => {
-  return verifyIfConfig.type === 'lineSymbol';
+export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineStringVectorConfig => {
+  return verifyIfConfig.type === 'lineString';
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseVectorConfig as a TypeFillSymbolVectorConfig if the type attribute of the
- * verifyIfConfig parameter is 'fillSymbol'. The type ascention applies only to the true block of the if clause that use
+ * Type Gard function that redefines a TypeBaseVectorConfig as a TypePolygonVectorConfig if the type attribute of the
+ * verifyIfConfig parameter is 'filledPolygon'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const isFillSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeFillSymbolVectorConfig => {
-  return verifyIfConfig.type === 'fillSymbol';
+export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypePolygonVectorConfig => {
+  return verifyIfConfig.type === 'filledPolygon';
 };
 
 /** ******************************************************************************************************************************
@@ -228,9 +228,9 @@ export type TypeStrokeSymbolConfig = {
 /** ******************************************************************************************************************************
  * Definition of the line symbol vector settings type.
  */
-export interface TypeLineSymbolVectorConfig extends TypeBaseVectorConfig {
+export interface TypeLineStringVectorConfig extends TypeBaseVectorConfig {
   /** Type of vector config */
-  type: 'lineSymbol';
+  type: 'lineString';
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
 }
@@ -243,9 +243,9 @@ export type TypeFillStyle = 'solid';
 /** ******************************************************************************************************************************
  * Definition of the line symbol vector settings type.
  */
-export interface TypeFillSymbolVectorConfig extends TypeBaseVectorConfig {
+export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
   /** Type of vector config */
-  type: 'fillSymbol';
+  type: 'filledPolygon';
   /** Fill color for vector features. */
   color?: string;
   /** Line stroke symbology */
@@ -290,9 +290,9 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
   /** Icon source. */
   src: string;
   /** Icon width in pixel. */
-  width: number;
+  width?: number;
   /** Icon height in pixel. */
-  height: number;
+  height?: number;
   /** Icon rotation in radians. */
   rotation?: number;
   /** Icon opacity. */
@@ -491,7 +491,7 @@ export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): 
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig if the entryType attribute of the
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorTileLayerEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type ascention applies only to the true block
  * of the if clause that use this function.
  *
@@ -499,22 +499,7 @@ export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): 
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorLayerEntryConfig => {
-  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorTile';
-};
-
-/** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig if
- * the entryType attribute of the verifyIfLayer parameter is 'vector' or 'vectorTile'. The type ascention applies only to the true
- * block of the if clause that use this function.
- *
- * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
- *
- * @return {boolean} true if the type ascention is valid.
- */
-export const vectorLayerEntryHasAstyle = (
-  verifyIfLayer: TypeLayerEntryConfig
-): verifyIfLayer is TypeVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig => {
+export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorTileLayerEntryConfig => {
   return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorTile';
 };
 
