@@ -2,11 +2,8 @@
 import Ajv from 'ajv';
 
 import { generateId } from '../utilities';
-import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import schema from '../../../../schema.json';
-import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
@@ -278,19 +275,15 @@ export class ConfigValidation {
       if (!valid && validate.errors && validate.errors.length) {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
+          const { instancePath } = error;
+          const path = instancePath.split('/');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let node: any = mapFeaturesConfigToValidate;
+          for (let i = 1; i < path.length; i += 1) {
+            node = node[path[i]];
+          }
           console.log(this.mapId, error);
-          console.log(this.mapId, mapFeaturesConfigToValidate);
-
-          setTimeout(() => {
-            const errorMessage = `Map ${this.mapId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
-
-            api.event.emit(
-              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-                type: 'string',
-                value: errorMessage,
-              })
-            );
-          }, 2000);
+          console.log(this.mapId, node);
         }
 
         validMapFeaturesConfig = {

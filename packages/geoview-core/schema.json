@@ -83,24 +83,24 @@
       "required": ["color", "lineStyle", "width"]
     },
 
-    "TypeLineSymbolVectorConfig": {
+    "TypeLineStringVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["lineSymbol"]
+          "enum": ["lineString"]
         },
         "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" }
       },
       "required": ["type", "stroke"]
     },
 
-    "TypeFillSymbolVectorConfig": {
+    "TypePolygonVectorConfig": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
-          "enum": ["fillSymbol"]
+          "enum": ["filledPolygon"]
         },
         "color": { "type": "string" },
         "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" },
@@ -180,7 +180,7 @@
           "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
         }
       },
-      "required": ["type", "mimeType", "src", "width", "height"]
+      "required": ["type", "mimeType", "src"]
     },
 
     "TypeSimpleStyleConfig": {
@@ -198,7 +198,7 @@
         },
         "settings": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
       },
-      "required": ["styleType", "label", "options"]
+      "required": ["styleType", "label", "settings"]
     },
 
     "TypeUniqueValueStyleConfig": {
@@ -294,8 +294,8 @@
 
     "TypeKinfOfSymbolVectorSettings": {
       "anyOf": [
-        { "$ref": "#/definitions/TypeLineSymbolVectorConfig" },
-        { "$ref": "#/definitions/TypeFillSymbolVectorConfig" },
+        { "$ref": "#/definitions/TypeLineStringVectorConfig" },
+        { "$ref": "#/definitions/TypePolygonVectorConfig" },
         { "$ref": "#/definitions/TypeSimpleSymbolVectorConfig" },
         { "$ref": "#/definitions/TypeIconSymbolVectorConfig" }
       ]

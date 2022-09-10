@@ -1,17 +1,16 @@
 /* eslint-disable no-console */
 import { asString } from 'ol/color';
 import {
-  isFillSymbolVectorConfig,
+  isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
-  isLineSymbolVectorConfig,
+  isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
-  TypeBaseVectorConfig,
   TypeFillStyle,
-  TypeFillSymbolVectorConfig,
+  TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
   TypeKinfOfSymbolVectorSettings,
   TypeLineStyle,
-  TypeLineSymbolVectorConfig,
+  TypeLineStringVectorConfig,
   TypeSimpleStyleConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStyleConfig,
@@ -100,7 +99,7 @@ export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
  *
  * @return {boolean} true if the type ascention is valid.
  */
-export const isSimpleFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleFillSymbol => {
+export const isEsriSimpleFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleFillSymbol => {
   return verifyIfSymbol.type === 'esriSFS';
 };
 
@@ -283,8 +282,8 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
       return simpleSymbolVectorConfig;
     }
     if (isSimpleLineSymbol(symbol)) {
-      const lineSymbolVectorConfig: TypeLineSymbolVectorConfig = {
-        type: 'lineSymbol',
+      const lineSymbolVectorConfig: TypeLineStringVectorConfig = {
+        type: 'lineString',
         stroke: {
           color: convertEsriColor(symbol.color),
           lineStyle: convertLineStyle(symbol.style),
@@ -293,9 +292,9 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
       };
       return lineSymbolVectorConfig;
     }
-    if (isSimpleFillSymbol(symbol)) {
-      const fillSymbolVectorConfig: TypeFillSymbolVectorConfig = {
-        type: 'fillSymbol',
+    if (isEsriSimpleFillSymbol(symbol)) {
+      const polygonVectorConfig: TypePolygonVectorConfig = {
+        type: 'filledPolygon',
         color: convertEsriColor(symbol.color),
         stroke: {
           color: convertEsriColor(symbol.color),
@@ -304,7 +303,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
         },
         fillStyle: 'solid',
       };
-      return fillSymbolVectorConfig;
+      return polygonVectorConfig;
     }
     if (isPictureMarkerSymbol(symbol)) {
       const offset: [number, number] = [
@@ -315,8 +314,6 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
         type: 'iconSymbol',
         mimeType: symbol.contentType,
         src: symbol.imageData,
-        width: symbol.width * 2,
-        height: symbol.height * 2,
         rotation: symbol.angle !== undefined ? symbol.angle : 0,
         opacity: 1,
         offset,
@@ -330,8 +327,8 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
 
 function getStyleConfigKey(settings: TypeKinfOfSymbolVectorSettings): TypeStyleConfigKey | undefined {
   if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'Point';
-  if (isFillSymbolVectorConfig(settings)) return 'Polygon';
-  if (isLineSymbolVectorConfig(settings)) return 'LineString';
+  if (isFilledPolygonVectorConfig(settings)) return 'Polygon';
+  if (isLineStringVectorConfig(settings)) return 'LineString';
   return undefined;
 }
 

@@ -2,24 +2,25 @@
 /* eslint-disable no-param-reassign */
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { Options as IconOptions } from 'ol/style/Icon';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
 
 import { FeatureLike } from 'ol/Feature';
 import { getLocalizedValue, setAlphaColor } from '../../core/utils/utilities';
 import {
-  isFillSymbolVectorConfig,
+  isFilledPolygonVectorConfig,
   isIconSymbolVectorConfig,
-  isLineSymbolVectorConfig,
+  isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
   isUniqueValueStyleConfig,
   TypeBaseStyleType,
   TypeFillStyle,
-  TypeFillSymbolVectorConfig,
+  TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
   TypeKinfOfSymbolVectorSettings,
   TypeLineStyle,
-  TypeLineSymbolVectorConfig,
+  TypeLineStringVectorConfig,
   TypeSimpleStyleConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStyleConfigKey,
@@ -33,16 +34,16 @@ import {
 import { defaultColor } from './geoview-renderer-types';
 
 const lineDashSettings: Record<TypeLineStyle, number[] | undefined> = {
-  dash: [10, 10],
-  'dash-dot': [10, 10, 2, 10],
-  'dash-dot-dot': [10, 10, 2, 10, 2, 10],
-  dot: [2, 10],
-  longDash: [20, 10],
-  'longDash-dot': [20, 10, 2, 10],
-  null: [],
-  shortDash: [5, 10],
-  'shortDash-dot': [5, 10, 2, 10],
-  'shortDash-dot-dot': [5, 10, 2, 10, 2, 10],
+  dash: [16, 4],
+  'dash-dot': [16, 4, 2, 4],
+  'dash-dot-dot': [16, 4, 2, 4, 2, 4],
+  dot: [2, 2],
+  longDash: [25, 5],
+  'longDash-dot': [25, 5, 2, 5],
+  null: [0, 3],
+  shortDash: [7, 3],
+  'shortDash-dot': [7, 3, 2, 3],
+  'shortDash-dot-dot': [7, 3, 2, 3, 2, 3],
   solid: undefined,
 };
 
@@ -58,9 +59,7 @@ function symbolNotImplemented(settings: TypeSimpleSymbolVectorConfig): Style | u
   return undefined;
 }
 
-function createStrokeOptions(
-  settings: TypeSimpleSymbolVectorConfig | TypeLineSymbolVectorConfig | TypeFillSymbolVectorConfig
-): StrokeOptions {
+function createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig): StrokeOptions {
   const strokeOptions: StrokeOptions = {
     color: settings.stroke?.color,
     width: settings.stroke?.width,
@@ -89,14 +88,14 @@ function processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | un
 }
 
 function processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
+  const iconOptions: IconOptions = {};
+  iconOptions.src = `data:${settings.mimeType};base64,${settings.src}`;
+  if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
+  if (settings.offset !== undefined) iconOptions.offset = settings.offset;
+  if (settings.rotation !== undefined) iconOptions.rotation = settings.rotation;
+  if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
   return new Style({
-    image: new StyleIcon({
-      src: `data:${settings.mimeType};base64,${settings.src}`,
-      size: [settings.width, settings.height],
-      offset: settings.offset !== undefined ? settings.offset : [0, 0],
-      rotation: settings.rotation !== undefined ? settings.rotation : 0,
-      opacity: settings.opacity !== undefined ? settings.opacity : 1,
-    }),
+    image: new StyleIcon(iconOptions),
   });
 }
 
@@ -121,14 +120,14 @@ function processSimplePoint(styleSettings: TypeStyleSettings | TypeUniqueValueSt
 
 function processSimpleLineString(styleSettings: TypeStyleSettings | TypeUniqueValueStyleInfo, feature: FeatureLike): Style | undefined {
   const { settings } = styleSettings as TypeSimpleStyleConfig;
-  if (isLineSymbolVectorConfig(settings)) {
+  if (isLineStringVectorConfig(settings)) {
     const strokeOptions: StrokeOptions = createStrokeOptions(settings);
     return new Style({ stroke: new Stroke(strokeOptions) });
   }
   return undefined;
 }
 
-function processSolidFill(settings: TypeFillSymbolVectorConfig): Style | undefined {
+function processSolidFill(settings: TypePolygonVectorConfig): Style | undefined {
   const fillOptions: FillOptions = { color: settings.color };
   const strokeOptions: StrokeOptions = createStrokeOptions(settings);
   return new Style({
@@ -137,13 +136,13 @@ function processSolidFill(settings: TypeFillSymbolVectorConfig): Style | undefin
   });
 }
 
-const processFillStyle: Record<TypeFillStyle, (settings: TypeFillSymbolVectorConfig) => Style | undefined> = {
+const processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig) => Style | undefined> = {
   solid: processSolidFill,
 };
 
 function processSimplePolygon(styleSettings: TypeStyleSettings | TypeUniqueValueStyleInfo, feature: FeatureLike): Style | undefined {
   const { settings } = styleSettings as TypeSimpleStyleConfig;
-  if (isFillSymbolVectorConfig(settings)) {
+  if (isFilledPolygonVectorConfig(settings)) {
     const { fillStyle } = settings;
     return processFillStyle[fillStyle](settings);
   }
@@ -259,8 +258,8 @@ export class GeoviewRenderer {
       return;
     }
     if (geometryType === 'LineString') {
-      const settings: TypeLineSymbolVectorConfig = {
-        type: 'lineSymbol',
+      const settings: TypeLineStringVectorConfig = {
+        type: 'lineString',
         stroke: {
           color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 1)),
           lineStyle: 'solid',
@@ -273,8 +272,8 @@ export class GeoviewRenderer {
       return;
     }
     if (geometryType === 'Polygon') {
-      const settings: TypeFillSymbolVectorConfig = {
-        type: 'fillSymbol',
+      const settings: TypePolygonVectorConfig = {
+        type: 'filledPolygon',
         color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 0.25)),
         stroke: {
           color: asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), 1)),
