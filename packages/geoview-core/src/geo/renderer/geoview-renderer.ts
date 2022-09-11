@@ -93,7 +93,7 @@ export class GeoviewRenderer {
     '+': this.symbolNotImplemented,
     diamond: this.processDiamondSymbol,
     square: this.processSquareSymbol,
-    triangle: this.symbolNotImplemented,
+    triangle: this.processTriangleSymbol,
     X: this.symbolNotImplemented,
   };
 
@@ -184,7 +184,12 @@ export class GeoviewRenderer {
     });
   }
 
-  private processRegularShape(settings: TypeSimpleSymbolVectorConfig, angle: number, scale: [number, number]): Style | undefined {
+  private processRegularShape(
+    settings: TypeSimpleSymbolVectorConfig,
+    points: number,
+    angle: number,
+    scale: [number, number]
+  ): Style | undefined {
     if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
@@ -192,7 +197,7 @@ export class GeoviewRenderer {
       radius: settings.size !== undefined ? settings.size : 6,
       angle,
       scale,
-      points: 4,
+      points,
     };
     regularShapeOptions.stroke = new Stroke(strokeOptions);
     regularShapeOptions.fill = new Fill(fillOptions);
@@ -204,11 +209,15 @@ export class GeoviewRenderer {
   }
 
   private processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processRegularShape(settings, Math.PI / 4, [1, 1]);
+    return this.processRegularShape(settings, 4, Math.PI / 4, [1, 1]);
   }
 
   private processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processRegularShape(settings, 0, [0.75, 1]);
+    return this.processRegularShape(settings, 4, 0, [0.75, 1]);
+  }
+
+  private processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processRegularShape(settings, 3, 0, [1, 1]);
   }
 
   private processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
