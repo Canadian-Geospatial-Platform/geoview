@@ -70,6 +70,7 @@
     },
 
     "TypeStrokeSymbolConfig": {
+      "minProperties": 1,
       "additionalProperties": false,
       "type": "object",
       "description": "Stroke style for vector features.",
@@ -79,8 +80,7 @@
           "enum": ["dash", "dash-dot", "dash-dot-dot", "dot", "longDash", "longDash-dot", "null", "shortDash", "shortDash-dot", "shortDash-dot-dot", "solid"]
         },
         "width": { "type": "number" }
-      },
-      "required": ["color", "lineStyle", "width"]
+      }
     },
 
     "TypeLineStringVectorConfig": {
