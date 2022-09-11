@@ -257,7 +257,7 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
 /** ******************************************************************************************************************************
  * Valid values to specify symbol shapes.
  */
-export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X';
+export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X' | 'star';
 
 /** ******************************************************************************************************************************
  * Definition of the circle symbol vector settings type.

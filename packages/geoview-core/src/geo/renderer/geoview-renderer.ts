@@ -90,11 +90,12 @@ export class GeoviewRenderer {
 
   private processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig) => Style | undefined> = {
     circle: this.processCircleSymbol,
-    '+': this.symbolNotImplemented,
+    '+': this.processPlusSymbol,
     diamond: this.processDiamondSymbol,
     square: this.processSquareSymbol,
     triangle: this.processTriangleSymbol,
-    X: this.symbolNotImplemented,
+    X: this.processXSymbol,
+    star: this.processStarSymbol,
   };
 
   private processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig) => Style | undefined> = {
@@ -182,6 +183,37 @@ export class GeoviewRenderer {
     return new Style({
       image: new StyleCircle(circleOptions),
     });
+  }
+
+  private processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    const regularShapeOptions: RegularShapeOptions = {
+      radius1: settings.size !== undefined ? settings.size : 6,
+      radius2: settings.size !== undefined ? settings.size / 3 : 2,
+      angle,
+      points,
+    };
+    regularShapeOptions.stroke = new Stroke(strokeOptions);
+    regularShapeOptions.fill = new Fill(fillOptions);
+    if (settings.offset !== undefined) regularShapeOptions.displacement = settings.offset;
+    if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
+    return new Style({
+      image: new RegularShape(regularShapeOptions),
+    });
+  }
+
+  private processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processStarShapeSymbol(settings, 5, 0);
+  }
+
+  private processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processStarShapeSymbol(settings, 4, Math.PI / 4);
+  }
+
+  private processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processStarShapeSymbol(settings, 4, 0);
   }
 
   private processRegularShape(

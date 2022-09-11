@@ -134,7 +134,7 @@
           "maxItems": 2
         },
         "symbol": {
-          "enum": ["circle", "+", "diamond", "square", "triangle", "X"]
+          "enum": ["circle", "+", "diamond", "square", "triangle", "X", "star"]
         }
       },
       "required": ["type", "symbol"]
