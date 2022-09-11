@@ -218,11 +218,11 @@ export type TypeLineStyle =
  */
 export type TypeStrokeSymbolConfig = {
   /** Color to use for vector features. */
-  color: string;
+  color?: string;
   /** Line style to use for the feature. */
-  lineStyle: TypeLineStyle;
+  lineStyle?: TypeLineStyle;
   /** Width to use for the stroke */
-  width: number;
+  width?: number;
 };
 
 /** ******************************************************************************************************************************

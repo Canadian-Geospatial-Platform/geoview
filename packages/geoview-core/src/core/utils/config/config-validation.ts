@@ -438,8 +438,10 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
       } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
         // and place the layerId at the end of it.
         // Value for layerEntryConfig.source.format can only be EsriJSON.
@@ -454,8 +456,10 @@ export class ConfigValidation {
           ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
           : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
       } else if (geoviewEntryIsWFS(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
         // Value for layerEntryConfig.source.format can only be WFS.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'WFS' };
@@ -464,8 +468,10 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsOgcFeature(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
         // Value for layerEntryConfig.source.format can only be WFS.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'featureAPI' };
@@ -474,16 +480,18 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsGeocore(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'geocore';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
         if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
           throw new Error(
-            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+            `metadataAccessPath or dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
           );
         }
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
         // and place the layerId at the end of it.
         // Value for layerEntryConfig.source.format can only be EsriJSON.
@@ -491,8 +499,8 @@ export class ConfigValidation {
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'GeoJSON';
         if (!layerEntryConfig.source.dataAccessPath) {
           let { en, fr } = rootLayerConfig.metadataAccessPath!;
-          en = en && en.split('/').length > 1 ? en.split('/').slice(0, -1).join('/') : './';
-          fr = fr && en.split('/').length > 1 ? fr.split('/').slice(0, -1).join('/') : './';
+          en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
+          fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
           layerEntryConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
         }
         layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')

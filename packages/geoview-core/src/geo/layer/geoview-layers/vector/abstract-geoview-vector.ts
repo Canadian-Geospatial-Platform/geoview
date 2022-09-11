@@ -10,14 +10,7 @@ import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import {
-  layerEntryIsVector,
-  layerEntryIsVectorTile,
-  TypeBaseVectorLayerEntryConfig,
-  TypeLayerEntryConfig,
-  TypeListOfLayerEntryConfig,
-  TypeStyleConfigKey,
-} from '../../../map/map-schema-types';
+import { TypeBaseVectorLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
@@ -263,18 +256,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       properties: { layerEntryConfig: layerEntry },
       source: vectorSource,
       style: (feature) => {
-        if (layerEntryIsVector(layerEntry) || layerEntryIsVectorTile(layerEntry)) {
+        if ('style' in layerEntry) {
           const { geoviewRenderer } = api.map(this.mapId);
-          const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
-          // If style does not exist, create it.
-          if (layerEntry.style === undefined || layerEntry.style[geometryType] === undefined)
-            geoviewRenderer.useDefaultStyle(geometryType, layerEntry);
-          // Get the style accordingly to its type and geometry.
-          if (layerEntry.style![geometryType] !== undefined) {
-            const styleSettings = layerEntry.style![geometryType]!;
-            const { styleType } = styleSettings;
-            return geoviewRenderer.getStyle[styleType][geometryType](styleSettings, feature);
-          }
+          return geoviewRenderer.getStyle(feature, layerEntry);
         }
         return undefined;
       },
