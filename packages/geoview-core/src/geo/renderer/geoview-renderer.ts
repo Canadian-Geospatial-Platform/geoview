@@ -36,6 +36,9 @@ import {
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
 
+type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
+type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
+
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** *****************************************************************************************************************************
@@ -99,7 +102,14 @@ export class GeoviewRenderer {
   };
 
   private processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig) => Style | undefined> = {
+    null: this.processNullFill,
     solid: this.processSolidFill,
+    backwardDiagonal: this.processBackwardDiagonalFill,
+    cross: this.processCrossFill,
+    diagonalCross: this.processDiagonalCrossFill,
+    forwardDiagonal: this.processForwardDiagonalFill,
+    horizontal: this.processHorizontalFill,
+    vertical: this.processVerticalFill,
   };
 
   constructor(mapId: string) {
@@ -141,12 +151,6 @@ export class GeoviewRenderer {
   }
 
   private styleNotImplemented(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    // eslint-disable-next-line no-console
-    console.log('Style processing function is not implemented.');
-    return undefined;
-  }
-
-  private symbolNotImplemented(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     // eslint-disable-next-line no-console
     console.log('Style processing function is not implemented.');
     return undefined;
@@ -291,6 +295,99 @@ export class GeoviewRenderer {
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
     });
+  }
+
+  private processNullFill(settings: TypePolygonVectorConfig): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    return new Style({
+      stroke: new Stroke(strokeOptions),
+      fill: new Fill(fillOptions),
+    });
+  }
+
+  private fillPaternSettings: FillPaternSettings = {
+    null: [],
+    solid: [],
+    backwardDiagonal: [
+      { moveTo: [1, 0], lineTo: [2, 1] },
+      { moveTo: [0, 0], lineTo: [2, 2] },
+      { moveTo: [0, 1], lineTo: [1, 2] },
+    ],
+    cross: [
+      { moveTo: [1, 0], lineTo: [1, 2] },
+      { moveTo: [0, 1], lineTo: [2, 1] },
+    ],
+    diagonalCross: [
+      { moveTo: [0, 0], lineTo: [2, 2] },
+      { moveTo: [0, 2], lineTo: [2, 0] },
+    ],
+    forwardDiagonal: [
+      { moveTo: [0, 1], lineTo: [1, 0] },
+      { moveTo: [0, 2], lineTo: [2, 0] },
+      { moveTo: [2, 1], lineTo: [1, 2] },
+    ],
+    horizontal: [{ moveTo: [0, 1], lineTo: [2, 1] }],
+    vertical: [{ moveTo: [1, 0], lineTo: [1, 2] }],
+  };
+
+  private processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: FillPaternLine[]): Style | undefined {
+    const paternSize = settings.paternSize !== undefined ? settings.paternSize : 8;
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = paternSize * 2;
+    drawingCanvas.height = paternSize * 2;
+    const context = drawingCanvas.getContext('2d');
+    context!.strokeStyle = settings.color;
+    context!.lineCap = 'butt';
+    context!.lineWidth = settings.paternWidth !== undefined ? settings.paternWidth : 1;
+    context!.beginPath();
+    for (let i = 0; i < fillPaternLines.length; i++) {
+      const { moveTo, lineTo } = fillPaternLines[i];
+      context!.moveTo(moveTo[0] * paternSize, moveTo[1] * paternSize);
+      context!.lineTo(lineTo[0] * paternSize, lineTo[1] * paternSize);
+    }
+    context!.stroke();
+
+    const outputCanvas = document.createElement('canvas');
+    outputCanvas.width = paternSize;
+    outputCanvas.height = paternSize;
+    const outputContext = outputCanvas.getContext('2d');
+    outputContext!.putImageData(context!.getImageData(paternSize / 2, paternSize / 2, paternSize, paternSize), 0, 0);
+
+    fillOptions.color = outputContext!.createPattern(outputCanvas, 'repeat');
+    return new Style({
+      stroke: new Stroke(strokeOptions),
+      fill: new Fill(fillOptions),
+    });
+  }
+
+  private processBackwardDiagonalFill(settings: TypePolygonVectorConfig): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.backwardDiagonal);
+  }
+
+  private processForwardDiagonalFill(settings: TypePolygonVectorConfig): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.forwardDiagonal);
+  }
+
+  private processCrossFill(settings: TypePolygonVectorConfig): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.cross);
+  }
+
+  private processDiagonalCrossFill(settings: TypePolygonVectorConfig): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.diagonalCross);
+  }
+
+  private processHorizontalFill(settings: TypePolygonVectorConfig): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.horizontal);
+  }
+
+  private processVerticalFill(settings: TypePolygonVectorConfig): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.vertical);
   }
 
   private processSimplePolygon(styleSettings: TypeStyleSettings | TypeUniqueValueStyleInfo, feature: FeatureLike): Style | undefined {

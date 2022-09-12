@@ -111,7 +111,15 @@ export interface EsriSimpleFillSymbol extends EsriBaseSymbol {
   width: number;
 }
 
-export type EsriFillStyle = 'esriSFSSolid';
+export type EsriFillStyle =
+  | 'esriSFSBackwardDiagonal'
+  | 'esriSFSCross'
+  | 'esriSFSDiagonalCross'
+  | 'esriSFSForwardDiagonal'
+  | 'esriSFSHorizontal'
+  | 'esriSFSNull'
+  | 'esriSFSSolid'
+  | 'esriSFSVertical';
 
 /** *****************************************************************************************************************************
  * Type Gard function that redefines an EsriBaseSymbol as an EsriSimpleLineSymbol if the type attribute of the verifyIfSymbol
@@ -225,8 +233,22 @@ function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
 
 function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
   switch (fillStyle) {
+    case 'esriSFSBackwardDiagonal':
+      return 'backwardDiagonal';
+    case 'esriSFSCross':
+      return 'cross';
+    case 'esriSFSDiagonalCross':
+      return 'diagonalCross';
+    case 'esriSFSForwardDiagonal':
+      return 'forwardDiagonal';
+    case 'esriSFSHorizontal':
+      return 'horizontal';
+    case 'esriSFSNull':
+      return 'solid';
     case 'esriSFSSolid':
       return 'solid';
+    case 'esriSFSVertical':
+      return 'vertical';
     default: {
       console.log(`Handling of ESRI renderer line style '${fillStyle}' is not coded, 'solid' will be used instead.`);
       return 'solid';
@@ -297,11 +319,11 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
         type: 'filledPolygon',
         color: convertEsriColor(symbol.color),
         stroke: {
-          color: convertEsriColor(symbol.color),
-          lineStyle: convertFillStyle(symbol.style),
-          width: symbol.width,
+          color: convertEsriColor(symbol.outline.color),
+          lineStyle: convertLineStyle(symbol.outline.style),
+          width: symbol.outline.width,
         },
-        fillStyle: 'solid',
+        fillStyle: convertFillStyle(symbol.style),
       };
       return polygonVectorConfig;
     }

@@ -104,8 +104,17 @@
         },
         "color": { "type": "string" },
         "stroke": { "$ref": "#/definitions/TypeStrokeSymbolConfig" },
+        "paternSize": {
+          "type": "number",
+          "description": "Distance between patern lines. Default = 8"
+        },
+        "paternWidth": {
+          "type": "number",
+          "description": "Patern line width.default = 1."
+        },
         "fillStyle": {
-          "enum": ["solid"]
+          "enum": ["solid", "backwardDiagonal", "cross", "diagonalCross", "forwardDiagonal", "horizontal", "null", "vertical"],
+          "description": "Kind of filling  for vector features. Default = solid. "
         }
       },
       "required": ["type", "stroke"]
