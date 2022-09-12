@@ -15,12 +15,10 @@ import {
   isIconSymbolVectorConfig,
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
-  isUniqueValueStyleConfig,
   TypeBaseStyleType,
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
-  TypeKinfOfSymbolVectorSettings,
   TypeLineStyle,
   TypeLineStringVectorConfig,
   TypeSimpleStyleConfig,
@@ -33,6 +31,7 @@ import {
   TypeVectorLayerEntryConfig,
   TypeVectorTileLayerEntryConfig,
   TypeBaseVectorLayerEntryConfig,
+  TypeStyleConfig,
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
 
@@ -91,6 +90,12 @@ export class GeoviewRenderer {
     },
   };
 
+  private styleNotImplemented(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
+    // eslint-disable-next-line no-console
+    console.log('Style processing function is not implemented.');
+    return undefined;
+  }
+
   private processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig) => Style | undefined> = {
     circle: this.processCircleSymbol,
     '+': this.processPlusSymbol,
@@ -123,9 +128,9 @@ export class GeoviewRenderer {
   ): Style | undefined {
     const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
     // If style does not exist for the geometryType, create it.
-    const { style } = layerEntry as TypeVectorLayerEntryConfig;
+    let { style } = layerEntry as TypeVectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
-      this.createDefaultStyle(geometryType, layerEntry as TypeVectorLayerEntryConfig);
+      style = this.createDefaultStyle(geometryType, layerEntry as TypeVectorLayerEntryConfig);
     // Get the style accordingly to its type and geometry.
     if (style![geometryType] !== undefined) {
       const styleSettings = style![geometryType]!;
@@ -148,12 +153,6 @@ export class GeoviewRenderer {
 
   private getDefaultColor(alpha: number): string {
     return asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), alpha));
-  }
-
-  private styleNotImplemented(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    // eslint-disable-next-line no-console
-    console.log('Style processing function is not implemented.');
-    return undefined;
   }
 
   private createStrokeOptions(
@@ -440,7 +439,10 @@ export class GeoviewRenderer {
     return undefined;
   }
 
-  private createDefaultStyle(geometryType: TypeStyleConfigKey, layerEntry: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig) {
+  private createDefaultStyle(
+    geometryType: TypeStyleConfigKey,
+    layerEntry: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+  ): TypeStyleConfig | undefined {
     if (layerEntry.style === undefined) layerEntry.style = {};
     const id = `${this.mapId}-${layerEntry.geoviewRootLayer?.layerId}-${layerEntry.layerId}`;
     let label = getLocalizedValue(layerEntry.layerName, this.mapId);
@@ -459,7 +461,7 @@ export class GeoviewRenderer {
       const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
       layerEntry.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
-      return;
+      return layerEntry.style;
     }
     if (geometryType === 'LineString') {
       const settings: TypeLineStringVectorConfig = {
@@ -469,7 +471,7 @@ export class GeoviewRenderer {
       const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
       layerEntry.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
-      return;
+      return layerEntry.style;
     }
     if (geometryType === 'Polygon') {
       const settings: TypePolygonVectorConfig = {
@@ -481,9 +483,10 @@ export class GeoviewRenderer {
       const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
       layerEntry.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
-      return;
+      return layerEntry.style;
     }
     // eslint-disable-next-line no-console
     console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
+    return undefined;
   }
 }

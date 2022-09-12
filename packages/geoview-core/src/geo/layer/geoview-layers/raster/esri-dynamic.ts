@@ -147,7 +147,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('EsriDynamic.setRenderer: This method needs to be coded!', rasterLayer);
   }
 
   /**
@@ -157,6 +157,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('EsriDynamic.registerToPanels: This method needs to be coded!', rasterLayer);
   }
 }

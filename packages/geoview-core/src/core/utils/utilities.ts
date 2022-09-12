@@ -74,7 +74,7 @@ export function isJsonString(str: string): boolean {
       return false;
     }
   } catch (e) {
-    console.log('- String passed to the JSON parser:');
+    console.log('- Invalid JSON string. String passed to the JSON parser:');
     console.log(str);
     console.log('- JSON Parser error:', (e as { message: string }).message);
     console.log('- See text above.');

@@ -32,6 +32,9 @@ import {
   TypeBaseVectorLayerEntryConfig,
 } from '../../../geo/map/map-schema-types';
 import { Cast, TypeMapFeaturesConfig } from '../../types/global-types';
+import { api } from '../../../app';
+import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -196,7 +199,7 @@ export class ConfigValidation {
     if (language && VALID_DISPLAY_LANGUAGE.includes(language)) return language;
 
     console.log(
-      `- map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
+      `- Map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
     );
     return this._defaultMapFeaturesConfig.displayLanguage!;
   }
@@ -285,6 +288,17 @@ export class ConfigValidation {
           console.log(this.mapId, error);
           console.log(this.mapId, node);
         }
+
+        setTimeout(() => {
+          const errorMessage = `- Map ${this.mapId}: A schema error was found, check the console to see what is wrong.`;
+
+          api.event.emit(
+            snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+              type: 'string',
+              value: errorMessage,
+            })
+          );
+        }, 2000);
 
         validMapFeaturesConfig = {
           ...this.adjustMapConfiguration(mapFeaturesConfigToValidate),
@@ -648,19 +662,19 @@ export class ConfigValidation {
     // eslint-disable-next-line array-callback-return
     Object.keys(inputMapFeaturesConfig).map((key) => {
       if (!(key in validMapFeaturesConfig)) {
-        console.log(`- map: ${this.mapId} - Key '${key}' is invalid -`);
+        console.log(`- Map: ${this.mapId} - Key '${key}' is invalid -`);
       }
     });
 
     if (inputMapFeaturesConfig?.map?.viewSettings?.projection !== validMapFeaturesConfig.map.viewSettings.projection) {
       console.log(
-        `- map: ${this.mapId} - Invalid projection code ${inputMapFeaturesConfig?.map?.viewSettings?.projection} replaced by ${validMapFeaturesConfig.map.viewSettings.projection} -`
+        `- Map: ${this.mapId} - Invalid projection code ${inputMapFeaturesConfig?.map?.viewSettings?.projection} replaced by ${validMapFeaturesConfig.map.viewSettings.projection} -`
       );
     }
 
     if (inputMapFeaturesConfig?.map?.viewSettings?.zoom !== validMapFeaturesConfig.map.viewSettings.zoom) {
       console.log(
-        `- map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.zoom} replaced by ${validMapFeaturesConfig.map.viewSettings.zoom} -`
+        `- Map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.zoom} replaced by ${validMapFeaturesConfig.map.viewSettings.zoom} -`
       );
     }
 
@@ -668,13 +682,13 @@ export class ConfigValidation {
       JSON.stringify(inputMapFeaturesConfig?.map?.viewSettings?.center) !== JSON.stringify(validMapFeaturesConfig.map.viewSettings.center)
     ) {
       console.log(
-        `- map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.center} replaced by ${validMapFeaturesConfig.map.viewSettings.center}`
+        `- Map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.center} replaced by ${validMapFeaturesConfig.map.viewSettings.center}`
       );
     }
 
     if (JSON.stringify(inputMapFeaturesConfig?.map?.basemapOptions) !== JSON.stringify(validMapFeaturesConfig.map.basemapOptions)) {
       console.log(
-        `- map: ${this.mapId} - Invalid basemap options ${JSON.stringify(
+        `- Map: ${this.mapId} - Invalid basemap options ${JSON.stringify(
           inputMapFeaturesConfig?.map?.basemapOptions
         )} replaced by ${JSON.stringify(validMapFeaturesConfig.map.basemapOptions)} -`
       );

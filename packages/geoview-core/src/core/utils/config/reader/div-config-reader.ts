@@ -36,12 +36,12 @@ export class InlineDivConfigReader {
       configObjStr = configObjStr.replace(/'/g, '"');
 
       if (!isJsonString(configObjStr)) {
-        console.log(`- map: ${mapId} - Invalid JSON configuration object, using default -`);
+        console.log(`- Map: ${mapId} - Invalid JSON configuration object, using default -`);
       } else {
         mapConfig = { ...JSON.parse(configObjStr) };
       }
     } else {
-      console.log(`- map: ${mapId} - Empty JSON configuration object, using default -`);
+      console.log(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
     return mapConfig;

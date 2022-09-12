@@ -199,6 +199,6 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('registerToPanels: This method needs to be coded!', rasterLayer);
+    console.log('OgcFeature.registerToPanels: This method needs to be coded!', rasterLayer);
   }
 }
