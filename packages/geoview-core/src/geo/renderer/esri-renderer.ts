@@ -297,7 +297,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
           lineStyle: convertLineStyle(symbol.outline.style),
           width: symbol.outline.width,
         },
-        size: symbol.size,
+        size: symbol.size * 0.667,
         symbol: convertSymbolStyle(symbol.style),
         offset,
       };

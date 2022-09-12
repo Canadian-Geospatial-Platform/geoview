@@ -427,7 +427,7 @@ export class GeoviewRenderer {
     const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings as TypeUniqueValueStyleConfig;
     const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
     if (i !== undefined) return this.processSimpleLineString(uniqueValueStyleInfo[i], feature);
-    if (defaultSettings !== undefined) return this.processSimplePoint(styleSettings, feature);
+    if (defaultSettings !== undefined) return this.processSimpleLineString(styleSettings, feature);
     return undefined;
   }
 
@@ -435,7 +435,7 @@ export class GeoviewRenderer {
     const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings as TypeUniqueValueStyleConfig;
     const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
     if (i !== undefined) return this.processSimplePolygon(uniqueValueStyleInfo[i], feature);
-    if (defaultSettings !== undefined) return this.processSimplePoint(styleSettings, feature);
+    if (defaultSettings !== undefined) return this.processSimplePolygon(styleSettings, feature);
     return undefined;
   }
 
