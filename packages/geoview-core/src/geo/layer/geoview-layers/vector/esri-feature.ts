@@ -193,6 +193,6 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('registerToPanels: This method needs to be coded!', rasterLayer);
+    console.log('EsriFeature.registerToPanels: This method needs to be coded!', rasterLayer);
   }
 }

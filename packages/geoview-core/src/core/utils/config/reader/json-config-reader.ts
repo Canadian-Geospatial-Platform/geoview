@@ -32,7 +32,7 @@ export class JsonConfigReader {
 
         mapConfig = { ...configData };
       } catch (error) {
-        console.log(`- map: ${mapId} - Invalid config url provided -`);
+        console.log(`- Map: ${mapId} - Invalid config url provided -`);
       }
     }
 

@@ -155,7 +155,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('XYZTiles.setRenderer: This method needs to be coded!', rasterLayer);
   }
 
   /** ****************************************************************************************************************************
@@ -165,6 +165,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('XYZTiles.registerToPanels: This method needs to be coded!', rasterLayer);
   }
 }
