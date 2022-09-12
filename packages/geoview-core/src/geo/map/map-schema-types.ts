@@ -238,7 +238,15 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorConfig {
 /** ******************************************************************************************************************************
  * Valid values to specify fill styles.
  */
-export type TypeFillStyle = 'solid';
+export type TypeFillStyle =
+  | 'null'
+  | 'solid'
+  | 'backwardDiagonal'
+  | 'cross'
+  | 'diagonalCross'
+  | 'forwardDiagonal'
+  | 'horizontal'
+  | 'vertical';
 
 /** ******************************************************************************************************************************
  * Definition of the line symbol vector settings type.
@@ -250,7 +258,11 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorConfig {
   color?: string;
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
-  /** Kind of filling  for vector features. */
+  /** Distance between patern lines. Default = 8. */
+  paternSize?: number;
+  /** Patern line width.default = 1. */
+  paternWidth?: number;
+  /** Kind of filling  for vector features. Default = solid.  */
   fillStyle: TypeFillStyle;
 }
 
