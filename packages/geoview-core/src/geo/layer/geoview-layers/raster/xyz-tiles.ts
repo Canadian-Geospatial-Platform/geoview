@@ -37,9 +37,9 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid
+ * @return {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
@@ -52,20 +52,21 @@ export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): ve
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
  * is valid
  *
- * @return {boolean} true if the type ascention is valid
+ * @return {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is XYZTiles => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute of the
- * verifyIfGeoViewEntry.geoviewRootLayer attribute is XYZ_TILES. The type ascention applies only to the true block of
+ * Type Gard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is XYZ_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
- * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
+ * valid.
  *
- * @return {boolean} true if the type ascention is valid
+ * @return {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsXYZTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
@@ -154,7 +155,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   setRenderer(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('XYZTiles.setRenderer: This method needs to be coded!', rasterLayer);
   }
 
   /** ****************************************************************************************************************************
@@ -164,6 +165,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('XYZTiles.registerToPanels: This method needs to be coded!', rasterLayer);
   }
 }

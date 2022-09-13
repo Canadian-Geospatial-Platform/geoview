@@ -2,8 +2,11 @@
 import axios from 'axios';
 
 import { Icon as StyleIcon } from 'ol/style';
+import { VectorImage as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
 
-import { toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { Cast, toJsonObject, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
 import {
@@ -11,12 +14,11 @@ import {
   TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
-  TypeUniqueValueStyleInfo,
-  TypeIconSymbolVectorConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { blueCircleIcon } from '../../../../core/types/marker-definitions';
+import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../../renderer/esri-renderer';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -36,9 +38,9 @@ export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig,
  * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid
+ * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid
+ * @return {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -51,7 +53,7 @@ export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig):
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
  * is valid
  *
- * @return {boolean} true if the type ascention is valid
+ * @return {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriFeature => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -65,7 +67,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention
  * is valid
  *
- * @return {boolean} true if the type ascention is valid
+ * @return {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsEsriFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
@@ -113,19 +115,24 @@ export class EsriFeature extends AbstractGeoViewVector {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getCapabilities().then(() => {
         if (this.metadata) {
-          // if layerEntry.layerId is not defined, use the dataAccessPath ending as value for layerEntry.layerId.
-          this.listOfLayerEntryConfig.forEach((layerEntry) => {
-            const esriIndex = Number(layerEntry.layerId);
-            if (!layerEntry.layerName) {
-              layerEntry.layerName = {
-                en: this.metadata!.layers[esriIndex].name as string,
-                fr: this.metadata!.layers[esriIndex].name as string,
-              };
-            }
-            this.getDrawingInfo(esriIndex, layerEntry as TypeVectorLayerEntryConfig);
-          });
-        }
-        resolve();
+          if (this.listOfLayerEntryConfig.length === 0) {
+            resolve(); // no layer entry.
+          } else {
+            const promiseOfLayerProcessed: Promise<void>[] = [];
+            this.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
+              const esriIndex = Number(layerEntry.layerId);
+              if (!layerEntry.layerName) {
+                layerEntry.layerName = {
+                  en: this.metadata!.layers[esriIndex].name as string,
+                  fr: this.metadata!.layers[esriIndex].name as string,
+                };
+              }
+            });
+            Promise.all(promiseOfLayerProcessed).then(() => {
+              resolve();
+            });
+          }
+        } else resolve(); // no metadata was read.
       });
     });
     return promisedExecution;
@@ -134,7 +141,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    */
-  private async getCapabilities(): Promise<void> {
+  private getCapabilities(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const capabilitiesUrl = `${getLocalizedValue(this.metadataAccessPath, this.mapId)}?f=json`;
       const promisedCapabilitiesString = getXMLHttpRequest(capabilitiesUrl);
@@ -153,59 +160,30 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   */
-  private async getDrawingInfo(esriIndex: number, layerEntry: TypeVectorLayerEntryConfig): Promise<void> {
-    if (!layerEntry.style) {
-      let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
-      queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}${esriIndex}?f=pjson` : `${queryUrl}/${esriIndex}?f=pjson`;
-
-      const queryResult = (await axios.get<TypeJsonObject>(queryUrl)).data;
-
-      const renderer = queryResult.drawingInfo?.renderer;
-      if (renderer) {
-        if (renderer.type === 'uniqueValue') {
-          const id = `${esriIndex}`;
-          const styleType = 'uniqueValue';
-          const label = renderer.defaultLabel ? (renderer.defaultLabel as string) : '';
-          const fields = [renderer.field1 as string];
-          if (renderer.field2) fields.push(renderer.field2 as string);
-          if (renderer.field3) fields.push(renderer.field3 as string);
-          const uniqueValueStyleInfo: TypeUniqueValueStyleInfo[] = [];
-          (renderer.uniqueValueInfos as TypeJsonArray).forEach((symbolInfo) => {
-            const options: TypeIconSymbolVectorConfig = {
-              src: `data:${symbolInfo.symbol.contentType};base64,${symbolInfo.symbol.imageData}`,
-              height: symbolInfo.symbol.height as number,
-              width: symbolInfo.symbol.width as number,
-              rotation: ((symbolInfo.symbol.angle as number) * Math.PI) / 180.0, // convert to radians
-              opacity: 1,
-            };
-            uniqueValueStyleInfo.push({
-              label: symbolInfo.label as string,
-              values: (symbolInfo.value as string).split(renderer.fieldDelimiter as string),
-              options,
-            });
-          });
-          layerEntry.style = { id, styleType, label, fields, uniqueValueStyleInfo };
-        } else if (renderer.symbol) {
-          const symbolInfo = renderer.symbol;
-          this.iconSymbols.valueAndSymbol.default = new StyleIcon({
-            src: `data:${symbolInfo.contentType};base64,${symbolInfo.imageData}`,
-            scale: (symbolInfo.height as number) / (symbolInfo.width as number),
-          });
-        }
-      }
-    }
-  }
-
-  /** ***************************************************************************************************************************
    * This method associate a renderer to the GeoView layer.
    *
-   * @param {TypeBaseVectorLayer} rasterLayer The GeoView layer associated to the renderer.
+   * @param {TypeBaseVectorLayer} vectorLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(rasterLayer: TypeBaseVectorLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+  setRenderer(baseVectorLayer: VectorLayer<VectorSource<Geometry>> | null): Promise<TypeBaseVectorLayer | null> {
+    const promiseOfBaseVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
+      if (baseVectorLayer) {
+        const layerEntry = baseVectorLayer.get('layerEntryConfig') as TypeVectorLayerEntryConfig;
+        if (layerEntry.style) {
+          resolve(baseVectorLayer);
+        } else {
+          let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+          queryUrl = queryUrl!.endsWith('/') ? `${queryUrl}${layerEntry.layerId}?f=pjson` : `${queryUrl}/${layerEntry.layerId}?f=pjson`;
+
+          const queryResult = axios.get<TypeJsonObject>(queryUrl);
+          queryResult.then((response) => {
+            const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
+            if (renderer) layerEntry.style = getStyleFromEsriRenderer(this.mapId, layerEntry, renderer);
+            resolve(baseVectorLayer);
+          });
+        }
+      } else resolve(baseVectorLayer);
+    });
+    return promiseOfBaseVectorLayer;
   }
 
   /** ***************************************************************************************************************************
@@ -215,6 +193,6 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
     // eslint-disable-next-line no-console
-    console.log('This method needs to be coded!', rasterLayer);
+    console.log('EsriFeature.registerToPanels: This method needs to be coded!', rasterLayer);
   }
 }

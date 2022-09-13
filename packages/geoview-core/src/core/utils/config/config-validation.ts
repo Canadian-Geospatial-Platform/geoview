@@ -2,11 +2,8 @@
 import Ajv from 'ajv';
 
 import { generateId } from '../utilities';
-import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
-import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import schema from '../../../../schema.json';
-import { api } from '../../../app';
 import { TypeBasemapId, TypeBasemapOptions, VALID_BASEMAP_ID } from '../../../geo/layer/basemap/basemap-types';
 import { geoviewEntryIsWMS } from '../../../geo/layer/geoview-layers/raster/wms';
 import { geoviewEntryIsXYZTiles } from '../../../geo/layer/geoview-layers/raster/xyz-tiles';
@@ -17,7 +14,6 @@ import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vect
 import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
 import { geoviewEntryIsGeocore } from '../../../geo/layer/other/geocore';
 import {
-  layerEntryIsVector,
   layerEntryIsGroupLayer,
   TypeGeoviewLayerConfig,
   TypeDisplayLanguage,
@@ -33,8 +29,12 @@ import {
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
+  TypeBaseVectorLayerEntryConfig,
 } from '../../../geo/map/map-schema-types';
-import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { Cast, TypeMapFeaturesConfig } from '../../types/global-types';
+import { api } from '../../../app';
+import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -199,7 +199,7 @@ export class ConfigValidation {
     if (language && VALID_DISPLAY_LANGUAGE.includes(language)) return language;
 
     console.log(
-      `- map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
+      `- Map: ${this.mapId} - Invalid display language code ${language} replaced by ${this._defaultMapFeaturesConfig.displayLanguage} -`
     );
     return this._defaultMapFeaturesConfig.displayLanguage!;
   }
@@ -278,20 +278,27 @@ export class ConfigValidation {
       if (!valid && validate.errors && validate.errors.length) {
         for (let j = 0; j < validate.errors.length; j += 1) {
           const error = validate.errors[j];
+          const { instancePath } = error;
+          const path = instancePath.split('/');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let node: any = mapFeaturesConfigToValidate;
+          for (let i = 1; i < path.length; i += 1) {
+            node = node[path[i]];
+          }
           console.log(this.mapId, error);
-          console.log(this.mapId, mapFeaturesConfigToValidate);
-
-          setTimeout(() => {
-            const errorMessage = `Map ${this.mapId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
-
-            api.event.emit(
-              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-                type: 'string',
-                value: errorMessage,
-              })
-            );
-          }, 2000);
+          console.log(this.mapId, node);
         }
+
+        setTimeout(() => {
+          const errorMessage = `- Map ${this.mapId}: A schema error was found, check the console to see what is wrong.`;
+
+          api.event.emit(
+            snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+              type: 'string',
+              value: errorMessage,
+            })
+          );
+        }, 2000);
 
         validMapFeaturesConfig = {
           ...this.adjustMapConfiguration(mapFeaturesConfigToValidate),
@@ -445,8 +452,10 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
       } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
         // and place the layerId at the end of it.
         // Value for layerEntryConfig.source.format can only be EsriJSON.
@@ -461,8 +470,10 @@ export class ConfigValidation {
           ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
           : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
       } else if (geoviewEntryIsWFS(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
         // Value for layerEntryConfig.source.format can only be WFS.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'WFS' };
@@ -471,8 +482,10 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsOgcFeature(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
         // Value for layerEntryConfig.source.format can only be WFS.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'featureAPI' };
@@ -481,16 +494,18 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsGeocore(layerEntryConfig)) {
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'geocore';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
         if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
           throw new Error(
-            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+            `metadataAccessPath or dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
           );
         }
-        // Value for layerEntryConfig.entryType can only be vector
+        // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
         // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it
         // and place the layerId at the end of it.
         // Value for layerEntryConfig.source.format can only be EsriJSON.
@@ -498,8 +513,8 @@ export class ConfigValidation {
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'GeoJSON';
         if (!layerEntryConfig.source.dataAccessPath) {
           let { en, fr } = rootLayerConfig.metadataAccessPath!;
-          en = en && en.split('/').length > 1 ? en.split('/').slice(0, -1).join('/') : './';
-          fr = fr && en.split('/').length > 1 ? fr.split('/').slice(0, -1).join('/') : './';
+          en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
+          fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
           layerEntryConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
         }
         layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
@@ -579,13 +594,12 @@ export class ConfigValidation {
           if (layerEntryConfig?.layerName) this.SynchronizeLocalizedString(layerEntryConfig.layerName!, sourceKey, destinationKey);
           if (layerEntryConfig?.source?.dataAccessPath)
             this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
-          if (layerEntryIsVector(layerEntryConfig)) {
-            if (layerEntryConfig?.source?.featureInfo) {
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
-              this.SynchronizeLocalizedString(layerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
-            }
+          const baseVectorLayerEntryConfig = Cast<TypeBaseVectorLayerEntryConfig>(layerEntryConfig);
+          if (baseVectorLayerEntryConfig?.source?.featureInfo) {
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
           }
         });
       });
@@ -648,19 +662,19 @@ export class ConfigValidation {
     // eslint-disable-next-line array-callback-return
     Object.keys(inputMapFeaturesConfig).map((key) => {
       if (!(key in validMapFeaturesConfig)) {
-        console.log(`- map: ${this.mapId} - Key '${key}' is invalid -`);
+        console.log(`- Map: ${this.mapId} - Key '${key}' is invalid -`);
       }
     });
 
     if (inputMapFeaturesConfig?.map?.viewSettings?.projection !== validMapFeaturesConfig.map.viewSettings.projection) {
       console.log(
-        `- map: ${this.mapId} - Invalid projection code ${inputMapFeaturesConfig?.map?.viewSettings?.projection} replaced by ${validMapFeaturesConfig.map.viewSettings.projection} -`
+        `- Map: ${this.mapId} - Invalid projection code ${inputMapFeaturesConfig?.map?.viewSettings?.projection} replaced by ${validMapFeaturesConfig.map.viewSettings.projection} -`
       );
     }
 
     if (inputMapFeaturesConfig?.map?.viewSettings?.zoom !== validMapFeaturesConfig.map.viewSettings.zoom) {
       console.log(
-        `- map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.zoom} replaced by ${validMapFeaturesConfig.map.viewSettings.zoom} -`
+        `- Map: ${this.mapId} - Invalid zoom level ${inputMapFeaturesConfig?.map?.viewSettings?.zoom} replaced by ${validMapFeaturesConfig.map.viewSettings.zoom} -`
       );
     }
 
@@ -668,13 +682,13 @@ export class ConfigValidation {
       JSON.stringify(inputMapFeaturesConfig?.map?.viewSettings?.center) !== JSON.stringify(validMapFeaturesConfig.map.viewSettings.center)
     ) {
       console.log(
-        `- map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.center} replaced by ${validMapFeaturesConfig.map.viewSettings.center}`
+        `- Map: ${this.mapId} - Invalid center ${inputMapFeaturesConfig?.map?.viewSettings?.center} replaced by ${validMapFeaturesConfig.map.viewSettings.center}`
       );
     }
 
     if (JSON.stringify(inputMapFeaturesConfig?.map?.basemapOptions) !== JSON.stringify(validMapFeaturesConfig.map.basemapOptions)) {
       console.log(
-        `- map: ${this.mapId} - Invalid basemap options ${JSON.stringify(
+        `- Map: ${this.mapId} - Invalid basemap options ${JSON.stringify(
           inputMapFeaturesConfig?.map?.basemapOptions
         )} replaced by ${JSON.stringify(validMapFeaturesConfig.map.basemapOptions)} -`
       );
