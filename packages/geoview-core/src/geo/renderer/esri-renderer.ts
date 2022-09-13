@@ -5,6 +5,8 @@ import {
   isIconSymbolVectorConfig,
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
+  TypeClassBreakStyleConfig,
+  TypeClassBreakStyleInfo,
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
@@ -24,7 +26,7 @@ import {
 /*
  * This file contains a partial implementation of the ESRI renderer types.
  */
-export type EsriRendererTypes = 'uniqueValue' | 'simple';
+export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 
 export type EsriBaseRenderer = {
   type: EsriRendererTypes;
@@ -401,6 +403,73 @@ function processSimpleRenderer(id: string, renderer: EsriSimpleRenderer): TypeSt
   return undefined;
 }
 
+function processClassBreakRenderer(id: string, EsriRenderer: EsriClassBreakRenderer): TypeStyleConfig | undefined {
+  const style: TypeStyleConfig = {};
+  const styleType = 'classBreaks';
+  const defaultLabel = EsriRenderer.defaultLabel === null ? undefined : EsriRenderer.defaultLabel;
+  const defaultSettings = convertSymbol(EsriRenderer.defaultSymbol);
+  const { field } = EsriRenderer;
+  const classBreakStyleInfos: TypeClassBreakStyleInfo[] = [];
+  for (let i = 0; i < EsriRenderer.classBreakInfos.length; i++) {
+    const settings = convertSymbol(EsriRenderer.classBreakInfos[i].symbol);
+    if (settings) {
+      if (EsriRenderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
+        settings.rotation = Math.PI / 2 - settings.rotation!;
+      const geoviewClassBreakInfo: TypeClassBreakStyleInfo = {
+        label: EsriRenderer.classBreakInfos[i].label,
+        minValue: EsriRenderer.classBreakInfos[i].classMinValue,
+        maxValue: EsriRenderer.classBreakInfos[i].classMaxValue,
+        settings,
+      };
+      classBreakStyleInfos.push(geoviewClassBreakInfo);
+      if (EsriRenderer.classBreakInfos[i].classMinValue || EsriRenderer.classBreakInfos[i].classMinValue === 0)
+        classBreakStyleInfos[i].minValue = EsriRenderer.classBreakInfos[i].classMinValue;
+      else if (i === 0) classBreakStyleInfos[i].minValue = EsriRenderer.minValue;
+      else classBreakStyleInfos[i].minValue = EsriRenderer.classBreakInfos[i - 1].classMaxValue;
+    }
+  }
+
+  const styleConfigKey = getStyleConfigKey(classBreakStyleInfos[0].settings);
+  const styleSettings: TypeClassBreakStyleConfig = { id, styleType, defaultLabel, defaultSettings, field, classBreakStyleInfos };
+  if (styleConfigKey) {
+    style[styleConfigKey] = styleSettings;
+    return style;
+  }
+  return undefined;
+}
+
+/** *****************************************************************************************************************************
+ * Type Gard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
+ * verifyIfRenderer parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @return {boolean} true if the type ascention is valid.
+ */
+export const esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriClassBreakRenderer => {
+  return verifyIfRenderer.type === 'classBreaks';
+};
+
+type EsriClassBreakInfoEntry = {
+  classMaxValue: number;
+  classMinValue: number | undefined | null;
+  description: string;
+  label: string;
+  symbol: EsriSymbol;
+};
+
+export interface EsriClassBreakRenderer extends EsriBaseRenderer {
+  type: 'classBreaks';
+  classBreakInfos: EsriClassBreakInfoEntry[];
+  defaultLabel: string;
+  defaultSymbol: EsriSymbol;
+  field: string;
+  minValue: number;
+  rotationExpression: string;
+  rotationType: 'arithmetic' | 'geographic';
+}
+
 export function getStyleFromEsriRenderer(
   mapId: string,
   layerEntry: TypeVectorLayerEntryConfig,
@@ -409,6 +478,7 @@ export function getStyleFromEsriRenderer(
   const id = `${mapId}-${layerEntry.geoviewRootLayer?.layerId}-${layerEntry.layerId}`;
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(id, renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(id, renderer);
+  if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(id, renderer);
   console.log(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
   return undefined;
 }

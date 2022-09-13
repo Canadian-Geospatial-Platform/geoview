@@ -268,15 +268,20 @@
           "type": "string"
         },
         "styleType": {
-          "enum": ["classBreak"]
+          "enum": ["classBreaks"]
         },
-        "label": {
-          "type": "string"
+        "defaultLabel": {
+          "type": "string",
+          "description": "Label used if field/value association is not found."
+        },
+        "defaultSettings": {
+          "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings",
+          "description": "Settings used if field/value association is not found."
         },
         "field": {
           "type": "string"
         },
-        "classBreakStyleInfo": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
+        "classBreakStyleInfos": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
       },
       "required": ["styleType", "label", "field", "classBreakStyleInfo"]
     },
@@ -289,10 +294,10 @@
         "label": {
           "type": "string"
         },
-        "minValues": {
+        "minValue": {
           "type": "number"
         },
-        "maxValues": {
+        "maxValue": {
           "type": "number"
         },
         "settings": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }

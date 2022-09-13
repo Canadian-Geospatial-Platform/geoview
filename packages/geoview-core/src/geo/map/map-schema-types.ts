@@ -321,7 +321,7 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
 /** ******************************************************************************************************************************
  * Base style configuration.
  */
-export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreak';
+export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreaks';
 
 /** ******************************************************************************************************************************
  * Base style configuration.
@@ -408,16 +408,16 @@ export type TypeClassBreakStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Minimum values associated to the style. */
-  minValues: number;
+  minValue: number | undefined | null;
   /** Maximum values associated to the style. */
-  maxValues: number;
+  maxValue: number;
   /** options associated to the style. */
   settings: TypeKinfOfSymbolVectorSettings;
 };
 
 /** ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseStyleConfig as a TypeClassBreakStyleConfig if the type attribute of the
- * verifyIfConfig parameter is 'classBreak'. The type ascention applies only to the true block of the if clause that use
+ * verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
  * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
@@ -425,7 +425,7 @@ export type TypeClassBreakStyleInfo = {
  * @return {boolean} true if the type ascention is valid.
  */
 export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeClassBreakStyleConfig => {
-  return verifyIfConfig.styleType === 'classBreak';
+  return verifyIfConfig.styleType === 'classBreaks';
 };
 
 /** ******************************************************************************************************************************
@@ -435,13 +435,15 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
   id?: string;
   /** Type of style. */
-  styleType: 'classBreak';
-  /** Label associated to the style */
-  label: string;
+  styleType: 'classBreaks';
+  /** Label used if field/value association is not found. */
+  defaultLabel?: string;
+  /** Options used if field/value association is not found. */
+  defaultSettings?: TypeKinfOfSymbolVectorSettings;
   /** Field used by the style. */
   field: string;
   /** Class break style information configuration. */
-  classBreakStyleInfo: TypeClassBreakStyleInfo[];
+  classBreakStyleInfos: TypeClassBreakStyleInfo[];
 }
 
 /** ******************************************************************************************************************************
