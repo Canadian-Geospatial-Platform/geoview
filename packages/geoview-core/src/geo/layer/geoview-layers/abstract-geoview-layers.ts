@@ -100,7 +100,10 @@ export abstract class AbstractGeoViewLayer {
    */
   gvLayers: BaseLayer | null = null;
 
-  /**
+  /** The layer Identifier that is used to get and set layer's settings. */
+  activeLayer: BaseLayer | null = null;
+
+  /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
    *
    * @param {TypeGeoviewLayerType} type The type of GeoView layer that is instantiated.
@@ -119,7 +122,33 @@ export abstract class AbstractGeoViewLayer {
     if (mapLayerConfig.initialSettings) this.initialSettings = mapLayerConfig.initialSettings;
   }
 
-  /**
+  /** ***************************************************************************************************************************
+   * Set the active layer. It is the layer that will be used in some functions when the optional layerId is undefined.
+   * When specified and the layerId is not found, the active layer is set to null.
+   *
+   * @param {string} layerId The layer identifier.
+   */
+  setActiveLayer(layerId: string) {
+    this.activeLayer = this.getBaseLayer(layerId);
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layer instance identified by the layerId.
+   *
+   * @param {string} layerId The layer identifier.
+   */
+  getBaseLayer(layerId: string, listOfLayerEntryConfig = this.listOfLayerEntryConfig): BaseLayer | null {
+    for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
+      if (listOfLayerEntryConfig[i].layerId === layerId) return listOfLayerEntryConfig[i].gvlayer!;
+      if (listOfLayerEntryConfig[i].entryType === 'group') {
+        const gvLayer = this.getBaseLayer(layerId, listOfLayerEntryConfig[i].listOfLayerEntryConfig);
+        if (gvLayer) return gvLayer;
+      }
+    }
+    return null;
+  }
+
+  /** ***************************************************************************************************************************
    * This method create a layer group. it uses the layer initial settings of the GeoView layer configuration.
    *
    * @returns {LayerGroup} A new layer group.
@@ -134,6 +163,8 @@ export abstract class AbstractGeoViewLayer {
     if (this.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = this.initialSettings?.minZoom;
     if (this.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = this.initialSettings?.opacity;
     if (this.initialSettings?.visible !== undefined) layerGroupOptions.visible = this.initialSettings?.visible;
-    return new LayerGroup(layerGroupOptions);
+    // eslint-disable-next-line no-param-reassign
+    layerEntryConfig.gvlayer = new LayerGroup(layerGroupOptions);
+    return layerEntryConfig.gvlayer as LayerGroup;
   }
 }

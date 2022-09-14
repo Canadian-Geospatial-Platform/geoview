@@ -45,7 +45,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * abstract method processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the
    * renderers can come from the configuration of the GeoView layer or from the information saved by the method
    * getAdditionalServiceDefinition, priority being given to the first of the two. This operation is done by the abstract
-   * method setRenderer. Note that if field aliases are used, they will be set at the same time as the renderer.
+   * method processLayerMetadata. Note that if field aliases are used, they will be set at the same time as the renderer.
    *
    * Finally, the layer registers to all panels that offer this possibility. For example, if the layer is query able, it could
    * subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer to return the
@@ -96,7 +96,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
         } else {
           this.processOneLayerEntry(listOfLayerEntryConfig[0]).then((rasterLayer) => {
             if (rasterLayer) {
-              this.setRenderer(rasterLayer);
+              this.processLayerMetadata(rasterLayer);
               this.registerToPanels(rasterLayer);
             } else {
               this.layerLoadError.push(listOfLayerEntryConfig[0].layerId);
@@ -106,10 +106,10 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
         }
       } else {
         const promiseOfLayerCreated: Promise<BaseLayer | null>[] = [];
-        listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-          if (layerEntry.entryType === 'group') {
-            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntry.listOfLayerEntryConfig));
-          } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntry));
+        listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+          if (layerEntryConfig.entryType === 'group') {
+            promiseOfLayerCreated.push(this.processListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig));
+          } else promiseOfLayerCreated.push(this.processOneLayerEntry(layerEntryConfig));
         });
         Promise.all(promiseOfLayerCreated)
           .then((listOfLayerCreated) => {
@@ -119,7 +119,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
               const layerGroup = this.createLayerGroup(parentLayerConfig);
               listOfLayerCreated.forEach((rasterLayer) => {
                 if (rasterLayer) {
-                  this.setRenderer(rasterLayer);
+                  this.processLayerMetadata(rasterLayer);
                   this.registerToPanels(rasterLayer);
                   (layerGroup as LayerGroup).getLayers().push(rasterLayer);
                 } else {
@@ -146,20 +146,20 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
   abstract getAdditionalServiceDefinition(): Promise<void>;
 
   /**
-   * This method creates a GeoView layer using the definition provided in the layerEntry parameter.
+   * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
    *
-   * @param {TypeLayerEntryConfig} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  abstract processOneLayerEntry(layerEntry: TypeLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
+  abstract processOneLayerEntry(layerEntryConfig: TypeLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
 
   /**
    * This method associate a renderer to the GeoView layer.
    *
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  abstract setRenderer(rasterLayer: TypeBaseRasterLayer): void;
+  abstract processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void;
 
   /**
    * This method register the GeoView layer to panels that offer this possibility.

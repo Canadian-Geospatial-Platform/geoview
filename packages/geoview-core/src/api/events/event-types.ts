@@ -1,136 +1,97 @@
-import { MAP, MapEventKey } from './constants/map';
-import { LAYER, LayerEventKey } from './constants/layer';
-import { ATTRIBUTION, AttributionEventKey } from './constants/attribution';
-import { APPBAR, AppbarEventKey } from './constants/appbar';
-import { FOOTERBAR, FooterbarEventKey } from './constants/footerbar';
-import { NAVBAR, NavbarEventKey } from './constants/navbar';
-import { SNACKBAR, SnackbarEventKey } from './constants/snackbar';
-import { BASEMAP, BasmapEventKey } from './constants/basemap';
-import { OVERVIEW_MAP, OverviewEventKey } from './constants/overview-map';
-import { DETAILS_PANEL, DetailPanelEventKey } from './constants/details-panel';
-import { MARKER_ICON, MarkerIconEventKey } from './constants/marker-icon';
-import { DRAWER, DrawerEventKey } from './constants/drawer';
-import { MODAL, ModalEventKey } from './constants/modal';
-import { PANEL, PanelEventKey } from './constants/panel';
-import { SLIDER, SliderEventKey } from './constants/slider';
-import { VECTOR, VectorEventKey } from './constants/vector';
-import { FOOTER_TABS, FooterTabsEventKey } from './constants/footer-tabs';
+import { APPBAR } from './constants/appbar';
+import { ATTRIBUTION } from './constants/attribution';
+import { BASEMAP } from './constants/basemap';
+import { DETAILS_PANEL } from './constants/details-panel';
+import { DRAWER } from './constants/drawer';
+import { FOOTERBAR } from './constants/footerbar';
+import { FOOTER_TABS } from './constants/footer-tabs';
+import { GET_FEATURE_INFO } from './constants/get-feature-info';
+import { LAYER } from './constants/layer';
+import { MAP } from './constants/map';
+import { MARKER_ICON } from './constants/marker-icon';
+import { MODAL } from './constants/modal';
+import { NAVBAR } from './constants/navbar';
+import { OVERVIEW_MAP } from './constants/overview-map';
+import { PANEL } from './constants/panel';
+import { SLIDER } from './constants/slider';
+import { SNACKBAR } from './constants/snackbar';
+import { VECTOR } from './constants/vector';
 
 /**
  * constant contains event names
  */
 export const EVENT_NAMES = {
-  MAP,
-  LAYER,
   APPBAR,
-  FOOTERBAR,
-  NAVBAR,
-  SNACKBAR,
+  ATTRIBUTION,
   BASEMAP,
-  OVERVIEW_MAP,
   DETAILS_PANEL,
-  MARKER_ICON,
   DRAWER,
+  FOOTERBAR,
+  FOOTER_TABS,
+  GET_FEATURE_INFO,
+  LAYER,
+  MAP,
+  MARKER_ICON,
   MODAL,
+  NAVBAR,
+  OVERVIEW_MAP,
   PANEL,
   SLIDER,
+  SNACKBAR,
   VECTOR,
-  ATTRIBUTION,
-  FOOTER_TABS,
 };
-
-/**
- * Event categories
- */
-export type EventCategories =
-  | 'MAP'
-  | 'LAYER'
-  | 'APPBAR'
-  | 'FOOTERBAR'
-  | 'NAVBAR'
-  | 'SNACKBAR'
-  | 'BASEMAP'
-  | 'OVERVIEW_MAP'
-  | 'DETAILS_PANEL'
-  | 'MARKER_ICON'
-  | 'DRAWER'
-  | 'MODAL'
-  | 'PANEL'
-  | 'SLIDER'
-  | 'VECTOR'
-  | 'ATTRIBUTION'
-  | 'FOOTER_TABS';
-
-/**
- * Event keys
- */
-export type EventKey =
-  | MapEventKey
-  | LayerEventKey
-  | AppbarEventKey
-  | FooterbarEventKey
-  | NavbarEventKey
-  | SnackbarEventKey
-  | BasmapEventKey
-  | OverviewEventKey
-  | DetailPanelEventKey
-  | MarkerIconEventKey
-  | DrawerEventKey
-  | ModalEventKey
-  | PanelEventKey
-  | SliderEventKey
-  | VectorEventKey
-  | AttributionEventKey
-  | FooterTabsEventKey;
 
 /**
  * Event names
  */
 export type EventStringId =
-  | 'map/loaded'
-  | 'map/reload'
-  | 'map/moveend'
-  | 'map/zoomend'
-  | 'map/add_component'
-  | 'map/remove_component'
-  | 'map/inkeyfocus'
-  | 'map/crosshair_enable_disable'
-  | 'map/view_projection_change'
-  | 'map/fix_north'
-  | 'layer/add'
-  | 'layer/added'
-  | 'layer/remove'
-  | 'layer/get_layers'
   | 'appbar/panel_create'
   | 'appbar/panel_remove'
+  | 'attribution/update'
+  | 'basemap/layers_update'
+  | 'details_panel/crosshair_enter'
+  | 'drawer/open_close'
   | 'footerbar/expand_collapse'
+  | 'footer_tabs/tab_create'
+  | 'footer_tabs/tab_remove'
+  | 'get_feature_info/register'
+  | 'get_feature_info/query_layer'
+  | 'get_feature_info/query_result'
+  | 'layer/add'
+  | 'layer/added'
+  | 'layer/get_layers'
+  | 'layer/remove'
+  | 'map/add_component'
+  | 'map/crosshair_enable_disable'
+  | 'map/fix_north'
+  | 'map/inkeyfocus'
+  | 'map/loaded'
+  | 'map/moveend'
+  | 'map/reload'
+  | 'map/remove_component'
+  | 'map/view_projection_change'
+  | 'map/zoomend'
+  | 'marker_icon/hide'
+  | 'marker_icon/show'
+  | 'modal/close'
+  | 'modal/create'
+  | 'modal/open'
+  | 'modal/update'
   | 'navbar/button_panel_create'
   | 'navbar/button_panel_remove'
   | 'navbar/toggle_controls'
-  | 'snackbar/open'
-  | 'basemap/layers_update'
   | 'overview_map/toggle'
-  | 'details_panel/crosshair_enter'
-  | 'marker_icon/show'
-  | 'marker_icon/hide'
-  | 'drawer/open_close'
-  | 'modal/create'
-  | 'modal/open'
-  | 'modal/close'
-  | 'modal/update'
-  | 'panel/open'
-  | 'panel/close'
   | 'panel/add_action'
-  | 'panel/remove_action'
   | 'panel/change_content'
+  | 'panel/close'
+  | 'panel/open'
+  | 'panel/remove_action'
   | 'slider/on_change_value'
-  | 'slider/set_values'
   | 'slider/set_min_max'
+  | 'slider/set_values'
+  | 'snackbar/open'
   | 'vector/add'
-  | 'vector/remove'
   | 'vector/added'
   | 'vector/off'
   | 'vector/on'
-  | 'attribution/update'
-  | 'footer_tabs/tab_create'
-  | 'footer_tabs/tab_remove';
+  | 'vector/remove';

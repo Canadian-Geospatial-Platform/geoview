@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';

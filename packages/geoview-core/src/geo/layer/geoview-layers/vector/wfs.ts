@@ -1,99 +1,19 @@
-import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
-import { asArray, asString } from 'ol/color';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import { Geometry } from 'ol/geom';
-
-import { TypeJsonObject } from '../../../../core/types/global-types';
+/* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
+import { Extent } from 'ol/extent';
+import { transformExtent } from 'ol/proj';
+import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
+import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue, getXMLHttpRequest, setAlphaColor, xmlToJson } from '../../../../core/utils/utilities';
-
-// constant to define default style if not set by renderer
-// TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultCircleMarkerStyle = new Style({
-  image: new StyleCircle({
-    radius: 5,
-    stroke: new Stroke({
-      color: asString(setAlphaColor(asArray('#333'), 1)),
-      width: 1,
-    }),
-    fill: new Fill({
-      color: asString(setAlphaColor(asArray('#FFB27F'), 0.8)),
-    }),
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultLineStringStyle = new Style({
-  stroke: new Stroke({
-    color: asString(setAlphaColor(asArray('#000000'), 1)),
-    width: 2,
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultLinePolygonStyle = new Style({
-  stroke: new Stroke({
-    // 1 is for opacity
-    color: asString(setAlphaColor(asArray('#000000'), 1)),
-    width: 2,
-  }),
-  fill: new Fill({
-    color: asString(setAlphaColor(asArray('#000000'), 0.5)),
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultSelectStyle = new Style({
-  stroke: new Stroke({
-    color: asString(setAlphaColor(asArray('#0000FF'), 1)),
-    width: 3,
-  }),
-  fill: new Fill({
-    color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
-  }),
-});
-
-/**
- * Create a style from a renderer object
- *
- * @param {TypeJsonObject} renderer the render with the style properties
- * @returns {Style} the new style with the custom renderer
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
-  return renderer.radius
-    ? new Style({
-        image: new StyleCircle({
-          radius: renderer.radius as number,
-          stroke: new Stroke({
-            color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
-            width: 1,
-          }),
-          fill: new Fill({
-            color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
-          }),
-        }),
-      })
-    : new Style({
-        stroke: new Stroke({
-          color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
-          width: 3,
-        }),
-        fill: new Fill({
-          color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
-        }),
-      });
-};
+import { getLocalizedValue, getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
+import { api } from '../../../../app';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -114,7 +34,7 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.WFS;
@@ -127,7 +47,7 @@ export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WFS => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WFS;
@@ -141,7 +61,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWfsLayerEntryConfig => {
   return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.WFS;
@@ -157,10 +77,7 @@ export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WFS extends AbstractGeoViewVector {
-  /** private varibale holding the wfs capabilities. */
-  private metadata: TypeJsonObject = {};
-
-  /** Feature type description obtained fy the DescribeFeatureType service call. */
+  /** Feature type description obtained by the DescribeFeatureType service call. */
   featureTypeDescripion: Record<string, TypeJsonObject> = {};
 
   /** private varibale holding wfs version. */
@@ -175,99 +92,141 @@ export class WFS extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
-   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  getAdditionalServiceDefinition(): Promise<void> {
+  protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      this.getWfsCapabilities().then(() => {
-        if (this.listOfLayerEntryConfig.length !== 0) {
-          const promiseOfFeatureDescriptions: Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>[] = [];
-          this.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-            promiseOfFeatureDescriptions.push(this.describeFeatureType(layerEntryConfig.layerId));
-          });
-          Promise.all(promiseOfFeatureDescriptions).then((listOfDescriptions) => {
-            listOfDescriptions.forEach((description) => {
-              if (!description.layerMetadata) this.layerLoadError.push(description.layerId);
-              else this.featureTypeDescripion[description.layerId] = description.layerMetadata;
-            });
-            // ! To be continued???
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        getXMLHttpRequest(`${metadataUrl}?service=WFS&request=getcapabilities`).then((metadataString) => {
+          if (metadataString === '{}') throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+          else {
+            // need to pass a xmldom to xmlToJson
+            const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
+            const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
+
+            this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
+            this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
+            resolve();
+          }
+        });
+      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+    });
+    return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined. If
+   * necessary, additional code can be executed in the child method to complete the layer configuration.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   *
+   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
+   */
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
+    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryConfig.entryType === 'group') {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
+        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
+      }
+      if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
+        const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
+        for (var i = 0; i < metadataLayerList.length; i++) {
+          const metadataLayerId = (metadataLayerList[i].Name && metadataLayerList[i].Name['#text']) as string;
+          if (metadataLayerId.includes(layerEntryConfig.layerId)) break;
+        }
+        if (i === metadataLayerList.length) {
+          this.layerLoadError.push(layerEntryConfig.layerId);
+          return false;
+        }
+        if (metadataLayerList[i]['ows:WGS84BoundingBox']) {
+          const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
+          const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
+          const extent = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
+          const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent: layerExtent };
+          else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = layerExtent;
+          return true;
+        }
+      }
+      this.layerLoadError.push(layerEntryConfig.layerId);
+      return false;
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * This method processes recursively the metadata of each layer in the "layer list" configuration.
+   *
+   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected processListOfLayerEntryMetadata(
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
+  ): Promise<void> {
+    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
+      const promisedAllLayerDone: Promise<void>[] = [];
+      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+        /* if ('esriType' in layerEntryConfig) promisedAllLayerDone.push(this.processWfsGroupLayer(layerEntryConfig));
+        else */ if (layerEntryConfig.entryType === 'group')
+          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
+        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
+      });
+      Promise.all(promisedAllLayerDone).then(() => resolve());
+    });
+    return promisedListOfLayerEntryProcessed;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
+   * layer's configuration.
+   *
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   */
+  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+    const promiseOfExecution = new Promise<void>((resolve) => {
+      const queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
+      if (queryUrl) {
+        fetch(`${queryUrl}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerEntryConfig.layerId}`)
+          .then<TypeJsonObject>((fetchResponse) => {
+            return fetchResponse.json();
+          })
+          .then((layerMetadata) => {
+            if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties))
+              this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerEntryConfig);
             resolve();
           });
-        } else resolve();
+      } else resolve();
+    });
+    return promiseOfExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method sets the outfields and aliasFields of the source feature info.
+   *
+   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+   */
+  private processFeatureInfoConfig(fields: TypeJsonArray, layerEntryConfig: TypeVectorLayerEntryConfig) {
+    if (!layerEntryConfig.source) layerEntryConfig.source = {};
+    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+    // Process undefined outfields or aliasFields ('' = false and !'' = true)
+    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+      if (processOutField) layerEntryConfig.source.featureInfo.outfields = { en: '' };
+      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+      fields.forEach((fieldEntry, i) => {
+        if (processOutField) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'outfields', fieldEntry.name as string, i);
+        if (processAliasFields) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'aliasFields', fieldEntry.name as string, i);
       });
-    });
-    return promisedExecution;
-  }
-
-  /** ****************************************************************************************************************************
-   * Query the WFS service to get the capacities.
-   */
-  private async getWfsCapabilities(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      const getcapabilitiesUrl = `${getLocalizedValue(this.metadataAccessPath, this.mapId)}?service=WFS&request=getcapabilities`;
-      getXMLHttpRequest(getcapabilitiesUrl).then((xmlStringCapabilities) => {
-        if (xmlStringCapabilities !== '{}') {
-          // need to pass a xmldom to xmlToJson
-          const xmlDOMCapabilities = new DOMParser().parseFromString(xmlStringCapabilities, 'text/xml');
-          const xmlJsonCapabilities = xmlToJson(xmlDOMCapabilities);
-
-          this.metadata = xmlJsonCapabilities['wfs:WFS_Capabilities'];
-          this.version = xmlJsonCapabilities['wfs:WFS_Capabilities']['@attributes'].version as string;
-          resolve();
-        } else {
-          throw new Error(`Cant't read capabilities for layer ${this.layerId} of map ${this.mapId}.`);
-        }
-      });
-    });
-    return promisedExecution;
-  }
-
-  /** ****************************************************************************************************************************
-   * Get the feature type description.
-   * @param {string} layerId The layer identifier.
-   *
-   * @returns {Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>} The feature type description or null.
-   */
-  private describeFeatureType(layerId: string): Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }> {
-    const promisedExecution = new Promise<{ layerId: string; layerMetadata: TypeJsonObject | null }>((resolve) => {
-      const describeFeatureTypeUrl = `${getLocalizedValue(
-        this.metadataAccessPath,
-        this.mapId
-      )}?service=WFS&request=DescribeFeatureType&outputFormat=application/json&typeName=${layerId}`;
-      fetch(describeFeatureTypeUrl)
-        .then<TypeJsonObject>((fetchResponse): Promise<TypeJsonObject> => {
-          return fetchResponse.json();
-        })
-        .then((jsonFeatureDescription) => {
-          resolve({ layerId, layerMetadata: jsonFeatureDescription });
-        })
-        .catch(() => {
-          resolve({ layerId, layerMetadata: null });
-        });
-    });
-    return promisedExecution;
-  }
-
-  /**
-   * This method associate a renderer to the GeoView layer.
-   *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
-   */
-  setRenderer(baseVectorLayer: VectorLayer<VectorSource<Geometry>> | null): Promise<TypeBaseVectorLayer | null> {
-    const promiseOfBaseVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
-      resolve(baseVectorLayer);
-    });
-    return promiseOfBaseVectorLayer;
-  }
-
-  /**
-   * This method register the GeoView layer to panels that offer this possibility.
-   *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
-   */
-  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('WFS.registerToPanels: This method needs to be coded!', rasterLayer);
+      layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
+      layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+    }
   }
 }

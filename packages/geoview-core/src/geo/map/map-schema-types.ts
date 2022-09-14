@@ -1,3 +1,5 @@
+import { Extent } from 'ol/extent';
+import BaseLayer from 'ol/layer/Base';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
 import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-layers';
 
@@ -40,7 +42,7 @@ export type TypeLayerInitialSettings = {
   /** Initial visibility setting. Default = true. */
   visible?: boolean;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: [number, number, number, number];
+  extent?: Extent;
   /** The minimum view zoom level (exclusive) above which this layer will be visible. */
   minZoom?: number;
   /** The maximum view zoom level (inclusive) below which this layer will be visible. */
@@ -87,20 +89,18 @@ export type TypeDetailsLayerConfig = {
  * Type used to configure the feature info for a layer.
  */
 export type TypeFeatureInfoLayerConfig = {
-  /** Allow querying. Default = true. */
-  queryable?: boolean;
-  customParser: TypeDetailsLayerConfig;
+  /** Allow querying. Default = false. */
+  queryable: boolean;
+  customParser?: TypeDetailsLayerConfig;
   /**
    * The display field (English/French) of the layer. If it is not present the viewer will make an attempt to find the first valid
    * field.
    */
-  nameField: TypeLocalizedString;
-  /** The field (English/French) to be used for tooltips. If it is not present the viewer will use nameField (if provided). */
-  tooltipField: TypeLocalizedString;
+  nameField?: TypeLocalizedString;
   /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
-  outfields: TypeLocalizedString;
+  outfields?: TypeLocalizedString;
   /** A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set */
-  aliasFields: TypeLocalizedString;
+  aliasFields?: TypeLocalizedString;
 };
 
 /** ******************************************************************************************************************************
@@ -152,7 +152,7 @@ export type TypeBaseVectorConfig = {
  *
  * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineStringVectorConfig => {
   return verifyIfConfig.type === 'lineString';
@@ -165,7 +165,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): 
  *
  * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypePolygonVectorConfig => {
   return verifyIfConfig.type === 'filledPolygon';
@@ -178,7 +178,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig
  *
  * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
   return verifyIfConfig.type === 'simpleSymbol';
@@ -191,7 +191,7 @@ export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig)
  *
  * @param {TypeBaseVectorConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
   return verifyIfConfig.type === 'iconSymbol';
@@ -338,7 +338,7 @@ export type TypeBaseStyleConfig = {
  *
  * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeSimpleStyleConfig => {
   return verifyIfConfig.styleType === 'simple';
@@ -377,7 +377,7 @@ export type TypeUniqueValueStyleInfo = {
  *
  * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isUniqueValueStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeUniqueValueStyleConfig => {
   return verifyIfConfig.styleType === 'uniqueValue';
@@ -422,7 +422,7 @@ export type TypeClassBreakStyleInfo = {
  *
  * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeClassBreakStyleConfig => {
   return verifyIfConfig.styleType === 'classBreaks';
@@ -472,7 +472,7 @@ export type TypeLayerEntryType = 'vector' | 'vectorTile' | 'vectorHeatmap' | 'ra
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntryConfig => {
   return 'entryType' in verifyIfLayer && verifyIfLayer.entryType === 'group';
@@ -485,7 +485,7 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): ver
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorLayerEntryConfig => {
   return 'entryType' in verifyIfLayer && verifyIfLayer.entryType === 'vector';
@@ -498,7 +498,7 @@ export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyI
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorHeatmapLayerEntryConfig => {
   return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorHeatmap';
@@ -511,7 +511,7 @@ export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): 
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorTileLayerEntryConfig => {
   return 'entryType' in verifyIfLayer && verifyIfLayer.entryType! === 'vectorTile';
@@ -524,7 +524,7 @@ export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): ver
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsRaster = (
   verifyIfLayer: TypeLayerEntryConfig
@@ -539,7 +539,7 @@ export const layerEntryIsRaster = (
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeGeocoreLayerEntryConfig => {
   return verifyIfLayer.entryType === 'geocore';
@@ -549,10 +549,12 @@ export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verify
  * Type used to define a GeoView vector layer to display on the map.
  */
 export type TypeBaseVectorLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
   geoviewRootLayer?: TypeGeoviewLayerConfig;
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
+  gvlayer?: BaseLayer;
   /** Layer entry data type. */
   entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap';
   /** The id of the layer to display on the map. */
@@ -645,7 +647,7 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceImageIni
  */
 export type TypeTileGrid = {
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: [number, number, number, number];
+  extent?: Extent;
   /**
    * The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards.
    * If not specified, extent must be provided.
@@ -729,10 +731,12 @@ export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayer
  * Type used to define a GeoView image layer to display on the map.
  */
 export type TypeImageLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
   geoviewRootLayer?: TypeGeoviewLayerConfig;
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
+  gvlayer?: BaseLayer;
   /** Layer entry data type. */
   entryType?: 'raster';
   /** The id of the layer to display on the map. */
@@ -754,10 +758,12 @@ export type TypeImageLayerEntryConfig = {
  * Type used to define a GeoView image layer to display on the map.
  */
 export type TypeTileLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
   geoviewRootLayer?: TypeGeoviewLayerConfig;
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
+  gvlayer?: BaseLayer;
   /** Layer entry data type. */
   entryType?: 'raster';
   /** The id of the layer to display on the map. */
@@ -780,10 +786,12 @@ export type TypeTileLayerEntryConfig = {
  * configuration will handle bilangual informations.
  */
 export type TypeGeocoreLayerEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
   geoviewRootLayer?: TypeGeoviewLayerConfig;
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
+  gvlayer?: BaseLayer;
   /** Layer entry data type. */
   entryType?: 'geocore';
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
@@ -812,10 +820,12 @@ export type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export type TypeLayerGroupEntryConfig = {
-  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
   geoviewRootLayer: TypeGeoviewLayerConfig;
-  /** This attribute is not part of the schema. It is used to link the layer entry config to the layer config parent. */
+  /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
+  /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
+  gvlayer?: BaseLayer;
   /** Layer entry data type. */
   entryType: 'group';
   /** The id of the layer group to display on the map. */
@@ -974,7 +984,7 @@ export type TypeViewSettings = {
    */
   rotation?: number;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: [number, number, number, number];
+  extent?: Extent;
   /**
    * The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.
    * Domaine = [0..50].

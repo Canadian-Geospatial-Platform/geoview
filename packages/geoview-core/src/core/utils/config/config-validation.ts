@@ -1,6 +1,7 @@
 /* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
 import Ajv from 'ajv';
 
+import { defaultsDeep } from 'lodash';
 import { generateId } from '../utilities';
 
 import schema from '../../../../schema.json';
@@ -21,7 +22,6 @@ import {
   TypeLocalizedString,
   TypeProjectionCodes,
   TypeValidVersions,
-  TypeLayerInitialSettings,
   TypeListOfLayerEntryConfig,
   TypeLayerGroupEntryConfig,
   VALID_DISPLAY_LANGUAGE,
@@ -415,10 +415,7 @@ export class ConfigValidation {
       // links the entry to its parent layer configuration.
       layerEntryConfig.parentLayerConfig = parentLayerConfig;
       // layerEntryConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
-      if (layerEntryConfig.parentLayerConfig?.initialSettings) {
-        if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-        this.inheritInitialSettings(layerEntryConfig.parentLayerConfig.initialSettings, layerEntryConfig.initialSettings);
-      }
+      layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, layerEntryConfig.parentLayerConfig.initialSettings);
       if (layerEntryIsGroupLayer(layerEntryConfig))
         this.processLayerEntryConfig(rootLayerConfig, layerEntryConfig, layerEntryConfig.listOfLayerEntryConfig);
       else if (geoviewEntryIsWMS(layerEntryConfig)) {
@@ -497,9 +494,9 @@ export class ConfigValidation {
         // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'geocore';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
-        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
+        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source?.dataAccessPath) {
           throw new Error(
-            `metadataAccessPath or dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type GeoJSON when the metadataAccessPath is undefined.`
           );
         }
         // Default value for layerEntryConfig.entryType is vector
@@ -526,24 +523,6 @@ export class ConfigValidation {
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       }
     });
-  }
-
-  /** ***************************************************************************************************************************
-   * Inherit the settings defined in the source if the corresponding setting of the destination is undefine.
-   * @param {TypeLayerInitialSettings} sourceSettings The initial settings to copy from.
-   * @param {TypeLayerInitialSettings} destinationSettings The initial settings to copy to.
-   */
-  private inheritInitialSettings(sourceSettings: TypeLayerInitialSettings, destinationSettings: TypeLayerInitialSettings) {
-    const canInherit = (settingsKey: 'className' | 'extent' | 'maxZoom' | 'minZoom' | 'opacity' | 'visible') => {
-      return sourceSettings[settingsKey] !== undefined && destinationSettings[settingsKey] === undefined;
-    };
-
-    if (canInherit('className')) destinationSettings.className = sourceSettings.className;
-    if (canInherit('extent')) destinationSettings.extent = sourceSettings.extent;
-    if (canInherit('maxZoom')) destinationSettings.maxZoom = sourceSettings.maxZoom;
-    if (canInherit('minZoom')) destinationSettings.minZoom = sourceSettings.minZoom;
-    if (canInherit('opacity')) destinationSettings.opacity = sourceSettings.opacity;
-    if (canInherit('visible')) destinationSettings.visible = sourceSettings.visible;
   }
 
   /** ***************************************************************************************************************************
@@ -596,10 +575,9 @@ export class ConfigValidation {
             this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
           const baseVectorLayerEntryConfig = Cast<TypeBaseVectorLayerEntryConfig>(layerEntryConfig);
           if (baseVectorLayerEntryConfig?.source?.featureInfo) {
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields!, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField!, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields!, sourceKey, destinationKey);
           }
         });
       });

@@ -58,7 +58,7 @@ interface CrosshairProps {
 /**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
  * @param {CrosshairProps} props the crosshair properties
- * @return {JSX.Element} the north arrow component
+ * @returns {JSX.Element} the crosshair component
  */
 export function Crosshair(props: CrosshairProps): JSX.Element {
   const { id } = props;
