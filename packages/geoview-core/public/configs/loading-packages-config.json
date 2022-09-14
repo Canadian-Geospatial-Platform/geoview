@@ -1,7 +1,7 @@
 {
   "map": {
     "interaction": "dynamic",
-    "view": {
+    "viewSettings": {
       "zoom": 4,
       "center": [-100, 60],
       "projection": 3978
@@ -10,137 +10,10 @@
       "id": "transport",
       "shaded": false,
       "labeled": true
-    },
-    "layers": [
-      {
-        "id": "wmsLYR1",
-        "name": {
-          "en": "Première Nation / First Nation",
-          "fr": "Première Nation / First Nation"
-        },
-        "url": {
-          "en": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
-          "fr": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer"
-        },
-        "layerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "id": "0"
-          }
-        ]
-      },
-      {
-        "id": "wmsMSI",
-        "name": {
-          "en": "Probability of permanent snow and ice (94% or more)",
-          "fr": "Probabilité de neige et glace permanente (94% ou plus)"
-        },
-        "url": {
-          "en": "https://datacube.services.geo.ca/ows/msi",
-          "fr": "https://datacube.services.geo.ca/ows/msi"
-        },
-        "layerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "id": "msi-94-or-more"
-          }
-        ]
-      },
-      {
-        "id": "esriDynamicLYR2",
-        "name": {
-          "en": "The Canadian Environmental Sustainability Indicators (CESI)",
-          "fr": "The Canadian Environmental Sustainability Indicators (CESI)"
-        },
-        "url": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
-        },
-        "layerType": "esriDynamic",
-        "listOfLayerEntryConfig": [
-          {
-            "index": 1
-          },
-          {
-            "index": 2
-          },
-          {
-            "index": 3
-          },
-          {
-            "index": 6
-          }
-        ]
-      },
-      {
-        "id": "esriFeatureLYR3",
-        "name": {
-          "en": "Water quality at monitoring sites",
-          "fr": "Water quality at monitoring sites"
-        },
-        "url": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/5",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/5"
-        },
-        "layerType": "esriFeature"
-      },
-      {
-        "id": "geojsonLYR5",
-        "name": {
-          "en": "GeoJSON Sample",
-          "fr": "Exemple GeoJSON"
-        },
-        "url": {
-          "en": "./geojson/polygons.json",
-          "fr": "./geojson/polygons.json"
-        },
-        "layerType": "geojson"
-      },
-      {
-        "id": "wfsLYR6",
-        "name": {
-          "en": "Airport data",
-          "fr": "Airport data"
-        },
-        "url": {
-          "en": "https://giswebservices.massgis.state.ma.us/geoserver/wfs",
-          "fr": "https://giswebservices.massgis.state.ma.us/geoserver/wfs"
-        },
-        "layerType": "ogcWfs",
-        "listOfLayerEntryConfig": [
-          {
-            "id": "GISDATA.AIRPORTS_PT"
-          }
-        ]
-      },
-      {
-        "id": "ogcFeatureLYR7",
-        "name": {
-          "en": "Large Lakes",
-          "fr": "Large Lakes"
-        },
-        "url": {
-          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
-          "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
-        },
-        "layerType": "ogcFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "id": "lakes"
-          }
-        ]
-      }
-    ]
-  },
-  "theme": "dark",
-  "appBar": {
-    "about": {
-      "en": "# An example of a markdown",
-      "fr": "# Un exemple de démarque"
     }
   },
+  "theme": "dark",
   "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": ["basemap-panel", "layers-panel"],
-  "externalPackages": [],
   "suportedLanguages": ["en-CA"]
 }

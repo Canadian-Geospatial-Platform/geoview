@@ -1,7 +1,7 @@
 {
   "map": {
     "interaction": "dynamic",
-    "view": {
+    "viewSettings": {
       "zoom": 4,
       "center": [-106, 60],
       "projection": 3978
@@ -10,51 +10,10 @@
       "id": "transport",
       "shaded": true,
       "labeled": true
-    },
-    "layers": [
-      {
-        "id": "geojsonLYR1",
-        "name": {
-          "en": "GeoJSON Sample",
-          "fr": "Exemple GeoJSON"
-        },
-        "url": {
-          "en": "./geojson/historical_flood_0.geojson",
-          "fr": "./geojson/historical_flood_0.geojson"
-        },
-        "renderer": {
-          "radius": 5,
-          "fillColor": "#ff7800",
-          "color": "#000",
-          "weight": 1,
-          "opacity": 1,
-          "fillOpacity": 0.8
-        },
-        "layerType": "geojson"
-      },
-      {
-        "id": "geojsonLYR2",
-        "name": {
-          "en": "GeoJSON Sample",
-          "fr": "Exemple GeoJSON"
-        },
-        "url": {
-          "en": "./geojson/polygons.json",
-          "fr": "./geojson/polygons.json"
-        },
-        "renderer": {
-          "fillColor": "#ff7800",
-          "color": "#000",
-          "weight": 1,
-          "opacity": 1,
-          "fillOpacity": 0.8
-        },
-        "layerType": "geojson"
-      }
-    ]
+    }
   },
   "corePackages": ["basemap-panel"],
-  "components": ["appbar", "navbar", "overview-map", "north-arrow"],
+  "components": ["appbar", "overview-map", "north-arrow"],
   "theme": "dark",
   "suportedLanguages": ["en-CA", "fr-CA"]
 }

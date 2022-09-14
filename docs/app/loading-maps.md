@@ -43,7 +43,7 @@ The content of the config must match the schema, an example of the object in the
 {
   "map": {
     "interaction": "dynamic",
-    "view": {
+    "viewSettings": {
       "zoom": 12,
       "center": [45, 75],
       "projection": 3978
@@ -53,7 +53,7 @@ The content of the config must match the schema, an example of the object in the
       "shaded": true,
       "labeled": true
     },
-    "layers": []
+    "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
   "appBar": {
@@ -62,9 +62,8 @@ The content of the config must match the schema, an example of the object in the
       "fr": "# Un exemple de démarque"
     }
   },
-  "components": ["appbar", "navbar", "north-arrow"],
+  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": [
-    "overview-map",
     "basemap-switcher",
     "layers-panel",
     "details-panel",
@@ -88,7 +87,7 @@ An example of this:
   data-config="{
                     'map': {
                         'interaction': 'dynamic',
-                        'view': {
+                        'viewSettings': {
                             'zoom': 12,
                             'center': [45,75],
                             'projection': 3978
@@ -98,48 +97,42 @@ An example of this:
                             'shaded': true,
                             'labeled': true
                         },
-                        'layers': [
+                        'listOfGeoviewLayerConfig': [
                           {
-                            'id': 'esriDynamicLYR3',
-                            'name': {
-                              'en': 'Energy Infrastructure of North America',
-                              'fr': 'Infrastructure énergétique d'Amérique du Nord'
+                            'layerId': 'wmsLYR1',
+                            'layerName': {
+                              'en': 'Première Nation / First Nation',
+                              'fr': 'Première Nation / First Nation'
                             },
-                            'url': {
-                              'en': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_en/MapServer',
-                              'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
+                            'metadataAccessPath': {
+                              'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                              'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
                             },
-                            'layerType': 'esriDynamic',
-                            'listOfLayerEntryConfig': [
-                              {
-                                'index': 4,
-                                'name': {
-                                  'en': 'Natural Gas Processing Plants - config',
-                                  'fr': 'Usines de traitement du gaz naturel - config'
-                                }
-                              },
-                              {
-                                'index': 5
-                              },
-                              {
-                                'index': 6
-                              }
-                            ]
+                            'geoviewLayerType': 'ogcWms',
+                            'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+                          },
+                          {
+                            'layerId': 'esriDynamicLYR2',
+                            'layerName': {
+                              'en': 'Energy',
+                              'fr': 'Energy'
+                            },
+                            'metadataAccessPath': {
+                              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+                              'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                            },
+                            'geoviewLayerType': 'esriDynamic',
+                            'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '6' }]
                           }
-                        ],
+                        ]
+                      }
                     },
                     'theme': 'dark',
-                    'appBar': {
-                        'about': {
-                            'en': '# An example of a markdown',
-                            'fr': '# Un exemple de démarque'
-                        }
-                    },
-                    'components': ['appbar', 'navbar', 'north-arrow'],
-                    'corePackages': ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
+                    'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
+                    'corePackages': ['basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
                     'suportedLanguages': ['en-CA', 'fr-CA']
-                }"
+                }'
 ></div>
 ```
 
@@ -163,7 +156,7 @@ cgpv.init(function() {
     cgpv.api.map('mapWM').loadConfig({
         map: {
             interaction: 'dynamic',
-            view: {
+            viewSettings: {
                 zoom: 12,
                 center: [45, 75],
                 projection: 3978
@@ -173,17 +166,11 @@ cgpv.init(function() {
                 shaded: true,
                 labeled: true,
             },
-            layers: [],
+            listOfGeoviewLayerConfig: [],
         },
         theme: 'dark',
-        appBar: {
-            about: {
-                'en': '# An example of a markdown',
-                'fr': '# Un exemple de démarque'
-            }
-        },
-        components: ['appbar', 'navbar', 'north-arrow'],
-        corePackages: ['overview-map', 'basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
+        components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
+        corePackages: ['basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
         suportedLanguages: ['en-CA', 'fr-CA'],
     });

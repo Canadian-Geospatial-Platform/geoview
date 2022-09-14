@@ -29,6 +29,8 @@ export const api = new API();
 // TODO look for a better place to put this when working on issue #8
 
 // listen to map reload event
+// TODO: Fix: because handler name is not know at registration, never trigger. Plus if we put default name, it triggers all the time.
+// break map 7 load default config
 api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
   if (payloadIsAmapFeaturesConfig(payload)) {
     if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {

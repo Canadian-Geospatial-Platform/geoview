@@ -58,14 +58,15 @@ export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
 }
 
 // ! Check if it must be deleted.
+// TODO: used in layer-panel packages... check if we can merge
 /** ******************************************************************************************************************************
  * Interface for the button properties used when creating a new button.
- * /
-interface ButtonProps {
+ */
+export interface ButtonPropsLayerPanel {
   isFirst?: boolean;
   isLast?: boolean;
   handleNext: () => void;
-}
+};
 
 /** ******************************************************************************************************************************
  * Interface used when creating a new button panel.

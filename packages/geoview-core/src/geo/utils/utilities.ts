@@ -41,7 +41,7 @@ export class GeoUtilities {
   getWMSServiceMetadata = async (url: string, layers: string): Promise<TypeJsonObject> => {
     const parser = new WMSCapabilities();
 
-    const capUrl = `${url}service=WMS&version=1.3.0&request=GetCapabilities&layers=${layers}`;
+    const capUrl = `${url}?service=WMS&version=1.3.0&request=GetCapabilities&layers=${layers}`;
 
     const response = await fetch(capUrl);
 

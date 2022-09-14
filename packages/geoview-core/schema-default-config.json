@@ -6,7 +6,7 @@
       "selectBox": true
     },
     "projection": 3978,
-    "view": {
+    "viewSettings": {
       "zoom": 12,
       "center": [-106, 60]
     },
@@ -15,7 +15,7 @@
       "shaded": true,
       "labeled": true
     },
-    "layers": []
+    "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
   "components": ["appbar", "navbar", "north-arrow", "overview-map"],
