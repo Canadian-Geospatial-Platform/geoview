@@ -1,57 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="shortcut icon" href="./favicon.ico" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="msapplication-config" content="./img/browserconfig.xml" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Languages</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#HLNG1">1. French</a><br />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase how the viewer may show different languages</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <h3 id="HLNG1">1. French</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LNG1"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
+    type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Languages</strong></h1>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <a href="./index.html">Main</a><br />
+            <a href="#HLNG1">1. French</a><br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>This page is used to showcase how the viewer may show different languages</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="map-title-holder">
+    <h4 id="HLNG1">1. French</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LNG1" class="llwp-map" data-lang="fr" data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -65,30 +66,31 @@
               'labeled': true
             }
           },
+          'components': ['overview-map', 'navbar'],
+          'corePackages': [],
           'theme': 'dark',
-          'suportedLanguages': ['en-CA', 'fr-CA']
-        }"
-      ></div>
-      <p>
-        This map is in French.
-        <strong
-          >NOTE: there can only be one language per page. We can have multiple maps on a page but they need to share the same
-          language!</strong
-        >
-      </p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LNG1CS" class="panel"></div>
-    </div>
-    <hr />
-    <script src="codedoc.js"></script>
-    <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
+          'suportedLanguages': ['fr-CA']
+        }"></div>
+  <p>
+    This map is in French.
+    <strong>NOTE: there can only be one language per page. We can have multiple maps on a page but they need to share
+      the same
+      language!</strong>
+  </p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LNG1CS" class="panel"></pre>
+  <hr />
 
-        //create snippet
-        createConfigSnippet();
-      });
-    </script>
-  </body>
+  <script src="codedoc.js"></script>
+  <script>
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
+
+      //create snippet
+      createConfigSnippet();
+    });
+  </script>
+</body>
+
 </html>

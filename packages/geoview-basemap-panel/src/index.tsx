@@ -47,10 +47,10 @@ class BasemapPanelPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations = toJsonObject({
-    'en-CA': {
+    'en': {
       basemapPanel: 'Basemaps',
     },
-    'fr-CA': {
+    'fr': {
       basemapPanel: 'Fond de carte',
     },
   });

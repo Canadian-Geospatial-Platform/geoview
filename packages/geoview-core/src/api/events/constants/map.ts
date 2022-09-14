@@ -5,6 +5,7 @@ import { EventStringId } from '../event-types';
  * in a record that associates an event key with its event string id for each event.
  */
 
+// TODO: repair map event as some of them does not exist on OL.... i.e. zoomend, OL uses change:moveend or change:resollution on view object
 /** Valid keys for the MAP category */
 export type MapEventKey =
   | 'EVENT_MAP_LOADED'
