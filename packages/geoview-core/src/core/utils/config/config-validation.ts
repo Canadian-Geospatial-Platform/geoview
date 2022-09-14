@@ -497,9 +497,9 @@ export class ConfigValidation {
         // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'geocore';
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
-        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source.dataAccessPath) {
+        if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source?.dataAccessPath) {
           throw new Error(
-            `metadataAccessPath or dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType} when the metadataAccessPath is undefined.`
+            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type GeoJSON when the metadataAccessPath is undefined.`
           );
         }
         // Default value for layerEntryConfig.entryType is vector
@@ -596,10 +596,9 @@ export class ConfigValidation {
             this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
           const baseVectorLayerEntryConfig = Cast<TypeBaseVectorLayerEntryConfig>(layerEntryConfig);
           if (baseVectorLayerEntryConfig?.source?.featureInfo) {
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.tooltipField, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields!, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField!, sourceKey, destinationKey);
+            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields!, sourceKey, destinationKey);
           }
         });
       });

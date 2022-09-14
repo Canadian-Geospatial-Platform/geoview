@@ -61,7 +61,7 @@ const deg = String.fromCharCode(176);
  * Format the coordinates for degrees - minutes - seconds
  * @param {number} value the value to format
  * @param {string} card the cardinality north/south or east/west
- * @return {string} the formatted value
+ * @returns {string} the formatted value
  */
 function coordFormnat(value: number, card: string): string {
   const d = Math.floor(Math.abs(value)) * (value < 0 ? -1 : 1);
@@ -80,7 +80,7 @@ interface MousePositionProps {
 /**
  * Create the mouse position
  * @param {MousePositionProps} props the mouse position properties
- * @return {JSX.Element} the mouse position component
+ * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(props: MousePositionProps): JSX.Element {
   const { id } = props;

@@ -34,7 +34,7 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.WMS;
@@ -47,7 +47,7 @@ export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WMS => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WMS;
@@ -61,7 +61,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWmsLayerEntryConfig => {
   return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.WMS;
@@ -114,9 +114,9 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ****************************************************************************************************************************
-   * This method creates a GeoView WMS layer using the definition provided in the layerEntry parameter.
+   * This method creates a GeoView WMS layer using the definition provided in the layerEntryConfig parameter.
    *
-   * @param {TypeWmsLayerEntryConfig} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeWmsLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
@@ -197,9 +197,9 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(rasterLayer: TypeBaseRasterLayer): void {
+  processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('The method setRenderer needs to be coded!', rasterLayer);
+    console.log('The method processLayerMetadata needs to be coded!', rasterLayer);
   }
 
   /**

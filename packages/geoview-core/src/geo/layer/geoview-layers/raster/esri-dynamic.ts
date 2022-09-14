@@ -30,7 +30,7 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
@@ -43,7 +43,7 @@ export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig):
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriDynamic => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
@@ -57,7 +57,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsEsriDynamic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
@@ -145,9 +145,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    *
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(rasterLayer: TypeBaseRasterLayer): void {
+  processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('EsriDynamic.setRenderer: This method needs to be coded!', rasterLayer);
+    console.log('EsriDynamic.processLayerMetadata: This method needs to be coded!', rasterLayer);
   }
 
   /**

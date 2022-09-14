@@ -23,7 +23,7 @@ export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsGeocore = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeocoreLayerEntryConfig => {
   return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
@@ -36,7 +36,7 @@ export const geoviewEntryIsGeocore = (verifyIfGeoViewEntry: TypeLayerEntryConfig
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsGeoCore = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoCoreLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
@@ -66,14 +66,14 @@ export class GeoCore {
    * Get GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
    *
    * @param {TypeGeocoreLayerEntryConfig} geocoreLayerConfig the layer configuration
-   * @return {Promise<TypeListOfGeoviewLayerConfig>} list of layer configurations to add to the map
+   * @returns {Promise<TypeListOfGeoviewLayerConfig>} list of layer configurations to add to the map
    */
   createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]> {
     const arrayOfListOfGeoviewLayerConfig = new Promise<TypeListOfGeoviewLayerConfig[]>((resolve) => {
       const url = geocoreLayerConfig.metadataAccessPath || `${catalogUrl}/${api.map(this.mapId).displayLanguage}`;
       const promiseOfLayerConfigs: Promise<TypeListOfGeoviewLayerConfig>[] = [];
-      geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntry: TypeLayerEntryConfig) => {
-        const requestUrl = `${url}/${layerEntry.layerId}`;
+      geocoreLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+        const requestUrl = `${url}/${layerEntryConfig.layerId}`;
         promiseOfLayerConfigs.push(UUIDmapConfigReader.getGVlayersConfigFromUUID(this.mapId, requestUrl));
       });
       Promise.all(promiseOfLayerConfigs).then((listOfLayerCreated) => {

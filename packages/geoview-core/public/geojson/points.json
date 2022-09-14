@@ -4,8 +4,11 @@
     {
       "type": "Feature",
       "properties": {
-        "data": "92;43.54;12.3;66;75",
-        "label": "Red;Green;Blue;Yellow;Orange"
+        "Red": 92,
+        "Green": 43.54,
+        "Blue": 12.3,
+        "Yellow": 66,
+        "Orange": 75
       },
       "geometry": {
         "type": "Point",
@@ -15,8 +18,11 @@
     {
       "type": "Feature",
       "properties": {
-        "data": "553;54;32.553;5.43;55",
-        "label": "Red;Green;Blue;Yellow;Orange"
+        "Red": 553,
+        "Green": 54,
+        "Blue": 32.3,
+        "Yellow": 5.43,
+        "Orange": 55
       },
       "geometry": {
         "type": "Point",
@@ -26,8 +32,11 @@
     {
       "type": "Feature",
       "properties": {
-        "data": "255;255;255",
-        "label": "Red;Green;Blue"
+        "Red": 255,
+        "Green": 255,
+        "Blue": 32.3,
+        "Yellow": 5.43,
+        "Orange": 55
       },
       "geometry": {
         "type": "Point",
