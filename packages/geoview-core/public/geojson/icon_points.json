@@ -9,7 +9,18 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-120, 45]
+        "coordinates": [-141, 42]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "data": "92;43.54;12.3;66;75",
+        "label": "Red;Green;Blue;Yellow;Orange"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-141, 83]
       }
     },
     {
@@ -20,7 +31,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-110, 45]
+        "coordinates": [-53, 83]
       }
     },
     {
@@ -31,7 +42,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-100, 54]
+        "coordinates": [-53, 42]
       }
     }
   ]

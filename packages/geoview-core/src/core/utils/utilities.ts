@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 /* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';
@@ -8,6 +10,28 @@ import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/global-types';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
+
+/**
+ * Inheritance function used to initialize undefined attributes of the child wit the coresponding value stored in the
+ * parent attribute. The parent and the child must have the same structure.
+ *
+ * @param {any} parent the parent object.
+ * @param {any} child the child object.
+ * @param {string} inheritanceKey the key of the attribute that will inherit values from the parent object..
+ */
+export function inherit(parent: any, child: any, inheritanceKey: string) {
+  if (parent !== undefined && parent[inheritanceKey] !== undefined) {
+    if (typeof parent[inheritanceKey] === 'object') {
+      if (child[inheritanceKey] === undefined) child[inheritanceKey] = parent[inheritanceKey];
+      else {
+        Object.keys(parent[inheritanceKey]).forEach((key: string) => {
+          if (child[inheritanceKey][key] === undefined) child[inheritanceKey][key] = parent[inheritanceKey][key];
+          else if (typeof parent[inheritanceKey][key] === 'object') inherit(parent[inheritanceKey], child[inheritanceKey], key);
+        });
+      }
+    } else if (child[inheritanceKey] === undefined) child[inheritanceKey] = parent[inheritanceKey];
+  }
+}
 
 /**
  * Display a message in the snackbar

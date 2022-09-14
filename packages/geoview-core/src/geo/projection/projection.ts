@@ -28,11 +28,24 @@ export class Projection {
    * initialize projections
    */
   constructor() {
+    this.initCRS84Projection();
     this.initWMProjection();
     this.initLCCProjection();
 
     proj4.defs('EPSG:4617', '+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs');
     register(proj4);
+  }
+
+  /**
+   * Initialize WM Projection
+   */
+  private initCRS84Projection() {
+    const newDefinition = proj4.defs('EPSG:4326');
+    newDefinition.axis = 'neu';
+    proj4.defs('http://www.opengis.net/def/crs/OGC/1.3/CRS84', newDefinition);
+
+    const projection = getOLProjection('http://www.opengis.net/def/crs/OGC/1.3/CRS84');
+    if (projection) this.projections['http://www.opengis.net/def/crs/OGC/1.3/CRS84'] = projection;
   }
 
   /**

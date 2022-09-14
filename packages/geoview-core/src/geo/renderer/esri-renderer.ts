@@ -32,6 +32,8 @@ export type EsriBaseRenderer = {
   type: EsriRendererTypes;
 };
 
+type TypeEsriColor = [number, number, number, number];
+
 /** *****************************************************************************************************************************
  * Type Gard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
@@ -39,7 +41,7 @@ export type EsriBaseRenderer = {
  *
  * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const esriRendererIsUniqueValue = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriUniqueValueRenderer => {
   return verifyIfRenderer.type === 'uniqueValue';
@@ -76,7 +78,7 @@ export type EsriBaseSymbol = {
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleMarkerSymbol => {
   return verifyIfSymbol.type === 'esriSMS';
@@ -84,7 +86,7 @@ export const isSimpleMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSy
 
 export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
   angle: number;
-  color: [number, number, number, number];
+  color: TypeEsriColor;
   outline: EsriSimpleLineSymbol;
   size: number;
   style: EsriSymbolStyle;
@@ -99,14 +101,14 @@ export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isEsriSimpleFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleFillSymbol => {
   return verifyIfSymbol.type === 'esriSFS';
 };
 
 export interface EsriSimpleFillSymbol extends EsriBaseSymbol {
-  color: [number, number, number, number];
+  color: TypeEsriColor;
   outline: EsriSimpleLineSymbol;
   style: EsriFillStyle;
   type: 'esriSFS';
@@ -129,14 +131,14 @@ export type EsriFillStyle =
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleLineSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleLineSymbol => {
   return verifyIfSymbol.type === 'esriSLS';
 };
 
 export interface EsriSimpleLineSymbol extends EsriBaseSymbol {
-  color: [number, number, number, number];
+  color: TypeEsriColor;
   style: EsriLineStyle;
   type: 'esriSLS';
   width: number;
@@ -164,7 +166,7 @@ export type EsriSymbolStyle = 'esriSMSCircle' | 'esriSMSCross' | 'esriSMSDiamond
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const isPictureMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriPictureMarkerSymbol => {
   return verifyIfSymbol.type === 'esriPMS';
@@ -187,7 +189,7 @@ export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
  *
  * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const esriRendererIsSimple = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriSimpleRenderer => {
   return verifyIfRenderer.type === 'simple';
@@ -252,7 +254,7 @@ function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
     case 'esriSFSVertical':
       return 'vertical';
     default: {
-      console.log(`Handling of ESRI renderer line style '${fillStyle}' is not coded, 'solid' will be used instead.`);
+      console.log(`Handling of ESRI renderer fill style '${fillStyle}' is not coded, 'solid' will be used instead.`);
       return 'solid';
     }
   }
@@ -279,7 +281,7 @@ function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
   }
 }
 
-function convertEsriColor(color: [number, number, number, number]): string {
+function convertEsriColor(color: TypeEsriColor): string {
   return asString([color[0], color[1], color[2], color[3] / 255]);
 }
 
@@ -296,7 +298,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
         color: convertEsriColor(symbol.color),
         stroke: {
           color: convertEsriColor(symbol.outline.color),
-          lineStyle: convertLineStyle(symbol.outline.style),
+          lineStyle: convertLineStyle(symbol.outline.style ? symbol.outline.style : 'esriSLSSolid'),
           width: symbol.outline.width,
         },
         size: symbol.size * 0.667,
@@ -310,7 +312,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
         type: 'lineString',
         stroke: {
           color: convertEsriColor(symbol.color),
-          lineStyle: convertLineStyle(symbol.style),
+          lineStyle: convertLineStyle(symbol.style ? symbol.style : 'esriSLSSolid'),
           width: symbol.width,
         },
       };
@@ -322,7 +324,7 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
         color: convertEsriColor(symbol.color),
         stroke: {
           color: convertEsriColor(symbol.outline.color),
-          lineStyle: convertLineStyle(symbol.outline.style),
+          lineStyle: convertLineStyle(symbol.outline.style ? symbol.outline.style : 'esriSLSSolid'),
           width: symbol.outline.width,
         },
         fillStyle: convertFillStyle(symbol.style),
@@ -445,7 +447,7 @@ function processClassBreakRenderer(id: string, EsriRenderer: EsriClassBreakRende
  *
  * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriClassBreakRenderer => {
   return verifyIfRenderer.type === 'classBreaks';
@@ -472,10 +474,10 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
 
 export function getStyleFromEsriRenderer(
   mapId: string,
-  layerEntry: TypeVectorLayerEntryConfig,
+  layerEntryConfig: TypeVectorLayerEntryConfig,
   renderer: EsriBaseRenderer
 ): TypeStyleConfig | undefined {
-  const id = `${mapId}-${layerEntry.geoviewRootLayer?.layerId}-${layerEntry.layerId}`;
+  const id = `${mapId}-${layerEntryConfig.geoviewRootLayer?.layerId}-${layerEntryConfig.layerId}`;
   if (esriRendererIsUniqueValue(renderer)) return processUniqueValueRenderer(id, renderer);
   if (esriRendererIsSimple(renderer)) return processSimpleRenderer(id, renderer);
   if (esriRendererIsClassBreaks(renderer)) return processClassBreakRenderer(id, renderer);

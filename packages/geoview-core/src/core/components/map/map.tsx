@@ -217,7 +217,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
               center: [centerCoordinate[0], centerCoordinate[1]],
             });
             const mapLayers = api.map(id).layer.layers;
-            Object.entries(mapLayers).forEach((layerEntry) => {
+            Object.entries(mapLayers).forEach((mapLayerEntry) => {
               const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
                 if (baseLayer) {
                   const layerGroup: Array<BaseLayer> | Collection<BaseLayer> | undefined = baseLayer.get('layers');
@@ -231,7 +231,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
                   }
                 }
               };
-              refreshBaseLayer(layerEntry[1].gvLayers);
+              refreshBaseLayer(mapLayerEntry[1].gvLayers);
             });
           }
         }

@@ -126,13 +126,13 @@ export class GeoviewRenderer {
 
   getStyle(
     feature: FeatureLike,
-    layerEntry: TypeBaseVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeBaseVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
     const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
     // If style does not exist for the geometryType, create it.
-    let { style } = layerEntry as TypeVectorLayerEntryConfig;
+    let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
-      style = this.createDefaultStyle(geometryType, layerEntry as TypeVectorLayerEntryConfig);
+      style = this.createDefaultStyle(geometryType, layerEntryConfig as TypeVectorLayerEntryConfig);
     // Get the style accordingly to its type and geometry.
     if (style![geometryType] !== undefined) {
       const styleSettings = style![geometryType]!;
@@ -414,15 +414,12 @@ export class GeoviewRenderer {
     uniqueValueStyleInfo: TypeUniqueValueStyleInfo[],
     feature: FeatureLike
   ): number | undefined {
-    let i = 0;
-    let matchFound = false;
-    for (i = 0; i < uniqueValueStyleInfo.length && !matchFound; i++) {
-      matchFound = true;
-      for (let j = 0; j < fields.length && matchFound; j++) {
-        if (feature.get(fields[j]) !== uniqueValueStyleInfo[i].values[j]) matchFound = false;
+    for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
+      for (let j = 0; j < fields.length; j++) {
+        // eslint-disable-next-line eqeqeq
+        if (feature.get(fields[j]) == uniqueValueStyleInfo[i].values[j] && j + 1 === fields.length) return i;
       }
     }
-    if (matchFound) return --i; // correction to the indexbecause it points to the next entry.
     return undefined;
   }
 
@@ -454,8 +451,7 @@ export class GeoviewRenderer {
     const fieldValue = feature.get(field) as number;
     if (fieldValue >= classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return 0;
 
-    let i = 1;
-    for (; i < classBreakStyleInfos.length; i++) {
+    for (let i = 1; i < classBreakStyleInfos.length; i++) {
       if (fieldValue > classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return i;
     }
     return undefined;
@@ -487,11 +483,11 @@ export class GeoviewRenderer {
 
   private createDefaultStyle(
     geometryType: TypeStyleConfigKey,
-    layerEntry: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
-    if (layerEntry.style === undefined) layerEntry.style = {};
-    const id = `${this.mapId}-${layerEntry.geoviewRootLayer?.layerId}-${layerEntry.layerId}`;
-    let label = getLocalizedValue(layerEntry.layerName, this.mapId);
+    if (layerEntryConfig.style === undefined) layerEntryConfig.style = {};
+    const id = `${this.mapId}-${layerEntryConfig.geoviewRootLayer?.layerId}-${layerEntryConfig.layerId}`;
+    let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
     label = label !== undefined ? label : id;
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
@@ -505,9 +501,9 @@ export class GeoviewRenderer {
         symbol: 'circle',
       };
       const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
-      layerEntry.style[geometryType] = styleSettings;
+      layerEntryConfig.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
-      return layerEntry.style;
+      return layerEntryConfig.style;
     }
     if (geometryType === 'LineString') {
       const settings: TypeLineStringVectorConfig = {
@@ -515,9 +511,9 @@ export class GeoviewRenderer {
         stroke: { color: this.getDefaultColor(1) },
       };
       const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
-      layerEntry.style[geometryType] = styleSettings;
+      layerEntryConfig.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
-      return layerEntry.style;
+      return layerEntryConfig.style;
     }
     if (geometryType === 'Polygon') {
       const settings: TypePolygonVectorConfig = {
@@ -527,9 +523,9 @@ export class GeoviewRenderer {
         fillStyle: 'solid',
       };
       const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
-      layerEntry.style[geometryType] = styleSettings;
+      layerEntryConfig.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
-      return layerEntry.style;
+      return layerEntryConfig.style;
     }
     // eslint-disable-next-line no-console
     console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);

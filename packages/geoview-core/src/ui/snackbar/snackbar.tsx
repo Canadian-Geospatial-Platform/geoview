@@ -32,7 +32,7 @@ interface SnackButtonProps {
 /**
  * The snackbar button component
  * @param {SnackButtonProps} props the snackbar button properties
- * @return {JSX.Element} the snackbar component
+ * @returns {JSX.Element} the snackbar component
  */
 function SnackButton(props: SnackButtonProps): JSX.Element {
   const { label, action } = props;
