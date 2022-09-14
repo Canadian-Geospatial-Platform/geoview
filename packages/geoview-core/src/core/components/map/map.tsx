@@ -60,7 +60,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const defaultTheme = useTheme();
 
   // if screen size is medium and up
-  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
+  const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('md'));
 
   /**
    * Get the center position of the map when move / drag has ended
@@ -143,7 +143,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         projection,
         center: fromLonLat([mapConfig.viewSettings.center[0], mapConfig.viewSettings.center[1]], projection),
         zoom: mapConfig.viewSettings.zoom,
-        // extent: projectionConfig.extent,
+        // TODO: is still valid? extent: projectionConfig.extent,
         extent: defaultBasemap?.defaultExtent ? defaultBasemap?.defaultExtent : undefined,
         minZoom: defaultBasemap?.zoomLevels.min || 0,
         maxZoom: defaultBasemap?.zoomLevels.max || 17,

@@ -47,10 +47,10 @@ class LayersPanelPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeJsonObject = toJsonObject({
-    'en-CA': {
+    'en': {
       layersPanel: 'Layers',
     },
-    'fr-CA': {
+    'fr': {
       layersPanel: 'Couches',
     },
   });

@@ -1,7 +1,7 @@
 {
   "map": {
     "interaction": "dynamic",
-    "view": {
+    "viewSettings": {
       "zoom": 4,
       "center": [-106, 60],
       "projection": 3857
@@ -10,29 +10,10 @@
       "id": "transport",
       "shaded": true,
       "labeled": true
-    },
-    "layers": [
-      {
-        "id": "ogcFeatureLYR7",
-        "name": {
-          "en": "Large Lakes",
-          "fr": "Large Lakes"
-        },
-        "url": {
-          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev",
-          "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
-        },
-        "layerType": "ogcFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "id": "lakes"
-          }
-        ]
-      }
-    ]
+    }
   },
   "corePackages": ["basemap-panel"],
-  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
+  "components": ["appbar", "north-arrow", "overview-map"],
   "theme": "dark",
   "suportedLanguages": ["en-CA", "fr-CA"]
 }

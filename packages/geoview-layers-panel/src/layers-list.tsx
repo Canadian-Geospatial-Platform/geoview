@@ -55,14 +55,14 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { Button, Slider, Tooltip, Checkbox } = ui.elements;
 
   const translations: TypeJsonObject = toJsonObject({
-    'en-CA': {
+    'en': {
       bounds: 'Toggle Bounds',
       zoom: 'Zoom to Layer',
       remove: 'Remove Layer',
       opacity: 'Adjust Opacity',
       visibility: 'Toggle Visibility',
     },
-    'fr-CA': {
+    'fr': {
       bounds: 'Basculer la limite',
       zoom: 'Zoom sur la Couche',
       remove: 'Supprimer la Couche',

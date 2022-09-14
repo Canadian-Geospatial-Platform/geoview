@@ -286,7 +286,7 @@ export class MapViewer {
   /**
    * Change the display language of the map
    *
-   * @param {TypeDisplayLanguage} displayLanguage the language to use (en-CA, fr-CA)
+   * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
    * @param {TypeListOfGeoviewLayerConfig} geoviewLayerConfi optional new set of layers to apply (will override origional set of layers)
    */
   changeLanguage = (displayLanguage: TypeDisplayLanguage, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void => {
@@ -305,16 +305,19 @@ export class MapViewer {
   /**
    * Load a new map config from a function call
    *
-   * @param {TypeMapFeaturesConfig} mapConfig a new config passed in from the function call
+   * @param {string} mapConfig a new config passed in from the function call
    */
-  loadMapConfig = (mapConfig: TypeMapFeaturesConfig) => {
+  loadMapConfig = (mapConfig: string) => {
+    // parse the config
+    const parsedMapConfig = JSON.parse(mapConfig.replace(/(\r\n|\n|\r)/gm, "").replace(/'/gm, '"'));
+
     // create a new config for this map element
     const config = new Config(this.map.getTargetElement());
 
-    const configObj = config.getMapConfigFromFunc(mapConfig);
+    const configObj = config.getMapConfigFromFunc(parsedMapConfig);
 
     // emit an event to reload the map with the new config
-    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, this.mapId, configObj!));
+    api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', configObj!));
   };
 
   /**

@@ -1192,7 +1192,7 @@
         "navBar": { "$ref": "#/definitions/TypeNavBarProps" },
         "components": { "$ref": "#/definitions/TypeMapComponents" },
         "corePackages": { "$ref": "#/definitions/TypeMapCorePackages" },
-        "externalPackages": { "$ref": "#/definitions/TypeServiceUrls" },
+        "externalPackages": { "$ref": "#/definitionsTypeExternalPackages" },
         "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
         "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
         "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
@@ -1212,7 +1212,7 @@
     "navBar": { "$ref": "#/definitions/TypeNavBarProps" },
     "components": { "$ref": "#/definitions/TypeMapComponents" },
     "corePackages": { "$ref": "#/definitions/TypeMapCorePackages" },
-    "externalPackages": { "$ref": "#/definitions/TypeServiceUrls" },
+    "externalPackages": { "$ref": "#/definitions/TypeExternalPackages" },
     "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
     "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
     "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
