@@ -67,9 +67,9 @@ export class Projection {
    * @param {string} fromProj projection to be converted from
    * @param {string} toProj projection to be converted to
    */
-  transformPoints = (points: unknown, fromProj: string, toProj: string): Array<Array<number> | number> => {
+  transformPoints = (points: unknown, fromProj: string, toProj: string): Array<Array<number>> => {
     // initialize empty array for the converted points
-    const converted: Array<number | Array<number>> = [];
+    const converted: Array<Array<number>> = [];
 
     // if the points is an array and has some points
     if (Array.isArray(points) && points.length > 0) {

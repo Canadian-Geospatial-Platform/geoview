@@ -2,9 +2,8 @@ import { Coordinate } from 'ol/coordinate';
 
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { TypeJsonObject } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeJsonObject } from '../../../core/types/global-types';
 
 /** Valid events that can create MarkerDefinitionPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW];
@@ -12,7 +11,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_
 /**
  * Type Gard function that redefines a PayloadBaseClass as a MarkerDefinitionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid

@@ -1,10 +1,15 @@
 import React from 'react';
 
+import { SwitchProps } from '@mui/material';
 import MaterialSwitch from '@mui/material/Switch';
 import MaterialFormControlLabel from '@mui/material/FormControlLabel';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeSwitchProps } from '../../core/types/cgpv-types';
+/**
+ * Custom Material UI Switch properties
+ */
+// eslint-disable-next-line react/require-default-props
+export type TypeSwitchProps = SwitchProps & { mapId?: string };
 
 const useStyles = makeStyles((theme) => ({
   formControl: {

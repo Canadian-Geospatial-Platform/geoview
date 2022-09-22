@@ -1,13 +1,44 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable react/require-default-props */
+import { useState, useEffect, CSSProperties } from 'react';
 
 import MaterialSlider from '@mui/material/Slider';
 import makeStyles from '@mui/styles/makeStyles';
+import { SliderProps } from '@mui/material';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
-
-import { TypeSliderProps } from '../../core/types/cgpv-types';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { sliderPayload, payloadIsASlider, SliderTypePayload } from '../../api/events/payloads/slider-payload';
+
+/**
+ * Properties for the Slider
+ */
+interface TypeSliderProps extends SliderProps {
+  id: string;
+
+  // custom slider classes and styles
+  className?: string;
+  style?: CSSProperties;
+
+  // default values (min, max, range)
+  min: number;
+  max: number;
+  value: Array<number> | number;
+
+  // custom onChange callback
+  customOnChange?: (value: number[] | number) => void;
+
+  // MUI optional props
+  disabled?: boolean;
+  marks?: Array<{ label?: string; value: number }>;
+  orientation?: 'vertical' | 'horizontal' | undefined;
+  step?: number;
+  size?: 'small' | 'medium';
+  track?: 'inverted' | 'normal' | false;
+  ariaLabelledby?: string;
+
+  // optional map id to link the slider to
+  mapId?: string;
+}
 
 const useStyles = makeStyles(() => ({
   slider: {

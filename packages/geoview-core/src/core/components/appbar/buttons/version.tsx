@@ -1,12 +1,25 @@
 import makeStyles from '@mui/styles/makeStyles';
 
 import { GITUHUB_REPO } from '../../../utils/constant';
-import { TypeAppVersion } from '../../../types/cgpv-types';
 
 import { Button, GitHubIcon } from '../../../../ui';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
+
+/**
+ * An object containing version information.
+ *
+ * @export
+ * @interface TypeAppVersion
+ */
+export type TypeAppVersion = {
+  hash: string;
+  major: number;
+  minor: number;
+  patch: number;
+  timestamp: string;
+};
 
 const useStyles = makeStyles((theme) => {
   return {

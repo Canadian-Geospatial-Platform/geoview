@@ -1,8 +1,7 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { TypeLayerConfig } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeGeoviewLayerConfig } from '../../../geo/map/map-schema-types';
 
 /** Valid events that can create LayerConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_LAYER_ADD];
@@ -10,7 +9,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_LAYER_ADD];
 /**
  * Type Gard function that redefines a PayloadBaseClass as a LayerConfigPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
@@ -27,16 +26,16 @@ export const payloadIsALayerConfig = (verifyIfPayload: PayloadBaseClass): verify
  */
 export class LayerConfigPayload extends PayloadBaseClass {
   // the layer configuration
-  layerConfig: TypeLayerConfig;
+  layerConfig: TypeGeoviewLayerConfig;
 
   /**
    * Constructor for the class
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {TypeLayerConfig} layerConfig the layer configuration
+   * @param {TypeGeoviewLayerConfig} layerConfig the layer configuration
    */
-  constructor(event: EventStringId, handlerName: string | null, layerConfig: TypeLayerConfig) {
+  constructor(event: EventStringId, handlerName: string | null, layerConfig: TypeGeoviewLayerConfig) {
     if (!validEvents.includes(event)) throw new Error(`LayerConfigPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.layerConfig = layerConfig;
@@ -49,10 +48,14 @@ export class LayerConfigPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {TypeLayerConfig} layerConfig the layer configuration
+ * @param {TypeGeoviewLayerConfig} layerConfig the layer configuration
  *
  * @returns {LayerConfigPayload} the LayerConfigPayload object created
  */
-export const layerConfigPayload = (event: EventStringId, handlerName: string | null, layerConfig: TypeLayerConfig): LayerConfigPayload => {
+export const layerConfigPayload = (
+  event: EventStringId,
+  handlerName: string | null,
+  layerConfig: TypeGeoviewLayerConfig
+): LayerConfigPayload => {
   return new LayerConfigPayload(event, handlerName, layerConfig);
 };

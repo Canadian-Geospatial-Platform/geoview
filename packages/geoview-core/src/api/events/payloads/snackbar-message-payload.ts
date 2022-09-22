@@ -1,8 +1,8 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
-
-import { TypeJsonObject, TypeSnackbarMessage } from '../../../core/types/cgpv-types';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeSnackbarMessage } from '../../../ui/snackbar/snackbar-types';
+import { TypeJsonObject } from '../../../core/types/global-types';
 
 /** Valid events that can create SnackbarMessagePayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN];
@@ -10,7 +10,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN];
 /**
  * Type Gard function that redefines a PayloadBaseClass as a SnackbarMessagePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid

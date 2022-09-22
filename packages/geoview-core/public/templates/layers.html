@@ -1,67 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="shortcut icon" href="./favicon.ico" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="msapplication-config" content="./img/browserconfig.xml" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Layers</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <a href="./index.html">Main</a><br />
-              <a href="#HLYR1">1. WMS Layer</a><br />
-              <a href="#HLYR2">2. XYZ Tiles Layer</a><br />
-              <a href="#HLYR3">3. Esri Dynamic Servive Layer</a><br />
-              <a href="#HLYR4">4. Esri Feature Servive Layer</a><br />
-              <a href="#HLYR5">5. GeoJSON Layer</a><br />
-              <a href="#HLYR6">6. WFS Layer</a><br />
-              <a href="#HLYR7">7. OGC API Feature Layer</a><br />
-              <a href="#HLYR8">8. GeoCore UUID Layer</a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page is used to showcase how the viewer may show different layer types</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <h3 id="HLYR1">1.WMS Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR1"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Layers</strong></h1>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <a href="./index.html">Main</a><br />
+            <a href="#HLYR1">1. WMS Layer</a><br />
+            <a href="#HLYR2">2. XYZ Tiles Layer</a><br />
+            <a href="#HLYR3">3. Esri Dynamic Servive Layer</a><br />
+            <a href="#HLYR4">4. Esri Feature Servive Layer</a><br />
+            <a href="#HLYR5">5. GeoJSON Layer</a><br />
+            <a href="#HLYR6">6. WFS Layer</a><br />
+            <a href="#HLYR7">7. OGC API Feature Layer</a><br />
+            <a href="#HLYR8">8. GeoCore UUID Layer</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>This page is used to showcase how the viewer may show different layer types</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="map-title-holder">
+    <h4 id="HLYR1">1.WMS Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
+  <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                'zoom': 4,
+                'center': [-100, 60],
+                'projection': 3857
+              },
+              'basemapOptions': {
+                'id': 'transport',
+                'shaded': false,
+                'labeled': true
+              },
+              'listOfGeoviewLayerConfig': [
+                {
+                  'layerId': 'wmsLYR1-Root',
+                  'layerName': { 'en': 'Root' },
+                  'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'entryType': 'group',
+                      'layerId': 'wmsLYR1-Group',
+                      'layerName': { 'en': 'Group' },
+                      'listOfLayerEntryConfig': [
+                        {
+                          'layerId': 'OSM-WMS'
+                        },
+                        {
+                          'layerId': 'TOPO-OSM-WMS'
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  'layerId': 'wmsLYR2-Root',
+                  'layerName': { 'en': 'Topographic OSM WMS' },
+                  'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
+                  'geoviewLayerType': 'ogcWms',
+                  'initialSettings': { 'visible': false },
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'OSM-WMS'
+                    },
+                    {
+                      'layerId': 'TOPO-OSM-WMS'
+                    }
+                  ]
+                },
+                {
+                  'layerId': 'wmsLYR3',
+                  'layerName': { 'en': 'MSI' },
+                  'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
+                  'geoviewLayerType': 'ogcWms',
+                  'listOfLayerEntryConfig': [
+                    {
+                      'layerId': 'msi-94-or-more'
+                    }
+                  ]
+                }
+              ]
+            },
+            'components': ['overview-map', 'navbar'],
+            'corePackages': [],
+            'theme': 'dark',
+            'suportedLanguages': ['en-CA']
+          }"></div>
+  <div>
+    <h3>Legend</h3>
+    <img id="wmsLegend" />
+  </div>
+  <p>This map has a wms layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR1CS" class="panel"></pre>
+  <hr />
+
+  <div class="map-title-holder">
+    <h4 id="HLYR2">2. XYZ Tiles Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR2" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3857
@@ -71,96 +155,44 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'wmsLYR1',
-                'name': {
-                  'en': 'Topographic OSM WMS',
-                  'fr': 'Topographic OSM WMS'
+                'layerId': 'xyzTilesLYR2',
+                'layerName': {
+                  'en': 'statmen toner'
                 },
-                'url': {
-                  'en': 'https://ows.mundialis.de/services/service?',
-                  'fr': 'https://ows.mundialis.de/services/service?'
-                },
-                'layerType': 'ogcWms',
-                'layerEntries': [
+                'geoviewLayerType': 'xyzTiles',
+                'initialSettings': { 'visible': true },
+                'listOfLayerEntryConfig': [
                   {
-                    'id': 'TOPO-OSM-WMS'
+                    'layerId': 'toner',
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                      }
+                    }
                   }
                 ]
               }
             ]
           },
+          'components': ['overview-map', 'navbar'],
+          'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+          'suportedLanguages': ['en-CA']
+        }"></div>
+  <p>This map has a XYZ Tiles layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR2CS" class="panel"></pre>
+  <hr />
 
-      <div>
-        <h3>Legend</h3>
-        <img id="wmsLegend" />
-      </div>
-      <p>This map has a wms layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR1CS" class="panel"></div>
-    </div>
-    <div>
-      <h3 id="HLYR2">2. XYZ Tiles Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR2"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'view': {
-            'zoom': 4,
-            'center': [-100, 60],
-            'projection': 3857
-          },
-          'basemapOptions': {
-            'id': 'transport',
-            'shaded': false,
-            'labeled': true
-          },
-          'layers': [
-            {
-              'id': 'xyzTilesLYR2',
-              'name': {
-                'en': 'statmen toner',
-                'fr': 'statmen toner'
-              },
-              'url': {
-                'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
-                'fr': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
-              },
-              'layerType': 'xyzTiles'
-            }
-          ]
-        },
-        'theme': 'dark',
-        'languages': ['en-CA']
-      }"
-      ></div>
-
-      <p>This map has a XYZ Tiles layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR2CS" class="panel"></div>
-    </div>
-
-    <hr />
-    <div>
-      <h3 id="HLYR3">3. Esri dynamic layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR3"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+  <div class="map-title-holder">
+    <h4 id="HLYR3">3. Esri dynamic layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR3" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
@@ -170,142 +202,193 @@
               'shaded': true,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'esriDynamicLYR3',
-                'name': {
-                  'en': 'Senior care facilities on April 2020',
-                  'fr': 'Senior care facilities on April 2020'
+                'layerId': 'esriDynamicLYR3',
+                'layerName': {
+                  'en': 'Senior care facilities on April 2020'
                 },
-                'url': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer'
                 },
-                'layerType': 'esriDynamic',
-                'layerEntries': [
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
                   {
-                    'index': 0
+                    'layerId': '0'
                   },
                   {
-                    'index': 1
+                    'layerId': '1'
                   }
                 ]
               }
             ]
           },
+          'components': ['overview-map', 'navbar'],
+          'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+          'suportedLanguages': ['en-CA']
+        }"></div>
 
-      <div id="esriDynamicLayerLegend">
-        <h3>Legend</h3>
-      </div>
-      <p>This map has a Esri dynamic layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR3CS" class="panel"></div>
-    </div>
-    <div>
-      <h3 id="HLYR4">4. Esri feature layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR4"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+  <div id="esriDynamicLayerLegend">
+    <h3>Legend</h3>
+  </div>
+  <p>This map has a Esri dynamic layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR3CS" class="panel"></pre>
+  <hr />
+
+  <div class="map-title-holder">
+    <h4 id="HLYR4">4. Esri feature layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR4" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
             },
             'basemapOptions': {
-              'id': 'nogeom',
-              'shaded': true,
-              'labeled': false
+              'id': 'transport',
+              'shaded': false,
+              'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'esriFeatureLYR4',
-                'name': {
-                  'en': 'Senior care facilities by province and territory',
-                  'fr': 'Senior care facilities by province and territory'
+                'layerId': 'esriFeatureLYR4',
+                'layerName': { 'en': 'Water quality at monitoring sites' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
                 },
-                'url': {
-                  'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0',
-                  'fr': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer/0'
-                },
-                'layerType': 'esriFeature'
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '5' }
+                ]
               }
             ]
           },
+          'components': ['overview-map', 'navbar'],
+          'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
-      <p>This map has a Esri feature layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR4CS" class="panel"></div>
-    </div>
-    <div>
-      <h3 id="HLYR5">5. GeoJSON Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR5"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'view': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3978
-            },
-            'basemapOptions': {
-              'id': 'nogeom',
-              'shaded': true,
-              'labeled': false
-            },
-            'layers': [
-              {
-                'id': 'geojsonLYR5',
-                'name': {
-                  'en': 'GeoJSON Sample',
-                  'fr': 'Exemple GeoJSON'
-                },
-                'url': {
-                  'en': './geojson/polygons.json',
-                  'fr': './geojson/polygons.json'
-                },
-                'layerType': 'geojson'
-              }
-            ]
-          },
-          'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+          'suportedLanguages': ['en-CA']
+        }"></div>
+  <p>This map has a Esri feature layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR4CS" class="panel"></pre>
+  <hr />
 
-      <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking the buttons</p>
-      <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
-      <label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id"></label>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR5CS" class="panel"></div>
-    </div>
-    <div>
-      <h3 id="HLYR6">6. WFS Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-
-      <div
-        id="LYR6"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+  <div class="map-title-holder">
+    <h4 id="HLYR5">5. GeoJSON Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR5" class="llwp-map" data-lang="en" data-config="{
         'map': {
           'interaction': 'dynamic',
-          'view': {
+          'viewSettings': {
+            'zoom': 4,
+            'center': [-100, 60],
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'id': 'nogeom',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'layerId': 'geojsonLYR5',
+              'layerName': {
+                'en': 'GeoJSON Sample'
+              },
+              'metadataAccessPath': {
+                'en': './geojson/metadata.json'
+              },
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'polygons.json',
+                  'style': {
+                    'Polygon': {
+                      'styleType': 'simple',
+                      'label': 'Polygon label',
+                      'settings': {
+                        'type': 'filledPolygon',
+                        'paternSize': 10,
+                        'paternWidth': 2,
+                        'fillStyle': 'diagonalCross',
+                        'stroke': {
+                          'lineStyle': 'dot'
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  'layerId': 'lines.json',
+                  'style': {
+                    'LineString': {
+                      'styleType': 'simple',
+                      'label': 'LineString label',
+                      'settings': {
+                        'type': 'lineString',
+                        'stroke': {
+                          'lineStyle': 'shortDash-dot-dot'
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  'layerId': 'icon_points.json',
+                  'style': {
+                    'Point': {
+                      'styleType': 'simple',
+                      'label': 'Icon point label',
+                      'settings': {
+                        'type': 'iconSymbol',
+                        'mimeType': 'image/png',
+                        'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=',
+                        'opacity': 0.25
+                      }
+                    }
+                  }
+                },
+                {
+                  'layerId': 'points.json',
+                  'style': {
+                    'Point': {
+                      'styleType': 'simple',
+                      'label': 'Point label',
+                      'settings': {
+                        'type': 'simpleSymbol',
+                        'symbol': 'star'
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'navbar'],
+        'corePackages': [],
+        'theme': 'dark',
+        'suportedLanguages': ['en-CA']
+      }"></div>
+  <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
+    the buttons</p>
+  <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
+  <label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id"></label>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR5CS" class="panel"></pre>
+  <hr />
+
+  <div class="map-title-holder">
+    <h4 id="HLYR6">6. WFS Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR6" class="llwp-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
             'zoom': 8,
             'center': [-71.370748, 42.001058],
             'projection': 3857
@@ -315,45 +398,41 @@
             'shaded': false,
             'labeled': true
           },
-          'layers': [
+          'listOfGeoviewLayerConfig': [
             {
-              'id': 'wfsLYR6',
-              'name': {
-                'en': 'Airport data',
-                'fr': 'Airport data'
+              'layerId': 'wfsLYR6',
+              'layerName': {
+                'en': 'Airport data'
               },
-              'url': {
-                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs',
-                'fr': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+              'metadataAccessPath': {
+                'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
               },
-              'layerType': 'ogcWfs',
-              'layerEntries': [
+              'geoviewLayerType': 'ogcWfs',
+              'listOfLayerEntryConfig': [
                 {
-                  'id': 'GISDATA.AIRPORTS_PT'
+                  'layerId': 'GISDATA.AIRPORTS_PT'
                 }
               ]
             }
           ]
         },
+        'components': ['overview-map', 'navbar'],
+        'corePackages': [],
         'theme': 'dark',
-        'languages': ['en-CA']
-      }"
-      ></div>
-      <p>This map has a WFS layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR6CS" class="panel"></div>
-    </div>
-    <div>
-      <h3 id="HLYR7">7. OGC API Feature Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR7"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+        'suportedLanguages': ['en-CA']
+      }"></div>
+  <p>This map has a WFS layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR6CS" class="panel"></pre>
+  <hr />
+
+  <div class="map-title-holder">
+    <h4 id="HLYR7">7. OGC API Feature Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR7" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 3,
               'center': [0, 20],
               'projection': 3857
@@ -363,46 +442,42 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'ogcFeatureLYR7',
-                'name': {
-                  'en': 'Large Lakes',
-                  'fr': 'Large Lakes'
+                'layerId': 'ogcFeatureLYR7',
+                'layerName': {
+                  'en': 'Large Lakes'
                 },
-                'url': {
-                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev',
-                  'fr': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
+                'metadataAccessPath': {
+                  'en': 'https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev'
                 },
-                'layerType': 'ogcFeature',
-                'layerEntries': [
+                'geoviewLayerType': 'ogcFeature',
+                'listOfLayerEntryConfig': [
                   {
-                    'id': 'lakes'
+                    'layerId': 'lakes'
                   }
                 ]
               }
             ]
           },
+          'components': ['overview-map', 'navbar'],
+          'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+          'suportedLanguages': ['en-CA']
+        }"></div>
 
-      <p>This map has an OGC API feature layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR7CS" class="panel"></div>
-    </div>
-    <div>
-      <h3 id="HLYR8">8. GeoCore UUID Layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <div
-        id="LYR8"
-        class="llwp-map"
-        data-lang="en-CA"
-        data-config="{
+  <p>This map has an OGC API feature layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR7CS" class="panel"></pre>
+  <hr />
+
+  <div class="map-title-holder">
+    <h4 id="HLYR8">8. GeoCore UUID Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR8" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
-            'view': {
+            'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
               'projection': 3857
@@ -412,115 +487,133 @@
               'shaded': false,
               'labeled': true
             },
-            'layers': [
+            'listOfGeoviewLayerConfig': [
               {
-                'id': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
-                'layerType': 'geoCore'
+                'layerId': 'ogcFeatureLYR7',
+                'geoviewLayerType': 'geoCore',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+                  }
+                ]
               }
             ]
           },
+          'components': ['overview-map', 'navbar'],
+          'corePackages': [],
           'theme': 'dark',
-          'languages': ['en-CA']
-        }"
-      ></div>
+          'suportedLanguages': ['en-CA']
+        }"></div>
 
-      <p>This map requests a layer from the catalog using uuid added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR8CS" class="panel"></div>
-    </div>
-    <p><strong>Code Snippet:</strong></p>
-    <div id="codeSnippet" class="panel"></div>
-    <script src="codedoc.js"></script>
-    <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
+  <p>This map requests a layer from the catalog using uuid added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR8CS" class="panel"></pre>
+  <hr />
 
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
-        addWMSLegend();
-        addEsriDynamicLegend();
+  <button type="button" class="collapsible">Code Snippet</button>
+  <pre id="codeSnippet" class="panel"></pre>
+
+  <script src="codedoc.js"></script>
+  <script>
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
+
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
+      // TODO: repair addWMSLegend();
+      // TODO: repair addEsriDynamicLegend();
+    });
+
+    // find the button element by ID
+    var addGeoJSONButton = document.getElementById('add-geojson');
+
+    // add an event listener when a button is clicked
+    // TODO: Repair
+    addGeoJSONButton.addEventListener('click', function (e) {
+      // adding a geojson layer requires a type of geojson and url
+      const layerID = cgpv.api.map('LYR5').layer.addLayer({
+        'layerId': 'geoJsonSample',
+        'layerName': {
+          'en': 'geojson sample',
+          'fr': 'exemple geojson'
+        },
+        'metadataAccessPath': {
+          'en': 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/',
+          'fr': 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/'
+        },
+        'geoviewLayerType': 'GeoJSON',
+        'listOfLayerEntryConfig': [ { 'layerId': 'pieChart.json' }],
       });
+      document.getElementById('new-layer-id').innerText = layerID;
+    });
 
-      // find the button element by ID
-      var addGeoJSONButton = document.getElementById('add-geojson');
+    // find the button element by ID
+    var removeGeoJSONButton = document.getElementById('remove-geojson');
 
-      // add an event listener when a button is clicked
-      addGeoJSONButton.addEventListener('click', function (e) {
-        // adding a geojson layer requires a type of geojson and url
-        const layerID = cgpv.api.map('LYR5').layer.addLayer({
-          id: 'geoJsonSample',
-          name: {
-            en: 'geojson sample',
-            fr: 'exemple geojson',
-          },
-          layerType: 'geojson',
-          url: {
-            en: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
-            fr: 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/pieChart.json',
-          },
+    // add an event listener when a button is clicked
+    removeGeoJSONButton.addEventListener('click', function (e) {
+      // removing a geojson layer using the ID
+      cgpv.api.map('LYR5').layer.removeLayerById(document.getElementById('new-layer-id').innerText);
+      document.getElementById('new-layer-id').innerText = '';
+    });
+
+    // Test a refresh WMS from projection change
+    var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+    testRefreshBtn.addEventListener('click', function (e) {
+      cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+    });
+
+    /*
+    //add legend to WMS layer
+    function addWMSLegend() {
+      cgpv.api
+        .map('LYR1')
+        .layer.layers['wmsLYR1'].getLegendGraphic('TOPO-OSM-WMS')
+        .then((res) => {
+          document.getElementById('wmsLegend').src = res;
         });
-        document.getElementById('new-layer-id').innerText = layerID;
-      });
+    }
 
-      // find the button element by ID
-      var removeGeoJSONButton = document.getElementById('remove-geojson');
+    //add legend to ESRI Dynamic layer
+    function addEsriDynamicLegend() {
+      cgpv.api
+        .map('LYR3')
+        .layer.layers['esriDynamicLYR3'].getLegendJson()
+        .then((layers) => {
+          //create a Table Object
+          let legendTable = document.createElement('table');
+          legendTable.className = 'legendTable';
+          document.getElementById('esriDynamicLayerLegend').appendChild(legendTable);
+          let legendRow = legendTable.insertRow();
+          let legendCol = legendRow.insertCell();
+          layers.forEach((layer) => {
+            let layerText = document.createElement('b');
+            layerText.innerHTML = layer.layerName;
+            legendCol.appendChild(layerText);
+            let table = document.createElement('table');
 
-      // add an event listener when a button is clicked
-      removeGeoJSONButton.addEventListener('click', function (e) {
-        // removing a geojson layer using the ID
-        //cgpv.api.map('LYR5').layer.removeLayer(document.getElementById('new-layer-id').innerText);
-        cgpv.api.map('LYR5').layer.removeLayerById(document.getElementById('new-layer-id').innerText);
-        document.getElementById('new-layer-id').innerText = '';
-      });
-
-      //add legend to WMS layer
-      function addWMSLegend() {
-        cgpv.api
-          .map('LYR1')
-          .layer.layers['wmsLYR1'].getLegendGraphic('TOPO-OSM-WMS')
-          .then((res) => {
-            document.getElementById('wmsLegend').src = res;
-          });
-      }
-
-      //add legend to ESRI Dynamic layer
-      function addEsriDynamicLegend() {
-        cgpv.api
-          .map('LYR3')
-          .layer.layers['esriDynamicLYR3'].getLegendJson()
-          .then((layers) => {
-            //create a Table Object
-            let legendTable = document.createElement('table');
-            legendTable.className = 'legendTable';
-            document.getElementById('esriDynamicLayerLegend').appendChild(legendTable);
-            let legendRow = legendTable.insertRow();
-            let legendCol = legendRow.insertCell();
-            layers.forEach((layer) => {
-              let layerText = document.createElement('b');
-              layerText.innerHTML = layer.layerName;
-              legendCol.appendChild(layerText);
-              let table = document.createElement('table');
-
-              layer.legend.forEach((lgd) => {
-                let row = table.insertRow();
-                row.vAlign = 'middle';
-                let col1 = row.insertCell();
-                col1.style.width = '100px';
-                let col2 = row.insertCell();
-                let icon = document.createElement('img');
-                icon.src = `data:${lgd.contentType};base64,${lgd.imageData}`;
-                //icon.width = lgd.width;
-                //icon.height = lgd.height;
-                col1.appendChild(icon);
-                let lbl = document.createTextNode(lgd.label);
-                col2.appendChild(lbl);
-              });
-              legendCol.appendChild(table);
+            layer.legend.forEach((lgd) => {
+              let row = table.insertRow();
+              row.vAlign = 'middle';
+              let col1 = row.insertCell();
+              col1.style.width = '100px';
+              let col2 = row.insertCell();
+              let icon = document.createElement('img');
+              icon.src = `data:${lgd.contentType};base64,${lgd.imageData}`;
+              //icon.width = lgd.width;
+              //icon.height = lgd.height;
+              col1.appendChild(icon);
+              let lbl = document.createTextNode(lgd.label);
+              col2.appendChild(lbl);
             });
+            legendCol.appendChild(table);
           });
-      }
-    </script>
-  </body>
+        });
+    }
+    */
+  </script>
+</body>
+
 </html>

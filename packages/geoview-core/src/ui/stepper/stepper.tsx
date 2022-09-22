@@ -2,8 +2,26 @@ import MaterialStepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
+import { StepperProps, StepLabelProps, StepContentProps, StepProps } from '@mui/material';
 
-import { TypeStepperProps, TypeStep } from '../../core/types/cgpv-types';
+/**
+ * Custom MUI Stepper Props
+ */
+interface TypeStepperProps extends StepperProps {
+  // eslint-disable-next-line react/require-default-props
+  mapId?: string;
+  steps: (TypeStep | null)[];
+}
+
+/**
+ * Object that holds a step of a stepper component
+ */
+interface TypeStep {
+  id?: string | null;
+  stepLabel?: StepLabelProps;
+  stepContent?: StepContentProps;
+  props?: StepProps;
+}
 
 /**
  * Create a Material UI Stepper component

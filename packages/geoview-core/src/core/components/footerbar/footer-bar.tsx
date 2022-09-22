@@ -14,7 +14,7 @@ import { FooterbarExpandButton } from './footerbar-expand-button';
 import { FooterbarRotationButton } from './footerbar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footerbar-fixnorth-switch';
 
-export const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   footerBarContainer: {
     display: 'flex',
     flexDirection: 'row',

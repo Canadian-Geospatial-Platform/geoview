@@ -1,10 +1,9 @@
 import { ModalModel } from './modal-model';
 
-import { TypeFunction, TypeChildren } from '../../core/types/cgpv-types';
 import { generateId } from '../../core/utils/utilities';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 import { modalPayload } from '../../api/events/payloads/modal-payload';
 
 /**
@@ -15,7 +14,7 @@ export interface ModalActionsType {
   id: string;
 
   // content is the action itself, HTML (in the form of a string) or JSX
-  content?: TypeChildren;
+  content?: React.ReactNode;
 }
 
 /**
@@ -57,10 +56,10 @@ export type TypeModalProps = {
   active?: boolean;
 
   // function that opens a modal
-  open?: TypeFunction;
+  open?: () => void;
 
   // function that closes a modal
-  close?: TypeFunction;
+  close?: () => void;
 
   // the id of map whose modal is generated
   mapId?: string;

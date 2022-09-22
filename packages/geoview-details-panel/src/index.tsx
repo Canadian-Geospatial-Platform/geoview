@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {
   Cast,
-  AbstractPluginClass,
+  AbstractPlugin,
   TypePluginOptions,
   TypeButtonPanel,
   toJsonObject,
@@ -17,7 +17,7 @@ const w = window as TypeWindow;
 /**
  * Create a class for the plugin instance
  */
-class DetailsPlugin extends AbstractPluginClass {
+class DetailsPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
@@ -56,13 +56,13 @@ class DetailsPlugin extends AbstractPluginClass {
     // access the api calls
     const { api, ui } = cgpv;
     const { DetailsIcon } = ui.elements;
-    const { language } = api.map(mapId);
+    const { displayLanguage } = api.map(mapId);
 
     // button props
     const button: TypeIconButtonProps = {
       // set ID to detailsPanel so that it can be accessed from the core viewer
       id: 'detailsPanelButton',
-      tooltip: this.translations[language].detailsPanel as string,
+      tooltip: this.translations[displayLanguage].detailsPanel as string,
       tooltipPlacement: 'right',
       children: <DetailsIcon />,
       visible: true,
@@ -70,7 +70,7 @@ class DetailsPlugin extends AbstractPluginClass {
 
     // panel props
     const panel: TypePanelProps = {
-      title: this.translations[language].detailsPanel,
+      title: this.translations[displayLanguage].detailsPanel,
       icon: '<i class="material-icons">details</i>',
       width: 300,
     };
@@ -104,4 +104,4 @@ class DetailsPlugin extends AbstractPluginClass {
 export default DetailsPlugin;
 
 w.plugins = w.plugins || {};
-w.plugins['details-panel'] = Cast<AbstractPluginClass>(DetailsPlugin);
+w.plugins['details-panel'] = Cast<AbstractPlugin>(DetailsPlugin);

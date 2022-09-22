@@ -17,7 +17,7 @@ import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 

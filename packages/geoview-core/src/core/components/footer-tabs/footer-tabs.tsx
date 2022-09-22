@@ -5,7 +5,7 @@ import makeStyles from '@mui/styles/makeStyles';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 import { FooterTabPayload, payloadIsAFooterTab } from '../../../api/events/payloads/footer-tab-payload';
 
 import { ExpandLessIcon, ExpandMoreIcon, IconButton, Tabs, TypeTabs } from '../../../ui';

@@ -1,4 +1,4 @@
-import { toJsonObject, TypePanelContentProps, TypeJsonObject, TypeWindow } from 'geoview-core';
+import { toJsonObject, TypePanelProps, TypeJsonObject, TypeWindow } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import LayersList from './layers-list';
@@ -11,7 +11,7 @@ const w = window as TypeWindow;
  * @param {TypePanelContentProps} props the properties of the pane content
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
-function PanelContent(props: TypePanelContentProps): JSX.Element {
+function PanelContent(props: TypePanelProps): JSX.Element {
   const { mapId, buttonPanel } = props;
 
   const { cgpv } = w;
@@ -21,13 +21,13 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const [mapLayers, setMapLayers] = useState({});
   const { Button } = ui.elements;
 
-  const { language } = api.map(mapId);
+  const { displayLanguage } = api.map(mapId);
 
   const translations: TypeJsonObject = toJsonObject({
-    'en-CA': {
+    'en': {
       addLayer: 'Add Layer',
     },
-    'fr-CA': {
+    'fr': {
       addLayer: 'Ajouter Couche',
     },
   });
@@ -89,7 +89,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       <div className={classes.mainContainer}>
         <Button
           className={classes.addLayerButton}
-          tooltip={translations[language].addLayer as string}
+          tooltip={translations[displayLanguage].addLayer as string}
           tooltipPlacement="right"
           variant="contained"
           type="icon"
@@ -99,7 +99,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       </div>
       {addLayerVisible && <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />}
       <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
-        <LayersList mapId={mapId} layers={mapLayers} language={language} />
+        <LayersList mapId={mapId} layers={mapLayers} displayLanguage={displayLanguage} />
       </div>
     </>
   );

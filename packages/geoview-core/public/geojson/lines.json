@@ -5,13 +5,14 @@
       "type": "LineString",
       "coordinates": [
         [-108, 53],
+        [-108, 44],
         [-120, 59]
       ]
     },
     {
       "type": "LineString",
       "coordinates": [
-        [-110, 58],
+        [-110, 45],
         [-106, 55]
       ]
     }

@@ -1,14 +1,15 @@
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
+import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeProjectionCodes } from '../../../geo/map/map-schema-types';
 
-/** Valid events that can create MapConfigPayload */
+/** Valid events that can create MapViewProjectionPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MapConfigPayload
+ * Type Gard function that redefines a PayloadBaseClass as a MapViewProjectionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid
@@ -25,7 +26,7 @@ export const payloadIsAMapViewProjection = (verifyIfPayload: PayloadBaseClass): 
  */
 export class MapViewProjectionPayload extends PayloadBaseClass {
   // the map configuration
-  projection: number;
+  projection: TypeProjectionCodes;
 
   /**
    * Constructor for the class
@@ -34,8 +35,8 @@ export class MapViewProjectionPayload extends PayloadBaseClass {
    * @param {string | null} handlerName the handler Name
    * @param {number} projection the map view projection
    */
-  constructor(event: EventStringId, handlerName: string | null, projection: number) {
-    if (!validEvents.includes(event)) throw new Error(`MapConfigPayload can't be instanciated for event of type ${event}`);
+  constructor(event: EventStringId, handlerName: string | null, projection: TypeProjectionCodes) {
+    if (!validEvents.includes(event)) throw new Error(`MapViewProjectionPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.projection = projection;
   }
@@ -54,7 +55,7 @@ export class MapViewProjectionPayload extends PayloadBaseClass {
 export const mapViewProjectionPayload = (
   event: EventStringId,
   handlerName: string | null,
-  projection: number
+  projection: TypeProjectionCodes
 ): MapViewProjectionPayload => {
   return new MapViewProjectionPayload(event, handlerName, projection);
 };

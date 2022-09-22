@@ -13,10 +13,9 @@ import { api } from '../../../app';
 import { Panel, ButtonGroup, IconButton } from '../../../ui';
 
 import { MapContext } from '../../app-start';
-import { TypeButtonPanel } from '../../types/cgpv-types';
-
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
+import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
 const navBtnWidth = '44px';
 const navBtnHeight = '44px';

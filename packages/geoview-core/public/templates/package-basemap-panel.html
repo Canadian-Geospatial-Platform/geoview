@@ -25,7 +25,11 @@
             </td>
           </tr>
           <tr>
-            <td><a href="./index.html">Main</a><br /></td>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HUC1">Default Configuration</a><br />
+              <a href="#HUC2">Custom Configuration</a><br />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -37,35 +41,30 @@
         </tbody>
       </table>
     </div>
-    <div>
-      <div>
-        <h3><a href="#top">Top of the page</a></h3>
-        <div id="mapWM" class="llwp-map" data-lang="en-CA" data-config-url="./configs/package-bp2-wm-config.json"></div>
-        <p>Default configuration</p>
-        <p><strong>Configuration Snippet:</strong></p>
-        <div id="mapWMCS" class="panel"></div>
-      </div>
 
-      <div>
-        <h3><a href="#top">Top of the page</a></h3>
-        <div id="mapLCC" class="llwp-map" data-lang="en-CA" data-config-url="./configs/package-bp1-lcc-config.json"></div>
+        <div class="map-title-holder">
+          <h4 id="HUC1">1. Default Configuration</h4><a class="ref-link" href="#top">Top</a>
+        </div>
+        <div id="mapWM" class="llwp-map" data-lang="en" data-config-url="./configs/package-bp2-wm-config.json"></div>
+        <p>Default configuration</p>
+        <hr />
+
+        <div class="map-title-holder">
+          <h4 id="HU24">2. Custom Configuration</h4><a class="ref-link" href="#top">Top</a>
+        </div>
+        <div id="mapLCC" class="llwp-map" data-lang="en" data-config-url="./configs/package-bp1-lcc-config.json"></div>
         <p>Custom basemap</p>
-        <p><strong>Configuration Snippet:</strong></p>
-        <div id="mapLCCCS" class="panel"></div>
-      </div>
-    </div>
-    <p><strong>Code Snippet:</strong></p>
-    <div id="codeSnippet" class="panel"></div>
+        
+
+
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
 
-        //config snippets
-        createConfigSnippet();
-
         //create snippets
+        createConfigSnippet();
         createCodeSnippet();
       });
     </script>

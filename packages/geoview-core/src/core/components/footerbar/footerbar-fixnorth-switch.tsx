@@ -9,7 +9,7 @@ import { MapContext } from '../../app-start';
 
 import { PROJECTION_NAMES } from '../../../geo/projection/projection';
 
-import { EVENT_NAMES } from '../../../api/events/event';
+import { EVENT_NAMES } from '../../../api/events/event-types';
 import { booleanPayload, payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
@@ -27,7 +27,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   const [expanded, setExpanded] = useState(false);
   const [mapProjection, setMapProjection] = useState(`EPSG:${api.map(mapId).currentProjection}`);
   const [switchChecked, setSwitchChecked] = useState(false);
-  const [isNorthEnable] = useState(api.map(mapId).mapProps.components!.indexOf('north-arrow') > -1);
+  const [isNorthEnable] = useState(api.map(mapId).mapFeaturesConfig.components!.indexOf('north-arrow') > -1);
 
   /**
    * Emit an event to specify the map to rotate to keep north straight

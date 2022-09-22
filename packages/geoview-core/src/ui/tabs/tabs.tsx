@@ -8,10 +8,11 @@ import MaterialTabs from '@mui/material/Tabs';
 import MaterialTab from '@mui/material/Tab';
 import MaterialBox from '@mui/material/Box';
 
-import { TypeChildren } from '../../core/types/cgpv-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { TabPanel } from './tab-panel';
+
+type TypeChildren = React.ReactNode;
 
 /**
  * Type used for properties of each tab

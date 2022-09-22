@@ -1,7 +1,20 @@
+/* eslint-disable react/require-default-props */
+import { AutocompleteProps } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
 import MaterialAutocomplete from '@mui/material/Autocomplete';
 
-import { TypeAutocompleteProps } from '../../core/types/cgpv-types';
+/**
+ * Customized Material UI Autocomplete properties
+ */
+export interface TypeAutocompleteProps<
+  T,
+  Multiple extends boolean | undefined = undefined,
+  DisableClearable extends boolean | undefined = undefined,
+  FreeSolo extends boolean | undefined = undefined
+> extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
+  mapId?: string;
+  fullWidth?: boolean;
+}
 
 /**
  * Create a Material UI Autocomplete component

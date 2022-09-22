@@ -1,8 +1,15 @@
 import React from 'react';
 
 import MaterialCheckbox from '@mui/material/Checkbox';
+import { CheckboxProps } from '@mui/material';
 
-import { TypeCheckboxProps } from '../../core/types/cgpv-types';
+/**
+ * Custom MUI Checkbox properties
+ */
+interface TypeCheckboxProps extends CheckboxProps {
+  // eslint-disable-next-line react/require-default-props
+  mapId?: string;
+}
 
 /**
  * Create a Material UI Checkbox component

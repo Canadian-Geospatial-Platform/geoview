@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable no-nested-ternary */
-import { TypeJsonArray, TypeFeatureInfoProps, TypeWindow } from 'geoview-core';
+import { TypeJsonArray, TypeWindow } from 'geoview-core';
+import { TypeFeatureInfoProps } from './details-panel-types';
 
 const w = window as TypeWindow;
 

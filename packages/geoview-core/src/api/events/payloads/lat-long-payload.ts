@@ -2,7 +2,7 @@ import { Coordinate } from 'ol/coordinate';
 
 import { PayloadBaseClass } from './payload-base-class';
 
-import { EventStringId, EVENT_NAMES } from '../event';
+import { EventStringId, EVENT_NAMES } from '../event-types';
 
 /** Valid events that can create LngLatPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, EVENT_NAMES.MAP.EVENT_MAP_MOVE_END];
@@ -10,7 +10,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PA
 /**
  * Type Gard function that redefines a PayloadBaseClass as a LngLatPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the the true block of the if clause.
+ * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
  * @returns {boolean} returns true of the payload is valid

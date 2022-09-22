@@ -1,13 +1,13 @@
 import { createElement } from 'react';
 
 import { api } from '../../app';
-import { EVENT_NAMES } from '../../api/events/event';
+import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
-import { TypePanelProps } from '../../core/types/cgpv-types';
 import { PanelPayload, TypeActionButton } from '../../api/events/payloads/panel-payload';
 import { generateId } from '../../core/utils/utilities';
+import { TypePanelProps } from './panel-types';
 
 /**
  * Class used to handle creating a new panel

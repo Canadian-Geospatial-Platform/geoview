@@ -1,7 +1,8 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { TypeJsonValue, TypeLayersEntry, TypeFeaturesListProps, TypeWindow, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { TypeJsonValue, TypeWindow, toJsonObject, TypeJsonObject } from 'geoview-core';
+import { TypeLayersEntry, TypeFeaturesListProps } from './details-panel-types';
 
 const w = window as TypeWindow;
 

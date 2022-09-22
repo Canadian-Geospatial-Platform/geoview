@@ -40,6 +40,7 @@
     "generate.d.ts": "tsc --noEmit false --skipLibCheck true --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "dependencies": {
+    "@mui/system": "^5.4.1",
     "@mui/material": "^5.4.3",
     "@mui/styles": "^5.4.2",
     "@mui/icons-material": "^5.4.2",
@@ -135,7 +136,7 @@
     "typescript": "^4.5.5",
     "terser-webpack-plugin": "^5.3.1",
     "glob": "^7.2.0",
-    "typedoc": "^0.22.17",
+    "typedoc": "^0.23.14",
     "webpack": "^5.68.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-bundle-size-analyzer": "^3.1.0",

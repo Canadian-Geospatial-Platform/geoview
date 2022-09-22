@@ -1,7 +1,15 @@
 import MaterialList from '@mui/material/List';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { TypeListProps } from '../../core/types/cgpv-types';
+import { ListProps } from '@mui/material';
+
+/**
+ * Properties for the List UI
+ */
+export interface TypeListProps extends ListProps {
+  // eslint-disable-next-line react/require-default-props
+  type?: 'ul' | 'ol';
+}
 
 const useStyles = makeStyles(() => ({
   list: {
