@@ -6,9 +6,9 @@ The Canadian Geospatial Platform intends to deploy new infrastructure, tools and
 
 ## Solution
 
-GeoView mapping capabilities are based on [Leaflet](https://github.com/Leaflet/Leaflet) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
+GeoView mapping capabilites are based on [Leafet](https://github.com/Leaflet/Leaflet) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
 
-- [react-leaflet](https://react-leaflet.js.org/) version 3+ to make the link between Leaflet and React
+- [react-leaflet](https://react-leaflet.js.org/) version 3+ to make the link between Leafelt and React
 
 - [i18next](https://www.i18next.com/) to do localization in English and French
 
@@ -28,9 +28,9 @@ This project is now a monorepo and contains the following packages under the `pa
 
 - [geoview-overview-map](packages/geoview-overview-map) a package that displays an overview map (mini-map)
 
-## Development
+## Developpement
 
-Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a few extentions to help linting and formatting
+Developement is made with [Visual Studio Code](https://code.visualstudio.com/) and uses few extentions to help linting and formating
 
 - Prettier - Code formatter
 
@@ -189,7 +189,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
               'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
             },
             'layerType': 'esriDynamic',
-            'listOfLayerEntryConfig': [
+            'layerEntries': [
               {
                 'index': 4,
                 'name': {
@@ -202,12 +202,12 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
               },
               {
                 'index': 6
-              }
+              }                  
             ]
           }
         ]
       },
-      'suportedLanguages': ['en-CA']
+      'languages': ['en-CA']
     }"
 ></div>
 ```
@@ -260,7 +260,7 @@ Full example:
 	                  'fr': 'https://geoappext.nrcan.gc.ca/arcgis/rest/services/NACEI/energy_infrastructure_of_north_america_fr/MapServer'
 	                },
 	                'layerType': 'esriDynamic',
-	                'listOfLayerEntryConfig': [
+	                'layerEntries': [
 	                  {
 	                    'index': 4,
 	                    'name': {
@@ -273,13 +273,13 @@ Full example:
 	                  },
 	                  {
 	                    'index': 6
-	                  }
+	                  }                  
 	                ]
 	              }
 	            ]
 	          },
 	          'theme': 'dark',
-	          'suportedLanguages': ['en-CA']
+	          'languages': ['en-CA']
 	        }"
     ></div>
     <script>
