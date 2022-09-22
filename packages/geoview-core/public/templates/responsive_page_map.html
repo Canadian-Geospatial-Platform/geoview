@@ -14,9 +14,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
     <style>
-      #RPT1 {
+      /* #RPT1 {
         height: 1000px;
-      }
+      } */
 
       html,
       body {
@@ -30,7 +30,7 @@
     <div
       id="RPT1"
       class="llwp-map"
-      data-lang="en-CA"
+      data-lang="en"
       data-config="{
         'map': {
           'interaction': 'dynamic',
@@ -45,6 +45,8 @@
             'labeled': true
           }
         },
+        'components': ['overview-map'],
+        'corePackages': [],
         'theme': 'dark',
         'suportedLanguages': ['en-CA']
       }"

@@ -3,12 +3,14 @@ import {
   TypeWindow,
   toJsonObject,
   TypeJsonArray,
-  TypeDynamicLayerEntry,
-  TypeOgcLayerEntry,
+  TypeEsriDynamicLayerEntryConfig,
+  TypeWmsLayerEntryConfig,
+  TypeWMSLayerConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   SelectChangeEvent,
   snackbarMessagePayload,
+  ButtonPropsLayerPanel,
 } from 'geoview-core';
 
 type Event = { target: { value: string } };
@@ -43,7 +45,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const [layerType, setLayerType] = useState<TypeGeoviewLayerType | ''>('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
-  const [layerEntries, setLayerEntries] = useState<(TypeDynamicLayerEntry | TypeOgcLayerEntry)[]>([]);
+  const [layerEntries, setLayerEntries] = useState<(TypeEsriDynamicLayerEntryConfig | TypeWMSLayerConfig)[]>([]);
 
   const useStyles = ui.makeStyles(() => ({
     buttonGroup: {
@@ -147,7 +149,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            id: layers[0][0] as string,
+            layerId: layers[0][0] as string,
+            geoviewLayerType: 'ogcWms',
+            listOfLayerEntryConfig: [],
           },
         ]);
       } else setLayerList(layers);
@@ -177,7 +181,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            id: layers[0][0] as string,
+            layerId: layers[0][0] as string,
+            geoviewLayerType: 'ogcWms',
+            listOfLayerEntryConfig: [],
           },
         ]);
       } else setLayerList(layers);
@@ -205,7 +211,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            id: layers[0][0] as string,
+            layerId: layers[0][0] as string,
+            geoviewLayerType: 'ogcWms',
+            listOfLayerEntryConfig: [],
           },
         ]);
       } else setLayerList(layers);
@@ -234,7 +242,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
             setLayerName(layers[0][1] as string);
             setLayerEntries([
               {
-                index: layers[0][0] as number,
+                layerId: layers[0][0] as string,
+                geoviewLayerType: 'ogcWms',
+                listOfLayerEntryConfig: [],
               },
             ]);
           } else setLayerList(layers);
@@ -242,7 +252,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           setLayerName(esri.name as string);
           setLayerEntries([
             {
-              index: esri.id as number,
+              layerId: esri.id as string,
+              geoviewLayerType: 'ogcWms',
+              listOfLayerEntryConfig: [],
             },
           ]);
         }
@@ -348,7 +360,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     // if (Array.isArray(entries)) entries = entries.join(',');
     if (layerType === ESRI_DYNAMIC) url = api.geoUtilities.getMapServerUrl(layerURL);
     else if (layerType === ESRI_FEATURE) {
-      url = `${api.geoUtilities.getMapServerUrl(layerURL)}/${(layerEntries as TypeDynamicLayerEntry[])[0].index}`;
+      url = `${api.geoUtilities.getMapServerUrl(layerURL)}/${(layerEntries as TypeEsriDynamicLayerEntryConfig[])[0].layerId}`;
       entries = [];
     }
 
@@ -357,17 +369,17 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
     const layerConfig: TypeGeoviewLayerConfig = {
-      id: api.generateId(),
-      name: {
+      layerId: api.generateId(),
+      layerName: {
         en: name,
         fr: name,
       },
-      layerType: layerType as TypeGeoviewLayerType,
+      geoviewLayerType: layerType as TypeGeoviewLayerType,
       metadataAccessPath: {
         en: url,
         fr: url,
       },
-      layerEntries: entries,
+      listOfLayerEntryConfig: entries,
     };
     if (valid) {
       api.map(mapId).layer.addLayer(layerConfig);
@@ -419,13 +431,13 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         newValue.map((x: string) => {
           if (layerType === ESRI_DYNAMIC) {
             return {
-              index: parseInt(x[0], 10),
-            } as TypeDynamicLayerEntry;
+              layerId: x,
+            } as TypeEsriDynamicLayerEntryConfig;
           }
 
           return {
-            id: x[0] as string,
-          } as TypeOgcLayerEntry;
+            layerId: x[0] as string,
+          } as TypeWmsLayerEntryConfig;
         })
       );
       setLayerName(newValue.map((x) => x[1]).join(', '));
@@ -433,14 +445,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       if (layerType === ESRI_DYNAMIC) {
         setLayerEntries([
           {
-            index: parseInt(newValue[0], 10),
-          } as TypeDynamicLayerEntry,
+            layerId: newValue[0],
+          } as TypeEsriDynamicLayerEntryConfig,
         ]);
       } else {
         setLayerEntries([
           {
-            id: newValue[0],
-          } as TypeOgcLayerEntry,
+            layerId: newValue[0],
+          } as TypeWmsLayerEntryConfig,
         ]);
       }
       setLayerName(newValue[1]);
@@ -463,7 +475,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @returns {JSX.Element} React component
    */
   // eslint-disable-next-line react/no-unstable-nested-components
-  function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonProps): JSX.Element {
+  function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
     return (
       <ButtonGroup className={classes.buttonGroup}>
         <Button variant="contained" type="text" onClick={handleNext}>

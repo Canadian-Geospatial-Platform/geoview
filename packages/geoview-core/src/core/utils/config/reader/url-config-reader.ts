@@ -6,6 +6,7 @@ import {
   TypeProjectionCodes,
   TypeValidVersions,
   TypeDisplayLanguage,
+  TypeMapComponents,
 } from '../../../../geo/map/map-schema-types';
 import { Cast, TypeJsonObject, TypeJsonValue, TypeMapFeaturesConfig } from '../../../types/global-types';
 import { catalogUrl } from '../config';
@@ -63,7 +64,8 @@ export class URLmapConfigReader {
       const objStrProps = objStr.match(objStrPropRegex);
 
       if (objStrProps && objStrProps.length) {
-        const objProps = objStrProps[0].split(',');
+        // first { is kept with regex, remove
+        const objProps = objStrProps[0].replace(/{/g, '').split(',');
 
         if (objProps) {
           for (let i = 0; i < objProps.length; i += 1) {
@@ -109,7 +111,7 @@ export class URLmapConfigReader {
 
     // if user provided any url parameters update
     if (Object.keys(urlParams).length && !urlParams.geoms) {
-      // Ex: ?p=3857&z=4&c=40,-100&l=en-CA&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel,overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
+      // Ex: ?p=3857&z=4&c=40,-100&l=en&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
       // update the language if provided from the map configuration.
       let displayLanguage = urlParams.l as TypeDisplayLanguage;
@@ -120,7 +122,7 @@ export class URLmapConfigReader {
       if (versionUsed) versionUsed = configValidation.validateVersion(versionUsed);
 
       let center = (urlParams.c as string).split(',');
-      if (!center) center = ['0', '0'];
+      if (!center) center = ['-100', '60'];
 
       const basemapOptions = Cast<TypeBasemapOptions>(this.parseObjectFromUrl(urlParams.b as string));
 
@@ -130,6 +132,12 @@ export class URLmapConfigReader {
       if (urlParams.keys) {
         const requestUrl = `${catalogUrl}/${displayLanguage.split('-')[0]}/${urlParams.keys}`;
         listOfGeoviewLayerConfig = await UUIDmapConfigReader.getGVlayersConfigFromUUID(mapId, requestUrl);
+      }
+
+      // get core components
+      let components: TypeMapComponents = [];
+      if (urlParams.cc) {
+        components = (urlParams.cc as string).split(',') as TypeMapComponents;
       }
 
       // get core packages if any
@@ -151,8 +159,9 @@ export class URLmapConfigReader {
           listOfGeoviewLayerConfig,
           extraOptions: {},
         },
-        suportedLanguages: ['en-CA', 'fr-CA'],
+        components,
         corePackages,
+        suportedLanguages: ['en-CA', 'fr-CA'],
         versionUsed,
       };
     }
