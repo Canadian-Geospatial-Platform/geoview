@@ -3,7 +3,7 @@
   "title": "GeoView Basemap Panel Schema",
   "type": "object",
   "version": 1.0,
-  "comments": "Configuration for GeoView basemap switcher panel package.",
+  "comments": "Configuration for GeoView basemap panel package.",
   "additionalProperties": false,
   "definitions": {
     "basemapNameNode": {
@@ -166,12 +166,12 @@
   "properties": {
     "isOpen": {
       "type": "boolean",
-      "description": "Specifies whether the basemap switcher panel is initially open or closed",
+      "description": "Specifies whether the basemap panel is initially open or closed",
       "default": false
     },
     "canSwichProjection": {
       "type": "boolean",
-      "description": "Allow the user to switch projection from the basemap switcher panel.",
+      "description": "Allow the user to switch projection from the basemap panel.",
       "default": true
     },
     "supportedProjections": {

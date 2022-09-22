@@ -117,7 +117,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       evt.stopPropagation();
 
       // focus the map element and emit the map keyboard focus event
-      (document.getElementById(id)?.getElementsByClassName(`leaflet-map-${id}`)[0] as HTMLElement).focus();
+      (document.getElementById(id)?.getElementsByClassName(`ol-viewport`)[0] as HTMLElement).focus();
       api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id));
     }
   }

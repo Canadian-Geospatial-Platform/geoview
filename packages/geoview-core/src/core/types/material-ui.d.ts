@@ -144,7 +144,7 @@ declare module '@mui/material/styles/components' {
 
 declare module '@mui/material/styles/zIndex' {
   interface ZIndex {
-    leafletControl: number;
+    olControl: number;
     focusDialog: number;
   }
 }

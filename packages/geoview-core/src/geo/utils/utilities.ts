@@ -68,9 +68,9 @@ export class GeoUtilities {
 
   /**
    * Apply outline to elements when keyboard is use to navigate
-   * Issue in Leaflet... not implemented in the current release: Leaflet/Leaflet#7259
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    */
+  // TODO: Repair #335
   manageKeyboardFocus = (): void => {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass() {
@@ -92,11 +92,11 @@ export class GeoUtilities {
         activeEl?.classList.toggle('keyboard-focused');
 
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
-        if (activeEl?.className.match(/leaflet-map-*/g) !== null) {
+        if (activeEl?.className.match(/ol-viewport*/g) !== null) {
           const mapId = activeEl?.getAttribute('id');
 
           activeEl?.classList.forEach((item) => {
-            if (item.includes('leaflet-map-')) {
+            if (item.includes('ol-viewport')) {
               api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
             }
           });

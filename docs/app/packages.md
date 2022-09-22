@@ -6,7 +6,7 @@ The viewer allows loading packages to extend the viewer's functionalities.
 
 The viewer also supports few core packages such as a basemap panel, details panel, layers panel, overview map.
 
-You can see an example package [here](https://github.com/Canadian-Geospatial-Platform/GeoView/blob/pre-develop/public/packages/basemap/basemap-switcher.js)
+You can see an example package [here](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-basemap-panel)
 
 ## Creating a package using vanilla javascript
 
@@ -36,10 +36,10 @@ The `translations` constant is an optional object, if defined then any translati
 (function () {
   class Test {
     translations = {
-      "en-CA": {
+      "en": {
         testMessage: "Hello",
       },
-      "fr-CA": {
+      "fr": {
         testMessage: "Bonjour",
       },
     };
@@ -57,7 +57,7 @@ As mentioned this class will automatically get access to few objects
 
 `react` is the an object to use React functions and hooks such as useState, useEffect etc... [see](https://reactjs.org/docs/hooks-intro.html) for more information.
 
-`props` is an object containing the package properties passed when loading the package [see](#loading-external-packages) for more information.
+`props` is an object containing the package properties passed when loading the package [see](#loading-the-package) for more information.
 
 `translate` is an object to access `react-i18next` functions including `useTranslation` which will allow for accessing the viewer translations [see](https://react.i18next.com/latest/usetranslation-hook) for more information.
 
@@ -82,10 +82,10 @@ Below is a simple example of a funcational component that will add a panel to th
 
         // optional
         translations = {
-            'en-CA': {
+            'en': {
                 count: 'Count',
             },
-            'fr-CA': {
+            'fr': {
                 count: 'Compter',
             },
         };
@@ -181,11 +181,11 @@ The viewer is bundled with core packages, you can load them by passing their id 
 <div
   id="mapWM"
   class="llwp-map"
-  data-lang="en-CA"
+  data-lang="en"
   data-config="{
         'map': {
           'interaction': 'dynamic',
-          'view': {
+          'viewSettings': {
             'zoom': 4,
             'center': [60, -100]
             'projection': 3857,
@@ -196,12 +196,12 @@ The viewer is bundled with core packages, you can load them by passing their id 
             'labeled': true
           }
         },
-        'components': ['appbar', 'navbar', 'north-arrow'],
-        'corePackages': ['details-panel', 'layers-panel', 'basemap-panel', 'overview-map'],
+        'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
+        'corePackages': ['details-panel', 'layers-panel', 'basemap-panel'],
         'theme': 'dark',
         'suportedLanguages': ['en-CA']
       }"
 ></div>
 ```
 
-Available package ids `overview-map`, `details-panel`, `layers-panel`, `basemap-panel`
+Available package ids `details-panel`, `layers-panel`, `basemap-panel`
