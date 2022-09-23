@@ -64,6 +64,7 @@ export function ClickMarker(): JSX.Element {
    * Hide features from markerPane (set zIndex to -1) because they are always on top of overlay
    */
   function hideMarker(): void {
+    // TODO: solve the same way as the rest of #335
     const featElems = document.getElementsByClassName(`leaflet-map-${mapId}`)[0].getElementsByClassName('leaflet-marker-pane')[0].children;
     [...featElems].forEach((element: Element) => {
       // eslint-disable-next-line no-param-reassign

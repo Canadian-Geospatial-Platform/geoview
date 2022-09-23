@@ -20,7 +20,7 @@ You can listen to events created by you or listen to existing events.
 
 ### Listening to existing events
 
-To listen to existing events, make a note of the event name that you want to listen to and the payload structure that you will receive when the event is emitted. To view a list of payloads for each event [click here](event/event-payloads.md).
+To listen to existing events, make a note of the event name that you want to listen to and the payload structure that you will receive when the event is emitted. To view a list of payloads for each event [code](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
 
 You can add an event listener by calling the `cgpv.api.event.on()` function.
 
@@ -50,7 +50,7 @@ or
 
 The **second** parameter is a function callback that provides the **received payload** as the parameter of the callback function.
 
-All existing events have certain payloads they emit and send, to view a list of all payloads for each event [click here](event/event-payloads.md).
+All existing events have certain payloads they emit and send, to view a list of all payloads for each event [code](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
 
 This is what we have so far
 
@@ -60,7 +60,7 @@ cgpv.api.event.on('map/moveend', function(payload) {
 }, ...);
 ```
 
-The viewer provides a function to **validate** each payload if it contains the correct data. This is helpful when using this in a typescript enviroment were you want to receive the correct payload type. The validate function will automatically convert the payload to it's correct type and provide you with auto completion. Documentation for payload validation functions for each event can be viewed [here](event/event-payloads.md).
+The viewer provides a function to **validate** each payload if it contains the correct data. This is helpful when using this in a typescript enviroment were you want to receive the correct payload type. The validate function will automatically convert the payload to it's correct type and provide you with auto completion. Documentation for payload validation functions for each event can be viewed here: [code](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
 
 Validation functions starts with `payloadIs...` You can call `cgpv.types.payloadIs...` to access the validation functions for each event.
 
@@ -126,13 +126,13 @@ To emit an event you need to call the `cgpv.api.event.emit()` function. The func
 
 The first parameter is an object that contains the **event name** to emit to, a **handler name**, and the **payload data**.
 
-Just like validation functions and event names, the viewer provides a function that creates the object for you. [Click here](event/event-payloads.md) to view a list of exported functions that creates the object for each event. Just like validation functions, the functions that creates the object are exported under `cgpv.types`.
+Just like validation functions and event names, the viewer provides a function that creates the object for you. [Click here](event-payloads.md) to view a list of exported functions that creates the object for each event. Just like validation functions, the functions that creates the object are exported under `cgpv.types`.
 
 The first parameter in the object creating function is required. To emit an event you must provide the event name to emit. Just like the `.on()` function, you can access the existing event names from `cgpv.api.eventNames`.
 
 The second parameter is an optional parameter for the handler name, usually its the map id. This can be set to null if you are emitting to all maps or if you want to set handler names in the second parameter of the `.emit()` function.
 
-The third parameter is payload data, this can be any types. For **existing** events you need to provide certain payload data. To list a list of payload data [click here](event/event-payloads.md)
+The third parameter is payload data, this can be any types. For **existing** events you need to provide certain payload data. To list a list of payload data [click here](event-payloads.md)
 
 ```js
 // here you will notice the second parameter for the snackbarMessagePayload function is mapOne. This can be null and you can provide the handler id in the second paramter of the emit function. In here the event name is snackbar/open. Providing the handler name it will automatically become snackbar/open/mapOne. Here we omitted the second parameter for the emit function.

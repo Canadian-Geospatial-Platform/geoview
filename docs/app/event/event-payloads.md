@@ -1,107 +1,126 @@
 # Event Payloads
 
-Below you will find a list of all available functions and payload types/interfaces
+Below you will find a list of some available functions and payload types/interfaces. To access the complete list, consult our [Typedoc](https://canadian-geospatial-platform.github.io/GeoView/public/docs/modules.html) pages.
 
 ## Event payload validation functions
 
 <ul>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPolygon">payloadIsAPolygon</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPolygonConfig">payloadIsAPolygonConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPolyline">payloadIsAPolyline</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPolylineConfig">payloadIsAPolylineConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsASelectBox">payloadIsASelectBox</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsASlider">payloadIsASlider</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsASnackbarMessage">payloadIsASnackbarMessage</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAVector">payloadIsAVector</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAVectorConfig">payloadIsAVectorConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAWebLayer">payloadIsAWebLayer</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsABasemapLayerArray">payloadIsABasemapLayerArray</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsABoolean">payloadIsABoolean</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAButtonPanel">payloadIsAButtonPanel</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsACircle">payloadIsACircle</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsACircleConfig">payloadIsACircleConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsACircleMarker">payloadIsACircleMarker</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsACircleMarkerConfig">payloadIsACircleMarkerConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAClusterElement">payloadIsAClusterElement</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAInKeyfocus">payloadIsAInKeyfocus</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsALatLng">payloadIsALatLng</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsALayerConfig">payloadIsALayerConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMap">payloadIsAMap</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMapComponent">payloadIsAMapComponent</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAmapFeaturesConfig">payloadIsAmapFeaturesConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarker">payloadIsAMarker</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarkerClusterConfig">payloadIsAMarkerClusterConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarkerConfig">payloadIsAMarkerConfig</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAMarkerDefinition">payloadIsAMarkerDefinition</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAModal">payloadIsAModal</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsANumber">payloadIsANumber</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPanel">payloadIsAPanel</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPanelAction">payloadIsAPanelAction</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#payloadIsAPanelContent">payloadIsAPanelContent</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPolygon.html">payloadIsAPolygon</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPolygonConfig.html">payloadIsAPolygonConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPolyline.html">payloadIsAPolyline</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPolylineConfig.html">payloadIsAPolylineConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsASelectBox.html">payloadIsASelectBox</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsASlider.html">payloadIsASlider</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsASnackbarMessage.html">payloadIsASnackbarMessage</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAVector.html">payloadIsAVector</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAVectorConfig.html">payloadIsAVectorConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAWebLayer.html">payloadIsAWebLayer</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsABasemapLayerArray.html">payloadIsABasemapLayerArray</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsABoolean.html">payloadIsABoolean</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAButtonPanel.html">payloadIsAButtonPanel</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsACircle.html">payloadIsACircle</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsACircleConfig.html">payloadIsACircleConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsACircleMarker.html">payloadIsACircleMarker</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsACircleMarkerConfig.html">payloadIsACircleMarkerConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAClusterElement.html">payloadIsAClusterElement</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAInKeyfocus.html">payloadIsAInKeyfocus</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsALatLng.html">payloadIsALatLng</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsALayerConfig.html">payloadIsALayerConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAMap.html">payloadIsAMap</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAMapComponent.html">payloadIsAMapComponent</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAmapFeaturesConfig.html">payloadIsAmapFeaturesConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAMarker.html">payloadIsAMarker</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAMarkerClusterConfig.html">payloadIsAMarkerClusterConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAMarkerConfig.html">payloadIsAMarkerConfig</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAMarkerDefinition.html">payloadIsAMarkerDefinition</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAModal.html">payloadIsAModal</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsANumber.html">payloadIsANumber</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPanel.html">payloadIsAPanel</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPanelAction.html">payloadIsAPanelAction</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/payloadIsAPanelContent.html">payloadIsAPanelContent</a></li>
 </ul>
 
 ## Event object creation functions
 
 <ul>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#basemapLayerArrayPayload">basemapLayerArrayPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#booleanPayload">booleanPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#buttonPanelPayload">buttonPanelPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#clusterElementPayload">clusterElementPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#inKeyfocusPayload">inKeyfocusPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#latLngPayload">latLngPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#layerConfigPayload">layerConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#mapComponentPayload">mapComponentPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#mapConfigPayload">mapConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#mapPayload">mapPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#markerClusterConfigPayload">markerClusterConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#markerDefinitionPayload">markerDefinitionPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#modalPayload">modalPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#numberPayload">numberPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#panelPayload">panelPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#selectBoxPayload">selectBoxPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#sliderPayload">sliderPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#snackbarMessagePayload">snackbarMessagePayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#vectorConfigPayload">vectorConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#vectorPayload">vectorPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/modules.html#geoviewLayerPayload">geoviewLayerPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/basemapLayerArrayPayload-1.html">basemapLayerArrayPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/booleanPayload-1.html">booleanPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/buttonPanelPayload-1.html">buttonPanelPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/clusterElementPayload-1.html">clusterElementPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/inKeyfocusPayload-1.html">inKeyfocusPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/latLngPayload-1.html">latLngPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/layerConfigPayload-1.html">layerConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/mapComponentPayload-1.html">mapComponentPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/mapConfigPayload.html">mapConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/mapPayload-1.html">mapPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/markerClusterConfigPayload.html">markerClusterConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/markerDefinitionPayload.html">markerDefinitionPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/modalPayload-1.html">modalPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/numberPayload-1.html">numberPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/panelPayload-1.html">panelPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/selectBoxPayload-1.html">selectBoxPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/sliderPayload-1.html">sliderPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/snackbarMessagePayload-1.html">snackbarMessagePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/vectorConfigPayload.html">vectorConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/vectorPayload-1.html">vectorPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/functions/geoviewLayerPayload.html">geoviewLayerPayload</a></li>
 </ul>
 
-## Event payloads
+## Event payloads classes
 
 <ul>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/BasemapLayerArrayPayload.html">BasemapLayerArrayPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/BooleanPayload.html">BooleanPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/ButtonPanelPayload.html">ButtonPanelPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/ClusterElementPayload.html">ClusterElementPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/InKeyfocusPayload.html">InKeyfocusPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/LatLngPayload.html">LatLngPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/LayerConfigPayload.html">LayerConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapComponentPayload.html">MapComponentPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapFeaturesPayload.html">MapFeaturesPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MapPayload.html">MapPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MarkerClusterConfigPayload.html">MarkerClusterConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/MarkerDefinitionPayload.html">MarkerDefinitionPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/ModalPayload.html">ModalPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/NumberPayload.html">NumberPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/PanelPayload.html">PanelPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/SelectBoxPayload.html">SelectBoxPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/SliderPayload.html">SliderPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/SnackbarMessagePayload.html">SnackbarMessagePayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/VectorConfigPayload.html">VectorConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/VectorPayload.html">VectorPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/classes/WebLayerPayload.html">WebLayerPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/CircleConfigPayload.html">CircleConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/CircleMarkerConfigPayload.html">CircleMarkerConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/CircleMarkerPayload.html">CircleMarkerPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/CirclePayload.html">CirclePayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/MarkerConfigPayload.html">MarkerConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/MarkerPayload.html">MarkerPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PanelAndActionPayload.html">PanelAndActionPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PanelAndContentPayload.html">PanelAndContentPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PanelWithAButtonIdAndTypePayload.html">PanelWithAButtonIdAndTypePayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PolygonConfigPayload.html">PolygonConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PolygonPayload.html">PolygonPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PolylineConfigPayload.html">PolylineConfigPayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/PolylinePayload.html">PolylinePayload</a></li>
-  <li><a href="https://yass0016.github.io/GeoView/docs/interfaces/SliderTypePayload.html">SliderTypePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/BasemapLayerArrayPayload.html">BasemapLayerArrayPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/BooleanPayload.html">BooleanPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/ButtonPanelPayload.html">ButtonPanelPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/ClusterElementPayload.html">ClusterElementPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/InKeyfocusPayload.html">InKeyfocusPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/LatLngPayload.html">LatLngPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/LayerConfigPayload.html">LayerConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/MapComponentPayload.html">MapComponentPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/MapFeaturesPayload.html">MapFeaturesPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/MapPayload.html">MapPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/MarkerClusterConfigPayload.html">MarkerClusterConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/MarkerDefinitionPayload.html">MarkerDefinitionPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/ModalPayload.html">ModalPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/NumberPayload.html">NumberPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/PanelPayload.html">PanelPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/SelectBoxPayload.html">SelectBoxPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/SliderPayload.html">SliderPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/SnackbarMessagePayload.html">SnackbarMessagePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/VectorConfigPayload.html">VectorConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/VectorPayload.html">VectorPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/public/docs/classes/WebLayerPayload.html">WebLayerPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CircleConfigPayload.html">CircleConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CircleMarkerConfigPayload.html">CircleMarkerConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CircleMarkerPayload.html">CircleMarkerPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CirclePayload.html">CirclePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/MarkerConfigPayload.html">MarkerConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/MarkerPayload.html">MarkerPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PanelAndActionPayload.html">PanelAndActionPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PanelAndContentPayload.html">PanelAndContentPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PanelWithAButtonIdAndTypePayload.html">PanelWithAButtonIdAndTypePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolygonConfigPayload.html">PolygonConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolygonPayload.html">PolygonPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolylineConfigPayload.html">PolylineConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolylinePayload.html">PolylinePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/SliderTypePayload.html">SliderTypePayload</a></li>
+</ul>
+
+## Event payloads interfaces
+
+<ul>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CircleConfigPayload.html">CircleConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CircleMarkerConfigPayload.html">CircleMarkerConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CircleMarkerPayload.html">CircleMarkerPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/CirclePayload.html">CirclePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/MarkerConfigPayload.html">MarkerConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/MarkerPayload.html">MarkerPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PanelAndActionPayload.html">PanelAndActionPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PanelAndContentPayload.html">PanelAndContentPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PanelWithAButtonIdAndTypePayload.html">PanelWithAButtonIdAndTypePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolygonConfigPayload.html">PolygonConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolygonPayload.html">PolygonPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolylineConfigPayload.html">PolylineConfigPayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/PolylinePayload.html">PolylinePayload</a></li>
+  <li><a href="https://canadian-geospatial-platform.github.io/GeoView/docs/interfaces/SliderTypePayload.html">SliderTypePayload</a></li>
 </ul>

@@ -164,6 +164,7 @@ export class Layer {
     // Because there is no way to know GeoJSON is loaded (load event never trigger), we use a timeout
     // TODO: timeout is never a good idea, may have to find a workaround...
     // !: This was a workaround for Leaflet, look if still needed
+    // TODO: check if still needed as part of #335
     setTimeout(() => {
       const mapContainer = document.getElementsByClassName(`leaflet-map-${this.mapId}`)[0];
 

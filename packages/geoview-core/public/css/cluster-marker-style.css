@@ -153,14 +153,6 @@
   font-size: 9px;
 }
 
-.leaflet-marker-icon.crosshair-cursor-enabled {
-  cursor: crosshair;
-}
-
-.leaflet-control-zoom.hide-zoom-control {
-  visibility: hidden;
-}
-
 .div-icon.blinking-icon-enabled div.hole {
   animation: blinking-hole 1s ease-in infinite;
 }
