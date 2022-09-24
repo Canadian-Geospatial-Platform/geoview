@@ -76,7 +76,7 @@ const themeOptions: ThemeOptions = {
     modal: 1300,
     snackbar: 1400,
     tooltip: 1500,
-    leafletControl: 500,
+    olControl: 500,
     focusDialog: 1300,
   },
   transitions: {

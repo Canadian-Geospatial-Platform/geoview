@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     'pointer-events': 'none !important',
-    zIndex: theme.zIndex.leafletControl,
+    zIndex: theme.zIndex.olControl,
   },
   crosshairInfo: {
     position: 'absolute',

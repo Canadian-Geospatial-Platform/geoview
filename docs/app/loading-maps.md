@@ -10,18 +10,19 @@ There are multiple ways to load maps on your projects
 ### By providing parameters in the URL
 
 You can provide a URL with search parameters for the config properties. This is useful for sharing links of certain configurations. An example link will look like
-`
-https://yass0016.github.io/GeoView/loading-packages.html?p=3857&z=4&c=57,-113&l=en-CA&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel,overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
+https://canadian-geospatial-platform.github.io/GeoView/public/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF5
+
+```
 z is for zoom level
 p is for projection (currently supported values: 3857 and 3978)
 c is for center (an array of two elements, represents latitude and longtitude)
 l is for language (currently supported values: en-CA, fr-CA
 t is for theme (currently supported values: dark, light)
 b is for basemap options (an object with three properties, id, shaded, labeled)
-cp is for core packages to be loaded (array of strings) supported values "overview-map", "details-panel", "layers-panel", "basemap-switcher"
+cp is for core packages to be loaded (array of strings) supported values: "details-panel", "layers-panel", "basemap-panel"
 keys is for layer uuid keys (the keys will match keys in the catalog, can be comma seperated)
-`
+```
 
 When the page loads with the provided URL search parameters, the app will look for a map with the **llwp-map** class. If a map is found, it will check if the map div element contains **data-shared="true"**. If the **data-shared** value is true, it means that the map will load the configurations from the url search parameters, if **multiple maps** are loaded in the page and all of them have the **data-shared** attribute then all of those maps will use the same URL parameters config.
 
@@ -33,7 +34,8 @@ You can also provide a URL for a json file with the config object and pass it in
 <div
   id="mapWM"
   class="llwp-map"
-  data-config-url="https://yass0016.github.io/GeoView/configs/my-config.json"
+  data-lang="en"
+  data-config-url="https://canadian-geospatial-platform.github.io/GeoView/public/configs/my-config.json"
 ></div>
 ```
 
@@ -56,19 +58,8 @@ The content of the config must match the schema, an example of the object in the
     "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
-  "appBar": {
-    "about": {
-      "en": "# An example of a markdown",
-      "fr": "# Un exemple de démarque"
-    }
-  },
-  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
-  "corePackages": [
-    "basemap-switcher",
-    "layers-panel",
-    "details-panel",
-    "geolocator"
-  ],
+  "components": ["appbar", "navbar", "north-arrow"],
+  "corePackages": ["basemap-panel", "layers-panel", "details-panel", "geolocator"],
   "externalPackages": [],
   "suportedLanguages": ["en-CA", "fr-CA"]
 }
@@ -84,6 +75,7 @@ An example of this:
 <div
   id="UC1"
   class="llwp-map"
+  data-lang="en"
   data-config="{
                     'map': {
                         'interaction': 'dynamic',
@@ -98,38 +90,24 @@ An example of this:
                             'labeled': true
                         },
                         'listOfGeoviewLayerConfig': [
-                          {
-                            'layerId': 'wmsLYR1',
-                            'layerName': {
-                              'en': 'Première Nation / First Nation',
-                              'fr': 'Première Nation / First Nation'
-                            },
-                            'metadataAccessPath': {
-                              'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
-                              'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
-                            },
-                            'geoviewLayerType': 'ogcWms',
-                            'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+                        {
+                          'layerId': 'wmsLYR1',
+                          'layerName': {
+                            'en': 'Première Nation / First Nation',
+                            'fr': 'Première Nation / First Nation'
                           },
-                          {
-                            'layerId': 'esriDynamicLYR2',
-                            'layerName': {
-                              'en': 'Energy',
-                              'fr': 'Energy'
-                            },
-                            'metadataAccessPath': {
-                              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
-                              'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
-                            },
-                            'geoviewLayerType': 'esriDynamic',
-                            'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '6' }]
-                          }
-                        ]
-                      }
+                          'metadataAccessPath': {
+                            'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                            'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
+                          },
+                          'geoviewLayerType': 'ogcWms',
+                          'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+                        }
+                      ],
                     },
                     'theme': 'dark',
                     'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
-                    'corePackages': ['basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
+                    'corePackages': ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
                     'suportedLanguages': ['en-CA', 'fr-CA']
                 }'
@@ -149,6 +127,7 @@ An example of this:
 <div
     id="mapWM"
     class="llwp-map"
+    data-lang="en"
 ></div>
 
 <script>
@@ -170,7 +149,7 @@ cgpv.init(function() {
         },
         theme: 'dark',
         components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
-        corePackages: ['basemap-switcher', 'layers-panel', 'details-panel', 'geolocator'],
+        corePackages: ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
         suportedLanguages: ['en-CA', 'fr-CA'],
     });

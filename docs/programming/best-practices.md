@@ -30,17 +30,17 @@ const [basemapList, setBasemapList] = useState<TypeBasemapProps[]>([]);
 
 It is difficult to know what a variable with the name `e` refers to. Is it an `element`, an `event` or anything else whose name starts
 with 'e'. In some cases, the name of the referred element does not even begin with 'e'. Don't hesitate to use long names like
-`elementOfTheListe`. This way, we know that the variable contains an element that comes from a list and if we know the type of the
-list, we can even deduce the type of the `elementOfTheListe` variable. The use of long variable names contributes to the
+`elementOfTheList`. This way, we know that the variable contains an element that comes from a list and if we know the type of the
+list, we can even deduce the type of the `elementOfTheList` variable. The use of long variable names contributes to the
 self-documentation of our code. This rule may seem to require more time to write our code, but the gain in clarity makes it much
 faster to understand what the code does. Moreover, with the cut and paste and auto-completion features provided by the editor,
 it doesn't take much longer to enter the code.
 
 ## 3- Avoid using existing names in third party libraries to declare elements of the GeoView code. ##
 
-The leaflet library has a base class named Layer. If we use the identifier Layer to define a class in our code and at the same
-time we use the Layer class of leaflet (`import { Layer as leafletLayer } from 'leaflet';`), it will be difficult to know at first
-sight the type of a variable named `layer`. On the other hand, if we define our class as `GVlayer` and we use the leaflet `Layer` class
+The OpenLayers library has a base class named Layer. If we use the identifier Layer to define a class in our code and at the same
+time we use the Layer class of OpenLayers (`import { Layer as OLLayer } from 'ol/layer';`), it will be difficult to know at first
+sight the type of a variable named `layer`. On the other hand, if we define our class as `GVlayer` and we use the OpenLayers `Layer` class
 at the same time by associating the `layer` variable with the `Layer` type and `gvLayer` with the `GVlayer` type, the confusion is thus
 cleared up.
 
@@ -79,7 +79,6 @@ const childTypeIs_A = (verifyIfChildType: BaseClass): verifyIfChildType is Child
 };
 
 // Here, we could do something similar to define a class and a type gard for child_b
-
 const typeGardExample = () {
   const instance: BaseClass = getTheInstanceByAnyMeans(); // Here, instance type is BaseClass
 
@@ -91,7 +90,7 @@ const typeGardExample = () {
 ```
 
 If you want to see how classes and type gards are used in the viewer, have a look at the
-/packages/geoview-core/src/api/events/payloads/ folder and search where we use these payloads through the code.
+[payloads folder](../../../packages/geoview-core/src/api/events/payloads) and search where we use these payloads through the code.
 
 
 ## 5- Use the spreading operator only when necessary ##
@@ -113,3 +112,27 @@ const noCollision = { object1, object2 };
 ## 6- Do not leave dead code in the source code ##
 
 It is useless to comment old code segments in order to remember how the viewer used to work. This unduly pollutes the code and affects its readability. The code is kept in a github repository and it is possible to go back in time to see how the viewer was coded at a given date.
+
+## 7- How we order the import statements
+
+We do the import statement in the following order
+* react
+* react-dom
+* react-i18n
+* material-ui
+* OpenLayers
+* other project dependecies
+
+We add an empty line between each group of import from different category
+```
+import { useRef, useEffect } from 'react';
+import { render } from 'react-dom';
+
+import { useTranslation } from 'react-i18next';
+
+import { makeStyles, createStyles } from '@material-ui/core/styles';
+import { Card, CardHeader, CardContent, Divider, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+
+import View, { ViewOptions } from 'ol/View';
+```
