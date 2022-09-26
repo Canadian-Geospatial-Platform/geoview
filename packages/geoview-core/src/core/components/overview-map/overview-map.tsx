@@ -94,6 +94,9 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .ol-viewport': {
       borderRadius: 4,
+      '& .ol-layer': {
+        backgroundColor: '#FFF',
+      },
     },
   },
 }));
