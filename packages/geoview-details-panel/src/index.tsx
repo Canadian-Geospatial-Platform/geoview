@@ -30,13 +30,13 @@ class DetailsPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations = toJsonObject({
-    'en-CA': {
+    'en': {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',
       click_map: 'Choose a point on the map to start',
       action_back: 'Back',
     },
-    'fr-CA': {
+    'fr': {
       detailsPanel: 'Détails',
       nothing_found: 'Aucun résultat',
       click_map: 'Choisissez un point sur la carte pour commencer',

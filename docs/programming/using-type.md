@@ -28,17 +28,15 @@ Here are two declaration examples that use the TypeJsonObject type.
 
 ```ts
       translations = toJsonObject({
-        en-CA': {
+        en: {
           detailsPanel: 'Details',
           nothing_found: 'Nothing found',
-          click_map: 'Choose a point on the map to start',
           action_back: 'Back',
         },
-        en-CA': {
-          detailsPanel: 'Details',
-          nothing_found: 'No results',
-          click_map: 'Choose a point on the map to start',
-          action_back: 'Back',
+        fr: {
+          detailsPanel: 'Détails',
+          nothing_found: 'Aucun résultats',
+          action_back: 'Retour',
         },
       });
 ```

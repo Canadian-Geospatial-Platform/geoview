@@ -30,7 +30,7 @@ Inside this function you need to create a class that will be used to initialize 
 
 The class implements 1 constant `translations` and 2 hooks `added, removed` that will be accessed and called directly from the viewer, it will also automatically get access to `api`, `createElement`, `react`, `props`, `translate` and `makeStyles`.
 
-The `translations` constant is an optional object, if defined then any translations provided will be passed to the core viewer translation instance (i18next) and will extend the current translations. Supported translations are for languages English and French and written as `en-CA` and `fr-CA` keys.
+The `translations` constant is an optional object, if defined then any translations provided will be passed to the core viewer translation instance (i18next) and will extend the current translations. Supported translations are for languages English and French and written as `en` and `fr` keys.
 
 ```js
 (function () {
@@ -199,7 +199,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
         'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
         'corePackages': ['details-panel', 'layers-panel', 'basemap-panel'],
         'theme': 'dark',
-        'suportedLanguages': ['en-CA']
+        'suportedLanguages': ['en']
       }"
 ></div>
 ```

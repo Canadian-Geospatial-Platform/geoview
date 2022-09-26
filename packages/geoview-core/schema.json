@@ -1156,7 +1156,7 @@
     },
 
     "TypeLocalizedLanguages": {
-      "enum": ["en-CA", "fr-CA"],
+      "enum": ["en", "fr"],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file."
     },
 
@@ -1164,7 +1164,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": { "$ref": "#/definitions/TypeLocalizedLanguages" },
-      "default": ["en-CA", "fr-CA"],
+      "default": ["en", "fr"],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.",
       "minItems": 1
     },

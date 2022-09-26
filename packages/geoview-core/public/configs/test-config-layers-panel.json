@@ -6,5 +6,5 @@
     "medium": false,
     "large": true
   },
-  "suportedLanguages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en", "fr"]
 }

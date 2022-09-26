@@ -242,7 +242,7 @@ export class DateMgt {
   createDateLocaleTooltip(date: string, locale: TypeLocalizedLanguages): string {
     // Handle locale for date label
     const tooltips = dayjs(date)
-      .locale(locale)
+      .locale(`${locale}-CA`)
       .format(`${date.split('T').length > 1 ? 'LLL' : 'LL'}`);
 
     return tooltips;
