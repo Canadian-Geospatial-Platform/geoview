@@ -15,5 +15,5 @@
   "corePackages": ["basemap-panel"],
   "components": ["appbar", "north-arrow", "overview-map"],
   "theme": "dark",
-  "suportedLanguages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en", "fr"]
 }

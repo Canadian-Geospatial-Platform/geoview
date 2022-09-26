@@ -161,7 +161,7 @@ export class URLmapConfigReader {
         },
         components,
         corePackages,
-        suportedLanguages: ['en-CA', 'fr-CA'],
+        suportedLanguages: ['en', 'fr'],
         versionUsed,
       };
     }

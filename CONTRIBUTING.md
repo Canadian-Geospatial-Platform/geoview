@@ -208,11 +208,11 @@ We use the [i18next](https://www.i18next.com/) localization library.
 
 __Translations files__
 
-The translations file is located in /public/locales/_language_/translation.json. This file contains the translations for the specified language (en-CA or fr-CA)for every viewer component. The file structure is a JSON object with a translation key and a value.
+The translations file is located in /public/locales/_language_/translation.json. This file contains the translations for the specified language (en or fr)for every viewer component. The file structure is a JSON object with a translation key and a value.
 
 Translation key is string identifier that we'll use later in this guide to tell the translation service to fetch this particular translation. It contains no spaces or special characters. We can create nested object to organize translations into groupings.
 
-Here is a sample translation for en-CA:
+Here is a sample translation for en:
 ```json
 {
     "mapnav": {

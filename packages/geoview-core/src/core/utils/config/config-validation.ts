@@ -74,7 +74,7 @@ export class ConfigValidation {
     components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
     corePackages: [],
     displayLanguage: 'en',
-    suportedLanguages: ['en-CA', 'fr-CA'],
+    suportedLanguages: ['en', 'fr'],
     versionUsed: '1.0',
   };
 
@@ -551,11 +551,11 @@ export class ConfigValidation {
     suportedLanguages: TypeListOfLocalizedLanguages,
     listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
   ): void {
-    if (suportedLanguages.includes('en-CA') && suportedLanguages.includes('fr-CA')) return;
+    if (suportedLanguages.includes('en') && suportedLanguages.includes('fr')) return;
 
     let sourceKey: TypeDisplayLanguage;
     let destinationKey: TypeDisplayLanguage;
-    if (suportedLanguages.includes('en-CA')) {
+    if (suportedLanguages.includes('en')) {
       sourceKey = 'en';
       destinationKey = 'fr';
     } else {

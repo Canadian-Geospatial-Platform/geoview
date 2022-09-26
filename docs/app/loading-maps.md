@@ -17,7 +17,7 @@ https://canadian-geospatial-platform.github.io/GeoView/public/default-config.htm
 z is for zoom level
 p is for projection (currently supported values: 3857 and 3978)
 c is for center (an array of two elements, represents latitude and longtitude)
-l is for language (currently supported values: en-CA, fr-CA
+l is for language (currently supported values: en, fr
 t is for theme (currently supported values: dark, light)
 b is for basemap options (an object with three properties, id, shaded, labeled)
 cp is for core packages to be loaded (array of strings) supported values: "details-panel", "layers-panel", "basemap-panel"
@@ -61,7 +61,7 @@ The content of the config must match the schema, an example of the object in the
   "components": ["appbar", "navbar", "north-arrow"],
   "corePackages": ["basemap-panel", "layers-panel", "details-panel", "geolocator"],
   "externalPackages": [],
-  "suportedLanguages": ["en-CA", "fr-CA"]
+  "suportedLanguages": ["en", "fr"]
 }
 ```
 
@@ -109,7 +109,7 @@ An example of this:
                     'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
                     'corePackages': ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
-                    'suportedLanguages': ['en-CA', 'fr-CA']
+                    'suportedLanguages': ['en', 'fr']
                 }'
 ></div>
 ```
@@ -151,7 +151,7 @@ cgpv.init(function() {
         components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
         corePackages: ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
-        suportedLanguages: ['en-CA', 'fr-CA'],
+        suportedLanguages: ['en', 'fr'],
     });
 });
 </script>

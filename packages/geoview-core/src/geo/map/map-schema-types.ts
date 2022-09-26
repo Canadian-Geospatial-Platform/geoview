@@ -901,11 +901,11 @@ export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
  * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to access
  * bilangual nodes. For value(s) provided here, each bilingual node MUST provide a value.
  */
-export type TypeLocalizedLanguages = 'en-CA' | 'fr-CA';
+export type TypeLocalizedLanguages = 'en' | 'fr';
 /** List of languages supported by the map. */
 export type TypeListOfLocalizedLanguages = TypeLocalizedLanguages[];
 /** Constante mainly use for language code validation. */
-export const VALID_LOCALIZED_LANGUAGES: TypeListOfLocalizedLanguages = ['en-CA', 'fr-CA'];
+export const VALID_LOCALIZED_LANGUAGES: TypeListOfLocalizedLanguages = ['en', 'fr'];
 
 /* *******************************************************************************************************************************
 /** Valid version number. */

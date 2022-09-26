@@ -112,6 +112,6 @@
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca"
   },
-  "suportedLanguages": ["en-CA", "fr-CA"],
+  "suportedLanguages": ["en", "fr"],
   "version": "1.0"
 }

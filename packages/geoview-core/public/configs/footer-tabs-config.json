@@ -44,5 +44,5 @@
   "components": ["appbar", "navbar", "north-arrow", "overview-map"],
   "corePackages": [],
   "externalPackages": [],
-  "suportedLanguages": ["en-CA"]
+  "suportedLanguages": ["en"]
 }

@@ -50,9 +50,9 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["en-CA", "fr-CA"]
+        "enum": ["en", "fr"]
       },
-      "default": ["en-CA", "fr-CA"],
+      "default": ["en", "fr"],
       "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
       "minItems": 1
     },

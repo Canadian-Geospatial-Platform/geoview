@@ -201,7 +201,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
       'theme': 'dark',
       'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
       'corePackages': [],
-      'suportedLanguages': ['en-CA']
+      'suportedLanguages': ['en']
     }"
 ></div>
 ```
