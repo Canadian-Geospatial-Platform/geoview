@@ -1,99 +1,20 @@
-import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
-import { asArray, asString } from 'ol/color';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import { Geometry } from 'ol/geom';
+/* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
+import { transformExtent } from 'ol/proj';
+import { Extent } from 'ol/extent';
 
-import { TypeJsonObject } from '../../../../core/types/global-types';
+import { defaultsDeep } from 'lodash';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
+import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
 } from '../../../map/map-schema-types';
-
-import { setAlphaColor } from '../../../../core/utils/utilities';
-
-// constant to define default style if not set by renderer
-// TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultCircleMarkerStyle = new Style({
-  image: new StyleCircle({
-    radius: 5,
-    stroke: new Stroke({
-      color: asString(setAlphaColor(asArray('#000000'), 1)),
-      width: 1,
-    }),
-    fill: new Fill({
-      color: asString(setAlphaColor(asArray('#000000'), 0.4)),
-    }),
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultLineStringStyle = new Style({
-  stroke: new Stroke({
-    color: asString(setAlphaColor(asArray('#000000'), 1)),
-    width: 2,
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultLinePolygonStyle = new Style({
-  stroke: new Stroke({
-    // 1 is for opacity
-    color: asString(setAlphaColor(asArray('#000000'), 1)),
-    width: 2,
-  }),
-  fill: new Fill({
-    color: asString(setAlphaColor(asArray('#000000'), 0.5)),
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultSelectStyle = new Style({
-  stroke: new Stroke({
-    color: asString(setAlphaColor(asArray('#0000FF'), 1)),
-    width: 3,
-  }),
-  fill: new Fill({
-    color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
-  }),
-});
-
-/**
- * Create a style from a renderer object
- *
- * @param {TypeJsonObject} renderer the render with the style properties
- * @returns {Style} the new style with the custom renderer
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const createStyleFromRenderer = (renderer: TypeJsonObject): Style => {
-  return renderer.radius
-    ? new Style({
-        image: new StyleCircle({
-          radius: renderer.radius as number,
-          stroke: new Stroke({
-            color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
-            width: 1,
-          }),
-          fill: new Fill({
-            color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
-          }),
-        }),
-      })
-    : new Style({
-        stroke: new Stroke({
-          color: asString(setAlphaColor(asArray(renderer.color as string), renderer.opacity as number)),
-          width: 3,
-        }),
-        fill: new Fill({
-          color: asString(setAlphaColor(asArray(renderer.fillColor as string), renderer.fillOpacity as number)),
-        }),
-      });
-};
+import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
+import { Cast, toJsonObject } from '../../../../core/types/global-types';
+import { api } from '../../../../app';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -115,7 +36,7 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
@@ -128,7 +49,7 @@ export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): ver
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoJSON => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.GEOJSON;
@@ -142,7 +63,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
   return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
@@ -168,37 +89,100 @@ export class GeoJSON extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
-   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  getAdditionalServiceDefinition(): Promise<void> {
+  protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      // ! Todo: Allow reading of metadata from a JSON file and maybe a STAC catalog.
-      resolve();
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
+          if (metadataString === '{}') throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+          else {
+            this.metadata = toJsonObject(JSON.parse(metadataString));
+            const { copyrightText } = this.metadata;
+            if (copyrightText) this.attributions.push(copyrightText as string);
+            resolve();
+          }
+        });
+      } else resolve();
     });
     return promisedExecution;
   }
 
-  /**
-   * This method associate a renderer to the GeoView layer.
+  /** ***************************************************************************************************************************
+   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
+   * extra configuration may be done here.
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   *
+   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  setRenderer(baseVectorLayer: VectorLayer<VectorSource<Geometry>> | null): Promise<TypeBaseVectorLayer | null> {
-    const promiseOfBaseVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
-      resolve(baseVectorLayer);
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
+    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryConfig.entryType === 'group') {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
+        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
+      }
+      if (!this.metadata) return true; // When no metadata are provided, all layers are considered valid.
+      if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
+        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+        for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
+        if (i === metadataLayerList.length) {
+          this.layerLoadError.push(layerEntryConfig.layerId);
+          return false;
+        }
+        return true;
+      }
+      this.layerLoadError.push(layerEntryConfig.layerId);
+      return false;
     });
-    return promiseOfBaseVectorLayer;
   }
 
-  /**
-   * This method register the GeoView layer to panels that offer this possibility.
+  /** ***************************************************************************************************************************
+   * This method processes recursively the metadata of each layer in the list of layer configuration.
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('GeoJSON.registerToPanels: This method needs to be coded!', rasterLayer);
+  protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
+    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
+      const promisedAllLayerDone: Promise<void>[] = [];
+      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+        if (layerEntryConfig.entryType === 'group')
+          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
+        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
+      });
+      Promise.all(promisedAllLayerDone).then(() => resolve());
+    });
+    return promisedListOfLayerEntryProcessed;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+   * initial settings, fields and aliases).
+   *
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+   */
+  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+    const promiseOfExecution = new Promise<void>((resolve) => {
+      const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+      for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
+      layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);
+      layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerList[i].initialSettings);
+      layerEntryConfig.style = defaultsDeep(layerEntryConfig.style, metadataLayerList[i].style);
+      const extent = layerEntryConfig.initialSettings?.extent;
+      if (extent) {
+        const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
+        layerEntryConfig.initialSettings!.extent = layerExtent;
+      }
+      resolve();
+    });
+    return promiseOfExecution;
   }
 }

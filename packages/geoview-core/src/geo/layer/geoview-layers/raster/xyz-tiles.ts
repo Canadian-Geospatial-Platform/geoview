@@ -39,7 +39,7 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
@@ -52,7 +52,7 @@ export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): ve
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
  * is valid
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is XYZTiles => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.XYZ_TILES;
@@ -66,7 +66,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsXYZTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
@@ -110,36 +110,36 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ****************************************************************************************************************************
-   * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntry parameter.
+   * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntryConfig parameter.
    *
-   * @param {TypeXYZTilesLayerEntryConfig} layerEntry Information needed to create the GeoView layer.
+   * @param {TypeXYZTilesLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
    *
    * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
    */
-  processOneLayerEntry(layerEntry: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
+  processOneLayerEntry(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
       const sourceOptions: SourceOptions = {
-        url: getLocalizedValue(layerEntry.source.dataAccessPath, this.mapId),
+        url: getLocalizedValue(layerEntryConfig.source.dataAccessPath, this.mapId),
       };
-      if (layerEntry.source.crossOrigin) sourceOptions.crossOrigin = layerEntry.source.crossOrigin;
-      if (layerEntry.source.projection) sourceOptions.projection = `EPSG:${layerEntry.source.projection}`;
-      if (layerEntry.source.tileGrid) {
+      if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+      if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
+      if (layerEntryConfig.source.tileGrid) {
         const tileGridOptions: TileGridOptions = {
-          origin: layerEntry.source.tileGrid?.origin,
-          resolutions: layerEntry.source.tileGrid?.resolutions as number[],
+          origin: layerEntryConfig.source.tileGrid?.origin,
+          resolutions: layerEntryConfig.source.tileGrid?.resolutions as number[],
         };
-        if (layerEntry.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerEntry.source.tileGrid?.tileSize;
-        if (layerEntry.source.tileGrid?.extent) tileGridOptions.extent = layerEntry.source.tileGrid?.extent;
+        if (layerEntryConfig.source.tileGrid?.tileSize) tileGridOptions.tileSize = layerEntryConfig.source.tileGrid?.tileSize;
+        if (layerEntryConfig.source.tileGrid?.extent) tileGridOptions.extent = layerEntryConfig.source.tileGrid?.extent;
         sourceOptions.tileGrid = new TileGrid(tileGridOptions);
       }
 
       const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-      if (layerEntry.initialSettings?.className !== undefined) tileLayerOptions.className = layerEntry.initialSettings?.className;
-      if (layerEntry.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntry.initialSettings?.extent;
-      if (layerEntry.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntry.initialSettings?.maxZoom;
-      if (layerEntry.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntry.initialSettings?.minZoom;
-      if (layerEntry.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntry.initialSettings?.opacity;
-      if (layerEntry.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntry.initialSettings?.visible;
+      if (layerEntryConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerEntryConfig.initialSettings?.className;
+      if (layerEntryConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
+      if (layerEntryConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
+      if (layerEntryConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
+      if (layerEntryConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+      if (layerEntryConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
       const xyzLayer = new TileLayer(tileLayerOptions);
 
@@ -153,9 +153,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
    *
    * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
    */
-  setRenderer(rasterLayer: TypeBaseRasterLayer): void {
+  processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void {
     // eslint-disable-next-line no-console
-    console.log('XYZTiles.setRenderer: This method needs to be coded!', rasterLayer);
+    console.log('XYZTiles.processLayerMetadata: This method needs to be coded!', rasterLayer);
   }
 
   /** ****************************************************************************************************************************

@@ -44,7 +44,7 @@ interface NorthArrowProps {
 /**
  * Create a north arrow
  *
- * @return {JSX.Element} the north arrow component
+ * @returns {JSX.Element} the north arrow component
  */
 export function NorthArrow(props: NorthArrowProps): JSX.Element {
   const { projection } = props;
@@ -75,7 +75,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * https://www.movable-type.co.uk/scripts/latlong.html
    *
    * @param {OLMap} map the map
-   * @return {string} the arrow angle
+   * @returns {string} the arrow angle
    */
   const getNorthArrowAngle = (map: OLMap): string => {
     try {
@@ -110,7 +110,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
   /**
    * Check if north is visible. This is not a perfect solution and more a work around
    * @param {OLMap} map the map
-   * @return {boolean} true if visible, false otherwise
+   * @returns {boolean} true if visible, false otherwise
    */
   function checkNorth(map: OLMap): boolean {
     // update map size in case an appbar panel is open
@@ -297,7 +297,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 /**
  * Create a north pole flag icon
  * @param {NorthArrowProps} props north arrow icon props
- * @return {JSX.Element} the north pole marker icon
+ * @returns {JSX.Element} the north pole marker icon
  */
 export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
   const { projection } = props;

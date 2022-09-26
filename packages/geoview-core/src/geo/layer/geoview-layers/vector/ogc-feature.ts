@@ -1,69 +1,22 @@
+/* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
 import axios from 'axios';
 
-import { Style, Stroke, Fill, Circle as StyleCircle } from 'ol/style';
-import { asArray, asString } from 'ol/color';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import { Geometry } from 'ol/geom';
+import { get, transformExtent } from 'ol/proj';
+import { Extent } from 'ol/extent';
 
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector, TypeBaseVectorLayer } from './abstract-geoview-vector';
+import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
   TypeLayerEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue, setAlphaColor } from '../../../../core/utils/utilities';
-
-// constant to define default style if not set by renderer
-// TODO: put somewhere to reuse for all vector layers + maybe array so if many layer, we increase the choice
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultCircleMarkerStyle = new Style({
-  image: new StyleCircle({
-    radius: 5,
-    stroke: new Stroke({
-      color: asString(setAlphaColor(asArray('#333'), 1)),
-      width: 1,
-    }),
-    fill: new Fill({
-      color: asString(setAlphaColor(asArray('#FFB27F'), 0.8)),
-    }),
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultLineStringStyle = new Style({
-  stroke: new Stroke({
-    color: asString(setAlphaColor(asArray('#000000'), 1)),
-    width: 2,
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultLinePolygonStyle = new Style({
-  stroke: new Stroke({
-    // 1 is for opacity
-    color: asString(setAlphaColor(asArray('#000000'), 1)),
-    width: 2,
-  }),
-  fill: new Fill({
-    color: asString(setAlphaColor(asArray('#000000'), 0.5)),
-  }),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const defaultSelectStyle = new Style({
-  stroke: new Stroke({
-    color: asString(setAlphaColor(asArray('#0000FF'), 1)),
-    width: 3,
-  }),
-  fill: new Fill({
-    color: asString(setAlphaColor(asArray('#0000FF'), 0.5)),
-  }),
-});
+import { getLocalizedValue } from '../../../../core/utils/utilities';
+import { api } from '../../../../app';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -85,7 +38,7 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
   return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
@@ -99,7 +52,7 @@ export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): 
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is OgcFeature => {
   return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.OGC_FEATURE;
@@ -113,7 +66,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
  * valid.
  *
- * @return {boolean} true if the type ascention is valid.
+ * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsOgcFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
@@ -131,9 +84,6 @@ export const geoviewEntryIsOgcFeature = (
  */
 // ******************************************************************************************************************************
 export class OgcFeature extends AbstractGeoViewVector {
-  // private varibale holding OGC feature capabilities.
-  private metadata: TypeJsonObject = {};
-
   // private varibale holding wfs version
   private version = '2.0.0';
 
@@ -147,58 +97,134 @@ export class OgcFeature extends AbstractGeoViewVector {
     super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
-   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  getAdditionalServiceDefinition(): Promise<void> {
+  protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      this.getCapabilities().then(() => {
-        if (this.metadata?.description) this.attributions.push(this.metadata.description as string);
-        resolve();
-      });
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        const queryUrl = metadataUrl.endsWith('/') ? `${metadataUrl}collections?f=json` : `${metadataUrl}/collections?f=json`;
+        axios.get<TypeJsonObject>(queryUrl).then((response) => {
+          this.metadata = response.data;
+          resolve();
+        });
+      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
 
-  /** ****************************************************************************************************************************
-   * Query the OGC feature service to get the capacities.
+  /** ***************************************************************************************************************************
+   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
+   * with a numeric layerId and creates a group entry when a layer is a group.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   *
+   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
-  private getCapabilities(): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      const rootUrl = getLocalizedValue(this.metadataAccessPath, this.mapId)!;
-      const capabilitiesUrl = rootUrl.endsWith('/') ? `${rootUrl}collections?f=json` : `${rootUrl}/collections?f=json`;
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
+    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (layerEntryConfig.entryType === 'group') {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
+        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
+      }
+      if (Array.isArray(this.metadata!.collections)) {
+        for (var i = 0; i < this.metadata!.collections.length; i++)
+          if (this.metadata!.collections[i].id === layerEntryConfig.layerId) break;
+        if (i === this.metadata!.collections.length) {
+          this.layerLoadError.push(layerEntryConfig.layerId);
+          return false;
+        }
+        if (this.metadata!.collections[i].description)
+          layerEntryConfig.layerName = {
+            en: this.metadata!.collections[i].description as string,
+            fr: this.metadata!.collections[i].description as string,
+          };
+        if (this.metadata?.collections[i].extent?.spatial?.bbox && this.metadata?.collections[i].extent?.spatial?.crs) {
+          const extent = transformExtent(
+            this.metadata.collections[i].extent.spatial.bbox[0] as number[],
+            get(this.metadata.collections[i].extent.spatial.crs as string)!,
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          ) as Extent;
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent };
+          else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = extent;
+        }
+        return true;
+      }
+      return false;
+    });
+  }
 
-      axios.get<TypeJsonObject>(capabilitiesUrl).then((response) => {
-        this.metadata = response.data;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const layerName = getLocalizedValue(this.layerName, this.mapId) || (this.metadata.title as string);
-        // ! To be continued
-        // const featureUrl = `${rootUrl}collections/${entries}/items?f=json`;
-        resolve();
+  /** ***************************************************************************************************************************
+   * This method processes recursively the metadata of each layer in the "layer list" configuration.
+   *
+   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected processListOfLayerEntryMetadata(
+    listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
+  ): Promise<void> {
+    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
+      const promisedAllLayerDone: Promise<void>[] = [];
+      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
+        if (layerEntryConfig.entryType === 'group')
+          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
+        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
       });
+      Promise.all(promisedAllLayerDone).then(() => resolve());
     });
-    return promisedExecution;
+    return promisedListOfLayerEntryProcessed;
   }
 
-  /**
-   * This method associate a renderer to the GeoView layer.
+  /** ***************************************************************************************************************************
+   * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
+   * layer's configuration.
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  setRenderer(baseVectorLayer: VectorLayer<VectorSource<Geometry>> | null): Promise<TypeBaseVectorLayer | null> {
-    const promiseOfBaseVectorLayer = new Promise<TypeBaseVectorLayer | null>((resolve) => {
-      resolve(baseVectorLayer);
+  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+    const promiseOfExecution = new Promise<void>((resolve) => {
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        const queryUrl = metadataUrl.endsWith('/')
+          ? `${metadataUrl}collections/${layerEntryConfig.layerId}/queryables?f=json`
+          : `${metadataUrl}/collections/${layerEntryConfig.layerId}/queryables?f=json`;
+        const queryResult = axios.get<TypeJsonObject>(queryUrl);
+        queryResult.then((response) => {
+          if (response.data.properties) this.processFeatureInfoConfig(response.data.properties, layerEntryConfig);
+          resolve();
+        });
+      } else resolve();
     });
-    return promiseOfBaseVectorLayer;
+    return promiseOfExecution;
   }
 
-  /**
-   * This method register the GeoView layer to panels that offer this possibility.
+  /** ***************************************************************************************************************************
+   * This method sets the outfields and aliasFields of the source feature info.
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+   * @param {TypeJsonArray} fields An array of field names and its aliases.
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
    */
-  registerToPanels(rasterLayer: TypeBaseVectorLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('OgcFeature.registerToPanels: This method needs to be coded!', rasterLayer);
+  private processFeatureInfoConfig(fields: TypeJsonObject, layerEntryConfig: TypeVectorLayerEntryConfig) {
+    if (!layerEntryConfig.source) layerEntryConfig.source = {};
+    if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
+    // Process undefined outfields or aliasFields ('' = false and !'' = true)
+    if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
+      const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
+      const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
+      if (processOutField) layerEntryConfig.source.featureInfo.outfields = { en: '' };
+      if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
+      Object.keys(fields).forEach((fieldEntry, i) => {
+        if (processOutField) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'outfields', fieldEntry, i);
+        if (processAliasFields) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'aliasFields', fieldEntry, i);
+      });
+      layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
+      layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+    }
   }
 }
