@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == false
     name: Develop build for demo files
     uses: ./.github/workflows/build.yml
     with:
@@ -17,6 +18,7 @@ jobs:
 
   deploy-pages:
     needs: [build]
+    if: github.event.pull_request.merged == false
     name: Deploy the files
     uses: ./.github/workflows/deploy.yml
     with:
