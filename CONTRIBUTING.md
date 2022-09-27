@@ -16,7 +16,7 @@ Below is a list of the software you'll need to download and install before conti
 Let's fork the GeoView repo and setup a working local copy.
 
 #### Fork the project
-Login to your https://github.com account and navigate to https://github.com/Canadian-Geospatial-Platform/GeoView. On this page click on the "Fork" button near the top right corner and follow the on screen prompts to have your own copy of GeoView.
+Login to your https://github.com account and navigate to https://github.com/Canadian-Geospatial-Platform/geoview. On this page click on the "Fork" button near the top right corner and follow the on screen prompts to have your own copy of GeoView.
 
 #### Setup forked repository
 Now that you have a forked copy of the repo, it is time to set it up on your local machine. Run the following commands in terminal, git bash, or wherever Git and Node are available:
@@ -24,14 +24,14 @@ Now that you have a forked copy of the repo, it is time to set it up on your loc
 __Clone the forked repo__
 
 ```
-git clone git@github.com:[GITHUB USERNAME]/GeoView.git LOCAL/REPO/PATH
+git clone git@github.com:[GITHUB USERNAME]/geoview.git LOCAL/REPO/PATH
 cd LOCAL/REPO/PATH
 ```
 Replace [GITHUB USERNAME] with your github username and LOCAL/REPO/PATH to wherever you'd like to save a copy of the forked repo on your local system. Git will create this path for you if it does not exist.
 
 __Add remotes__
 ```
-git remote add upstream https://github.com/Canadian-Geospatial-Platform/GeoView.git
+git remote add upstream https://github.com/Canadian-Geospatial-Platform/geoview.git
 ```
 
 To make sure you are properly setup, check if both remote are ok
@@ -40,10 +40,10 @@ git remote -v
 ```
 You should see
 ```
-origin  https://github.com/[GITHUB USERNAME]/GeoView (fetch)
-origin  https://github.com/[GITHUB USERNAME]/GeoView (push)
-upstream        https://github.com/Canadian-Geospatial-Platform/GeoView (fetch)
-upstream        https://github.com/Canadian-Geospatial-Platform/GeoView (push)
+origin  https://github.com/[GITHUB USERNAME]/geoView (fetch)
+origin  https://github.com/[GITHUB USERNAME]/geoView (push)
+upstream        https://github.com/Canadian-Geospatial-Platform/geoView (fetch)
+upstream        https://github.com/Canadian-Geospatial-Platform/geoView (push)
 ```
 You'll be __pulling changes from upstream__, but __pushing to origin__.
 

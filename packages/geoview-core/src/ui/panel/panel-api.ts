@@ -19,7 +19,7 @@ export class PanelApi {
   // panel id
   id: string;
 
-  // panel type (appbar, navbar)
+  // panel type (app-bar, nav-bar)
   type: string | undefined;
 
   // panel open status (open/closed)
@@ -83,7 +83,7 @@ export class PanelApi {
    * Close all other panels
    */
   closeAll = (): void => {
-    if (this.type === 'appbar') {
+    if (this.type === 'app-bar') {
       Object.keys(api.map(this.mapId).appBarButtons.buttons).forEach((groupName: string) => {
         // get button panels from group
         const buttonPanels = api.map(this.mapId).appBarButtons.buttons[groupName];
@@ -97,7 +97,7 @@ export class PanelApi {
           }
         });
       });
-    } else if (this.type === 'navbar') {
+    } else if (this.type === 'nav-bar') {
       Object.keys(api.map(this.mapId).navBarButtons.buttons).forEach((groupName: string) => {
         // get button panels from group
         const buttonPanels = api.map(this.mapId).navBarButtons.buttons[groupName];

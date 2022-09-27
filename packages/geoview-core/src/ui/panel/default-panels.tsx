@@ -3,7 +3,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import { TypeButtonPanelProps } from './panel-types';
 
 /**
- * Create a default button panel for the appbar
+ * Create a default button panel for the app-bar
  */
 export const DefaultPanel: TypeButtonPanelProps = {
   button: {

@@ -30,10 +30,10 @@ export const payloadIsAButtonPanel = (verifyIfPayload: PayloadBaseClass): verify
  * @class ButtonPanelPayload
  */
 export class ButtonPanelPayload extends PayloadBaseClass {
-  // id of the appbar panel
+  // id of the app-bar panel
   id: string;
 
-  // group name for this appbar panel
+  // group name for this app-bar panel
   groupName: string;
 
   // button panel configuration
@@ -44,8 +44,8 @@ export class ButtonPanelPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {string} id the appbar panel identifier carried by the payload
-   * @param {string} groupName the appbar panel group name carried by the payload
+   * @param {string} id the app-bar panel identifier carried by the payload
+   * @param {string} groupName the app-bar panel group name carried by the payload
    * @param {TypeButtonPanel} buttonPanel optional button panel configuration carried by the payload
    *
    */
@@ -64,8 +64,8 @@ export class ButtonPanelPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {string} id the appbar panel identifier carried by the payload
- * @param {string} groupName the appbar panel group name carried by the payload
+ * @param {string} id the app-bar panel identifier carried by the payload
+ * @param {string} groupName the app-bar panel group name carried by the payload
  * @param {TypeButtonPanel} buttonPanel optional button panel configuration carried by the payload
  *
  * @returns {ButtonPanelPayload} the ButtonPanelPayload object created

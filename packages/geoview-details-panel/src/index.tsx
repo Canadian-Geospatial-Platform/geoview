@@ -75,7 +75,7 @@ class DetailsPlugin extends AbstractPlugin {
       width: 300,
     };
 
-    // create a new button panel on the appbar
+    // create a new button panel on the app-bar
     this.buttonPanel = api.map(mapId as string).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content

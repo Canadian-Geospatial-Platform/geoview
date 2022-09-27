@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Create a navbar with buttons that can call functions or open custom panels
+ * Create a nav-bar with buttons that can call functions or open custom panels
  */
 export function Navbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
@@ -131,7 +131,7 @@ export function Navbar(): JSX.Element {
   );
 
   useEffect(() => {
-    // listen to new navbar panel creation
+    // listen to new nav-bar panel creation
     api.event.on(
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
@@ -144,7 +144,7 @@ export function Navbar(): JSX.Element {
       mapId
     );
 
-    // listen to new navbar panel removal
+    // listen to new nav-bar panel removal
     api.event.on(
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {

@@ -79,9 +79,10 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
   const openCloseDrawer = (drawerStatus: boolean): void => {
     setOpen(drawerStatus);
 
-    // if appbar is open then close it
+    // if app-bar is open then close it
     api.event.emit(booleanPayload(EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE, mapId, drawerStatus));
 
+    // TODO: this is still needed?
     // if panel is open then close it
     // if (panelOpen) openClosePanel(false);
     // use an event to close the panel instead of calling a function

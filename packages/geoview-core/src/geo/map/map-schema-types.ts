@@ -1020,7 +1020,7 @@ export const VALID_PROJECTION_CODES = [3978, 3857];
 export type TypeAppBarProps = {
   /**
    * The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button
-   * on the appbar to open the panel. In the basic view, this information may be added in a container above the map.
+   * on the app-bar to open the panel. In the basic view, this information may be added in a container above the map.
    */
   about: TypeLocalizedString;
 };
@@ -1031,9 +1031,9 @@ export type TypeAppBarProps = {
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
 
 /** ******************************************************************************************************************************
- * Core components to initialize on viewer load. Default = ['appbar', 'navbar', 'north-arrow', 'overview-map'].
+ * Core components to initialize on viewer load. Default = ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'].
  */
-export type TypeMapComponents = Array<'appbar' | 'navbar' | 'north-arrow' | 'overview-map'>;
+export type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'overview-map'>;
 
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in

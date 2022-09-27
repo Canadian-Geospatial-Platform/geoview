@@ -7,7 +7,7 @@ A component that can be used to create steps for the required process.
 - Import Stepper from UI folder
 
   ```
-  GeoView/packages/geoview-core/src/ui/stepper
+  geoview/packages/geoview-core/src/ui/stepper
   ```
 
 - It takes the following props:

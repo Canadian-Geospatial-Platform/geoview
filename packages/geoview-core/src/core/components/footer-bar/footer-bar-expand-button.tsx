@@ -37,7 +37,7 @@ export function FooterbarExpandButton(): JSX.Element {
   const mapId = mapConfig.id;
 
   /**
-   * Expand the footerbar
+   * Expand the footer bar
    */
   const expandFooterbar = () => {
     const footerBar = document.getElementById(`${mapId}-footerBar`);
@@ -59,7 +59,7 @@ export function FooterbarExpandButton(): JSX.Element {
   };
 
   /**
-   * Collapse footerbar
+   * Collapse footer bar
    */
   const collapseFooterbar = () => {
     const footerBar = document.getElementById(`${mapId}-footerBar`);

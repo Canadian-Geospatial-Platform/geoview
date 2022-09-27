@@ -18,7 +18,7 @@
     "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
-  "components": ["appbar", "navbar", "north-arrow", "overview-map"],
+  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map"],
   "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "serviceUrls": {

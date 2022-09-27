@@ -7,7 +7,7 @@ The Select component creates a drop-down list with pre-defined options. In DOM, 
 - Import Select from UI folder
 
 ```
-GeoView/packages/geoview-core/src/ui/select
+geoview/packages/geoview-core/src/ui/select
 ```
 
 - It takes the following props:
