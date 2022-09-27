@@ -7,7 +7,7 @@ A component that can be used to create an `<input>` element.
 - Import TextField from UI folder
 
   ```
-  GeoView/packages/geoview-core/src/ui/text-field
+  geoview/packages/geoview-core/src/ui/text-field
   ```
 
 - It takes all of the props defined by MUI under the BaseTextFieldProps. Some of the commonly used props are defined/modified in the custom UI folder. Those props are as follows:

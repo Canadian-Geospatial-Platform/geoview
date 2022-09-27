@@ -11,12 +11,12 @@ export type AppbarEventKey = 'EVENT_APPBAR_PANEL_CREATE' | 'EVENT_APPBAR_PANEL_R
 /** Record that associates APPBAR's event keys to their event string id */
 export const APPBAR: Record<AppbarEventKey, EventStringId> = {
   /**
-   * Event triggered when a new appbar panel has been created
+   * Event triggered when a new app-bar panel has been created
    */
   EVENT_APPBAR_PANEL_CREATE: 'appbar/panel_create',
 
   /**
-   * Event triggered when an appbar button panel has been removed
+   * Event triggered when an app-bar button panel has been removed
    */
   EVENT_APPBAR_PANEL_REMOVE: 'appbar/panel_remove',
 };

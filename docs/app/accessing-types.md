@@ -4,7 +4,7 @@ GeoView provides the types used in the project for developers to use in their ow
 
 **The types are available at:**
 
-    https://github.com/Canadian-Geospatial-Platform/GeoView/tree/types
+    https://github.com/Canadian-Geospatial-Platform/geoview/tree/types
 
 ### How does it work
 
@@ -18,7 +18,7 @@ Because the types branch is a node module package, you can install it as a dev d
 
 ```json
 "devDependencies": {
-	"geoview-core-types": "github:Canadian-Geospatial-Platform/GeoView#types",
+	"geoview-core-types": "github:Canadian-Geospatial-Platform/geoview#types",
 	...
 }
 ```
@@ -31,7 +31,7 @@ and run
 
 You can install the package directly like how you install any other module, simply run in the command line:
 
-    npm install -D https://github.com/Canadian-Geospatial-Platform/GeoView/tree/types
+    npm install -D https://github.com/Canadian-Geospatial-Platform/geoview/tree/types
 
 ### Importing types in your project
 
@@ -64,4 +64,4 @@ To do that, in the root of your project, in a command line type:
 
 Then re-install the module by typing:
 
-    npm install -D https://github.com/Canadian-Geospatial-Platform/GeoView/tree/types
+    npm install -D https://github.com/Canadian-Geospatial-Platform/geoview/tree/types

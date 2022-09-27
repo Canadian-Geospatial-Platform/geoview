@@ -15,7 +15,7 @@
   },
   "telemetryEnabled": false,
   "repository": {
-    "url": "https://github.com/Canadian-Geospatial-Platform/GeoView"
+    "url": "https://github.com/Canadian-Geospatial-Platform/geoview"
   },
   "projects": [
     {

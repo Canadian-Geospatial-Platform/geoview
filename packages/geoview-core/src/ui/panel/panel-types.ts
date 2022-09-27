@@ -19,7 +19,7 @@ export type TypeButtonPanelProps = {
 export type TypePanelProps = {
   /** Panel id. */
   id?: string;
-  /** Panel type (appbar, navbar). */
+  /** Panel type (app-bar, nav-bar). */
   type?: string;
   /** Panel open status (open/closed). */
   status?: boolean;
@@ -86,6 +86,6 @@ export type TypeButtonPanel = {
  * constant that defines the panel types.
  */
 export const CONST_PANEL_TYPES = {
-  APPBAR: 'appbar',
-  NAVBAR: 'navbar',
+  APPBAR: 'app-bar',
+  NAVBAR: 'nav-bar',
 };

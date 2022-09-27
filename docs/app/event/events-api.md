@@ -12,7 +12,7 @@ The viewer exports many events that can be used to listen to or emit to. You nee
 cgpv.api.eventNames
 ```
 
-You can also view the event names in the source code at [event.ts](https://github.com/Canadian-Geospatial-Platform/GeoView/blob/develop/packages/geoview-core/src/api/events/event.ts#L81)
+You can also view the event names in the source code at [event.ts](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/api/events/event.ts#L81)
 
 ## Listening to Events
 
@@ -20,7 +20,7 @@ You can listen to events created by you or listen to existing events.
 
 ### Listening to existing events
 
-To listen to existing events, make a note of the event name that you want to listen to and the payload structure that you will receive when the event is emitted. To view a list of payloads for each event [code](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
+To listen to existing events, make a note of the event name that you want to listen to and the payload structure that you will receive when the event is emitted. To view a list of payloads for each event [code](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
 
 You can add an event listener by calling the `cgpv.api.event.on()` function.
 
@@ -50,7 +50,7 @@ or
 
 The **second** parameter is a function callback that provides the **received payload** as the parameter of the callback function.
 
-All existing events have certain payloads they emit and send, to view a list of all payloads for each event [code](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
+All existing events have certain payloads they emit and send, to view a list of all payloads for each event [code](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
 
 This is what we have so far
 
@@ -60,7 +60,7 @@ cgpv.api.event.on('map/moveend', function(payload) {
 }, ...);
 ```
 
-The viewer provides a function to **validate** each payload if it contains the correct data. This is helpful when using this in a typescript enviroment were you want to receive the correct payload type. The validate function will automatically convert the payload to it's correct type and provide you with auto completion. Documentation for payload validation functions for each event can be viewed here: [code](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
+The viewer provides a function to **validate** each payload if it contains the correct data. This is helpful when using this in a typescript enviroment were you want to receive the correct payload type. The validate function will automatically convert the payload to it's correct type and provide you with auto completion. Documentation for payload validation functions for each event can be viewed here: [code](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-core/src/api/events/payloads) and [doc](event-payloads.md).
 
 Validation functions starts with `payloadIs...` You can call `cgpv.types.payloadIs...` to access the validation functions for each event.
 

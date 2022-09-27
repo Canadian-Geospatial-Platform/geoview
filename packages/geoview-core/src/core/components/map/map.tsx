@@ -27,7 +27,7 @@ import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basema
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
-import { Footerbar } from '../footerbar/footer-bar';
+import { Footerbar } from '../footer-bar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 

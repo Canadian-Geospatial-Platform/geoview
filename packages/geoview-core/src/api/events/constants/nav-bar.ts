@@ -11,12 +11,12 @@ export type NavbarEventKey = 'EVENT_NAVBAR_BUTTON_PANEL_CREATE' | 'EVENT_NAVBAR_
 /** Record that associates NAVBAR's event keys to their event string id */
 export const NAVBAR: Record<NavbarEventKey, EventStringId> = {
   /**
-   * Event triggered when a new navbar button or panel has been created
+   * Event triggered when a new nav-bar button or panel has been created
    */
   EVENT_NAVBAR_BUTTON_PANEL_CREATE: 'navbar/button_panel_create',
 
   /**
-   * Event triggered when a navbar button or button panel has been removed
+   * Event triggered when a nav-bar button or button panel has been removed
    */
   EVENT_NAVBAR_BUTTON_PANEL_REMOVE: 'navbar/button_panel_remove',
 

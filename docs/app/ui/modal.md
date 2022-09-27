@@ -7,7 +7,7 @@ A component that can be used to create, show, hide and delete a modal.
 - Import Modal from UI folder
 
   ```
-  GeoView/packages/geoview-core/src/ui/modal
+  geoview/packages/geoview-core/src/ui/modal
   ```
 
 - It takes all of the MUI Dialog props. The following props are modified for customizability. Those props are:

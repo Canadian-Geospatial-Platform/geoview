@@ -21,7 +21,7 @@ export class FooterTabsApi {
   /**
    * initialize the footer tabs api
    *
-   * @param mapId the id of the map this appbar belongs to
+   * @param mapId the id of the map this footer tabs belongs to
    */
   constructor(mapId: string) {
     this.mapId = mapId;

@@ -10,9 +10,9 @@ import { MousePosition } from '../mouse-position/mouse-position';
 import { Scale } from '../scale/scale';
 
 import { MapContext } from '../../app-start';
-import { FooterbarExpandButton } from './footerbar-expand-button';
-import { FooterbarRotationButton } from './footerbar-rotation-button';
-import { FooterbarFixNorthSwitch } from './footerbar-fixnorth-switch';
+import { FooterbarExpandButton } from './footer-bar-expand-button';
+import { FooterbarRotationButton } from './footer-bar-rotation-button';
+import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
 
 const useStyles = makeStyles((theme) => ({
   footerBarContainer: {
@@ -44,9 +44,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Create a footerbar element that contains attribtuion, mouse position and scale
+ * Create a footer bar element that contains attribtuion, mouse position and scale
  *
- * @returns {JSX.Element} the footerbar element
+ * @returns {JSX.Element} the footer bar element
  */
 export function Footerbar(): JSX.Element {
   const classes = useStyles();

@@ -6,7 +6,7 @@ The viewer allows loading packages to extend the viewer's functionalities.
 
 The viewer also supports few core packages such as a basemap panel, details panel, layers panel, overview map.
 
-You can see an example package [here](https://github.com/Canadian-Geospatial-Platform/GeoView/tree/develop/packages/geoview-basemap-panel)
+You can see an example package [here](https://github.com/Canadian-Geospatial-Platform/geoview/tree/develop/packages/geoview-basemap-panel)
 
 ## Creating a package using vanilla javascript
 
@@ -71,7 +71,7 @@ Using the `added` hook you can create and load a react component in the viewer
 
 A react component can be a functional component or a class component [see](https://reactjs.org/docs/hooks-state.html) for more information on how to use each one.
 
-Below is a simple example of a funcational component that will add a panel to the viewer on the appbar that will have a counter as it's content
+Below is a simple example of a funcational component that will add a panel to the viewer on the app-bar that will have a counter as it's content
 
 ```js
 // counter.js
@@ -129,7 +129,7 @@ Below is a simple example of a funcational component that will add a panel to th
                 width: 200,
             };
 
-            // create a new button panel on the appbar
+            // create a new button panel on the app-bar
             this.panel = api.map(mapId).createAppbarPanel(button, panel, null);
         };
 
@@ -196,7 +196,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
             'labeled': true
           }
         },
-        'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
+        'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
         'corePackages': ['details-panel', 'layers-panel', 'basemap-panel'],
         'theme': 'dark',
         'suportedLanguages': ['en']

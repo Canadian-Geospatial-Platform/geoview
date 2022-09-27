@@ -90,7 +90,7 @@ class LayersPanelPlugin extends AbstractPlugin {
       status: panelStatus,
     };
 
-    // create a new button panel on the appbar
+    // create a new button panel on the app-bar
     this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content

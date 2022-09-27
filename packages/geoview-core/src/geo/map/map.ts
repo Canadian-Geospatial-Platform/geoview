@@ -18,8 +18,8 @@ import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { Config } from '../../core/utils/config/config';
 
-import { AppbarButtons } from '../../core/components/appbar/app-bar-buttons';
-import { NavbarButtons } from '../../core/components/navbar/nav-bar-buttons';
+import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
+import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 
@@ -53,10 +53,10 @@ export class MapViewer {
   // the openlayer map
   map!: OLMap;
 
-  // used to access button panel API to create buttons and button panels on the appbar
+  // used to access button panel API to create buttons and button panels on the app-bar
   appBarButtons!: AppbarButtons;
 
-  // used to access button panel API to create buttons and button panels on the navbar
+  // used to access button panel API to create buttons and button panels on the nav-bar
   navBarButtons!: NavbarButtons;
 
   // used to access the footer tabs api

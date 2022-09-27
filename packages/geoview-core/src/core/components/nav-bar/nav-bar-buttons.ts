@@ -10,7 +10,7 @@ import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '../../../ui/
 import { TypeIconButtonProps } from '../../../ui/icon-button/icon-button-types';
 
 /**
- * Class to manage buttons on the navbar
+ * Class to manage buttons on the nav-bar
  *
  * @exports
  * @class
@@ -18,7 +18,7 @@ import { TypeIconButtonProps } from '../../../ui/icon-button/icon-button-types';
 export class NavbarButtons {
   mapId!: string;
 
-  // group of array to hold all buttons, button panels created on the navbar
+  // group of array to hold all buttons, button panels created on the nav-bar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
   /**
@@ -36,21 +36,21 @@ export class NavbarButtons {
    * Function used to create default buttons, button panels
    */
   private createDefaultButtonPanels = () => {
-    // create default group for navbar buttons
+    // create default group for nav-bar buttons
     this.buttons.default = {};
   };
 
   /**
-   * Create a group for the navbar buttons
+   * Create a group for the nav-bar buttons
    *
-   * @param {string} groupName a group name to be used to manage the group of navbar buttons
+   * @param {string} groupName a group name to be used to manage the group of nav-bar buttons
    */
   createNavbarButtonGroup = (groupName: string): void => {
     this.buttons[groupName] = {};
   };
 
   /**
-   * Create either a button or a button panel on the navbar
+   * Create either a button or a button panel on the nav-bar
    *
    * @param {TypeButtonProps} buttonProps button properties
    * @param {TypePanelProps} panelProps panel properties
@@ -110,7 +110,7 @@ export class NavbarButtons {
   };
 
   /**
-   * Create a navbar button panel
+   * Create a nav-bar button panel
    *
    * @param {TypeButtonProps} buttonProps button properties
    * @param {TypePanelProps} panelProps panel properties
@@ -123,7 +123,7 @@ export class NavbarButtons {
   };
 
   /**
-   * Create a new navbar button that will trigger a callback when clicked
+   * Create a new nav-bar button that will trigger a callback when clicked
    *
    * @param {TypeButtonProps} buttonProps button properties
    * @param {string} groupName group name to add button to
@@ -135,13 +135,13 @@ export class NavbarButtons {
   };
 
   /**
-   * Get a button panel from the navbar by using it's id
+   * Get a button panel from the nav-bar by using it's id
    *
    * @param {string} id the id of the button panel to get
    * @returns {TypeButtonPanel} the returned button panel
    */
   getNavBarButtonPanelById = (id: string): TypeButtonPanel | null => {
-    // loop through groups of appbar button panels
+    // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
 
@@ -158,7 +158,7 @@ export class NavbarButtons {
   };
 
   /**
-   * Remove a navbar button or panel using it's id
+   * Remove a nav-bar button or panel using it's id
    *
    * @param {string} id the id of the panel or button to remove
    */

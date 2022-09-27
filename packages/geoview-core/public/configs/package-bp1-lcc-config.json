@@ -13,7 +13,7 @@
     }
   },
   "corePackages": ["basemap-panel"],
-  "components": ["appbar", "overview-map", "north-arrow"],
+  "components": ["app-bar", "overview-map", "north-arrow"],
   "theme": "dark",
   "suportedLanguages": ["en", "fr"]
 }
