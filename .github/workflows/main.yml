@@ -13,6 +13,10 @@ jobs:
     name: Check if we continue the process
     runs-on: ubuntu-latest
     steps:
+      - name: Echo PR info
+        run: |
+          echo User ${user} is about to ${github.event.action} on this Pull Request.
+
       - name: Check if contributor is an org member
         id: is_organization_member
         if: github.event_name == 'pull_request_target'
@@ -28,32 +32,29 @@ jobs:
             result=${{ steps.is_organization_member.outputs.result }}
             if [ $result == false ]; then
               user=${{ github.event.pull_request.head.user.login }}
-              echo Either ${user} is not part of the ramp4-pcar4 organization
+              echo Either ${user} is not part of the Canadian-Geospatial-Platform organization
               echo or ${user} has its Organization Visibility set to Private at
               echo https://github.com/orgs/Canadian-Geospatial-Platform/people?query=${user}
               exit 1
             fi
 
-  build:
-    name: Develop build for demo files
-    uses: ./.github/workflows/build.yml
-    with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Develop build for demo files
+        uses: ./.github/workflows/build.yml
+        with:
+          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
-  deploy-pages-pr:
-    needs: [build]
-    if: github.event.pull_request.merged == false
-    name: Deploy the files for PR
-    uses: ./.github/workflows/deploy.yml
-    with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-      folder: ${{github.head_ref}}
+      - name: Deploy the files for PR
+        needs: [build]
+        if: github.event.pull_request.merged == false
+        uses: ./.github/workflows/deploy.yml
+        with:
+          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          folder: ${{github.head_ref}}
 
-  deploy-pages-public:
-    needs: [build]
-    if: github.event.pull_request.merged == true
-    name: Deploy the files on public demo
-    uses: ./.github/workflows/deploy.yml
-    with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-      folder: public
+      - name: Deploy the files on public demo
+        needs: [build]
+        if: github.event.pull_request.merged == true
+        uses: ./.github/workflows/deploy.yml
+        with:
+          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          folder: public
