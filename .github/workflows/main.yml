@@ -38,21 +38,27 @@ jobs:
               exit 1
             fi
 
-      - name: Develop build for demo files
-        uses: ./.github/workflows/build.yml
-        with:
-          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+  install-build:
+    name: Develop build for demo files
+    needs: [check-member]
+    uses: ./.github/workflows/build.yml
+    with:
+      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Deploy the files for PR
-        if: github.event.pull_request.merged == false
-        uses: ./.github/workflows/deploy.yml
-        with:
-          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-          folder: ${{github.head_ref}}
+  deploy-pr-pages:
+    name: Deploy the files for PR
+    needs: [install-build]
+    if: github.event.pull_request.merged == false
+    uses: ./.github/workflows/deploy.yml
+    with:
+      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      folder: ${{github.head_ref}}
 
-      - name: Deploy the files on public demo
-        if: github.event.pull_request.merged == true
-        uses: ./.github/workflows/deploy.yml
-        with:
-          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-          folder: public
+  deploy-demo-pages:
+    name: Deploy the files on public demo
+    needs: [install-build]
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/deploy.yml
+    with:
+      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      folder: public
