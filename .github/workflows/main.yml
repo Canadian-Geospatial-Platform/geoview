@@ -44,7 +44,6 @@ jobs:
           cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Deploy the files for PR
-        needs: [build]
         if: github.event.pull_request.merged == false
         uses: ./.github/workflows/deploy.yml
         with:
@@ -52,7 +51,6 @@ jobs:
           folder: ${{github.head_ref}}
 
       - name: Deploy the files on public demo
-        needs: [build]
         if: github.event.pull_request.merged == true
         uses: ./.github/workflows/deploy.yml
         with:
