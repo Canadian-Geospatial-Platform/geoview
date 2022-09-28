@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Echo PR info
         run: |
-          echo User ${user} is about to ${{ github.event.action }} on this Pull Request.
+          echo User ${{ github.actor }} is about to ${{ github.event.action }} on this Pull Request.
 
       - name: Check if contributor is an org member
         id: is_organization_member
