@@ -11,7 +11,7 @@ There are multiple ways to load maps on your projects
 
 You can provide a URL with search parameters for the config properties. This is useful for sharing links of certain configurations. An example link will look like
 
-https://canadian-geospatial-platform.github.io/GeoView/public/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF5
+https://canadian-geospatial-platform.github.io/geoview/public/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF5
 
 ```
 z is for zoom level
@@ -35,7 +35,7 @@ You can also provide a URL for a json file with the config object and pass it in
   id="mapWM"
   class="llwp-map"
   data-lang="en"
-  data-config-url="https://canadian-geospatial-platform.github.io/GeoView/public/configs/my-config.json"
+  data-config-url="https://canadian-geospatial-platform.github.io/geoview/public/configs/my-config.json"
 ></div>
 ```
 
@@ -58,7 +58,7 @@ The content of the config must match the schema, an example of the object in the
     "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
-  "components": ["appbar", "navbar", "north-arrow"],
+  "components": ["app-bar", "nav-bar", "north-arrow"],
   "corePackages": ["basemap-panel", "layers-panel", "details-panel", "geolocator"],
   "externalPackages": [],
   "suportedLanguages": ["en", "fr"]
@@ -106,7 +106,7 @@ An example of this:
                       ],
                     },
                     'theme': 'dark',
-                    'components': ['appbar', 'navbar', 'north-arrow', 'overview-map'],
+                    'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
                     'corePackages': ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
                     'suportedLanguages': ['en', 'fr']
@@ -148,7 +148,7 @@ cgpv.init(function() {
             listOfGeoviewLayerConfig: [],
         },
         theme: 'dark',
-        components: ['appbar', 'navbar', 'north-arrow', 'overview-map'],
+        components: ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
         corePackages: ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
         suportedLanguages: ['en', 'fr'],

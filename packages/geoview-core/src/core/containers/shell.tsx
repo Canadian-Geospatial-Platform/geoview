@@ -10,8 +10,8 @@ import makeStyles from '@mui/styles/makeStyles';
 import { SnackbarProvider } from 'notistack';
 
 import { Map } from '../components/map/map';
-import { Appbar } from '../components/appbar/app-bar';
-import { Navbar } from '../components/navbar/nav-bar';
+import { Appbar } from '../components/app-bar/app-bar';
+import { Navbar } from '../components/nav-bar/nav-bar';
 import { FooterTabs } from '../components/footer-tabs/footer-tabs';
 
 import { FocusTrapDialog } from './focus-trap';
@@ -190,9 +190,9 @@ export function Shell(props: ShellProps): JSX.Element {
           {t('keyboardnav.start')}
         </a>
         <div className={classes.mapContainer}>
-          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('appbar') > -1 && <Appbar />}
+          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && <Appbar />}
           <Map {...mapFeaturesConfig} />
-          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('navbar') > -1 && <Navbar />}
+          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('nav-bar') > -1 && <Navbar />}
         </div>
         <FooterTabs />
         {Object.keys(api.map(id).modal.modals).map((modalId) => (

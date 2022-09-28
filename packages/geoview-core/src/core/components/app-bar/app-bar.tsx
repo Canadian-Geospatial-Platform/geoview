@@ -78,7 +78,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Create an appbar with buttons that can open a panel
+ * Create an app-bar with buttons that can open a panel
  */
 export function Appbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});

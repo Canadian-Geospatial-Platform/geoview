@@ -113,7 +113,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * @returns {boolean} true if visible, false otherwise
    */
   function checkNorth(map: OLMap): boolean {
-    // update map size in case an appbar panel is open
+    // update map size in case an app-bar panel is open
     map.updateSize();
 
     // Check the container value for top middle of the screen
@@ -133,7 +133,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
    * @param {number} angleDegrees north arrow rotation
    */
   function setOffset(map: OLMap, angleDegrees: number): void {
-    // update map size in case an appbar panel is open
+    // update map size in case an app-bar panel is open
     map.updateSize();
 
     const mapWidth = map.getSize()![0] / 2;

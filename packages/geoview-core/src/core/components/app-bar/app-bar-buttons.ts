@@ -11,7 +11,7 @@ import { CONST_PANEL_TYPES, TypeButtonPanel, TypePanelProps } from '../../../ui/
 import { TypeIconButtonProps } from '../../../ui/icon-button/icon-button-types';
 
 /**
- * Class to manage buttons on the appbar
+ * Class to manage buttons on the app-bar
  *
  * @exports
  * @class
@@ -19,13 +19,13 @@ import { TypeIconButtonProps } from '../../../ui/icon-button/icon-button-types';
 export class AppbarButtons {
   mapId!: string;
 
-  // groups of array of button panels to hold all buttons created on the appbar
+  // groups of array of button panels to hold all buttons created on the app-bar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
   /**
-   * initialize the buttons for the appbar
+   * initialize the buttons for the app-bar
    *
-   * @param mapId the id of the map this appbar belongs to
+   * @param mapId the id of the map this app-bar belongs to
    */
   constructor(mapId: string) {
     this.mapId = mapId;
@@ -37,10 +37,10 @@ export class AppbarButtons {
    * Function used to create default buttons, button panels
    */
   private createDefaultButtonPanels = () => {
-    // create default group for appbar button panels
+    // create default group for app-bar button panels
     this.buttons.default = {};
 
-    // // TODO: do not keep, just proof of concept
+    // TODO: do not keep, just proof of concept
     // this.createAppbarPanel(
     //   {
     //     ...DefaultPanel.button,
@@ -52,16 +52,16 @@ export class AppbarButtons {
   };
 
   /**
-   * Create a group for the appbar buttons
+   * Create a group for the app-bar buttons
    *
-   * @param {string} groupName a group name to be used to manage the group of appbar buttons
+   * @param {string} groupName a group name to be used to manage the group of app-bar buttons
    */
   createAppbarButtonGroup = (groupName: string): void => {
     this.buttons[groupName] = {};
   };
 
   /**
-   * Create a button on the appbar that will open a panel
+   * Create a button on the app-bar that will open a panel
    *
    * @param {TypeIconButtonProps} buttonProps button properties (icon, tooltip)
    * @param {TypePanelProps} panelProps panel properties (icon, title, content)
@@ -116,13 +116,13 @@ export class AppbarButtons {
   };
 
   /**
-   * Get a button panel from the appbar by using it's id
+   * Get a button panel from the app-bar by using it's id
    *
    * @param {string} id the id of the button panel to get
    * @returns {TypeButtonPanel} the returned button panel
    */
   getAppBarButtonPanelById = (id: string): TypeButtonPanel | null => {
-    // loop through groups of appbar button panels
+    // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
 
@@ -160,12 +160,12 @@ export class AppbarButtons {
   };
 
   /**
-   * Remove an appbar panel using an id
+   * Remove an app-bar panel using an id
    *
    * @param {string} id the id of the panel to remove
    */
   removeAppbarPanel = (id: string): void => {
-    // loop through groups of appbar button panels
+    // loop through groups of app-bar button panels
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 

@@ -1073,7 +1073,7 @@
       "properties": {
         "about": {
           "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the appbar to open the panel. In the basic view, this information may be added in a container above the map."
+          "description": "The content of the about section in Markdown format. If empty, it will be ignored. If not, it will create a button on the app-bar to open the panel. In the basic view, this information may be added in a container above the map."
         }
       }
     },
@@ -1093,9 +1093,9 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["appbar", "navbar", "overview-map", "north-arrow"]
+        "enum": ["app-bar", "nav-bar", "overview-map", "north-arrow"]
       },
-      "default": ["appbar", "navbar", "overview-map", "north-arrow"],
+      "default": ["app-bar", "nav-bar", "overview-map", "north-arrow"],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
       "minItems": 0
     },
