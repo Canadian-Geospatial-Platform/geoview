@@ -1,6 +1,13 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
 import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { all } from 'ol/loadingstrategy';
+import { GeoJSON as FormatGeoJSON } from 'ol/format';
+import { ReadOptions } from 'ol/format/Feature';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
+
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
@@ -10,6 +17,9 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
+  layerEntryIsGroupLayer,
+  TypeBaseVectorSourceInitialConfig,
+  TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
@@ -128,10 +138,29 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryConfig.entryType === 'group') {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
-        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
+      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
       }
+
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          return true;
+        }
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      // Note that the code assumes wfs feature type list does not contains layer group. If you need layer group,
+      // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
         const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
         for (var i = 0; i < metadataLayerList.length; i++) {
@@ -139,9 +168,13 @@ export class WFS extends AbstractGeoViewVector {
           if (metadataLayerId.includes(layerEntryConfig.layerId)) break;
         }
         if (i === metadataLayerList.length) {
-          this.layerLoadError.push(layerEntryConfig.layerId);
+          this.layerLoadError.push({
+            layer: layerEntryConfig.layerId,
+            consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          });
           return false;
         }
+
         if (metadataLayerList[i]['ows:WGS84BoundingBox']) {
           const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
           const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
@@ -149,10 +182,14 @@ export class WFS extends AbstractGeoViewVector {
           const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
           if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent: layerExtent };
           else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = layerExtent;
+          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
           return true;
         }
       }
-      this.layerLoadError.push(layerEntryConfig.layerId);
+      this.layerLoadError.push({
+        layer: layerEntryConfig.layerId,
+        consoleMessage: `Invalid feature type list in WFS metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+      });
       return false;
     });
   }
@@ -170,8 +207,7 @@ export class WFS extends AbstractGeoViewVector {
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        /* if ('esriType' in layerEntryConfig) promisedAllLayerDone.push(this.processWfsGroupLayer(layerEntryConfig));
-        else */ if (layerEntryConfig.entryType === 'group')
+        if (layerEntryIsGroupLayer(layerEntryConfig))
           promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
         else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
       });
@@ -228,5 +264,27 @@ export class WFS extends AbstractGeoViewVector {
       layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
       layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
     }
+  }
+
+  /** ***************************************************************************************************************************
+   * Create a source configuration for the vector layer.
+   *
+   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   *
+   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   */
+  protected createVectorSource(
+    layerEntryConfig: TypeBaseLayerEntryConfig,
+    sourceOptions: SourceOptions = { strategy: all },
+    readOptions: ReadOptions = {}
+  ): VectorSource<Geometry> {
+    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&outputFormat=application/json&version=2.0.0`;
+    sourceOptions.url = `${sourceOptions.url}&srsname=${(layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection}`;
+    sourceOptions.url = `${sourceOptions.url}&typeName=${layerEntryConfig.layerId}`;
+    sourceOptions.format = new FormatGeoJSON();
+    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    return vectorSource;
   }
 }

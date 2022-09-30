@@ -48,7 +48,7 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Layer [__param__] failed to load on map __param__",
+      "loadfailed": "Layer [__param__] failed to load on map __param__. More details are in the console.",
       "notfound": "The sublayer __param__ of the GeoView layer __param__ does not exist on the server",
       "createtwice": "Can not execute twice the createGeoViewRasterLayers method for the map __param__"
     }

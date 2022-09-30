@@ -1,6 +1,12 @@
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
 import { transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { all } from 'ol/loadingstrategy';
+import { GeoJSON as FormatGeoJSON } from 'ol/format';
+import { ReadOptions } from 'ol/format/Feature';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
 
 import { defaultsDeep } from 'lodash';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -11,6 +17,9 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
+  layerEntryIsGroupLayer,
+  TypeBaseVectorSourceInitialConfig,
+  TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
@@ -122,21 +131,52 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryConfig.entryType === 'group') {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
-        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
+      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
       }
-      if (!this.metadata) return true; // When no metadata are provided, all layers are considered valid.
+
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          return true;
+        }
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      // When no metadata are provided, all layers are considered valid.
+      if (!this.metadata) {
+        this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+        return true;
+      }
+
+      // Note that geojson metadata as we defined it does not contains layer group. If you need geogson layer group,
+      // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
         for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
         if (i === metadataLayerList.length) {
-          this.layerLoadError.push(layerEntryConfig.layerId);
+          this.layerLoadError.push({
+            layer: layerEntryConfig.layerId,
+            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          });
           return false;
         }
+        this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
         return true;
       }
-      this.layerLoadError.push(layerEntryConfig.layerId);
+      this.layerLoadError.push({
+        layer: layerEntryConfig.layerId,
+        consoleMessage: `Invalid GeoJSON metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+      });
       return false;
     });
   }
@@ -152,8 +192,8 @@ export class GeoJSON extends AbstractGeoViewVector {
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryConfig.entryType === 'group')
-          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
+        if (layerEntryIsGroupLayer(layerEntryConfig))
+          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!));
         else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
       });
       Promise.all(promisedAllLayerDone).then(() => resolve());
@@ -184,5 +224,24 @@ export class GeoJSON extends AbstractGeoViewVector {
       resolve();
     });
     return promiseOfExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * Create a source configuration for the vector layer.
+   *
+   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   *
+   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   */
+  protected createVectorSource(
+    layerEntryConfig: TypeBaseLayerEntryConfig,
+    sourceOptions: SourceOptions = { strategy: all },
+    readOptions: ReadOptions = {}
+  ): VectorSource<Geometry> {
+    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.format = new FormatGeoJSON();
+    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    return vectorSource;
   }
 }

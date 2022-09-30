@@ -1,4 +1,5 @@
 import proj4 from 'proj4';
+import { Coordinate } from 'ol/coordinate';
 
 import { register } from 'ol/proj/proj4';
 import { get as getOLProjection, Projection as OLProjection, getPointResolution } from 'ol/proj';
@@ -169,7 +170,7 @@ export class Projection {
    * @param {Coordinate} center map center
    * @returns the point resolution for map center
    */
-  getResolution = (projection: string, center: number[]): number => {
+  getResolution = (projection: string, center: Coordinate): number => {
     return getPointResolution(projection, 1, center, 'm');
   };
 }
