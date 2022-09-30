@@ -32,7 +32,7 @@ import {
   TypeUniqueValueStyleInfo,
   TypeVectorLayerEntryConfig,
   TypeVectorTileLayerEntryConfig,
-  TypeBaseVectorLayerEntryConfig,
+  TypeBaseLayerEntryConfig,
   TypeStyleConfig,
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
@@ -126,7 +126,7 @@ export class GeoviewRenderer {
 
   getStyle(
     feature: FeatureLike,
-    layerEntryConfig: TypeBaseVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
     const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
     // If style does not exist for the geometryType, create it.

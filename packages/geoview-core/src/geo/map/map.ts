@@ -309,7 +309,7 @@ export class MapViewer {
    */
   loadMapConfig = (mapConfig: string) => {
     // parse the config
-    const parsedMapConfig = JSON.parse(mapConfig.replace(/(\r\n|\n|\r)/gm, "").replace(/'/gm, '"'));
+    const parsedMapConfig = JSON.parse(mapConfig.replace(/(\r\n|\n|\r)/gm, '').replace(/'/gm, '"'));
 
     // create a new config for this map element
     const config = new Config(this.map.getTargetElement());

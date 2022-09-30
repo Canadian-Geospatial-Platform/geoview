@@ -1,2 +1,2 @@
-// PUT GEO CONSTASNT HERE
-export {}
+// PUT GEO CONSTANTS HERE
+export {};

@@ -1,6 +1,7 @@
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
+import { Coordinate } from 'ol/coordinate';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -10,8 +11,11 @@ import {
   TypeSourceTileInitialConfig,
   TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
+  TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
+import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 
 // TODO: Implement method to validate XYZ tile service
 //
@@ -97,16 +101,45 @@ export class XYZTiles extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.XYZ_TILES, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
-   * This method is not used by XYZTiles.
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  getAdditionalServiceDefinition(): Promise<void> {
+  protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       // ! TODO: Implement a stac reader or a JSON reader to get additionalServiceDefinition
       resolve();
     });
     return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method processes recursively the metadata of each layer in the list of layer configuration.
+   *
+   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      // eslint-disable-next-line no-console
+      console.log('XYZTiles.processListOfLayerEntryMetadata: The method needs to be coded!', listOfLayerEntryConfig);
+      resolve();
+    });
+    return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
+   * Since xyz-tile layer does not have metadata for the moment, the method does nothing.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   *
+   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
+   */
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
+    return listOfLayerEntryConfig;
   }
 
   /** ****************************************************************************************************************************
@@ -134,7 +167,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
 
       const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
-      if (layerEntryConfig.initialSettings?.className !== undefined) tileLayerOptions.className = layerEntryConfig.initialSettings?.className;
+      if (layerEntryConfig.initialSettings?.className !== undefined)
+        tileLayerOptions.className = layerEntryConfig.initialSettings?.className;
       if (layerEntryConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
       if (layerEntryConfig.initialSettings?.maxZoom !== undefined) tileLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
       if (layerEntryConfig.initialSettings?.minZoom !== undefined) tileLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
@@ -148,23 +182,37 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return promisedVectorLayer;
   }
 
-  /** ****************************************************************************************************************************
-   * This method associate a renderer to the GeoView layer.
+  /** ***************************************************************************************************************************
+   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+   * initial settings, fields and aliases).
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
+   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
-  processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('XYZTiles.processLayerMetadata: This method needs to be coded!', rasterLayer);
+  protected processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void> {
+    const promiseOfExecution = new Promise<void>((resolve) => {
+      // eslint-disable-next-line no-console
+      console.log('XYZTiles.processLayerMetadata: The method needs to be coded!', layerEntryConfig);
+      resolve();
+    });
+    return promiseOfExecution;
   }
 
-  /** ****************************************************************************************************************************
-   * This method register the GeoView layer to panels that offer this possibility.
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided coordinate.
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+   * @param {Coordinate} lnglat The coordinate that will be used by the query.
+   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
    */
-  registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('XYZTiles.registerToPanels: This method needs to be coded!', rasterLayer);
+  protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      // eslint-disable-next-line no-console
+      console.log('XYZTiles.getFeatureInfoAtCoordinate: The method needs to be coded!', lnglat, layerId);
+      resolve(null);
+    });
+    return promisedQueryResult;
   }
 }

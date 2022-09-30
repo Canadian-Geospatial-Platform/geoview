@@ -15,60 +15,53 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div>
-      <h3 id="HLYR4">4. Esri feature layer</h3>
-      <h3><a href="#top">Top of the page</a></h3>
-      <button id="get-feature-info">Run getFeatureInfo</button><br />
-      <div
-        id="LYR4"
-        class="llwp-map"
-        data-lang="en"
-        data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3978
+    <button id="get-feature-info">Run getFeatureInfo</button><br />
+        <div id="LYR3" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [-100, 60],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'id': 'transport',
+          'shaded': true,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'layerId': 'esriDynamicLYR3.2',
+            'layerName': {
+              'en': 'Senior care facilities on April 2020'
             },
-            'basemapOptions': {
-              'id': 'transport',
-              'shaded': false,
-              'labeled': true
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
             },
-            'listOfGeoviewLayerConfig': [
+            'geoviewLayerType': 'esriDynamic',
+            'listOfLayerEntryConfig': [
               {
-                'layerId': 'Root',
-                'layerName': { 'en': 'Root' },
-                'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  {
-                    'entryType': 'group',
-                    'layerId': 'esriFeature-Group1',
-                    'layerName': { 'en': 'Group 1' },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': '9'
-                      },
-                      {
-                        'layerId': '1'
-                      }
-                    ]
-                  }
-                ]
+                'layerId': '0',
+                'initialSettings': {
+                  'visible': false
+                }
+              },
+              {
+                'layerId': '1',
+                'initialSettings': {
+                  'visible': false
+                }
               }
             ]
-          },
-          'theme': 'dark',
-          'suportedLanguages': ['en']
-        }"
-      ></div>
-      <p>This map has a Esri feature layer added from configuration.</p>
-      <p><strong>Configuration Snippet:</strong></p>
-      <div id="LYR4CS" class="panel"></div>
-    </div>
-    <p><strong>Code Snippet:</strong></p>
+          }
+        ]
+      },
+      'components': ['overview-map', 'nav-bar', 'north-arrow'],
+      'corePackages': [],
+      'theme': 'dark',
+      'suportedLanguages': ['en']
+    }"></div>
+<p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>
@@ -76,30 +69,32 @@
       cgpv.init(function () {
         console.log('api is ready');
         /*
-        cgpv.api.map('LYR4').layer.layers['Root'].setVisible(true, '1');
-        cgpv.api.map('LYR4').layer.layers['Root'].setVisible(true, '2');
-        cgpv.api.map('LYR4').layer.layers['Root'].setVisible(false, '3');
-        */
-        const gvLayer = cgpv.api.map('LYR4').layer.layers['Root'];
+        cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(false, '1');
+        cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(true, '2');
+        cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(false, '3');
+        /* /
+        const gvLayer = cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'];
         if (gvLayer) {
-          gvLayer.setVisible(false, '9');
+          gvLayer.setVisible(true, '1');
           console.log(gvLayer.getLegend('1'));
         }
         cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
           console.log(payload)
-        }, 'LYR4/1');
+        }, 'LYR3/1');
 
         var getFeatureInfoButton = document.getElementById('get-feature-info');
         getFeatureInfoButton.addEventListener('click', function (e) {
+          cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(true, '0');
           cgpv.api.event.emit(
             cgpv.types.getFeatureInfoPayload(
               cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
-              'LYR4/1',
-              { location: [-1642193.0769999996, 301092.23800000176], queryType: 'at coordinate' }
+              'LYR3/1',
+              { location: [-72.0, 45.33], queryType: 'at coordinate' }
             )
           );
-          console.log(cgpv.api.map('LYR4').layer.layers.Root.getAllFeatureInfo('1'));
+          // console.log(cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].getFeatureInfo('1'));
         });
+        // */
 
         //create snippets
         createCodeSnippet();
