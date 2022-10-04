@@ -58,16 +58,15 @@ const useStyles = makeStyles((theme) => ({
 const deg = String.fromCharCode(176);
 
 /**
- * Format the coordinates for degrees - minutes - seconds
+ * Format the coordinates for degrees - minutes - seconds (lat, long)
  * @param {number} value the value to format
- * @param {string} card the cardinality north/south or east/west
  * @returns {string} the formatted value
  */
-function coordFormnat(value: number, card: string): string {
+function coordFormnatDMS(value: number): string {
   const d = Math.floor(Math.abs(value)) * (value < 0 ? -1 : 1);
   const m = Math.floor(Math.abs((value - d) * 60));
   const s = Math.round((Math.abs(value) - Math.abs(d) - m / 60) * 3600);
-  return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${s >= 10 ? `${s}` : `0${s}`}" ${card}`;
+  return `${Math.abs(d)}${deg} ${m >= 10 ? `${m}` : `0${m}`}' ${s >= 10 ? `${s}` : `0${s}`}"`;
 }
 
 /**
@@ -105,31 +104,47 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   const mapId = mapConfig.id;
 
   /**
-   * Format the coordinates output
+   * Format the coordinates output in lat long
    * @param {Coordinate} lnglat the Lng and Lat value to format
+   * @param {boolean} DMS true if need to be formatted as Degree Minute Second, false otherwise
+   * @returns {Object} an object containing formatted Longitude and Latitude values
    */
-  function formatCoord(lnglat: Coordinate) {
-    const lng = coordFormnat(lnglat[0], lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east'));
-    const lat = coordFormnat(lnglat[1], lnglat[1] > 0 ? t('mapctrl.mouseposition.north') : t('mapctrl.mouseposition.south'));
+  function formatCoordinates(lnglat: Coordinate, DMS: boolean) {
+    const lng = `${DMS ? coordFormnatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${
+      lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east')
+    }`;
+    const lat = `${DMS ? coordFormnatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${
+      lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north')
+    }`;
 
     return { lng, lat };
+  }
+
+  /**
+   * Get the formatted coordinate for Degree Minute Second, Decimal degree and projected values
+   * @param {Coordinate} coord coordinates array to process
+   * @returns {Object} the coordinates
+   */
+  function getCoordinates(coord: Coordinate) {
+    const projection = api.projection.projections[api.map(mapId).currentProjection];
+    const coordinate = toLonLat(coord, projection);
+
+    const DMS = formatCoordinates(coordinate, true);
+    const DD = formatCoordinates(coordinate, false);
+    const projected = fromLonLat([coordinate[0], coordinate[1]], projection);
+
+    return { DMS, DD, projected };
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMouseMove = useCallback(
     debounce((e) => {
-      const projection = api.projection.projections[api.map(mapId).currentProjection];
-
-      const coordinate = toLonLat(e.coordinate, projection);
-
-      const formatedCoorinate = formatCoord(coordinate);
-
-      const projectedCoordinate = fromLonLat([coordinate[0], coordinate[1]], projection);
+      const coord = getCoordinates(e.coordinate);
 
       setPositions([
-        `${formatedCoorinate.lng} | ${formatedCoorinate.lat}`,
-        `${coordinate[0].toFixed(4)} W | ${coordinate[1].toFixed(4)} N`,
-        `${projectedCoordinate[0].toFixed(4)}m W | ${projectedCoordinate[1].toFixed(4)}m N`,
+        `${coord.DMS.lng} | ${coord.DMS.lat}`,
+        `${coord.DD.lng} | ${coord.DD.lat}`,
+        `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
       ]);
     }, 10),
     [t, positionMode]
@@ -138,22 +153,13 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onMoveEnd = useCallback(
     debounce((e) => {
-      const projection = api.projection.projections[api.map(mapId).currentProjection];
-
-      const coordinate = toLonLat(e.map.getView().getCenter(), api.projection.projections[api.map(mapId).currentProjection]);
-
-      const projectedCoordinate = fromLonLat([coordinate[0], coordinate[1]], projection);
-
-      // if (isCrosshairsActive.current) {
-      const formatedCoorinate = formatCoord(coordinate);
+      const coord = getCoordinates(e.map.getView().getCenter());
 
       setPositions([
-        `${formatedCoorinate.lng} | ${formatedCoorinate.lat}`,
-        `${coordinate[0].toFixed(4)} W | ${coordinate[1].toFixed(4)} N`,
-        `${projectedCoordinate[0].toFixed(4)}m W | ${projectedCoordinate[1].toFixed(4)}m N`,
+        `${coord.DMS.lng} | ${coord.DMS.lat}`,
+        `${coord.DD.lng} | ${coord.DD.lat}`,
+        `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
       ]);
-
-      // }
     }, 10),
     [t, positionMode]
   );
@@ -163,19 +169,12 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
    */
   const switchPositionMode = () => {
     const { map } = api.map(mapId);
-
-    const projection = api.projection.projections[api.map(mapId).currentProjection];
-
-    const coordinate = toLonLat(map.getView().getCenter()!, api.projection.projections[api.map(mapId).currentProjection]);
-
-    const formatedCoorinate = formatCoord(coordinate);
-
-    const projectedCoordinate = fromLonLat([coordinate[0], coordinate[1]], projection);
+    const coord = getCoordinates(map.getView().getCenter()!);
 
     setPositions([
-      `${formatedCoorinate.lng} | ${formatedCoorinate.lat}`,
-      `${coordinate[0].toFixed(4)} W | ${coordinate[1].toFixed(4)} N`,
-      `${projectedCoordinate[0].toFixed(4)}m W | ${projectedCoordinate[1].toFixed(4)}m N`,
+      `${coord.DMS.lng} | ${coord.DMS.lat}`,
+      `${coord.DD.lng} | ${coord.DD.lat}`,
+      `${coord.projected[0].toFixed(4)}m E | ${coord.projected[1].toFixed(4)}m N`,
     ]);
 
     setPositionMode((positionMode + 1) % 3);
@@ -195,6 +194,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   useEffect(() => {
     // on map crosshair enable\disable, set variable for WCAG mouse position
+    // TODO: On crosshaih, add crosshair center information to screen reader / mouse position component
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
       (payload) => {
