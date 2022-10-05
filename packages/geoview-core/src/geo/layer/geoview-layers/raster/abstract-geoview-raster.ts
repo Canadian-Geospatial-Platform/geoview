@@ -42,7 +42,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    *
    * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
    *
-   * @returns {BaseLayer} The GeoView vector layer that has been created.
+   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
 
