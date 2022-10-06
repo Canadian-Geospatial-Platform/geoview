@@ -1,6 +1,14 @@
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 import cloneDeep from 'lodash/cloneDeep';
+import { Extent } from 'ol/extent';
+import { transformExtent } from 'ol/proj';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { all } from 'ol/loadingstrategy';
+import { EsriJSON } from 'ol/format';
+import { ReadOptions } from 'ol/format/Feature';
 
 import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -13,10 +21,12 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeLayerGroupEntryConfig,
+  layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../../renderer/esri-renderer';
+import { api } from '../../../../app';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -126,15 +136,44 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryConfig.entryType === 'group') {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
-        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
-      }
-      const esriIndex = Number(layerEntryConfig.layerId);
-      if (Number.isNaN(esriIndex)) {
-        this.layerLoadError.push(layerEntryConfig.layerId);
+      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
         return false;
       }
+
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          return true;
+        }
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      const esriIndex = Number(layerEntryConfig.layerId);
+      if (Number.isNaN(esriIndex)) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      if (this.metadata?.layers[esriIndex] === undefined) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
       if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
         const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
         (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
@@ -154,24 +193,29 @@ export class EsriFeature extends AbstractGeoViewVector {
             fr: this.metadata!.layers[layerId as number].name as string,
           };
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
+          this.layersOfTheMap[subLayerEntryConfig.layerId] = subLayerEntryConfig;
         });
-        Object.assign(layerEntryConfig, {
-          entryType: 'group',
-          // esriType is not part of the schema, but we need it to distinguish ESRI group layer in processListOfLayerEntryMetadata
-          esriType: 'Group Layer',
-          listOfLayerEntryConfig: newListOfLayerEntryConfig,
-        });
-
+        const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
+        switchToGroupLayer.entryType = 'group';
+        switchToGroupLayer.isEsriLayerGroup = true;
+        switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
+        this.layersOfTheMap[switchToGroupLayer.layerId] = switchToGroupLayer;
         return true;
       }
+
       if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
-        this.layerLoadError.push(layerEntryConfig.layerId);
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `LayerId ${layerEntryConfig.layerId} of map ${this.mapId} is not a feature layer`,
+        });
         return false;
       }
+
       layerEntryConfig.layerName = {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
+      this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
       return true;
     });
   }
@@ -189,8 +233,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if ('esriType' in layerEntryConfig) promisedAllLayerDone.push(this.processEsriGroupLayer(layerEntryConfig));
-        else if (layerEntryConfig.entryType === 'group')
+        if (layerEntryIsGroupLayer(layerEntryConfig) && layerEntryConfig.isEsriLayerGroup)
+          promisedAllLayerDone.push(this.processEsriGroupLayer(layerEntryConfig));
+        else if (layerEntryIsGroupLayer(layerEntryConfig))
           promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
         else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
       });
@@ -202,16 +247,16 @@ export class EsriFeature extends AbstractGeoViewVector {
   /** ***************************************************************************************************************************
    * This method is used to process ESRI layers that define an ESRI group layer. These layers behave as a GeoView group layer and
    * also as a data layer (i.e. they have extent, visibility and query flag definition). ESRI group layer can be identified by
-   * the presence of a esriType attribute. The attribute content is 'Group Layer', but it has no meaning. We could have decided
-   * to put any other value, and it would not have had any impact on the code.
+   * the presence of an isEsriLayerGroup attribute. The attribute content is 'Group Layer', but it has no meaning. We could have
+   * decided to put any other value, and it would not have had any impact on the code.
    *
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
-  private processEsriGroupLayer(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+  private processEsriGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig).then(() => {
+      this.processLayerMetadata(layerEntryConfig).then(() => {
         this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
       });
     });
@@ -222,57 +267,79 @@ export class EsriFeature extends AbstractGeoViewVector {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
-      const queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
-      if (queryUrl) {
-        const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
-        queryResult.then((response) => {
-          if (!response.data.fields) {
-            ((): never => {
+      // User-defined groups do not have metadata provided by the service endpoint.
+      if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isEsriLayerGroup) resolve();
+      else {
+        let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+        if (queryUrl) {
+          queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerEntryConfig.layerId}` : `${queryUrl}/${layerEntryConfig.layerId}`;
+          const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
+          queryResult.then((response) => {
+            // layers must have a fields attribute except if it is an ESRI layer group.
+            if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isEsriLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
-            })();
-          }
-          if (!layerEntryConfig.style) {
-            const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
-            if (renderer) layerEntryConfig.style = getStyleFromEsriRenderer(this.mapId, layerEntryConfig, renderer);
-          }
-          this.processFeatureInfoConfig(
-            response.data.capabilities as string,
-            response.data.displayField as string,
-            response.data.geometryField.name as string,
-            response.data.fields as TypeJsonArray,
-            layerEntryConfig
-          );
-          this.processInitialSettings(response.data.defaultVisibility as boolean, response.data.extent, layerEntryConfig);
-          resolve();
-        });
-      } else resolve();
+            if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
+              if (!layerEntryConfig.style) {
+                const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
+                if (renderer) layerEntryConfig.style = getStyleFromEsriRenderer(this.mapId, layerEntryConfig, renderer);
+              }
+              this.processFeatureInfoConfig(
+                response.data.capabilities as string,
+                response.data.displayField as string,
+                response.data.geometryField.name as string,
+                response.data.fields as TypeJsonArray,
+                layerEntryConfig
+              );
+              this.processInitialSettings(
+                response.data.defaultVisibility as boolean,
+                response.data.minScale as number,
+                response.data.maxScale as number,
+                response.data.extent,
+                layerEntryConfig
+              );
+            }
+            resolve();
+          });
+        } else resolve();
+      }
     });
     return promiseOfExecution;
   }
 
   /** ***************************************************************************************************************************
-   * This method verify if the layer is queryable and set the array of fields and aliases.
+   * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
    *
-   * @param {boolean} visibility The default visibility of the layer.
-   * @param {TypeJsonObject} extent The layer extent.
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+   * @param {boolean} visibility The metadata initial visibility of the layer.
+   * @param {number} minScale The metadata minScale of the layer.
+   * @param {number} maxScale The metadata maxScale of the layer.
+   * @param {TypeJsonObject} extent The metadata layer extent.
+   * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
    */
-  private processInitialSettings(visibility: boolean, extent: TypeJsonObject, layerEntryConfig: TypeVectorLayerEntryConfig) {
+  private processInitialSettings(
+    visibility: boolean,
+    minScale: number,
+    maxScale: number,
+    extent: TypeJsonObject,
+    layerEntryConfig: TypeEsriFeatureLayerEntryConfig
+  ) {
     if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-    if (!layerEntryConfig.initialSettings?.visible) layerEntryConfig.initialSettings.visible = visibility;
-    if (!layerEntryConfig.initialSettings?.extent)
-      layerEntryConfig.initialSettings.extent = [
-        extent.xmin as number,
-        extent.ymin as number,
-        extent.xmax as number,
-        extent.ymax as number,
-      ];
+    if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
+    if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
+    if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings.visible = visibility;
+    if (!layerEntryConfig.initialSettings?.extent) {
+      const layerExtent: Extent = [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number];
+      layerEntryConfig.initialSettings.extent = transformExtent(
+        layerExtent,
+        `EPSG:${extent.spatialReference.wkid as number}`,
+        `EPSG:${api.map(this.mapId).currentProjection}`
+      ) as Extent;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -282,19 +349,18 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} nameField The display field associated to the layer.
    * @param {string} geometryFieldName The field name of the geometry property.
    * @param {TypeJsonArray} fields An array of field names and its aliases.
-   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+   * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
    */
   private processFeatureInfoConfig(
     capabilities: string,
     nameField: string,
     geometryFieldName: string,
     fields: TypeJsonArray,
-    layerEntryConfig: TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeEsriFeatureLayerEntryConfig
   ) {
-    if (!layerEntryConfig.source) layerEntryConfig.source = {};
     if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
     // ESRI group layer doesn't have fields definition
-    if (!('esriType' in layerEntryConfig)) {
+    if (!layerEntryConfig.isEsriLayerGroup) {
       if (!layerEntryConfig.source.featureInfo.nameField)
         layerEntryConfig.source.featureInfo.nameField = {
           en: nameField,
@@ -318,9 +384,28 @@ export class EsriFeature extends AbstractGeoViewVector {
               i
             );
         });
-        layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
-        layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+        layerEntryConfig.source.featureInfo!.outfields!.fr = layerEntryConfig.source.featureInfo!.outfields?.en;
+        layerEntryConfig.source.featureInfo!.aliasFields!.fr = layerEntryConfig.source.featureInfo!.aliasFields?.en;
       }
     }
+  }
+
+  /** ***************************************************************************************************************************
+   * Create a source configuration for the vector layer.
+   *
+   * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   *
+   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   */
+  protected createVectorSource(
+    layerEntryConfig: TypeEsriFeatureLayerEntryConfig,
+    sourceOptions: SourceOptions = { strategy: all },
+    readOptions: ReadOptions = {}
+  ): VectorSource<Geometry> {
+    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = `${sourceOptions.url}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.format = new EsriJSON();
+    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    return vectorSource;
   }
 }

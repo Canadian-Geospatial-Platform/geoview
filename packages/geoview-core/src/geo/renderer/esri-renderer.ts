@@ -20,7 +20,7 @@ import {
   TypeSymbol,
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
-  TypeVectorLayerEntryConfig,
+  TypeLayerEntryConfig,
 } from '../map/map-schema-types';
 
 /*
@@ -474,7 +474,7 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
 
 export function getStyleFromEsriRenderer(
   mapId: string,
-  layerEntryConfig: TypeVectorLayerEntryConfig,
+  layerEntryConfig: TypeLayerEntryConfig,
   renderer: EsriBaseRenderer
 ): TypeStyleConfig | undefined {
   const id = `${mapId}-${layerEntryConfig.geoviewRootLayer?.layerId}-${layerEntryConfig.layerId}`;

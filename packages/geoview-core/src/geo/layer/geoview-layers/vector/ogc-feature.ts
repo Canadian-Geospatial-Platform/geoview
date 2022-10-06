@@ -3,6 +3,12 @@ import axios from 'axios';
 
 import { get, transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { all } from 'ol/loadingstrategy';
+import { GeoJSON as FormatGeoJSON } from 'ol/format';
+import { ReadOptions } from 'ol/format/Feature';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
 
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -13,6 +19,9 @@ import {
   TypeVectorSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
+  layerEntryIsGroupLayer,
+  TypeBaseLayerEntryConfig,
+  TypeBaseVectorSourceInitialConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue } from '../../../../core/utils/utilities';
@@ -126,17 +135,40 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (layerEntryConfig.entryType === 'group') {
-        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig);
-        return layerEntryConfig.listOfLayerEntryConfig.length; // if the list is empty. then delete the node.
+      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
       }
+
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (layerEntryConfig.listOfLayerEntryConfig.length) {
+          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          return true;
+        }
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      // Note that the code assumes ogc-feature collections does not contains layer group. If you need layer group,
+      // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
         for (var i = 0; i < this.metadata!.collections.length; i++)
           if (this.metadata!.collections[i].id === layerEntryConfig.layerId) break;
         if (i === this.metadata!.collections.length) {
-          this.layerLoadError.push(layerEntryConfig.layerId);
+          this.layerLoadError.push({
+            layer: layerEntryConfig.layerId,
+            consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          });
           return false;
         }
+
         if (this.metadata!.collections[i].description)
           layerEntryConfig.layerName = {
             en: this.metadata!.collections[i].description as string,
@@ -151,8 +183,13 @@ export class OgcFeature extends AbstractGeoViewVector {
           if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent };
           else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = extent;
         }
+        this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
         return true;
       }
+      this.layerLoadError.push({
+        layer: layerEntryConfig.layerId,
+        consoleMessage: `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+      });
       return false;
     });
   }
@@ -170,7 +207,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryConfig.entryType === 'group')
+        if (layerEntryIsGroupLayer(layerEntryConfig))
           promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
         else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
       });
@@ -226,5 +263,25 @@ export class OgcFeature extends AbstractGeoViewVector {
       layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
       layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
     }
+  }
+
+  /** ***************************************************************************************************************************
+   * Create a source configuration for the vector layer.
+   *
+   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   *
+   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   */
+  protected createVectorSource(
+    layerEntryConfig: TypeBaseLayerEntryConfig,
+    sourceOptions: SourceOptions = { strategy: all },
+    readOptions: ReadOptions = {}
+  ): VectorSource<Geometry> {
+    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = `${sourceOptions.url}/collections/${layerEntryConfig.layerId}/items?f=json`;
+    sourceOptions.format = new FormatGeoJSON();
+    const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
+    return vectorSource;
   }
 }

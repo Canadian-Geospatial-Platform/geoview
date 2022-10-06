@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import ImageLayer from 'ol/layer/Image';
+import { Coordinate } from 'ol/coordinate';
 import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
@@ -13,7 +14,10 @@ import {
   TypeLayerEntryConfig,
   TypeSourceImageWmsInitialConfig,
   TypeGeoviewLayerConfig,
+  TypeListOfLayerEntryConfig,
+  TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
+import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
@@ -77,12 +81,6 @@ export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WMS extends AbstractGeoViewRaster {
-  // private varibale holding wms capabilities.
-  private metadata: TypeJsonObject = {};
-
-  // private varibale holding attributions string.
-  private attributions: string[] = [];
-
   /** ***************************************************************************************************************************
    * Initialize layer
    * @param {string} mapId the id of the map
@@ -92,23 +90,52 @@ export class WMS extends AbstractGeoViewRaster {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
   }
 
-  /** ****************************************************************************************************************************
-   * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from the metadataAccessPath.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
    */
-  getAdditionalServiceDefinition(): Promise<void> {
+  protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       const parser = new WMSCapabilities();
-      const getCapabilitiesUrl = `${getLocalizedValue(
-        this.metadataAccessPath,
-        this.mapId
-      )}?service=WMS&version=1.3.0&request=GetCapabilities`;
-      fetch(getCapabilitiesUrl).then((response) => {
-        response.text().then((capabilitiesString) => {
-          this.metadata = parser.read(capabilitiesString);
-          if (this.metadata?.Service?.Abstract) this.attributions.push(this.metadata.Service.Abstract as string);
-          resolve();
+      let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
+        fetch(metadataUrl).then((response) => {
+          response.text().then((capabilitiesString) => {
+            this.metadata = parser.read(capabilitiesString);
+            if (this.metadata?.Service?.Abstract) this.attributions.push(this.metadata.Service.Abstract as string);
+            resolve();
+          });
         });
-      });
+      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+    });
+    return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   *
+   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
+   */
+  protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
+    return listOfLayerEntryConfig;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method processes recursively the metadata of each layer in the list of layer configuration.
+   *
+   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      // eslint-disable-next-line no-console
+      console.log('WMS.processListOfLayerEntryMetadata: The method needs to be coded!', listOfLayerEntryConfig);
+      resolve();
     });
     return promisedExecution;
   }
@@ -122,7 +149,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   processOneLayerEntry(layerEntryConfig: TypeWmsLayerEntryConfig): Promise<TypeBaseRasterLayer | null> {
     const promisedVectorLayer = new Promise<TypeBaseRasterLayer | null>((resolve) => {
-      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.layerId, this.metadata.Capability.Layer);
+      const layerCapabilities = this.findLayerCapabilities(layerEntryConfig.layerId, this.metadata!.Capability.Layer);
       if (layerCapabilities) {
         const dataAccessPath = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
         const sourceOptions: SourceOptions = {
@@ -192,23 +219,37 @@ export class WMS extends AbstractGeoViewRaster {
     return null;
   }
 
-  /**
-   * This method associate a renderer to the GeoView layer.
+  /** ***************************************************************************************************************************
+   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+   * initial settings, fields and aliases).
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
+   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   *
+   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
    */
-  processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('The method processLayerMetadata needs to be coded!', rasterLayer);
+  protected processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void> {
+    const promiseOfExecution = new Promise<void>((resolve) => {
+      // eslint-disable-next-line no-console
+      console.log('WMS.processLayerMetadata: The method needs to be coded!', layerEntryConfig);
+      resolve();
+    });
+    return promiseOfExecution;
   }
 
-  /**
-   * This method register the GeoView layer to panels that offer this possibility.
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided coordinate.
    *
-   * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+   * @param {Coordinate} lnglat The coordinate that will be used by the query.
+   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
    */
-  registerToPanels(rasterLayer: TypeBaseRasterLayer): void {
-    // eslint-disable-next-line no-console
-    console.log('The method registerToPanels needs to be coded!', rasterLayer);
+  protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      // eslint-disable-next-line no-console
+      console.log('WMS.getFeatureInfoAtCoordinate: The method needs to be coded!', lnglat, layerId);
+      resolve(null);
+    });
+    return promisedQueryResult;
   }
 }

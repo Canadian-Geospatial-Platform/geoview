@@ -686,7 +686,6 @@
           "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326."
         },
         "featureInfo": { "$ref": "#/definitions/TypeFeatureInfoLayerConfig" },
-        "style": { "$ref": "#/definitions/TypeStyleConfig" },
         "tileGrid": {
           "additionalProperties": false,
           "type": "object",
@@ -764,7 +763,8 @@
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
         },
-        "source": { "$ref": "#/definitions/TypeSourceImageInitialConfig" }
+        "source": { "$ref": "#/definitions/TypeSourceImageInitialConfig" },
+        "style": { "$ref": "#/definitions/TypeStyleConfig" }
       },
       "required": ["layerId"]
     },

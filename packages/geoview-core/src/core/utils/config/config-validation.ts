@@ -29,9 +29,10 @@ import {
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
-  TypeBaseVectorLayerEntryConfig,
+  TypeVectorLayerEntryConfig,
+  TypeImageLayerEntryConfig,
 } from '../../../geo/map/map-schema-types';
-import { Cast, TypeMapFeaturesConfig } from '../../types/global-types';
+import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { api } from '../../../app';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -439,7 +440,7 @@ export class ConfigValidation {
       } else if (geoviewEntryIsEsriDynamic(layerEntryConfig)) {
         if (Number.isNaN(layerEntryConfig.layerId)) {
           throw new Error(
-            `The layer entry with layerId equal to ${layerEntryConfig.layerId} on GeoView layer ${rootLayerConfig.layerId} must be an integer`
+            `The layer entry with layerId equal to ${layerEntryConfig.layerId} on GeoView layer ${rootLayerConfig.layerId} must be an integer string`
           );
         }
         // Value for layerEntryConfig.entryType can only be raster
@@ -449,6 +450,11 @@ export class ConfigValidation {
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
       } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
+        if (Number.isNaN(layerEntryConfig.layerId)) {
+          throw new Error(
+            `The layer entry with layerId equal to ${layerEntryConfig.layerId} on GeoView layer ${rootLayerConfig.layerId} must be an integer string`
+          );
+        }
         // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
         // Attribute 'style' must exist in layerEntryConfig even if it is undefined
@@ -573,7 +579,7 @@ export class ConfigValidation {
           if (layerEntryConfig?.layerName) this.SynchronizeLocalizedString(layerEntryConfig.layerName!, sourceKey, destinationKey);
           if (layerEntryConfig?.source?.dataAccessPath)
             this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
-          const baseVectorLayerEntryConfig = Cast<TypeBaseVectorLayerEntryConfig>(layerEntryConfig);
+          const baseVectorLayerEntryConfig = layerEntryConfig as TypeVectorLayerEntryConfig | TypeImageLayerEntryConfig;
           if (baseVectorLayerEntryConfig?.source?.featureInfo) {
             this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields!, sourceKey, destinationKey);
             this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField!, sourceKey, destinationKey);

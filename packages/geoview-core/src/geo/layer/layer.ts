@@ -70,37 +70,37 @@ export class Layer {
               });
             } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.mapId, layerConfig);
-              geoJSON.createGeoViewVectorLayers().then(() => {
+              geoJSON.createGeoViewLayers().then(() => {
                 this.addToMap(geoJSON);
               });
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.mapId, layerConfig);
-              wmsLayer.createGeoViewRasterLayers().then(() => {
+              wmsLayer.createGeoViewLayers().then(() => {
                 this.addToMap(wmsLayer);
               });
             } else if (layerConfigIsEsriDynamic(layerConfig)) {
               const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
-              esriDynamic.createGeoViewRasterLayers().then(() => {
+              esriDynamic.createGeoViewLayers().then(() => {
                 this.addToMap(esriDynamic);
               });
             } else if (layerConfigIsEsriFeature(layerConfig)) {
               const esriFeature = new EsriFeature(this.mapId, layerConfig);
-              esriFeature.createGeoViewVectorLayers().then(() => {
+              esriFeature.createGeoViewLayers().then(() => {
                 this.addToMap(esriFeature);
               });
             } else if (layerConfigIsWFS(layerConfig)) {
               const wfsLayer = new WFS(this.mapId, layerConfig);
-              wfsLayer.createGeoViewVectorLayers().then(() => {
+              wfsLayer.createGeoViewLayers().then(() => {
                 this.addToMap(wfsLayer);
               });
             } else if (layerConfigIsOgcFeature(layerConfig)) {
               const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
-              ogcFeatureLayer.createGeoViewVectorLayers().then(() => {
+              ogcFeatureLayer.createGeoViewLayers().then(() => {
                 this.addToMap(ogcFeatureLayer);
               });
             } else if (layerConfigIsXYZTiles(layerConfig)) {
               const xyzTiles = new XYZTiles(this.mapId, layerConfig);
-              xyzTiles.createGeoViewRasterLayers().then(() => {
+              xyzTiles.createGeoViewLayers().then(() => {
                 this.addToMap(xyzTiles);
               });
             }
@@ -136,18 +136,20 @@ export class Layer {
    */
   private addToMap(geoviewLayer: AbstractGeoViewLayer): void {
     // if the returned layer object has something in the layerLoadError, it is because an error was detected
-    // do not add to the map
+    // do not add the layer to the map
     if (geoviewLayer.layerLoadError.length !== 0) {
-      const names = geoviewLayer.layerLoadError.toString();
-      api.event.emit(
-        snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
-          type: 'key',
-          value: 'validation.layer.loadfailed',
-          params: [names, this.mapId],
-        })
-      );
-      // eslint-disable-next-line no-console
-      console.log(`Layer [${names}] failed to load on map ${this.mapId}`);
+      geoviewLayer.layerLoadError.forEach((loadError) => {
+        const { layer, consoleMessage } = loadError;
+        api.event.emit(
+          snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+            type: 'key',
+            value: 'validation.layer.loadfailed',
+            params: [layer, this.mapId],
+          })
+        );
+        // eslint-disable-next-line no-console
+        console.log(consoleMessage);
+      });
     } else {
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
 
