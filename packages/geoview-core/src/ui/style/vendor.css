@@ -2,29 +2,9 @@
 Hold all third party libraries override
 */
 
+/*
+OpenLayers
+*/
 .ol-scale-line-inner {
   display: none;
 }
-
-/** Overview Map Styling **/
-
-/* .ol-custom-overviewmap:not(.ol-collapsed) button {
-  bottom: auto;
-  left: auto;
-  right: 1px;
-  top: 1px;
-  position: absolute;
-} */
-/*
-.ol-overviewmap.ol-uncollapsible button {
-  display: block;
-  width: 32px;
-  height: 32px;
-  bottom: auto;
-  left: auto;
-  right: 1px;
-  top: 1px;
-  position: absolute;
-  z-index: 10000;
-  pointer-events: all;
-} */

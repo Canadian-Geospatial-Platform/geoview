@@ -103,27 +103,28 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   };
 
   /**
-   * Manage skip bottom link. If user press enter it goes to top link and if he tries to focus the map, it goes to focus dialog
+   * Manage skip top and bottom link. If user press enter it goes to top link and if he tries to focus the map, it goes to focus dialog
    * @param {KeyboardEvent} evt the keyboard event
    */
-  function manageBottomLink(evt: KeyboardEvent): void {
-    // if Enter, skip before the map element
-    // if shift+Tab, focus the map element
-    if (evt.code === 'Enter') {
-      document.getElementById(`toplink-${id}`)?.focus();
-    } else if (evt.code === 'Tab' && evt.shiftKey) {
+  function manageLinks(evt: KeyboardEvent): void {
+    // if Enter, skip to the right link (handle the ref of the link)
+    // if Tab from topLink or shift+Tab from bottomLink, focus the map element
+    const linkId = (evt.target as HTMLElement).id.split('-')[0];
+
+    if ((evt.code === 'Tab' && linkId === 'toplink') || (evt.code === 'Tab' && evt.shiftKey && linkId === 'bottomlink')) {
       // prevent the event to tab to inner map
       evt.preventDefault();
       evt.stopPropagation();
 
       // focus the map element and emit the map keyboard focus event
-      (document.getElementById(id)?.getElementsByClassName(`ol-viewport`)[0] as HTMLElement).focus();
+      (document.getElementById(`map-${id}`) as HTMLElement).focus();
       api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id));
     }
   }
 
   useEffect(() => {
-    document.getElementById(`bottomlink-${id}`)?.addEventListener('keydown', manageBottomLink);
+    document.getElementById(`bottomlink-${id}`)?.addEventListener('keydown', manageLinks);
+    document.getElementById(`toplink-${id}`)?.addEventListener('keydown', manageLinks);
 
     // on map keyboard focus, show focus trap dialog
     api.event.on(
@@ -154,7 +155,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     );
 
     return () => {
-      document.removeEventListener('keydown', manageBottomLink);
+      document.getElementById(`bottomlink-${id}`)?.removeEventListener('keydown', manageLinks);
+      document.getElementById(`toplink-${id}`)?.removeEventListener('keydown', manageLinks);
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,7 +164,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   return (
     <Modal
-      container={document.getElementsByClassName('llwp-map')[0]}
+      container={document.getElementById(id)}
       mapId={id}
       open={open}
       aria-labelledby="wcag-dialog-title"

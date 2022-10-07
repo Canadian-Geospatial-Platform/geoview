@@ -6,13 +6,18 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 const validEvents: EventStringId[] = [
   EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
   EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
+  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
   EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
   EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
   EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
 ];
 
 /** Valid events that can create PanelWithAButtonIdAndTypePayload  */
-const validEvents4ButtonIdAndType: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE];
+const validEvents4ButtonIdAndType: EventStringId[] = [
+  EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
+  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
+  EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
+];
 
 /** Valid events that can create PanelAndActionPayload  */
 const validEvents4Action: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION];

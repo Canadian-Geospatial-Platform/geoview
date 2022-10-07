@@ -132,7 +132,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     // emit an event to hide the marker when using the details panel
     api.event.emit(payloadBaseClass(EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
 
-    const buttonElement = document.getElementById(button.id!);
+    const buttonElement = document.getElementById(mapId)?.querySelector(`#${button.id}`);
 
     if (buttonElement) {
       // put back focus on calling button
@@ -144,7 +144,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // if in focus trap mode, trigger the event
       if (mapCont.closest('.llwp-map')?.classList.contains('map-focus-trap')) {
         mapCont.classList.add('keyboard-focus');
-        api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `ol-viewport-${mapId}`));
+        api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, `map-${mapId}`));
       }
     }
 
@@ -202,6 +202,19 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         if (payloadHasAButtonIdAndType(payload)) {
           if (payload.buttonId === button.id! && payload.handlerName === mapId) {
             closePanel();
+          }
+        }
+      },
+      mapId,
+      button.id!
+    );
+
+    api.event.on(
+      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
+      (payload) => {
+        if (payloadHasAButtonIdAndType(payload)) {
+          if (payload.handlerName === mapId) {
+            setPanelStatus(false);
           }
         }
       },
@@ -268,6 +281,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId, button.id!);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId, button.id!);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, mapId, button.id!);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, mapId, button.id!);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, mapId, button.id!);
       api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId, button.id!);

@@ -92,14 +92,9 @@ export class GeoUtilities {
         activeEl?.classList.toggle('keyboard-focused');
 
         // Check if the focus element is a map. If so, emit the keyboard focus event with the map id
-        if (activeEl?.className.match(/ol-viewport*/g) !== null) {
-          const mapId = activeEl?.getAttribute('id');
-
-          activeEl?.classList.forEach((item) => {
-            if (item.includes('ol-viewport')) {
-              api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
-            }
-          });
+        if (activeEl?.className.match(/mapContainer*/g) !== null) {
+          const mapId = activeEl?.getAttribute('id')?.split('-')[1];
+          api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId!));
         }
       }
     });

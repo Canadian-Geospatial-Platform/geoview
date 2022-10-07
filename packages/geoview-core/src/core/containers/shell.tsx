@@ -198,7 +198,7 @@ export function Shell(props: ShellProps): JSX.Element {
         {Object.keys(api.map(id).modal.modals).map((modalId) => (
           <Modal key={modalId} id={modalId} open={false} mapId={id} />
         ))}
-        <FocusTrapDialog id={id} callback={() => handleCallback(true)} />
+        <FocusTrapDialog id={id} callback={(isActive) => handleCallback(isActive)} />
         <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: '0px' }}>
           {t('keyboardnav.end')}
         </a>
