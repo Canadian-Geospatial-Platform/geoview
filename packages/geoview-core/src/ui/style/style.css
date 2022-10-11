@@ -2,7 +2,12 @@
 Hold viewer specific css not inside theme
 */
 .keyboard-focused {
-  outline: revert !important;
+  border: revert !important;
+}
+
+/* Work around to have border map container focus */
+[class*="mapContainer"].keyboard-focused {
+  border: #000 solid 2px !important;
 }
 
 .llwp-map {

@@ -72,7 +72,7 @@ export function FooterbarExpandButton(): JSX.Element {
       }
 
       footerBar.style.transition = 'max-height 300ms ease-out';
-      footerBar.style.maxHeight = '20px';
+      footerBar.style.maxHeight = '25px';
     }
 
     setStatus(false);

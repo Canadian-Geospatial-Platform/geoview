@@ -71,8 +71,8 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
 
           if (overviewMapViewport) {
             if (isCollapsed) {
-              overviewMapViewport.style.width = '32px';
-              overviewMapViewport.style.height = '32px';
+              overviewMapViewport.style.width = '40px';
+              overviewMapViewport.style.height = '40px';
               overviewMapViewport.style.margin = '0px';
             } else {
               overviewMapViewport.style.width = '150px';

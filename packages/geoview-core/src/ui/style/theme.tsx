@@ -24,7 +24,7 @@ const themeOptions: ThemeOptions = {
   typography: {
     fontSize: 16,
     htmlFontSize: 16,
-    fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+    fontFamily: "'Monserrat', 'Helvetica', 'Arial', sans-serif",
     h1: headingStyles,
     h2: headingStyles,
     h3: headingStyles,
@@ -34,11 +34,11 @@ const themeOptions: ThemeOptions = {
       fontWeight: 400,
     },
     subtitle1: {
-      fontSize: '0.8rem',
+      fontSize: '1rem',
       lineHeight: 1.25,
     },
     subtitle2: {
-      fontSize: '0.7rem',
+      fontSize: '0.8rem',
       lineHeight: 1.25,
     },
     body1: {},

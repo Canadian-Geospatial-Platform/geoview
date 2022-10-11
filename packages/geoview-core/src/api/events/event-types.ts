@@ -84,6 +84,7 @@ export type EventStringId =
   | 'panel/add_action'
   | 'panel/change_content'
   | 'panel/close'
+  | 'panel/close_all'
   | 'panel/open'
   | 'panel/remove_action'
   | 'slider/on_change_value'

@@ -21,12 +21,10 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    // height: '20px',
-    maxHeight: '20px',
-    minHeight: '20px',
-    transition: 'max-height 2s ease-out',
-    backgroundColor: '#0000008f',
+    maxHeight: '25px',
+    minHeight: '25px',
     backdropFilter: 'blur(5px)',
+    backgroundColor: '#000000aa',
     pointerEvents: 'all',
     position: 'absolute',
     left: 0,
@@ -36,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',
+    padding: '5px',
+    '& button': {
+      cursor: 'pointer',
+      margin: 'auto',
+    },
   },
   rotationControlsContainer: {
     display: 'flex',

@@ -93,7 +93,7 @@ export class PanelApi {
           const buttonPanel = buttonPanels[buttonId];
 
           if (this.buttonId !== buttonPanel.id) {
-            buttonPanel.panel?.close();
+            buttonPanel.panel?.closeAllPanels();
           }
         });
       });
@@ -107,7 +107,7 @@ export class PanelApi {
           const buttonPanel = buttonPanels[buttonId];
 
           if (this.buttonId !== buttonPanel.id) {
-            buttonPanel.panel?.close();
+            buttonPanel.panel?.closeAllPanels();
           }
         });
       });
@@ -122,6 +122,15 @@ export class PanelApi {
 
     api.event.emit(
       PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, this.buttonId, this.type!),
+      this.buttonId
+    );
+  };
+
+  closeAllPanels = (): void => {
+    this.status = false;
+
+    api.event.emit(
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, this.mapId, this.buttonId, this.type!),
       this.buttonId
     );
   };

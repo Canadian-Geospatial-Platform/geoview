@@ -15,6 +15,9 @@ import { useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
+import { Crosshair } from '../crosshair/crosshair';
+import { Footerbar } from '../footer-bar/footer-bar';
+import { OverviewMap } from '../overview-map/overview-map';
 
 import { generateId } from '../../utils/utilities';
 
@@ -27,8 +30,6 @@ import { payloadIsABasemapLayerArray } from '../../../api/events/payloads/basema
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
-import { Footerbar } from '../footer-bar/footer-bar';
-import { OverviewMap } from '../overview-map/overview-map';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 
 const useStyles = makeStyles(() => ({
@@ -149,6 +150,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         maxZoom: defaultBasemap?.zoomLevels.max || 17,
       }),
       controls: [],
+      keyboardEventTarget: document.getElementById(`map-${id}`) as HTMLElement,
     });
 
     initCGPVMap(initialMap);
@@ -247,13 +249,15 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   }, []);
 
   return (
-    <div id={id} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer}>
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+    <div id={`map-${id}`} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} tabIndex={0}>
       {isLoaded && (
         <>
           {components !== undefined && components.indexOf('north-arrow') > -1 && (
             <NorthArrow projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           )}
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
+          <Crosshair />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>

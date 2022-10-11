@@ -49,20 +49,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Crosshair properties interface
- */
-interface CrosshairProps {
-  id: string;
-}
-
-/**
  * Create a Crosshair when map is focus with the keyboard so user can click on the map
- * @param {CrosshairProps} props the crosshair properties
  * @returns {JSX.Element} the crosshair component
  */
-export function Crosshair(props: CrosshairProps): JSX.Element {
-  const { id } = props;
-
+export function Crosshair(): JSX.Element {
   const classes = useStyles();
   const { t } = useTranslation<string>();
 
@@ -118,7 +108,7 @@ export function Crosshair(props: CrosshairProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payloadIsAInKeyfocus(payload)) {
-          if (payload.handlerName!.includes(id)) {
+          if (payload.handlerName!.includes(mapId)) {
             setCrosshairsActive(true);
             isCrosshairsActiveValue.current = true;
             api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
