@@ -1,4 +1,4 @@
-import { TypeStyleConfig, TypeVectorLayerEntryConfig } from '../map/map-schema-types';
+import { TypeStyleConfig, TypeLayerEntryConfig } from '../map/map-schema-types';
 export declare type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export declare type EsriBaseRenderer = {
     type: EsriRendererTypes;
@@ -151,5 +151,5 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
     rotationExpression: string;
     rotationType: 'arithmetic' | 'geographic';
 }
-export declare function getStyleFromEsriRenderer(mapId: string, layerEntryConfig: TypeVectorLayerEntryConfig, renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
+export declare function getStyleFromEsriRenderer(mapId: string, layerEntryConfig: TypeLayerEntryConfig, renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
 export {};

@@ -1,3 +1,7 @@
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { ReadOptions } from 'ol/format/Feature';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
@@ -82,10 +86,10 @@ export declare class EsriFeature extends AbstractGeoViewVector {
     /** ***************************************************************************************************************************
      * This method is used to process ESRI layers that define an ESRI group layer. These layers behave as a GeoView group layer and
      * also as a data layer (i.e. they have extent, visibility and query flag definition). ESRI group layer can be identified by
-     * the presence of a esriType attribute. The attribute content is 'Group Layer', but it has no meaning. We could have decided
-     * to put any other value, and it would not have had any impact on the code.
+     * the presence of an isEsriLayerGroup attribute. The attribute content is 'Group Layer', but it has no meaning. We could have
+     * decided to put any other value, and it would not have had any impact on the code.
      *
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
      */
@@ -94,17 +98,19 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    private processLayerMetadata;
+    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
-     * This method verify if the layer is queryable and set the array of fields and aliases.
+     * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
      *
-     * @param {boolean} visibility The default visibility of the layer.
-     * @param {TypeJsonObject} extent The layer extent.
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     * @param {boolean} visibility The metadata initial visibility of the layer.
+     * @param {number} minScale The metadata minScale of the layer.
+     * @param {number} maxScale The metadata maxScale of the layer.
+     * @param {TypeJsonObject} extent The metadata layer extent.
+     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
      */
     private processInitialSettings;
     /** ***************************************************************************************************************************
@@ -114,7 +120,15 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param {string} nameField The display field associated to the layer.
      * @param {string} geometryFieldName The field name of the geometry property.
      * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
+    /** ***************************************************************************************************************************
+     * Create a source configuration for the vector layer.
+     *
+     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     *
+     * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+     */
+    protected createVectorSource(layerEntryConfig: TypeEsriFeatureLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
 }

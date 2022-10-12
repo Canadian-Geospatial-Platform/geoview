@@ -1,6 +1,10 @@
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { ReadOptions } from 'ol/format/Feature';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'GeoJSON';
 }
@@ -88,4 +92,12 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
     private processLayerMetadata;
+    /** ***************************************************************************************************************************
+     * Create a source configuration for the vector layer.
+     *
+     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     *
+     * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+     */
+    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
 }

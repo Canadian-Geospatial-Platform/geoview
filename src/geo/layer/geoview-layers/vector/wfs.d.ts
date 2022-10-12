@@ -1,7 +1,11 @@
+import { Options as SourceOptions } from 'ol/source/Vector';
+import { ReadOptions } from 'ol/format/Feature';
+import { Vector as VectorSource } from 'ol/source';
+import { Geometry } from 'ol/geom';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
-import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
     format: 'WFS';
 }
@@ -98,4 +102,12 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {TypeVectorLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
+    /** ***************************************************************************************************************************
+     * Create a source configuration for the vector layer.
+     *
+     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration.
+     *
+     * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+     */
+    protected createVectorSource(layerEntryConfig: TypeBaseLayerEntryConfig, sourceOptions?: SourceOptions, readOptions?: ReadOptions): VectorSource<Geometry>;
 }

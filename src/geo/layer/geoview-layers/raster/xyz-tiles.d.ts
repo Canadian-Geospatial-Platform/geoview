@@ -1,8 +1,10 @@
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
+import { Coordinate } from 'ol/coordinate';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig } from '../../../map/map-schema-types';
+import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 export declare type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
     source: TypeSourceImageXYZTilesInitialConfig;
@@ -57,10 +59,29 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param {TypeXYZTilesConfig} layerConfig the layer configuration
      */
     constructor(mapId: string, layerConfig: TypeXYZTilesConfig);
-    /** ****************************************************************************************************************************
-     * This method is not used by XYZTiles.
+    /** ***************************************************************************************************************************
+     * This method reads the service metadata from the metadataAccessPath.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
      */
-    getAdditionalServiceDefinition(): Promise<void>;
+    protected getServiceMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method processes recursively the metadata of each layer in the list of layer configuration.
+     *
+     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
+     */
+    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
+     * Since xyz-tile layer does not have metadata for the moment, the method does nothing.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     *
+     * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
+     */
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ****************************************************************************************************************************
      * This method creates a GeoView XYZTiles layer using the definition provided in the layerEntryConfig parameter.
      *
@@ -69,16 +90,22 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
      */
     processOneLayerEntry(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
-    /** ****************************************************************************************************************************
-     * This method associate a renderer to the GeoView layer.
+    /** ***************************************************************************************************************************
+     * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+     * initial settings, fields and aliases).
      *
-     * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
-     */
-    processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void;
-    /** ****************************************************************************************************************************
-     * This method register the GeoView layer to panels that offer this possibility.
+     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
      *
-     * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+     * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
-    registerToPanels(rasterLayer: TypeBaseRasterLayer): void;
+    protected processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided coordinate.
+     *
+     * @param {Coordinate} lnglat The coordinate that will be used by the query.
+     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     */
+    protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult>;
 }

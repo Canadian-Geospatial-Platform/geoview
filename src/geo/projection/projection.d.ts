@@ -1,3 +1,4 @@
+import { Coordinate } from 'ol/coordinate';
 import { Projection as OLProjection } from 'ol/proj';
 /**
  * constant used for the available projection names
@@ -85,5 +86,5 @@ export declare class Projection {
      * @param {Coordinate} center map center
      * @returns the point resolution for map center
      */
-    getResolution: (projection: string, center: number[]) => number;
+    getResolution: (projection: string, center: Coordinate) => number;
 }

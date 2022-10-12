@@ -1,7 +1,9 @@
+import { Coordinate } from 'ol/coordinate';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
-import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig, TypeGeoviewLayerConfig } from '../../../map/map-schema-types';
+import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
     source: TypeSourceImageWmsInitialConfig;
 }
@@ -46,18 +48,34 @@ export declare const geoviewEntryIsWMS: (verifyIfGeoViewEntry: TypeLayerEntryCon
  * @class WMS
  */
 export declare class WMS extends AbstractGeoViewRaster {
-    private metadata;
-    private attributions;
     /** ***************************************************************************************************************************
      * Initialize layer
      * @param {string} mapId the id of the map
      * @param {TypeWMSLayerConfig} layerConfig the layer configuration
      */
     constructor(mapId: string, layerConfig: TypeWMSLayerConfig);
-    /** ****************************************************************************************************************************
-     * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
+    /** ***************************************************************************************************************************
+     * This method reads the service metadata from the metadataAccessPath.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
      */
-    getAdditionalServiceDefinition(): Promise<void>;
+    protected getServiceMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
+     *
+     * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
+     */
+    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    /** ***************************************************************************************************************************
+     * This method processes recursively the metadata of each layer in the list of layer configuration.
+     *
+     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+     *
+     * @returns {Promise<void>} A promise that the execution is completed.
+     */
+    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void>;
     /** ****************************************************************************************************************************
      * This method creates a GeoView WMS layer using the definition provided in the layerEntryConfig parameter.
      *
@@ -73,16 +91,22 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {TypeJsonObject} layerFromCapabilities The layer entry found in the capabilities.
      */
     findLayerCapabilities(layerId: string, layerFromCapabilities: TypeJsonObject): TypeJsonObject | null;
-    /**
-     * This method associate a renderer to the GeoView layer.
+    /** ***************************************************************************************************************************
+     * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+     * initial settings, fields and aliases).
      *
-     * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
-     */
-    processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void;
-    /**
-     * This method register the GeoView layer to panels that offer this possibility.
+     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
      *
-     * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+     * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
-    registerToPanels(rasterLayer: TypeBaseRasterLayer): void;
+    protected processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided coordinate.
+     *
+     * @param {Coordinate} lnglat The coordinate that will be used by the query.
+     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     */
+    protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult>;
 }

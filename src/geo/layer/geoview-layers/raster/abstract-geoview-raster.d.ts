@@ -1,6 +1,9 @@
 import BaseLayer from 'ol/layer/Base';
+import { Coordinate } from 'ol/coordinate';
+import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeFeatureInfoResult, TypeQueryType } from '../../../../api/events/payloads/get-feature-info-payload';
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
  */
@@ -19,60 +22,46 @@ export declare type TypeBaseRasterLayer = BaseLayer;
  * features are placed.
  */
 export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
-    /**
-     * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
-     * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
-     * Its code is the same for all child classes. It must first validate that the gvLayers attribute is null indicating
-     * that the method has never been called before. If this is not the case, an error message must be sent. Then, it calls the
-     * abstract method getAdditionalServiceDefinition. If the GeoView layer does not have a service definition, this method does
-     * nothing. For example, when the child is a WMS service, this method executes the GetCapabilities request and saves the
-     * result in an attribute of the class.
-     *
-     * The next operation is to instantiate each layer identified by the listOfLayerEntryConfig attribute. This is done using the
-     * abstract method processOneLayerEntry. Then, a renderer is assigned to the newly created layer. The definition of the
-     * renderers can come from the configuration of the GeoView layer or from the information saved by the method
-     * getAdditionalServiceDefinition, priority being given to the first of the two. This operation is done by the abstract
-     * method processLayerMetadata. Note that if field aliases are used, they will be set at the same time as the renderer.
-     *
-     * Finally, the layer registers to all panels that offer this possibility. For example, if the layer is query able, it could
-     * subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer to return the
-     * descriptive information of all the features in a tolerance radius. This information will be used to populate the
-     * details-panel.
-     *
-     * @returns {Promise<void>} The promise that the code was executed.
-     */
-    createGeoViewRasterLayers(): Promise<void>;
     /** ***************************************************************************************************************************
-     * Process recursively the list of layer Entries to create the layers and the layer groups.
+     * This method reads the service metadata from the metadataAccessPath.
      *
-     * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries to process.
-     *
-     * @returns {Promise<BaseLayer | null>} The promise that the layers were created.
+     * @returns {Promise<void>} A promise that the execution is completed.
      */
-    private processListOfLayerEntryConfig;
-    /**
-     * This method reads from the metadataAccessPath additional information to complete the GeoView layer configuration.
-     * If the GeoView layer does not have a service definition, this method does nothing.
-     */
-    abstract getAdditionalServiceDefinition(): Promise<void>;
-    /**
+    protected abstract getServiceMetadata(): Promise<void>;
+    /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
      *
      * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
      *
-     * @returns {TypeBaseRasterLayer} The GeoView raster layer that has been created.
+     * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
      */
-    abstract processOneLayerEntry(layerEntryConfig: TypeLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
-    /**
-     * This method associate a renderer to the GeoView layer.
+    protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
+    /** ***************************************************************************************************************************
+     * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+     * initial settings, fields and aliases).
      *
-     * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer associated to the renderer.
-     */
-    abstract processLayerMetadata(rasterLayer: TypeBaseRasterLayer): void;
-    /**
-     * This method register the GeoView layer to panels that offer this possibility.
+     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
      *
-     * @param {TypeBaseRasterLayer} rasterLayer The GeoView layer who wants to register.
+     * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
-    abstract registerToPanels(rasterLayer: TypeBaseRasterLayer): void;
+    protected abstract processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided coordinate.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features stored in the layer.
+     *
+     * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
+     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+     * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    getFeatureInfo(location: Pixel | Coordinate | Coordinate[], layerId?: string, queryType?: TypeQueryType): Promise<TypeFeatureInfoResult>;
 }

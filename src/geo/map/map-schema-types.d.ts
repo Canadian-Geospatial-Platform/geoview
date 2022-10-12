@@ -100,7 +100,7 @@ export declare type TypeBaseVectorSourceInitialConfig = {
     dataAccessPath?: TypeLocalizedString;
     /** The feature format used by the XHR feature loader when url is set. */
     format?: TypeVectorSourceFormats | 'MVT';
-    /** The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326. */
+    /** The projection code of the source. Default value is EPSG:4326. */
     dataProjection?: string;
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
@@ -447,17 +447,19 @@ export declare const layerEntryIsRaster: (verifyIfLayer: TypeLayerEntryConfig) =
  */
 export declare const layerEntryIsGeocore: (verifyIfLayer: TypeLayerEntryConfig) => verifyIfLayer is TypeGeocoreLayerEntryConfig;
 /** ******************************************************************************************************************************
- * Type used to define a GeoView vector layer to display on the map.
+ * Base type used to define a GeoView layer to display on the map.
  */
-export declare type TypeBaseVectorLayerEntryConfig = {
-    /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
+export declare type TypeBaseLayerEntryConfig = {
+    /** This attribute is not part of the schema. It is used to link the layer entry config to the GeoView root layer config. */
     geoviewRootLayer?: TypeGeoviewLayerConfig;
     /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
     parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
     /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
     gvlayer?: BaseLayer;
+    /** This attribute is not part of the schema. It is used internally to distinguish ESRI layer groups. */
+    isEsriLayerGroup?: boolean;
     /** Layer entry data type. */
-    entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap';
+    entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
     /** The id of the layer to display on the map. */
     layerId: string;
     /** The display name of the layer (English/French). */
@@ -468,14 +470,14 @@ export declare type TypeBaseVectorLayerEntryConfig = {
      */
     initialSettings?: TypeLayerInitialSettings;
     /** Source settings to apply to the GeoView vector layer source at creation time. */
-    source?: TypeBaseVectorSourceInitialConfig;
+    source?: TypeBaseVectorSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
     /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
     listOfLayerEntryConfig?: never;
 };
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector layer to display on the map.
  */
-export interface TypeVectorLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
+export interface TypeVectorLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
     entryType?: 'vector';
     /** Initial settings to apply to the GeoView vector layer source at creation time. */
@@ -575,7 +577,7 @@ export declare type TypeSourceTileInitialConfig = {
 /** ******************************************************************************************************************************
  * Type used to identify a GeoView vector heamap layer to display on the map.
  */
-export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
+export interface TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
     entryType?: 'vectorHeatmap';
     /** Initial settings to apply to the GeoView vector layer source at creation time. */
@@ -596,15 +598,13 @@ export interface TypeVectorHeatmapLayerEntryConfig extends Omit<TypeBaseVectorLa
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
  */
 export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
-    /** Style to apply to the vector layer. */
-    style?: TypeStyleConfig;
     /** Tile grid parameters to use. */
     tileGrid?: TypeTileGrid;
 }
 /** ******************************************************************************************************************************
  * Type used to define a GeoView vector tile layer to display on the map. The vector data is divided into a tile grid.
  */
-export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayerEntryConfig, 'source'> {
+export interface TypeVectorTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
     entryType?: 'vectorTile';
     /**
@@ -618,55 +618,22 @@ export interface TypeVectorTileLayerEntryConfig extends Omit<TypeBaseVectorLayer
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export declare type TypeImageLayerEntryConfig = {
-    /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
-    geoviewRootLayer?: TypeGeoviewLayerConfig;
-    /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
-    parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
-    /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    gvlayer?: BaseLayer;
+export interface TypeImageLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
     entryType?: 'raster';
-    /** The id of the layer to display on the map. */
-    layerId: string;
-    /** The display name of the layer (English/French). */
-    layerName?: TypeLocalizedString;
-    /**
-     * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
-     * configuration tree.
-     */
-    initialSettings?: TypeLayerInitialSettings;
-    /** Initial settings to apply to the GeoView image layer source at creation time. */
     source?: TypeSourceImageInitialConfig;
-    /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
-    listOfLayerEntryConfig?: never;
-};
+    /** Style to apply to the raster layer. */
+    style?: TypeStyleConfig;
+}
 /** ******************************************************************************************************************************
  * Type used to define a GeoView image layer to display on the map.
  */
-export declare type TypeTileLayerEntryConfig = {
-    /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
-    geoviewRootLayer?: TypeGeoviewLayerConfig;
-    /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
-    parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
-    /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    gvlayer?: BaseLayer;
+export interface TypeTileLayerEntryConfig extends TypeBaseLayerEntryConfig {
     /** Layer entry data type. */
     entryType?: 'raster';
-    /** The id of the layer to display on the map. */
-    layerId: string;
-    /** The display name of the layer (English/French). */
-    layerName?: TypeLocalizedString;
-    /**
-     * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
-     * configuration tree.
-     */
-    initialSettings?: TypeLayerInitialSettings;
     /** Initial settings to apply to the GeoView image layer source at creation time. */
     source?: TypeSourceTileInitialConfig;
-    /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
-    listOfLayerEntryConfig?: never;
-};
+}
 /** ******************************************************************************************************************************
  * Type used to define a GeoView layer where configration is extracted by a configuration snippet stored on a server. The server
  * configuration will handle bilangual informations.
@@ -703,33 +670,20 @@ export declare type TypeSourceGeocoreConfig = {
 /** ******************************************************************************************************************************
  * Type used to define a layer group.
  */
-export declare type TypeLayerGroupEntryConfig = {
-    /** This attribute is not part of the schema. It is used to link the layer config config to the GeoView parent's layer config. */
-    geoviewRootLayer: TypeGeoviewLayerConfig;
-    /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
-    parentLayerConfig: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
-    /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    gvlayer?: BaseLayer;
+export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'listOfLayerEntryConfig'> {
+    /** This attribute is not part of the schema. It is used internally to distinguish ESRI layer groups. */
+    isEsriLayerGroup?: boolean;
     /** Layer entry data type. */
     entryType: 'group';
-    /** The id of the layer group to display on the map. */
-    layerId: string;
-    /** The display name of the layer group (English/French). */
-    layerName: TypeLocalizedString;
     /** The source attribute does not exists on the layer group entry. */
     source: never;
-    /**
-     * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
-     * configuration tree.
-     */
-    initialSettings?: TypeLayerInitialSettings;
     /** The list of layer entry configurations to use from the GeoView layer group. */
     listOfLayerEntryConfig: TypeListOfLayerEntryConfig;
-};
+}
 /** ******************************************************************************************************************************
  * Layer config type.
  */
-export declare type TypeLayerEntryConfig = TypeLayerGroupEntryConfig | TypeBaseVectorLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig | TypeImageLayerEntryConfig | TypeTileLayerEntryConfig | TypeGeocoreLayerEntryConfig;
+export declare type TypeLayerEntryConfig = TypeLayerGroupEntryConfig | TypeBaseLayerEntryConfig | TypeVectorHeatmapLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig | TypeImageLayerEntryConfig | TypeTileLayerEntryConfig | TypeGeocoreLayerEntryConfig;
 /** ******************************************************************************************************************************
  * List of layers. Corresponds to the layerList defined in the schema.
  */
@@ -890,7 +844,7 @@ export declare type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'].
  */
-export declare type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'overview-map'>;
+export declare type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'legend'>;
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
  * the same loaction as core config (<<core config name>>-<<package name>>.json).

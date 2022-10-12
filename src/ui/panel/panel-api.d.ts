@@ -38,6 +38,7 @@ export declare class PanelApi {
      * Trigger an event to close the panel
      */
     close: () => void;
+    closeAllPanels: () => void;
     /**
      * Add a new action button to the header of the panel before the close button
      *

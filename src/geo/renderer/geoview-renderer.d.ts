@@ -1,6 +1,6 @@
 import { Style } from 'ol/style';
 import { FeatureLike } from 'ol/Feature';
-import { TypeVectorLayerEntryConfig, TypeVectorTileLayerEntryConfig, TypeBaseVectorLayerEntryConfig } from '../map/map-schema-types';
+import { TypeVectorLayerEntryConfig, TypeVectorTileLayerEntryConfig, TypeBaseLayerEntryConfig } from '../map/map-schema-types';
 /** *****************************************************************************************************************************
  * A class to define the GeoView renderers.
  *
@@ -18,7 +18,7 @@ export declare class GeoviewRenderer {
     private processSymbol;
     private processFillStyle;
     constructor(mapId: string);
-    getStyle(feature: FeatureLike, layerEntryConfig: TypeBaseVectorLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig): Style | undefined;
+    getStyle(feature: FeatureLike, layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig): Style | undefined;
     private incrementDefaultColorIndex;
     private getDefaultColorAndIncrementIndex;
     private getDefaultColor;
