@@ -9,7 +9,7 @@ import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payl
 import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
 import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
 import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';
@@ -25,6 +25,9 @@ import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-til
  * @class Layer
  */
 export class Layer {
+  /** Layers with valid configuration for this map. */
+  registeredLayers: Record<string, TypeLayerEntryConfig> = {};
+
   // variable used to store all added layers
   layers: { [key: string]: AbstractGeoViewLayer } = {};
 
@@ -128,6 +131,28 @@ export class Layer {
         api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.mapId, aSingleLayerConfig))
       );
     }
+  }
+
+  /**
+   * Register the layer identifier. Duplicate identifier are not allowed.
+   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to register.
+   *
+   * @returns {boolean} Returns false if the layer configuration can't be registered.
+   */
+  registerLayerConfig(layerEntryConfig: TypeLayerEntryConfig): boolean {
+    if (this.registeredLayers[layerEntryConfig.layerId]) return false;
+    this.registeredLayers[layerEntryConfig.layerId] = layerEntryConfig;
+    return true;
+  }
+
+  /**
+   * Method used to verify if a layer is registered. Returns true if registered.
+   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to test.
+   *
+   * @returns {boolean} Returns true if the layer configuration is registered.
+   */
+  isRegistered(layerEntryConfig: TypeLayerEntryConfig): boolean {
+    return this.registeredLayers[layerEntryConfig.layerId] !== undefined;
   }
 
   /**

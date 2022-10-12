@@ -106,7 +106,7 @@ export type TypeFeatureInfoLayerConfig = {
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
-export type TypeBaseVectorSourceInitialConfig = {
+export type TypeBaseSourceVectorInitialConfig = {
   /** Path used to access the data. */
   dataAccessPath?: TypeLocalizedString;
   /** The feature format used by the XHR feature loader when url is set. */
@@ -120,7 +120,7 @@ export type TypeBaseVectorSourceInitialConfig = {
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
-export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
+export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
   /** The feature format used by the XHR feature loader when url is set. */
   format?: TypeVectorSourceFormats;
   /** Vector source clustering configuration. */
@@ -554,9 +554,10 @@ export type TypeBaseLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  gvlayer?: BaseLayer;
-  /** This attribute is not part of the schema. It is used internally to distinguish ESRI layer groups. */
-  isEsriLayerGroup?: boolean;
+  gvLayer?: BaseLayer;
+  /** This attribute is not part of the schema. It is used internally to distinguish dynamic layer groups derived from the
+   * metadata. */
+  isDynamicLayerGroup?: boolean;
   /** Layer entry data type. */
   entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
   /** The id of the layer to display on the map. */
@@ -569,7 +570,7 @@ export type TypeBaseLayerEntryConfig = {
    */
   initialSettings?: TypeLayerInitialSettings;
   /** Source settings to apply to the GeoView vector layer source at creation time. */
-  source?: TypeBaseVectorSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
+  source?: TypeBaseSourceVectorInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
   /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
   listOfLayerEntryConfig?: never;
 };
@@ -707,7 +708,7 @@ export interface TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryCon
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
  */
-export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
+export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
 }
@@ -758,7 +759,7 @@ export type TypeGeocoreLayerEntryConfig = {
   /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-  gvlayer?: BaseLayer;
+  gvLayer?: BaseLayer;
   /** Layer entry data type. */
   entryType?: 'geocore';
   /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
@@ -787,8 +788,9 @@ export type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'listOfLayerEntryConfig'> {
-  /** This attribute is not part of the schema. It is used internally to distinguish ESRI layer groups. */
-  isEsriLayerGroup?: boolean;
+  /** This attribute is not part of the schema. It is used internally to distinguish dynanic layer groups derived from the
+   * metadata. */
+  isDynamicLayerGroup?: boolean;
   /** Layer entry data type. */
   entryType: 'group';
   /** The source attribute does not exists on the layer group entry. */
