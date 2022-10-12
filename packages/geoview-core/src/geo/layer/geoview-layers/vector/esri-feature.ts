@@ -136,7 +136,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
           layer: layerEntryConfig.layerId,
           consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
@@ -147,7 +147,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
         layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
         if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
           return true;
         }
         this.layerLoadError.push({
@@ -193,13 +193,13 @@ export class EsriFeature extends AbstractGeoViewVector {
             fr: this.metadata!.layers[layerId as number].name as string,
           };
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
-          this.layersOfTheMap[subLayerEntryConfig.layerId] = subLayerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         });
         const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
         switchToGroupLayer.entryType = 'group';
-        switchToGroupLayer.isEsriLayerGroup = true;
+        switchToGroupLayer.isDynamicLayerGroup = true;
         switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
-        this.layersOfTheMap[switchToGroupLayer.layerId] = switchToGroupLayer;
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
       }
 
@@ -215,52 +215,9 @@ export class EsriFeature extends AbstractGeoViewVector {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
-      this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+      api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       return true;
     });
-  }
-
-  /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the "layer list" configuration.
-   *
-   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected processListOfLayerEntryMetadata(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
-  ): Promise<void> {
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      const promisedAllLayerDone: Promise<void>[] = [];
-      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig) && layerEntryConfig.isEsriLayerGroup)
-          promisedAllLayerDone.push(this.processEsriGroupLayer(layerEntryConfig));
-        else if (layerEntryIsGroupLayer(layerEntryConfig))
-          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
-      });
-      Promise.all(promisedAllLayerDone).then(() => resolve());
-    });
-    return promisedListOfLayerEntryProcessed;
-  }
-
-  /** ***************************************************************************************************************************
-   * This method is used to process ESRI layers that define an ESRI group layer. These layers behave as a GeoView group layer and
-   * also as a data layer (i.e. they have extent, visibility and query flag definition). ESRI group layer can be identified by
-   * the presence of an isEsriLayerGroup attribute. The attribute content is 'Group Layer', but it has no meaning. We could have
-   * decided to put any other value, and it would not have had any impact on the code.
-   *
-   * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
-   */
-  private processEsriGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      this.processLayerMetadata(layerEntryConfig).then(() => {
-        this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
-      });
-    });
-    return promisedListOfLayerEntryProcessed;
   }
 
   /** ***************************************************************************************************************************
@@ -274,15 +231,15 @@ export class EsriFeature extends AbstractGeoViewVector {
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       // User-defined groups do not have metadata provided by the service endpoint.
-      if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isEsriLayerGroup) resolve();
+      if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isDynamicLayerGroup) resolve();
       else {
         let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
         if (queryUrl) {
           queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerEntryConfig.layerId}` : `${queryUrl}/${layerEntryConfig.layerId}`;
           const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
           queryResult.then((response) => {
-            // layers must have a fields attribute except if it is an ESRI layer group.
-            if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isEsriLayerGroup)
+            // layers must have a fields attribute except if it is an dynamic layer group.
+            if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isDynamicLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
             if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
               if (!layerEntryConfig.style) {
@@ -359,8 +316,8 @@ export class EsriFeature extends AbstractGeoViewVector {
     layerEntryConfig: TypeEsriFeatureLayerEntryConfig
   ) {
     if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
-    // ESRI group layer doesn't have fields definition
-    if (!layerEntryConfig.isEsriLayerGroup) {
+    // dynamic group layer doesn't have fields definition
+    if (!layerEntryConfig.isDynamicLayerGroup) {
       if (!layerEntryConfig.source.featureInfo.nameField)
         layerEntryConfig.source.featureInfo.nameField = {
           en: nameField,
