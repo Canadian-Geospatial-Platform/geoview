@@ -1,10 +1,7 @@
 import BaseLayer from 'ol/layer/Base';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeFeatureInfoResult, TypeQueryType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -45,67 +42,4 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
    */
   protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
-
-  /** ***************************************************************************************************************************
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-   * initial settings, fields and aliases).
-   *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
-   *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
-   */
-  protected abstract processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void>;
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate.
-   *
-   * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
-   *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
-   */
-  protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult>;
-
-  /** ***************************************************************************************************************************
-   * Return feature information for all the features stored in the layer.
-   *
-   * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
-   * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
-   *
-   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
-   */
-  getFeatureInfo(
-    location: Pixel | Coordinate | Coordinate[],
-    layerId?: string,
-    queryType: TypeQueryType = 'at pixel'
-  ): Promise<TypeFeatureInfoResult> {
-    const queryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      switch (queryType) {
-        case 'at pixel':
-          // eslint-disable-next-line no-console
-          console.log('Queries using pixel are not implemented.');
-          resolve(null);
-          break;
-        case 'at coordinate':
-          this.getFeatureInfoAtCoordinate(location as Coordinate, layerId).then((featureInfoResult) => resolve(featureInfoResult));
-          break;
-        case 'using a bounding box':
-          // eslint-disable-next-line no-console
-          console.log('Queries using bounding box are not implemented.');
-          resolve(null);
-          break;
-        case 'using a polygon':
-          // eslint-disable-next-line no-console
-          console.log('Queries using polygon are not implemented.');
-          resolve(null);
-          break;
-        default:
-          // eslint-disable-next-line no-console
-          console.log(`Queries using ${queryType} are invalid.`);
-          resolve(null);
-      }
-    });
-    return queryResult;
-  }
 }

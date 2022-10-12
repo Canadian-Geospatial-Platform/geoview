@@ -21,7 +21,7 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
-  TypeBaseVectorSourceInitialConfig,
+  TypeBaseSourceVectorInitialConfig,
 } from '../../../map/map-schema-types';
 
 import { getLocalizedValue } from '../../../../core/utils/utilities';
@@ -135,7 +135,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
           layer: layerEntryConfig.layerId,
           consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
@@ -146,7 +146,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
         layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
         if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
           return true;
         }
         this.layerLoadError.push({
@@ -183,7 +183,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent };
           else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = extent;
         }
-        this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
       }
       this.layerLoadError.push({
@@ -195,28 +195,6 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the "layer list" configuration.
-   *
-   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected processListOfLayerEntryMetadata(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
-  ): Promise<void> {
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      const promisedAllLayerDone: Promise<void>[] = [];
-      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig))
-          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
-      });
-      Promise.all(promisedAllLayerDone).then(() => resolve());
-    });
-    return promisedListOfLayerEntryProcessed;
-  }
-
-  /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration.
    *
@@ -224,7 +202,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
@@ -277,7 +255,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = { strategy: all },
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
-    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}/collections/${layerEntryConfig.layerId}/items?f=json`;
     sourceOptions.format = new FormatGeoJSON();

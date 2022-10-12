@@ -18,7 +18,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeBaseVectorSourceInitialConfig,
+  TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
@@ -131,7 +131,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
           layer: layerEntryConfig.layerId,
           consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
@@ -142,7 +142,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
         layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
         if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
           return true;
         }
         this.layerLoadError.push({
@@ -154,7 +154,7 @@ export class GeoJSON extends AbstractGeoViewVector {
 
       // When no metadata are provided, all layers are considered valid.
       if (!this.metadata) {
-        this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
       }
 
@@ -170,7 +170,7 @@ export class GeoJSON extends AbstractGeoViewVector {
           });
           return false;
         }
-        this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
       }
       this.layerLoadError.push({
@@ -182,26 +182,6 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the list of layer configuration.
-   *
-   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      const promisedAllLayerDone: Promise<void>[] = [];
-      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig))
-          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!));
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
-      });
-      Promise.all(promisedAllLayerDone).then(() => resolve());
-    });
-    return promisedListOfLayerEntryProcessed;
-  }
-
-  /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
@@ -209,7 +189,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
       for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
@@ -238,7 +218,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = { strategy: all },
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
-    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
