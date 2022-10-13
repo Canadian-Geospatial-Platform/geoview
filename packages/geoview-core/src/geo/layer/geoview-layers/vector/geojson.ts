@@ -108,7 +108,8 @@ export class GeoJSON extends AbstractGeoViewVector {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
-          if (metadataString === '{}') throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+          if (metadataString === '{}')
+            throw new Error(`Cant't read service metadata for GeoView layer ${this.layerId} of map ${this.mapId}.`);
           else {
             this.metadata = toJsonObject(JSON.parse(metadataString));
             const { copyrightText } = this.metadata;

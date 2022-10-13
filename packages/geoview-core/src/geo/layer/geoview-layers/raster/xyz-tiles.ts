@@ -1,9 +1,14 @@
+/* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import { Coordinate } from 'ol/coordinate';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import { Pixel } from 'ol/pixel';
+import { transformExtent } from 'ol/proj';
+import { Extent } from 'ol/extent';
+
+import { defaultsDeep } from 'lodash';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -12,11 +17,14 @@ import {
   TypeTileLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
-  TypeBaseLayerEntryConfig,
+  layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
-import { getLocalizedValue } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
+import { Cast, toJsonObject } from '../../../../core/types/global-types';
+import { api } from '../../../../app';
 
+// ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
 //
 // NOTE: The signature of tile services may vary depending of if it's a dynamic or static tile service. Dynamic tile services solutions like TiTiler allows users
@@ -31,7 +39,7 @@ export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryCon
   source: TypeSourceImageXYZTilesInitialConfig;
 }
 
-export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
+export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: 'xyzTiles';
   listOfLayerEntryConfig: TypeXYZTilesLayerEntryConfig[];
 }
@@ -108,38 +116,81 @@ export class XYZTiles extends AbstractGeoViewRaster {
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      // ! TODO: Implement a stac reader or a JSON reader to get additionalServiceDefinition
-      resolve();
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
+          if (metadataString === '{}')
+            throw new Error(`Cant't read service metadata for GeoView layer ${this.layerId} of map ${this.mapId}.`);
+          else {
+            this.metadata = toJsonObject(JSON.parse(metadataString));
+            const { copyrightText } = this.metadata;
+            if (copyrightText) this.attributions.push(copyrightText as string);
+            resolve();
+          }
+        });
+      } else resolve();
     });
     return promisedExecution;
   }
 
   /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the list of layer configuration.
-   *
-   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void> {
-    const promisedExecution = new Promise<void>((resolve) => {
-      // eslint-disable-next-line no-console
-      console.log('XYZTiles.processListOfLayerEntryMetadata: The method needs to be coded!', listOfLayerEntryConfig);
-      resolve();
-    });
-    return promisedExecution;
-  }
-
-  /** ***************************************************************************************************************************
-   * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   * Since xyz-tile layer does not have metadata for the moment, the method does nothing.
+   * This method recursively validates the layer configuration entries by filtering and reporting invalid layers. If needed,
+   * extra configuration may be done here.
    *
    * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layer entries configuration to validate.
    *
-   * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
+   * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
-    return listOfLayerEntryConfig;
+    return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
+      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      if (layerEntryIsGroupLayer(layerEntryConfig)) {
+        layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
+        if (layerEntryConfig.listOfLayerEntryConfig.length) {
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+          return true;
+        }
+        this.layerLoadError.push({
+          layer: layerEntryConfig.layerId,
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        });
+        return false;
+      }
+
+      // When no metadata are provided, all layers are considered valid.
+      if (!this.metadata) {
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+        return true;
+      }
+
+      // Note that geojson metadata as we defined it does not contains layer group. If you need geogson layer group,
+      // you can define them in the configuration section.
+      if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
+        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+        for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
+        if (i === metadataLayerList.length) {
+          this.layerLoadError.push({
+            layer: layerEntryConfig.layerId,
+            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          });
+          return false;
+        }
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+        return true;
+      }
+      this.layerLoadError.push({
+        layer: layerEntryConfig.layerId,
+        consoleMessage: `Invalid GeoJSON metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+      });
+      return false;
+    });
   }
 
   /** ****************************************************************************************************************************
@@ -186,14 +237,21 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
    *
-   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+   * @param {TypeVectorLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
-   * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+   * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  protected processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerEntryConfig: TypeXYZTilesLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
-      // eslint-disable-next-line no-console
-      console.log('XYZTiles.processLayerMetadata: The method needs to be coded!', layerEntryConfig);
+      const metadataLayerList = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
+      for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
+      layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);
+      layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerList[i].initialSettings);
+      const extent = layerEntryConfig.initialSettings?.extent;
+      if (extent) {
+        const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
+        layerEntryConfig.initialSettings!.extent = layerExtent;
+      }
       resolve();
     });
     return promiseOfExecution;
