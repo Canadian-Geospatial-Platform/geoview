@@ -15,13 +15,15 @@ import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
   TypeBaseLayerEntryConfig,
-  TypeBaseVectorSourceInitialConfig,
+  TypeBaseSourceVectorInitialConfig,
   TypeFeatureInfoLayerConfig,
+  TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
+  TypeVectorLayerEntryConfig,
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeQueryType } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry, TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -65,15 +67,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {TypeListOfLayerEntryConfig} A new layer configuration list with layers in error removed.
    */
   protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
-
-  /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the list of layer configuration.
-   *
-   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected abstract processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void>;
 
   /** ***************************************************************************************************************************
    * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
@@ -158,8 +151,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     };
 
     // eslint-disable-next-line no-param-reassign
-    layerEntryConfig.gvlayer = new VectorLayer(layerOptions);
-    return layerEntryConfig.gvlayer as VectorLayer<VectorSource>;
+    layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
+    return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
   }
 
   private formatFeatureInfoResult(features: Feature<Geometry>[], featureInfo?: TypeFeatureInfoLayerConfig): TypeFeatureInfoResult {
@@ -185,73 +178,81 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {TypeFeatureInfoResult} The feature info table.
    */
   getAllFeatureInfo(layerId?: string): TypeFeatureInfoResult {
-    const gvLayer = this.getBaseLayer(layerId) as VectorLayer<VectorSource>;
-    if (!gvLayer) return null;
+    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
+    if (!layerConfig?.gvLayer) return null;
     return this.formatFeatureInfoResult(
-      gvLayer.getSource()!.getFeatures(),
-      ((gvLayer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig).source as TypeBaseVectorSourceInitialConfig)?.featureInfo
+      (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
+      (layerConfig.source as TypeBaseSourceVectorInitialConfig)?.featureInfo
     );
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features stored in the layer.
+   * Return feature information for all the features around the provided Pixel.
    *
-   * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
-   * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
+   * @param {Coordinate} location The pixel coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  getFeatureInfo(
-    location: Pixel | Coordinate | Coordinate[],
-    layerId?: string,
-    queryType: TypeQueryType = 'at pixel'
-  ): Promise<TypeFeatureInfoResult> {
-    const queryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      let layer: BaseLayer | null = null;
-      switch (queryType) {
-        case 'at pixel':
-          layer = layerId ? this.getBaseLayer(layerId) : this.activeLayer;
-          if (!layer) resolve(null);
-          (layer as VectorLayer<VectorSource>).getFeatures(location as Pixel).then((features) => {
-            resolve(
-              this.formatFeatureInfoResult(
-                features,
-                ((layer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig).source as TypeBaseVectorSourceInitialConfig)?.featureInfo
-              )
-            );
-          });
-          break;
-        case 'at coordinate':
-          layer = layerId ? this.getBaseLayer(layerId) : this.activeLayer;
-          if (!layer) resolve(null);
-          (layer as VectorLayer<VectorSource>)
-            .getFeatures(api.map(this.mapId).map.getPixelFromCoordinate(location as Coordinate))
-            .then((features) => {
-              resolve(
-                this.formatFeatureInfoResult(
-                  features,
-                  ((layer?.get('layerEntryConfig') as TypeBaseLayerEntryConfig).source as TypeBaseVectorSourceInitialConfig)?.featureInfo
-                )
-              );
-            });
-          break;
-        case 'using a bounding box':
-          // eslint-disable-next-line no-console
-          console.log('Queries using bounding box are not implemented.');
-          resolve(null);
-          break;
-        case 'using a polygon':
-          // eslint-disable-next-line no-console
-          console.log('Queries using polygon are not implemented.');
-          resolve(null);
-          break;
-        default:
-          // eslint-disable-next-line no-console
-          console.log(`Queries using ${queryType} are invalid.`);
-          resolve(null);
-      }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      (layerConfig.gvLayer as VectorLayer<VectorSource>).getFeatures(location as Pixel).then((features) => {
+        resolve(this.formatFeatureInfoResult(features, (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo));
+      });
     });
-    return queryResult;
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided Pixel.
+   *
+   * @param {Coordinate} location The pixel coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      (layerConfig.gvLayer as VectorLayer<VectorSource>)
+        .getFeatures(api.map(this.mapId).map.getPixelFromCoordinate(location as Coordinate))
+        .then((features) => {
+          resolve(this.formatFeatureInfoResult(features, (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo));
+        });
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features in the provided bounding box.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      resolve(null);
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features in the provided polygon.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      resolve(null);
+    });
+    return promisedQueryResult;
   }
 }

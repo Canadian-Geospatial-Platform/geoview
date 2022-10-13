@@ -3,7 +3,7 @@ import { Options as TileOptions } from 'ol/layer/BaseTile';
 import XYZ, { Options as SourceOptions } from 'ol/source/XYZ';
 import { Coordinate } from 'ol/coordinate';
 import TileGrid, { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
-
+import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -117,7 +117,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * This method processes recursively the metadata of each layer in the list of layer configuration.
    *
-   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
+   * @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
@@ -200,17 +200,64 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided Pixel.
+   *
+   * @param {Coordinate} location The pixel coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      resolve(null);
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features in the provided bounding box.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      resolve(null);
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features in the provided polygon.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      resolve(null);
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided coordinate.
    *
-   * @param {Coordinate} lnglat The coordinate that will be used by the query.
-   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      // eslint-disable-next-line no-console
-      console.log('XYZTiles.getFeatureInfoAtCoordinate: The method needs to be coded!', lnglat, layerId);
       resolve(null);
     });
     return promisedQueryResult;

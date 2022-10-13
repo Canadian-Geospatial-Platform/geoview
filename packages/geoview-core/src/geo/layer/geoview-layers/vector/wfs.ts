@@ -18,7 +18,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
-  TypeBaseVectorSourceInitialConfig,
+  TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
 } from '../../../map/map-schema-types';
 
@@ -138,7 +138,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
-      if (this.layersOfTheMap[layerEntryConfig.layerId]) {
+      if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
           layer: layerEntryConfig.layerId,
           consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
@@ -149,7 +149,7 @@ export class WFS extends AbstractGeoViewVector {
       if (layerEntryIsGroupLayer(layerEntryConfig)) {
         layerEntryConfig.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(layerEntryConfig.listOfLayerEntryConfig!);
         if (layerEntryConfig.listOfLayerEntryConfig.length) {
-          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
           return true;
         }
         this.layerLoadError.push({
@@ -182,7 +182,7 @@ export class WFS extends AbstractGeoViewVector {
           const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
           if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent: layerExtent };
           else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = layerExtent;
-          this.layersOfTheMap[layerEntryConfig.layerId] = layerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
           return true;
         }
       }
@@ -195,28 +195,6 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /** ***************************************************************************************************************************
-   * This method processes recursively the metadata of each layer in the "layer list" configuration.
-   *
-   *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected processListOfLayerEntryMetadata(
-    listOfLayerEntryConfig: TypeListOfLayerEntryConfig = this.listOfLayerEntryConfig
-  ): Promise<void> {
-    const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
-      const promisedAllLayerDone: Promise<void>[] = [];
-      listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-        if (layerEntryIsGroupLayer(layerEntryConfig))
-          promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
-        else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig as TypeVectorLayerEntryConfig));
-      });
-      Promise.all(promisedAllLayerDone).then(() => resolve());
-    });
-    return promisedListOfLayerEntryProcessed;
-  }
-
-  /** ***************************************************************************************************************************
    * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
    * layer's configuration.
    *
@@ -224,7 +202,7 @@ export class WFS extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
    */
-  private processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
+  protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       const queryUrl = getLocalizedValue(layerEntryConfig.source!.dataAccessPath, this.mapId);
       if (queryUrl) {
@@ -278,10 +256,10 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = { strategy: all },
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
-    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
+    readOptions.dataProjection = (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection;
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
     sourceOptions.url = `${sourceOptions.url}?service=WFS&request=getFeature&outputFormat=application/json&version=2.0.0`;
-    sourceOptions.url = `${sourceOptions.url}&srsname=${(layerEntryConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection}`;
+    sourceOptions.url = `${sourceOptions.url}&srsname=${(layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).dataProjection}`;
     sourceOptions.url = `${sourceOptions.url}&typeName=${layerEntryConfig.layerId}`;
     sourceOptions.format = new FormatGeoJSON();
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
