@@ -30,6 +30,7 @@ import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { generateId } from '../../core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
+import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -80,6 +81,9 @@ export class MapViewer {
   // store current position
   currentPosition: Coordinate;
 
+  // store last single click position
+  singleClickedPosition: TypeMapSingleClick;
+
   // i18n instance
   i18nInstance!: i18n;
 
@@ -108,6 +112,7 @@ export class MapViewer {
     this.i18nInstance = i18instance;
     this.currentZoom = mapFeaturesConfig.map.viewSettings.zoom;
     this.currentPosition = [mapFeaturesConfig.map.viewSettings.center[0], mapFeaturesConfig.map.viewSettings.center[1]];
+    this.singleClickedPosition = { pixel: [], lnglat: [], projected: [] };
 
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
