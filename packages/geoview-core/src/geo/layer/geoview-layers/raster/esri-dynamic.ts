@@ -434,9 +434,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
           const mapLayer = api.map(this.mapId).map;
           // get map size
+          const { currentProjection } = api.map(this.mapId);
           const size = mapLayer.getSize()!;
           let bounds = mapLayer.getView().calculateExtent();
-          bounds = transformExtent(bounds, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+          bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
 
           const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 

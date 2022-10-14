@@ -6,7 +6,6 @@ import { Coordinate } from 'ol/coordinate';
 import { toLonLat, fromLonLat } from 'ol/proj';
 
 import { useTheme } from '@mui/material/styles';
-
 import makeStyles from '@mui/styles/makeStyles';
 
 import { debounce } from 'lodash';
@@ -315,8 +314,9 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
       api.projection.projections[api.map(mapId).currentProjection]
     );
 
-    // create overlay for northj pole icon
+    // create overlay for north pole icon
     const northPoleMarker = new Overlay({
+      id: northPoleId,
       position: projectionPosition,
       positioning: 'center-center',
       element: document.getElementById(northPoleId) as HTMLElement,

@@ -6,6 +6,7 @@ import OLMap from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import { ObjectEvent } from 'ol/Object';
+import MapBrowserEvent from 'ol/MapBrowserEvent';
 import { Collection, MapEvent } from 'ol';
 import BaseLayer from 'ol/layer/Base';
 import Source from 'ol/source/Source';
@@ -18,6 +19,7 @@ import { NorthArrow, NorthPoleFlag } from '../north-arrow/north-arrow';
 import { Crosshair } from '../crosshair/crosshair';
 import { Footerbar } from '../footer-bar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
+import { ClickMarker } from '../click-marker/click-marker';
 
 import { generateId } from '../../utils/utilities';
 
@@ -31,6 +33,7 @@ import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-vi
 import { numberPayload } from '../../../api/events/payloads/number-payload';
 import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { TypeMapSingleClick, mapSingleClickPayload } from '../../../api/events/payloads/map-slingle-click-payload';
 
 const useStyles = makeStyles(() => ({
   mapContainer: {
@@ -96,6 +99,19 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
   }
 
+  function mapSingleClick(event: MapEvent): void {
+    const coordinates: TypeMapSingleClick = {
+      projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+      pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+      lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(id).currentProjection}`),
+    };
+
+    api.map(id).singleClickedPosition = coordinates;
+
+    // emit the singleclick map position
+    api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, id, coordinates));
+  }
+
   const initCGPVMap = (cgpvMap: OLMap) => {
     cgpvMap.set('id', id);
 
@@ -112,6 +128,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', cgpvMap.getView().getCenter()!));
 
     cgpvMap.on('moveend', mapMoveEnd);
+    cgpvMap.on('singleclick', mapSingleClick);
     cgpvMap.getView().on('change:resolution', mapZoomEnd);
 
     viewer.toggleMapInteraction(mapConfig.interaction);
@@ -258,6 +275,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           )}
           <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
           <Crosshair />
+          <ClickMarker />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
         </>
