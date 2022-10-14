@@ -2,8 +2,7 @@ import { useContext, useState } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { CollapseIcon, ExpandIcon, IconButton } from '../../../ui';
-
+import { ExpandMoreIcon, ExpandLessIcon, IconButton } from '../../../ui';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
@@ -17,9 +16,6 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     color: `${theme.palette.primary.light}`,
     padding: `0px 5px`,
-  },
-  expandButtonText: {
-    fontSize: `${theme.typography.fontSize}px !important`,
   },
 }));
 
@@ -82,7 +78,7 @@ export function FooterbarExpandButton(): JSX.Element {
 
   return (
     <IconButton className={`${classes.expandbuttonContainer}`} onClick={() => (status ? collapseFooterbar() : expandFooterbar())}>
-      {status ? <ExpandIcon className={classes.expandButtonText} /> : <CollapseIcon className={classes.expandButtonText} />}
+      {status ? <ExpandMoreIcon /> : <ExpandLessIcon />}
     </IconButton>
   );
 }

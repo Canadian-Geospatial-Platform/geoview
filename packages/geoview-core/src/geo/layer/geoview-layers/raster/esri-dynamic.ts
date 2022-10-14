@@ -410,7 +410,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      resolve(null);
+      const { map } = api.map(this.mapId);
+      resolve(this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerConfig));
     });
     return promisedQueryResult;
   }
@@ -438,7 +439,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      if (!layerConfig.gvLayer) resolve(null);
+      if (!this.getVisible(layerConfig.layerId) || !layerConfig.gvLayer) resolve(null);
       else {
         if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) resolve(null);
         let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);
@@ -446,10 +447,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         else {
           identifyUrl = identifyUrl.endsWith('/') ? identifyUrl : `${identifyUrl}/`;
           const mapLayer = api.map(this.mapId).map;
-          // get map size
+          const { currentProjection } = api.map(this.mapId);
           const size = mapLayer.getSize()!;
           let bounds = mapLayer.getView().calculateExtent();
-          bounds = transformExtent(bounds, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+          bounds = transformExtent(bounds, `EPSG:${currentProjection}`, 'EPSG:4326');
 
           const extent = { xmin: bounds[0], ymin: bounds[1], xmax: bounds[2], ymax: bounds[3] };
 

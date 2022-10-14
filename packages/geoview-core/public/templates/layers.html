@@ -120,6 +120,9 @@
     <img id="wmsLegend" />
   </div>
   <p>This map has a wms layer added from configuration.</p>
+  <button type="button" class="collapsible">Get Feature Info</button>
+  <pre id="LYR1-INFO-OSM-WMS" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR1CS" class="panel"></pre>
   <hr />
@@ -190,9 +193,13 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'esriDynamicLYR3',
-                'layerName': { 'en': 'Senior care facilities on April 2020' },
-                'metadataAccessPath': { 'en': 'https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/StatCan/senior_care_facilities_en/MapServer' },
+                'layerId': 'esriDynamicLYR3.2',
+                'layerName': {
+                  'en': 'Flood'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer/'
+                },
                 'geoviewLayerType': 'esriDynamic',
                 'listOfLayerEntryConfig': [
                   {
@@ -207,11 +214,13 @@
           'theme': 'dark',
           'suportedLanguages': ['en']
         }"></div>
-
   <div id="esriDynamicLayerLegend">
     <h3>Legend</h3>
   </div>
   <p>This map has a Esri dynamic layer added from configuration.</p>
+  <button type="button" class="collapsible">Get Feature Info</button>
+  <pre id="LYR3-INFO-0" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR3CS" class="panel"></pre>
   <hr />
@@ -237,11 +246,11 @@
                 'layerId': 'esriFeatureLYR4',
                 'layerName': { 'en': 'Water quality at monitoring sites' },
                 'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '5' }
+                  { 'layerId': '8' }
                 ]
               }
             ]
@@ -252,6 +261,9 @@
           'suportedLanguages': ['en']
         }"></div>
   <p>This map has a Esri feature layer added from configuration.</p>
+  <button type="button" class="collapsible">Get Feature Info</button>
+  <pre id="LYR4-INFO-8" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR4CS" class="panel"></pre>
   <hr />
@@ -360,6 +372,12 @@
     the buttons</p>
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
   <label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id"></label>
+  <button type="button" class="collapsible">Get Feature Info polygons</button>
+  <pre id="LYR5-INFO-polygons.json" class="panel">Click on feature on the map</pre>
+  <hr />
+  <button type="button" class="collapsible">Get Feature Info stars</button>
+  <pre id="LYR5-INFO-points.json" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR5CS" class="panel"></pre>
   <hr />
@@ -404,6 +422,9 @@
         'suportedLanguages': ['en']
       }"></div>
   <p>This map has a WFS layer added from configuration.</p>
+  <button type="button" class="collapsible">Get Feature Info</button>
+  <pre id="LYR6-INFO-GISDATA.AIRPORTS_PT" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR6CS" class="panel"></pre>
   <hr />
@@ -447,8 +468,10 @@
           'theme': 'dark',
           'suportedLanguages': ['en']
         }"></div>
-
   <p>This map has an OGC API feature layer added from configuration.</p>
+  <button type="button" class="collapsible">Get Feature Info</button>
+  <pre id="LYR7-INFO-lakes" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR7CS" class="panel"></pre>
   <hr />
@@ -471,7 +494,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'ogcFeatureLYR7',
+                'layerId': 'LYR8',
                 'geoviewLayerType': 'geoCore',
                 'listOfLayerEntryConfig': [
                   {
@@ -486,8 +509,10 @@
           'theme': 'dark',
           'suportedLanguages': ['en']
         }"></div>
-
   <p>This map requests a layer from the catalog using uuid added from configuration.</p>
+  <button type="button" class="collapsible">Get Feature Info</button>
+  <pre id="LYR8-INFO-0" class="panel">Click on feature on the map</pre>
+  <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR8CS" class="panel"></pre>
   <hr />
@@ -547,7 +572,40 @@
       cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
     });
 
-    /*
+
+    // WMS
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR1', 'OSM-WMS') }, 'LYR1');
+    // ESRI Dynamic
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR3', '0') }, 'LYR3');
+    // ESRI Feature
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4', '8') }, 'LYR4');
+    // GeoJSON
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'polygons.json') }, 'LYR5');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'points.json') }, 'LYR5');
+    // WFS
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6', 'GISDATA.AIRPORTS_PT') }, 'LYR6');
+    // OGC Feature API
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7', 'lakes') }, 'LYR7');
+    // NOT WORKING: Event not trapped GeoCore
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', '0') }, 'LYR8');
+
+    function handleMapClick(payload, mapId, layerId) {
+      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
+        document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
+        if (payload.data !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
+      }, `${mapId}/${layerId}`);
+
+      cgpv.api.event.emit(
+        cgpv.types.getFeatureInfoPayload(
+          cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
+          `${mapId}/${layerId}`,
+          { location: (mapId === 'LYR1' || mapId === 'LYR3') ? payload.coordinates.lnglat : payload.coordinates.projected,
+          queryType: (mapId === 'LYR1' || mapId === 'LYR3') ? 'at long lat' : 'at coordinate'}
+        )
+      );
+    }
+
+    /**
     //add legend to WMS layer
     function addWMSLegend() {
       cgpv.api

@@ -206,8 +206,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      const layerFilter = (layer: BaseLayer) => {
+        return layer === layerConfig.gvLayer;
+      };
       const { map } = api.map(this.mapId);
-      const features = map.getFeaturesAtPixel(location, { hitTolerance: 4 });
+      const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
       resolve(
         this.formatFeatureInfoResult(features as Feature<Geometry>[], (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo)
       );
