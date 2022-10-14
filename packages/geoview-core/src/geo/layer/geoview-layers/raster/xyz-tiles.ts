@@ -258,15 +258,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided Pixel.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features around the provided Pixel.
    *
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -274,15 +275,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns information for all the features around the provided coordinate.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -290,15 +292,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features around the provided longitude latitude.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -306,15 +309,33 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features in the provided bounding box.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      resolve(null);
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features in the provided polygon.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });

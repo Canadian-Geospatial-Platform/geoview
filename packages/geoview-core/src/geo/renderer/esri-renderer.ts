@@ -204,6 +204,45 @@ export interface EsriSimpleRenderer extends EsriBaseRenderer {
   symbol: EsriSymbol;
 }
 
+/** *****************************************************************************************************************************
+ * Type Gard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
+ * verifyIfRenderer parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use this
+ * function.
+ *
+ * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
+ *
+ * @returns {boolean} true if the type ascention is valid.
+ */
+export const esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriClassBreakRenderer => {
+  return verifyIfRenderer.type === 'classBreaks';
+};
+
+type EsriClassBreakInfoEntry = {
+  classMaxValue: number;
+  classMinValue: number | undefined | null;
+  description: string;
+  label: string;
+  symbol: EsriSymbol;
+};
+
+export interface EsriClassBreakRenderer extends EsriBaseRenderer {
+  type: 'classBreaks';
+  classBreakInfos: EsriClassBreakInfoEntry[];
+  defaultLabel: string;
+  defaultSymbol: EsriSymbol;
+  field: string;
+  minValue: number;
+  rotationExpression: string;
+  rotationType: 'arithmetic' | 'geographic';
+}
+
+/** *****************************************************************************************************************************
+ * Convert the ESRI line style to the GeoView line style.
+ *
+ * @param {EsriLineStyle} lineStyle The ESRI line style to convert.
+ *
+ * @returns {TypeLineStyle} The Geoview line style associated to the ESRI line style.
+ */
 function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
   switch (lineStyle) {
     case 'esriSLSDash':
@@ -235,6 +274,13 @@ function convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
   }
 }
 
+/** *****************************************************************************************************************************
+ * Convert the ESRI fill style to the GeoView fill style.
+ *
+ * @param {EsriFillStyle} fillStyle The ESRI fill style to convert.
+ *
+ * @returns {TypeFillStyle} The Geoview fill style associated to the ESRI fill style.
+ */
 function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
   switch (fillStyle) {
     case 'esriSFSBackwardDiagonal':
@@ -260,6 +306,13 @@ function convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
   }
 }
 
+/** *****************************************************************************************************************************
+ * Convert the ESRI symbol style to the GeoView symbol style.
+ *
+ * @param {EsriSymbolStyle} symbolStyle The ESRI symbol style to convert.
+ *
+ * @returns {TypeSymbol} The Geoview symbol style associated to the ESRI symbol style.
+ */
 function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
   switch (symbolStyle) {
     case 'esriSMSCircle':
@@ -281,10 +334,25 @@ function convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
   }
 }
 
+/** *****************************************************************************************************************************
+ * Convert an ESRI color to a GeoView color.
+ *
+ * @param {TypeEsriColor} color The ESRI color to convert.
+ *
+ * @returns {string} The Geoview color corresponding to the ESRI color.
+ */
 function convertEsriColor(color: TypeEsriColor): string {
   return asString([color[0], color[1], color[2], color[3] / 255]);
 }
 
+/** *****************************************************************************************************************************
+ * Convert an ESRI symbol to a GeoView symbol.
+ *
+ * @param {EsriSymbol} symbol The ESRI symbol to convert.
+ *
+ * @returns {TypeKinfOfSymbolVectorSettings | undefined} The Geoview symbol corresponding to the ESRI symbol or undefined if
+ * ESRI symbol is not handled.
+ */
 function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | undefined {
   if (symbol) {
     if (isSimpleMarkerSymbol(symbol)) {
@@ -351,6 +419,13 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
   return undefined;
 }
 
+/** *****************************************************************************************************************************
+ * Get the configuration key of the style.
+ *
+ * @param {TypeKinfOfSymbolVectorSettings} settings The GeoView settings.
+ *
+ * @returns {TypeKinfOfSymbolVectorSettings | undefined} The Geoview style key or undefined if it can not be determined.
+ */
 function getStyleConfigKey(settings: TypeKinfOfSymbolVectorSettings): TypeStyleConfigKey | undefined {
   if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'Point';
   if (isFilledPolygonVectorConfig(settings)) return 'Polygon';
@@ -358,6 +433,14 @@ function getStyleConfigKey(settings: TypeKinfOfSymbolVectorSettings): TypeStyleC
   return undefined;
 }
 
+/** *****************************************************************************************************************************
+ * Process ESRI unique value renderer and convert it to a GeoView style.
+ *
+ * @param {string} id The identifier to assign to the style.
+ * @param {EsriUniqueValueRenderer} renderer The ESRI renderer to convert.
+ *
+ * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ */
 function processUniqueValueRenderer(id: string, renderer: EsriUniqueValueRenderer): TypeStyleConfig | undefined {
   const style: TypeStyleConfig = {};
   const styleType = 'uniqueValue';
@@ -388,6 +471,14 @@ function processUniqueValueRenderer(id: string, renderer: EsriUniqueValueRendere
   return undefined;
 }
 
+/** *****************************************************************************************************************************
+ * Process ESRI simple renderer and convert it to a GeoView style.
+ *
+ * @param {string} id The identifier to assign to the style.
+ * @param {EsriSimpleRenderer} renderer The ESRI renderer to convert.
+ *
+ * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ */
 function processSimpleRenderer(id: string, renderer: EsriSimpleRenderer): TypeStyleConfig | undefined {
   const style: TypeStyleConfig = {};
   const label = renderer.label ? renderer.label : id;
@@ -405,6 +496,14 @@ function processSimpleRenderer(id: string, renderer: EsriSimpleRenderer): TypeSt
   return undefined;
 }
 
+/** *****************************************************************************************************************************
+ * Process ESRI class break renderer and convert it to a GeoView style.
+ *
+ * @param {string} id The identifier to assign to the style.
+ * @param {EsriClassBreakRenderer} EsriRenderer The ESRI renderer to convert.
+ *
+ * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ */
 function processClassBreakRenderer(id: string, EsriRenderer: EsriClassBreakRenderer): TypeStyleConfig | undefined {
   const style: TypeStyleConfig = {};
   const styleType = 'classBreaks';
@@ -441,37 +540,14 @@ function processClassBreakRenderer(id: string, EsriRenderer: EsriClassBreakRende
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
- * verifyIfRenderer parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use this
- * function.
+ * Get GeoView style from Esri renderer.
  *
- * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {string} mapId The map identifier of the ESRI layer.
+ * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration object.
+ * @param {EsriBaseRenderer} renderer The ESRI renderer to convert.
  *
- * @returns {boolean} true if the type ascention is valid.
+ * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
  */
-export const esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriClassBreakRenderer => {
-  return verifyIfRenderer.type === 'classBreaks';
-};
-
-type EsriClassBreakInfoEntry = {
-  classMaxValue: number;
-  classMinValue: number | undefined | null;
-  description: string;
-  label: string;
-  symbol: EsriSymbol;
-};
-
-export interface EsriClassBreakRenderer extends EsriBaseRenderer {
-  type: 'classBreaks';
-  classBreakInfos: EsriClassBreakInfoEntry[];
-  defaultLabel: string;
-  defaultSymbol: EsriSymbol;
-  field: string;
-  minValue: number;
-  rotationExpression: string;
-  rotationType: 'arithmetic' | 'geographic';
-}
-
 export function getStyleFromEsriRenderer(
   mapId: string,
   layerEntryConfig: TypeLayerEntryConfig,

@@ -394,6 +394,9 @@ export abstract class AbstractGeoViewLayer {
         case 'at coordinate':
           this.getFeatureInfoAtCoordinate(location as Coordinate, layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
           break;
+        case 'at long lat':
+          this.getFeatureInfoAtLongLat(location as Coordinate, layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
+          break;
         case 'using a bounding box':
           this.getFeatureInfoUsingBBox(location as Coordinate[], layerConfig!).then((featureInfoResult) => resolve(featureInfoResult));
           break;
@@ -428,6 +431,16 @@ export abstract class AbstractGeoViewLayer {
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided longitude latitude.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided bounding box.

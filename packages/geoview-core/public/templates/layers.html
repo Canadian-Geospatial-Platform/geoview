@@ -121,7 +121,7 @@
   </div>
   <p>This map has a wms layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR1INFO" class="panel">Click on feature on the map</pre>
+  <pre id="LYR1-INFO-OSM-WMS" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR1CS" class="panel"></pre>
@@ -219,7 +219,7 @@
   </div>
   <p>This map has a Esri dynamic layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR3INFO" class="panel">Click on feature on the map</pre>
+  <pre id="LYR3-INFO-0" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR3CS" class="panel"></pre>
@@ -262,7 +262,7 @@
         }"></div>
   <p>This map has a Esri feature layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR4INFO" class="panel">Click on feature on the map</pre>
+  <pre id="LYR4-INFO-8" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR4CS" class="panel"></pre>
@@ -372,8 +372,11 @@
     the buttons</p>
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
   <label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id"></label>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR5INFO" class="panel">Click on feature on the map</pre>
+  <button type="button" class="collapsible">Get Feature Info polygons</button>
+  <pre id="LYR5-INFO-polygons.json" class="panel">Click on feature on the map</pre>
+  <hr />
+  <button type="button" class="collapsible">Get Feature Info stars</button>
+  <pre id="LYR5-INFO-points.json" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR5CS" class="panel"></pre>
@@ -420,7 +423,7 @@
       }"></div>
   <p>This map has a WFS layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR6INFO" class="panel">Click on feature on the map</pre>
+  <pre id="LYR6-INFO-GISDATA.AIRPORTS_PT" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR6CS" class="panel"></pre>
@@ -467,7 +470,7 @@
         }"></div>
   <p>This map has an OGC API feature layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR7INFO" class="panel">Click on feature on the map</pre>
+  <pre id="LYR7-INFO-lakes" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR7CS" class="panel"></pre>
@@ -491,7 +494,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'ogcFeatureLYR7',
+                'layerId': 'LYR8',
                 'geoviewLayerType': 'geoCore',
                 'listOfLayerEntryConfig': [
                   {
@@ -508,7 +511,7 @@
         }"></div>
   <p>This map requests a layer from the catalog using uuid added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR8INFO" class="panel">Click on feature on the map</pre>
+  <pre id="LYR8-INFO-0" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR8CS" class="panel"></pre>
@@ -578,24 +581,26 @@
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4', '8') }, 'LYR4');
     // GeoJSON
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'polygons.json') }, 'LYR5');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'points.json') }, 'LYR5');
     // WFS
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6', 'GISDATA.AIRPORTS_PT') }, 'LYR6');
     // OGC Feature API
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7', 'lakes') }, 'LYR7');
     // NOT WORKING: Event not trapped GeoCore
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', 'ccc75c12-5acc-4a6a-959f-ef6f621147b9') }, 'LYR8');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', '0') }, 'LYR8');
 
     function handleMapClick(payload, mapId, layerId) {
       cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
-        document.getElementById(`${mapId}INFO`).textContent = 'Click on feature on the map';
-        if (payload.data !== null) document.getElementById(`${mapId}INFO`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
+        document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
+        if (payload.data !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
       }, `${mapId}/${layerId}`);
 
       cgpv.api.event.emit(
         cgpv.types.getFeatureInfoPayload(
           cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
           `${mapId}/${layerId}`,
-          { location: (mapId === 'LYR1' || mapId === 'LYR3') ? payload.coordinates.lnglat : payload.coordinates.projected, queryType: 'at coordinate' }
+          { location: (mapId === 'LYR1' || mapId === 'LYR3') ? payload.coordinates.lnglat : payload.coordinates.projected,
+          queryType: (mapId === 'LYR1' || mapId === 'LYR3') ? 'at long lat' : 'at coordinate'}
         )
       );
     }
