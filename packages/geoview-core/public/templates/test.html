@@ -16,13 +16,13 @@
   </head>
   <body>
     <button id="get-feature-info">Run getFeatureInfo</button><br />
-    <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
+    <div id="LYR4" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
           'zoom': 4,
           'center': [-100, 60],
-          'projection': 3857
+          'projection': 3978
         },
         'basemapOptions': {
           'id': 'transport',
@@ -31,45 +31,19 @@
         },
         'listOfGeoviewLayerConfig': [
           {
-            'layerId': 'wmsLYR1-Root',
-            'layerName': { 'en': 'Root' },
-            'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
-            'initialSettings': { 'visible': true },
-            'geoviewLayerType': 'ogcWms',
+            'layerId': 'esriFeatureLYR4',
+            'layerName': { 'en': 'Water quality at monitoring sites' },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+            },
+            'geoviewLayerType': 'esriFeature',
             'listOfLayerEntryConfig': [
-              {
-                'entryType': 'group',
-                'layerId': 'wmsLYR1-Group',
-                'layerName': { 'en': 'Group' },
-                'listOfLayerEntryConfig': [
-                  {
-                    'initialSettings': { 'visible': true },
-                    'layerId': 'OSM-WMS'
-                  },
-                  {
-                    'initialSettings': { 'visible': false },
-                    'layerId': 'TOPO-OSM-WMS'
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            'layerId': 'DataCube',
-            'layerName': { 'en': 'MSI' },
-            'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
-            'initialSettings': { 'visible': true },
-            'geoviewLayerType': 'ogcWms',
-            'listOfLayerEntryConfig': [
-              {
-                'initialSettings': { 'visible': true },
-                'layerId': 'top-layer'
-              }
+              { 'layerId': '5' }
             ]
           }
         ]
       },
-      'components': ['overview-map', 'nav-bar'],
+      'components': ['overview-map', 'nav-bar', 'north-arrow'],
       'corePackages': [],
       'theme': 'dark',
       'suportedLanguages': ['en']
@@ -85,7 +59,7 @@
         cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(false, '1');
         cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(true, '2');
         cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(false, '3');
-        /*/
+        /* /
         cgpv.api.map('LYR1').layer.layers['DataCube'].setVisible(true, 'top-layer');
         cgpv.api.map('LYR1').layer.layers['DataCube'].setVisible(true, 'msi');
         cgpv.api.map('LYR1').layer.layers['DataCube'].setVisible(true, 'msi-94-or-more');
@@ -96,18 +70,18 @@
             console.log(legend);
           });
         }
+        //*/
         cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
           console.log(payload)
-        }, 'LYR1/msi');
-        //*/
+        }, 'LYR4/5');
 
         var getFeatureInfoButton = document.getElementById('get-feature-info');
         getFeatureInfoButton.addEventListener('click', function (e) {
           cgpv.api.event.emit(
             cgpv.types.getFeatureInfoPayload(
               cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
-              'LYR1/msi',
-              { location: [-42, 70], queryType: 'at coordinate' }
+              'LYR4/5',
+              { location: [-73.12472222, 46.027777778], queryType: 'at coordinate' }
             )
           );
           // console.log(cgpv.api.map('LYR1').layer.layers['wmsLYR1-Root'].getFeatureInfo('OSM-WMS'));

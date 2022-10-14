@@ -11,6 +11,7 @@ import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import { transform } from 'ol/proj';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
@@ -155,6 +156,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
   }
 
+  /** ***************************************************************************************************************************
+   * Convert the feature information to an array of TypeFeatureInfoResult.
+   *
+   * @param {Feature<Geometry>[]} features The array of features to convert.
+   * @param {TypeFeatureInfoLayerConfig} featureInfo The featureInfo configuration.
+   *
+   * @returns {TypeFeatureInfoResult} The Array of feature information.
+   */
   private formatFeatureInfoResult(features: Feature<Geometry>[], featureInfo?: TypeFeatureInfoLayerConfig): TypeFeatureInfoResult {
     if (!features.length) return null;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
@@ -197,15 +206,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      (layerConfig.gvLayer as VectorLayer<VectorSource>).getFeatures(location as Pixel).then((features) => {
-        resolve(this.formatFeatureInfoResult(features, (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo));
-      });
+      const { map } = api.map(this.mapId);
+      const features = map.getFeaturesAtPixel(location, { hitTolerance: 4 });
+      resolve(
+        this.formatFeatureInfoResult(features as Feature<Geometry>[], (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo)
+      );
     });
     return promisedQueryResult;
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided Pixel.
+   * Return feature information for all the features around the provided projected coordinate.
    *
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
@@ -215,11 +226,26 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      (layerConfig.gvLayer as VectorLayer<VectorSource>)
-        .getFeatures(api.map(this.mapId).map.getPixelFromCoordinate(location as Coordinate))
-        .then((features) => {
-          resolve(this.formatFeatureInfoResult(features, (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo));
-        });
+      const { map } = api.map(this.mapId);
+      resolve(this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerConfig));
+    });
+    return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided longitude latitude.
+   *
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+      const { map } = api.map(this.mapId);
+      const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
+      resolve(this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerConfig));
     });
     return promisedQueryResult;
   }

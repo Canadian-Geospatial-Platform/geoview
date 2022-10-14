@@ -355,12 +355,12 @@ export class WMS extends AbstractGeoViewRaster {
    * Return feature information for all the features in the provided bounding box.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -371,12 +371,12 @@ export class WMS extends AbstractGeoViewRaster {
    * Return feature information for all the features in the provided polygon.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -517,14 +517,27 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate.
+   * Return feature information for all the features around the provided projection coordinate.
    *
-   * @param {Coordinate} lnglat The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+    return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided coordinate.
+   *
+   * @param {Coordinate} lnglat The coordinate that will be used by the query.
+   * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+   */
+  protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       if (!this.getVisible(layerConfig.layerId)) resolve(null);
       else {

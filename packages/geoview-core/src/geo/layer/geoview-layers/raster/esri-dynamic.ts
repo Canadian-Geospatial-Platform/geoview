@@ -8,7 +8,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 
 import { cloneDeep } from 'lodash';
-import { transformExtent } from 'ol/proj';
+import { transform, transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { Cast, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
@@ -403,12 +403,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Return feature information for all the features around the provided Pixel.
    *
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -416,14 +416,27 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate.
+   * Return feature information for all the features around the provided projection coordinate.
    *
-   * @param {Coordinate} lnglat The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {Coordinate} location The coordinate that will be used by the query.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+    const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
+    return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
+  }
+
+  /** ***************************************************************************************************************************
+   * Return feature information for all the features around the provided coordinate.
+   *
+   * @param {Coordinate} lnglat The coordinate that will be used by the query.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+   *
+   * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+   */
+  protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       if (!layerConfig.gvLayer) resolve(null);
       else {
@@ -468,12 +481,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Return feature information for all the features in the provided bounding box.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });
@@ -484,12 +497,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Return feature information for all the features in the provided polygon.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
-   * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+   * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult> {
+  protected getFeatureInfoUsingPolygon(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    location: Coordinate[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    layerConfig: TypeEsriDynamicLayerEntryConfig
+  ): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
       resolve(null);
     });

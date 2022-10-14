@@ -24,7 +24,7 @@ export const payloadIsGetFeatureInfo = (verifyIfPayload: PayloadBaseClass): veri
   return validEvents.includes(verifyIfPayload.event);
 };
 
-export type TypeQueryType = 'at pixel' | 'at coordinate' | 'using a bounding box' | 'using a polygon';
+export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
 
 export type TypeFeatureInfoQuery = {
   queryType: TypeQueryType;
