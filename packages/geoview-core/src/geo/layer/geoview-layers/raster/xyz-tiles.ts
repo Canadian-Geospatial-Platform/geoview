@@ -258,7 +258,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided Pixel.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features around the provided Pixel.
    *
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
@@ -274,7 +275,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided coordinate.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns information for all the features around the provided coordinate.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
@@ -290,7 +292,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features around the provided longitude latitude.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features around the provided longitude latitude.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
@@ -306,7 +309,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided bounding box.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features in the provided bounding box.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
@@ -322,7 +326,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return feature information for all the features in the provided polygon.
+   * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
+   * method returns feature information for all the features in the provided polygon.
    *
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.

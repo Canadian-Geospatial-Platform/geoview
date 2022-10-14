@@ -539,7 +539,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      if (!this.getVisible(layerConfig.layerId)) resolve(null);
+      if (!this.getVisible(layerConfig.layerId) || !layerConfig.gvLayer) resolve(null);
       else {
         const viewResolution = api.map(this.mapId).getView().getResolution() as number;
         const crs = `EPSG:${api.map(this.mapId).currentProjection}`;
