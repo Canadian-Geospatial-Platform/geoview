@@ -26,28 +26,32 @@ function createConfigSnippet() {
     // check if JSON can be parsed, if not do nothing
     try {
       if (configSnippet !== undefined && el !== null) {
-        el.textContent = JSON.stringify(JSON.parse(configSnippet.value.replace(/(\r\n|\n|\r)/gm, "").replace(/'/gm, '"')), undefined, 2);
+        el.textContent = JSON.stringify(JSON.parse(configSnippet.value.replace(/(\r\n|\n|\r)/gm, '').replace(/'/gm, '"')), undefined, 2);
       }
-    } catch (error) { }
-    
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Error trapped');
+    }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   createCollapsible();
 }
 
 function createCollapsible() {
-  var coll = document.getElementsByClassName("collapsible");
-      var i;
+  const coll = document.getElementsByClassName('collapsible');
+  let i;
 
-      for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-          this.classList.toggle("active");
-          var content = this.nextElementSibling;
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
-          }
-        });
+  for (i = 0; i < coll.length; i++) {
+    // eslint-disable-next-line func-names
+    coll[i].addEventListener('click', function() {
+      this.classList.toggle('active');
+      const content = this.nextElementSibling;
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+      } else {
+        content.style.display = 'block';
       }
+    });
+  }
 }
