@@ -21,6 +21,7 @@ import Check from '@mui/icons-material/CheckCircle';
 import ArrowUp from '@mui/icons-material/ArrowUpward';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
+import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 
 export {
   Layers as LayersIcon,
@@ -46,4 +47,5 @@ export {
   ArrowUp as ArrowUpIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
+  WhereToVoteIcon as ClickMapMarker,
 };
