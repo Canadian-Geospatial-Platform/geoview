@@ -36,6 +36,7 @@ import { TypeMapFeaturesConfig } from '../../types/global-types';
 import { api } from '../../../app';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../api/events/event-types';
+import { Layer } from '../../../geo/layer/layer';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -64,7 +65,7 @@ export class ConfigValidation {
         rotation: 0,
       },
       basemapOptions: {
-        id: 'transport',
+        basemapId: 'transport',
         shaded: true,
         labeled: true,
       },
@@ -165,9 +166,9 @@ export class ConfigValidation {
    */
   validateBasemap(projection?: TypeProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions {
     if (projection && basemapOptions) {
-      const id = this._basemapId[projection].includes(basemapOptions.id)
-        ? basemapOptions.id
-        : this._defaultMapFeaturesConfig.map.basemapOptions.id;
+      const basemapId = this._basemapId[projection].includes(basemapOptions.basemapId)
+        ? basemapOptions.basemapId
+        : this._defaultMapFeaturesConfig.map.basemapOptions.basemapId;
       const shaded = this._basemapShaded[projection].includes(basemapOptions.shaded)
         ? basemapOptions.shaded
         : this._defaultMapFeaturesConfig.map.basemapOptions.shaded;
@@ -175,7 +176,7 @@ export class ConfigValidation {
         ? basemapOptions.labeled
         : this._defaultMapFeaturesConfig.map.basemapOptions.labeled;
 
-      return { id, shaded, labeled };
+      return { basemapId, shaded, labeled };
     }
     return this._defaultMapFeaturesConfig.map.basemapOptions;
   }
@@ -393,7 +394,7 @@ export class ConfigValidation {
   private metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     if (!geoviewLayerConfig.metadataAccessPath) {
       throw new Error(
-        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.layerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
+        `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
     }
   }
@@ -434,14 +435,14 @@ export class ConfigValidation {
         /** layerEntryConfig.source.dataAccessPath is mandatory. */
         if (!layerEntryConfig.source.dataAccessPath) {
           throw new Error(
-            `source.dataAccessPath on layer entry ${layerEntryConfig.layerId} is mandatory for GeoView layer ${rootLayerConfig.layerId} of type ${rootLayerConfig.geoviewLayerType}`
+            `source.dataAccessPath on layer entry ${Layer.getLayerPath(layerEntryConfig)} is mandatory for GeoView layer ${
+              rootLayerConfig.geoviewLayerId
+            } of type ${rootLayerConfig.geoviewLayerType}`
           );
         }
       } else if (geoviewEntryIsEsriDynamic(layerEntryConfig)) {
         if (Number.isNaN(layerEntryConfig.layerId)) {
-          throw new Error(
-            `The layer entry with layerId equal to ${layerEntryConfig.layerId} on GeoView layer ${rootLayerConfig.layerId} must be an integer string`
-          );
+          throw new Error(`The layer entry with layerId equal to ${Layer.getLayerPath(layerEntryConfig)} must be an integer string`);
         }
         // Value for layerEntryConfig.entryType can only be raster
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
@@ -451,9 +452,7 @@ export class ConfigValidation {
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
       } else if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
         if (Number.isNaN(layerEntryConfig.layerId)) {
-          throw new Error(
-            `The layer entry with layerId equal to ${layerEntryConfig.layerId} on GeoView layer ${rootLayerConfig.layerId} must be an integer string`
-          );
+          throw new Error(`The layer entry with layerId equal to ${Layer.getLayerPath(layerEntryConfig)} must be an integer string`);
         }
         // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
@@ -502,7 +501,7 @@ export class ConfigValidation {
       } else if (geoviewEntryIsGeoJSON(layerEntryConfig)) {
         if (!layerEntryConfig.geoviewRootLayer.metadataAccessPath && !layerEntryConfig.source?.dataAccessPath) {
           throw new Error(
-            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.layerId} of type GeoJSON when the metadataAccessPath is undefined.`
+            `dataAccessPath is mandatory for GeoView layer ${rootLayerConfig.geoviewLayerId} of type GeoJSON when the metadataAccessPath is undefined.`
           );
         }
         // Default value for layerEntryConfig.entryType is vector
@@ -571,7 +570,8 @@ export class ConfigValidation {
 
     if (listOfGeoviewLayerConfig) {
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
-        if (geoviewLayerConfig?.layerName) this.SynchronizeLocalizedString(geoviewLayerConfig.layerName, sourceKey, destinationKey);
+        if (geoviewLayerConfig?.geoviewLayerName)
+          this.SynchronizeLocalizedString(geoviewLayerConfig.geoviewLayerName, sourceKey, destinationKey);
         if (geoviewLayerConfig?.metadataAccessPath)
           this.SynchronizeLocalizedString(geoviewLayerConfig.metadataAccessPath, sourceKey, destinationKey);
 

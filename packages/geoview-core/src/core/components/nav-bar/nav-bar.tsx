@@ -100,15 +100,15 @@ export function Navbar(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
         ...buttonPanelGroups,
-        [payload.groupName]: {
-          ...buttonPanelGroups[payload.groupName],
-          [payload.id]: payload.buttonPanel as TypeButtonPanel,
+        [payload.appBarGroupName]: {
+          ...buttonPanelGroups[payload.appBarGroupName],
+          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
         },
       });
     },
@@ -120,9 +120,9 @@ export function Navbar(): JSX.Element {
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
-        const group = state[payload.groupName];
+        const group = state[payload.appBarGroupName];
 
-        delete group[payload.id];
+        delete group[payload.appBarId];
 
         return state;
       });

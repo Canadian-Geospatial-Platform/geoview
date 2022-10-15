@@ -24,6 +24,7 @@ import {
 
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
+import { Layer } from '../../layer';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -112,7 +113,8 @@ export class WFS extends AbstractGeoViewVector {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         getXMLHttpRequest(`${metadataUrl}?service=WFS&request=getcapabilities`).then((metadataString) => {
-          if (metadataString === '{}') throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+          if (metadataString === '{}')
+            throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           else {
             // need to pass a xmldom to xmlToJson
             const xmlDOMCapabilities = new DOMParser().parseFromString(metadataString, 'text/xml');
@@ -123,7 +125,7 @@ export class WFS extends AbstractGeoViewVector {
             resolve();
           }
         });
-      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
@@ -140,8 +142,8 @@ export class WFS extends AbstractGeoViewVector {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -153,8 +155,8 @@ export class WFS extends AbstractGeoViewVector {
           return true;
         }
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -169,8 +171,8 @@ export class WFS extends AbstractGeoViewVector {
         }
         if (i === metadataLayerList.length) {
           this.layerLoadError.push({
-            layer: layerEntryConfig.layerId,
-            consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+            layer: Layer.getLayerPath(layerEntryConfig),
+            consoleMessage: `WFS feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
           });
           return false;
         }
@@ -187,8 +189,10 @@ export class WFS extends AbstractGeoViewVector {
         }
       }
       this.layerLoadError.push({
-        layer: layerEntryConfig.layerId,
-        consoleMessage: `Invalid feature type list in WFS metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        layer: Layer.getLayerPath(layerEntryConfig),
+        consoleMessage: `Invalid feature type list in WFS metadata prevent loading of layer (mapId:  ${
+          this.mapId
+        }, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
       });
       return false;
     });

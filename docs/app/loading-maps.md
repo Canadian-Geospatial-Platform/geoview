@@ -85,14 +85,14 @@ An example of this:
                             'projection': 3978
                         },
                         'basemapOptions': {
-                            'id': 'transport',
+                            'basemapId': 'transport',
                             'shaded': true,
                             'labeled': true
                         },
                         'listOfGeoviewLayerConfig': [
                         {
-                          'layerId': 'wmsLYR1',
-                          'layerName': {
+                          'geoviewLayerId': 'wmsLYR1',
+                          'geoviewLayerName': {
                             'en': 'Première Nation / First Nation',
                             'fr': 'Première Nation / First Nation'
                           },
@@ -141,7 +141,7 @@ cgpv.init(function() {
                 projection: 3978
             },
             basemapOptions: {
-                id: 'transport',
+                basemapId: 'transport',
                 shaded: true,
                 labeled: true,
             },

@@ -21,8 +21,8 @@ class DetailsPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypePluginOptions) {
-    super(id, props);
+  constructor(pluginId: string, props: TypePluginOptions) {
+    super(pluginId, props);
     this.buttonPanel = null;
   }
 
@@ -30,13 +30,13 @@ class DetailsPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations = toJsonObject({
-    'en': {
+    en: {
       detailsPanel: 'Details',
       nothing_found: 'Nothing found',
       click_map: 'Choose a point on the map to start',
       action_back: 'Back',
     },
-    'fr': {
+    fr: {
       detailsPanel: 'Détails',
       nothing_found: 'Aucun résultat',
       click_map: 'Choisissez un point sur la carte pour commencer',
@@ -61,7 +61,7 @@ class DetailsPlugin extends AbstractPlugin {
     // button props
     const button: TypeIconButtonProps = {
       // set ID to detailsPanel so that it can be accessed from the core viewer
-      id: 'detailsPanelButton',
+      buttonPanelId: 'detailsPanelButton',
       tooltip: this.translations[displayLanguage].detailsPanel as string,
       tooltipPlacement: 'right',
       children: <DetailsIcon />,
@@ -95,7 +95,7 @@ class DetailsPlugin extends AbstractPlugin {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
       api.event.emit(payloadBaseClass(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
     }
   }

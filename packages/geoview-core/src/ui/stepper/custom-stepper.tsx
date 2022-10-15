@@ -19,7 +19,7 @@ import { HtmlToReact } from '../../core/containers/html-to-react';
  * Properties for the Custom Stepper
  */
 interface TypeCustomStepperProps {
-  id: string;
+  stepperId: string;
   className?: string;
   style?: CSSProperties;
 
@@ -114,7 +114,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
   const {
     className,
     style,
-    id,
+    stepperId,
     orientation,
     alternativeLabel,
     nonLinear,
@@ -225,7 +225,7 @@ export function CustomStepper(props: TypeCustomStepperProps): JSX.Element {
       <MaterialStepper
         className={`${classes.stepperContainer} ${className && className}`}
         style={style || undefined}
-        id={id || ''}
+        id={stepperId || ''}
         orientation={stepsOrientation}
         activeStep={activeStep}
         // eslint-disable-next-line no-nested-ternary
