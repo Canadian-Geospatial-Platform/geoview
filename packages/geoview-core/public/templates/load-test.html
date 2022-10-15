@@ -144,7 +144,7 @@
             'projection': 3978
           },
           'basemapOptions': {
-            'id': 'transport',
+            'basemapId': 'transport',
             'shaded': false,
             'labeled': true
           }
@@ -243,8 +243,8 @@
 
           for (j = 0; j < parseInt(document.getElementById('layerCount').value); j++) {
             cgpv.api.map('mapWM').layer.addLayer({
-              layerId: new Date().getTime().toString(),
-              layerName: {
+              geoviewLayerId: new Date().getTime().toString(),
+              geoviewLayerName: {
                 en: 'test',
                 fr: 'test',
               },

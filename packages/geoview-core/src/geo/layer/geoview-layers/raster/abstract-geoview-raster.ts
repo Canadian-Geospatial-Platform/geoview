@@ -1,7 +1,6 @@
 import BaseLayer from 'ol/layer/Base';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
 
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
@@ -26,20 +25,4 @@ export type TypeBaseRasterLayer = BaseLayer; // TypeRasterLayerGroup | TypeRaste
  * features are placed.
  */
 // ******************************************************************************************************************************
-export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
-  /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
-   *
-   * @returns {Promise<void>} A promise that the execution is completed.
-   */
-  protected abstract getServiceMetadata(): Promise<void>;
-
-  /** ***************************************************************************************************************************
-   * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
-   *
-   * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
-   *
-   * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
-   */
-  protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
-}
+export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {}

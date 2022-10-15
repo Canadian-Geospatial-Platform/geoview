@@ -7,7 +7,6 @@ export interface TypeIconButtonProps extends IconButtonProps {
   children?: React.ReactNode;
   tooltip?: string;
   tooltipPlacement?: TooltipProps['placement'];
-  id?: string;
   tabIndex?: number;
   iconRef?: React.RefObject<HTMLButtonElement>;
   // button visibility

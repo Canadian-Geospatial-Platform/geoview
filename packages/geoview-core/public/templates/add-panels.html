@@ -58,7 +58,7 @@
             'projection': 3857
           },
           'basemapOptions': {
-            'id': 'transport',
+            'basemapId': 'transport',
             'shaded': false,
             'labeled': true
           }
@@ -95,12 +95,14 @@
       // button will open a panel on the app-bar
       addAppbarPanelBtn.addEventListener('click', function (e) {
         const button = {
+          id: 'AppbarPanelButtonId',
           tooltip: 'Test',
           tooltipPlacement: 'right',
           children: cgpv.react.createElement(cgpv.ui.elements.AppsIcon),
         };
 
         const panel = {
+          panelId: 'AppbarPanelId',
           title: 'Test',
           content: `<div>Test content</div>`,
           width: 200,
@@ -158,12 +160,14 @@
       // button will add a button panel on the nav-bar in a new group
       addNavbarButtonGroupBtn.addEventListener('click', function (e) {
         const button = {
+          id: 'id',
           tooltip: 'Group',
           tooltipPlacement: 'left',
-          children: cgpv.react.createElement(cgpv.ui.elements.GroupIcon),
+          children: cgpv.react.createElement(cgpv.ui.elements.GroupIcon), // comment
         };
 
         const panel = {
+          panelId: 'panerId',
           title: 'Group',
           content: `<div>Test content</div>`,
           width: 400,

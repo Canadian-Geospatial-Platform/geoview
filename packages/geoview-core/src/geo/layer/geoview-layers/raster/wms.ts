@@ -8,7 +8,7 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { ImageWMS } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/ImageWMS';
 import WMSCapabilities from 'ol/format/WMSCapabilities';
-import { Layer } from 'ol/layer';
+import { Layer as gvLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 import { transform, transformExtent } from 'ol/proj';
 
@@ -31,6 +31,7 @@ import { getLocalizedValue, xmlToJson } from '../../../../core/utils/utilities';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
 import { api } from '../../../../app';
+import { Layer } from '../../layer';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;
@@ -119,7 +120,7 @@ export class WMS extends AbstractGeoViewRaster {
             resolve();
           });
         });
-      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
@@ -154,8 +155,8 @@ export class WMS extends AbstractGeoViewRaster {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -167,8 +168,8 @@ export class WMS extends AbstractGeoViewRaster {
           return true;
         }
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -176,8 +177,8 @@ export class WMS extends AbstractGeoViewRaster {
       const layerFound = this.getLayerMetadataEntry(layerEntryConfig.layerId);
       if (!layerFound) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Layer metadata not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -292,7 +293,7 @@ export class WMS extends AbstractGeoViewRaster {
           snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
             type: 'key',
             value: 'validation.layer.notfound',
-            params: [layerEntryConfig.layerId, this.layerId],
+            params: [layerEntryConfig.layerId, this.geoviewLayerId],
           })
         );
         resolve(null);
@@ -375,11 +376,11 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      if (!this.getVisible(layerConfig.layerId) || !layerConfig.gvLayer) resolve(null);
+      if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve(null);
       else {
         const viewResolution = api.map(this.mapId).getView().getResolution() as number;
         const crs = `EPSG:${api.map(this.mapId).currentProjection}`;
-        const wmsSource = (layerConfig.gvLayer as Layer).getSource() as ImageWMS;
+        const wmsSource = (layerConfig.gvLayer as gvLayer).getSource() as ImageWMS;
         const featureInfoUrl = wmsSource.getFeatureInfoUrl(transform(lnglat, 'EPSG:4326', crs), viewResolution, crs, {
           INFO_FORMAT: 'text/xml',
         });
@@ -483,24 +484,23 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. If no layer identifier is specified, the activeLayer of the class will be used. This routine
-   * returns null when the layerId specified is not found or when the layerId is undefined and the active layer is null or the
-   * legend image is null.
+   * Return the legend of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
+   * return null when the layer specified is not found.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerId?: string): Promise<TypeLegend | null> {
+  getLegend(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
-      const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
+      const layerConfig = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig) : layerIdOrConfig;
       if (!layerConfig) resolve(null);
 
       this.getLegendImage(layerConfig!.layerId).then((legendImage) => {
         if (!legendImage) resolve(null);
         const legend: TypeLegend = {
           type: this.type,
-          layerId: layerConfig!.layerId,
+          layerPath: Layer.getLayerPath(layerConfig!),
           layerName: layerConfig!.layerName,
           legend: legendImage!,
         };

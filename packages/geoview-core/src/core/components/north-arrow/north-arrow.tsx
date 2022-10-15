@@ -67,7 +67,7 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
@@ -304,7 +304,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const [mapProjection, setMapProjection] = useState(projection);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
   const northPoleId = `${mapId}-northpole`;
 
   useEffect(() => {

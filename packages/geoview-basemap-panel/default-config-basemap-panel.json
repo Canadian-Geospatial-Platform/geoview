@@ -6,32 +6,32 @@
       "projectionCode": 3978,
       "coreBasemaps": [
         {
-          "id": "transport",
+          "basemapId": "transport",
           "shaded": true,
           "labeled": true
         },
         {
-          "id": "transport",
+          "basemapId": "transport",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "osm",
+          "basemapId": "osm",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "simple",
+          "basemapId": "simple",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "shaded",
+          "basemapId": "shaded",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "nogeom",
+          "basemapId": "nogeom",
           "shaded": false,
           "labeled": false
         }
@@ -42,32 +42,32 @@
       "projectionCode": 3857,
       "coreBasemaps": [
         {
-          "id": "transport",
+          "basemapId": "transport",
           "shaded": true,
           "labeled": true
         },
         {
-          "id": "transport",
+          "basemapId": "transport",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "osm",
+          "basemapId": "osm",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "simple",
+          "basemapId": "simple",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "shaded",
+          "basemapId": "shaded",
           "shaded": true,
           "labeled": false
         },
         {
-          "id": "nogeom",
+          "basemapId": "nogeom",
           "shaded": false,
           "labeled": false
         }

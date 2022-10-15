@@ -73,9 +73,9 @@
     "basemapLayersNode": {
       "type": "object",
       "properties": {
-        "id": {
+        "basemapId": {
           "type": "string",
-          "description": "the id of the layer."
+          "description": "the id of the basmap layer."
         },
         "url": {
           "$ref": "#/definitions/basemapLayerUrlNode"
@@ -87,12 +87,12 @@
         }
       },
       "additionalItems": false,
-      "required": ["id", "url"]
+      "required": ["basemapId", "url"]
     },
     "basemap": {
       "type": "object",
       "properties": {
-        "id": {
+        "basemapId": {
           "type": "string",
           "description": "the basemap id",
           "enum": ["transport", "simple", "shaded", "osm", "nogeom"]
@@ -109,12 +109,12 @@
         }
       },
       "additionalProperties": false,
-      "required": ["id", "shaded", "labeled"]
+      "required": ["basemapId", "shaded", "labeled"]
     },
     "customBasemap": {
       "type": "object",
       "properties": {
-        "id": {
+        "basemapId": {
           "type": "string",
           "description": "the basemap id."
         },
@@ -160,7 +160,7 @@
         }
       },
       "additionalProperties": false,
-      "required": ["id", "name", "description", "layers"]
+      "required": ["basemapId", "name", "description", "layers"]
     }
   },
   "properties": {
