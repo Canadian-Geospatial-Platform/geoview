@@ -16,7 +16,7 @@ import MaterialSelect from '@mui/material/Select';
  * Properties for the Custom Select component
  */
 interface TypeCustomSelectProps {
-  id: string;
+  labelId: string;
   className?: string;
   style?: CSSProperties;
 
@@ -48,7 +48,7 @@ interface TypeSelectItems {
  * Required and optional properties for the item object
  */
 export interface TypeItemProps {
-  id: string;
+  itemId: string;
   value: string;
   default?: boolean;
 }
@@ -87,7 +87,7 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
   const classes = useStyles();
   const [value, setValue] = useState('');
   const [multipleValue, setMultipleValue] = useState([]);
-  const { className, style, id, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
+  const { className, style, labelId, label, selectItems, callBack, helperText, multiple, ...otherProps } = props;
 
   /**
    * Runs when a selection is changed
@@ -132,14 +132,14 @@ export function CustomSelect(props: TypeCustomSelectProps): JSX.Element {
 
   return (
     <FormControl className={classes.formControl} {...otherProps}>
-      <InputLabel className={(isDefault && classes.label) as string} id={id}>
+      <InputLabel className={(isDefault && classes.label) as string} id={labelId}>
         {label}
       </InputLabel>
       <MaterialSelect
         className={`${classes.select} ${className && className}`}
         style={style}
-        labelId={id}
-        id={`select-${id}`}
+        labelId={labelId}
+        id={`select-${labelId}`}
         label={label || undefined}
         value={(!multiple ? value : multipleValue) as string}
         onChange={changeHandler}

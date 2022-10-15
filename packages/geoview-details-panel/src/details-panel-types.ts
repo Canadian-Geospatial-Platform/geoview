@@ -13,7 +13,7 @@ export type TypeLayersEntry = {
 };
 
 export type TypeLayerInfo = {
-  id: string;
+  layerPath: string;
   name: string;
   displayField: string;
   displayFieldName: string;

@@ -24,7 +24,7 @@ export function ClickMarker(): JSX.Element {
   const clickMarkerRef = useRef<HTMLDivElement>(null);
 
   const mapConfig = useContext(MapContext);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
   const clickMarkerId = `${mapId}-clickmarker`;
 
   // create overlay for map click marker icon

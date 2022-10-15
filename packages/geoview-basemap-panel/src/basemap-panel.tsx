@@ -2,6 +2,7 @@ import {
   toJsonObject,
   TypeBasemapProps,
   TypeJsonObject,
+  TypeJsonArray,
   SelectChangeEvent,
   TypeWindow,
   TypeViewSettings,
@@ -114,7 +115,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
   // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
-    (config.supportedProjections as Array<TypeJsonObject>).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
+    (config.supportedProjections as TypeJsonArray).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
   const [mapProjection, setMapProjection] = useState(myMap.mapFeaturesConfig.map.viewSettings.projection);
 
   /**
@@ -122,10 +123,10 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    *
    * @param {string} id update the basemap on the map
    */
-  const setBasemap = (id: string) => {
+  const setBasemap = (basemapId: string) => {
     // set the new basemap and update the active basemap variable
-    myMap.basemap.setBasemap(id);
-    setActiveBasemapId(id);
+    myMap.basemap.setBasemap(basemapId);
+    setActiveBasemapId(basemapId);
   };
 
   /**

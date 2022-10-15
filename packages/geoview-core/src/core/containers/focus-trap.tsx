@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
  * Interface for the focus trap properties
  */
 interface FocusTrapProps {
-  id: string;
+  focusTrapId: string;
   callback: (dialogTrap: boolean) => void;
 }
 
@@ -45,7 +45,7 @@ interface FocusTrapProps {
  * @returns {JSX.Element} the focus trap dialog component
  */
 export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
-  const { id, callback } = props;
+  const { focusTrapId, callback } = props;
 
   const defaultTheme = useTheme();
   const classes = useStyles();
@@ -59,26 +59,26 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    * Exit the focus trap
    */
   function exitFocus(): void {
-    const mapElement = document.getElementById(id);
+    const mapElement = document.getElementById(focusTrapId);
 
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     callback(false);
     mapElement?.classList.remove('map-focus-trap');
-    mapElement?.querySelectorAll(`a[id*="link-${id}"]`).forEach((elem) => elem.setAttribute('tabindex', '0'));
-    document.getElementById(`toplink-${id}`)?.focus();
+    mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.setAttribute('tabindex', '0'));
+    document.getElementById(`toplink-${focusTrapId}`)?.focus();
   }
 
   /**
    * Set the focus trap
    */
   function setFocusTrap(): void {
-    const mapElement = document.getElementById(id);
+    const mapElement = document.getElementById(focusTrapId);
 
     // add a class to specify the viewer is in focus trap mode
     mapElement?.classList.add('map-focus-trap');
 
     // remove the top and bottom link from focus cycle and start the FocusTrap
-    mapElement?.querySelectorAll(`a[id*="link-${id}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
+    mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
     callback(true);
 
     // manage the exit of FocusTrap, remove the trap and focus the top link
@@ -99,7 +99,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleSkip = () => {
     // because the process is about to focus the map, apply a timeout before shifting focus on bottom link
     setOpen(false);
-    setTimeout(() => document.getElementById(`bottomlink-${id}`)?.focus(), 0);
+    setTimeout(() => document.getElementById(`bottomlink-${focusTrapId}`)?.focus(), 0);
   };
 
   /**
@@ -117,23 +117,23 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       evt.stopPropagation();
 
       // focus the map element and emit the map keyboard focus event
-      (document.getElementById(`map-${id}`) as HTMLElement).focus();
-      api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id));
+      (document.getElementById(`map-${focusTrapId}`) as HTMLElement).focus();
+      api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, focusTrapId));
     }
   }
 
   useEffect(() => {
-    document.getElementById(`bottomlink-${id}`)?.addEventListener('keydown', manageLinks);
-    document.getElementById(`toplink-${id}`)?.addEventListener('keydown', manageLinks);
+    document.getElementById(`bottomlink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
+    document.getElementById(`toplink-${focusTrapId}`)?.addEventListener('keydown', manageLinks);
 
     // on map keyboard focus, show focus trap dialog
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payloadIsAInKeyfocus(payload)) {
-          if (payload.handlerName!.includes(id)) {
+          if (payload.handlerName!.includes(focusTrapId)) {
             // when mnap element get focus and focus is not trap, show dialog window
-            const mapElement = document.getElementById(id);
+            const mapElement = document.getElementById(focusTrapId);
 
             if (mapElement && !mapElement.classList.contains('map-focus-trap')) {
               setOpen(true);
@@ -151,21 +151,21 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
           }
         }
       },
-      id
+      focusTrapId
     );
 
     return () => {
-      document.getElementById(`bottomlink-${id}`)?.removeEventListener('keydown', manageLinks);
-      document.getElementById(`toplink-${id}`)?.removeEventListener('keydown', manageLinks);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, id);
+      document.getElementById(`bottomlink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
+      document.getElementById(`toplink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, focusTrapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Modal
-      container={document.getElementById(id)}
-      mapId={id}
+      container={document.getElementById(focusTrapId)}
+      mapId={focusTrapId}
       open={open}
       aria-labelledby="wcag-dialog-title"
       aria-describedby="wcag-dialog-description"

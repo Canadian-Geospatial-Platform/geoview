@@ -109,7 +109,7 @@ const useStyles = makeStyles((theme) => ({
 export function OverviewMap(): JSX.Element {
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const classes = useStyles();
 
@@ -136,10 +136,10 @@ export function OverviewMap(): JSX.Element {
               const layer = layers[layerIndex];
 
               // get group id that this layer belongs to
-              const layerId = layer.get('id');
+              const layerMapId = layer.get('mapId');
 
               // check if the group id matches basemap
-              if (layerId && layerId === 'basemap') {
+              if (layerMapId && layerMapId === 'basemap') {
                 // remove the basemap layer
                 overviewMap.getOverviewMap().removeLayer(layer);
               }
@@ -153,7 +153,7 @@ export function OverviewMap(): JSX.Element {
               });
 
               // set this basemap's group id to basemap
-              basemapLayer.set('id', 'basemap');
+              basemapLayer.set('mapId', 'basemap');
 
               // add the basemap layer
               overviewMap.getOverviewMap().addLayer(basemapLayer);
@@ -221,7 +221,7 @@ export function OverviewMap(): JSX.Element {
         });
 
         // add this layer to the basemap group
-        tileLayer.set('id', 'basemap');
+        tileLayer.set('mapId', 'basemap');
 
         return tileLayer;
       }),

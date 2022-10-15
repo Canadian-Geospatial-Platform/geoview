@@ -49,7 +49,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
-  const id = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
+  const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -59,7 +59,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const mapElement = useRef<HTMLDivElement | null>();
 
   // create a new map viewer instance
-  const viewer: MapViewer = api.map(id);
+  const viewer: MapViewer = api.map(mapId);
 
   const defaultTheme = useTheme();
 
@@ -77,10 +77,10 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     const position = map.getView().getCenter()!;
 
-    api.map(id).currentPosition = position;
+    api.map(mapId).currentPosition = position;
 
     // emit the moveend event to the api
-    api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id, position));
+    api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId, position));
   }
 
   /**
@@ -93,27 +93,27 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
     const currentZoom = view.getZoom()!;
 
-    api.map(id).currentZoom = currentZoom;
+    api.map(mapId).currentZoom = currentZoom;
 
     // emit the moveend event to the api
-    api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, id, currentZoom));
+    api.event.emit(numberPayload(EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END, mapId, currentZoom));
   }
 
   function mapSingleClick(event: MapEvent): void {
     const coordinates: TypeMapSingleClick = {
       projected: (event as MapBrowserEvent<UIEvent>).coordinate,
       pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(id).currentProjection}`),
+      lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
     };
 
-    api.map(id).singleClickedPosition = coordinates;
+    api.map(mapId).singleClickedPosition = coordinates;
 
     // emit the singleclick map position
-    api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, id, coordinates));
+    api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
   }
 
   const initCGPVMap = (cgpvMap: OLMap) => {
-    cgpvMap.set('id', id);
+    cgpvMap.set('mapId', mapId);
 
     // initialize the map viewer and load plugins
     viewer.initMap(cgpvMap);
@@ -125,7 +125,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     });
 
     // emit the initial map position
-    api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, id || '', cgpvMap.getView().getCenter()!));
+    api.event.emit(lngLatPayload(EVENT_NAMES.MAP.EVENT_MAP_MOVE_END, mapId || '', cgpvMap.getView().getCenter()!));
 
     cgpvMap.on('moveend', mapMoveEnd);
     cgpvMap.on('singleclick', mapSingleClick);
@@ -141,7 +141,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // create map
     const projection = api.projection.projections[mapConfig.viewSettings.projection];
 
-    const defaultBasemap = await api.map(id).basemap.loadDefaultBasemaps();
+    const defaultBasemap = await api.map(mapId).basemap.loadDefaultBasemaps();
 
     const initialMap = new OLMap({
       target: mapElement.current as string | HTMLElement | undefined,
@@ -153,7 +153,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         });
 
         // add this layer to the basemap group
-        tileLayer.set('id', 'basemap');
+        tileLayer.set('mapId', 'basemap');
 
         return tileLayer;
       }),
@@ -167,7 +167,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
         maxZoom: defaultBasemap?.zoomLevels.max || 17,
       }),
       controls: [],
-      keyboardEventTarget: document.getElementById(`map-${id}`) as HTMLElement,
+      keyboardEventTarget: document.getElementById(`map-${mapId}`) as HTMLElement,
     });
 
     initCGPVMap(initialMap);
@@ -181,21 +181,21 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
         if (payloadIsABasemapLayerArray(payload)) {
-          if (payload.handlerName === id) {
+          if (payload.handlerName === mapId) {
             // remove previous basemaps
-            const layers = api.map(id).map.getAllLayers();
+            const layers = api.map(mapId).map.getAllLayers();
 
             // loop through all layers on the map
             for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
               const layer = layers[layerIndex];
 
               // get group id that this layer belongs to
-              const layerId = layer.get('id');
+              const layerId = layer.get('mapId');
 
               // check if the group id matches basemap
               if (layerId && layerId === 'basemap') {
                 // remove the basemap layer
-                api.map(id).map.removeLayer(layer);
+                api.map(mapId).map.removeLayer(layer);
               }
             }
 
@@ -207,10 +207,10 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
               });
 
               // set this basemap's group id to basemap
-              basemapLayer.set('id', 'basemap');
+              basemapLayer.set('mapId', 'basemap');
 
               // add the basemap layer
-              api.map(id).map.getLayers().insertAt(index, basemapLayer);
+              api.map(mapId).map.getLayers().insertAt(index, basemapLayer);
 
               // render the layer
               basemapLayer.changed();
@@ -218,7 +218,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           }
         }
       },
-      id
+      mapId
     );
 
     // listen to geoview-basemap-panel package change projection event
@@ -226,16 +226,16 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload) => {
         if (payloadIsAMapViewProjection(payload)) {
-          if (payload.handlerName === id) {
+          if (payload.handlerName === mapId) {
             // on map view projection change, layer source needs to be refreshed
-            const currentView = api.map(id).getView();
+            const currentView = api.map(mapId).getView();
             const centerCoordinate = toLonLat(currentView.getCenter()!, currentView.getProjection());
-            api.map(id).setView({
+            api.map(mapId).setView({
               projection: 3978,
               zoom: currentView.getZoom()!,
               center: [centerCoordinate[0], centerCoordinate[1]],
             });
-            const mapLayers = api.map(id).layer.layers;
+            const mapLayers = api.map(mapId).layer.layers;
             Object.entries(mapLayers).forEach((mapLayerEntry) => {
               const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
                 if (baseLayer) {
@@ -255,25 +255,25 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           }
         }
       },
-      id
+      mapId
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, id);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, id);
+      api.event.off(EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE, mapId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-    <div id={`map-${id}`} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} tabIndex={0}>
+    <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} tabIndex={0}>
       {isLoaded && (
         <>
           {components !== undefined && components.indexOf('north-arrow') > -1 && (
-            <NorthArrow projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
+            <NorthArrow projection={api.projection.projections[api.map(mapId).currentProjection].getCode()} />
           )}
-          <NorthPoleFlag projection={api.projection.projections[api.map(id).currentProjection].getCode()} />
+          <NorthPoleFlag projection={api.projection.projections[api.map(mapId).currentProjection].getCode()} />
           <Crosshair />
           <ClickMarker />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}

@@ -24,8 +24,8 @@ class BasemapPanelPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypePluginOptions) {
-    super(id, props);
+  constructor(pluginId: string, props: TypePluginOptions) {
+    super(pluginId, props);
     this.buttonPanel = null;
   }
 
@@ -47,10 +47,10 @@ class BasemapPanelPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations = toJsonObject({
-    'en': {
+    en: {
       basemapPanel: 'Basemaps',
     },
-    'fr': {
+    fr: {
       basemapPanel: 'Fond de carte',
     },
   });
@@ -73,7 +73,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
       const { displayLanguage } = api.map(mapId);
       // button props
       const button: TypeIconButtonProps = {
-        id: 'basemapPanelButton',
+        iconButtonId: 'basemapPanelButton',
         tooltip: this.translations[displayLanguage].basemapPanel as string,
         tooltipPlacement: 'right',
         children: <MapIcon />,

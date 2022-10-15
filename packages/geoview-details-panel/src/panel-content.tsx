@@ -457,21 +457,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     const data: Record<string, AbstractGeoViewLayer> = {};
 
     // loop through each map server layer loaded from the map config and created using the API
-    const layerIds = Object.keys(mapLayers);
+    const arrayOfgeoviewLayerId = Object.keys(mapLayers);
 
-    layerIds.forEach(async (id: string) => {
-      const mapLayer = mapLayers[id];
-      data[mapLayer.id] = Cast<AbstractGeoViewLayer>({
-        // the map server layer id
-        id: mapLayer.id,
-        name: mapLayer.name,
-        // the type of the map server layer (WMS, Dynamic, Feature)
-        type: mapLayer.type,
-        // the layer class
-        layer: mapLayer,
-        // an object that will contains added layers from the map server layer
-        layers: {},
-      });
+    arrayOfgeoviewLayerId.forEach(async (geoviewLayerId: string) => {
+      const mapLayer = mapLayers[geoviewLayerId];
+      data[mapLayer.mapId] = mapLayer;
 
       // check each map server layer type and add it to the layers object of the map server in the data array
       if (geoviewLayerIsWMS(mapLayer)) {

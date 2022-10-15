@@ -28,7 +28,7 @@ export default function ZoomOut(props: ZoomOutProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Causes the map to zoom out
