@@ -35,12 +35,12 @@ export class Plugin {
   /**
    * Load a package script on runtime
    *
-   * @param {string} id the package id to load
+   * @param {string} pluginId the package id to load
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  loadScript = async (id: string): Promise<any> => {
+  loadScript = async (pluginId: string): Promise<any> => {
     return new Promise((resolve) => {
-      const existingScript = document.getElementById(id);
+      const existingScript = document.getElementById(pluginId);
 
       if (!existingScript) {
         // get all loaded js scripts on the page
@@ -65,11 +65,11 @@ export class Plugin {
 
         // create a script element
         const script = document.createElement('script');
-        script.src = `${scriptPath}/corePackages/geoview-${id}.js`;
-        script.id = id;
+        script.src = `${scriptPath}/corePackages/geoview-${pluginId}.js`;
+        script.id = pluginId;
         document.body.appendChild(script);
         script.onload = () => {
-          resolve(window.plugins[id]);
+          resolve(window.plugins[pluginId]);
         };
 
         script.onerror = () => {
@@ -77,8 +77,8 @@ export class Plugin {
         };
       }
 
-      if (existingScript && window.plugins && window.plugins[id]) {
-        resolve(window.plugins[id]);
+      if (existingScript && window.plugins && window.plugins[pluginId]) {
+        resolve(window.plugins[pluginId]);
       }
     });
   };
@@ -182,7 +182,7 @@ export class Plugin {
 
         // assign the plugin default values to be accessible from the plugin
         Object.defineProperties(plugin, {
-          id: { value: pluginId },
+          pluginId: { value: pluginId },
           api: { value: api },
           createElement: { value: React.createElement },
           react: { value: React },
@@ -246,16 +246,17 @@ export class Plugin {
       delete this.plugins[mapId][pluginId];
     } else {
       // remove the plugin from all maps
-      for (let i = 0; i < Object.keys(this.plugins).length; i += 1) {
-        const aMapId = Object.keys(this.plugins)[i];
-        const recordOfPlugins = this.plugins[aMapId];
+      const pluginKeys = Object.keys(this.plugins);
+      for (let i = 0; i < pluginKeys.length; i += 1) {
+        const pluginKey = pluginKeys[i];
+        const recordOfPlugins = this.plugins[pluginKey];
 
         const plugin = recordOfPlugins[pluginId];
 
         // call the removed function on the plugin
         if (typeof plugin.removed === 'function') plugin.removed();
 
-        delete this.plugins[aMapId][pluginId];
+        delete this.plugins[pluginKey][pluginId];
       }
     }
   };

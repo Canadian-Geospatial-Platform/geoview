@@ -18,7 +18,7 @@ import { payloadIsASnackbarMessage } from '../../api/events/payloads/snackbar-me
  * Snackbar properties interface
  */
 interface SnackBarProps {
-  id: string;
+  snackBarId: string;
 }
 
 /**
@@ -46,7 +46,7 @@ function SnackButton(props: SnackButtonProps): JSX.Element {
  * @param {SnackBarProps} props the snackbar properties
  */
 export function Snackbar(props: SnackBarProps): null {
-  const { id } = props;
+  const { snackBarId } = props;
 
   const { t } = useTranslation<string>();
 
@@ -54,7 +54,7 @@ export function Snackbar(props: SnackBarProps): null {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Take string and replace parameters from array of values
@@ -94,7 +94,7 @@ export function Snackbar(props: SnackBarProps): null {
             payload.message.type === 'string' ? payload.message.value : replaceParams(payload.message.params!, t(payload.message.value));
 
           // show the notification
-          if (payload && id === payload.handlerName) enqueueSnackbar(message, options);
+          if (payload && snackBarId === payload.handlerName) enqueueSnackbar(message, options);
         }
       },
       mapId

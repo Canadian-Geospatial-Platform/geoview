@@ -24,8 +24,8 @@ class BasemapPanelPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypePluginOptions) {
-    super(id, props);
+  constructor(pluginId: string, props: TypePluginOptions) {
+    super(pluginId, props);
     this.buttonPanel = null;
   }
 
@@ -47,10 +47,10 @@ class BasemapPanelPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations = toJsonObject({
-    'en': {
+    en: {
       basemapPanel: 'Basemaps',
     },
-    'fr': {
+    fr: {
       basemapPanel: 'Fond de carte',
     },
   });
@@ -110,7 +110,7 @@ class BasemapPanelPlugin extends AbstractPlugin {
       const { api } = cgpv;
 
       if (this.buttonPanel) {
-        api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+        api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
 
         // reset basemaps array
         api.map(mapId).basemap.basemaps = [];

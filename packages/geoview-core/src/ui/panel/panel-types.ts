@@ -18,7 +18,7 @@ export type TypeButtonPanelProps = {
  */
 export type TypePanelProps = {
   /** Panel id. */
-  id?: string;
+  panelId?: string;
   /** Panel type (app-bar, nav-bar). */
   type?: string;
   /** Panel open status (open/closed). */
@@ -37,8 +37,6 @@ export type TypePanelProps = {
  * Interface for the button properties used when creating a new button.
  */
 export interface TypeButtonProps extends Omit<ButtonProps, 'type'> {
-  /** Generated button id. */
-  id?: string;
   /** Button tooltip. */
   tooltip?: string;
   /** Location for tooltip. */
@@ -66,14 +64,14 @@ export interface ButtonPropsLayerPanel {
   isFirst?: boolean;
   isLast?: boolean;
   handleNext: () => void;
-};
+}
 
 /** ******************************************************************************************************************************
  * Interface used when creating a new button panel.
  */
 export type TypeButtonPanel = {
   /** Panel identifier. */
-  id: string;
+  buttonPanelId: string;
   /** Pasnel API. */
   panel?: PanelApi;
   /** Button used by the panel. */

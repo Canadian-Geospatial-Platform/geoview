@@ -191,7 +191,7 @@ The viewer is bundled with core packages, you can load them by passing their id 
             'projection': 3857,
           },
           'basemapOptions': {
-            'id': 'transport',
+            'basemapId': 'transport',
             'shaded': false,
             'labeled': true
           }

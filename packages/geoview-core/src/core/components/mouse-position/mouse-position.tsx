@@ -73,7 +73,7 @@ function coordFormnatDMS(value: number): string {
  * Mouse position properties interface
  */
 interface MousePositionProps {
-  id: string;
+  mousePositionMapId: string;
 }
 
 /**
@@ -82,7 +82,7 @@ interface MousePositionProps {
  * @returns {JSX.Element} the mouse position component
  */
 export function MousePosition(props: MousePositionProps): JSX.Element {
-  const { id } = props;
+  const { mousePositionMapId } = props;
 
   const [expanded, setExpanded] = useState(false);
 
@@ -101,7 +101,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Format the coordinates output in lat long
@@ -199,7 +199,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE,
       (payload) => {
         if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(id)) {
+          if (payload.handlerName!.includes(mousePositionMapId)) {
             isCrosshairsActive.current = payload.status;
           }
         }
@@ -211,7 +211,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
       EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
       (payload) => {
         if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(id)) {
+          if (payload.handlerName!.includes(mousePositionMapId)) {
             setExpanded(payload.status);
           }
         }

@@ -42,7 +42,7 @@ export function FooterTabs(): JSX.Element | null {
 
   const tabsContainerRef = useRef<HTMLDivElement>();
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Add a tab

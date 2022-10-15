@@ -11,7 +11,7 @@ import { modalPayload } from '../../api/events/payloads/modal-payload';
  */
 export interface ModalActionsType {
   // the id of the action (button)
-  id: string;
+  actionId: string;
 
   // content is the action itself, HTML (in the form of a string) or JSX
   content?: React.ReactNode;
@@ -41,7 +41,7 @@ export interface modalFooter {
  */
 export type TypeModalProps = {
   // id of the modal. Must be unique. If not provided, it will be generated
-  id?: string;
+  modalId?: string;
 
   // header of modal. Contains heading (title) of modal and/or action buttons, if provided. If header is not provided, modal will have no header content
   header?: modalHeader;
@@ -98,17 +98,17 @@ export class ModalApi {
    */
   createModal = (modal: TypeModalProps): void => {
     if (!modal.content) return;
-    const id = modal.id ? modal.id : generateId('');
-    this.modals[id] = new ModalModel(modal.content);
-    this.modals[id].id = id;
-    this.modals[id].mapId = this.mapId;
-    this.modals[id].header = modal.header || this.modals[id].header;
-    this.modals[id].content = modal.content;
-    this.modals[id].footer = modal.footer || this.modals[id].footer;
-    this.modals[id].width = modal.width || this.modals[id].width;
-    this.modals[id].height = modal.height || this.modals[id].height;
+    const modalId = modal.modalId ? modal.modalId : generateId('');
+    this.modals[modalId] = new ModalModel(modal.content);
+    this.modals[modalId].modalModelId = modalId;
+    this.modals[modalId].mapId = this.mapId;
+    this.modals[modalId].header = modal.header || this.modals[modalId].header;
+    this.modals[modalId].content = modal.content;
+    this.modals[modalId].footer = modal.footer || this.modals[modalId].footer;
+    this.modals[modalId].width = modal.width || this.modals[modalId].width;
+    this.modals[modalId].height = modal.height || this.modals[modalId].height;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, this.mapId, id));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, this.mapId, modalId));
   };
 
   /**
@@ -116,8 +116,8 @@ export class ModalApi {
    *
    * @param { string } id of the modal that is to be deleted
    */
-  deleteModal = (id: string): void => {
+  deleteModal = (modalId: string): void => {
     if (!Object.keys(this.modals)) return;
-    delete this.modals[id];
+    delete this.modals[modalId];
   };
 }

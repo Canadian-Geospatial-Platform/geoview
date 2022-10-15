@@ -20,7 +20,7 @@ import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-vi
  */
 export function FooterbarFixNorthSwitch(): JSX.Element {
   const mapConfig = useContext(MapContext);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const { t } = useTranslation<string>();
 

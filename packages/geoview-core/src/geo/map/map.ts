@@ -137,7 +137,7 @@ export class MapViewer {
    * @param cgpMap
    */
   initMap(cgpMap: OLMap): void {
-    this.mapId = cgpMap.get('id');
+    this.mapId = cgpMap.get('mapId');
     this.map = cgpMap;
 
     // initialize layers and load the layers passed in from map config if any
@@ -181,25 +181,25 @@ export class MapViewer {
   /**
    * Add a new custom component to the map
    *
-   * @param {string} id an id to the new component
+   * @param {string} mapComponentId an id to the new component
    * @param {JSX.Element} component the component to add
    */
-  addComponent = (id: string, component: JSX.Element): void => {
-    if (id && component) {
+  addComponent = (mapComponentId: string, component: JSX.Element): void => {
+    if (mapComponentId && component) {
       // emit an event to add the component
-      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.mapId, id, component));
+      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, this.mapId, mapComponentId, component));
     }
   };
 
   /**
    * Remove an existing custom component from the map
    *
-   * @param id the id of the component to remove
+   * @param imapComponentIdd the id of the component to remove
    */
-  removeComponent = (id: string): void => {
-    if (id) {
+  removeComponent = (mapComponentId: string): void => {
+    if (mapComponentId) {
       // emit an event to add the component
-      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, id));
+      api.event.emit(mapComponentPayload(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, this.mapId, mapComponentId));
     }
   };
 

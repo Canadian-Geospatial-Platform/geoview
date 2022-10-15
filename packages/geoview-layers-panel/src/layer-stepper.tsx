@@ -11,6 +11,7 @@ import {
   SelectChangeEvent,
   snackbarMessagePayload,
   ButtonPropsLayerPanel,
+  TypeListOfLayerEntryConfig,
 } from 'geoview-core';
 
 type Event = { target: { value: string } };
@@ -149,7 +150,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            layerId: layers[0][0] as string,
+            geoviewLayerId: layers[0][0] as string,
             geoviewLayerType: 'ogcWms',
             listOfLayerEntryConfig: [],
           },
@@ -181,7 +182,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            layerId: layers[0][0] as string,
+            geoviewLayerId: layers[0][0] as string,
             geoviewLayerType: 'ogcWms',
             listOfLayerEntryConfig: [],
           },
@@ -211,7 +212,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            layerId: layers[0][0] as string,
+            geoviewLayerId: layers[0][0] as string,
             geoviewLayerType: 'ogcWms',
             listOfLayerEntryConfig: [],
           },
@@ -242,7 +243,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
             setLayerName(layers[0][1] as string);
             setLayerEntries([
               {
-                layerId: layers[0][0] as string,
+                geoviewLayerId: layers[0][0] as string,
                 geoviewLayerType: 'ogcWms',
                 listOfLayerEntryConfig: [],
               },
@@ -252,7 +253,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           setLayerName(esri.name as string);
           setLayerEntries([
             {
-              layerId: esri.id as string,
+              geoviewLayerId: esri.id as string,
               geoviewLayerType: 'ogcWms',
               listOfLayerEntryConfig: [],
             },
@@ -369,8 +370,8 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
     const layerConfig: TypeGeoviewLayerConfig = {
-      layerId: api.generateId(),
-      layerName: {
+      geoviewLayerId: api.generateId(),
+      geoviewLayerName: {
         en: name,
         fr: name,
       },
@@ -379,7 +380,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         en: url,
         fr: url,
       },
-      listOfLayerEntryConfig: entries,
+      listOfLayerEntryConfig: entries as TypeListOfLayerEntryConfig,
     };
     if (valid) {
       api.map(mapId).layer.addLayer(layerConfig);
@@ -430,30 +431,18 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       setLayerEntries(
         newValue.map((x: string) => {
           if (layerType === ESRI_DYNAMIC) {
-            return {
-              layerId: x,
-            } as TypeEsriDynamicLayerEntryConfig;
+            return { layerId: x[0] } as TypeEsriDynamicLayerEntryConfig;
           }
 
-          return {
-            layerId: x[0] as string,
-          } as TypeWmsLayerEntryConfig;
+          return { layerId: x[0] as string } as TypeWmsLayerEntryConfig;
         })
       );
       setLayerName(newValue.map((x) => x[1]).join(', '));
     } else {
       if (layerType === ESRI_DYNAMIC) {
-        setLayerEntries([
-          {
-            layerId: newValue[0],
-          } as TypeEsriDynamicLayerEntryConfig,
-        ]);
+        setLayerEntries([{ layerId: newValue[0] } as TypeEsriDynamicLayerEntryConfig]);
       } else {
-        setLayerEntries([
-          {
-            layerId: newValue[0],
-          } as TypeWmsLayerEntryConfig,
-        ]);
+        setLayerEntries([{ layerId: newValue[0] } as TypeWmsLayerEntryConfig]);
       }
       setLayerName(newValue[1]);
     }

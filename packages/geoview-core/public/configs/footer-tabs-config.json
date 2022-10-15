@@ -7,14 +7,14 @@
       "projection": 3978
     },
     "basemapOptions": {
-      "id": "transport",
+      "basemapId": "transport",
       "shaded": false,
       "labeled": true
     },
     "listOfGeoviewLayerConfig": [
       {
-        "layerId": "wmsLYR1",
-        "layerName": {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": {
           "en": "Première Nation / First Nation",
           "fr": "Première Nation / First Nation"
         },
@@ -26,8 +26,8 @@
         "listOfLayerEntryConfig": [{ "layerId": "0" }]
       },
       {
-        "layerId": "esriDynamicLYR2",
-        "layerName": {
+        "geoviewLayerId": "esriDynamicLYR2",
+        "geoviewLayerName": {
           "en": "Energy",
           "fr": "Energy"
         },

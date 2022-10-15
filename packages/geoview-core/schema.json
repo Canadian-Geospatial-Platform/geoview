@@ -193,7 +193,7 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "id": {
+        "styleId": {
           "type": "string"
         },
         "styleType": {
@@ -211,7 +211,7 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "id": {
+        "styleId": {
           "type": "string"
         },
         "styleType": {
@@ -261,7 +261,7 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "id": {
+        "styleId": {
           "type": "string"
         },
         "styleType": {
@@ -894,7 +894,7 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "id": { "$ref": "#/definitions/TypeBasemapId" },
+        "basemapId": { "$ref": "#/definitions/TypeBasemapId" },
         "shaded": {
           "type": "boolean",
           "default": true,
@@ -906,7 +906,7 @@
           "description": "Enable or disable basemap labels"
         }
       },
-      "required": ["id", "shaded", "labeled"]
+      "required": ["basemapId", "shaded", "labeled"]
     },
 
     "TypeBasemapId": {
@@ -934,11 +934,11 @@
       "additionalProperties": false,
       "type": "object",
       "properties": {
-        "layerId": {
+        "geoviewLayerId": {
           "type": "string",
           "description": "The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have the language extension (id-'lang')."
         },
-        "layerName": {
+        "geoviewLayerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
@@ -960,7 +960,7 @@
         }
       },
       "required": [
-        "layerId",
+        "geoviewLayerId",
         "geoviewLayerType",
         "listOfLayerEntryConfig"
       ]

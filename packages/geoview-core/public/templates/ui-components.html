@@ -62,23 +62,28 @@
               'projection': 3857
             },
             'basemapOptions': {
-              'id': 'transport',
+              'basemapId': 'transport',
               'shaded': false,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'geojsonHistoFlood',
-                'layerName': {
+                'geoviewLayerId': 'geojsonHistoFlood',
+                'geoviewLayerName': {
                   'en': 'GeoJSON Line',
                   'fr': 'GeoJSON Line'
                 },
-                'metadataAccessPath': {
-                  'en': './geojson/',
-                  'fr': './geojson/'
-                },
                 'geoviewLayerType': 'GeoJSON',
-                'listOfLayerEntryConfig': [ { 'layerId': 'historical_flood_0.geojson' } ]
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'historical_flood_0.geojson',
+                    'source': {
+                      'dataAccessPath': {
+                        'en': './geojson/'
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
