@@ -89,15 +89,15 @@ export function Appbar(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
         ...buttonPanelGroups,
-        [payload.groupName]: {
-          ...buttonPanelGroups[payload.groupName],
-          [payload.id]: payload.buttonPanel as TypeButtonPanel,
+        [payload.appBarGroupName]: {
+          ...buttonPanelGroups[payload.appBarGroupName],
+          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
         },
       });
     },
@@ -109,9 +109,9 @@ export function Appbar(): JSX.Element {
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
-        const group = state[payload.groupName];
+        const group = state[payload.appBarGroupName];
 
-        delete group[payload.id];
+        delete group[payload.appBarId];
 
         return state;
       });
@@ -165,8 +165,8 @@ export function Appbar(): JSX.Element {
             // display the button panels in the list
             return (
               <List key={groupName} className={classes.appBarList}>
-                {Object.keys(buttonPanels).map((buttonId) => {
-                  const buttonPanel = buttonPanels[buttonId];
+                {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+                  const buttonPanel = buttonPanels[buttonPanelsKey];
                   return buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible ? (
                     <Fragment key={buttonPanel.button.id}>
                       <ListItem>
@@ -204,9 +204,11 @@ export function Appbar(): JSX.Element {
         // display the panels in the list
         return (
           <div key={groupName}>
-            {Object.keys(buttonPanels).map((buttonId) => {
-              const buttonPanel = buttonPanels[buttonId];
-              return buttonPanel?.panel ? <Panel key={buttonPanel.panel.id} panel={buttonPanel.panel} button={buttonPanel.button} /> : null;
+            {Object.keys(buttonPanels).map((buttonPanelsKey) => {
+              const buttonPanel = buttonPanels[buttonPanelsKey];
+              return buttonPanel?.panel ? (
+                <Panel key={buttonPanel.panel.panelId} panel={buttonPanel.panel} button={buttonPanel.button} />
+              ) : null;
             })}
           </div>
         );

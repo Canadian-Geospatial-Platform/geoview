@@ -27,6 +27,7 @@ import {
 } from '../../../map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 import { api } from '../../../../app';
+import { Layer } from '../../layer';
 
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;
@@ -111,7 +112,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
-          if (metadataString === '{}') throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+          if (metadataString === '{}')
+            throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           else {
             this.metadata = JSON.parse(metadataString) as TypeJsonObject;
             const { copyrightText } = this.metadata;
@@ -119,7 +121,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             resolve();
           }
         });
-      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
@@ -136,16 +138,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerId (mapId: ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
 
       if (!this.metadata!.supportsDynamicLayers) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Layer ${layerEntryConfig.layerId} of map ${this.mapId} does not support dynamic layers.`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Layer ${Layer.getLayerPath(layerEntryConfig)} of map ${this.mapId} does not support dynamic layers.`,
         });
         return false;
       }
@@ -157,8 +159,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           return true;
         }
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -166,16 +168,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const esriIndex = Number(layerEntryConfig.layerId);
       if (Number.isNaN(esriIndex)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
 
       if (this.metadata?.layers[esriIndex] === undefined) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -439,7 +441,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    */
   protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult> {
     const promisedQueryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      if (!this.getVisible(layerConfig.layerId) || !layerConfig.gvLayer) resolve(null);
+      if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve(null);
       else {
         if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) resolve(null);
         let identifyUrl = getLocalizedValue(layerConfig.source?.dataAccessPath, this.mapId);

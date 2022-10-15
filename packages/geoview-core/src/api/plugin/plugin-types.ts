@@ -9,7 +9,7 @@ import { API } from '../api';
  */
 export type TypePluginStructure = {
   // id of the plugin
-  id: string;
+  pluginId: string;
   api: API;
   createElement: typeof React.createElement;
   react: typeof React;

@@ -4,7 +4,7 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 import { TypeGeoviewLayerConfig } from '../../../geo/map/map-schema-types';
 
 /** Valid events that can create LayerConfigPayload */
-const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_LAYER_ADD];
+const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_ADD_LAYER];
 
 /**
  * Type Gard function that redefines a PayloadBaseClass as a LayerConfigPayload

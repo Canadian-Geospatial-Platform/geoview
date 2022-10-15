@@ -24,16 +24,6 @@ export type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr'> & Par
 export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
 
 /** ******************************************************************************************************************************
- * Basic type used to identify the layer to display on the map.
- */
-export type TypeLayerBasicInfoConfig = {
-  /** The id of the layer to display on the map. */
-  layerId: string;
-  /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
-};
-
-/** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
  */
 export type TypeLayerInitialSettings = {
@@ -349,7 +339,7 @@ export const isSimpleStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verify
  */
 export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
-  id?: string;
+  styleId?: string;
   /** Type of style. */
   styleType: 'simple';
   /** Label associated to the style */
@@ -388,7 +378,7 @@ export const isUniqueValueStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): v
  */
 export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
-  id?: string;
+  styleId?: string;
   /** Type of style. */
   styleType: 'uniqueValue';
   /** Label used if field/value association is not found. */
@@ -433,7 +423,7 @@ export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): ve
  */
 export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
-  id?: string;
+  styleId?: string;
   /** Type of style. */
   styleType: 'classBreaks';
   /** Label used if field/value association is not found. */
@@ -902,15 +892,14 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
  */
 export type TypeGeoviewLayerConfig = {
   /**
-   * The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have
-   * the language extension (id-'lang').
+   * The GeoView layer identifier.
    */
-  layerId: string;
+  geoviewLayerId: string;
   /**
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  layerName?: TypeLocalizedString;
+  geoviewLayerName?: TypeLocalizedString;
   /** The GeoView layer access path (English/French). */
   metadataAccessPath?: TypeLocalizedString;
   /** Type of GeoView layer. */
@@ -1002,7 +991,7 @@ export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'deta
  * List of external packages to initialize on viewer load. Default = [].
  */
 export type TypeExternalPackages = {
-  /** External Package name. The name must be ideintical to the window external package object to load. */
+  /** External Package name. The name must be identical to the window external package object to load. */
   name: string;
   /**
    * The url to the external package configuration setting. The core package will read the configuration and pass it inside

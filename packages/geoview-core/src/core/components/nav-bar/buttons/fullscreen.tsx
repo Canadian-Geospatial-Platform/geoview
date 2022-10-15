@@ -34,7 +34,7 @@ export default function Fullscreen(props: FullscreenProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   // TODO: need to trap the exit full screen event by ESC to arrange the fs state and icon
   /**

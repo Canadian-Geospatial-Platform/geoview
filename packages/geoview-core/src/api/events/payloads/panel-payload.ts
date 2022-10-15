@@ -27,7 +27,7 @@ const validEvents4Content: EventStringId[] = [EVENT_NAMES.PANEL.EVENT_PANEL_CHAN
 
 /** Type used to define an action button  */
 export type TypeActionButton = {
-  id: string;
+  actionButtonId: string;
   title?: string;
   children?: string | React.ReactElement | Element;
   action?: () => void;

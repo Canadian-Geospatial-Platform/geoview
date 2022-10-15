@@ -182,12 +182,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Return feature information for all the features stored in the layer.
    *
-   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {TypeFeatureInfoResult} The feature info table.
    */
-  getAllFeatureInfo(layerId?: string): TypeFeatureInfoResult {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
+  getAllFeatureInfo(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): TypeFeatureInfoResult {
+    const layerConfig = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig) : layerIdOrConfig;
     if (!layerConfig?.gvLayer) return null;
     return this.formatFeatureInfoResult(
       (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),

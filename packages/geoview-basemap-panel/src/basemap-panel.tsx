@@ -2,6 +2,7 @@ import {
   toJsonObject,
   TypeBasemapProps,
   TypeJsonObject,
+  TypeJsonArray,
   SelectChangeEvent,
   TypeWindow,
   TypeViewSettings,
@@ -114,7 +115,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
   // TODO: change the path for getting projection on schema refactor
   const projections: number[] =
-    (config.supportedProjections as Array<TypeJsonObject>).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
+    (config.supportedProjections as TypeJsonArray).map((obj: TypeJsonObject) => obj?.projectionCode as number) || [];
   const [mapProjection, setMapProjection] = useState(myMap.mapFeaturesConfig.map.viewSettings.projection);
 
   /**
@@ -122,10 +123,10 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    *
    * @param {string} id update the basemap on the map
    */
-  const setBasemap = (id: string) => {
+  const setBasemap = (basemapId: string) => {
     // set the new basemap and update the active basemap variable
-    myMap.basemap.setBasemap(id);
-    setActiveBasemapId(id);
+    myMap.basemap.setBasemap(basemapId);
+    setActiveBasemapId(basemapId);
   };
 
   /**
@@ -151,7 +152,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
       // custom basemap are provided set it by default (can't be set as basemap from geoview config)
       if (basemap && basemapIndex === 0 && activeBasemapId === '') {
-        setBasemap(basemap.id!);
+        setBasemap(basemap.basemapId!);
         isInit = true;
       }
     }
@@ -172,7 +173,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
     }
 
     // if previous basemap does not exist in previous projection, init first one
-    if (!isInit) setBasemap(myMap.basemap.basemaps[0].id as string);
+    if (!isInit) setBasemap(myMap.basemap.basemaps[0].basemapId as string);
   };
 
   /**
@@ -247,10 +248,10 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             classes={{ root: classes.basemapCard }}
-            className={`${basemap.id === activeBasemapId ? 'active' : ''}`}
-            onClick={() => setBasemap(basemap.id as string)}
-            onKeyPress={() => setBasemap(basemap.id as string)}
-            key={basemap.id}
+            className={`${basemap.basemapId === activeBasemapId ? 'active' : ''}`}
+            onClick={() => setBasemap(basemap.basemapId as string)}
+            onKeyPress={() => setBasemap(basemap.basemapId as string)}
+            key={basemap.basemapId}
             title={basemap.name}
             content={
               <>

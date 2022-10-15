@@ -70,14 +70,14 @@
                 'projection': 3857
               },
               'basemapOptions': {
-                'id': 'transport',
+                'basemapId': 'transport',
                 'shaded': false,
                 'labeled': true
               },
               'listOfGeoviewLayerConfig': [
                 {
-                  'layerId': 'wmsLYR1-Root',
-                  'layerName': { 'en': 'Root' },
+                  'geoviewLayerId': 'wmsLYR1-Root',
+                  'geoviewLayerName': { 'en': 'Root' },
                   'metadataAccessPath': { 'en': 'https://ows.mundialis.de/services/service' },
                   'geoviewLayerType': 'ogcWms',
                   'initialSettings': { 'visible': true },
@@ -98,8 +98,8 @@
                   ]
                 },
                 {
-                  'layerId': 'wmsLYR1-msi',
-                  'layerName': { 'en': 'MSI' },
+                  'geoviewLayerId': 'wmsLYR1-msi',
+                  'geoviewLayerName': { 'en': 'MSI' },
                   'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/msi' },
                   'geoviewLayerType': 'ogcWms',
                   'listOfLayerEntryConfig': [
@@ -121,7 +121,7 @@
   </div>
   <p>This map has a wms layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR1-INFO-OSM-WMS" class="panel">Click on feature on the map</pre>
+  <pre id="LYR1-INFO-wmsLYR1-Root/wmsLYR1-Group/OSM-WMS" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR1CS" class="panel"></pre>
@@ -139,14 +139,14 @@
               'projection': 3857
             },
             'basemapOptions': {
-              'id': 'transport',
+              'basemapId': 'transport',
               'shaded': false,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'xyzTilesLYR2',
-                'layerName': {
+                'geoviewLayerId': 'xyzTilesLYR2',
+                'geoviewLayerName': {
                   'en': 'statmen toner'
                 },
                 'geoviewLayerType': 'xyzTiles',
@@ -187,14 +187,14 @@
               'projection': 3978
             },
             'basemapOptions': {
-              'id': 'transport',
+              'basemapId': 'transport',
               'shaded': true,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'esriDynamicLYR3.2',
-                'layerName': {
+                'geoviewLayerId': 'esriDynamicLYR3',
+                'geoviewLayerName': {
                   'en': 'Flood'
                 },
                 'metadataAccessPath': {
@@ -219,7 +219,7 @@
   </div>
   <p>This map has a Esri dynamic layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR3-INFO-0" class="panel">Click on feature on the map</pre>
+  <pre id="LYR3-INFO-esriDynamicLYR3/0" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR3CS" class="panel"></pre>
@@ -237,14 +237,14 @@
               'projection': 3978
             },
             'basemapOptions': {
-              'id': 'transport',
+              'basemapId': 'transport',
               'shaded': false,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'esriFeatureLYR4',
-                'layerName': { 'en': 'Water quality at monitoring sites' },
+                'geoviewLayerId': 'esriFeatureLYR4',
+                'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
                 'metadataAccessPath': {
                   'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
                 },
@@ -262,7 +262,7 @@
         }"></div>
   <p>This map has a Esri feature layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR4-INFO-8" class="panel">Click on feature on the map</pre>
+  <pre id="LYR4-INFO-esriFeatureLYR4/8" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR4CS" class="panel"></pre>
@@ -280,85 +280,20 @@
             'projection': 3978
           },
           'basemapOptions': {
-            'id': 'nogeom',
+            'basemapId': 'nogeom',
             'shaded': true,
             'labeled': false
           },
           'listOfGeoviewLayerConfig': [
             {
-              'layerId': 'geojsonLYR5',
-              'layerName': {
-                'en': 'GeoJSON Sample'
-              },
-              'metadataAccessPath': {
-                'en': './geojson/metadata.json'
-              },
+              'geoviewLayerId': 'geojsonLYR5',
+              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+              'metadataAccessPath': { 'en': './geojson/metadata.json' },
               'geoviewLayerType': 'GeoJSON',
               'listOfLayerEntryConfig': [
-                {
-                  'layerId': 'polygons.json',
-                  'initialSettings': {
-                    'visible': true
-                  },
-                  'style': {
-                    'Polygon': {
-                      'styleType': 'simple',
-                      'label': 'Polygon label',
-                      'settings': {
-                        'type': 'filledPolygon',
-                        'paternSize': 10,
-                        'paternWidth': 2,
-                        'fillStyle': 'diagonalCross',
-                        'stroke': {
-                          'lineStyle': 'dot'
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  'layerId': 'lines.json',
-                  'style': {
-                    'LineString': {
-                      'styleType': 'simple',
-                      'label': 'LineString label',
-                      'settings': {
-                        'type': 'lineString',
-                        'stroke': {
-                          'lineStyle': 'shortDash-dot-dot'
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  'layerId': 'icon_points.json',
-                  'style': {
-                    'Point': {
-                      'styleType': 'simple',
-                      'label': 'Icon point label',
-                      'settings': {
-                        'type': 'iconSymbol',
-                        'mimeType': 'image/png',
-                        'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=',
-                        'opacity': 0.25
-                      }
-                    }
-                  }
-                },
-                {
-                  'layerId': 'points.json',
-                  'style': {
-                    'Point': {
-                      'styleType': 'simple',
-                      'label': 'Point label',
-                      'settings': {
-                        'type': 'simpleSymbol',
-                        'symbol': 'star'
-                      }
-                    }
-                  }
-                }
+                { 'layerId': 'polygons.json' },
+                { 'layerId': 'lines.json' },
+                { 'layerId': 'points.json' }
               ]
             }
           ]
@@ -373,10 +308,10 @@
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
   <label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id"></label>
   <button type="button" class="collapsible">Get Feature Info polygons</button>
-  <pre id="LYR5-INFO-polygons.json" class="panel">Click on feature on the map</pre>
+  <pre id="LYR5-INFO-geojsonLYR5/polygons.json" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Get Feature Info stars</button>
-  <pre id="LYR5-INFO-points.json" class="panel">Click on feature on the map</pre>
+  <pre id="LYR5-INFO-geojsonLYR5/points.json" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR5CS" class="panel"></pre>
@@ -394,14 +329,14 @@
             'projection': 3857
           },
           'basemapOptions': {
-            'id': 'transport',
+            'basemapId': 'transport',
             'shaded': false,
             'labeled': true
           },
           'listOfGeoviewLayerConfig': [
             {
-              'layerId': 'wfsLYR6',
-              'layerName': {
+              'geoviewLayerId': 'wfsLYR6',
+              'geoviewLayerName': {
                 'en': 'Airport data'
               },
               'metadataAccessPath': {
@@ -423,7 +358,7 @@
       }"></div>
   <p>This map has a WFS layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR6-INFO-GISDATA.AIRPORTS_PT" class="panel">Click on feature on the map</pre>
+  <pre id="LYR6-INFO-wfsLYR6/GISDATA.AIRPORTS_PT" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR6CS" class="panel"></pre>
@@ -441,14 +376,14 @@
               'projection': 3857
             },
             'basemapOptions': {
-              'id': 'transport',
+              'basemapId': 'transport',
               'shaded': false,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'ogcFeatureLYR7',
-                'layerName': {
+                'geoviewLayerId': 'ogcFeatureLYR7',
+                'geoviewLayerName': {
                   'en': 'Large Lakes'
                 },
                 'metadataAccessPath': {
@@ -470,7 +405,7 @@
         }"></div>
   <p>This map has an OGC API feature layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR7-INFO-lakes" class="panel">Click on feature on the map</pre>
+  <pre id="LYR7-INFO-ogcFeatureLYR7/lakes" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR7CS" class="panel"></pre>
@@ -488,13 +423,13 @@
               'projection': 3857
             },
             'basemapOptions': {
-              'id': 'transport',
+              'basemapId': 'transport',
               'shaded': false,
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
               {
-                'layerId': 'LYR8',
+                'geoviewLayerId': 'LYR8',
                 'geoviewLayerType': 'geoCore',
                 'listOfLayerEntryConfig': [
                   {
@@ -511,7 +446,7 @@
         }"></div>
   <p>This map requests a layer from the catalog using uuid added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR8-INFO-0" class="panel">Click on feature on the map</pre>
+  <pre id="LYR8-INFO-rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR8CS" class="panel"></pre>
@@ -529,7 +464,7 @@
       //create snippets
       createCodeSnippet();
       createConfigSnippet();
-      // TODO: repair addWMSLegend();
+      addWMSLegend();
       // TODO: repair addEsriDynamicLegend();
     });
 
@@ -541,17 +476,17 @@
     addGeoJSONButton.addEventListener('click', function (e) {
       // adding a geojson layer requires a type of geojson and url
       const layerID = cgpv.api.map('LYR5').layer.addLayer({
-        'layerId': 'geoJsonSample',
-        'layerName': {
+        'geoviewLayerId': 'geoJsonSample',
+        'geoviewLayerName': {
           'en': 'geojson sample',
           'fr': 'exemple geojson'
         },
         'metadataAccessPath': {
-          'en': 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/',
-          'fr': 'https://raw.githubusercontent.com/fgpv-vpgf/contributed-plugins/master/chart/src/samples/geoJSON/'
+          'en': './geojson/metadata.json',
+          'fr': './geojson/metadata.json'
         },
         'geoviewLayerType': 'GeoJSON',
-        'listOfLayerEntryConfig': [ { 'layerId': 'pieChart.json' }],
+        'listOfLayerEntryConfig': [ { 'layerId': 'icon_points.json' }],
       });
       document.getElementById('new-layer-id').innerText = layerID;
     });
@@ -566,31 +501,24 @@
       document.getElementById('new-layer-id').innerText = '';
     });
 
-    // Test a refresh WMS from projection change
-    var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
-    testRefreshBtn.addEventListener('click', function (e) {
-      cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
-    });
-
-
     // WMS
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR1', 'OSM-WMS') }, 'LYR1');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR1', 'wmsLYR1-Root/wmsLYR1-Group/OSM-WMS') }, 'LYR1');
     // ESRI Dynamic
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR3', '0') }, 'LYR3');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR3', 'esriDynamicLYR3/0') }, 'LYR3');
     // ESRI Feature
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4', '8') }, 'LYR4');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4', 'esriFeatureLYR4/8') }, 'LYR4');
     // GeoJSON
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'polygons.json') }, 'LYR5');
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'points.json') }, 'LYR5');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'geojsonLYR5/polygons.json') }, 'LYR5');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'geojsonLYR5/points.json') }, 'LYR5');
     // WFS
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6', 'GISDATA.AIRPORTS_PT') }, 'LYR6');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6', 'wfsLYR6/GISDATA.AIRPORTS_PT') }, 'LYR6');
     // OGC Feature API
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7', 'lakes') }, 'LYR7');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7', 'ogcFeatureLYR7/lakes') }, 'LYR7');
     // NOT WORKING: Event not trapped GeoCore
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', '0') }, 'LYR8');
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', 'rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0') }, 'LYR8');
 
     function handleMapClick(payload, mapId, layerId) {
-      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
+      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {console.log(document.getElementById(`${mapId}-INFO-${layerId}`));
         document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
         if (payload.data !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
       }, `${mapId}/${layerId}`);
@@ -605,17 +533,23 @@
       );
     }
 
-    /**
+    // Test a refresh WMS from projection change
+    var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+    testRefreshBtn.addEventListener('click', function (e) {
+      cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+    });
+
     //add legend to WMS layer
     function addWMSLegend() {
       cgpv.api
         .map('LYR1')
-        .layer.layers['wmsLYR1'].getLegendGraphic('TOPO-OSM-WMS')
+        .layer.layers['wmsLYR1-Root'].getLegend('wmsLYR1-Root/wmsLYR1-Group/TOPO-OSM-WMS')
         .then((res) => {
-          document.getElementById('wmsLegend').src = res;
+          document.getElementById('wmsLegend').src = res.legend;
         });
     }
 
+    /**
     //add legend to ESRI Dynamic layer
     function addEsriDynamicLegend() {
       cgpv.api

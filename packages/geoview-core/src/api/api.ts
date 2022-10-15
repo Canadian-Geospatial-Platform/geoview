@@ -113,11 +113,11 @@ export class API {
   /**
    * Get the instance of a map by it's ID to access API functions
    *
-   * @param {string} id the map id
+   * @param {string} mapId the map id
    *
    * @returns map api functions
    */
-  map = (id: string): MapViewer => {
-    return this.maps[id];
+  map = (mapId: string): MapViewer => {
+    return this.maps[mapId];
   };
 }
