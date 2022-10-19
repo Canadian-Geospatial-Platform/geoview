@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import i18n from 'i18next';
+
 import { Extent } from 'ol/extent';
 import { XYZ, OSM } from 'ol/source';
 import TileGrid from 'ol/tilegrid/TileGrid';
@@ -13,7 +15,7 @@ import { TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
-import { TypeDisplayLanguage, TypeProjectionCodes } from '../../map/map-schema-types';
+import { TypeDisplayLanguage, TypeProjectionCodes, TypeLocalizedString } from '../../map/map-schema-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -122,10 +124,10 @@ export class Basemap {
   /**
    * attribution to add the map
    */
-  private attributionVal: TypeJsonObject = toJsonObject({
-    en: '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
-    fr: '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
-  });
+  private attributionVal: TypeLocalizedString = {
+    en: i18n.t('mapctrl.attribution.defaultnrcan') || '',
+    fr: i18n.t('mapctrl.attribution.defaultnrcan') || '',
+  };
 
   /**
    * Get projection from basemap url
@@ -217,8 +219,6 @@ export class Basemap {
    * @returns {string} array with information [name, description]
    */
   private getInfo = (basemapTypes: string[], displayLanguage: TypeDisplayLanguage): string[] => {
-    // const info = { name: '', description: '' };
-
     let name = '';
     let description = '';
 
@@ -285,11 +285,6 @@ export class Basemap {
     let origin: number[] = [];
     let urlProj = 0;
 
-    // check if nrcan copyright exists
-    let nrcanCopyrightExists = false;
-
-    const attributions = [];
-
     // should we do a get request to get the layer information from the server?
     if (rest && (basemapLayer.jsonUrl as string)) {
       try {
@@ -334,28 +329,6 @@ export class Basemap {
         // set extent for this layer
         extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
-        if (basemapId === 'label') {
-          if (result.copyrightText) {
-            const attributionText = result.copyrightText as string;
-
-            // check if nrcan copyright exists
-            if (
-              (attributionText.includes('Queen in Right of Canada') && attributionText.includes('Natural Resources')) ||
-              (attributionText.includes('Reine du Chef du Canada') && attributionText.includes('Ressources naturelles'))
-            ) {
-              nrcanCopyrightExists = true;
-            }
-
-            // attributions.push(result.copyrightText as string);
-            this.attribution = result.copyrightText as string;
-          }
-        }
-
-        // if nrcan copyright does not exist, add it
-        if (!nrcanCopyrightExists) {
-          attributions.unshift(this.attributionVal[this.displayLanguage] as string);
-        }
-
         // Because OpenLayers can reporject on the fly raster, some like Shaded and Simple even if only available in 3978
         // can be use in 3857. For this we need to make a difference between map projection and url use for the basemap
         urlProj = this.getProjectionFromUrl(basemapLayer.url as string);
@@ -371,7 +344,7 @@ export class Basemap {
       url: basemapLayer.url as string,
       jsonUrl: basemapLayer.jsonUrl as string,
       source: new XYZ({
-        attributions,
+        attributions: this.attribution,
         projection: api.projection.projections[urlProj],
         url: basemapLayer.url as string,
         tileGrid: new TileGrid({
@@ -555,32 +528,11 @@ export class Basemap {
       fr: string;
     }
 
-    // store attributions
-    const attributions: string[] = [];
-
     // extract bilangual sections
     const name: bilingual = basemapProps.name as unknown as bilingual;
     const description: bilingual = basemapProps.description as unknown as bilingual;
     const thumbnailUrl: bilingual = basemapProps.thumbnailUrl as unknown as bilingual;
     const attribution: bilingual = basemapProps.attribution as unknown as bilingual;
-
-    let nrcanCopyrightExists = false;
-    const attributionText = this.displayLanguage === 'en' ? attribution.en : attribution.fr;
-
-    // check if nrcan copyright exists in attribution
-    if (
-      (attributionText.includes('Queen in Right of Canada') && attributionText.includes('Natural Resources')) ||
-      (attributionText.includes('Reine du Chef du Canada') && attributionText.includes('Ressources naturelles'))
-    ) {
-      nrcanCopyrightExists = true;
-    }
-
-    if (!nrcanCopyrightExists) {
-      attributions.push(this.attributionVal[this.displayLanguage] as string);
-    }
-
-    // add the attribution from layer
-    attributions.push(attributionText);
 
     // create the basemap properties
     const formatProps: TypeBasemapProps = { ...basemapProps };
@@ -590,7 +542,7 @@ export class Basemap {
         ...layer,
         url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
         source: new XYZ({
-          attributions,
+          attributions: attribution[this.displayLanguage],
           projection: api.projection.projections[this.projection],
           url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
           tileGrid: new TileGrid({

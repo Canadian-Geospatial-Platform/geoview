@@ -24,6 +24,9 @@
     "overviewmap": {
       "toggle": "Basculer la mini-carte"
     },
+    "attribution": {
+      "defaultnrcan": "© Sa Majesté le Roi du Chef du Canada, représentée par le ministre des Ressources naturelle"
+    },
     "crosshair": "Utilisez les touches <strong>fléchées</strong>, <strong>+</strong> et <strong>-</strong> pour naviguer sur la carte et <strong>Entrée</strong> pour sélectionner."
   },
   "appbar": {
