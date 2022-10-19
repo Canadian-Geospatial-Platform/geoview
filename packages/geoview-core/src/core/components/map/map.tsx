@@ -20,6 +20,7 @@ import { Crosshair } from '../crosshair/crosshair';
 import { Footerbar } from '../footer-bar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
 import { ClickMarker } from '../click-marker/click-marker';
+import { Legend } from '../legend/legend';
 
 import { generateId } from '../../utils/utilities';
 
@@ -278,6 +279,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
           <ClickMarker />
           {deviceSizeMedUp && components !== undefined && components.indexOf('overview-map') > -1 && <OverviewMap />}
           {deviceSizeMedUp && <Footerbar />}
+          {deviceSizeMedUp && components !== undefined && components.indexOf('legend') > -1 && <Legend />}
         </>
       )}
     </div>

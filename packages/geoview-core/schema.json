@@ -1093,7 +1093,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["app-bar", "nav-bar", "overview-map", "north-arrow"]
+        "enum": ["app-bar", "nav-bar", "overview-map", "north-arrow", "legend"]
       },
       "default": ["app-bar", "nav-bar", "overview-map", "north-arrow"],
       "description": "Core components to initialize on viewer load. The schema for those are inside this file.",
