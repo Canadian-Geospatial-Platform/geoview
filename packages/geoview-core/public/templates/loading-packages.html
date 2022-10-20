@@ -148,20 +148,20 @@
         cgpv.api.removePlugin('basemap-panel', 'mapWM');
       });
 
-      // get load basemap panel button element
+      // get load layers panel button element
       var loadLayersPanelBtn = document.getElementById('load-layers-panel-btn');
 
-      // add event handler to the load basemap panel button
+      // add event handler to the load layers panel button
       loadLayersPanelBtn.addEventListener('click', function (e) {
         cgpv.api.addPlugin('layers-panel', 'mapWM', window.plugins['layers-panel'], {
           mapId: 'mapWM',
         });
       });
 
-      // get unload basemap panel button element
+      // get unload layers panel button element
       var unloadLayersPanelBtn = document.getElementById('unload-layers-panel-btn');
 
-      // add event handler to the unload basemap panel button
+      // add event handler to the unload layers panel button
       unloadLayersPanelBtn.addEventListener('click', function (e) {
         cgpv.api.removePlugin('layers-panel');
       });

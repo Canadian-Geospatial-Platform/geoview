@@ -17,7 +17,7 @@ import { TypePanelProps } from './panel-types';
  */
 export class PanelApi {
   // panel id
-  id: string;
+  panelId: string;
 
   // panel type (app-bar, nav-bar)
   type: string | undefined;
@@ -53,7 +53,7 @@ export class PanelApi {
    * @param {string} mapId the map id that this panel belongs to
    */
   constructor(panel: TypePanelProps, buttonId: string, mapId: string) {
-    this.id = panel.id || generateId();
+    this.panelId = panel.panelId || generateId();
     this.mapId = mapId;
     this.buttonId = buttonId;
     this.type = panel.type;
@@ -89,10 +89,10 @@ export class PanelApi {
         const buttonPanels = api.map(this.mapId).appBarButtons.buttons[groupName];
 
         // get all button panels in each group
-        Object.keys(buttonPanels).forEach((buttonId) => {
-          const buttonPanel = buttonPanels[buttonId];
+        Object.keys(buttonPanels).forEach((buttonPanelId) => {
+          const buttonPanel = buttonPanels[buttonPanelId];
 
-          if (this.buttonId !== buttonPanel.id) {
+          if (this.buttonId !== buttonPanel.buttonPanelId) {
             buttonPanel.panel?.closeAllPanels();
           }
         });
@@ -103,10 +103,10 @@ export class PanelApi {
         const buttonPanels = api.map(this.mapId).navBarButtons.buttons[groupName];
 
         // get all button panels in each group
-        Object.keys(buttonPanels).forEach((buttonId) => {
-          const buttonPanel = buttonPanels[buttonId];
+        Object.keys(buttonPanels).forEach((buttonPanelId) => {
+          const buttonPanel = buttonPanels[buttonPanelId];
 
-          if (this.buttonId !== buttonPanel.id) {
+          if (this.buttonId !== buttonPanel.buttonPanelId) {
             buttonPanel.panel?.closeAllPanels();
           }
         });
@@ -138,15 +138,20 @@ export class PanelApi {
   /**
    * Add a new action button to the header of the panel before the close button
    *
-   * @param {string} id an id for the new action button to be used later to delete this button
+   * @param {string} actionButtonId an id for the new action button to be used later to delete this button
    * @param {string} title the title of the action button, will display in the tooltip
    * @param {string | ReactElement | Element} children the icon of the action button
    * @param {Function} action a function that will be triggered when clicking this action
    * @returns {Panel} the panel
    */
-  addActionButton = (id: string, title: string, children: string | React.ReactElement | Element, action: () => void): PanelApi => {
+  addActionButton = (
+    actionButtonId: string,
+    title: string,
+    children: string | React.ReactElement | Element,
+    action: () => void
+  ): PanelApi => {
     const actionButton: TypeActionButton = {
-      id: `${this.buttonId}_${id}`,
+      actionButtonId: `${this.buttonId}_${actionButtonId}`,
       title,
       children,
       action,
@@ -193,12 +198,12 @@ export class PanelApi {
   /**
    * Remove action button
    *
-   * @param {string} id the id of the action button to be removed
+   * @param {string} actionButtonId the id of the action button to be removed
    * @returns {Panel} this panel
    */
-  removeActionButton = (id: string): PanelApi => {
+  removeActionButton = (actionButtonId: string): PanelApi => {
     const actionButton: TypeActionButton = {
-      id: `${this.buttonId}_${id}`,
+      actionButtonId: `${this.buttonId}_${actionButtonId}`,
     };
     api.event.emit(
       PanelPayload.withButtonIdAndActionButton(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, this.mapId, this.buttonId, actionButton),

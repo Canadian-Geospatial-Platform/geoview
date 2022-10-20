@@ -69,7 +69,7 @@
             'projection': 3857
           },
           'basemapOptions': {
-            'id': 'transport',
+            'basemapId': 'transport',
             'shaded': false,
             'labeled': true
           }
@@ -91,6 +91,7 @@
   <script>
     // TODO: for layer.vector.add* add a optional param to specify the geometry group - UPDATE CODE AND SAMPLE
     function addPolyline(map) {
+      cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
       // call an api function to draw a polyline
       const polyline = cgpv.api.map(map).layer.vector.addPolyline(
         [
@@ -105,11 +106,10 @@
           },
         }
       );
-
-      cgpv.api.map(map).layer.vector.addToGeometryGroup(polyline, document.getElementById('groupname').value);
     }
 
     function addPolygon(map) {
+      cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
       // call an api function to draw a polygon
       const polygon = cgpv.api.map(map).layer.vector.addPolygon(
         [
@@ -128,12 +128,12 @@
           },
         }
       );
-      cgpv.api.map(map).layer.vector.addToGeometryGroup(polygon, document.getElementById('groupname').value);
     }
 
     function addCircle(map) {
+      cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
       // call an api function to draw a polygon
-      const circle = cgpv.api.map(map).layer.vector.addCircle([-100, 50], 5.0, {
+      const circle = cgpv.api.map(map).layer.vector.addCircle([-100, 50], 1, {
         style: {
           strokeColor: 'red',
           fillColor: '#f03',
@@ -141,19 +141,18 @@
         },
       });
 
-      cgpv.api.map(map).layer.vector.addToGeometryGroup(circle, document.getElementById('groupname').value);
     }
 
     function addCircleMarker(map) {
+      cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
       // call an api function to draw a polygon
-      const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker([-109, 70], 50.0, {
+      const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker([-109, 70], 1, {
         style: {
           strokeColor: 'red',
           fillColor: '#f03',
           fillOpacity: 0.5,
         },
       });
-      cgpv.api.map(map).layer.vector.addToGeometryGroup(circleMarker, document.getElementById('groupname').value);
     }
 
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

@@ -7,8 +7,8 @@ import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
-
 import { FeatureLike } from 'ol/Feature';
+
 import { getLocalizedValue, setAlphaColor } from '../../core/utils/utilities';
 import {
   isFilledPolygonVectorConfig,
@@ -36,6 +36,7 @@ import {
   TypeStyleConfig,
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
+import { Layer } from '../layer/layer';
 
 type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
 type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
@@ -486,9 +487,9 @@ export class GeoviewRenderer {
     layerEntryConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerEntryConfig.style === undefined) layerEntryConfig.style = {};
-    const id = `${this.mapId}-${layerEntryConfig.geoviewRootLayer?.layerId}-${layerEntryConfig.layerId}`;
+    const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
     let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
-    label = label !== undefined ? label : id;
+    label = label !== undefined ? label : styleId;
     if (geometryType === 'Point') {
       const settings: TypeSimpleSymbolVectorConfig = {
         type: 'simpleSymbol',
@@ -500,7 +501,7 @@ export class GeoviewRenderer {
         },
         symbol: 'circle',
       };
-      const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
+      const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
       return layerEntryConfig.style;
@@ -510,7 +511,7 @@ export class GeoviewRenderer {
         type: 'lineString',
         stroke: { color: this.getDefaultColor(1) },
       };
-      const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
+      const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
       return layerEntryConfig.style;
@@ -522,7 +523,7 @@ export class GeoviewRenderer {
         stroke: { color: this.getDefaultColor(1) },
         fillStyle: 'solid',
       };
-      const styleSettings: TypeSimpleStyleConfig = { id, styleType: 'simple', label, settings };
+      const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
       layerEntryConfig.style[geometryType] = styleSettings;
       this.incrementDefaultColorIndex();
       return layerEntryConfig.style;

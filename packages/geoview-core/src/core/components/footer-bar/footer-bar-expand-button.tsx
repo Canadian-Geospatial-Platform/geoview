@@ -30,7 +30,7 @@ export function FooterbarExpandButton(): JSX.Element {
   const classes = useStyles();
 
   const mapConfig = useContext(MapContext);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Expand the footer bar

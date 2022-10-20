@@ -75,12 +75,12 @@ export class AppbarButtons {
     groupName?: string | null | undefined
   ): TypeButtonPanel | null => {
     if (buttonProps && panelProps) {
-      const id = generateId(buttonProps.id);
+      const buttonId = generateId(buttonProps.id);
 
       const button: TypeIconButtonProps = {
         ...buttonProps,
-        id,
-        visible: !buttonProps.visible ? true : buttonProps.visible,
+        id: buttonId,
+        visible: buttonProps.visible === undefined ? true : buttonProps.visible,
       };
 
       const panel: TypePanelProps = {
@@ -97,17 +97,17 @@ export class AppbarButtons {
       }
 
       const buttonPanel: TypeButtonPanel = {
-        id,
-        panel: new PanelApi(panel, id, this.mapId),
+        buttonPanelId: buttonId,
+        panel: new PanelApi(panel, buttonId, this.mapId),
         button,
         groupName: group,
       };
 
       // add the new button panel to the correct group
-      this.buttons[group][id] = buttonPanel;
+      if (group !== '__proto__' && buttonId !== '__proto__') this.buttons[group][buttonId] = buttonPanel;
 
       // trigger an event that a new button panel has been created to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, id, group, buttonPanel));
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, this.mapId, buttonId, group, buttonPanel));
 
       return buttonPanel;
     }
@@ -118,10 +118,10 @@ export class AppbarButtons {
   /**
    * Get a button panel from the app-bar by using it's id
    *
-   * @param {string} id the id of the button panel to get
+   * @param {string} buttonPanelId the id of the button panel to get
    * @returns {TypeButtonPanel} the returned button panel
    */
-  getAppBarButtonPanelById = (id: string): TypeButtonPanel | null => {
+  getAppBarButtonPanelById = (buttonPanelId: string): TypeButtonPanel | null => {
     // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
@@ -129,7 +129,7 @@ export class AppbarButtons {
       for (let j = 0; j < Object.keys(group).length; j++) {
         const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 
-        if (buttonPanel.id === id) {
+        if (buttonPanel.buttonPanelId === buttonPanelId) {
           return buttonPanel;
         }
       }
@@ -152,7 +152,7 @@ export class AppbarButtons {
       for (let j = 0; j < Object.keys(group).length; j++) {
         const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 
-        buttonPanels[buttonPanel.id] = buttonPanel;
+        buttonPanels[buttonPanel.buttonPanelId] = buttonPanel;
       }
     }
 
@@ -162,18 +162,20 @@ export class AppbarButtons {
   /**
    * Remove an app-bar panel using an id
    *
-   * @param {string} id the id of the panel to remove
+   * @param {string} buttonPanelId the id of the panel to remove
    */
-  removeAppbarPanel = (id: string): void => {
+  removeAppbarPanel = (buttonPanelId: string): void => {
     // loop through groups of app-bar button panels
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 
       // delete the panel from the group
-      delete group[id];
+      delete group[buttonPanelId];
 
       // trigger an event that a panel has been removed to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
+      api.event.emit(
+        buttonPanelPayload(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, this.mapId, buttonPanelId, groupName, group[buttonPanelId])
+      );
     });
   };
 }

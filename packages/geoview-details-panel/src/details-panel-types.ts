@@ -13,7 +13,7 @@ export type TypeLayersEntry = {
 };
 
 export type TypeLayerInfo = {
-  id: string;
+  layerPath: string;
   name: string;
   displayField: string;
   displayFieldName: string;
@@ -25,6 +25,13 @@ export type TypeLayerInfo = {
 
 export type TypeEntry = {
   attributes: TypeJsonObject;
+};
+
+export type TypeFieldAlias = { [name: string]: string };
+
+export type TypeFoundLayers = {
+  layer: TypeLayersEntry;
+  entries: TypeEntry[];
 };
 
 export type TypeFieldNameAliasArray = {

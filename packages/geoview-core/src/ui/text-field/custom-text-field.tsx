@@ -11,7 +11,7 @@ import MaterialTextField, { BaseTextFieldProps } from '@mui/material/TextField';
  * Customized Material UI Custom TextField Properties
  */
 interface TypeCustomTextFieldProps extends Omit<BaseTextFieldProps, 'prefix'> {
-  id: string;
+  textFieldId: string;
 
   // the helper text (as defined above) but only if there is an error
   errorHelpertext?: string | undefined;

@@ -29,7 +29,7 @@
           'c=-100,40&' +
           'l=en&' +
           't=dark&' +
-          'b={id:transport,shaded:false,labeled:true}&' +
+          'b={basemapId:transport,shaded:false,labeled:true}&' +
           'i=dynamic&' +
           'cc=overview-map&' +
           'keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9';
@@ -103,7 +103,7 @@
               'projection': 3857
             },
             'basemapOptions': {
-              'id': 'notdefined',
+              'basemapId': 'notdefined',
               'shaded': true,
               'labeledWhat': true
             },
@@ -131,25 +131,25 @@
             'projection': 3857
           },
           'basemapOptions': {
-            'id': 'notdefined',
+            'basemapId': 'notdefined',
             'shaded': true,
             'labeledWhat': true
           },
-          'layers': [
+          'listOfGeoviewLayerConfig': [
             {
-              'id': 'wmsLYR1',
-              'name': {
+              'geoviewLayerId': 'wmsLYR1',
+              'geoviewLayerName': {
                 'en': 'Census WMS',
                 'fr': 'Census WMS'
               },
-              'url': {
+              'metadataAccessPath': {
                 'en': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer',
                 'fr': 'https://webservices.maps.canada.ca/arcgis/services/StatCan/census_subdivisions_2016_en/MapServer/WMSServer'
               },
-              'layerType': 'ogcWms',
+              'geoviewLayerType': 'ogcWms',
               'listOfLayerEntryConfig': [
                 {
-                  'id': '0'
+                  'layerId': '0'
                 }
               ]
             },
@@ -208,7 +208,7 @@
               'projection': 3978
             },
             'basemapOptions': {
-              'id': 'simple',
+              'basemapId': 'simple',
               'shaded': true,
               'labeled': false
             }

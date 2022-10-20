@@ -33,9 +33,10 @@ import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-me
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { TypeJsonObject } from '../../../core/types/global-types';
+import { Layer } from '../layer';
 
 export type TypeLegend = {
-  layerId: string;
+  layerPath: string;
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   legend: TypeStyleConfig | string | ArrayBuffer;
@@ -99,12 +100,12 @@ export abstract class AbstractGeoViewLayer {
   /** The unique identifier for the GeoView layer. The value of this attribute is extracted from the mapLayerConfig parameter.
    * If its value is undefined, a unique value is generated.
    */
-  layerId: string;
+  geoviewLayerId: string;
 
   /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
    * undefined, a default value is generated.
    */
-  layerName: TypeLocalizedString = { en: '', fr: '' };
+  geoviewLayerName: TypeLocalizedString = { en: '', fr: '' };
 
   /** The GeoView layer metadataAccessPath. The name attribute is optional */
   metadataAccessPath: TypeLocalizedString = { en: '', fr: '' };
@@ -143,9 +144,9 @@ export abstract class AbstractGeoViewLayer {
   constructor(type: TypeGeoviewLayerType, mapLayerConfig: TypeGeoviewLayerConfig, mapId: string) {
     this.mapId = mapId;
     this.type = type;
-    this.layerId = mapLayerConfig.layerId || generateId('');
-    this.layerName.en = mapLayerConfig?.layerName?.en ? mapLayerConfig.layerName.en : DEFAULT_LAYER_NAMES[type];
-    this.layerName.fr = mapLayerConfig?.layerName?.fr ? mapLayerConfig.layerName.fr : DEFAULT_LAYER_NAMES[type];
+    this.geoviewLayerId = mapLayerConfig.geoviewLayerId || generateId('');
+    this.geoviewLayerName.en = mapLayerConfig?.geoviewLayerName?.en ? mapLayerConfig.geoviewLayerName.en : DEFAULT_LAYER_NAMES[type];
+    this.geoviewLayerName.fr = mapLayerConfig?.geoviewLayerName?.fr ? mapLayerConfig.geoviewLayerName.fr : DEFAULT_LAYER_NAMES[type];
     if (mapLayerConfig.metadataAccessPath?.en) this.metadataAccessPath.en = mapLayerConfig.metadataAccessPath.en.trim();
     if (mapLayerConfig.metadataAccessPath?.fr) this.metadataAccessPath.fr = mapLayerConfig.metadataAccessPath.fr.trim();
     if (mapLayerConfig.listOfLayerEntryConfig) this.listOfLayerEntryConfig = mapLayerConfig.listOfLayerEntryConfig;
@@ -175,7 +176,7 @@ export abstract class AbstractGeoViewLayer {
         this.getAdditionalServiceDefinition().then(() => {
           this.processListOfLayerEntryConfig(this.listOfLayerEntryConfig).then((layersCreated) => {
             this.gvLayers = layersCreated as BaseLayer;
-            if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0].layerId);
+            if (this.listOfLayerEntryConfig.length) this.setActiveLayer(this.listOfLayerEntryConfig[0]);
             resolve();
           });
         });
@@ -298,8 +299,8 @@ export abstract class AbstractGeoViewLayer {
               resolve(groupCreated);
             } else {
               this.layerLoadError.push({
-                layer: listOfLayerEntryConfig[0].layerId,
-                consoleMessage: `Unable to create group layer ${listOfLayerEntryConfig[0].layerId} on map ${this.mapId}`,
+                layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+                consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
               });
               resolve(null);
             }
@@ -311,8 +312,8 @@ export abstract class AbstractGeoViewLayer {
               resolve(baseLayer);
             } else {
               this.layerLoadError.push({
-                layer: listOfLayerEntryConfig[0].layerId,
-                consoleMessage: `Unable to create layer ${listOfLayerEntryConfig[0].layerId} on map ${this.mapId}`,
+                layer: Layer.getLayerPath(listOfLayerEntryConfig[0]),
+                consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[0])} on map ${this.mapId}`,
               });
               resolve(null);
             }
@@ -338,13 +339,13 @@ export abstract class AbstractGeoViewLayer {
                   layerGroup.getLayers().push(baseLayer);
                 } else if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
                   this.layerLoadError.push({
-                    layer: listOfLayerEntryConfig[i].layerId,
-                    consoleMessage: `Unable to create group layer ${listOfLayerEntryConfig[i].layerId} on map ${this.mapId}`,
+                    layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
+                    consoleMessage: `Unable to create group layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                   });
                 else
                   this.layerLoadError.push({
-                    layer: listOfLayerEntryConfig[i].layerId,
-                    consoleMessage: `Unable to create layer ${listOfLayerEntryConfig[i].layerId} on map ${this.mapId}`,
+                    layer: Layer.getLayerPath(listOfLayerEntryConfig[i]),
+                    consoleMessage: `Unable to create layer ${Layer.getLayerPath(listOfLayerEntryConfig[i])} on map ${this.mapId}`,
                   });
               });
               resolve(layerGroup);
@@ -373,18 +374,21 @@ export abstract class AbstractGeoViewLayer {
    * Return feature information for the layer specified. If layerId is undefined, this.activeLayer is used.
    *
    * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-   * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   getFeatureInfo(
     location: Pixel | Coordinate | Coordinate[],
-    layerId?: string,
+    layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer,
     queryType: TypeQueryType = 'at pixel'
   ): Promise<TypeFeatureInfoResult> {
     const queryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
-      const layerConfig = this.getLayerConfig(layerId) as TypeVectorLayerEntryConfig | TypeImageLayerEntryConfig | null;
+      const layerConfig = (typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig) : layerIdOrConfig) as
+        | TypeVectorLayerEntryConfig
+        | TypeImageLayerEntryConfig
+        | null;
       if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve(null);
 
       switch (queryType) {
@@ -469,35 +473,29 @@ export abstract class AbstractGeoViewLayer {
    */
   protected registerToPanels(layerEntryConfig: TypeBaseLayerEntryConfig) {
     if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
+      const layerPath = Layer.getLayerPath(layerEntryConfig);
       // Register to panels that are already created.
-      api.event.emit(
-        getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerEntryConfig.layerId}`, { origin: 'layer' })
-      );
+      api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerPath}`, { origin: 'layer' }));
       // Listen to events that request to register to panels created after the layer is created.
       api.event.on(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, (payload) => {
         if (payloadIsGetFeatureInfo(payload)) {
           if ((payload.data as TypeFeatureInfoRegister).origin === 'panel')
-            api.event.emit(
-              getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerEntryConfig.layerId}`, { origin: 'layer' })
-            );
+            api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerPath}`, { origin: 'layer' }));
         }
       });
       api.event.on(
         EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
         (payload) => {
           if (payloadIsGetFeatureInfo(payload)) {
-            const handlerName = payload.handlerName?.split('/');
-            if (handlerName && handlerName[0] === this.mapId) {
+            if (payload.handlerName === `${this.mapId}/${layerPath}`) {
               const { location, queryType } = payload.data as TypeFeatureInfoQuery;
-              this.getFeatureInfo(location, handlerName[1], queryType).then((queryResult) => {
-                api.event.emit(
-                  getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT, `${this.mapId}/${layerEntryConfig.layerId}`, queryResult)
-                );
+              this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
+                api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT, `${this.mapId}/${layerPath}`, queryResult));
               });
             }
           }
         },
-        `${this.mapId}/${layerEntryConfig.layerId}`
+        `${this.mapId}/${layerPath}`
       );
     }
   }
@@ -530,56 +528,47 @@ export abstract class AbstractGeoViewLayer {
    * @param {string | TypeLayerEntryConfig} layerId The layer identifier.
    */
   setActiveLayer(layer: string | TypeLayerEntryConfig) {
-    if (typeof layer === 'string') {
-      const layerConfig = this.getLayerConfig(layer);
-      if (layerConfig) this.activeLayer = layerConfig;
-    } else this.activeLayer = layer;
+    if (typeof layer === 'string') this.activeLayer = api.map(this.mapId).layer.registeredLayers[layer];
+    else this.activeLayer = layer;
   }
 
   /** ***************************************************************************************************************************
-   * Get the layer configuration of the specified layerId.
+   * Get the layer configuration of the specified layerId. If the layer identifier is undefined, the active layer is returned.
    *
    * @param {string} layerId The layer identifier.
+   *
+   * @returns {TypeLayerEntryConfig | null} The layer configuration or null if not found.
    */
-  getLayerConfig(layerId?: string, listOfLayerEntryConfig = this.listOfLayerEntryConfig): TypeLayerEntryConfig | null {
+  getLayerConfig(layerId?: string): TypeLayerEntryConfig | null {
     if (layerId === undefined) return this.activeLayer;
-    for (let i = 0; i < listOfLayerEntryConfig.length; i++) {
-      if (listOfLayerEntryConfig[i].layerId === layerId) return listOfLayerEntryConfig[i];
-      if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i])) {
-        const layerConfig = this.getLayerConfig(layerId, listOfLayerEntryConfig[i].listOfLayerEntryConfig);
-        if (layerConfig) return layerConfig;
-      }
-    }
-    return null;
+    return api.map(this.mapId).layer.registeredLayers[layerId];
   }
 
   /** ***************************************************************************************************************************
    * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. If no layer identifier is specified, the activeLayer of the class
-   * will be used. This routine return undefined when the layerId specified is not found or when the layerId is undefined and
-   * the active layer is null.
+   * numbers representing an extent: [minx, miny, maxx, maxy]. If no layer config is specified, the activeLayer of the class
+   * will be used. This routine return undefined when no layer config is specified and the active layer is null.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {Extent} The layer extent.
    */
-  getBounds(layerId?: string): Extent | undefined {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    return layerConfig?.gvLayer ? layerConfig.gvLayer.getExtent() : undefined;
+  getBounds(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): Extent | undefined {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    return gvLayer ? gvLayer.getExtent() : undefined;
   }
 
   /** ***************************************************************************************************************************
    * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-   * numbers representing an extent: [minx, miny, maxx, maxy]. If no layer identifier is specified, the activeLayer of the class
-   * will be used. This routine does nothing when the layerId specified is not found or when the layerId is undefined and the
-   * active layer is null.
+   * numbers representing an extent: [minx, miny, maxx, maxy]. If no layer config is specified, the activeLayer of the class
+   * will be used. This routine does nothing when no layer config is specified and the active layer is null.
    *
    * @param {Extent} layerExtent The extent to assign to the layer.
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    */
-  setBounds(layerExtent: Extent, layerId?: string) {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    if (layerConfig?.gvLayer) layerConfig.gvLayer.setExtent(layerExtent);
+  setBounds(layerExtent: Extent, layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer) {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    if (gvLayer) gvLayer.setExtent(layerExtent);
   }
 
   /** ***************************************************************************************************************************
@@ -587,13 +576,13 @@ export abstract class AbstractGeoViewLayer {
    * used. This routine return undefined when the layerId specified is not found or when the layerId is undefined and the active
    * layer is null.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {number} The opacity of the layer.
    */
-  getOpacity(layerId?: string): number | undefined {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    return layerConfig?.gvLayer ? layerConfig.gvLayer.getOpacity() : undefined;
+  getOpacity(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): number | undefined {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    return gvLayer ? gvLayer.getOpacity() : undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -602,12 +591,12 @@ export abstract class AbstractGeoViewLayer {
    * null.
    *
    * @param {number} layerOpacity The opacity of the layer.
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    */
-  setOpacity(layerOpacity: number, layerId?: string) {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    if (layerConfig?.gvLayer) layerConfig.gvLayer.setOpacity(layerOpacity);
+  setOpacity(layerOpacity: number, layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer) {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    if (gvLayer) gvLayer.setOpacity(layerOpacity);
   }
 
   /** ***************************************************************************************************************************
@@ -615,13 +604,13 @@ export abstract class AbstractGeoViewLayer {
    * used. This routine return undefined when the layerId specified is not found or when the layerId is undefined and the active
    * layer is null.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getVisible(layerId?: string): boolean | undefined {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    return layerConfig?.gvLayer ? layerConfig.gvLayer.getVisible() : undefined;
+  getVisible(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): boolean | undefined {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    return gvLayer ? gvLayer.getVisible() : undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -630,24 +619,24 @@ export abstract class AbstractGeoViewLayer {
    * layer is null.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    */
-  setVisible(layerVisibility: boolean, layerId?: string) {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    if (layerConfig?.gvLayer) layerConfig.gvLayer.setVisible(layerVisibility);
+  setVisible(layerVisibility: boolean, layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer) {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    if (gvLayer) gvLayer.setVisible(layerVisibility);
   }
 
   /** ***************************************************************************************************************************
    * Return the min zoom of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
    * return undefined when the layerId specified is not found or when the layerId is undefined and the active layer is null.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getMinZoom(layerId?: string): number | undefined {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    return layerConfig?.gvLayer ? layerConfig.gvLayer.getMinZoom() : undefined;
+  getMinZoom(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): number | undefined {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    return gvLayer ? gvLayer.getMinZoom() : undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -655,24 +644,24 @@ export abstract class AbstractGeoViewLayer {
    * does nothing when the layerId specified is not found or when the layerId is undefined and the active layer is null.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    */
-  setMinZoom(minZoom: number, layerId?: string) {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    if (layerConfig?.gvLayer) layerConfig.gvLayer.setMinZoom(minZoom);
+  setMinZoom(minZoom: number, layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer) {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    if (gvLayer) gvLayer.setMinZoom(minZoom);
   }
 
   /** ***************************************************************************************************************************
    * Return the max zoom of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-   * return undefined when the layerId specified is not found or when the layerId is undefined and the active layer is null.
+   * return undefined when the layer specified is not found.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {boolean} The visibility of the layer.
    */
-  getMaxZoom(layerId?: string): number | undefined {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    return layerConfig?.gvLayer ? layerConfig.gvLayer.getMaxZoom() : undefined;
+  getMaxZoom(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): number | undefined {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    return gvLayer ? gvLayer.getMaxZoom() : undefined;
   }
 
   /** ***************************************************************************************************************************
@@ -680,31 +669,32 @@ export abstract class AbstractGeoViewLayer {
    * does nothing when the layerId specified is not found or when the layerId is undefined and the active layer is null.
    *
    * @param {boolean} layerVisibility The visibility of the layer.
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    */
-  setMaxZoom(maxZoom: number, layerId?: string) {
-    const layerConfig = layerId ? this.getLayerConfig(layerId) : this.activeLayer;
-    if (layerConfig?.gvLayer) layerConfig.gvLayer.setMaxZoom(maxZoom);
+  setMaxZoom(maxZoom: number, layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer) {
+    const gvLayer = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig)?.gvLayer : layerIdOrConfig?.gvLayer;
+    if (gvLayer) gvLayer.setMaxZoom(maxZoom);
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. If no layer identifier is specified, the activeLayer of the class will be used. This routine
-   * returns null when the layerId specified is not found or when the layerId is undefined and the active layer is null or the
-   * configuration's style is undefined.
+   * Return the legend of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
+   * return null when the layer specified is not found.
    *
-   * @param {string} layerId Optional layer identifier.
+   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerId?: string): Promise<TypeLegend | null> {
+  getLegend(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
-      const layerConfig = (layerId ? this.getLayerConfig(layerId) : this.activeLayer) as TypeBaseLayerEntryConfig & {
+      const layerConfig = (
+        typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig) : layerIdOrConfig
+      ) as TypeBaseLayerEntryConfig & {
         style: TypeStyleConfig;
       };
       if (!layerConfig?.style) resolve(null);
       const legend: TypeLegend = {
         type: layerConfig.geoviewRootLayer!.geoviewLayerType,
-        layerId: layerConfig.layerId,
+        layerPath: Layer.getLayerPath(layerConfig),
         layerName: layerConfig.layerName!,
         legend: cloneDeep(layerConfig.style),
       };

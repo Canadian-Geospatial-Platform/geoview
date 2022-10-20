@@ -7,76 +7,86 @@
       "projection": 3978
     },
     "basemapOptions": {
-      "id": "transport",
+      "basemapId": "transport",
       "shaded": true,
       "labeled": true
     },
-    "layers": [
+    "listOfGeoviewLayerConfig": [
       {
-        "id": "wmsLYR1",
-        "name": {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": {
           "en": "Topographic OSM WMS",
           "fr": "WMS OSM Topographique"
         },
-        "url": {
+        "metadataAccessPath": {
           "en": "https://ows.mundialis.de/services/service?",
           "fr": "https://ows.mundialis.de/services/service?"
         },
-        "layerType": "ogcWMS",
+        "geoviewLayerType": "ogcWMS",
         "listOfLayerEntryConfig": [
           {
-            "id": "TOPO-OSM-WMS"
+            "layerId": "TOPO-OSM-WMS"
           }
         ]
       },
       {
-        "id": "esriDynamicLYR2",
-        "name": {
+        "geoviewLayerId": "esriDynamicLYR2",
+        "geoviewLayerName": {
           "en": "The Canadian Environmental Sustainability Indicators (CESI)",
           "fr": "The Canadian Environmental Sustainability Indicators (CESI)"
         },
-        "url": {
+        "metadataAccessPath": {
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
           "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
         },
-        "layerType": "esriDynamic",
+        "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "index": 1
+            "layerId": "1"
           },
           {
-            "index": 2
+            "layerId": "2"
           },
           {
-            "index": 3
+            "layerId": "3"
           },
           {
-            "index": 6
+            "layerId": "6"
           }
         ]
       },
       {
-        "id": "esriFeatureLYR4",
-        "name": {
+        "geoviewLayerId": "esriFeatureLYR4",
+        "geoviewLayerName": {
           "en": "Geothermal",
           "fr": "Géothermie"
         },
-        "url": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/5",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/5"
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
         },
-        "layerType": "esriFeature"
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "5"
+          }
+        ]
+       },
+      {
+        "geoviewLayerId": "esriFeatureLYR5",
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer",
+          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "7"
+          }
+        ]
       },
       {
-        "id": "esriFeatureLYR5",
-        "url": {
-          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7",
-          "fr": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7"
-        },
-        "layerType": "esriFeature"
-      },
-      {
-        "name": {
+        "geoviewLayerName": {
           "en": "GeoJSON Sample",
           "fr": "Exemple GeoJSON"
         },
@@ -84,19 +94,19 @@
           "en": "./geojson/polygons.json",
           "fr": "./geojson/polygons.json"
         },
-        "layerType": "geojson"
+        "geoviewLayerType": "geojson"
       },
       {
-        "id": "geojsonEnPointLYR6",
-        "name": {
+        "geoviewLayerId": "geojsonEndPointLYR6",
+        "geoviewLayerName": {
           "en": "GeoJSON Service End Point Sample",
           "fr": "Exemple Service GeoJSON"
         },
-        "url": {
+        "metadataAccessPath": {
           "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/",
           "fr": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/canadian-geospatial-platform/items/"
         },
-        "layerType": "geojsonEndpoint"
+        "geoviewLayerType": "geojsonEndpoint"
       },
       {
         "id": "9e1507cd-f25c-4c64-995b-6563bf9d65bd",

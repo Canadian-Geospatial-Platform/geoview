@@ -13,7 +13,7 @@ import { sliderPayload, payloadIsASlider, SliderTypePayload } from '../../api/ev
  * Properties for the Slider
  */
 interface TypeSliderProps extends SliderProps {
-  id: string;
+  sliderId: string;
 
   // custom slider classes and styles
   className?: string;
@@ -117,7 +117,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     };
 
     // emit the slider values change event to the api
-    api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.id);
+    api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.sliderId);
   };
 
   // remove overlapping labels
@@ -162,7 +162,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
             value,
             activeThumb,
           };
-          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.id);
+          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.sliderId);
         }
       },
       properties.id
@@ -185,7 +185,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
             value: payload.sliderValues.value,
             activeThumb,
           };
-          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.id);
+          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.sliderId);
         }
       },
       properties.id

@@ -1,7 +1,12 @@
-import { toJsonObject, TypePanelProps, TypeJsonObject, TypeWindow } from 'geoview-core';
+import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
 import LayersList from './layers-list';
+
+type TypePanelContentProps = {
+  buttonPanel: TypeButtonPanel;
+  mapId: string;
+};
 
 const w = window as TypeWindow;
 
@@ -11,7 +16,7 @@ const w = window as TypeWindow;
  * @param {TypePanelContentProps} props the properties of the pane content
  * @returns {JSX.Element} A React JSX Element with the details panel
  */
-function PanelContent(props: TypePanelProps): JSX.Element {
+function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { mapId, buttonPanel } = props;
 
   const { cgpv } = w;
@@ -21,13 +26,13 @@ function PanelContent(props: TypePanelProps): JSX.Element {
   const [mapLayers, setMapLayers] = useState({});
   const { Button } = ui.elements;
 
-  const { displayLanguage } = api.map(mapId);
+  const { displayLanguage } = api.map(mapId!);
 
   const translations: TypeJsonObject = toJsonObject({
-    'en': {
+    en: {
       addLayer: 'Add Layer',
     },
-    'fr': {
+    fr: {
       addLayer: 'Ajouter Couche',
     },
   });
@@ -50,13 +55,13 @@ function PanelContent(props: TypePanelProps): JSX.Element {
   const onClick = () => setAddLayerVisible((state: boolean) => !state);
 
   useEffect(() => {
-    setMapLayers(() => ({ ...api.map(mapId).layer.layers }));
+    setMapLayers(() => ({ ...api.map(mapId!).layer.layers }));
 
     api.event.on(
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () =>
         setMapLayers(() => ({
-          ...api.map(mapId).layer.layers,
+          ...api.map(mapId!).layer.layers,
         })),
       mapId
     );
@@ -64,7 +69,7 @@ function PanelContent(props: TypePanelProps): JSX.Element {
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       () =>
         setMapLayers(() => ({
-          ...api.map(mapId).layer.layers,
+          ...api.map(mapId!).layer.layers,
         })),
       mapId
     );
@@ -74,15 +79,15 @@ function PanelContent(props: TypePanelProps): JSX.Element {
         setAddLayerVisible(false);
       },
       mapId,
-      buttonPanel.id
+      buttonPanel.buttonPanelId
     );
 
     return () => {
       api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
       api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
-      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId, buttonPanel.id);
+      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId, buttonPanel.buttonPanelId);
     };
-  }, [api, buttonPanel.id, mapId]);
+  }, [api, buttonPanel.buttonPanelId, mapId]);
 
   return (
     <>
@@ -97,9 +102,9 @@ function PanelContent(props: TypePanelProps): JSX.Element {
           onClick={onClick}
         />
       </div>
-      {addLayerVisible && <LayerStepper mapId={mapId} setAddLayerVisible={setAddLayerVisible} />}
+      {addLayerVisible && <LayerStepper mapId={mapId!} setAddLayerVisible={setAddLayerVisible} />}
       <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
-        <LayersList mapId={mapId} layers={mapLayers} displayLanguage={displayLanguage} />
+        <LayersList mapId={mapId!} layers={mapLayers} displayLanguage={displayLanguage} />
       </div>
     </>
   );

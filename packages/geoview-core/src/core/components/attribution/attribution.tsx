@@ -191,7 +191,7 @@ export function Attribution(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   useEffect(() => {
     const { map } = api.map(mapId);

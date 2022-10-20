@@ -27,6 +27,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../../renderer/esri-renderer';
 import { api } from '../../../../app';
+import { Layer } from '../../layer';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'EsriJSON';
@@ -113,7 +114,8 @@ export class EsriFeature extends AbstractGeoViewVector {
       const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
-          if (metadataString === '{}') throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+          if (metadataString === '{}')
+            throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           else {
             this.metadata = toJsonObject(JSON.parse(metadataString));
             const { copyrightText } = this.metadata;
@@ -121,7 +123,7 @@ export class EsriFeature extends AbstractGeoViewVector {
             resolve();
           }
         });
-      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
@@ -138,8 +140,8 @@ export class EsriFeature extends AbstractGeoViewVector {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -151,8 +153,8 @@ export class EsriFeature extends AbstractGeoViewVector {
           return true;
         }
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -160,16 +162,16 @@ export class EsriFeature extends AbstractGeoViewVector {
       const esriIndex = Number(layerEntryConfig.layerId);
       if (Number.isNaN(esriIndex)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `ESRI layerId must be a number (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
 
       if (this.metadata?.layers[esriIndex] === undefined) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -205,8 +207,8 @@ export class EsriFeature extends AbstractGeoViewVector {
 
       if (this.metadata!.layers[esriIndex].type !== 'Feature Layer') {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `LayerId ${layerEntryConfig.layerId} of map ${this.mapId} is not a feature layer`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `LayerId ${Layer.getLayerPath(layerEntryConfig)} of map ${this.mapId} is not a feature layer`,
         });
         return false;
       }

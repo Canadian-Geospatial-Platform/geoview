@@ -28,7 +28,7 @@ type TypeLegend =
       dataUrl: string[] | string | ArrayBuffer | null;
     }[];
 
-type TypeSubLayerVisibility = { [id: string]: number[] };
+type TypeSubLayerVisibility = { [subLayerId: string]: number[] };
 
 const w = window as TypeWindow;
 
@@ -45,7 +45,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { useState, useEffect } = react;
 
   const [selectedLayer, setSelectedLayer] = useState<string>('');
-  const [layerLegend, setLayerLegend] = useState<{ [id: string]: TypeLegend }>({});
+  const [layerLegend, setLayerLegend] = useState<{ [legendId: string]: TypeLegend }>({});
   const [layerBounds, setLayerBounds] = useState<Record<string, number[]>>({});
   const [layerBbox, setLayerBbox] = useState<number[][]>([]);
   const [layerOpacity, setLayerOpacity] = useState<Record<string, number>>({});
@@ -55,14 +55,14 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
   const { Button, Slider, Tooltip, Checkbox } = ui.elements;
 
   const translations: TypeJsonObject = toJsonObject({
-    'en': {
+    en: {
       bounds: 'Toggle Bounds',
       zoom: 'Zoom to Layer',
       remove: 'Remove Layer',
       opacity: 'Adjust Opacity',
       visibility: 'Toggle Visibility',
     },
-    'fr': {
+    fr: {
       bounds: 'Basculer la limite',
       zoom: 'Zoom sur la Couche',
       remove: 'Supprimer la Couche',
@@ -145,13 +145,13 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     Object.values(layers).forEach(async (layer) => {
       if (geoviewLayerIsWMS(layer)) {
         const dataUrl = await layer.getLegendGraphic();
-        const name = getLocalizedValue(layer.metadataAccessPath, layer.mapId)!.includes('/MapServer') ? layer.layerName : '';
+        const name = getLocalizedValue(layer.metadataAccessPath, layer.mapId)!.includes('/MapServer') ? layer.geoviewLayerName : '';
         const legend = [{ name, dataUrl }];
-        setLayerLegend((state) => ({ ...state, [layer.layerId]: legend }));
+        setLayerLegend((state) => ({ ...state, [layer.geoviewLayerId]: legend }));
       } else if (geoviewLayerIsEsriDynamic(layer) || geoviewLayerIsEsriFeature(layer)) {
         const legend = await layer.getLegendJson();
         const legendArray = Array.isArray(legend) ? legend : [legend];
-        setLayerLegend((state) => ({ ...state, [layer.layerId]: legendArray }));
+        setLayerLegend((state) => ({ ...state, [layer.geoviewLayerId]: legendArray }));
       }
     });
 
@@ -165,26 +165,26 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
 
       // eslint-disable-next-line no-await-in-loop
       const bounds = await layerValue.getBounds();
-      setLayerBounds((state) => ({ ...state, [layerValue.id]: bounds }));
+      setLayerBounds((state) => ({ ...state, [layerValue.geoviewLayerId]: bounds }));
     }
   };
 
   useEffect(() => {
-    const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
+    const defaultLegends = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.geoviewLayerId]: [] }), {});
     setLayerLegend((state) => ({ ...defaultLegends, ...state }));
     setLayerLegendAll();
 
-    const defaultBounds = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: [] }), {});
+    const defaultBounds = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.geoviewLayerId]: [] }), {});
     setLayerBounds((state) => ({ ...defaultBounds, ...state }));
     setLayerBoundsAll();
 
-    const defaultSliders = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: 100 }), {});
+    const defaultSliders = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.geoviewLayerId]: 100 }), {});
     setLayerOpacity((state) => ({ ...defaultSliders, ...state }));
 
-    const defaultVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: true }), {});
+    const defaultVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.geoviewLayerId]: true }), {});
     setLayerVisibility((state) => ({ ...defaultVisibility, ...state }));
 
-    const defaultSubVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.id]: curr.entries }), {});
+    const defaultSubVisibility = Object.values(layers).reduce((prev, curr) => ({ ...prev, [curr.geoviewLayerId]: curr.entries }), {});
     setSubLayerVisibility((state) => ({ ...defaultSubVisibility, ...state }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layers]);
@@ -207,7 +207,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    *
    * @param layer layer config
    */
-  const onZoom = (layer: AbstractGeoViewLayer) => api.map(mapId).fitBounds(layerBounds[layer.id]);
+  const onZoom = (layer: AbstractGeoViewLayer) => api.map(mapId).fitBounds(layerBounds[layer.geoviewLayerId]);
 
   /**
    * Returns polygon with segmented top and bottom to handle curved projection
@@ -258,7 +258,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param layer layer config
    */
   const onBounds = (layer: AbstractGeoViewLayer) => {
-    const bbox = polygonFromBounds(layerBounds[layer.id]);
+    const bbox = polygonFromBounds(layerBounds[layer.geoviewLayerId]);
 
     if (layerBbox.toString() === bbox.toString()) {
       api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
@@ -301,8 +301,8 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param data Layer data
    */
   const onSliderChange = (value: number, data: AbstractGeoViewLayer) => {
-    setLayerOpacity((state) => ({ ...state, [data.id]: value }));
-    const opacity = layerVisibility[data.id] ? value / 100 : 0;
+    setLayerOpacity((state) => ({ ...state, [data.geoviewLayerId]: value }));
+    const opacity = layerVisibility[data.geoviewLayerId] ? value / 100 : 0;
     data.setOpacity(opacity);
   };
 
@@ -313,15 +313,15 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param data Layer data
    */
   const onVisibilityChange = (value: boolean, data: AbstractGeoViewLayer) => {
-    setLayerVisibility((state) => ({ ...state, [data.id]: value }));
-    const opacity = value ? layerOpacity[data.id] / 100 : 0;
+    setLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: value }));
+    const opacity = value ? layerOpacity[data.geoviewLayerId] / 100 : 0;
     data.setOpacity(opacity);
     if (value && data.setEntries) {
-      setSubLayerVisibility((state) => ({ ...state, [data.id]: data.entries as number[] }));
+      setSubLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: data.entries as number[] }));
       data.setEntries(data.entries as number[]);
     }
     if (!value && data.setEntries) {
-      setSubLayerVisibility((state) => ({ ...state, [data.id]: [] }));
+      setSubLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: [] }));
       data.setEntries([]);
     }
   };
@@ -334,32 +334,32 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
    * @param id sublayer ID
    */
   const onSubVisibilityChange = (value: boolean, data: AbstractGeoViewLayer, id: number) => {
-    const oldEntries = subLayerVisibility[data.id];
+    const oldEntries = subLayerVisibility[data.geoviewLayerId];
     const entries = value ? [...new Set([...oldEntries, id])] : oldEntries.filter((x) => x !== id);
     if (oldEntries.length === 0) {
-      setLayerVisibility((state) => ({ ...state, [data.id]: true }));
-      data.setOpacity(layerOpacity[data.id] / 100);
+      setLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: true }));
+      data.setOpacity(layerOpacity[data.geoviewLayerId] / 100);
     }
     if (entries.length === 0) {
-      setLayerVisibility((state) => ({ ...state, [data.id]: false }));
+      setLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: false }));
       data.setOpacity(0);
     }
-    setSubLayerVisibility((state) => ({ ...state, [data.id]: entries }));
+    setSubLayerVisibility((state) => ({ ...state, [data.geoviewLayerId]: entries }));
     if (data.setEntries) data.setEntries(entries);
   };
 
   return (
     <div className={classes.layersContainer}>
       {Object.values(layers).map((layer) => (
-        <div key={layer.id}>
-          <button type="button" className={classes.layerItem} onClick={() => onClick(layer.id)}>
+        <div key={layer.geoviewLayerId}>
+          <button type="button" className={classes.layerItem} onClick={() => onClick(layer.geoviewLayerId)}>
             <div className={classes.layerCountTextContainer}>
-              <div className={classes.layerItemText} title={layer.name}>
-                {layer.name}
+              <div className={classes.layerItemText} title={layer.geoviewLayerName}>
+                {layer.geoviewLayerName}
               </div>
             </div>
           </button>
-          {selectedLayer === layer.id && (
+          {selectedLayer === layer.geoviewLayerId && (
             <>
               <div className={classes.flexGroup}>
                 <Button
@@ -400,16 +400,16 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                     min={0}
                     max={100}
                     size="small"
-                    value={layerOpacity[layer.id]}
+                    value={layerOpacity[layer.geoviewLayerId]}
                     valueLabelDisplay="auto"
                     customOnChange={(value) => onSliderChange(value as number, layer)}
                   />
                 </div>
                 <Tooltip title={translations[displayLanguage].visibility}>
-                  <Checkbox checked={layerVisibility[layer.id]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
+                  <Checkbox checked={layerVisibility[layer.geoviewLayerId]} onChange={(e) => onVisibilityChange(e.target.checked, layer)} />
                 </Tooltip>
               </div>
-              {(layerLegend[layer.id] as TypeJsonArray).map((subLayer, index: number) => (
+              {(layerLegend[layer.geoviewLayerId] as TypeJsonArray).map((subLayer, index: number) => (
                 <div key={index}>
                   {subLayer!.legend && (
                     <div className={classes.legendSubLayerGroup}>
@@ -418,7 +418,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
                       </div>
                       <Tooltip title={translations[displayLanguage].visibility}>
                         <Checkbox
-                          checked={subLayerVisibility[layer.id].includes(subLayer.layerId as number)}
+                          checked={subLayerVisibility[layer.geoviewLayerId].includes(subLayer.layerId as number)}
                           onChange={(e) => onSubVisibilityChange(e.target.checked, layer, subLayer.layerId as number)}
                         />
                       </Tooltip>

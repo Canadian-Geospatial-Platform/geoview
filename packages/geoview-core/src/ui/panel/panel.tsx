@@ -112,7 +112,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const mapConfig = useContext(MapContext)!;
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
@@ -138,7 +138,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       // put back focus on calling button
       document.getElementById(button.id!)?.focus();
     } else {
-      const mapCont = api.map(mapConfig.id).map.getTargetElement();
+      const mapCont = api.map(mapConfig.mapId).map.getTargetElement();
       mapCont.focus();
 
       // if in focus trap mode, trigger the event
@@ -233,10 +233,10 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             setActionButtons((prev) => [
               ...prev,
               <IconButton
-                key={actionButton.id}
+                key={actionButton.actionButtonId}
                 tooltip={actionButton.title}
                 tooltipPlacement="right"
-                id={actionButton.id}
+                id={actionButton.actionButtonId}
                 aria-label={actionButton.title}
                 onClick={Cast<React.MouseEventHandler>(actionButton.action)}
                 size="small"
@@ -268,7 +268,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           if (payload.buttonId === button.id!) {
             setActionButtons((list) =>
               list.filter((item) => {
-                return item.props.id !== payload.actionButton.id;
+                return item.props.id !== payload.actionButton.actionButtonId;
               })
             );
           }

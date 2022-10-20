@@ -10,7 +10,7 @@ import { modalPayload } from '../../api/events/payloads/modal-payload';
  * @class ModalModel
  */
 export class ModalModel {
-  id?: string;
+  modalModelId?: string;
 
   header?: modalHeader;
 
@@ -41,7 +41,7 @@ export class ModalModel {
   open = (): void => {
     this.active = true;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.mapId!, this.id!, true));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_OPEN, this.mapId!, this.modalModelId!, true));
   };
 
   /**
@@ -50,7 +50,7 @@ export class ModalModel {
   close = (): void => {
     this.active = false;
 
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.mapId!, this.id!, false));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE, this.mapId!, this.modalModelId!, false));
   };
 
   /**
@@ -60,7 +60,7 @@ export class ModalModel {
    * @param { TypeModalProps } modal must be an object with the above defined (TypeModalProps) properties
    */
   update = (modal: TypeModalProps): void => {
-    this.id = modal.id || this.id;
+    this.modalModelId = modal.modalId || this.modalModelId;
 
     if (this.header) {
       if (this.header.title) this.header.title = modal.header?.title || this.header.title;
@@ -108,13 +108,13 @@ export class ModalModel {
   /**
    * Function to remove actions from header
    *
-   * @param { string } id of the action to be deleted
+   * @param { string } actionId of the action to be deleted
    */
-  removeHeaderActions = (id: string): void => {
+  removeHeaderActions = (actionId: string): void => {
     if (!this.header?.actions || typeof this.header?.actions !== 'object') {
       return;
     }
-    const actionIndex = this.header?.actions?.findIndex((action) => action.id === id);
+    const actionIndex = this.header?.actions?.findIndex((action) => action.actionId === actionId);
     if (actionIndex === -1) return;
     this.header?.actions?.splice(actionIndex, 1);
     this.reRender();
@@ -123,11 +123,11 @@ export class ModalModel {
   /**
    * Function to remove actions from footer
    *
-   * @param { string } id of the action to be deleted
+   * @param { string } actionId of the action to be deleted
    */
-  removeFooterActions = (id: string): void => {
+  removeFooterActions = (actionId: string): void => {
     if (!this.footer?.actions || typeof this.header?.actions !== 'object') return;
-    const actionIndex = this.footer?.actions?.findIndex((action) => action.id === id);
+    const actionIndex = this.footer?.actions?.findIndex((action) => action.actionId === actionId);
     if (actionIndex === -1) return;
     this.footer?.actions?.splice(actionIndex, 1);
     this.reRender();
@@ -137,6 +137,6 @@ export class ModalModel {
    * to update the modal as soon as a change is made to any content
    */
   reRender = (): void => {
-    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, this.mapId!, this.id!));
+    api.event.emit(modalPayload(EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE, this.mapId!, this.modalModelId!));
   };
 }

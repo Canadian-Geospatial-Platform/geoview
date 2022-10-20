@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface TypeScale {
-  id: string;
+  scaleId: string;
   label: string;
   borderBottom: boolean;
 }
@@ -71,12 +71,12 @@ export function Scale(): JSX.Element {
   const [scaleMode, setScaleMode] = useState<number>(0);
   const [scaleValues, setScaleValues] = useState<TypeScale[]>([
     {
-      id: '0',
+      scaleId: '0',
       label: '',
       borderBottom: false,
     },
     {
-      id: '1',
+      scaleId: '1',
       label: '',
       borderBottom: false,
     },
@@ -85,7 +85,7 @@ export function Scale(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const classes = useStyles();
 
@@ -99,14 +99,15 @@ export function Scale(): JSX.Element {
   const onMoveEnd = (e: MapEvent) => {
     const { map } = e;
 
-    const id = map.get('id');
+    const eventMapId = map.get('mapId');
 
-    const scaleLineText = document.getElementById(`${id}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')?.innerHTML as string;
-    const scaleBarText = document.getElementById(`${id}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string;
+    const scaleLineText = document.getElementById(`${eventMapId}-scaleControlLine`)?.querySelector('.ol-scale-line-inner')
+      ?.innerHTML as string;
+    const scaleBarText = document.getElementById(`${eventMapId}-scaleControlBar`)?.querySelector('.ol-scale-text')?.innerHTML as string;
 
     setScaleValues([
-      { id: '0', label: scaleLineText, borderBottom: true },
-      { id: '1', label: scaleBarText, borderBottom: false },
+      { scaleId: '0', label: scaleLineText, borderBottom: true },
+      { scaleId: '1', label: scaleBarText, borderBottom: false },
     ]);
   };
 
@@ -159,7 +160,7 @@ export function Scale(): JSX.Element {
           <div className={classes.scaleExpandedContainer}>
             {scaleValues.map((value, index) => {
               return (
-                <div className={classes.scaleExpandedCheckmarkText} key={value.id}>
+                <div className={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
                   {scaleMode === index && <CheckIcon className={classes.scaleCheckmark} />}
                   <span
                     className={classes.scaleText}

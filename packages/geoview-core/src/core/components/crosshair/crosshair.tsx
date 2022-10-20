@@ -57,7 +57,7 @@ export function Crosshair(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const mapConfig = useContext(MapContext);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const [isCrosshairsActive, setCrosshairsActive] = useState(false);

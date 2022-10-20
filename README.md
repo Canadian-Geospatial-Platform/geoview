@@ -178,14 +178,14 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
           'projection': 3978
         },
         'basemapOptions': {
-          'id': 'transport',
+          'basemapId': 'transport',
           'shaded': true,
           'labeled': true
         },
         'listOfGeoviewLayerConfig': [
           {
-            'layerId': 'esriDynamicLYR2',
-            'layerName': {
+            'geoviewLayerId': 'esriDynamicLYR2',
+            'geoviewLayerName': {
               'en': 'Energy',
               'fr': 'Energy'
             },

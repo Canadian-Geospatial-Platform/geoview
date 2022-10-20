@@ -25,7 +25,7 @@ export const payloadIsAMapComponent = (verifyIfPayload: PayloadBaseClass): verif
  */
 export class MapComponentPayload extends PayloadBaseClass {
   // the map component identifier
-  id: string;
+  mapComponentId: string;
 
   // the map component element
   component?: JSX.Element;
@@ -35,13 +35,13 @@ export class MapComponentPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {string} id the map component identifier
+   * @param {string} mapComponentId the map component identifier
    * @param {JSX.Element} component the map component element
    */
-  constructor(event: EventStringId, handlerName: string | null, id: string, component?: JSX.Element) {
+  constructor(event: EventStringId, handlerName: string | null, mapComponentId: string, component?: JSX.Element) {
     if (!validEvents.includes(event)) throw new Error(`MapComponentPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.id = id;
+    this.mapComponentId = mapComponentId;
     this.component = component;
   }
 }
@@ -52,7 +52,7 @@ export class MapComponentPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {string} id the map component identifier
+ * @param {string} mapComponentId the map component identifier
  * @param {JSX.Element} component the map component element
  *
  * @returns {MapComponentPayload} the MapComponentPayload object created
@@ -60,8 +60,8 @@ export class MapComponentPayload extends PayloadBaseClass {
 export const mapComponentPayload = (
   event: EventStringId,
   handlerName: string | null,
-  id: string,
+  mapComponentId: string,
   component?: JSX.Element
 ): MapComponentPayload => {
-  return new MapComponentPayload(event, handlerName, id, component);
+  return new MapComponentPayload(event, handlerName, mapComponentId, component);
 };

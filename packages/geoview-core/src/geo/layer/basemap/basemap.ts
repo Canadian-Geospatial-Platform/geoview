@@ -272,7 +272,12 @@ export class Basemap {
    * @param {boolean} rest should we do a get request to get the info from the server
    * @returns {TypeBasemapLayer} return the created basemap layer
    */
-  createBasemapLayer = async (id: string, basemapLayer: TypeJsonObject, opacity: number, rest: boolean): Promise<TypeBasemapLayer> => {
+  createBasemapLayer = async (
+    basemapId: string,
+    basemapLayer: TypeJsonObject,
+    opacity: number,
+    rest: boolean
+  ): Promise<TypeBasemapLayer> => {
     const resolutions: number[] = [];
     let minZoom = 0;
     let maxZoom = 17;
@@ -329,7 +334,7 @@ export class Basemap {
         // set extent for this layer
         extent = [fullExtent.xmin as number, fullExtent.ymin as number, fullExtent.xmax as number, fullExtent.ymax as number];
 
-        if (id === 'label') {
+        if (basemapId === 'label') {
           if (result.copyrightText) {
             const attributionText = result.copyrightText as string;
 
@@ -361,8 +366,8 @@ export class Basemap {
 
     // return a basemap layer
     return {
-      id,
-      type: id,
+      basemapId,
+      type: basemapId,
       url: basemapLayer.url as string,
       jsonUrl: basemapLayer.jsonUrl as string,
       source: new XYZ({
@@ -418,7 +423,7 @@ export class Basemap {
         }
 
         // create transport layer
-        if (coreBasemapOptions.id === 'transport' && this.basemapsList[projectionCode].transport) {
+        if (coreBasemapOptions.basemapId === 'transport' && this.basemapsList[projectionCode].transport) {
           const transportLayer = await this.createBasemapLayer(
             'transport',
             this.basemapsList[projectionCode].transport,
@@ -438,7 +443,7 @@ export class Basemap {
         }
 
         // create simple layer
-        if (coreBasemapOptions.id === 'simple' && this.basemapsList[projectionCode].simple) {
+        if (coreBasemapOptions.basemapId === 'simple' && this.basemapsList[projectionCode].simple) {
           const simpleLayer = await this.createBasemapLayer(
             'simple',
             this.basemapsList[projectionCode].simple,
@@ -458,9 +463,9 @@ export class Basemap {
         }
 
         // create open street maps layer
-        if (coreBasemapOptions.id === 'osm') {
+        if (coreBasemapOptions.basemapId === 'osm') {
           basemapLayers.push({
-            id: 'osm',
+            basemapId: 'osm',
             type: 'osm',
             source: new OSM(),
             opacity: coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
@@ -474,7 +479,7 @@ export class Basemap {
         }
 
         // no geometry basemap layer
-        if (coreBasemapOptions.id === 'nogeom') {
+        if (coreBasemapOptions.basemapId === 'nogeom') {
           basemaplayerTypes.push('nogeom');
         }
 
@@ -502,13 +507,13 @@ export class Basemap {
 
       if (
         !this.isExisting(basemaplayerTypes.join('-')) &&
-        (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.id === 'nogeom'))
+        (basemapLayers.length > 0 || (basemapLayers.length === 0 && coreBasemapOptions.basemapId === 'nogeom'))
       ) {
         const info = this.getInfo(basemaplayerTypes, this.displayLanguage as TypeDisplayLanguage);
 
         // id and typer are derived from the basemap type composition (shaded, label, transport, simple)
         const basemap = this.createBasemap({
-          id: basemaplayerTypes.join(''),
+          basemapId: basemaplayerTypes.join(''),
           name: info[0],
           layers: basemapLayers,
           type: basemaplayerTypes.join('-'),
@@ -630,7 +635,7 @@ export class Basemap {
   private createBasemap = (basemapProps: TypeBasemapProps): TypeBasemapProps => {
     // generate an id if none provided
     // eslint-disable-next-line no-param-reassign
-    if (!basemapProps.id) basemapProps.id = generateId(basemapProps.id);
+    if (!basemapProps.basemapId) basemapProps.basemapId = generateId(basemapProps.basemapId);
 
     const thumbnailUrls: string[] = [];
 
@@ -655,9 +660,9 @@ export class Basemap {
    *
    * @param {string} id the id of the basemap
    */
-  setBasemap = (id: string): void => {
+  setBasemap = (basemapId: string): void => {
     // get basemap by id
-    const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.id === id)[0];
+    const basemap = this.basemaps.filter((basemapType: TypeBasemapProps) => basemapType.basemapId === basemapId)[0];
 
     // set active basemap
     this.activeBasemap = basemap;

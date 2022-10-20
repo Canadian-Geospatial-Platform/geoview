@@ -26,6 +26,7 @@ import {
 
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
+import { Layer } from '../../layer';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -120,7 +121,7 @@ export class OgcFeature extends AbstractGeoViewVector {
           this.metadata = response.data;
           resolve();
         });
-      } else throw new Error(`Cant't read service metadata for layer ${this.layerId} of map ${this.mapId}.`);
+      } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
@@ -137,8 +138,8 @@ export class OgcFeature extends AbstractGeoViewVector {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -150,8 +151,8 @@ export class OgcFeature extends AbstractGeoViewVector {
           return true;
         }
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -163,8 +164,8 @@ export class OgcFeature extends AbstractGeoViewVector {
           if (this.metadata!.collections[i].id === layerEntryConfig.layerId) break;
         if (i === this.metadata!.collections.length) {
           this.layerLoadError.push({
-            layer: layerEntryConfig.layerId,
-            consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+            layer: Layer.getLayerPath(layerEntryConfig),
+            consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
           });
           return false;
         }
@@ -187,8 +188,10 @@ export class OgcFeature extends AbstractGeoViewVector {
         return true;
       }
       this.layerLoadError.push({
-        layer: layerEntryConfig.layerId,
-        consoleMessage: `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        layer: Layer.getLayerPath(layerEntryConfig),
+        consoleMessage: `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(
+          layerEntryConfig
+        )})`,
       });
       return false;
     });

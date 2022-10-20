@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => {
  * Interface for the shell properties
  */
 interface ShellProps {
-  id: string;
+  shellId: string;
   mapFeaturesConfig: TypeMapFeaturesConfig;
 }
 
@@ -81,7 +81,7 @@ interface ShellProps {
  * @returns {JSX.Element} the shell component
  */
 export function Shell(props: ShellProps): JSX.Element {
-  const { id, mapFeaturesConfig } = props;
+  const { shellId, mapFeaturesConfig } = props;
 
   const classes = useStyles();
   const { t } = useTranslation<string>();
@@ -120,14 +120,14 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
         if (payloadIsAMapComponent(payload)) {
-          if (payload.handlerName === id)
+          if (payload.handlerName === shellId)
             setComponents((tempComponents) => ({
               ...tempComponents,
-              [payload.id]: payload.component!,
+              [payload.mapComponentId]: payload.component!,
             }));
         }
       },
-      id
+      shellId
     );
 
     // listen to removing a component events
@@ -135,9 +135,9 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
         if (payloadIsAMapComponent(payload)) {
-          if (payload.handlerName === id) {
+          if (payload.handlerName === shellId) {
             const tempComponents: Record<string, JSX.Element> = { ...components };
-            delete tempComponents[payload.id];
+            delete tempComponents[payload.mapComponentId];
 
             setComponents(() => ({
               ...tempComponents,
@@ -145,20 +145,20 @@ export function Shell(props: ShellProps): JSX.Element {
           }
         }
       },
-      id
+      shellId
     );
 
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_LOADED,
       (payload) => {
         if (payloadIsAMap(payload)) {
-          if (payload.handlerName!.includes(id)) {
+          if (payload.handlerName!.includes(shellId)) {
             // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
             setIsLoaded(true);
           }
         }
       },
-      id
+      shellId
     );
 
     // CHANGED
@@ -166,27 +166,27 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_CREATE,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (payload.handlerName === id) {
+          if (payload.handlerName === shellId) {
             updateShell();
           }
         }
       },
-      id
+      shellId
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, id);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, id);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_LOADED, id);
-      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, id);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT, shellId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT, shellId);
+      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_LOADED, shellId);
+      api.event.off(EVENT_NAMES.MODAL.EVENT_MODAL_CREATE, shellId);
     };
-  }, [components, id, updateShell]);
+  }, [components, shellId, updateShell]);
 
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
-      <div id={`shell-${id}`} className={classes.shell}>
+      <div id={`shell-${shellId}`} className={classes.shell}>
         <CircularProgress isLoaded={isLoaded} />
-        <a id={`toplink-${id}`} href={`#bottomlink-${id}`} className={classes.skip} style={{ top: '0px' }}>
+        <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
         <div className={classes.mapContainer}>
@@ -195,11 +195,11 @@ export function Shell(props: ShellProps): JSX.Element {
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('nav-bar') > -1 && <Navbar />}
         </div>
         <FooterTabs />
-        {Object.keys(api.map(id).modal.modals).map((modalId) => (
-          <Modal key={modalId} id={modalId} open={false} mapId={id} />
+        {Object.keys(api.map(shellId).modal.modals).map((modalId) => (
+          <Modal key={modalId} id={modalId} open={false} mapId={shellId} />
         ))}
-        <FocusTrapDialog id={id} callback={(isActive) => handleCallback(isActive)} />
-        <a id={`bottomlink-${id}`} href={`#toplink-${id}`} className={classes.skip} style={{ bottom: '0px' }}>
+        <FocusTrapDialog focusTrapId={shellId} callback={(isActive) => handleCallback(isActive)} />
+        <a id={`bottomlink-${shellId}`} href={`#toplink-${shellId}`} className={classes.skip} style={{ bottom: '0px' }}>
           {t('keyboardnav.end')}
         </a>
         {Object.keys(components).map((key: string) => {
@@ -215,7 +215,7 @@ export function Shell(props: ShellProps): JSX.Element {
           }}
           className={`${classes.snackBar}`}
         >
-          <Snackbar id={id} />
+          <Snackbar snackBarId={shellId} />
         </SnackbarProvider>
       </div>
     </FocusTrap>

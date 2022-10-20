@@ -30,7 +30,7 @@ export const payloadIsAModal = (verifyIfPayload: PayloadBaseClass): verifyIfPayl
  */
 export class ModalPayload extends PayloadBaseClass {
   // the modal identifier
-  id: string;
+  modalId: string;
 
   // Optional flag used to specify if the modal is open
   open?: boolean;
@@ -40,13 +40,13 @@ export class ModalPayload extends PayloadBaseClass {
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
    * @param {string | null} handlerName the handler Name
-   * @param {string} id the modal identifier
+   * @param {string} modalId the modal identifier
    * @param {boolean} open optional flag used to specify if the modal is open
    */
-  constructor(event: EventStringId, handlerName: string | null, id: string, open?: boolean) {
+  constructor(event: EventStringId, handlerName: string | null, modalId: string, open?: boolean) {
     if (!validEvents.includes(event)) throw new Error(`ModalPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
-    this.id = id;
+    this.modalId = modalId;
     this.open = open;
   }
 }
@@ -57,11 +57,11 @@ export class ModalPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {string} id the modal identifier
+ * @param {string} modalId the modal identifier
  * @param {boolean} open optional flag used to specify if the modal is open
  *
  * @returns {ModalPayload} the ModalPayload object created
  */
-export const modalPayload = (event: EventStringId, handlerName: string | null, id: string, open?: boolean): ModalPayload => {
-  return new ModalPayload(event, handlerName, id, open);
+export const modalPayload = (event: EventStringId, handlerName: string | null, modalId: string, open?: boolean): ModalPayload => {
+  return new ModalPayload(event, handlerName, modalId, open);
 };
