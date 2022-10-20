@@ -202,7 +202,7 @@
         "label": {
           "type": "string"
         },
-        "settings": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
+        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
       },
       "required": ["styleType", "label", "settings"]
     },
@@ -222,7 +222,7 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultSettings": {
-          "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings",
+          "$ref": "#/definitions/TypeKindOfVectorSettings",
           "description": "Settings used if field/value association is not found."
         },
         "fields": {
@@ -251,7 +251,7 @@
           },
           "minItems": 1
         },
-        "settings": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
+        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
       },
       "minItems": 2,
       "required": ["label", "values", "options"]
@@ -272,7 +272,7 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultSettings": {
-          "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings",
+          "$ref": "#/definitions/TypeKindOfVectorSettings",
           "description": "Settings used if field/value association is not found."
         },
         "field": {
@@ -297,13 +297,13 @@
         "maxValue": {
           "type": "number"
         },
-        "settings": { "$ref": "#/definitions/TypeKinfOfSymbolVectorSettings" }
+        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
       },
       "minItems": 2,
       "required": ["label", "minValue", "maxValue", "options"]
     },
 
-    "TypeKinfOfSymbolVectorSettings": {
+    "TypeKindOfVectorSettings": {
       "anyOf": [
         { "$ref": "#/definitions/TypeLineStringVectorConfig" },
         { "$ref": "#/definitions/TypePolygonVectorConfig" },

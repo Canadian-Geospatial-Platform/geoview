@@ -120,7 +120,7 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorIniti
 /** ******************************************************************************************************************************
  * Kind of symbol vector settings.
  */
-export type TypeKinfOfSymbolVectorSettings =
+export type TypeKindOfVectorSettings =
   | TypeBaseVectorConfig
   | TypeLineStringVectorConfig
   | TypePolygonVectorConfig
@@ -326,12 +326,12 @@ export type TypeBaseStyleConfig = {
  * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const isSimpleStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeSimpleStyleConfig => {
-  return verifyIfConfig.styleType === 'simple';
+export const isSimpleStyleConfig = (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings): verifyIfConfig is TypeSimpleStyleConfig => {
+  return (verifyIfConfig as TypeStyleSettings).styleType === 'simple';
 };
 
 /** ******************************************************************************************************************************
@@ -345,7 +345,7 @@ export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
   /** Label associated to the style */
   label: string;
   /** options associated to the style. */
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 }
 
 /** ******************************************************************************************************************************
@@ -357,7 +357,7 @@ export type TypeUniqueValueStyleInfo = {
   /** Values associated to the style. */
   values: string[];
   /** options associated to the style. */
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 };
 
 /** ******************************************************************************************************************************
@@ -365,12 +365,12 @@ export type TypeUniqueValueStyleInfo = {
  * verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const isUniqueValueStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeUniqueValueStyleConfig => {
-  return verifyIfConfig.styleType === 'uniqueValue';
+export const isUniqueValueStyleConfig = (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings): verifyIfConfig is TypeUniqueValueStyleConfig => {
+  return (verifyIfConfig as TypeStyleSettings).styleType === 'uniqueValue';
 };
 
 /** ******************************************************************************************************************************
@@ -384,7 +384,7 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultSettings?: TypeKinfOfSymbolVectorSettings;
+  defaultSettings?: TypeKindOfVectorSettings;
   /** Fields used by the style. */
   fields: string[];
   /** Unique value style information configuration. */
@@ -402,7 +402,7 @@ export type TypeClassBreakStyleInfo = {
   /** Maximum values associated to the style. */
   maxValue: number;
   /** options associated to the style. */
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 };
 
 /** ******************************************************************************************************************************
@@ -410,12 +410,12 @@ export type TypeClassBreakStyleInfo = {
  * verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeClassBreakStyleConfig => {
-  return verifyIfConfig.styleType === 'classBreaks';
+export const isClassBreakStyleConfig = (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings): verifyIfConfig is TypeClassBreakStyleConfig => {
+  return (verifyIfConfig as TypeStyleSettings).styleType === 'classBreaks';
 };
 
 /** ******************************************************************************************************************************
@@ -429,7 +429,7 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultSettings?: TypeKinfOfSymbolVectorSettings;
+  defaultSettings?: TypeKindOfVectorSettings;
   /** Field used by the style. */
   field: string;
   /** Class break style information configuration. */

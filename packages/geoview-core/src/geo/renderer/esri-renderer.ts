@@ -11,7 +11,7 @@ import {
   TypeFillStyle,
   TypePolygonVectorConfig,
   TypeIconSymbolVectorConfig,
-  TypeKinfOfSymbolVectorSettings,
+  TypeKindOfVectorSettings,
   TypeLineStyle,
   TypeLineStringVectorConfig,
   TypeSimpleStyleConfig,
@@ -351,10 +351,10 @@ function convertEsriColor(color: TypeEsriColor): string {
  *
  * @param {EsriSymbol} symbol The ESRI symbol to convert.
  *
- * @returns {TypeKinfOfSymbolVectorSettings | undefined} The Geoview symbol corresponding to the ESRI symbol or undefined if
+ * @returns {TypeKindOfVectorSettings | undefined} The Geoview symbol corresponding to the ESRI symbol or undefined if
  * ESRI symbol is not handled.
  */
-function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | undefined {
+function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined {
   if (symbol) {
     if (isSimpleMarkerSymbol(symbol)) {
       const offset: [number, number] = [
@@ -423,11 +423,11 @@ function convertSymbol(symbol: EsriSymbol): TypeKinfOfSymbolVectorSettings | und
 /** *****************************************************************************************************************************
  * Get the configuration key of the style.
  *
- * @param {TypeKinfOfSymbolVectorSettings} settings The GeoView settings.
+ * @param {TypeKindOfVectorSettings} settings The GeoView settings.
  *
- * @returns {TypeKinfOfSymbolVectorSettings | undefined} The Geoview style key or undefined if it can not be determined.
+ * @returns {TypeStyleConfigKey | undefined} The Geoview style key or undefined if it can not be determined.
  */
-function getStyleConfigKey(settings: TypeKinfOfSymbolVectorSettings): TypeStyleConfigKey | undefined {
+function getStyleConfigKey(settings: TypeKindOfVectorSettings): TypeStyleConfigKey | undefined {
   if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'Point';
   if (isFilledPolygonVectorConfig(settings)) return 'Polygon';
   if (isLineStringVectorConfig(settings)) return 'LineString';
