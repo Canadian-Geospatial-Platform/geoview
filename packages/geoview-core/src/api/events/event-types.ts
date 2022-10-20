@@ -1,6 +1,7 @@
 import { APPBAR } from './constants/app-bar';
 import { ATTRIBUTION } from './constants/attribution';
 import { BASEMAP } from './constants/basemap';
+import { DATA_GRID } from './constants/data-grid';
 import { DETAILS_PANEL } from './constants/details-panel';
 import { DRAWER } from './constants/drawer';
 import { FOOTERBAR } from './constants/footer-bar';
@@ -26,6 +27,7 @@ export const EVENT_NAMES = {
   APPBAR,
   ATTRIBUTION,
   BASEMAP,
+  DATA_GRID,
   DETAILS_PANEL,
   DRAWER,
   FOOTERBAR,
@@ -53,6 +55,8 @@ export type EventStringId =
   | 'appbar/panel_remove'
   | 'attribution/update'
   | 'basemap/layers_update'
+  | 'data_grid/register'
+  | 'data_grid/create'
   | 'details_panel/crosshair_enter'
   | 'drawer/open_close'
   | 'footerbar/expand_collapse'
