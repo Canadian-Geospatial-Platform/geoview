@@ -108,7 +108,7 @@ export const cgpv: types.TypeCGPV = {
     ...api.plugin,
   }),
   react: React,
-  reactDOM: ReactDOM,
+  reactDom: ReactDOM,
   ui: {
     useTheme,
     useMediaQuery,
