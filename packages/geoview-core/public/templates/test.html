@@ -48,6 +48,12 @@
       'theme': 'dark',
       'suportedLanguages': ['en']
     }"></div>
+    <table id="legendTable" style="width:33%">
+      <tr>
+        <th>Value</th>
+        <th>Symbology</th>
+      </tr>
+    </table>
 <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
@@ -87,6 +93,20 @@
           // console.log(cgpv.api.map('LYR1').layer.layers['wmsLYR1-Root'].getFeatureInfo('OSM-WMS'));
         });
         // */
+        cgpv.api.map('LYR4').layer.layers['esriFeatureLYR4'].getLegend('esriFeatureLYR4/8').then((legend) => {
+          var legendTable = document.getElementById('legendTable');
+          for (var i = 0; i < legend.legend.Point.length; i++) {
+            var tableRow = document.createElement("tr");
+            tableRow.align = "left";
+            var tableData1 = document.createElement("td");
+            tableData1.innerHTML = legend.styleConfig.Point.classBreakStyleInfos[i].label;
+            tableRow.appendChild(tableData1);
+            var tableData2 = document.createElement("td");
+            tableData2.appendChild(legend.legend.Point[i]);
+            tableRow.appendChild(tableData2);
+            legendTable.appendChild(tableRow);
+          }
+        });
 
         //create snippets
         createCodeSnippet();

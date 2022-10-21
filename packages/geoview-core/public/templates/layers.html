@@ -261,6 +261,13 @@
           'suportedLanguages': ['en']
         }"></div>
   <p>This map has a Esri feature layer added from configuration.</p>
+  <button class="Get-Esri-dynamic-Legend">Get Legend</button>
+  <table border="1" id="legendTable" style="width:33%">
+    <tr>
+      <th style="text-align: center; vertical-align: middle;">Value</th>
+      <th style="text-align: center; vertical-align: middle;">Symbology</th>
+    </tr>
+  </table>
   <button type="button" class="collapsible">Get Feature Info</button>
   <pre id="LYR4-INFO-esriFeatureLYR4/8" class="panel">Click on feature on the map</pre>
   <hr />
@@ -272,37 +279,46 @@
     <h4 id="HLYR5">5. GeoJSON Layer</h4><a class="ref-link" href="#top">Top</a>
   </div>
   <div id="LYR5" class="llwp-map" data-lang="en" data-config="{
-        'map': {
-          'interaction': 'dynamic',
-          'viewSettings': {
-            'zoom': 4,
-            'center': [-100, 60],
-            'projection': 3978
-          },
-          'basemapOptions': {
-            'basemapId': 'nogeom',
-            'shaded': true,
-            'labeled': false
-          },
-          'listOfGeoviewLayerConfig': [
-            {
-              'geoviewLayerId': 'geojsonLYR5',
-              'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-              'metadataAccessPath': { 'en': './geojson/metadata.json' },
-              'geoviewLayerType': 'GeoJSON',
-              'listOfLayerEntryConfig': [
-                { 'layerId': 'polygons.json' },
-                { 'layerId': 'lines.json' },
-                { 'layerId': 'points.json' }
-              ]
-            }
+    'map': {
+      'interaction': 'dynamic',
+      'viewSettings': {
+        'zoom': 4,
+        'center': [-100, 60],
+        'projection': 3978
+      },
+      'basemapOptions': {
+        'basemapId': 'nogeom',
+        'shaded': true,
+        'labeled': false
+      },
+      'listOfGeoviewLayerConfig': [
+        {
+          'geoviewLayerId': 'geojsonLYR5',
+          'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+          'metadataAccessPath': { 'en': './geojson/metadata.json' },
+          'geoviewLayerType': 'GeoJSON',
+          'listOfLayerEntryConfig': [
+            { 'layerId': 'polygons.json' },
+            { 'layerId': 'lines.json' },
+            { 'layerId': 'icon_points.json' },
+            { 'layerId': 'points.json' }
           ]
-        },
-        'components': ['overview-map', 'nav-bar'],
-        'corePackages': [],
-        'theme': 'dark',
-        'suportedLanguages': ['en']
-      }"></div>
+        }
+      ]
+    },
+    'components': ['overview-map', 'nav-bar'],
+    'corePackages': [],
+    'theme': 'dark',
+    'suportedLanguages': ['en']
+  }">
+  </div>
+  <button class="Get-GeoJson-Legend">Get Legend</button>
+  <table border="1" id="geojsonLegendTable" style="width:33%">
+    <tr>
+      <th style="text-align: center; vertical-align: middle;">Value</th>
+      <th style="text-align: center; vertical-align: middle;">Symbology</th>
+    </tr>
+  </table>
   <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
     the buttons</p>
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
@@ -548,6 +564,65 @@
           document.getElementById('wmsLegend').src = res.legend;
         });
     }
+
+    // find the button element by ID
+    var addEsriDynamicLegendButton = document.getElementsByClassName('Get-Esri-dynamic-Legend')[0];
+    // add legend to ESRI feature layer
+    addEsriDynamicLegendButton.addEventListener('click', function (e) {
+      cgpv.api.map('LYR4').layer.layers['esriFeatureLYR4'].getLegend('esriFeatureLYR4/8').then((legend) => {
+          var legendTable = document.getElementById('legendTable');
+          for (var i = 0; i < legend.legend.Point.length; i++) {
+            var tableRow = document.createElement("tr");
+            var tableData1 = document.createElement("td");
+            tableData1.style.verticalAlign = "middle";
+            tableData1.style.textAlign = "center";
+            tableData1.innerHTML = legend.styleConfig.Point.classBreakStyleInfos[i].label;
+            tableRow.appendChild(tableData1);
+            var tableData2 = document.createElement("td");
+            tableData2.style.verticalAlign = "middle";
+            tableData2.style.textAlign = "center";
+            tableData2.appendChild(legend.legend.Point[i]);
+            tableRow.appendChild(tableData2);
+            legendTable.appendChild(tableRow);
+          }
+        });
+      });
+
+    // find the button element by ID
+    var addGeoJsonLegendButton = document.getElementsByClassName('Get-GeoJson-Legend')[0];
+    // add legend to ESRI feature layer
+    addGeoJsonLegendButton.addEventListener('click', function (e) {
+      var addRow = (legendTable, label, canvas) => {
+        var tableRow = document.createElement("tr");
+        var tableData1 = document.createElement("td");
+        tableData1.style.verticalAlign = "middle";
+        tableData1.style.textAlign = "center";
+        tableData1.innerHTML = label;
+        tableRow.appendChild(tableData1);
+        var tableData2 = document.createElement("td");
+        tableData2.style.verticalAlign = "middle";
+            tableData2.style.textAlign = "center";
+        tableData2.appendChild(canvas);
+        tableRow.appendChild(tableData2);
+        legendTable.appendChild(tableRow);
+      }
+      cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/polygons.json').then((legend) => {
+          var legendTable = document.getElementById('geojsonLegendTable');
+          addRow(legendTable, legend.styleConfig.Polygon.label, legend.legend.Polygon)
+        });
+        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/lines.json').then((legend) => {
+          var legendTable = document.getElementById('geojsonLegendTable');
+          addRow(legendTable, legend.styleConfig.LineString.label, legend.legend.LineString)
+        });
+        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/points.json').then((legend) => {
+          var legendTable = document.getElementById('geojsonLegendTable');
+          addRow(legendTable, legend.styleConfig.Point.label, legend.legend.Point)
+        });
+        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/icon_points.json').then((legend) => {
+          var legendTable = document.getElementById('geojsonLegendTable');
+          addRow(legendTable, legend.styleConfig.Point.label, legend.legend.Point)
+        });
+      });
 
     /**
     //add legend to ESRI Dynamic layer

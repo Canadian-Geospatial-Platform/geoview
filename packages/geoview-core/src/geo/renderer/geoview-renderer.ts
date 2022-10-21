@@ -2,12 +2,15 @@
 /* eslint-disable no-param-reassign */
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { LineString, Point, Polygon } from 'ol/geom';
 import { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { FeatureLike } from 'ol/Feature';
+import { toContext } from 'ol/render';
+import { Size } from 'ol/size';
 
 import { getLocalizedValue, setAlphaColor } from '../../core/utils/utilities';
 import {
@@ -43,6 +46,7 @@ import {
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
+import { TypeLayerStyle } from '../layer/geoview-layers/abstract-geoview-layers';
 
 type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
 type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
@@ -76,6 +80,7 @@ export class GeoviewRenderer {
     'shortDash-dot-dot': [7, 3, 2, 3, 2, 3],
     solid: undefined,
   };
+
   /** Table of function to process the style settings. */
   private processStyle: Record<
     TypeBaseStyleType,
@@ -125,12 +130,120 @@ export class GeoviewRenderer {
     vertical: this.processVerticalFill,
   };
 
+  private LEGEND_CANVAS_WIDTH = 50;
+
+  private LEGEND_CANVAS_HEIGHT = 50;
+
   constructor(mapId: string) {
     this.mapId = mapId;
     this.defaultColorIndex = 0;
   }
 
-  getStyle(
+  private createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
+    const [width, height] = pointStyle?.getImage().getSize() as Size;
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = width;
+    drawingCanvas.height = height;
+    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    if (pointStyle) drawingContext.setStyle(pointStyle);
+    drawingContext.drawGeometry(new Point([width / 2, height / 2]));
+    return drawingCanvas;
+  }
+
+  private createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    if (lineStringStyle) drawingContext.setStyle(lineStringStyle);
+    drawingContext.drawGeometry(
+      new LineString([
+        [0, this.LEGEND_CANVAS_HEIGHT],
+        [this.LEGEND_CANVAS_WIDTH, 0],
+      ])
+    );
+    return drawingCanvas;
+  }
+
+  private createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    if (polygonStyle) drawingContext.setStyle(polygonStyle);
+    drawingContext.drawGeometry(
+      new Polygon([
+        [
+          [0, 0],
+          [this.LEGEND_CANVAS_WIDTH, 0],
+          [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT],
+          [0, this.LEGEND_CANVAS_HEIGHT],
+          [0, 0],
+        ],
+      ])
+    );
+    return drawingCanvas;
+  }
+
+  getStyle(styleConfig: TypeStyleConfig): TypeLayerStyle {
+    const layerStyle: TypeLayerStyle = {};
+    if (styleConfig.Point) {
+      if (isSimpleStyleConfig(styleConfig.Point)) {
+        layerStyle.Point = this.createPointCanvas(this.processSimplePoint(styleConfig.Point));
+      } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
+        const styleArray: HTMLCanvasElement[] = [];
+        styleConfig.Point.uniqueValueStyleInfo.forEach((styleInfo) => {
+          styleArray.push(this.createPointCanvas(this.processSimplePoint(styleInfo.settings)));
+        });
+        layerStyle.Point = styleArray;
+      } else if (isClassBreakStyleConfig(styleConfig.Point)) {
+        const styleArray: HTMLCanvasElement[] = [];
+        styleConfig.Point.classBreakStyleInfos.forEach((styleInfo) => {
+          styleArray.push(this.createPointCanvas(this.processSimplePoint(styleInfo.settings)));
+        });
+        layerStyle.Point = styleArray;
+      }
+    }
+
+    if (styleConfig.LineString) {
+      if (isSimpleStyleConfig(styleConfig.LineString)) {
+        layerStyle.LineString = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
+      } else if (isUniqueValueStyleConfig(styleConfig.LineString)) {
+        const styleArray: HTMLCanvasElement[] = [];
+        styleConfig.LineString.uniqueValueStyleInfo.forEach((styleInfo) => {
+          styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
+        });
+        layerStyle.LineString = styleArray;
+      } else if (isClassBreakStyleConfig(styleConfig.LineString)) {
+        const styleArray: HTMLCanvasElement[] = [];
+        styleConfig.LineString.classBreakStyleInfos.forEach((styleInfo) => {
+          styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
+        });
+        layerStyle.LineString = styleArray;
+      }
+    }
+
+    if (styleConfig.Polygon) {
+      if (isSimpleStyleConfig(styleConfig.Polygon)) {
+        layerStyle.Polygon = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
+      } else if (isUniqueValueStyleConfig(styleConfig.Polygon)) {
+        const styleArray: HTMLCanvasElement[] = [];
+        styleConfig.Polygon.uniqueValueStyleInfo.forEach((styleInfo) => {
+          styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
+        });
+        layerStyle.Polygon = styleArray;
+      } else if (isClassBreakStyleConfig(styleConfig.Polygon)) {
+        const styleArray: HTMLCanvasElement[] = [];
+        styleConfig.Polygon.classBreakStyleInfos.forEach((styleInfo) => {
+          styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
+        });
+        layerStyle.Polygon = styleArray;
+      }
+    }
+    return layerStyle;
+  }
+
+  getFeatureStyle(
     feature: FeatureLike,
     layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
@@ -275,11 +388,8 @@ export class GeoviewRenderer {
     });
   }
 
-  private processSimplePoint(
-    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature: FeatureLike
-  ): Style | undefined {
-    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeBaseVectorConfig ;
+  private processSimplePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
+    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeBaseVectorConfig;
     if (isSimpleSymbolVectorConfig(settings)) {
       const { symbol } = settings;
       return this.processSymbol[symbol].call(this, settings);
@@ -288,10 +398,7 @@ export class GeoviewRenderer {
     return undefined;
   }
 
-  private processSimpleLineString(
-    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature: FeatureLike
-  ): Style | undefined {
+  private processSimpleLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
     const { settings } = styleSettings as TypeSimpleStyleConfig;
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
@@ -403,10 +510,7 @@ export class GeoviewRenderer {
     return this.processPaternFill(settings, this.fillPaternSettings.vertical);
   }
 
-  private processSimplePolygon(
-    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature: FeatureLike
-  ): Style | undefined {
+  private processSimplePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
     const { settings } = styleSettings as TypeSimpleStyleConfig;
     if (isFilledPolygonVectorConfig(settings)) {
       const { fillStyle } = settings;
@@ -433,8 +537,8 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined) return this.processSimplePoint(uniqueValueStyleInfo[i].settings, feature);
-      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings, feature);
+      if (i !== undefined) return this.processSimplePoint(uniqueValueStyleInfo[i].settings);
+      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings);
     }
     return undefined;
   }
@@ -473,13 +577,16 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-      if (i !== undefined) return this.processSimplePoint(classBreakStyleInfos[i].settings, feature);
-      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings, feature);
+      if (i !== undefined) return this.processSimplePoint(classBreakStyleInfos[i].settings);
+      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings);
     }
     return undefined;
   }
 
-  private processClassBreaksLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+  private processClassBreaksLineString(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature: FeatureLike
+  ): Style | undefined {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);

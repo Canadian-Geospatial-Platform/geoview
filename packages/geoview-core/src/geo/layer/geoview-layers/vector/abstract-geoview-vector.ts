@@ -145,7 +145,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       style: (feature) => {
         if ('style' in layerEntryConfig) {
           const { geoviewRenderer } = api.map(this.mapId);
-          return geoviewRenderer.getStyle(feature, layerEntryConfig);
+          return geoviewRenderer.getFeatureStyle(feature, layerEntryConfig);
         }
         return undefined;
       },
