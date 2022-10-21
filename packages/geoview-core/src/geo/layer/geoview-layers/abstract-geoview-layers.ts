@@ -27,12 +27,6 @@ import {
   TypeArrayOfRecords,
   TypeQueryType,
 } from '../../../api/events/payloads/get-feature-info-payload';
-import {
-  getDataGridPayload,
-  payloadIsDataGrid,
-  TypeDataGridRegister,
-  TypeDataGridCreate,
-} from '../../../api/events/payloads/data-grid-payload';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';

@@ -37,6 +37,17 @@
         },
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [{ "layerId": "0" }, { "layerId": "6" }]
+      },
+      {
+        "geoviewLayerId": "esriFeatureLYR4",
+        "geoviewLayerName": { "en": "Water quality at monitoring sites" },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          { "layerId": "8" }
+        ]
       }
     ]
   },

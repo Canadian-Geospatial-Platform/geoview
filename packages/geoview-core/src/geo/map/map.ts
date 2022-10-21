@@ -22,6 +22,7 @@ import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '../../core/components/legend/legend-api';
+import { DataGridAPI } from '../../core/components/data-grid/data-grid-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 
 import { ModalApi } from '../../ui';
@@ -66,6 +67,9 @@ export class MapViewer {
 
   // used to access the legend api
   legend!: LegendApi;
+
+  // used to access the footer tabs api
+  dataGrid!: DataGridAPI;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -122,6 +126,7 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
+    this.dataGrid = new DataGridAPI(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 
@@ -282,15 +287,6 @@ export class MapViewer {
    */
   mapReady = (): void => {
     api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
-  };
-
-  /**
-   * Return the language code prefix from localized language
-   *
-   * @returns {TypeDisplayLanguage} returns the language code prefix from localized language. Ex: en, fr
-   */
-  getLanguageCodePrefix = (): TypeDisplayLanguage => {
-    return this.displayLanguage.split('-')[0] as TypeDisplayLanguage;
   };
 
   /**
