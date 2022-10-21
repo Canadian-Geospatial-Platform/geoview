@@ -24,6 +24,9 @@
     "overviewmap": {
       "toggle": "Toggle minimap"
     },
+    "attribution": {
+      "defaultnrcan": "© Her Majesty the King in Right of Canada, as represented by the Minister of Natural Resources"
+    },
     "crosshair": "Use <strong>arrows</strong>, <strong>+</strong> and <strong>-</strong> keys to navigation the map, and <strong>Enter</strong> to select."
   },
   "appbar": {

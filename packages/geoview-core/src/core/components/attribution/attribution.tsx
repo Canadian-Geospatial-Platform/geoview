@@ -7,8 +7,9 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
-import { getLocalizedValue } from '../../utils/utilities';
-import { TypeLocalizedString } from '../../../geo/map/map-schema-types';
+
+import { EVENT_NAMES } from '../../../api/events/event-types';
+import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
   attributionContainer: {
@@ -82,20 +83,7 @@ class CustomAttribution extends OLAttribution {
     super(options);
 
     this.mapId = mapId;
-
-    /**
-     * Enable attribution text tooltip.
-     * Timeout is used to wait for attribution control to get attribution text from layer sources
-     */
-    setTimeout(() => {
-      this.enableAttributionTextTooltip_();
-    }, 5000);
   }
-
-  private attributionVal: TypeLocalizedString = {
-    en: '© Her Majesty the Queen in Right of Canada, as represented by the Minister of Natural Resources',
-    fr: '© Sa Majesté la Reine du Chef du Canada, représentée par le ministre des Ressources naturelles',
-  };
 
   /**
    * Return the attribution control element
@@ -107,17 +95,12 @@ class CustomAttribution extends OLAttribution {
   }
 
   /**
-   * function that enables attribution text tooltip
-   * and adds nrcan copyright text if it is not already added.
-   *
-   * @private
+   * Format the attribution element by removing duplicate and add tooltip (title)
    */
-  enableAttributionTextTooltip_() {
+  formatAttribution() {
     // find ul element in attribution control
     const ulElement = this.element.getElementsByTagName('UL')[0];
-
-    // nrcan copy right exists? If not add it
-    let nrcanCopyRightExists = false;
+    const compAttribution: string[] = [];
 
     if (ulElement) {
       // find li elements in ul element
@@ -127,45 +110,17 @@ class CustomAttribution extends OLAttribution {
         // add title attribute to li elements
         for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
           const liElement = liElements[liElementIndex] as HTMLElement;
-
           const attributionText = liElement.innerText;
 
-          // check if nrcan copyright exists
-          if (
-            (attributionText.includes('Queen in Right of Canada') && attributionText.includes('Natural Resources')) ||
-            (attributionText.includes('Reine du Chef du Canada') && attributionText.includes('Ressources naturelles'))
-          ) {
-            nrcanCopyRightExists = true;
-          }
-
-          // add tooltip title
-          liElement.setAttribute('title', liElement.innerText);
-
-          if (liElement.tagName === 'LI') {
-            this.attributions.push(liElement.innerText);
+          // if elemetn doat not exist, add. Otherwise remove
+          if (!compAttribution.includes(attributionText.toLowerCase().replaceAll(' ', ''))) {
+            liElement.setAttribute('title', attributionText);
+            this.attributions.push(attributionText);
+            compAttribution.push(attributionText.toLowerCase().replaceAll(' ', ''));
+          } else {
+            liElement.remove();
           }
         }
-      }
-
-      // if nrcan copyright does not exist add it
-      if (!nrcanCopyRightExists) {
-        // get nrcan copyright based on language
-        const copyRightText = getLocalizedValue(this.attributionVal, this.mapId)!;
-
-        // create li element
-        const nrcanCopyRight = document.createElement('LI');
-
-        // add nrcan copyright text to li element
-        nrcanCopyRight.innerText = copyRightText;
-
-        // add tooltip text
-        nrcanCopyRight.setAttribute('title', copyRightText);
-
-        // add nrcan copyright li to ul element at the top
-        ulElement.prepend(nrcanCopyRight);
-
-        // add nrcan copyright text to attributions at the beginning of the array
-        this.attributions.unshift(copyRightText);
       }
     }
   }
@@ -205,6 +160,18 @@ export function Attribution(): JSX.Element {
         collapsed: false,
         label: document.createElement('div'),
         collapseLabel: document.createElement('div'),
+      },
+      mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
+      (payload) => {
+        if (payloadIsABoolean(payload)) {
+          if (payload.handlerName!.includes(mapId) && payload.status) {
+            attributionControl.formatAttribution();
+          }
+        }
       },
       mapId
     );
