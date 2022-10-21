@@ -14,9 +14,9 @@ export declare class Plugin {
     /**
      * Load a package script on runtime
      *
-     * @param {string} id the package id to load
+     * @param {string} pluginId the package id to load
      */
-    loadScript: (id: string) => Promise<any>;
+    loadScript: (pluginId: string) => Promise<any>;
     /**
      * Add new plugin
      *

@@ -4,7 +4,7 @@ import { TypeMapFeaturesConfig } from '../types/global-types';
  * Interface for the shell properties
  */
 interface ShellProps {
-    id: string;
+    shellId: string;
     mapFeaturesConfig: TypeMapFeaturesConfig;
 }
 /**

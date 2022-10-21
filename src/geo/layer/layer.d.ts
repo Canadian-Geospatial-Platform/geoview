@@ -1,6 +1,6 @@
 import { Vector } from './vector/vector';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '../map/map-schema-types';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
@@ -8,6 +8,8 @@ import { TypeGeoviewLayerConfig } from '../map/map-schema-types';
  * @class Layer
  */
 export declare class Layer {
+    /** Layers with valid configuration for this map. */
+    registeredLayers: Record<string, TypeLayerEntryConfig>;
     layers: {
         [key: string]: AbstractGeoViewLayer;
     };
@@ -19,25 +21,42 @@ export declare class Layer {
     /**
      * Initialize layer types and listen to add/remove layer events from outside
      *
-     * @param {string} id a reference to the map
+     * @param {string} mapId a reference to the map
      * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
      */
-    constructor(id: string, layersConfig?: TypeGeoviewLayerConfig[]);
+    constructor(mapId: string, layersConfig?: TypeGeoviewLayerConfig[]);
+    /**
+     * Get the layer Path of the layer parameter.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
+     *
+     * @returns {string} Returns the layer path.
+     */
+    static getLayerPath(layerEntryConfig: TypeLayerEntryConfig, layerPath?: string): string;
+    /**
+     * Register the layer identifier. Duplicate identifier are not allowed.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to register.
+     *
+     * @returns {boolean} Returns false if the layer configuration can't be registered.
+     */
+    registerLayerConfig(layerEntryConfig: TypeLayerEntryConfig): boolean;
+    /**
+     * Method used to verify if a layer is registered. Returns true if registered.
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration to test.
+     *
+     * @returns {boolean} Returns true if the layer configuration is registered.
+     */
+    isRegistered(layerEntryConfig: TypeLayerEntryConfig): boolean;
     /**
      * Add the layer to the map if valid. If not (is a string) emit an error
      * @param {any} geoviewLayer the layer config
      */
     private addToMap;
     /**
-     * Remove feature from ESRI Feature and GeoJSON layer from tabindex
-     */
-    removeTabindex(): void;
-    /**
      * Remove a layer from the map
      *
      * @param {string} id the id of the layer to be removed
      */
-    removeLayerById: (id: string) => void;
+    removeGeoviewLayerById: (geoviewLayerId: string) => void;
     /**
      * Add a layer to the map
      *
@@ -56,5 +75,5 @@ export declare class Layer {
      * @param {string} id the layer id to look for
      * @returns the found layer data object
      */
-    getLayerById: (id: string) => AbstractGeoViewLayer | null;
+    getGeoviewLayerById: (geoviewLayerId: string) => AbstractGeoViewLayer | null;
 }

@@ -7,8 +7,8 @@ import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeFeatureInfoResult, TypeQueryType } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeBaseLayerEntryConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
 export declare type TypeVectorLayerGroup = LayerGroup;
 export declare type TypeVectorLayer = VectorSource<Geometry>;
 export declare type TypeBaseVectorLayer = BaseLayer | TypeVectorLayerGroup | TypeVectorLayer;
@@ -42,14 +42,6 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     protected abstract validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method processes recursively the metadata of each layer in the list of layer configuration.
-     *
-     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected abstract processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
      * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
      *
      * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
@@ -75,23 +67,66 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns {VectorLayer<VectorSource>} The vector layer created.
      */
     private createVectorLayer;
+    /** ***************************************************************************************************************************
+     * Convert the feature information to an array of TypeFeatureInfoResult.
+     *
+     * @param {Feature<Geometry>[]} features The array of features to convert.
+     * @param {TypeFeatureInfoLayerConfig} featureInfo The featureInfo configuration.
+     *
+     * @returns {TypeFeatureInfoResult} The Array of feature information.
+     */
     private formatFeatureInfoResult;
     /** ***************************************************************************************************************************
      * Return feature information for all the features stored in the layer.
      *
-     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
      *
      * @returns {TypeFeatureInfoResult} The feature info table.
      */
-    getAllFeatureInfo(layerId?: string): TypeFeatureInfoResult;
+    getAllFeatureInfo(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): TypeFeatureInfoResult;
     /** ***************************************************************************************************************************
-     * Return feature information for all the features stored in the layer.
+     * Return feature information for all the features around the provided Pixel.
      *
-     * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
-     * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
+     * @param {Coordinate} location The pixel coordinate that will be used by the query.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    getFeatureInfo(location: Pixel | Coordinate | Coordinate[], layerId?: string, queryType?: TypeQueryType): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided projected coordinate.
+     *
+     * @param {Coordinate} location The pixel coordinate that will be used by the query.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided longitude latitude.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features in the provided bounding box.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features in the provided polygon.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
 }

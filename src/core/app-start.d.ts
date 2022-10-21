@@ -11,7 +11,7 @@ export declare const MapContext: React.Context<TypeMapContext>;
  * Type used for the map context
  */
 declare type TypeMapContext = {
-    id: string;
+    mapId: string;
     interaction: string;
 };
 /**

@@ -8,7 +8,7 @@ import { TypeFeatureCircleStyle, TypeFeatureStyle } from './vector-types';
  * Store a group of features
  */
 interface FeatureCollection {
-    id: string;
+    geometryGroupId: string;
     vectorLayer: VectorLayer<VectorSource>;
     vectorSource: VectorSource;
 }
@@ -48,69 +48,69 @@ export declare class Vector {
      *
      * @param {Coordinate} points array of points to create the polygon
      * @param options polygon options including styling
-     * @param {string} id an optional id to be used to manage this geometry
+     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addPolygon: (points: number[] | Coordinate[][], options?: {
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureStyle;
-    }, id?: string) => Feature;
+    }, optionalFeatureId?: string) => Feature;
     /**
      * Create a new circle
      *
      * @param {Coordinate} coordinate long lat coordinate of the circle
      * @param {number} radius an optional radius
      * @param options circle options including styling
-     * @param {string} id an optional id to be used to manage this geometry
+     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addCircle: (coordinate: Coordinate, radius?: number, options?: {
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureCircleStyle;
-    }, id?: string) => Feature;
+    }, optionalFeatureId?: string) => Feature;
     /**
      * Create a new circle marker
      *
      * @param {Coordinate} coordinate long lat coordinate of the circle marker
      * @param {number} radius optional circle marker radius
      * @param options circle marker options including styling
-     * @param {string} id an optional id to be used to manage this geometry
+     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addCircleMarker: (coordinate: Coordinate, radius?: number, options?: {
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureCircleStyle;
-    }, id?: string) => Feature;
+    }, optionalFeatureId?: string) => Feature;
     /**
      * Create a new marker
      *
      * @param {Coordinate} coordinate the long lat position of the marker
      * @param options marker options including styling
-     * @param {string} id an optional id to be used to manage this geometry
+     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
      *
      * @returns {Feature} a geometry containing the id and the created geometry
      */
     addMarker: (coordinate: Coordinate, options?: {
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureStyle;
-    }, id?: string) => Feature;
+    }, optionalFeatureId?: string) => Feature;
     /**
-     * Find a geometry using it's id
+     * Find a feature using it's id
      *
-     * @param {string} id the id of the geometry to return
+     * @param {string} featureId the id of the feature to return
      *
-     * @returns {Feature} a geometry having the specified id
+     * @returns {Feature} a feature having the specified id
      */
-    getGeometry: (id: string) => Feature;
+    getGeometry: (featureId: string) => Feature;
     /**
-     * Delete a geometry using the id and delete it from the groups and the map
+     * Delete a feature using the id and delete it from the groups and the map
      *
-     * @param {string} id the id of the geometry to delete
+     * @param {string} featureId the id of the feature to delete
      */
-    deleteGeometry: (id: string) => void;
+    deleteGeometry: (featureId: string) => void;
     /**
      * Create a new geometry group to manage multiple geometries at once
      *
@@ -147,12 +147,11 @@ export declare class Vector {
     /**
      * Find the groups that contain the geometry using it's id
      *
-     * @param {string} id the id of the geometry
+     * @param {string} featureId the id of the geometry
      *
-     * @returns {FeatureGroup | null} the groups that contain the geometry
-     *                                or null if not found
+     * @returns {FeatureCollection[]} the groups that contain the geometry
      */
-    getGeometryGroupsByGeometryId: (id: string) => FeatureCollection[];
+    getGeometryGroupsByFeatureId: (featureId: string) => FeatureCollection[];
     /**
      * Show the identified geometry group on the map
      * if geometryGroupId is not provided, use the active geometry group
@@ -177,19 +176,19 @@ export declare class Vector {
      */
     addToGeometryGroup: (geometry: Feature, geometryGroupId?: string) => void;
     /**
-     * Find the groups that the geometry exists in and delete the geometry from those groups
+     * Find the groups that the feature exists in and delete the feature from those groups
      *
-     * @param {string} geometryId the geometry id
+     * @param {string} featureId the geometry id
      */
-    deleteGeometryFromGroups: (geometryId: string) => void;
+    deleteGeometryFromGroups: (featureId: string) => void;
     /**
-     * Delete a specific geometry from a group using the geometry id
+     * Delete a specific feature from a group using the feature id
      * If geometryGroupid is not provided, the active geometry group is used.
      *
-     * @param {string} geometryId the geometry id to be deleted
+     * @param {string} featureId the feature id to be deleted
      * @param {string} geometryGroupid optional group id
      */
-    deleteGeometryFromGroup: (geometryId: string, geometryGroupid?: string) => void;
+    deleteGeometryFromGroup: (featureId: string, geometryGroupid?: string) => void;
     /**
      * Delete all geometries from the geometry group but keep the group
      * If geometryGroupid is not provided, the active geometry group is used.

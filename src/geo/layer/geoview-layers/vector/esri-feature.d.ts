@@ -76,25 +76,6 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method processes recursively the metadata of each layer in the "layer list" configuration.
-     *
-     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
-     * This method is used to process ESRI layers that define an ESRI group layer. These layers behave as a GeoView group layer and
-     * also as a data layer (i.e. they have extent, visibility and query flag definition). ESRI group layer can be identified by
-     * the presence of an isEsriLayerGroup attribute. The attribute content is 'Group Layer', but it has no meaning. We could have
-     * decided to put any other value, and it would not have had any impact on the code.
-     *
-     * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
-     *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
-     */
-    private processEsriGroupLayer;
-    /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *

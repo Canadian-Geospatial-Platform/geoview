@@ -76,14 +76,6 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method processes recursively the metadata of each layer in the list of layer configuration.
-     *
-     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
@@ -91,7 +83,7 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    private processLayerMetadata;
+    protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

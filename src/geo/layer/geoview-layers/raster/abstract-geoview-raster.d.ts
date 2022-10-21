@@ -1,9 +1,5 @@
 import BaseLayer from 'ol/layer/Base';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeFeatureInfoResult, TypeQueryType } from '../../../../api/events/payloads/get-feature-info-payload';
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
  */
@@ -22,46 +18,4 @@ export declare type TypeBaseRasterLayer = BaseLayer;
  * features are placed.
  */
 export declare abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
-    /** ***************************************************************************************************************************
-     * This method reads the service metadata from the metadataAccessPath.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected abstract getServiceMetadata(): Promise<void>;
-    /** ***************************************************************************************************************************
-     * This method creates a GeoView layer using the definition provided in the layerEntryConfig parameter.
-     *
-     * @param {TypeLayerEntryConfig} layerEntryConfig Information needed to create the GeoView layer.
-     *
-     * @returns {Promise<BaseLayer | null>} The GeoView base layer that has been created.
-     */
-    protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
-    /** ***************************************************************************************************************************
-     * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-     * initial settings, fields and aliases).
-     *
-     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
-     *
-     * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
-     */
-    protected abstract processLayerMetadata(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided coordinate.
-     *
-     * @param {Coordinate} location The coordinate that will be used by the query.
-     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
-     *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
-     */
-    protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult>;
-    /** ***************************************************************************************************************************
-     * Return feature information for all the features stored in the layer.
-     *
-     * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
-     * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
-     *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
-     */
-    getFeatureInfo(location: Pixel | Coordinate | Coordinate[], layerId?: string, queryType?: TypeQueryType): Promise<TypeFeatureInfoResult>;
 }

@@ -4,7 +4,7 @@ import { DialogProps } from '@mui/material';
  * Customized Material UI Dialog Properties
  */
 interface TypeDialogProps extends Omit<DialogProps, 'title'> {
-    id?: string;
+    modalId?: string;
     className?: string;
     style?: CSSProperties;
     title?: React.ReactNode;

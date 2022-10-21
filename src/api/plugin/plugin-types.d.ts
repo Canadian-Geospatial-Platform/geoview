@@ -7,7 +7,7 @@ import { API } from '../api';
  * interface used when creating the actual plugin.
  */
 export declare type TypePluginStructure = {
-    id: string;
+    pluginId: string;
     api: API;
     createElement: typeof React.createElement;
     react: typeof React;

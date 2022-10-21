@@ -4,7 +4,7 @@ import { SliderProps } from '@mui/material';
  * Properties for the Slider
  */
 interface TypeSliderProps extends SliderProps {
-    id: string;
+    sliderId: string;
     className?: string;
     style?: CSSProperties;
     min: number;

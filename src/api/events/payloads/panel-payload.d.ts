@@ -3,7 +3,7 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 /** Type used to define an action button  */
 export declare type TypeActionButton = {
-    id: string;
+    actionButtonId: string;
     title?: string;
     children?: string | React.ReactElement | Element;
     action?: () => void;

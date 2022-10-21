@@ -1,4 +1,5 @@
 import { Coordinate } from 'ol/coordinate';
+import { Pixel } from 'ol/pixel';
 import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
@@ -73,25 +74,6 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method processes recursively the metadata of each layer in the "layer list" configuration.
-     *
-     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
-     * This method is used to process ESRI layers that define an ESRI group layer. These layers behave as a GeoView group layer and
-     * also as a data layer (i.e. they have extent, visibility and query flag definition). ESRI group layer can be identified by
-     * the presence of an isEsriLayerGroup attribute. The attribute content is 'Group Layer', but it has no meaning. We could have
-     * decided to put any other value, and it would not have had any impact on the code.
-     *
-     * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
-     *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
-     */
-    private processEsriGroupLayer;
-    /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
      *
@@ -138,12 +120,48 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     private formatFeatureInfoAtCoordinateResult;
     /** ***************************************************************************************************************************
-     * Return feature information for all the features around the provided coordinate.
+     * Return feature information for all the features around the provided Pixel.
      *
-     * @param {Coordinate} lnglat The coordinate that will be used by the query.
-     * @param {string} layerId Optional layer identifier. If undefined, this.activeLayer is used.
+     * @param {Coordinate} location The pixel coordinate that will be used by the query.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided projection coordinate.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
      *
      * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
      */
-    protected getFeatureInfoAtCoordinate(lnglat: Coordinate, layerId?: string): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features around the provided coordinate.
+     *
+     * @param {Coordinate} lnglat The coordinate that will be used by the query.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     */
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features in the provided bounding box.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    /** ***************************************************************************************************************************
+     * Return feature information for all the features in the provided polygon.
+     *
+     * @param {Coordinate} location The coordinate that will be used by the query.
+     * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
+     *
+     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     */
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
 }

@@ -38,10 +38,10 @@ export declare class AppbarButtons {
     /**
      * Get a button panel from the app-bar by using it's id
      *
-     * @param {string} id the id of the button panel to get
+     * @param {string} buttonPanelId the id of the button panel to get
      * @returns {TypeButtonPanel} the returned button panel
      */
-    getAppBarButtonPanelById: (id: string) => TypeButtonPanel | null;
+    getAppBarButtonPanelById: (buttonPanelId: string) => TypeButtonPanel | null;
     /**
      * Get all created buttons panels regardless of group
      *
@@ -51,7 +51,7 @@ export declare class AppbarButtons {
     /**
      * Remove an app-bar panel using an id
      *
-     * @param {string} id the id of the panel to remove
+     * @param {string} buttonPanelId the id of the panel to remove
      */
-    removeAppbarPanel: (id: string) => void;
+    removeAppbarPanel: (buttonPanelId: string) => void;
 }

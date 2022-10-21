@@ -4,7 +4,7 @@ import { ModalModel } from './modal-model';
  * Both header and footer actions' properties interface
  */
 export interface ModalActionsType {
-    id: string;
+    actionId: string;
     content?: React.ReactNode;
 }
 /**
@@ -24,7 +24,7 @@ export interface modalFooter {
  * Properties definition of the modal
  */
 export declare type TypeModalProps = {
-    id?: string;
+    modalId?: string;
     header?: modalHeader;
     content: React.ReactNode | string;
     footer?: modalFooter;
@@ -61,5 +61,5 @@ export declare class ModalApi {
      *
      * @param { string } id of the modal that is to be deleted
      */
-    deleteModal: (id: string) => void;
+    deleteModal: (modalId: string) => void;
 }

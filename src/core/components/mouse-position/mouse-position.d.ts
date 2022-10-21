@@ -3,7 +3,7 @@
  * Mouse position properties interface
  */
 interface MousePositionProps {
-    id: string;
+    mousePositionMapId: string;
 }
 /**
  * Create the mouse position

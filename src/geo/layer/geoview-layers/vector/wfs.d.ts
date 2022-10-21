@@ -79,14 +79,6 @@ export declare class WFS extends AbstractGeoViewVector {
      */
     protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method processes recursively the metadata of each layer in the "layer list" configuration.
-     *
-     *  @param {TypeListOfLayerEntryConfig} listOfLayerEntryConfig The list of layers to process.
-     *
-     * @returns {Promise<void>} A promise that the execution is completed.
-     */
-    protected processListOfLayerEntryMetadata(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): Promise<void>;
-    /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty outfields and aliasFields properties of the
      * layer's configuration.
      *
@@ -94,7 +86,7 @@ export declare class WFS extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
      */
-    private processLayerMetadata;
+    protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * This method sets the outfields and aliasFields of the source feature info.
      *

@@ -3,7 +3,7 @@
  * Interface for the focus trap properties
  */
 interface FocusTrapProps {
-    id: string;
+    focusTrapId: string;
     callback: (dialogTrap: boolean) => void;
 }
 /**

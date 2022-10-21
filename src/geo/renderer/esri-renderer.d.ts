@@ -151,5 +151,14 @@ export interface EsriClassBreakRenderer extends EsriBaseRenderer {
     rotationExpression: string;
     rotationType: 'arithmetic' | 'geographic';
 }
+/** *****************************************************************************************************************************
+ * Get GeoView style from Esri renderer.
+ *
+ * @param {string} mapId The map identifier of the ESRI layer.
+ * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration object.
+ * @param {EsriBaseRenderer} renderer The ESRI renderer to convert.
+ *
+ * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+ */
 export declare function getStyleFromEsriRenderer(mapId: string, layerEntryConfig: TypeLayerEntryConfig, renderer: EsriBaseRenderer): TypeStyleConfig | undefined;
 export {};

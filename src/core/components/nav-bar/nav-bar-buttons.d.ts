@@ -60,11 +60,11 @@ export declare class NavbarButtons {
      * @param {string} id the id of the button panel to get
      * @returns {TypeButtonPanel} the returned button panel
      */
-    getNavBarButtonPanelById: (id: string) => TypeButtonPanel | null;
+    getNavBarButtonPanelById: (buttonPanelId: string) => TypeButtonPanel | null;
     /**
      * Remove a nav-bar button or panel using it's id
      *
      * @param {string} id the id of the panel or button to remove
      */
-    removeNavbarButtonPanel: (id: string) => void;
+    removeNavbarButtonPanel: (buttonPanelId: string) => void;
 }

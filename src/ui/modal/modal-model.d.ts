@@ -6,7 +6,7 @@ import { modalHeader, modalFooter, TypeModalProps, ModalActionsType } from './mo
  * @class ModalModel
  */
 export declare class ModalModel {
-    id?: string;
+    modalModelId?: string;
     header?: modalHeader;
     content: React.ReactNode | string;
     footer?: modalFooter;
@@ -50,15 +50,15 @@ export declare class ModalModel {
     /**
      * Function to remove actions from header
      *
-     * @param { string } id of the action to be deleted
+     * @param { string } actionId of the action to be deleted
      */
-    removeHeaderActions: (id: string) => void;
+    removeHeaderActions: (actionId: string) => void;
     /**
      * Function to remove actions from footer
      *
-     * @param { string } id of the action to be deleted
+     * @param { string } actionId of the action to be deleted
      */
-    removeFooterActions: (id: string) => void;
+    removeFooterActions: (actionId: string) => void;
     /**
      * to update the modal as soon as a change is made to any content
      */

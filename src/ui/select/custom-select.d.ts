@@ -3,7 +3,7 @@ import { CSSProperties } from 'react';
  * Properties for the Custom Select component
  */
 interface TypeCustomSelectProps {
-    id: string;
+    labelId: string;
     className?: string;
     style?: CSSProperties;
     label: string;
@@ -23,7 +23,7 @@ interface TypeSelectItems {
  * Required and optional properties for the item object
  */
 export interface TypeItemProps {
-    id: string;
+    itemId: string;
     value: string;
     default?: boolean;
 }

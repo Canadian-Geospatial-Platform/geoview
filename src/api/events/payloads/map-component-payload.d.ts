@@ -17,17 +17,17 @@ export declare const payloadIsAMapComponent: (verifyIfPayload: PayloadBaseClass)
  * @class MapComponentPayload
  */
 export declare class MapComponentPayload extends PayloadBaseClass {
-    id: string;
+    mapComponentId: string;
     component?: JSX.Element;
     /**
      * Constructor for the class
      *
      * @param {EventStringId} event the event identifier for which the payload is constructed
      * @param {string | null} handlerName the handler Name
-     * @param {string} id the map component identifier
+     * @param {string} mapComponentId the map component identifier
      * @param {JSX.Element} component the map component element
      */
-    constructor(event: EventStringId, handlerName: string | null, id: string, component?: JSX.Element);
+    constructor(event: EventStringId, handlerName: string | null, mapComponentId: string, component?: JSX.Element);
 }
 /**
  * Helper function used to instanciate a MapComponentPayload object. This function
@@ -35,9 +35,9 @@ export declare class MapComponentPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {string} id the map component identifier
+ * @param {string} mapComponentId the map component identifier
  * @param {JSX.Element} component the map component element
  *
  * @returns {MapComponentPayload} the MapComponentPayload object created
  */
-export declare const mapComponentPayload: (event: EventStringId, handlerName: string | null, id: string, component?: JSX.Element) => MapComponentPayload;
+export declare const mapComponentPayload: (event: EventStringId, handlerName: string | null, mapComponentId: string, component?: JSX.Element) => MapComponentPayload;

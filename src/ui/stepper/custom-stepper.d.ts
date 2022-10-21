@@ -3,7 +3,7 @@ import { CSSProperties } from 'react';
  * Properties for the Custom Stepper
  */
 interface TypeCustomStepperProps {
-    id: string;
+    stepperId: string;
     className?: string;
     style?: CSSProperties;
     orientation?: 'horizontal' | 'vertical';

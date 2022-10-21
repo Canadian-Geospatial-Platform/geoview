@@ -17,20 +17,20 @@ export declare const payloadIsAButtonPanel: (verifyIfPayload: PayloadBaseClass) 
  * @class ButtonPanelPayload
  */
 export declare class ButtonPanelPayload extends PayloadBaseClass {
-    id: string;
-    groupName: string;
+    appBarId: string;
+    appBarGroupName: string;
     buttonPanel: TypeButtonPanel;
     /**
      * Constructor for the class
      *
      * @param {EventStringId} event the event identifier for which the payload is constructed
      * @param {string | null} handlerName the handler Name
-     * @param {string} id the app-bar panel identifier carried by the payload
-     * @param {string} groupName the app-bar panel group name carried by the payload
+     * @param {string} appBarId the app-bar panel identifier carried by the payload
+     * @param {string} appBarGroupName the app-bar panel group name carried by the payload
      * @param {TypeButtonPanel} buttonPanel optional button panel configuration carried by the payload
      *
      */
-    constructor(event: EventStringId, handlerName: string | null, id: string, groupName: string, buttonPanel: TypeButtonPanel);
+    constructor(event: EventStringId, handlerName: string | null, appBarId: string, appBarGroupName: string, buttonPanel: TypeButtonPanel);
 }
 /**
  * Helper function used to instanciate a ButtonPanelPayload object. This function
@@ -38,10 +38,10 @@ export declare class ButtonPanelPayload extends PayloadBaseClass {
  *
  * @param {EventStringId} event the event identifier for which the payload is constructed
  * @param {string | null} handlerName the handler Name
- * @param {string} id the app-bar panel identifier carried by the payload
- * @param {string} groupName the app-bar panel group name carried by the payload
+ * @param {string} appBarId the app-bar panel identifier carried by the payload
+ * @param {string} appBarGroupName the app-bar panel group name carried by the payload
  * @param {TypeButtonPanel} buttonPanel optional button panel configuration carried by the payload
  *
  * @returns {ButtonPanelPayload} the ButtonPanelPayload object created
  */
-export declare const buttonPanelPayload: (event: EventStringId, handlerName: string | null, id: string, groupName: string, buttonPanel: TypeButtonPanel) => ButtonPanelPayload;
+export declare const buttonPanelPayload: (event: EventStringId, handlerName: string | null, appBarId: string, appBarGroupName: string, buttonPanel: TypeButtonPanel) => ButtonPanelPayload;

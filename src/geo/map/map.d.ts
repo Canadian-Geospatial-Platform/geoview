@@ -13,6 +13,7 @@ import { GeoviewRenderer } from '../renderer/geoview-renderer';
 import { ModalApi } from '../../ui';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
+import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
 /**
  * Class used to manage created maps
  *
@@ -32,6 +33,7 @@ export declare class MapViewer {
     currentProjection: number;
     currentZoom: number;
     currentPosition: Coordinate;
+    singleClickedPosition: TypeMapSingleClick;
     i18nInstance: i18n;
     modal: ModalApi;
     geoviewRenderer: GeoviewRenderer;
@@ -55,16 +57,16 @@ export declare class MapViewer {
     /**
      * Add a new custom component to the map
      *
-     * @param {string} id an id to the new component
+     * @param {string} mapComponentId an id to the new component
      * @param {JSX.Element} component the component to add
      */
-    addComponent: (id: string, component: JSX.Element) => void;
+    addComponent: (mapComponentId: string, component: JSX.Element) => void;
     /**
      * Remove an existing custom component from the map
      *
-     * @param id the id of the component to remove
+     * @param imapComponentIdd the id of the component to remove
      */
-    removeComponent: (id: string) => void;
+    removeComponent: (mapComponentId: string) => void;
     /**
      * Toggle fullscreen / exit fullscreen function
      *

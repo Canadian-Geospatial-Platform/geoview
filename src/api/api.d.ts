@@ -72,9 +72,9 @@ export declare class API {
     /**
      * Get the instance of a map by it's ID to access API functions
      *
-     * @param {string} id the map id
+     * @param {string} mapId the map id
      *
      * @returns map api functions
      */
-    map: (id: string) => MapViewer;
+    map: (mapId: string) => MapViewer;
 }

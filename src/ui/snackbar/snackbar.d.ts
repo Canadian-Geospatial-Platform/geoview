@@ -2,7 +2,7 @@
  * Snackbar properties interface
  */
 interface SnackBarProps {
-    id: string;
+    snackBarId: string;
 }
 /**
  * Create a app/map message component to inform user on viewer state

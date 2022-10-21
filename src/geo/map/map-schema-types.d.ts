@@ -19,15 +19,6 @@ export declare type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr
  */
 export declare type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
 /** ******************************************************************************************************************************
- * Basic type used to identify the layer to display on the map.
- */
-export declare type TypeLayerBasicInfoConfig = {
-    /** The id of the layer to display on the map. */
-    layerId: string;
-    /** The display name of the layer (English/French). */
-    layerName?: TypeLocalizedString;
-};
-/** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
  */
 export declare type TypeLayerInitialSettings = {
@@ -95,7 +86,7 @@ export declare type TypeFeatureInfoLayerConfig = {
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
-export declare type TypeBaseVectorSourceInitialConfig = {
+export declare type TypeBaseSourceVectorInitialConfig = {
     /** Path used to access the data. */
     dataAccessPath?: TypeLocalizedString;
     /** The feature format used by the XHR feature loader when url is set. */
@@ -108,7 +99,7 @@ export declare type TypeBaseVectorSourceInitialConfig = {
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.
  */
-export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
+export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
     /** The feature format used by the XHR feature loader when url is set. */
     format?: TypeVectorSourceFormats;
     /** Vector source clustering configuration. */
@@ -117,7 +108,7 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceIniti
 /** ******************************************************************************************************************************
  * Kind of symbol vector settings.
  */
-export declare type TypeKinfOfSymbolVectorSettings = TypeBaseVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig | TypeSimpleSymbolVectorConfig | TypeIconSymbolVectorConfig;
+export declare type TypeKindOfVectorSettings = TypeBaseVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig | TypeSimpleSymbolVectorConfig | TypeIconSymbolVectorConfig;
 /** ******************************************************************************************************************************
  * Definition of the line symbol vector settings type.
  */
@@ -275,23 +266,23 @@ export declare type TypeBaseStyleConfig = {
  * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const isSimpleStyleConfig: (verifyIfConfig: TypeBaseStyleConfig) => verifyIfConfig is TypeSimpleStyleConfig;
+export declare const isSimpleStyleConfig: (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings) => verifyIfConfig is TypeSimpleStyleConfig;
 /** ******************************************************************************************************************************
  * Simple style configuration.
  */
 export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
     /** Style identifier. */
-    id?: string;
+    styleId?: string;
     /** Type of style. */
     styleType: 'simple';
     /** Label associated to the style */
     label: string;
     /** options associated to the style. */
-    settings: TypeKinfOfSymbolVectorSettings;
+    settings: TypeKindOfVectorSettings;
 }
 /** ******************************************************************************************************************************
  * Unique value style information configuration.
@@ -302,30 +293,30 @@ export declare type TypeUniqueValueStyleInfo = {
     /** Values associated to the style. */
     values: string[];
     /** options associated to the style. */
-    settings: TypeKinfOfSymbolVectorSettings;
+    settings: TypeKindOfVectorSettings;
 };
 /** ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseStyleConfig as a TypeUniqueValueStyleConfig if the type attribute of the
  * verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const isUniqueValueStyleConfig: (verifyIfConfig: TypeBaseStyleConfig) => verifyIfConfig is TypeUniqueValueStyleConfig;
+export declare const isUniqueValueStyleConfig: (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings) => verifyIfConfig is TypeUniqueValueStyleConfig;
 /** ******************************************************************************************************************************
  * Unique value style configuration.
  */
 export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
     /** Style identifier. */
-    id?: string;
+    styleId?: string;
     /** Type of style. */
     styleType: 'uniqueValue';
     /** Label used if field/value association is not found. */
     defaultLabel?: string;
     /** Options used if field/value association is not found. */
-    defaultSettings?: TypeKinfOfSymbolVectorSettings;
+    defaultSettings?: TypeKindOfVectorSettings;
     /** Fields used by the style. */
     fields: string[];
     /** Unique value style information configuration. */
@@ -342,30 +333,30 @@ export declare type TypeClassBreakStyleInfo = {
     /** Maximum values associated to the style. */
     maxValue: number;
     /** options associated to the style. */
-    settings: TypeKinfOfSymbolVectorSettings;
+    settings: TypeKindOfVectorSettings;
 };
 /** ******************************************************************************************************************************
  * Type Gard function that redefines a TypeBaseStyleConfig as a TypeClassBreakStyleConfig if the type attribute of the
  * verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export declare const isClassBreakStyleConfig: (verifyIfConfig: TypeBaseStyleConfig) => verifyIfConfig is TypeClassBreakStyleConfig;
+export declare const isClassBreakStyleConfig: (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings) => verifyIfConfig is TypeClassBreakStyleConfig;
 /** ******************************************************************************************************************************
  * Class break style configuration.
  */
 export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
     /** Style identifier. */
-    id?: string;
+    styleId?: string;
     /** Type of style. */
     styleType: 'classBreaks';
     /** Label used if field/value association is not found. */
     defaultLabel?: string;
     /** Options used if field/value association is not found. */
-    defaultSettings?: TypeKinfOfSymbolVectorSettings;
+    defaultSettings?: TypeKindOfVectorSettings;
     /** Field used by the style. */
     field: string;
     /** Class break style information configuration. */
@@ -455,9 +446,10 @@ export declare type TypeBaseLayerEntryConfig = {
     /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
     parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
     /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    gvlayer?: BaseLayer;
-    /** This attribute is not part of the schema. It is used internally to distinguish ESRI layer groups. */
-    isEsriLayerGroup?: boolean;
+    gvLayer?: BaseLayer;
+    /** This attribute is not part of the schema. It is used internally to distinguish dynamic layer groups derived from the
+     * metadata. */
+    isDynamicLayerGroup?: boolean;
     /** Layer entry data type. */
     entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
     /** The id of the layer to display on the map. */
@@ -470,7 +462,7 @@ export declare type TypeBaseLayerEntryConfig = {
      */
     initialSettings?: TypeLayerInitialSettings;
     /** Source settings to apply to the GeoView vector layer source at creation time. */
-    source?: TypeBaseVectorSourceInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
+    source?: TypeBaseSourceVectorInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
     /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
     listOfLayerEntryConfig?: never;
 };
@@ -597,7 +589,7 @@ export interface TypeVectorHeatmapLayerEntryConfig extends TypeBaseLayerEntryCon
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector tile layer source at creation time.
  */
-export interface TypeVectorTileSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
+export interface TypeVectorTileSourceInitialConfig extends TypeBaseSourceVectorInitialConfig {
     /** Tile grid parameters to use. */
     tileGrid?: TypeTileGrid;
 }
@@ -644,7 +636,7 @@ export declare type TypeGeocoreLayerEntryConfig = {
     /** This attribute is not part of the schema. It is used to link the layer entry config to the parent's layer config. */
     parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
     /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
-    gvlayer?: BaseLayer;
+    gvLayer?: BaseLayer;
     /** Layer entry data type. */
     entryType?: 'geocore';
     /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
@@ -671,8 +663,9 @@ export declare type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'listOfLayerEntryConfig'> {
-    /** This attribute is not part of the schema. It is used internally to distinguish ESRI layer groups. */
-    isEsriLayerGroup?: boolean;
+    /** This attribute is not part of the schema. It is used internally to distinguish dynanic layer groups derived from the
+     * metadata. */
+    isDynamicLayerGroup?: boolean;
     /** Layer entry data type. */
     entryType: 'group';
     /** The source attribute does not exists on the layer group entry. */
@@ -763,15 +756,14 @@ export declare type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
  */
 export declare type TypeGeoviewLayerConfig = {
     /**
-     * The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have
-     * the language extension (id-'lang').
+     * The GeoView layer identifier.
      */
-    layerId: string;
+    geoviewLayerId: string;
     /**
      * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
      * information.
      */
-    layerName?: TypeLocalizedString;
+    geoviewLayerName?: TypeLocalizedString;
     /** The GeoView layer access path (English/French). */
     metadataAccessPath?: TypeLocalizedString;
     /** Type of GeoView layer. */
@@ -844,7 +836,7 @@ export declare type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'
 /** ******************************************************************************************************************************
  * Core components to initialize on viewer load. Default = ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'].
  */
-export declare type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'overview-map' | 'legend'>;
+export declare type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'overview-map'>;
 /** ******************************************************************************************************************************
  * Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
@@ -855,7 +847,7 @@ export declare type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel'
  * List of external packages to initialize on viewer load. Default = [].
  */
 export declare type TypeExternalPackages = {
-    /** External Package name. The name must be ideintical to the window external package object to load. */
+    /** External Package name. The name must be identical to the window external package object to load. */
     name: string;
     /**
      * The url to the external package configuration setting. The core package will read the configuration and pass it inside

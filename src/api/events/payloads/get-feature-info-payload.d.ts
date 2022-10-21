@@ -11,7 +11,7 @@ import { EventStringId } from '../event-types';
  * @returns {boolean} returns true of the payload is valid
  */
 export declare const payloadIsGetFeatureInfo: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is GetFeatureInfoPayload;
-export declare type TypeQueryType = 'at pixel' | 'at coordinate' | 'using a bounding box' | 'using a polygon';
+export declare type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
 export declare type TypeFeatureInfoQuery = {
     queryType: TypeQueryType;
     location: Pixel | Coordinate | Coordinate[];

@@ -13,7 +13,7 @@ export declare const VALID_BASEMAP_ID: TypeBasemapId[];
  */
 export declare type TypeBasemapOptions = {
     /** Id of the basemap to use. */
-    id: TypeBasemapId;
+    basemapId: TypeBasemapId;
     /** Enable or disable shaded basemap (if basemap id is set to shaded then this should be false). */
     shaded: boolean;
     /** Enable or disable basemap labels. */
@@ -23,7 +23,7 @@ export declare type TypeBasemapOptions = {
  * interface used to define a new basemap.
  */
 export declare type TypeBasemapProps = {
-    id?: string;
+    basemapId?: string;
     name: string;
     type: string;
     description: string;
@@ -44,7 +44,7 @@ export declare type TypeBasemapProps = {
  * interface used to define a new basemap layer
  */
 export declare type TypeBasemapLayer = {
-    id: string;
+    basemapId: string;
     url?: string;
     jsonUrl?: string;
     source: OSM | XYZ;

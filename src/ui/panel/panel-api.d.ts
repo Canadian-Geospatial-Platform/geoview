@@ -8,7 +8,7 @@ import { TypePanelProps } from './panel-types';
  * @class PanelApi
  */
 export declare class PanelApi {
-    id: string;
+    panelId: string;
     type: string | undefined;
     status: boolean | undefined;
     width: string | number;
@@ -42,13 +42,13 @@ export declare class PanelApi {
     /**
      * Add a new action button to the header of the panel before the close button
      *
-     * @param {string} id an id for the new action button to be used later to delete this button
+     * @param {string} actionButtonId an id for the new action button to be used later to delete this button
      * @param {string} title the title of the action button, will display in the tooltip
      * @param {string | ReactElement | Element} children the icon of the action button
      * @param {Function} action a function that will be triggered when clicking this action
      * @returns {Panel} the panel
      */
-    addActionButton: (id: string, title: string, children: string | React.ReactElement | Element, action: () => void) => PanelApi;
+    addActionButton: (actionButtonId: string, title: string, children: string | React.ReactElement | Element, action: () => void) => PanelApi;
     /**
      * Create a check list that can be used as a content
      *
@@ -68,8 +68,8 @@ export declare class PanelApi {
     /**
      * Remove action button
      *
-     * @param {string} id the id of the action button to be removed
+     * @param {string} actionButtonId the id of the action button to be removed
      * @returns {Panel} this panel
      */
-    removeActionButton: (id: string) => PanelApi;
+    removeActionButton: (actionButtonId: string) => PanelApi;
 }

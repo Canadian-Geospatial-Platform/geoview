@@ -9,8 +9,8 @@ export declare type TypePluginOptions = {
  * Plugin abstract base class.
  */
 export declare abstract class AbstractPlugin {
-    id: string;
+    pluginId: string;
     pluginProps: TypePluginOptions;
     configObj?: TypeJsonObject;
-    constructor(id: string, props: TypePluginOptions);
+    constructor(pluginId: string, props: TypePluginOptions);
 }
