@@ -34,6 +34,12 @@ import {
   TypeVectorTileLayerEntryConfig,
   TypeBaseLayerEntryConfig,
   TypeStyleConfig,
+  TypeKindOfVectorSettings,
+  isSimpleStyleConfig,
+  TypeBaseStyleConfig,
+  isUniqueValueStyleConfig,
+  isClassBreakStyleConfig,
+  TypeBaseVectorConfig,
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
@@ -70,11 +76,10 @@ export class GeoviewRenderer {
     'shortDash-dot-dot': [7, 3, 2, 3, 2, 3],
     solid: undefined,
   };
-
   /** Table of function to process the style settings. */
   private processStyle: Record<
     TypeBaseStyleType,
-    Record<TypeStyleConfigKey, (styleSettings: TypeStyleSettings, feature: FeatureLike) => Style | undefined>
+    Record<TypeStyleConfigKey, (styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike) => Style | undefined>
   > = {
     simple: {
       Point: this.processSimplePoint,
@@ -271,10 +276,10 @@ export class GeoviewRenderer {
   }
 
   private processSimplePoint(
-    styleSettings: TypeStyleSettings | TypeUniqueValueStyleInfo | TypeClassBreakStyleInfo,
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
     feature: FeatureLike
   ): Style | undefined {
-    const { settings } = styleSettings as TypeSimpleStyleConfig | TypeUniqueValueStyleInfo;
+    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeBaseVectorConfig ;
     if (isSimpleSymbolVectorConfig(settings)) {
       const { symbol } = settings;
       return this.processSymbol[symbol].call(this, settings);
@@ -284,7 +289,7 @@ export class GeoviewRenderer {
   }
 
   private processSimpleLineString(
-    styleSettings: TypeStyleSettings | TypeUniqueValueStyleInfo | TypeClassBreakStyleInfo,
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
     feature: FeatureLike
   ): Style | undefined {
     const { settings } = styleSettings as TypeSimpleStyleConfig;
@@ -399,7 +404,7 @@ export class GeoviewRenderer {
   }
 
   private processSimplePolygon(
-    styleSettings: TypeStyleSettings | TypeUniqueValueStyleInfo | TypeClassBreakStyleInfo,
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
     feature: FeatureLike
   ): Style | undefined {
     const { settings } = styleSettings as TypeSimpleStyleConfig;
@@ -424,27 +429,33 @@ export class GeoviewRenderer {
     return undefined;
   }
 
-  private processUniqueValuePoint(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings as TypeUniqueValueStyleConfig;
-    const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-    if (i !== undefined) return this.processSimplePoint(uniqueValueStyleInfo[i], feature);
-    if (defaultSettings !== undefined) return this.processSimplePoint(styleSettings, feature);
+  private processUniqueValuePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+    if (isUniqueValueStyleConfig(styleSettings)) {
+      const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
+      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
+      if (i !== undefined) return this.processSimplePoint(uniqueValueStyleInfo[i].settings, feature);
+      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings, feature);
+    }
     return undefined;
   }
 
-  private processUniqueLineString(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings as TypeUniqueValueStyleConfig;
-    const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-    if (i !== undefined) return this.processSimpleLineString(uniqueValueStyleInfo[i], feature);
-    if (defaultSettings !== undefined) return this.processSimpleLineString(styleSettings, feature);
+  private processUniqueLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+    if (isUniqueValueStyleConfig(styleSettings)) {
+      const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
+      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
+      if (i !== undefined) return this.processSimpleLineString(uniqueValueStyleInfo[i].settings, feature);
+      if (defaultSettings !== undefined) return this.processSimpleLineString(defaultSettings, feature);
+    }
     return undefined;
   }
 
-  private processUniquePolygon(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings as TypeUniqueValueStyleConfig;
-    const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-    if (i !== undefined) return this.processSimplePolygon(uniqueValueStyleInfo[i], feature);
-    if (defaultSettings !== undefined) return this.processSimplePolygon(styleSettings, feature);
+  private processUniquePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+    if (isUniqueValueStyleConfig(styleSettings)) {
+      const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
+      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
+      if (i !== undefined) return this.processSimplePolygon(uniqueValueStyleInfo[i].settings, feature);
+      if (defaultSettings !== undefined) return this.processSimplePolygon(defaultSettings, feature);
+    }
     return undefined;
   }
 
@@ -453,32 +464,38 @@ export class GeoviewRenderer {
     if (fieldValue >= classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return 0;
 
     for (let i = 1; i < classBreakStyleInfos.length; i++) {
-      if (fieldValue > classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return i;
+      if (fieldValue > classBreakStyleInfos[i].minValue! && fieldValue <= classBreakStyleInfos[i].maxValue) return i;
     }
     return undefined;
   }
 
-  private processClassBreaksPoint(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    const { defaultSettings, field, classBreakStyleInfos } = styleSettings as TypeClassBreakStyleConfig;
-    const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-    if (i !== undefined) return this.processSimplePoint(classBreakStyleInfos[i], feature);
-    if (defaultSettings !== undefined) return this.processSimplePoint(styleSettings, feature);
+  private processClassBreaksPoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+    if (isClassBreakStyleConfig(styleSettings)) {
+      const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
+      if (i !== undefined) return this.processSimplePoint(classBreakStyleInfos[i].settings, feature);
+      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings, feature);
+    }
     return undefined;
   }
 
-  private processClassBreaksLineString(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    const { defaultSettings, field, classBreakStyleInfos } = styleSettings as TypeClassBreakStyleConfig;
-    const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-    if (i !== undefined) return this.processSimpleLineString(classBreakStyleInfos[i], feature);
-    if (defaultSettings !== undefined) return this.processSimpleLineString(styleSettings, feature);
+  private processClassBreaksLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+    if (isClassBreakStyleConfig(styleSettings)) {
+      const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
+      if (i !== undefined) return this.processSimpleLineString(classBreakStyleInfos[i].settings, feature);
+      if (defaultSettings !== undefined) return this.processSimpleLineString(defaultSettings, feature);
+    }
     return undefined;
   }
 
-  private processClassBreaksPolygon(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    const { defaultSettings, field, classBreakStyleInfos } = styleSettings as TypeClassBreakStyleConfig;
-    const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-    if (i !== undefined) return this.processSimplePolygon(classBreakStyleInfos[i], feature);
-    if (defaultSettings !== undefined) return this.processSimplePolygon(styleSettings, feature);
+  private processClassBreaksPolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+    if (isClassBreakStyleConfig(styleSettings)) {
+      const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
+      if (i !== undefined) return this.processSimplePolygon(classBreakStyleInfos[i].settings, feature);
+      if (defaultSettings !== undefined) return this.processSimplePolygon(defaultSettings, feature);
+    }
     return undefined;
   }
 
