@@ -8,11 +8,11 @@ var execCommand = function (command, cb) {
   return new Promise(function (resolve) {
     exec(command, function (err, stdout, stderr) {
       if (err != null) {
-        // console.log(new Error(err));
+        console.log(new Error(err));
 
         resolve(null);
       } else if (typeof stderr != "string") {
-        // console.log(new Error(stderr));
+        console.log(new Error(stderr));
 
         resolve(null);
       } else {
