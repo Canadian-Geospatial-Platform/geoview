@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
