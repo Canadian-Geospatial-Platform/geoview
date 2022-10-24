@@ -5,7 +5,6 @@ import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 
-import { cloneDeep } from 'lodash';
 import { generateId } from '../../../core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
@@ -20,6 +19,7 @@ import {
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeImageLayerEntryConfig,
+  TypeStyleConfigKey,
 } from '../../map/map-schema-types';
 import {
   getFeatureInfoPayload,
@@ -39,8 +39,11 @@ export type TypeLegend = {
   layerPath: string;
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
-  legend: TypeStyleConfig | string | ArrayBuffer;
+  styleConfig?: TypeStyleConfig;
+  legend: TypeLayerStyle | string | ArrayBuffer;
 };
+
+export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -691,14 +694,19 @@ export abstract class AbstractGeoViewLayer {
       ) as TypeBaseLayerEntryConfig & {
         style: TypeStyleConfig;
       };
+
       if (!layerConfig?.style) resolve(null);
-      const legend: TypeLegend = {
-        type: layerConfig.geoviewRootLayer!.geoviewLayerType,
-        layerPath: Layer.getLayerPath(layerConfig),
-        layerName: layerConfig.layerName!,
-        legend: cloneDeep(layerConfig.style),
-      };
-      resolve(legend);
+      else {
+        const { geoviewRenderer } = api.map(this.mapId);
+        const legend: TypeLegend = {
+          type: layerConfig.geoviewRootLayer!.geoviewLayerType,
+          layerPath: Layer.getLayerPath(layerConfig),
+          layerName: layerConfig.layerName!,
+          styleConfig: layerConfig?.style,
+          legend: geoviewRenderer.getStyle(layerConfig.style as TypeStyleConfig),
+        };
+        resolve(legend);
+      }
     });
     return promisedLegend;
   }
