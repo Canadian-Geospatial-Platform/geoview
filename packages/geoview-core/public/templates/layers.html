@@ -338,7 +338,7 @@
   <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
     the buttons</p>
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
-  <input type="text" id="new-layer-id" /><br /><label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id-label2"></label>
+  <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
   <button type="button" class="collapsible">Get Feature Info polygons</button>
   <pre id="LYR5-INFO-geojsonLYR5/polygons.json" class="panel">Click on feature on the map</pre>
   <hr />
@@ -529,7 +529,7 @@
         },
         ['en', 'fr']
       );
-      document.getElementById('new-layer-id-label2').innerText = layerID;
+      document.getElementById('new-layer-id-label').innerText = layerID;
     });
 
     // find the button element by ID
@@ -538,8 +538,8 @@
     // add an event listener when a button is clicked
     removeGeoJSONButton.addEventListener('click', function (e) {
       // removing a geojson layer using the ID
-      cgpv.api.map('LYR5').layer.removeLayersUsingPath(document.getElementById('new-layer-id').value);
-      document.getElementById('new-layer-id').innerText = '';
+      cgpv.api.map('LYR5').layer.removeLayersUsingPath(document.getElementById('new-layer-id-label').innerText);
+      document.getElementById('new-layer-id-label').innerText = '';
     });
 
     // WMS
@@ -559,7 +559,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', 'rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0') }, 'LYR8');
 
     function handleMapClick(payload, mapId, layerId) {
-      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {console.log(document.getElementById(`${mapId}-INFO-${layerId}`));
+      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
         document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
         if (payload.data !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
       }, `${mapId}/${layerId}`);
