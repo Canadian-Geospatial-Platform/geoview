@@ -531,8 +531,10 @@ export abstract class AbstractGeoViewLayer {
    * @param {string | TypeLayerEntryConfig} layerId The layer identifier.
    */
   setActiveLayer(layer: string | TypeLayerEntryConfig) {
-    if (typeof layer === 'string') this.activeLayer = api.map(this.mapId).layer.registeredLayers[layer];
-    else this.activeLayer = layer;
+    if (typeof layer === 'string') {
+      const activeLayer = api.map(this.mapId).layer.registeredLayers[layer];
+      this.activeLayer = activeLayer !== undefined ? activeLayer : this.activeLayer;
+    } else this.activeLayer = layer as TypeLayerEntryConfig;
   }
 
   /** ***************************************************************************************************************************
@@ -544,7 +546,8 @@ export abstract class AbstractGeoViewLayer {
    */
   getLayerConfig(layerId?: string): TypeLayerEntryConfig | null {
     if (layerId === undefined) return this.activeLayer;
-    return api.map(this.mapId).layer.registeredLayers[layerId];
+    const activeLayer = api.map(this.mapId).layer.registeredLayers[layerId];
+    return activeLayer !== undefined ? activeLayer : null;
   }
 
   /** ***************************************************************************************************************************
