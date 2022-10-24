@@ -24,8 +24,8 @@ class LayersPanelPlugin extends AbstractPlugin {
   // store the created button panel object
   buttonPanel: TypeButtonPanel | null;
 
-  constructor(id: string, props: TypePluginOptions) {
-    super(id, props);
+  constructor(pluginId: string, props: TypePluginOptions) {
+    super(pluginId, props);
     this.buttonPanel = null;
   }
 
@@ -47,10 +47,10 @@ class LayersPanelPlugin extends AbstractPlugin {
    * translations object to inject to the viewer translations
    */
   translations: TypeJsonObject = toJsonObject({
-    'en': {
+    en: {
       layersPanel: 'Layers',
     },
-    'fr': {
+    fr: {
       layersPanel: 'Couches',
     },
   });
@@ -110,7 +110,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     const { api } = cgpv;
 
     if (this.buttonPanel) {
-      api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.id);
+      api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
     }
   }
 }

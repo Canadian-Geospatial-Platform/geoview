@@ -179,7 +179,7 @@ On the page, after few seconds, a Reviewable button will appear. You can click o
 ```
 git add *
 git ci --amend
-git push -f origin/[BRANCH NAME]
+git push -f origin [BRANCH NAME]
 ```
 
 Reviewable will see a new commit has been push and will update with the new information. This process can be done in loop until everything is resolve. Then the reviewer will merge the **Pull Request** and the code will be available to all the other developers.

@@ -100,15 +100,15 @@ export function Navbar(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
       setButtonPanelGroups({
         ...buttonPanelGroups,
-        [payload.groupName]: {
-          ...buttonPanelGroups[payload.groupName],
-          [payload.id]: payload.buttonPanel as TypeButtonPanel,
+        [payload.appBarGroupName]: {
+          ...buttonPanelGroups[payload.appBarGroupName],
+          [payload.appBarId]: payload.buttonPanel as TypeButtonPanel,
         },
       });
     },
@@ -120,9 +120,9 @@ export function Navbar(): JSX.Element {
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
 
-        const group = state[payload.groupName];
+        const group = state[payload.appBarGroupName];
 
-        delete group[payload.id];
+        delete group[payload.appBarId];
 
         return state;
       });
@@ -167,13 +167,15 @@ export function Navbar(): JSX.Element {
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
     <div ref={navBarRef} className={`${classes.navBarRef}`}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
-        const buttons = buttonPanelGroups[groupName];
+        const buttonPanelGroup = buttonPanelGroups[groupName];
 
         // display the panels in the list
-        const panels = Object.keys(buttons).map((buttonId) => {
-          const buttonPanel = buttons[buttonId];
+        const panels = Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
+          const buttonPanel = buttonPanelGroup[buttonPanelKey];
 
-          return buttonPanel.panel ? <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} /> : null;
+          return buttonPanel.panel ? (
+            <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} />
+          ) : null;
         });
 
         if (panels.length > 0) {
@@ -184,10 +186,10 @@ export function Navbar(): JSX.Element {
 
       <div className={classes.navBtnGroupContainer}>
         {Object.keys(buttonPanelGroups).map((groupName) => {
-          const buttons = buttonPanelGroups[groupName];
+          const buttonPanelGroup = buttonPanelGroups[groupName];
 
           // if not an empty object, only then render any HTML
-          if (Object.keys(buttons).length !== 0) {
+          if (Object.keys(buttonPanelGroup).length !== 0) {
             return (
               <ButtonGroup
                 key={groupName}
@@ -196,8 +198,8 @@ export function Navbar(): JSX.Element {
                 variant="contained"
                 classes={{ root: classes.navBtnGroup }}
               >
-                {Object.keys(buttons).map((buttonId) => {
-                  const buttonPanel: TypeButtonPanel = buttons[buttonId];
+                {Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
+                  const buttonPanel: TypeButtonPanel = buttonPanelGroup[buttonPanelKey];
                   // eslint-disable-next-line no-nested-ternary
                   return buttonPanel.button.visible ? (
                     !buttonPanel.panel ? (

@@ -15,6 +15,7 @@ import ListAlt from '@mui/icons-material/ListAlt';
 import { ListItem, Checkbox, Tooltip } from '../../../ui';
 
 import {
+  api,
   AbstractGeoViewLayer,
   TypeClassBreakStyleConfig,
   TypeIconSymbolVectorConfig,
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 
 export interface TypeLegendItemProps {
   layerId: string;
-  lyr: AbstractGeoViewLayer;
+  geoViewLayer: AbstractGeoViewLayer;
 }
 /**
  * Legend Item for a Legend list
@@ -49,11 +50,12 @@ export interface TypeLegendItemProps {
  */
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const mapConfig = useContext(MapContext);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
+  const { layers } = api.map(mapId).layer;
+  const { layerId, geoViewLayer } = props;
 
   const classes = useStyles();
 
-  const { layerId, lyr } = props;
 
   const [isChecked, setChecked] = React.useState(true);
   const [isGroupOpen, setGroupOpen] = React.useState(false);
@@ -91,7 +93,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   };
 
   useEffect(() => {
-    lyr?.getLegend().then((layerLegend) => {
+    geoViewLayer?.getLegend().then((layerLegend) => {
       if (layerLegend) {
         // WMS layers just return a string
         if (isBase64(layerLegend.legend)) {
@@ -119,15 +121,17 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         console.log(`${layerId} - NULL LAYER DATA`);
       }
     });
-
-    if (lyr.listOfLayerEntryConfig && lyr.listOfLayerEntryConfig.length > 1) {
-      setGroupItems(lyr.listOfLayerEntryConfig);
+    if (
+      geoViewLayer?.listOfLayerEntryConfig &&
+      (geoViewLayer?.listOfLayerEntryConfig.length > 1 || geoViewLayer.listOfLayerEntryConfig[0].entryType === 'group')
+    ) {
+      setGroupItems(geoViewLayer.listOfLayerEntryConfig);
     }
   }, []);
 
   useEffect(() => {
     if (layerId !== 'vector') {
-      lyr.gvLayers?.setVisible(isChecked);
+      geoViewLayer?.gvLayers?.setVisible(isChecked);
     }
     // TODO emit layer toggle event?
     // api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH, mapId, event.target.checked));
@@ -163,8 +167,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </Avatar>
             )}
           </ListItemIcon>
-          <Tooltip title={lyr && lyr.layerName.en ? lyr.layerName.en : 'Unknown layer title'} placement="top" enterDelay={1000}>
-            <ListItemText primary={lyr ? lyr.layerName.en : 'Unknown layer title'} />
+          <Tooltip
+            title={geoViewLayer && geoViewLayer.geoviewLayerName.en ? geoViewLayer.geoviewLayerName.en : 'Unknown layer title'}
+            placement="top"
+            enterDelay={1000}
+          >
+            <ListItemText primary={geoViewLayer ? geoViewLayer.geoviewLayerName.en : 'Unknown layer title'} />
           </Tooltip>
           <ListItemIcon>
             <Checkbox
@@ -185,9 +193,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       <Collapse in={isGroupOpen} timeout="auto" unmountOnExit>
         <div>
           {groupItems.map((subItem) => (
-            // <LegendItem key={`sub-${subItem.layerId}`} layerId={layerId} layer={subItem} />
+            // <LegendItem key={`sub-${subItem.layerId}`} layerId={`${layerId}/${subItem.layerId}`} geoViewLayer={subItem} />
             // TODO When the layer api supports sublayer queries remove this component
-            <LegendSubItem key={`sub-${subItem.layerId}`} layerId={layerId} layerConfigEntry={subItem} />
+            <LegendSubItem
+              key={`sub-${subItem.layerId}`}
+              layerId={layerId}
+              subLayerId={`${layerId}/${subItem.layerId}`}
+              layerConfigEntry={subItem}
+            />
           ))}
         </div>
       </Collapse>

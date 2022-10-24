@@ -12,7 +12,7 @@ export type TypePluginOptions = {
  */
 export abstract class AbstractPlugin {
   // id of the plugin
-  id: string;
+  pluginId: string;
 
   // plugin properties
   pluginProps: TypePluginOptions;
@@ -20,8 +20,8 @@ export abstract class AbstractPlugin {
   // plugin config object
   configObj?: TypeJsonObject;
 
-  constructor(id: string, props: TypePluginOptions) {
-    this.id = id;
+  constructor(pluginId: string, props: TypePluginOptions) {
+    this.pluginId = pluginId;
     this.pluginProps = props;
   }
 }

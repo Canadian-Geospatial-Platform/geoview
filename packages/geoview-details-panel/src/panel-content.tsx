@@ -1,16 +1,7 @@
 import {
   Cast,
   TypeJsonValue,
-  TypeRendererSymbol,
-  TypeSelectedFeature,
   AbstractGeoViewLayer,
-  TypeLayerInfo,
-  TypeFieldNameAliasArray,
-  TypeFieldAlias,
-  TypeFoundLayers,
-  TypeLayersEntry,
-  TypeEntry,
-  TypePanelContentProps,
   TypeWindow,
   toJsonObject,
   TypeJsonObject,
@@ -25,11 +16,27 @@ import {
   payloadBaseClass,
   payloadIsALngLat,
   markerDefinitionPayload,
+  TypeButtonPanel,
 } from 'geoview-core';
 
 import LayersList from './layers-list';
 import FeaturesList from './features-list';
 import FeatureInfo from './feature-info';
+import {
+  TypeEntry,
+  TypeFoundLayers,
+  TypeFieldAlias,
+  TypeLayerInfo,
+  TypeSelectedFeature,
+  TypeRendererSymbol,
+  TypeLayersEntry,
+  TypeFieldNameAliasArray,
+} from './details-panel-types';
+
+type TypePanelContentProps = {
+  buttonPanel: TypeButtonPanel;
+  mapId: string;
+};
 
 // get the window object
 const w = window as TypeWindow;
@@ -137,7 +144,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       setFeatureInfo(showFeaturesInfo);
 
       // emit content change event so the panel can focus on close button
-      api.event.emit(payloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId), buttonPanel.id);
+      api.event.emit(payloadBaseClass(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId), buttonPanel.buttonPanelId);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [buttonPanel.panel, mapId]
@@ -220,10 +227,10 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     isGroupLayer: boolean
   ) => {
     // get the layers object from the map, it begins with an empty object then adds each layer
-    const { layers } = data[mapLayer.id];
+    const { layers } = data[mapLayer.mapId];
 
     // add the layer to the layers object, the layer will have a key generated from the id and name of the layer seperated by dashes
-    layers[`${layerInfo.id}-${layerInfo.name.replace(/\s+/g, '-').toLowerCase()}`] = Cast<TypeLayersEntry>({
+    layers[`${layerInfo.layerPath}-${layerInfo.name.replace(/\s+/g, '-').toLowerCase()}`] = Cast<TypeLayersEntry>({
       // the information about this layer
       layer: layerInfo,
       // is it a group layer or not
@@ -235,12 +242,12 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       // the defined field aliases by the layer
       fieldAliases: getFieldAliases(layerInfo.fields),
       // the renderer object containing the symbology
-      renderer: layerInfo.drawingInfo && layerInfo.drawingInfo.renderer,
+      renderer: layerInfo.drawingInfo?.renderer,
     });
 
     // save the layers back to the data object on the specified map server layer
     // eslint-disable-next-line no-param-reassign
-    data[mapLayer.id].layers = layers;
+    data[mapLayer.mapId].layers = layers;
   };
 
   /**
@@ -430,7 +437,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       // open the details panel
       buttonPanel.panel?.open();
 
-      const panelContainer = document.querySelectorAll(`[data-id=${buttonPanel.id}]`)[0];
+      const panelContainer = document.querySelectorAll(`[data-id=${buttonPanel.buttonPanelId}]`)[0];
 
       // emit an event to display a marker on the click position
       // if there is only one layer with entries the symbology will be of that layer
@@ -446,7 +453,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mapId, buttonPanel.panel, buttonPanel.id, layersData, clearResults, selectLayer, getSymbol, selectFeature, selectLayersList]
+    [mapId, buttonPanel.panel, buttonPanel.buttonPanelId, layersData, clearResults, selectLayer, getSymbol, selectFeature, selectLayersList]
   );
 
   useEffect(() => {
@@ -457,21 +464,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     const data: Record<string, AbstractGeoViewLayer> = {};
 
     // loop through each map server layer loaded from the map config and created using the API
-    const layerIds = Object.keys(mapLayers);
+    const arrayOfgeoviewLayerId = Object.keys(mapLayers);
 
-    layerIds.forEach(async (id: string) => {
-      const mapLayer = mapLayers[id];
-      data[mapLayer.id] = Cast<AbstractGeoViewLayer>({
-        // the map server layer id
-        id: mapLayer.id,
-        name: mapLayer.name,
-        // the type of the map server layer (WMS, Dynamic, Feature)
-        type: mapLayer.type,
-        // the layer class
-        layer: mapLayer,
-        // an object that will contains added layers from the map server layer
-        layers: {},
-      });
+    arrayOfgeoviewLayerId.forEach(async (geoviewLayerId: string) => {
+      const mapLayer = mapLayers[geoviewLayerId];
+      data[mapLayer.mapId] = mapLayer;
 
       // check each map server layer type and add it to the layers object of the map server in the data array
       if (geoviewLayerIsWMS(mapLayer)) {

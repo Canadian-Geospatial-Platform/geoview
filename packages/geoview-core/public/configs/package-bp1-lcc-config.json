@@ -7,7 +7,7 @@
       "projection": 3978
     },
     "basemapOptions": {
-      "id": "transport",
+      "basemapId": "transport",
       "shaded": true,
       "labeled": true
     }

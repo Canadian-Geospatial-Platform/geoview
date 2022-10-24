@@ -65,7 +65,7 @@ export class NavbarButtons {
   ): TypeButtonPanel | null => {
     if (buttonProps) {
       // generate an id if not provided
-      const id = generateId(buttonProps.id);
+      const buttonId = generateId(buttonProps.id);
 
       // if group was not specified then add button panels to the default group
       const group = groupName || 'default';
@@ -77,12 +77,12 @@ export class NavbarButtons {
 
       const button: TypeIconButtonProps = {
         ...buttonProps,
-        id,
+        id: buttonId,
         visible: !buttonProps.visible ? true : buttonProps.visible,
       };
 
       const buttonPanel: TypeButtonPanel = {
-        id,
+        buttonPanelId: buttonId,
         button,
         groupName: group,
       };
@@ -94,14 +94,14 @@ export class NavbarButtons {
           type: CONST_PANEL_TYPES.NAVBAR,
         };
 
-        buttonPanel.panel = new PanelApi(panel, id, this.mapId);
+        buttonPanel.panel = new PanelApi(panel, buttonId, this.mapId);
       }
 
       // add the new button panel to the correct group
-      this.buttons[group][id] = buttonPanel;
+      if (group !== '__proto__' && buttonId !== '__proto__') this.buttons[group][buttonId] = buttonPanel;
 
       // trigger an event that a new button or button panel has been created to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, id, group, buttonPanel));
+      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, this.mapId, buttonId, group, buttonPanel));
 
       return buttonPanel;
     }
@@ -140,7 +140,7 @@ export class NavbarButtons {
    * @param {string} id the id of the button panel to get
    * @returns {TypeButtonPanel} the returned button panel
    */
-  getNavBarButtonPanelById = (id: string): TypeButtonPanel | null => {
+  getNavBarButtonPanelById = (buttonPanelId: string): TypeButtonPanel | null => {
     // loop through groups of app-bar button panels
     for (let i = 0; i < Object.keys(this.buttons).length; i++) {
       const group = this.buttons[Object.keys(this.buttons)[i]];
@@ -148,7 +148,7 @@ export class NavbarButtons {
       for (let j = 0; j < Object.keys(group).length; j++) {
         const buttonPanel: TypeButtonPanel = group[Object.keys(group)[j]];
 
-        if (buttonPanel.id === id) {
+        if (buttonPanel.buttonPanelId === buttonPanelId) {
           return buttonPanel;
         }
       }
@@ -162,16 +162,18 @@ export class NavbarButtons {
    *
    * @param {string} id the id of the panel or button to remove
    */
-  removeNavbarButtonPanel = (id: string): void => {
+  removeNavbarButtonPanel = (buttonPanelId: string): void => {
     // loop through groups
     Object.keys(this.buttons).forEach((groupName) => {
       const group = this.buttons[groupName];
 
       // delete the button or panel from the group
-      delete group[id];
+      delete group[buttonPanelId];
 
       // trigger an event that a button or panel has been removed to update the state and re-render
-      api.event.emit(buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, id, groupName, group[id]));
+      api.event.emit(
+        buttonPanelPayload(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, this.mapId, buttonPanelId, groupName, group[buttonPanelId])
+      );
     });
   };
 }

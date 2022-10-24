@@ -22,18 +22,18 @@ export const useStyles = makeStyles((theme) => ({
  */
 export function Legend(): JSX.Element | null {
   const mapConfig = useContext(MapContext);
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
   const classes = useStyles();
 
   const createLegendComponent = () => {
-    const vectors = api.map(mapId).layer.vector;
+    // const vectors = api.map(mapId).layer.vector;
     const { layers } = api.map(mapId).layer;
     return (
       <div>
         <List className={classes.legend}>
-          {vectors && vectors.geometries?.length > 0 ? <LegendItem layerId="vector" lyr={layers.vector} /> : null}
+          {/* {vectors && vectors.geometries?.length > 0 ? <LegendItem layerId="vector" geoViewLayer={layers['vector']} /> : null} */}
           {Object.keys(layers).map((layerId) => {
-            return <LegendItem key={layerId} layerId={layerId} lyr={layers[layerId]} />;
+            return <LegendItem key={layerId} layerId={layerId} geoViewLayer={layers[layerId]} />;
           })}
         </List>
       </div>
@@ -41,6 +41,7 @@ export function Legend(): JSX.Element | null {
   };
 
   const { footerTabs } = api.map(mapId);
+
   useEffect(() => {
     footerTabs.createFooterTab({
       value: 0,

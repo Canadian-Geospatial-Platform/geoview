@@ -3,13 +3,13 @@ import React, { useEffect } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import SvgIcon from '@mui/material/SvgIcon';
 
-import { TypeKinfOfSymbolVectorSettings, TypeSimpleSymbolVectorConfig, TypeStrokeSymbolConfig } from '../../../app';
+import { TypeKindOfVectorSettings, TypeSimpleSymbolVectorConfig, TypeStrokeSymbolConfig } from '../../../app';
 
 const useStyles = makeStyles((theme) => ({
 }));
 
 export interface TypeVectorIconProps {
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 }
 /**
  * Vector Icon for a Legend

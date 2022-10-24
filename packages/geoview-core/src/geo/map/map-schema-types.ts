@@ -24,16 +24,6 @@ export type TypeLocalizedStringFr = Pick<TypeLocalizedStringEnAndFr, 'fr'> & Par
 export type TypeLocalizedStringEnAndFr = Required<Record<TypeDisplayLanguage, string>>;
 
 /** ******************************************************************************************************************************
- * Basic type used to identify the layer to display on the map.
- */
-export type TypeLayerBasicInfoConfig = {
-  /** The id of the layer to display on the map. */
-  layerId: string;
-  /** The display name of the layer (English/French). */
-  layerName?: TypeLocalizedString;
-};
-
-/** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView layer at creation time.
  */
 export type TypeLayerInitialSettings = {
@@ -130,7 +120,7 @@ export interface TypeVectorSourceInitialConfig extends TypeBaseSourceVectorIniti
 /** ******************************************************************************************************************************
  * Kind of symbol vector settings.
  */
-export type TypeKinfOfSymbolVectorSettings =
+export type TypeKindOfVectorSettings =
   | TypeBaseVectorConfig
   | TypeLineStringVectorConfig
   | TypePolygonVectorConfig
@@ -336,12 +326,12 @@ export type TypeBaseStyleConfig = {
  * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const isSimpleStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeSimpleStyleConfig => {
-  return verifyIfConfig.styleType === 'simple';
+export const isSimpleStyleConfig = (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings): verifyIfConfig is TypeSimpleStyleConfig => {
+  return (verifyIfConfig as TypeStyleSettings).styleType === 'simple';
 };
 
 /** ******************************************************************************************************************************
@@ -349,13 +339,13 @@ export const isSimpleStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verify
  */
 export interface TypeSimpleStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
-  id?: string;
+  styleId?: string;
   /** Type of style. */
   styleType: 'simple';
   /** Label associated to the style */
   label: string;
   /** options associated to the style. */
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 }
 
 /** ******************************************************************************************************************************
@@ -367,7 +357,7 @@ export type TypeUniqueValueStyleInfo = {
   /** Values associated to the style. */
   values: string[];
   /** options associated to the style. */
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 };
 
 /** ******************************************************************************************************************************
@@ -375,12 +365,12 @@ export type TypeUniqueValueStyleInfo = {
  * verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const isUniqueValueStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeUniqueValueStyleConfig => {
-  return verifyIfConfig.styleType === 'uniqueValue';
+export const isUniqueValueStyleConfig = (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings): verifyIfConfig is TypeUniqueValueStyleConfig => {
+  return (verifyIfConfig as TypeStyleSettings).styleType === 'uniqueValue';
 };
 
 /** ******************************************************************************************************************************
@@ -388,13 +378,13 @@ export const isUniqueValueStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): v
  */
 export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
-  id?: string;
+  styleId?: string;
   /** Type of style. */
   styleType: 'uniqueValue';
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultSettings?: TypeKinfOfSymbolVectorSettings;
+  defaultSettings?: TypeKindOfVectorSettings;
   /** Fields used by the style. */
   fields: string[];
   /** Unique value style information configuration. */
@@ -412,7 +402,7 @@ export type TypeClassBreakStyleInfo = {
   /** Maximum values associated to the style. */
   maxValue: number;
   /** options associated to the style. */
-  settings: TypeKinfOfSymbolVectorSettings;
+  settings: TypeKindOfVectorSettings;
 };
 
 /** ******************************************************************************************************************************
@@ -420,12 +410,12 @@ export type TypeClassBreakStyleInfo = {
  * verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeBaseStyleConfig} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
-export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): verifyIfConfig is TypeClassBreakStyleConfig => {
-  return verifyIfConfig.styleType === 'classBreaks';
+export const isClassBreakStyleConfig = (verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings): verifyIfConfig is TypeClassBreakStyleConfig => {
+  return (verifyIfConfig as TypeStyleSettings).styleType === 'classBreaks';
 };
 
 /** ******************************************************************************************************************************
@@ -433,13 +423,13 @@ export const isClassBreakStyleConfig = (verifyIfConfig: TypeBaseStyleConfig): ve
  */
 export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Style identifier. */
-  id?: string;
+  styleId?: string;
   /** Type of style. */
   styleType: 'classBreaks';
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
-  defaultSettings?: TypeKinfOfSymbolVectorSettings;
+  defaultSettings?: TypeKindOfVectorSettings;
   /** Field used by the style. */
   field: string;
   /** Class break style information configuration. */
@@ -902,15 +892,14 @@ export type TypeListOfGeoviewLayerConfig = TypeGeoviewLayerConfig[];
  */
 export type TypeGeoviewLayerConfig = {
   /**
-   * The id of the layer for referencing within the viewer (does not relate directly to any external service). The id will have
-   * the language extension (id-'lang').
+   * The GeoView layer identifier.
    */
-  layerId: string;
+  geoviewLayerId: string;
   /**
    * The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this
    * information.
    */
-  layerName?: TypeLocalizedString;
+  geoviewLayerName?: TypeLocalizedString;
   /** The GeoView layer access path (English/French). */
   metadataAccessPath?: TypeLocalizedString;
   /** Type of GeoView layer. */
@@ -1002,7 +991,7 @@ export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'deta
  * List of external packages to initialize on viewer load. Default = [].
  */
 export type TypeExternalPackages = {
-  /** External Package name. The name must be ideintical to the window external package object to load. */
+  /** External Package name. The name must be identical to the window external package object to load. */
   name: string;
   /**
    * The url to the external package configuration setting. The core package will read the configuration and pass it inside

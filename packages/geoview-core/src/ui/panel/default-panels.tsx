@@ -7,7 +7,7 @@ import { TypeButtonPanelProps } from './panel-types';
  */
 export const DefaultPanel: TypeButtonPanelProps = {
   button: {
-    id: 'default-panel',
+    id: 'default-button',
     tooltip: 'Default',
     tooltipPlacement: 'right',
     icon: <HelpIcon />,

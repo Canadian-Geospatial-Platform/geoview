@@ -14,7 +14,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
-import { toJsonObject } from '../../core/types/global-types';
+import { TypeJsonObject } from '../../core/types/global-types';
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { EVENT_NAMES } from '../../api/events/event-types';
@@ -28,7 +28,7 @@ import { payloadIsAModal } from '../../api/events/payloads/modal-payload';
  * Customized Material UI Dialog Properties
  */
 interface TypeDialogProps extends Omit<DialogProps, 'title'> {
-  id?: string;
+  modalId?: string;
 
   // custom dialog classes and styles
   className?: string;
@@ -110,7 +110,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Modal(props: TypeDialogProps): JSX.Element {
   const {
-    id,
+    modalId,
     title,
     titleId,
     className,
@@ -183,22 +183,20 @@ export function Modal(props: TypeDialogProps): JSX.Element {
                 {modal.header?.actions.map((action) => {
                   if (typeof action.content === 'string') {
                     return (
-                      <Fragment key={action.id}>
+                      <Fragment key={action.actionId}>
                         <HtmlToReact
-                          extraOptions={toJsonObject({
-                            id: action.id,
-                          })}
+                          extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject}
                           htmlContent={action.content}
                         />
                       </Fragment>
                     );
                   }
-                  return <Fragment key={action.id}>{action.content}</Fragment>;
+                  return <Fragment key={action.actionId}>{action.content}</Fragment>;
                 })}
               </div>
             ) : null}
             <IconButton
-              id={`${id}-close-button`}
+              id={`${modalId}-close-button`}
               tooltip={t('close')}
               tooltipPlacement="right"
               onClick={modal.close}
@@ -222,17 +220,12 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             {modal.footer?.actions.map((action) => {
               if (typeof action.content === 'string') {
                 return (
-                  <Fragment key={action.id}>
-                    <HtmlToReact
-                      extraOptions={toJsonObject({
-                        id: action.id,
-                      })}
-                      htmlContent={action.content}
-                    />
+                  <Fragment key={action.actionId}>
+                    <HtmlToReact extraOptions={{ id: action.actionId as TypeJsonObject } as TypeJsonObject} htmlContent={action.content} />
                   </Fragment>
                 );
               }
-              return <Fragment key={action.id}>{action.content}</Fragment>;
+              return <Fragment key={action.actionId}>{action.content}</Fragment>;
             }) || null}
           </DialogActions>
         ) : null}
@@ -248,8 +241,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_OPEN,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (id === payload.id && payload.handlerName === mapId) {
-            const modal = api.map(mapId).modal.modals[payload.id] as TypeModalProps;
+          if (modalId === payload.modalId && payload.handlerName === mapId) {
+            const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
             // eslint-disable-next-line react-hooks/exhaustive-deps
             openEvent = true;
 
@@ -265,8 +258,8 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (id === payload.id && payload.handlerName === mapId) {
-            const modal = api.map(mapId).modal.modals[payload.id] as TypeModalProps;
+          if (modalId === payload.modalId && payload.handlerName === mapId) {
+            const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
 
             setCreatedModal(ceatedModalJSXReturner(modal));
           }
@@ -280,7 +273,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (id === payload.id && payload.handlerName === mapId) {
+          if (modalId === payload.modalId && payload.handlerName === mapId) {
             if (!payload.open) openEvent = false;
             setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
           }

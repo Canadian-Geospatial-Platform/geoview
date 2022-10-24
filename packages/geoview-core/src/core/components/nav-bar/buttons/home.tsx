@@ -33,7 +33,7 @@ export default function Home(props: HomeProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   /**
    * Return user to map initial center

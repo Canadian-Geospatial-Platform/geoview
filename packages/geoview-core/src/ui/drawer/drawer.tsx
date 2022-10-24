@@ -74,7 +74,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const openCloseDrawer = (drawerStatus: boolean): void => {
     setOpen(drawerStatus);

@@ -24,6 +24,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
+import { Layer } from '../../layer';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -109,7 +110,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (metadataUrl) {
         getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
           if (metadataString === '{}')
-            throw new Error(`Cant't read service metadata for GeoView layer ${this.layerId} of map ${this.mapId}.`);
+            throw new Error(`Cant't read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
           else {
             this.metadata = toJsonObject(JSON.parse(metadataString));
             const { copyrightText } = this.metadata;
@@ -134,8 +135,8 @@ export class GeoJSON extends AbstractGeoViewVector {
     return listOfLayerEntryConfig.filter((layerEntryConfig: TypeLayerEntryConfig) => {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -147,8 +148,8 @@ export class GeoJSON extends AbstractGeoViewVector {
           return true;
         }
         this.layerLoadError.push({
-          layer: layerEntryConfig.layerId,
-          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+          layer: Layer.getLayerPath(layerEntryConfig),
+          consoleMessage: `Empty layer group (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -166,8 +167,8 @@ export class GeoJSON extends AbstractGeoViewVector {
         for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
         if (i === metadataLayerList.length) {
           this.layerLoadError.push({
-            layer: layerEntryConfig.layerId,
-            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+            layer: Layer.getLayerPath(layerEntryConfig),
+            consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
           });
           return false;
         }
@@ -175,8 +176,10 @@ export class GeoJSON extends AbstractGeoViewVector {
         return true;
       }
       this.layerLoadError.push({
-        layer: layerEntryConfig.layerId,
-        consoleMessage: `Invalid GeoJSON metadata prevent loading of layer (mapId:  ${this.mapId}, layerId: ${layerEntryConfig.layerId})`,
+        layer: Layer.getLayerPath(layerEntryConfig),
+        consoleMessage: `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${
+          this.mapId
+        }, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
       });
       return false;
     });

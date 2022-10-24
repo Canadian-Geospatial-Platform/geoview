@@ -19,7 +19,7 @@ declare module '@mui/styles/defaultTheme' {
 
 // create a state that will hold map config information
 export const MapContext = React.createContext<TypeMapContext>({
-  id: '',
+  mapId: '',
   interaction: 'dynamic',
 });
 
@@ -27,7 +27,7 @@ export const MapContext = React.createContext<TypeMapContext>({
  * Type used for the map context
  */
 type TypeMapContext = {
-  id: string;
+  mapId: string;
   interaction: string;
 };
 
@@ -45,7 +45,7 @@ function AppStart(props: AppStartProps): JSX.Element {
   const { mapFeaturesConfig } = props;
 
   const mapContextValue = useMemo(() => {
-    return { id: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
+    return { mapId: mapFeaturesConfig.mapId as string, interaction: mapFeaturesConfig.map.interaction };
   }, [mapFeaturesConfig.mapId, mapFeaturesConfig.map.interaction]);
 
   /**
@@ -64,7 +64,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <Shell id={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
+          <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
         </MapContext.Provider>
       </I18nextProvider>
     );

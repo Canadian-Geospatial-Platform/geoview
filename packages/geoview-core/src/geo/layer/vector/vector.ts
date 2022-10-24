@@ -26,7 +26,7 @@ import { TypeFeatureCircleStyle, TypeFeatureStyle } from './vector-types';
  * Store a group of features
  */
 interface FeatureCollection {
-  id: string;
+  geometryGroupId: string;
   vectorLayer: VectorLayer<VectorSource>;
   vectorSource: VectorSource;
 }
@@ -133,7 +133,7 @@ export class Vector {
   ): Feature => {
     const polylineOptions = options || {};
 
-    const lId = generateId(id);
+    const featureId = generateId(id);
 
     // create a line geometry
     const polyline = new Feature({
@@ -170,7 +170,7 @@ export class Vector {
     }
 
     // set an id to this geometry
-    polyline.set('id', lId);
+    polyline.set('featureId', featureId);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polyline);
@@ -189,7 +189,7 @@ export class Vector {
    *
    * @param {Coordinate} points array of points to create the polygon
    * @param options polygon options including styling
-   * @param {string} id an optional id to be used to manage this geometry
+   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -199,11 +199,11 @@ export class Vector {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
     },
-    id?: string
+    optionalFeatureId?: string
   ): Feature => {
     const polygonOptions = options || {};
 
-    const lId = generateId(id);
+    const featureId = generateId(optionalFeatureId);
 
     // create a line geometry
     const polygon = new Feature({
@@ -240,7 +240,7 @@ export class Vector {
     }
 
     // set an id to this geometry
-    polygon.set('id', lId);
+    polygon.set('featureId', featureId);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polygon);
@@ -260,7 +260,7 @@ export class Vector {
    * @param {Coordinate} coordinate long lat coordinate of the circle
    * @param {number} radius an optional radius
    * @param options circle options including styling
-   * @param {string} id an optional id to be used to manage this geometry
+   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -271,11 +271,11 @@ export class Vector {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureCircleStyle;
     },
-    id?: string
+    optionalFeatureId?: string
   ): Feature => {
     const circleOptions = options || {};
 
-    const lId = generateId(id);
+    const featureId = generateId(optionalFeatureId);
 
     // create a line geometry
     const circle = new Feature({
@@ -312,7 +312,7 @@ export class Vector {
     }
 
     // set an id to this geometry
-    circle.set('id', lId);
+    circle.set('featureId', featureId);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circle);
@@ -332,7 +332,7 @@ export class Vector {
    * @param {Coordinate} coordinate long lat coordinate of the circle marker
    * @param {number} radius optional circle marker radius
    * @param options circle marker options including styling
-   * @param {string} id an optional id to be used to manage this geometry
+   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -343,11 +343,11 @@ export class Vector {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureCircleStyle;
     },
-    id?: string
+    optionalFeatureId?: string
   ): Feature => {
     const circleMarkerOptions = options || {};
 
-    const lId = generateId(id);
+    const featureId = generateId(optionalFeatureId);
 
     // create a line geometry
     const circleMarker = new Feature({
@@ -384,7 +384,7 @@ export class Vector {
     }
 
     // set an id to this geometry
-    circleMarker.set('id', lId);
+    circleMarker.set('featureId', featureId);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circleMarker);
@@ -403,7 +403,7 @@ export class Vector {
    *
    * @param {Coordinate} coordinate the long lat position of the marker
    * @param options marker options including styling
-   * @param {string} id an optional id to be used to manage this geometry
+   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
    *
    * @returns {Feature} a geometry containing the id and the created geometry
    */
@@ -413,11 +413,11 @@ export class Vector {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
       style?: TypeFeatureStyle;
     },
-    id?: string
+    optionalFeatureId?: string
   ): Feature => {
     const markerOptions = options || {};
 
-    const idMarker = generateId(id);
+    const featureId = generateId(optionalFeatureId);
 
     // create a line geometry
     const marker = new Feature({
@@ -454,7 +454,7 @@ export class Vector {
     }
 
     // set an id to this geometry
-    marker.set('id', idMarker);
+    marker.set('featureId', featureId);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
@@ -469,25 +469,25 @@ export class Vector {
   };
 
   /**
-   * Find a geometry using it's id
+   * Find a feature using it's id
    *
-   * @param {string} id the id of the geometry to return
+   * @param {string} featureId the id of the feature to return
    *
-   * @returns {Feature} a geometry having the specified id
+   * @returns {Feature} a feature having the specified id
    */
-  getGeometry = (id: string): Feature => {
-    return this.geometries.filter((layer) => layer.get('id') === id)[0];
+  getGeometry = (featureId: string): Feature => {
+    return this.geometries.filter((layer) => layer.get('featureId') === featureId)[0];
   };
 
   /**
-   * Delete a geometry using the id and delete it from the groups and the map
+   * Delete a feature using the id and delete it from the groups and the map
    *
-   * @param {string} id the id of the geometry to delete
+   * @param {string} featureId the id of the feature to delete
    */
-  deleteGeometry = (id: string): void => {
+  deleteGeometry = (featureId: string): void => {
     for (let i = 0; i < this.geometries.length; i++) {
-      if (this.geometries[i].get('id') === id) {
-        this.deleteGeometryFromGroups(id);
+      if (this.geometries[i].get('featureId') === featureId) {
+        this.deleteGeometryFromGroups(featureId);
 
         this.geometries[i].dispose();
 
@@ -514,8 +514,8 @@ export class Vector {
   ): FeatureCollection => {
     const geometryGroupOptions = options || {};
 
-    let featureGroup = this.getGeometryGroup(geometryGroupId);
-    if (!featureGroup) {
+    let geometryGroup = this.getGeometryGroup(geometryGroupId);
+    if (!geometryGroup) {
       const vectorSource = new VectorSource(geometryGroupOptions.vectorSourceOptions);
 
       const vectorLayer = new VectorLayer({
@@ -523,20 +523,20 @@ export class Vector {
         source: vectorSource,
       });
 
-      featureGroup = {
-        id: geometryGroupId,
+      geometryGroup = {
+        geometryGroupId,
         vectorLayer,
         vectorSource,
       };
 
-      if (featureGroup.vectorLayer.getVisible()) {
-        api.map(this.#mapId).map.addLayer(featureGroup.vectorLayer);
-        featureGroup.vectorLayer.changed();
+      if (geometryGroup.vectorLayer.getVisible()) {
+        api.map(this.#mapId).map.addLayer(geometryGroup.vectorLayer);
+        geometryGroup.vectorLayer.changed();
       }
-      this.geometryGroups.push(featureGroup);
+      this.geometryGroups.push(geometryGroup);
     }
 
-    return featureGroup;
+    return geometryGroup;
   };
 
   /**
@@ -547,9 +547,9 @@ export class Vector {
    */
   setActiveGeometryGroup = (id?: string): void => {
     // if group name not give, add to default group
-    const groupId = id || this.defaultGeometryGroupId;
+    const geometryGroupId = id || this.defaultGeometryGroupId;
     for (let i = 0; i < this.geometryGroups.length; i++) {
-      if (this.geometryGroups[i].id === groupId) {
+      if (this.geometryGroups[i].geometryGroupId === geometryGroupId) {
         this.activeGeometryGroupIndex = i;
         break;
       }
@@ -576,7 +576,7 @@ export class Vector {
   getGeometryGroup = (geometryGroupId?: string): FeatureCollection => {
     let geometryGroup: FeatureCollection;
     if (geometryGroupId) {
-      [geometryGroup] = this.geometryGroups.filter((theGeometryGroup) => theGeometryGroup.id === geometryGroupId);
+      [geometryGroup] = this.geometryGroups.filter((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
     } else {
       geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
     }
@@ -587,21 +587,18 @@ export class Vector {
   /**
    * Find the groups that contain the geometry using it's id
    *
-   * @param {string} id the id of the geometry
+   * @param {string} featureId the id of the geometry
    *
-   * @returns {FeatureGroup | null} the groups that contain the geometry
-   *                                or null if not found
+   * @returns {FeatureCollection[]} the groups that contain the geometry
    */
-  getGeometryGroupsByGeometryId = (id: string): FeatureCollection[] => {
+  getGeometryGroupsByFeatureId = (featureId: string): FeatureCollection[] => {
     const returnValue: FeatureCollection[] = [];
     for (let i = 0; i < this.geometryGroups.length; i++) {
       const geometries = this.geometryGroups[i].vectorLayer.getSource()?.getFeatures() || [];
       for (let j = 0; j < geometries.length; j++) {
         const geometry = geometries[j];
 
-        const geometryId = geometry.get('id');
-
-        if (geometryId === id) returnValue.push(this.geometryGroups[i]);
+        if (geometry.get('featureId') === featureId) returnValue.push(this.geometryGroups[i]);
       }
     }
 
@@ -661,12 +658,12 @@ export class Vector {
   };
 
   /**
-   * Find the groups that the geometry exists in and delete the geometry from those groups
+   * Find the groups that the feature exists in and delete the feature from those groups
    *
-   * @param {string} geometryId the geometry id
+   * @param {string} featureId the geometry id
    */
-  deleteGeometryFromGroups = (geometryId: string): void => {
-    const geometry = this.getGeometry(geometryId);
+  deleteGeometryFromGroups = (featureId: string): void => {
+    const geometry = this.getGeometry(featureId);
     for (let i = 0; i < this.geometryGroups.length; i++) {
       this.geometryGroups[i].vectorLayer
         .getSource()
@@ -681,14 +678,14 @@ export class Vector {
   };
 
   /**
-   * Delete a specific geometry from a group using the geometry id
+   * Delete a specific feature from a group using the feature id
    * If geometryGroupid is not provided, the active geometry group is used.
    *
-   * @param {string} geometryId the geometry id to be deleted
+   * @param {string} featureId the feature id to be deleted
    * @param {string} geometryGroupid optional group id
    */
-  deleteGeometryFromGroup = (geometryId: string, geometryGroupid?: string): void => {
-    const geometry = this.getGeometry(geometryId);
+  deleteGeometryFromGroup = (featureId: string, geometryGroupid?: string): void => {
+    const geometry = this.getGeometry(featureId);
     const geometryGroup = this.getGeometryGroup(geometryGroupid);
     geometryGroup.vectorLayer
       .getSource()
@@ -724,9 +721,9 @@ export class Vector {
    */
   deleteGeometryGroup = (geometryGroupid?: string): void => {
     const geometryGroup = this.deleteGeometriesFromGroup(geometryGroupid);
-    if (geometryGroup.id !== this.defaultGeometryGroupId) {
+    if (geometryGroup.geometryGroupId !== this.defaultGeometryGroupId) {
       for (let i = 0; i < this.geometryGroups.length; i++) {
-        if (this.geometryGroups[i].id === geometryGroup.id) {
+        if (this.geometryGroups[i].geometryGroupId === geometryGroup.geometryGroupId) {
           this.geometryGroups.splice(i, 1);
         }
       }

@@ -56,7 +56,7 @@ export function Footerbar(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const mapId = mapConfig.id;
+  const { mapId } = mapConfig;
 
   const footerBarRef = useRef<HTMLDivElement>();
 
@@ -70,7 +70,7 @@ export function Footerbar(): JSX.Element {
       <FooterbarExpandButton />
       {deviceSizeMedUp && <Attribution />}
       <div id="mouseAndScaleControls" className={classes.mouseScaleControlsContainer}>
-        {deviceSizeMedUp && <MousePosition id={mapId} />}
+        {deviceSizeMedUp && <MousePosition mousePositionMapId={mapId} />}
         <Scale />
       </div>
       <div className={classes.rotationControlsContainer}>

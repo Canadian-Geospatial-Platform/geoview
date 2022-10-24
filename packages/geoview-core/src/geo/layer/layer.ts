@@ -9,7 +9,7 @@ import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payl
 import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerGroupEntryConfig } from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
 import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
 import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';
@@ -42,17 +42,17 @@ export class Layer {
   /**
    * Initialize layer types and listen to add/remove layer events from outside
    *
-   * @param {string} id a reference to the map
+   * @param {string} mapId a reference to the map
    * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
    */
-  constructor(id: string, layersConfig?: TypeGeoviewLayerConfig[]) {
-    this.mapId = id;
+  constructor(mapId: string, layersConfig?: TypeGeoviewLayerConfig[]) {
+    this.mapId = mapId;
 
     this.vector = new Vector(this.mapId);
 
     // listen to outside events to add layers
     api.event.on(
-      EVENT_NAMES.LAYER.EVENT_LAYER_ADD,
+      EVENT_NAMES.LAYER.EVENT_ADD_LAYER,
       (payload) => {
         if (payloadIsALayerConfig(payload)) {
           if (payload.handlerName!.includes(this.mapId)) {
@@ -119,7 +119,7 @@ export class Layer {
       (payload) => {
         if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
-          this.removeLayerById(payload.geoviewLayer.layerId);
+          this.removeGeoviewLayerById(payload.geoviewLayer.geoviewLayerId);
         }
       },
       this.mapId
@@ -127,10 +127,26 @@ export class Layer {
 
     // Load layers that was passed in with the map config
     if (layersConfig && layersConfig.length > 0) {
-      layersConfig?.forEach((aSingleLayerConfig) =>
-        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.mapId, aSingleLayerConfig))
+      layersConfig?.forEach((layerConfig) =>
+        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, layerConfig))
       );
     }
+  }
+
+  /**
+   * Get the layer Path of the layer parameter.
+   * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
+   *
+   * @returns {string} Returns the layer path.
+   */
+  static getLayerPath(layerEntryConfig: TypeLayerEntryConfig, layerPath?: string): string {
+    const pathEnding = typeof layerPath === 'undefined' ? layerEntryConfig.layerId : layerPath;
+    if (layerEntryConfig.geoviewRootLayer === layerEntryConfig.parentLayerConfig)
+      return `${layerEntryConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
+    return this.getLayerPath(
+      layerEntryConfig.parentLayerConfig as TypeLayerGroupEntryConfig,
+      `${(layerEntryConfig.parentLayerConfig as TypeLayerGroupEntryConfig).layerId}/${pathEnding}`
+    );
   }
 
   /**
@@ -140,8 +156,9 @@ export class Layer {
    * @returns {boolean} Returns false if the layer configuration can't be registered.
    */
   registerLayerConfig(layerEntryConfig: TypeLayerEntryConfig): boolean {
-    if (this.registeredLayers[layerEntryConfig.layerId]) return false;
-    this.registeredLayers[layerEntryConfig.layerId] = layerEntryConfig;
+    const layerPath = Layer.getLayerPath(layerEntryConfig);
+    if (this.registeredLayers[layerPath]) return false;
+    this.registeredLayers[layerPath] = layerEntryConfig;
     return true;
   }
 
@@ -152,7 +169,8 @@ export class Layer {
    * @returns {boolean} Returns true if the layer configuration is registered.
    */
   isRegistered(layerEntryConfig: TypeLayerEntryConfig): boolean {
-    return this.registeredLayers[layerEntryConfig.layerId] !== undefined;
+    const layerPath = Layer.getLayerPath(layerEntryConfig);
+    return this.registeredLayers[layerPath] !== undefined;
   }
 
   /**
@@ -179,31 +197,9 @@ export class Layer {
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
 
       // this.layers.push(geoviewLayer);
-      this.layers[geoviewLayer.layerId] = geoviewLayer;
+      this.layers[geoviewLayer.geoviewLayerId] = geoviewLayer;
       api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
     }
-  }
-
-  /**
-   * Remove feature from ESRI Feature and GeoJSON layer from tabindex
-   */
-  removeTabindex(): void {
-    // Because there is no way to know GeoJSON is loaded (load event never trigger), we use a timeout
-    // TODO: timeout is never a good idea, may have to find a workaround...
-    // !: This was a workaround for Leaflet, look if still needed
-    // TODO: check if still needed as part of #335
-    setTimeout(() => {
-      const mapContainer = document.getElementsByClassName(`leaflet-map-${this.mapId}`)[0];
-
-      if (mapContainer) {
-        const featElems = document
-          .getElementsByClassName(`leaflet-map-${this.mapId}`)[0]
-          .getElementsByClassName('leaflet-marker-pane')[0].children;
-        [...featElems].forEach((element) => {
-          element.setAttribute('tabindex', '-1');
-        });
-      }
-    }, 3000);
   }
 
   /**
@@ -211,11 +207,9 @@ export class Layer {
    *
    * @param {string} id the id of the layer to be removed
    */
-  removeLayerById = (id: string): void => {
-    this.layers[id].gvLayers!.dispose();
-
-    // this.layers[id].layer!.removeFrom(api.map(this.mapId).map);
-    delete this.layers[id];
+  removeGeoviewLayerById = (geoviewLayerId: string): void => {
+    this.layers[geoviewLayerId].gvLayers!.dispose();
+    delete this.layers[geoviewLayerId];
   };
 
   /**
@@ -225,10 +219,10 @@ export class Layer {
    */
   addLayer = (layerConfig: TypeGeoviewLayerConfig): string => {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.layerId = generateId(layerConfig.layerId);
-    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADD, this.mapId, layerConfig));
+    layerConfig.geoviewLayerId = generateId(layerConfig.geoviewLayerId);
+    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, layerConfig));
 
-    return layerConfig.layerId;
+    return layerConfig.geoviewLayerId;
   };
 
   /**
@@ -238,10 +232,10 @@ export class Layer {
    */
   removeLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
     // eslint-disable-next-line no-param-reassign
-    geoviewLayer.layerId = generateId(geoviewLayer.layerId);
+    geoviewLayer.geoviewLayerId = generateId(geoviewLayer.geoviewLayerId);
     api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, geoviewLayer));
 
-    return geoviewLayer.layerId;
+    return geoviewLayer.geoviewLayerId;
   };
 
   /**
@@ -250,8 +244,7 @@ export class Layer {
    * @param {string} id the layer id to look for
    * @returns the found layer data object
    */
-  getLayerById = (id: string): AbstractGeoViewLayer | null => {
-    // return this.layers.filter((layer: AbstractGeoViewLayer) => layer.layerId === id)[0];
-    return this.layers[id];
+  getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
+    return this.layers[geoviewLayerId];
   };
 }
