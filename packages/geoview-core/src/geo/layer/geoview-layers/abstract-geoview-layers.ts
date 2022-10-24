@@ -24,6 +24,7 @@ import {
 import {
   getFeatureInfoPayload,
   payloadIsGetFeatureInfo,
+  TypeArrayOfRecords,
   TypeFeatureInfoQuery,
   TypeFeatureInfoRegister,
   TypeFeatureInfoResult,
@@ -377,22 +378,22 @@ export abstract class AbstractGeoViewLayer {
    * Return feature information for the layer specified. If layerId is undefined, this.activeLayer is used.
    *
    * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-   * @param {string | TypeLayerEntryConfig | null | undefined} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   getFeatureInfo(
     location: Pixel | Coordinate | Coordinate[],
-    layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer,
+    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
     queryType: TypeQueryType = 'at pixel'
-  ): Promise<TypeFeatureInfoResult> {
-    const queryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+  ): Promise<TypeArrayOfRecords> {
+    const queryResult = new Promise<TypeArrayOfRecords>((resolve) => {
       const layerConfig = (typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig) as
         | TypeVectorLayerEntryConfig
         | TypeImageLayerEntryConfig
         | null;
-      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve(null);
+      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve([]);
 
       switch (queryType) {
         case 'at pixel':
@@ -413,7 +414,7 @@ export abstract class AbstractGeoViewLayer {
         default:
           // eslint-disable-next-line no-console
           console.log(`Queries using ${queryType} are invalid.`);
-          resolve(null);
+          resolve([]);
       }
     });
     return queryResult;
@@ -427,7 +428,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided coordinate.
@@ -437,7 +438,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided longitude latitude.
@@ -447,7 +448,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided bounding box.
@@ -457,7 +458,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided polygon.
@@ -467,7 +468,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * This method register the GeoView layer to panels that offer this possibility.

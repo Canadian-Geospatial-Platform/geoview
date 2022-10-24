@@ -16,7 +16,7 @@
   </head>
   <body>
     <button id="get-feature-info">Run getFeatureInfo</button><br />
-    <div id="LYR4" class="llwp-map" data-lang="en" data-config="{
+    <div id="mapId" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
@@ -25,89 +25,112 @@
           'projection': 3978
         },
         'basemapOptions': {
-          'basemapId': 'transport',
-          'shaded': false,
-          'labeled': true
+          'basemapId': 'nogeom',
+          'shaded': true,
+          'labeled': false
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'esriFeatureLYR4',
-            'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
-            'metadataAccessPath': {
-              'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
-            },
-            'geoviewLayerType': 'esriFeature',
+            'geoviewLayerId': 'geojsonLYR',
+            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'geoviewLayerType': 'GeoJSON',
             'listOfLayerEntryConfig': [
-              { 'layerId': '8' }
+              { 'layerId': 'polygons.json' },
+              {
+                'entryType': 'group',
+                'layerId': 'Group',
+                'layerName': { 'en': 'Group' },
+                'listOfLayerEntryConfig': [
+                  { 'layerId': 'icon_points.json' },
+                  { 'layerId': 'points.json' }
+                ]
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'test',
+            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+            'metadataAccessPath': { 'en': './geojson/metadata.json' },
+            'geoviewLayerType': 'GeoJSON',
+            'listOfLayerEntryConfig': [
+              { 'layerId': 'lines.json' }
             ]
           }
         ]
       },
-      'components': ['overview-map', 'nav-bar', 'north-arrow'],
+      'components': ['overview-map', 'nav-bar'],
       'corePackages': [],
       'theme': 'dark',
       'suportedLanguages': ['en']
-    }"></div>
-    <table id="legendTable" style="width:33%">
+    }">
+    </div>
+      <table border="1" id="legendTable" style="width:33%">
       <tr>
-        <th>Value</th>
+        <th>Label</th>
         <th>Symbology</th>
       </tr>
     </table>
-<p><strong>Code Snippet:</strong></p>
+    <p><strong>Code Snippet:</strong></p>
     <div id="codeSnippet" class="panel"></div>
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
-        /*
-        cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(false, '1');
-        cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(true, '2');
-        cgpv.api.map('LYR3').layer.layers['esriDynamicLYR3.2'].setVisible(false, '3');
-        /* /
-        cgpv.api.map('LYR1').layer.layers['DataCube'].setVisible(true, 'top-layer');
-        cgpv.api.map('LYR1').layer.layers['DataCube'].setVisible(true, 'msi');
-        cgpv.api.map('LYR1').layer.layers['DataCube'].setVisible(true, 'msi-94-or-more');
-        const gvLayer = cgpv.api.map('LYR1').layer.layers['wmsLYR1-Root'];
-        if (gvLayer) {
-          // gvLayer.setVisible(true, 'OSM-WMS');
-          gvLayer.getLegend('OSM-WMS').then((legend) => {
-            console.log(legend);
-          });
-        }
-        //*/
-        cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
-          console.log(payload)
-        }, 'LYR4/5');
+        setTimeout(() => {
+          const registeredLayers = {};
 
-        var getFeatureInfoButton = document.getElementById('get-feature-info');
-        getFeatureInfoButton.addEventListener('click', function (e) {
+          // Register layers that are created after the panel creation.
+          cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.REGISTER, (payload) => {
+            if (payload.handlerName === 'mapId') {
+              if (payload.data.origin === 'layer') {
+                registeredLayers[payload.data.layerPath] = {
+                  queryIsDone /* boolean */ : false,
+                  queryResult /* TypeFeatureInfoEntry */ : null
+                }
+              }
+            }
+          }, 'mapId');
+
+          // Send a register panel signal to all existing layers of he map. These layers will return a register layer event.
           cgpv.api.event.emit(
             cgpv.types.getFeatureInfoPayload(
-              cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
-              'LYR4/5',
-              { location: [-73.12472222, 46.027777778], queryType: 'at long lat' }
+              cgpv.api.eventNames.GET_FEATURE_INFO.REGISTER,
+              'mapId', {
+                origin: 'panel'
+              }
             )
           );
-          // console.log(cgpv.api.map('LYR1').layer.layers['wmsLYR1-Root'].getFeatureInfo('OSM-WMS'));
-        });
-        // */
-        cgpv.api.map('LYR4').layer.layers['esriFeatureLYR4'].getLegend('esriFeatureLYR4/8').then((legend) => {
-          var legendTable = document.getElementById('legendTable');
-          for (var i = 0; i < legend.legend.Point.length; i++) {
+
+          cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => {
+            console.log(payload.coordinates.lnglat)
+            cgpv.api.event.emit(
+              cgpv.types.getFeatureInfoPayload(
+                cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
+                'mapId/geojsonLYR/polygons.json',
+                { location: payload.coordinates.lnglat, queryType: 'at long lat' }
+              )
+            );
+          }, 'mapId');
+
+          cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
+            console.log(payload)
+          }, 'mapId/geojsonLYR/polygons.json');
+
+          cgpv.api.map('mapId').layer.layers['geojsonLYR'].getLegend('geojsonLYR/polygons.json').then((legend) => {
+            var legendTable = document.getElementById('legendTable');
             var tableRow = document.createElement("tr");
             tableRow.align = "left";
             var tableData1 = document.createElement("td");
-            tableData1.innerHTML = legend.styleConfig.Point.classBreakStyleInfos[i].label;
+            tableData1.innerHTML = legend.styleConfig.Polygon.label;
             tableRow.appendChild(tableData1);
             var tableData2 = document.createElement("td");
-            tableData2.appendChild(legend.legend.Point[i]);
+            tableData2.appendChild(legend.legend.Polygon);
             tableRow.appendChild(tableData2);
             legendTable.appendChild(tableRow);
-          }
-        });
-
+          });
+        }, 5000);
         //create snippets
         createCodeSnippet();
         createConfigSnippet();

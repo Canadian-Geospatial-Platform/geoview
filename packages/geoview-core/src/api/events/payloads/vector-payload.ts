@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED];
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAVector = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is VectorPayload => {
   return validEvents.includes(verifyIfPayload.event);
@@ -26,7 +26,7 @@ export const payloadIsAVector = (verifyIfPayload: PayloadBaseClass): verifyIfPay
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsACircle = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CirclePayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -48,7 +48,7 @@ export interface CirclePayload extends VectorPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsACircleMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleMarkerPayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -70,7 +70,7 @@ export interface CircleMarkerPayload extends VectorPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerPayload => {
   if (payloadIsAMarker(verifyIfPayload)) {
@@ -92,7 +92,7 @@ export interface MarkerPayload extends VectorPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPolygon = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolygonPayload => {
   if (payloadIsAVector(verifyIfPayload)) {
@@ -114,7 +114,7 @@ export interface PolygonPayload extends VectorPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPolyline = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolylinePayload => {
   if (payloadIsAVector(verifyIfPayload)) {

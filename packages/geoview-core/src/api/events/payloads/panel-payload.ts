@@ -39,7 +39,7 @@ export type TypeActionButton = {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadHasAButtonIdAndType = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelWithAButtonIdAndTypePayload => {
   return validEvents4ButtonIdAndType.includes(verifyIfPayload.event);
@@ -62,7 +62,7 @@ export interface PanelWithAButtonIdAndTypePayload extends PanelPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPanelAction = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelAndActionPayload => {
   return validEvents4Action.includes(verifyIfPayload.event);
@@ -85,7 +85,7 @@ export interface PanelAndActionPayload extends PanelPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPanelContent = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelAndContentPayload => {
   return validEvents4Content.includes(verifyIfPayload.event);
@@ -108,7 +108,7 @@ export interface PanelAndContentPayload extends PanelPayload {
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPanel = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelPayload => {
   return validEvents.includes(verifyIfPayload.event);

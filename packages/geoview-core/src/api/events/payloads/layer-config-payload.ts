@@ -12,7 +12,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_ADD_LAYER];
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsALayerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is LayerConfigPayload => {
   return validEvents.includes(verifyIfPayload.event);
