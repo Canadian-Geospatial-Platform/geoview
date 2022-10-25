@@ -4,12 +4,18 @@ import { Vector } from './vector/vector';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
+import { Config } from '../../core/utils/config/config';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
 import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerGroupEntryConfig } from '../map/map-schema-types';
+import {
+  TypeGeoviewLayerConfig,
+  TypeLayerEntryConfig,
+  TypeLayerGroupEntryConfig,
+  TypeListOfLocalizedLanguages,
+} from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
 import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
 import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';
@@ -26,7 +32,7 @@ import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-til
  */
 export class Layer {
   /** Layers with valid configuration for this map. */
-  registeredLayers: Record<string, TypeLayerEntryConfig> = {};
+  registeredLayers: Partial<Record<string, TypeLayerEntryConfig>> = {};
 
   // variable used to store all added layers
   layers: { [key: string]: AbstractGeoViewLayer } = {};
@@ -65,7 +71,7 @@ export class Layer {
                   arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
                     if (listOfGeoviewLayerConfig.length > 0) {
                       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-                        this.addLayer(geoviewLayerConfig);
+                        this.addGeoviewLayer(geoviewLayerConfig);
                       });
                     }
                   });
@@ -119,7 +125,7 @@ export class Layer {
       (payload) => {
         if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
-          this.removeGeoviewLayerById(payload.geoviewLayer.geoviewLayerId);
+          this.removeLayersUsingPath(payload.geoviewLayer.geoviewLayerId);
         }
       },
       this.mapId
@@ -134,7 +140,7 @@ export class Layer {
   }
 
   /**
-   * Get the layer Path of the layer parameter.
+   * Get the layer Path of the layer configuration parameter.
    * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
    *
    * @returns {string} Returns the layer path.
@@ -203,13 +209,29 @@ export class Layer {
   }
 
   /**
-   * Remove a layer from the map
+   * Remove a GeoView layer from the map using its geoviewLayerId
    *
-   * @param {string} id the id of the layer to be removed
+   * @param {string} geoviewLayerId the path of the GeoView layer to be removed
    */
-  removeGeoviewLayerById = (geoviewLayerId: string): void => {
-    this.layers[geoviewLayerId].gvLayers!.dispose();
-    delete this.layers[geoviewLayerId];
+  removeLayersUsingPath = (layerPath: string): void => {
+    this.registeredLayers = Object.keys(this.registeredLayers)
+      .filter((key) => {
+        if (key.startsWith(layerPath)) {
+          this.registeredLayers[key]?.gvLayer!.dispose();
+          return false;
+        }
+        return true;
+      })
+      .reduce((newRegisteredLayers: Partial<Record<string, TypeLayerEntryConfig>>, key: string) => {
+        // eslint-disable-next-line no-param-reassign
+        newRegisteredLayers[key] = this.registeredLayers[key];
+        return newRegisteredLayers;
+      }, {});
+
+    if (this.layers[layerPath]) {
+      this.layers[layerPath].gvLayers!.dispose();
+      delete this.layers[layerPath];
+    }
   };
 
   /**
@@ -217,12 +239,18 @@ export class Layer {
    *
    * @param {TypeGeoviewLayerConfig} layerConfig the layer configuration to add
    */
-  addLayer = (layerConfig: TypeGeoviewLayerConfig): string => {
+  addGeoviewLayer = (geoviewLayerConfig: TypeGeoviewLayerConfig, optionalSuportedLanguages?: TypeListOfLocalizedLanguages): string => {
     // eslint-disable-next-line no-param-reassign
-    layerConfig.geoviewLayerId = generateId(layerConfig.geoviewLayerId);
-    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, layerConfig));
+    geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
+    // create a new config for this map element
+    const config = new Config(api.map(this.mapId).map.getTargetElement());
 
-    return layerConfig.geoviewLayerId;
+    const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
+    config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
+
+    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
+
+    return geoviewLayerConfig.geoviewLayerId;
   };
 
   /**
@@ -230,7 +258,7 @@ export class Layer {
    *
    * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
    */
-  removeLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
+  removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
     // eslint-disable-next-line no-param-reassign
     geoviewLayer.geoviewLayerId = generateId(geoviewLayer.geoviewLayerId);
     api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, geoviewLayer));

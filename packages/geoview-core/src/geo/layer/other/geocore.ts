@@ -78,7 +78,7 @@ export class GeoCore {
       });
       Promise.all(promiseOfLayerConfigs).then((listOfLayerCreated) => {
         listOfLayerCreated.forEach((listeOfGeoviewLayerConfig) => {
-          this.configValidation.validateUUIDConfigAgainstSchema(
+          this.configValidation.validateListOfGeoviewLayerConfig(
             api.map(this.mapId).mapFeaturesConfig.suportedLanguages,
             listeOfGeoviewLayerConfig
           );

@@ -264,7 +264,7 @@
   <button class="Get-Esri-dynamic-Legend">Get Legend</button>
   <table border="1" id="legendTable" style="width:33%">
     <tr>
-      <th style="text-align: center; vertical-align: middle;">Value</th>
+      <th style="text-align: center; vertical-align: middle;">Label</th>
       <th style="text-align: center; vertical-align: middle;">Symbology</th>
     </tr>
   </table>
@@ -300,7 +300,23 @@
           'listOfLayerEntryConfig': [
             { 'layerId': 'polygons.json' },
             { 'layerId': 'lines.json' },
-            { 'layerId': 'icon_points.json' },
+            {
+              'entryType': 'group',
+              'layerId': 'LYR5-Group2',
+              'layerName': { 'en': 'LYR5-Group2' },
+              'listOfLayerEntryConfig': [
+                { 'layerId': 'icon_points.json' },
+                { 'layerId': 'points.json' }
+              ]
+            }
+          ]
+        },
+        {
+          'geoviewLayerId': 'test',
+          'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+          'metadataAccessPath': { 'en': './geojson/metadata.json' },
+          'geoviewLayerType': 'GeoJSON',
+          'listOfLayerEntryConfig': [
             { 'layerId': 'points.json' }
           ]
         }
@@ -315,14 +331,14 @@
   <button class="Get-GeoJson-Legend">Get Legend</button>
   <table border="1" id="geojsonLegendTable" style="width:33%">
     <tr>
-      <th style="text-align: center; vertical-align: middle;">Value</th>
+      <th style="text-align: center; vertical-align: middle;">Label</th>
       <th style="text-align: center; vertical-align: middle;">Symbology</th>
     </tr>
   </table>
   <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
     the buttons</p>
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
-  <label id="new-layer-id-label"> Added Layer ID : </label><label id="new-layer-id"></label>
+  <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
   <button type="button" class="collapsible">Get Feature Info polygons</button>
   <pre id="LYR5-INFO-geojsonLYR5/polygons.json" class="panel">Click on feature on the map</pre>
   <hr />
@@ -491,20 +507,29 @@
     // TODO: Repair
     addGeoJSONButton.addEventListener('click', function (e) {
       // adding a geojson layer requires a type of geojson and url
-      const layerID = cgpv.api.map('LYR5').layer.addLayer({
-        'geoviewLayerId': 'geoJsonSample',
-        'geoviewLayerName': {
-          'en': 'geojson sample',
-          'fr': 'exemple geojson'
+      const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+        {
+          'geoviewLayerId': 'geoJsonSample',
+          'geoviewLayerName': {
+            'en': 'geojson sample',
+            'fr': 'exemple geojson'
+          },
+          'geoviewLayerType': 'GeoJSON',
+          'listOfLayerEntryConfig': [
+            {
+              'layerId': 'historical_flood_0.geojson',
+              'source': {
+                'dataAccessPath': {
+                  'en': './geojson/',
+                  'fr': './geojson/'
+                }
+              }
+            }
+          ],
         },
-        'metadataAccessPath': {
-          'en': './geojson/metadata.json',
-          'fr': './geojson/metadata.json'
-        },
-        'geoviewLayerType': 'GeoJSON',
-        'listOfLayerEntryConfig': [ { 'layerId': 'icon_points.json' }],
-      });
-      document.getElementById('new-layer-id').innerText = layerID;
+        ['en', 'fr']
+      );
+      document.getElementById('new-layer-id-label').innerText = layerID;
     });
 
     // find the button element by ID
@@ -513,8 +538,8 @@
     // add an event listener when a button is clicked
     removeGeoJSONButton.addEventListener('click', function (e) {
       // removing a geojson layer using the ID
-      cgpv.api.map('LYR5').layer.removeLayerById(document.getElementById('new-layer-id').innerText);
-      document.getElementById('new-layer-id').innerText = '';
+      cgpv.api.map('LYR5').layer.removeLayersUsingPath(document.getElementById('new-layer-id-label').innerText);
+      document.getElementById('new-layer-id-label').innerText = '';
     });
 
     // WMS
@@ -534,7 +559,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', 'rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0') }, 'LYR8');
 
     function handleMapClick(payload, mapId, layerId) {
-      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {console.log(document.getElementById(`${mapId}-INFO-${layerId}`));
+      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
         document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
         if (payload.data !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
       }, `${mapId}/${layerId}`);
@@ -614,11 +639,11 @@
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.LineString.label, legend.legend.LineString)
         });
-        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/points.json').then((legend) => {
+        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/LYR5-Group2/points.json').then((legend) => {
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.Point.label, legend.legend.Point)
         });
-        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/icon_points.json').then((legend) => {
+        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/LYR5-Group2/icon_points.json').then((legend) => {
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.Point.label, legend.legend.Point)
         });

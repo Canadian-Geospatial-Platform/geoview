@@ -23,7 +23,7 @@ export class Config {
   private mapElement: Element;
 
   /** Config validation object used to validate the configuration and define default values */
-  private configValidation: ConfigValidation;
+  configValidation: ConfigValidation;
 
   /** ***************************************************************************************************************************
    * The Config class constructor used to instanciate an object of this type.

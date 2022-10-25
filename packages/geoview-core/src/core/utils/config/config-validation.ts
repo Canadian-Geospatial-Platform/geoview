@@ -333,7 +333,7 @@ export class ConfigValidation {
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and
    * validate.
    */
-  validateUUIDConfigAgainstSchema(
+  validateListOfGeoviewLayerConfig(
     suportedLanguages: TypeListOfLocalizedLanguages,
     listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
   ): void {

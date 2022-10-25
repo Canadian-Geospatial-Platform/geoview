@@ -291,7 +291,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
     // remove bounding box layer from map
     api.map(mapId).layer.vector?.deleteGeometry('layerBoundingBox');
     // remove layer from map
-    api.map(mapId).layer.removeLayer(layer);
+    api.map(mapId).layer.removeGeoviewLayer(layer);
   };
 
   /**

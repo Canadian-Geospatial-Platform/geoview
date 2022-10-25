@@ -484,16 +484,17 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Return the legend of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-   * return null when the layer specified is not found.
+   * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+   * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
+   * is null or the selected layerConfig is undefined or null.
    *
-   * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    *
    * @returns {Promise<TypeLegend | null>} The legend of the layer.
    */
-  getLegend(layerIdOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): Promise<TypeLegend | null> {
+  getLegend(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
-      const layerConfig = typeof layerIdOrConfig === 'string' ? this.getLayerConfig(layerIdOrConfig) : layerIdOrConfig;
+      const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
       if (!layerConfig) resolve(null);
 
       this.getLegendImage(layerConfig!.layerId).then((legendImage) => {
