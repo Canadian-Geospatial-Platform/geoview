@@ -383,7 +383,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       listOfLayerEntryConfig: entries as TypeListOfLayerEntryConfig,
     };
     if (valid) {
-      api.map(mapId).layer.addLayer(layerConfig);
+      api.map(mapId).layer.addGeoviewLayer(layerConfig);
       setAddLayerVisible(false);
     }
   };
