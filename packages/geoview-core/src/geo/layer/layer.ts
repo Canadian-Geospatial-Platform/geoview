@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
@@ -23,6 +24,7 @@ import { EsriFeature, layerConfigIsEsriFeature } from './geoview-layers/vector/e
 import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
+import { GetFeatureInfoPayload } from '../../api/events/payloads/get-feature-info-payload';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -209,28 +211,30 @@ export class Layer {
   }
 
   /**
-   * Remove a GeoView layer from the map using its geoviewLayerId
+   * Remove a layer from the map using its layer path. The path may point to the root geoview layer
+   * or a sub layer.
    *
-   * @param {string} geoviewLayerId the path of the GeoView layer to be removed
+   * @param {string} partialLayerPath the path of the layer to be removed
    */
-  removeLayersUsingPath = (layerPath: string): void => {
+  removeLayersUsingPath = (partialLayerPath: string): void => {
     this.registeredLayers = Object.keys(this.registeredLayers)
-      .filter((key) => {
-        if (key.startsWith(layerPath)) {
-          this.registeredLayers[key]?.gvLayer!.dispose();
+      .filter((compleLayerPath) => {
+        if (compleLayerPath.startsWith(partialLayerPath)) {
+          this.registeredLayers[compleLayerPath]?.gvLayer!.dispose();
+          api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, compleLayerPath, 'remove'));
           return false;
         }
         return true;
       })
-      .reduce((newRegisteredLayers: Partial<Record<string, TypeLayerEntryConfig>>, key: string) => {
+      .reduce((newRegisteredLayers: Partial<Record<string, TypeLayerEntryConfig>>, compleLayerPath: string) => {
         // eslint-disable-next-line no-param-reassign
-        newRegisteredLayers[key] = this.registeredLayers[key];
+        newRegisteredLayers[compleLayerPath] = this.registeredLayers[compleLayerPath];
         return newRegisteredLayers;
       }, {});
 
-    if (this.layers[layerPath]) {
-      this.layers[layerPath].gvLayers!.dispose();
-      delete this.layers[layerPath];
+    if (this.layers[partialLayerPath]) {
+      this.layers[partialLayerPath].gvLayers!.dispose();
+      delete this.layers[partialLayerPath];
     }
   };
 
@@ -254,13 +258,11 @@ export class Layer {
   };
 
   /**
-   * Remove a layer from the map
+   * Remove a geoview layer from the map
    *
    * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
-    // eslint-disable-next-line no-param-reassign
-    geoviewLayer.geoviewLayerId = generateId(geoviewLayer.geoviewLayerId);
     api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
