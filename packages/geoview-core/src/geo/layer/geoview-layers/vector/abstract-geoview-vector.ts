@@ -172,7 +172,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const featureFields = feature.getKeys();
       const featureInfoEntry: TypeFeatureInfoEntry = {};
       featureFields.forEach((fieldName) => {
-        if (!outfields || outfields.includes(fieldName)) featureInfoEntry[fieldName] = feature.get(fieldName);
+        if (fieldName !== 'geometry' && (!outfields || outfields.includes(fieldName))) featureInfoEntry[fieldName] = feature.get(fieldName);
       });
       queryResult.push(featureInfoEntry);
     });

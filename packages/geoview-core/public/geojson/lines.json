@@ -2,19 +2,33 @@
   "type": "FeatureCollection",
   "features": [
     {
-      "type": "LineString",
-      "coordinates": [
-        [-108, 53],
-        [-108, 44],
-        [-120, 59]
-      ]
+      "type": "Feature",
+      "properties": {
+        "Road Number": 55,
+        "Province": "Quebec"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-108, 53],
+          [-108, 44],
+          [-120, 59]
+        ]
+      }
     },
     {
-      "type": "LineString",
-      "coordinates": [
-        [-110, 45],
-        [-106, 55]
-      ]
+      "type": "Feature",
+      "properties": {
+        "Road Number": 20,
+        "Province": "Ontario"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-110, 45],
+          [-106, 55]
+        ]
+      }
     }
   ]
 }

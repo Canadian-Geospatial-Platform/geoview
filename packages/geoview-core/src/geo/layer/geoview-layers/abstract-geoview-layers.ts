@@ -22,12 +22,10 @@ import {
   TypeStyleConfigKey,
 } from '../../map/map-schema-types';
 import {
-  getFeatureInfoPayload,
-  payloadIsGetFeatureInfo,
+  GetFeatureInfoPayload,
+  payloadIsQueryLayer,
+  payloadIsRequestLayerInventory,
   TypeArrayOfRecords,
-  TypeFeatureInfoQuery,
-  TypeFeatureInfoRegister,
-  TypeFeatureInfoResult,
   TypeQueryType,
 } from '../../../api/events/payloads/get-feature-info-payload';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
@@ -478,28 +476,36 @@ export abstract class AbstractGeoViewLayer {
   protected registerToPanels(layerEntryConfig: TypeBaseLayerEntryConfig) {
     if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
+
       // Register to panels that are already created.
-      api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerPath}`, { origin: 'layer' }));
-      // Listen to events that request to register to panels created after the layer is created.
-      api.event.on(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, (payload) => {
-        if (payloadIsGetFeatureInfo(payload)) {
-          if ((payload.data as TypeFeatureInfoRegister).origin === 'panel')
-            api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerPath}`, { origin: 'layer' }));
-        }
-      });
+      api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
+
+      // Listen to events that request a layer inventory and emit a register payload if the map identifier is this.mapId.
+      api.event.on(
+        EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY,
+        (payload) => {
+          if (payloadIsRequestLayerInventory(payload)) {
+            const { handlerName } = payload;
+            if (handlerName === this.mapId) api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
+          }
+        },
+        this.mapId
+      );
+
+      // Listen to events that request to query a layer and return the resultset to the requester.
       api.event.on(
         EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
         (payload) => {
-          if (payloadIsGetFeatureInfo(payload)) {
-            if (payload.handlerName === `${this.mapId}/${layerPath}`) {
-              const { location, queryType } = payload.data as TypeFeatureInfoQuery;
+          if (payloadIsQueryLayer(payload)) {
+            const { handlerName, queryType, location } = payload;
+            if (handlerName === this.mapId) {
               this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
-                api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT, `${this.mapId}/${layerPath}`, queryResult));
+                api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
               });
             }
           }
         },
-        `${this.mapId}/${layerPath}`
+        this.mapId
       );
     }
   }

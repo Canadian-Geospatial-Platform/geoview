@@ -310,15 +310,6 @@
               ]
             }
           ]
-        },
-        {
-          'geoviewLayerId': 'test',
-          'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-          'metadataAccessPath': { 'en': './geojson/metadata.json' },
-          'geoviewLayerType': 'GeoJSON',
-          'listOfLayerEntryConfig': [
-            { 'layerId': 'points.json' }
-          ]
         }
       ]
     },
@@ -343,7 +334,7 @@
   <pre id="LYR5-INFO-geojsonLYR5/polygons.json" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Get Feature Info stars</button>
-  <pre id="LYR5-INFO-geojsonLYR5/points.json" class="panel">Click on feature on the map</pre>
+  <pre id="LYR5-INFO-geojsonLYR5/LYR5-Group2/points.json" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR5CS" class="panel"></pre>
@@ -543,35 +534,40 @@
     });
 
     // WMS
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR1', 'wmsLYR1-Root/wmsLYR1-Group/OSM-WMS') }, 'LYR1');
+    createMapClickHandler('LYR1', 'wmsLYR1-Root/wmsLYR1-Group/OSM-WMS')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR1') }, 'LYR1');
     // ESRI Dynamic
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR3', 'esriDynamicLYR3/0') }, 'LYR3');
+    createMapClickHandler('LYR3', 'esriDynamicLYR3/0')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR3') }, 'LYR3');
     // ESRI Feature
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4', 'esriFeatureLYR4/8') }, 'LYR4');
+    createMapClickHandler('LYR4', 'esriFeatureLYR4/8')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4') }, 'LYR4');
     // GeoJSON
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'geojsonLYR5/polygons.json') }, 'LYR5');
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5', 'geojsonLYR5/points.json') }, 'LYR5');
+    createMapClickHandler('LYR5', 'geojsonLYR5/polygons.json')
+    createMapClickHandler('LYR5', 'geojsonLYR5/LYR5-Group2/points.json')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5') }, 'LYR5');
     // WFS
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6', 'wfsLYR6/GISDATA.AIRPORTS_PT') }, 'LYR6');
+    createMapClickHandler('LYR6', 'wfsLYR6/GISDATA.AIRPORTS_PT')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6') }, 'LYR6');
     // OGC Feature API
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7', 'ogcFeatureLYR7/lakes') }, 'LYR7');
-    // NOT WORKING: Event not trapped GeoCore
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8', 'rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0') }, 'LYR8');
+    createMapClickHandler('LYR7', 'ogcFeatureLYR7/lakes')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7') }, 'LYR7');
+    // GeoCore
+    createMapClickHandler('LYR8', 'rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0')
+    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8') }, 'LYR8');
 
-    function handleMapClick(payload, mapId, layerId) {
-      cgpv.api.event.once(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
-        document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
-        if (payload.data !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(payload.data.pop(), undefined, 2);
-      }, `${mapId}/${layerId}`);
+    function createMapClickHandler(mapId, layerId) {
+      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_RESULT, (payload) => {
+        const { handlerName, layerPath, arrayOfRecords, } = payload;
+        if (layerPath === layerId) {
+          document.getElementById(`${mapId}-INFO-${layerId}`).textContent = 'Click on feature on the map';
+          if (arrayOfRecords !== null) document.getElementById(`${mapId}-INFO-${layerId}`).textContent = JSON.stringify(arrayOfRecords.pop(), undefined, 2);
+        }
+      }, mapId);
+    }
 
-      cgpv.api.event.emit(
-        cgpv.types.getFeatureInfoPayload(
-          cgpv.api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
-          `${mapId}/${layerId}`,
-          { location: (mapId === 'LYR1' || mapId === 'LYR3') ? payload.coordinates.lnglat : payload.coordinates.projected,
-          queryType: (mapId === 'LYR1' || mapId === 'LYR3') ? 'at long lat' : 'at coordinate'}
-        )
-      );
+    function handleMapClick(payload, mapId) {
+      cgpv.api.event.emit( cgpv.types.GetFeatureInfoPayload.createQueryLayerPayload(mapId,'at long lat', payload.coordinates.lnglat) );
     }
 
     // Test a refresh WMS from projection change
