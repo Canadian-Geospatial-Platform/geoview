@@ -37,6 +37,9 @@
     "share": "Share",
     "version": "Access GitHub repo"
   },
+  "legend": {
+    "unknown": "Unknown Layer Title"
+  },
   "keyboardnav": {
     "start": "Skip after map element",
     "end": "Skip before map element",
