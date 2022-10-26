@@ -21,6 +21,7 @@ import { Config } from '../../core/utils/config/config';
 import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
+import { LegendApi } from '../../core/components/legend/legend-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 
 import { ModalApi } from '../../ui';
@@ -62,6 +63,9 @@ export class MapViewer {
 
   // used to access the footer tabs api
   footerTabs!: FooterTabsApi;
+
+  // used to access the legend api
+  legend!: LegendApi;
 
   // used to access basemap functions
   basemap!: Basemap;
@@ -117,6 +121,7 @@ export class MapViewer {
     this.appBarButtons = new AppbarButtons(this.mapId);
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
+    this.legend = new LegendApi(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
 
