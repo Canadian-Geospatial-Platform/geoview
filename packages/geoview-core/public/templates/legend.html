@@ -51,9 +51,9 @@
     </table>
   </div>
   <div class="map-title-holder">
-    <h4 id="HUC2">1. Legend Core Component</h4><a class="ref-link" href="#top">Top</a>
+    <h4 id="HUC1">1. Legend Core Component</h4><a class="ref-link" href="#top">Top</a>
   </div>
-  <div id="UC2" class="llwp-map" data-lang="en" data-config="{
+  <div id="UC1" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -76,17 +76,6 @@
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   { 'layerId': '2' }
-                ]
-              },
-              {
-                'geoviewLayerId': 'esriFeatureLYR1',
-                'geoviewLayerName': { 'en': 'Water quality at monitoring sites (Esri-feature UNIQUE VALUES)' },
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
-                },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  { 'layerId': '5' }
                 ]
               },
               {
@@ -114,6 +103,71 @@
                 },
                 'geoviewLayerType': 'ogcWms',
                 'listOfLayerEntryConfig': [{ 'layerId': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }]
+              },
+              {
+                'geoviewLayerId': 'esriFeatureLYR3',
+                'geoviewLayerName': { 'en': 'Provinces (Esri-feature SIMPLE / vector)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '0' }
+                ]
+              },
+              {
+                'geoviewLayerId': 'esriFeatureLYR1x',
+                'geoviewLayerName': { 'en': 'Water quality at monitoring sites (Esri-feature UNIQUE VALUES)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '5' }
+                ]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'components': ['legend'],
+          'corePackages': [],
+          'suportedLanguages': ['en']
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC1CS" class="panel"></pre>
+
+  <div class="map-title-holder">
+    <h4 id="HUC2">2. Class Break Style Legend</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'esriDynamicLYR2',
+                'geoviewLayerName': {
+                  'en': 'Water quality at monitoring sites',
+                  'fr': 'Water quality at monitoring sites'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer',
+                  'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {'layerId': '8'}
+                ]
               }
             ]
           },
@@ -125,21 +179,9 @@
   <p>Add a legend component.</p>
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="UC2CS" class="panel"></pre>
-<!--
-              {
-                'layerId': 'esriFeatureLYR3',
-                'layerName': { 'en': 'Provinces (Esri-feature SIMPLE / vector)' },
-                'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer'
-                },
-                'geoviewLayerType': 'esriFeature',
-                'listOfLayerEntryConfig': [
-                  { 'layerId': '0' }
-                ]
-              }
-  -->
+  
   <div class="map-title-holder">
-    <h4 id="HUC3">2. Group Layer</h4><a class="ref-link" href="#top">Top</a>
+    <h4 id="HUC3">3. Group Layer</h4><a class="ref-link" href="#top">Top</a>
   </div>
   <div id="UC3" class="llwp-map" data-lang="en" data-config="{
           'map': {
@@ -156,7 +198,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerId': 'esriDynamicLYR2',
+                'geoviewLayerId': 'esriDynamicLYR3z',
                 'geoviewLayerName': {
                   'en': 'Energy (Esri-dynamic)',
                   'fr': 'Energy'
@@ -177,26 +219,6 @@
           'theme': 'dark',
           'suportedLanguages': ['en']
         }"></div>
-        <!--
-                  {
-                    'entryType': 'group',
-                    'layerId': '0',
-                    'layerName': {
-                      'en': 'Group'
-                    },
-                    'listOfLayerEntryConfig': [
-                      {
-                        'layerId': '1'
-                      },
-                      {
-                        'layerId': '2'
-                      }
-                      {
-                        'layerId': '3'
-                      }
-                    ]
-                  }
- -->
   <p>Add a legend component.</p>
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="UC3CS" class="panel"></pre>
