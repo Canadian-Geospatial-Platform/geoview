@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMarkerDefinition = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerDefinitionPayload => {
   return validEvents.includes(verifyIfPayload.event);

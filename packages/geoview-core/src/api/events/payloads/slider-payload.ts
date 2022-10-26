@@ -15,7 +15,7 @@ const validEvents: EventStringId[] = [
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsASlider = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is SliderPayload => {
   return validEvents.includes(verifyIfPayload.event);

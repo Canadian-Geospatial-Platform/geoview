@@ -12,7 +12,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMapViewProjection = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapViewProjectionPayload => {
   return validEvents.includes(verifyIfPayload.event);

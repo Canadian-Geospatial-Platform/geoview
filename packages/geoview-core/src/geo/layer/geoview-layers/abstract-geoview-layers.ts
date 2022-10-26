@@ -22,11 +22,10 @@ import {
   TypeStyleConfigKey,
 } from '../../map/map-schema-types';
 import {
-  getFeatureInfoPayload,
-  payloadIsGetFeatureInfo,
-  TypeFeatureInfoQuery,
-  TypeFeatureInfoRegister,
-  TypeFeatureInfoResult,
+  GetFeatureInfoPayload,
+  payloadIsQueryLayer,
+  payloadIsRequestLayerInventory,
+  TypeArrayOfRecords,
   TypeQueryType,
 } from '../../../api/events/payloads/get-feature-info-payload';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
@@ -377,22 +376,22 @@ export abstract class AbstractGeoViewLayer {
    * Return feature information for the layer specified. If layerId is undefined, this.activeLayer is used.
    *
    * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-   * @param {string | TypeLayerEntryConfig | null | undefined} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   getFeatureInfo(
     location: Pixel | Coordinate | Coordinate[],
-    layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer,
+    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
     queryType: TypeQueryType = 'at pixel'
-  ): Promise<TypeFeatureInfoResult> {
-    const queryResult = new Promise<TypeFeatureInfoResult>((resolve) => {
+  ): Promise<TypeArrayOfRecords> {
+    const queryResult = new Promise<TypeArrayOfRecords>((resolve) => {
       const layerConfig = (typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig) as
         | TypeVectorLayerEntryConfig
         | TypeImageLayerEntryConfig
         | null;
-      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve(null);
+      if (!layerConfig || !layerConfig.source?.featureInfo?.queryable) resolve([]);
 
       switch (queryType) {
         case 'at pixel':
@@ -413,7 +412,7 @@ export abstract class AbstractGeoViewLayer {
         default:
           // eslint-disable-next-line no-console
           console.log(`Queries using ${queryType} are invalid.`);
-          resolve(null);
+          resolve([]);
       }
     });
     return queryResult;
@@ -427,7 +426,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided coordinate.
@@ -437,7 +436,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided longitude latitude.
@@ -447,7 +446,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided bounding box.
@@ -457,7 +456,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided polygon.
@@ -467,7 +466,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+  protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
    * This method register the GeoView layer to panels that offer this possibility.
@@ -477,28 +476,36 @@ export abstract class AbstractGeoViewLayer {
   protected registerToPanels(layerEntryConfig: TypeBaseLayerEntryConfig) {
     if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
+
       // Register to panels that are already created.
-      api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerPath}`, { origin: 'layer' }));
-      // Listen to events that request to register to panels created after the layer is created.
-      api.event.on(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, (payload) => {
-        if (payloadIsGetFeatureInfo(payload)) {
-          if ((payload.data as TypeFeatureInfoRegister).origin === 'panel')
-            api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.REGISTER, `${this.mapId}/${layerPath}`, { origin: 'layer' }));
-        }
-      });
+      api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
+
+      // Listen to events that request a layer inventory and emit a register payload if the map identifier is this.mapId.
+      api.event.on(
+        EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY,
+        (payload) => {
+          if (payloadIsRequestLayerInventory(payload)) {
+            const { handlerName } = payload;
+            if (handlerName === this.mapId) api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
+          }
+        },
+        this.mapId
+      );
+
+      // Listen to events that request to query a layer and return the resultset to the requester.
       api.event.on(
         EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
         (payload) => {
-          if (payloadIsGetFeatureInfo(payload)) {
-            if (payload.handlerName === `${this.mapId}/${layerPath}`) {
-              const { location, queryType } = payload.data as TypeFeatureInfoQuery;
+          if (payloadIsQueryLayer(payload)) {
+            const { handlerName, queryType, location } = payload;
+            if (handlerName === this.mapId) {
               this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
-                api.event.emit(getFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT, `${this.mapId}/${layerPath}`, queryResult));
+                api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
               });
             }
           }
         },
-        `${this.mapId}/${layerPath}`
+        this.mapId
       );
     }
   }

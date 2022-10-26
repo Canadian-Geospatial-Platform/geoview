@@ -12,7 +12,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_U
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsABasemapLayerArray = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is BasemapLayerArrayPayload => {
   return validEvents.includes(verifyIfPayload.event);

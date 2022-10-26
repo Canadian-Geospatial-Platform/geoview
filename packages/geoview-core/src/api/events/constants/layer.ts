@@ -6,7 +6,7 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the LAYER category */
-export type LayerEventKey = 'EVENT_ADD_LAYER' | 'EVENT_LAYER_ADDED' | 'EVENT_REMOVE_LAYER' | 'EVENT_GET_LAYERS';
+export type LayerEventKey = 'EVENT_ADD_LAYER' | 'EVENT_LAYER_ADDED' | 'EVENT_REMOVE_LAYER';
 
 /** Record that associates LAYER's event keys to their event string id */
 export const LAYER: Record<LayerEventKey, EventStringId> = {
@@ -24,10 +24,4 @@ export const LAYER: Record<LayerEventKey, EventStringId> = {
    * Event triggered when removing a layer
    */
   EVENT_REMOVE_LAYER: 'layer/remove',
-
-  // TODO there is no code linked to the following event for the moment
-  /**
-   * Event triggered when getting all layers
-   */
-  EVENT_GET_LAYERS: 'layer/get_layers',
 };
