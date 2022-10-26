@@ -140,7 +140,8 @@ export class GeoviewRenderer {
   }
 
   private createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
-    const [width, height] = pointStyle?.getImage().getSize() as Size;
+    const size = pointStyle?.getImage().getSize() as Size;
+    const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
     const drawingCanvas = document.createElement('canvas');
     drawingCanvas.width = width;
     drawingCanvas.height = height;

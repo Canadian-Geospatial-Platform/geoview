@@ -216,7 +216,7 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+      api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
       if ('Layer' in subLayer) this.createGroupLayer(subLayer, subLayerEntryConfig);
     });
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
