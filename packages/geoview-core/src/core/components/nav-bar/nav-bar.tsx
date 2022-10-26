@@ -173,9 +173,7 @@ export function Navbar(): JSX.Element {
         const panels = Object.keys(buttonPanelGroup).map((buttonPanelKey) => {
           const buttonPanel = buttonPanelGroup[buttonPanelKey];
 
-          return buttonPanel.panel ? (
-            <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} />
-          ) : null;
+          return buttonPanel.panel ? <Panel key={buttonPanel.button.id} button={buttonPanel.button} panel={buttonPanel.panel} /> : null;
         });
 
         if (panels.length > 0) {

@@ -193,7 +193,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             fr: this.metadata!.layers[layerId as number].name as string,
           };
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+          api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
         });
         const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
         switchToGroupLayer.entryType = 'group';

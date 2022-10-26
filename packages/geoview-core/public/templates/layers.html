@@ -215,6 +215,7 @@
           'suportedLanguages': ['en']
         }"></div>
   <div id="esriDynamicLayerLegend">
+    <button class="Get-Esri-dynamic-Legend">Get Legend</button>
     <h3>Legend</h3>
   </div>
   <p>This map has a Esri dynamic layer added from configuration.</p>
@@ -261,7 +262,7 @@
           'suportedLanguages': ['en']
         }"></div>
   <p>This map has a Esri feature layer added from configuration.</p>
-  <button class="Get-Esri-dynamic-Legend">Get Legend</button>
+  <button class="Get-Esri-feature-Legend">Get Legend</button>
   <table border="1" id="legendTable" style="width:33%">
     <tr>
       <th style="text-align: center; vertical-align: middle;">Label</th>
@@ -488,7 +489,7 @@
       createCodeSnippet();
       createConfigSnippet();
       addWMSLegend();
-      // TODO: repair addEsriDynamicLegend();
+      addEsriDynamicLegend();
     });
 
     // find the button element by ID
@@ -587,9 +588,9 @@
     }
 
     // find the button element by ID
-    var addEsriDynamicLegendButton = document.getElementsByClassName('Get-Esri-dynamic-Legend')[0];
+    var addEsriFeatureLegendButton = document.getElementsByClassName('Get-Esri-feature-Legend')[0];
     // add legend to ESRI feature layer
-    addEsriDynamicLegendButton.addEventListener('click', function (e) {
+    addEsriFeatureLegendButton.addEventListener('click', function (e) {
       cgpv.api.map('LYR4').layer.layers['esriFeatureLYR4'].getLegend('esriFeatureLYR4/8').then((legend) => {
           var legendTable = document.getElementById('legendTable');
           for (var i = 0; i < legend.legend.Point.length; i++) {
@@ -645,13 +646,18 @@
         });
       });
 
-    /**
+    // find the button element by ID
+    var addEsriDynamicLegendButton = document.getElementsByClassName('Get-Esri-dynamic-Legend')[0];
     //add legend to ESRI Dynamic layer
-    function addEsriDynamicLegend() {
+    addEsriDynamicLegendButton.addEventListener('click', function (e) {
       cgpv.api
         .map('LYR3')
-        .layer.layers['esriDynamicLYR3'].getLegendJson()
+        .layer.layers['esriDynamicLYR3'].getLegend()
         .then((layers) => {
+          console.log(layers);
+        });
+    });
+    /**
           //create a Table Object
           let legendTable = document.createElement('table');
           legendTable.className = 'legendTable';
