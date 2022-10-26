@@ -1,10 +1,10 @@
-import MaterialListItem from '@mui/material/ListItem';
+import MaterialListItemButton from '@mui/material/ListItemButton';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { ListItemProps } from '@mui/material';
+import { ListItemButtonProps } from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
-  listItem: {
+  listItemButton: {
     //
   },
 }));
@@ -15,14 +15,14 @@ const useStyles = makeStyles((theme) => ({
  * @param {ListItemProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
-export function ListItem(props: ListItemProps): JSX.Element {
+export function ListItemButton(props: ListItemButtonProps): JSX.Element {
   const { children, className, style } = props;
 
   const classes = useStyles();
 
   return (
-    <MaterialListItem className={`${classes.listItem} ${className || ''}`} style={style || undefined}>
+    <MaterialListItemButton className={`${classes.listItemButton} ${className || ''}`} style={style || undefined}>
       {children !== undefined && children}
-    </MaterialListItem>
+    </MaterialListItemButton>
   );
 }

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
+    type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Legend</strong></h1>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <a href="./index.html">Main</a><br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            This page demonstrates the legend component
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="map-title-holder">
+    <h4 id="HUC1">1. Legend Core Component</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC1" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'esriFeatureLYR2',
+                'geoviewLayerName': { 'en': 'Cities L2 (Esri-feature SIMPLE / base64 img)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '2' }
+                ]
+              },
+              {
+                'geoviewLayerId': 'wmsLYR1',
+                'geoviewLayerName': {
+                  'en': 'Première Nation / First Nation (WMS)',
+                  'fr': 'Première Nation / First Nationz'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer',
+                  'fr': 'https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer'
+                },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': '0' }]
+              },
+              {
+                'geoviewLayerId': 'wmsLYR7',
+                'geoviewLayerName': {
+                  'en': 'Geomet (WMS)',
+                  'fr': 'Geomet'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://geo.weather.gc.ca/geomet',
+                  'fr': 'https://geo.weather.gc.ca/geomet'
+                },
+                'geoviewLayerType': 'ogcWms',
+                'listOfLayerEntryConfig': [{ 'layerId': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }]
+              },
+              {
+                'geoviewLayerId': 'esriFeatureLYR3',
+                'geoviewLayerName': { 'en': 'Provinces (Esri-feature SIMPLE / vector)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '0' }
+                ]
+              },
+              {
+                'geoviewLayerId': 'esriFeatureLYR1x',
+                'geoviewLayerName': { 'en': 'Water quality at monitoring sites (Esri-feature UNIQUE VALUES)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  { 'layerId': '5' }
+                ]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'components': ['legend'],
+          'corePackages': [],
+          'suportedLanguages': ['en']
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC1CS" class="panel"></pre>
+
+  <div class="map-title-holder">
+    <h4 id="HUC2">2. Class Break Style Legend</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'esriDynamicLYR2',
+                'geoviewLayerName': {
+                  'en': 'Water quality at monitoring sites',
+                  'fr': 'Water quality at monitoring sites'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer',
+                  'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {'layerId': '8'}
+                ]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'components': ['legend'],
+          'corePackages': [],
+          'suportedLanguages': ['en']
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC2CS" class="panel"></pre>
+  
+  <div class="map-title-holder">
+    <h4 id="HUC3">3. Group Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC3" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'esriDynamicLYR3z',
+                'geoviewLayerName': {
+                  'en': 'Energy (Esri-dynamic)',
+                  'fr': 'Energy'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
+                  'fr': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {'layerId': '0'}, {'layerId': '11'}
+                ]
+              }
+            ]
+          },
+          'components': ['legend', 'nav-bar'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC3CS" class="panel"></pre>
+
+  <div class="map-title-holder">
+    <h4 id="HUC4">3. WMS Group</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC4" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [
+            -100,
+            60
+          ],
+          'projection': 3857
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'wmsLYR1-Root',
+            'geoviewLayerName': {
+              'en': 'Root'
+            },
+            'metadataAccessPath': {
+              'en': 'https://ows.mundialis.de/services/service'
+            },
+            'geoviewLayerType': 'ogcWms',
+            'initialSettings': {
+              'visible': true
+            },
+            'listOfLayerEntryConfig': [
+              {
+                'entryType': 'group',
+                'layerId': 'wmsLYR1-Group',
+                'layerName': {
+                  'en': 'Group'
+                },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'OSM-WMS'
+                  },
+                  {
+                    'layerId': 'TOPO-OSM-WMS'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'wmsLYR1-msi',
+            'geoviewLayerName': {
+              'en': 'MSI'
+            },
+            'metadataAccessPath': {
+              'en': 'https://datacube.services.geo.ca/ows/msi'
+            },
+            'geoviewLayerType': 'ogcWms',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'msi-94-or-more'
+              }
+            ]
+          }
+        ]
+      },
+      'components': [
+        'nav-bar',
+        'legend'
+      ],
+      'corePackages': [],
+      'theme': 'dark',
+      'suportedLanguages': [
+        'en'
+      ]
+  }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC4CS" class="panel"></pre>
+
+  <!--
+  <div class="map-title-holder">
+    <h4 id="HLYR2">2. XYZ Tiles Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR2" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'xyzTilesLYR2',
+                'geoviewLayerName': {
+                  'en': 'statmen toner'
+                },
+                'geoviewLayerType': 'xyzTiles',
+                'initialSettings': { 'visible': true },
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'toner',
+                    'initialSettings': { 'minZoom': 3, 'maxZoom': 8 },
+                    'source': {
+                      'dataAccessPath': {
+                        'en': 'https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['legend', 'nav-bar'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div>
+  <p>This map has a XYZ Tiles layer added from configuration.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="LYR2CS" class="panel"></pre>
+  <hr />
+      -->
+      <!--
+  <div class="map-title-holder">
+    <h4 id="HLYR3">3. Esri dynamic layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="LYR3" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'esriDynamicLYR3',
+                'geoviewLayerName': {
+                  'en': 'Flood'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer/'
+                },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['legend', 'nav-bar', 'north-arrow'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }"></div>
+      -->
+  <script src="codedoc.js"></script>
+  <script>
+    function addPolyline(map) {
+      // call an api function to draw a polyline
+      const polyline = cgpv.api.map(map).layer.vector.addPolyline(
+        [
+          [-100, 45],
+          [-105, 50],
+        ],
+        {
+          style: {
+            strokeColor: '#000',
+            strokeWidth: 5,
+            strokeOpacity: 0.8,
+          },
+        }
+      );
+    }
+
+    function addPolygon(map) {
+      // call an api function to draw a polygon
+      const polygon = cgpv.api.map(map).layer.vector.addPolygon(
+        [
+          [
+            [-109.05, 41.0],
+            [-102.06, 40.99],
+            [-102.03, 36.99],
+            [-109.04, 36.99],
+            [-109.05, 41.0],
+          ],
+        ],
+        {
+          style: {
+            strokeColor: '#000',
+            strokeWidth: 5,
+            strokeOpacity: 0.8,
+            fillColor: 'red',
+            fillOpacity: 1,
+          },
+        }
+      );
+    }
+
+    function addCircle(map) {
+      // call an api function to draw a polygon
+      const circle = cgpv.api.map(map).layer.vector.addCircle([-109, 50], 5.0, {
+        style: {
+          strokeColor: 'red',
+          strokeWidth: 1,
+          fillColor: '#f03',
+          fillOpacity: 0.5,
+        },
+      });
+    }
+
+    function addCircleMarker(map) {
+      // call an api function to draw a polygon
+      const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker([-109, 70], 20.0, {
+        style: {
+          strokeColor: 'red',
+          strokeWidth: 1,
+          fillColor: '#666',
+          fillOpacity: 0.5,
+        },
+      });
+    }
+
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
+
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
+
+      //add geometries to map
+      // addPolyline('UC2');
+      // addPolygon('UC2');
+      // addCircle('UC2');
+      // addCircleMarker('UC2');
+
+      // define the map id
+      // const mapId = 'UC3';
+
+      // import react and api from the core
+      const { react, api, ui } = cgpv;
+
+      // import footerTabs from the core for the current map
+      // const { footerTabs } = api.map(mapId);
+
+
+      // create new tab and add the LegendComponent to the footer tab
+      // footerTabs.createFooterTab({
+      //   value: 0,
+      //   label: 'XLegend',
+      //   // TODO: Repair when getLegend is back for raster layer
+      //   // content: LegendComponent,
+      //   content: 'Coming Soon'
+      // });
+
+      // footerTabs.createLegendFooterTab({
+      //   value: 1,
+      //   label: 'Legend',
+      //   // TODO: Repair when getLegend is back for raster layer
+      //   // content: LegendComponent,
+      //   content: 'Coming Soon s'
+      // });
+
+      // const l = api.map(mapId).legend.createLegend();
+
+    });
+  </script>
+</body>
+
+</html>
