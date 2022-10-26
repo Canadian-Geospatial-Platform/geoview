@@ -22,6 +22,8 @@ import ArrowUp from '@mui/icons-material/ArrowUpward';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
+import LiveHelp from '@mui/icons-material/LiveHelp';
+import ListAlt from '@mui/icons-material/ListAlt';
 
 export {
   Layers as LayersIcon,
@@ -48,4 +50,6 @@ export {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   WhereToVoteIcon as ClickMapMarker,
+  LiveHelp as TodoIcon,
+  ListAlt as ListAltIcon,
 };
