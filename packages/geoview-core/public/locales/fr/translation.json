@@ -37,6 +37,9 @@
     "share": "Partager",
     "version": "Accéder au repo sur GitHub"
   },
+  "legend": {
+    "unknown": "Titre de calque inconnu"
+  },
   "keyboardnav": {
     "start": "Aller après l'élément carte",
     "end": "Aller avant l'élément carte",
