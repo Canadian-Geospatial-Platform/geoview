@@ -458,7 +458,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   useEffect(() => {
     // get the map service layers from the API
-    const mapLayers = api.map(mapId).layer.layers;
+    const mapLayers = api.map(mapId).layer.geoviewLayers;
 
     // will be used to store the added map server layers, layers in the map server etc...
     const data: Record<string, AbstractGeoViewLayer> = {};

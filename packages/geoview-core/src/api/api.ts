@@ -12,6 +12,8 @@ import { DateMgt } from '../core/utils/date-mgt';
 import { CONST_LAYER_TYPES } from '../geo/layer/geoview-layers/abstract-geoview-layers';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
+import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
+import { LegendsLayerSet } from '../geo/utils/legend-layer-set';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -61,6 +63,12 @@ export class API {
 
   // add ui component to a custom div
   addUiComponent = addUiComponent;
+
+  // FeatureInfo layer set instanciator
+  createFeatureInfoLayerSet = FeatureInfoLayerSet.create;
+
+  // Legends layer set instanciator
+  createLegendsLayerSet = LegendsLayerSet.create;
 
   /**
    * Initiate the event and projection objects
