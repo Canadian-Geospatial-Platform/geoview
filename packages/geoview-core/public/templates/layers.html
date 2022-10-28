@@ -121,7 +121,7 @@
   </div>
   <p>This map has a wms layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR1-INFO-wmsLYR1-Root/wmsLYR1-Group/OSM-WMS" class="panel">Click on feature on the map</pre>
+  <pre id="wmsResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR1CS" class="panel"></pre>
@@ -220,7 +220,7 @@
   </div>
   <p>This map has a Esri dynamic layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR3-INFO-esriDynamicLYR3/0" class="panel">Click on feature on the map</pre>
+  <pre id="esriDynamicResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR3CS" class="panel"></pre>
@@ -270,7 +270,7 @@
     </tr>
   </table>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR4-INFO-esriFeatureLYR4/8" class="panel">Click on feature on the map</pre>
+  <pre id="esriFeatureResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR4CS" class="panel"></pre>
@@ -303,8 +303,8 @@
             { 'layerId': 'lines.json' },
             {
               'entryType': 'group',
-              'layerId': 'LYR5-Group2',
-              'layerName': { 'en': 'LYR5-Group2' },
+              'layerId': 'point-feature-group',
+              'layerName': { 'en': 'point-feature-group' },
               'listOfLayerEntryConfig': [
                 { 'layerId': 'icon_points.json' },
                 { 'layerId': 'points.json' }
@@ -332,10 +332,7 @@
   <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
   <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
   <button type="button" class="collapsible">Get Feature Info polygons</button>
-  <pre id="LYR5-INFO-geojsonLYR5/polygons.json" class="panel">Click on feature on the map</pre>
-  <hr />
-  <button type="button" class="collapsible">Get Feature Info stars</button>
-  <pre id="LYR5-INFO-geojsonLYR5/LYR5-Group2/points.json" class="panel">Click on feature on the map</pre>
+  <pre id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR5CS" class="panel"></pre>
@@ -382,7 +379,7 @@
       }"></div>
   <p>This map has a WFS layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR6-INFO-wfsLYR6/GISDATA.AIRPORTS_PT" class="panel">Click on feature on the map</pre>
+  <pre id="wfsResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR6CS" class="panel"></pre>
@@ -429,7 +426,7 @@
         }"></div>
   <p>This map has an OGC API feature layer added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR7-INFO-ogcFeatureLYR7/lakes" class="panel">Click on feature on the map</pre>
+  <pre id="ogcFeatureResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR7CS" class="panel"></pre>
@@ -470,7 +467,7 @@
         }"></div>
   <p>This map requests a layer from the catalog using uuid added from configuration.</p>
   <button type="button" class="collapsible">Get Feature Info</button>
-  <pre id="LYR8-INFO-rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0" class="panel">Click on feature on the map</pre>
+  <pre id="geocoreResultSetId" class="panel">Click on feature on the map</pre>
   <hr />
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="LYR8CS" class="panel"></pre>
@@ -510,10 +507,16 @@
           'listOfLayerEntryConfig': [
             {
               'layerId': 'historical_flood_0.geojson',
-              'source': {
+              "source": {
                 'dataAccessPath': {
                   'en': './geojson/',
                   'fr': './geojson/'
+                },
+                "featureInfo": {
+                  "queryable": "true",
+                  "nameField": { "en": "comment_en", "fr": "comment_fr" },
+                  "outfields": { "en": "comment_en,death_en_1,end_date", "fr": "comment_fr,death_fr_1,end_date" },
+                  "aliasFields":  { "en": "comment_en,death_en_1,end_date", "fr": "comment_fr,death_fr_1,end_date" }
                 }
               }
             }
@@ -535,25 +538,54 @@
     });
 
     // WMS
-    createMapClickHandler('LYR1', 'wmsLYR1-Root/wmsLYR1-Group/OSM-WMS')
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR1') }, 'LYR1');
+    const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR1');
+
     // ESRI Dynamic
-    createMapClickHandler('LYR3', 'esriDynamicLYR3/0')
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR3') }, 'LYR3');
+    const featureInfoEsriDynamicLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR3', 'esriDynamicResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR3');
+
     // ESRI Feature
-    createMapClickHandler('LYR4', 'esriFeatureLYR4/8')
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR4') }, 'LYR4');
-    // GeoJSON
-    createMapClickHandler('LYR5', 'geojsonLYR5/polygons.json')
-    createMapClickHandler('LYR5', 'geojsonLYR5/LYR5-Group2/points.json')
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR5') }, 'LYR5');
+    const featureInfoEsriFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR4', 'esriFeatureResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR4');
+
+    // GeoJson
+    const featureInfoGeoJsonLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR5', 'geoJsonResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR5');
+
     // WFS
-    createMapClickHandler('LYR6', 'wfsLYR6/GISDATA.AIRPORTS_PT')
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR6') }, 'LYR6');
+    const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR6');
+
     // OGC Feature API
-    createMapClickHandler('LYR7', 'ogcFeatureLYR7/lakes')
-    cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR7') }, 'LYR7');
+    const featureInfoOgcFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR7', 'ogcFeatureResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR7');
+
     // GeoCore
+    const featureInfoGeocoreFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR8', 'geocoreResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR8');
+
     createMapClickHandler('LYR8', 'rcs.ccc75c12-5acc-4a6a-959f-ef6f621147b9.en/0')
     cgpv.api.event.on(cgpv.api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, (payload) => { handleMapClick(payload, 'LYR8') }, 'LYR8');
 
@@ -581,7 +613,7 @@
     function addWMSLegend() {
       cgpv.api
         .map('LYR1')
-        .layer.layers['wmsLYR1-Root'].getLegend('wmsLYR1-Root/wmsLYR1-Group/TOPO-OSM-WMS')
+        .layer.geoviewLayers['wmsLYR1-Root'].getLegend('wmsLYR1-Root/wmsLYR1-Group/TOPO-OSM-WMS')
         .then((res) => {
           document.getElementById('wmsLegend').src = res.legend;
         });
@@ -591,7 +623,7 @@
     var addEsriFeatureLegendButton = document.getElementsByClassName('Get-Esri-feature-Legend')[0];
     // add legend to ESRI feature layer
     addEsriFeatureLegendButton.addEventListener('click', function (e) {
-      cgpv.api.map('LYR4').layer.layers['esriFeatureLYR4'].getLegend('esriFeatureLYR4/8').then((legend) => {
+      cgpv.api.map('LYR4').layer.geoviewLayers['esriFeatureLYR4'].getLegend('esriFeatureLYR4/8').then((legend) => {
           var legendTable = document.getElementById('legendTable');
           for (var i = 0; i < legend.legend.Point.length; i++) {
             var tableRow = document.createElement("tr");
@@ -628,19 +660,19 @@
         tableRow.appendChild(tableData2);
         legendTable.appendChild(tableRow);
       }
-      cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/polygons.json').then((legend) => {
+      cgpv.api.map('LYR5').layer.geoviewLayers['geojsonLYR5'].getLegend('geojsonLYR5/polygons.json').then((legend) => {
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.Polygon.label, legend.legend.Polygon)
         });
-        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/lines.json').then((legend) => {
+        cgpv.api.map('LYR5').layer.geoviewLayers['geojsonLYR5'].getLegend('geojsonLYR5/lines.json').then((legend) => {
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.LineString.label, legend.legend.LineString)
         });
-        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/LYR5-Group2/points.json').then((legend) => {
+        cgpv.api.map('LYR5').layer.geoviewLayers['geojsonLYR5'].getLegend('geojsonLYR5/point-feature-group/points.json').then((legend) => {
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.Point.label, legend.legend.Point)
         });
-        cgpv.api.map('LYR5').layer.layers['geojsonLYR5'].getLegend('geojsonLYR5/LYR5-Group2/icon_points.json').then((legend) => {
+        cgpv.api.map('LYR5').layer.geoviewLayers['geojsonLYR5'].getLegend('geojsonLYR5/point-feature-group/icon_points.json').then((legend) => {
           var legendTable = document.getElementById('geojsonLegendTable');
           addRow(legendTable, legend.styleConfig.Point.label, legend.legend.Point)
         });
@@ -652,7 +684,7 @@
     addEsriDynamicLegendButton.addEventListener('click', function (e) {
       cgpv.api
         .map('LYR3')
-        .layer.layers['esriDynamicLYR3'].getLegend()
+        .layer.geoviewLayers['esriDynamicLYR3'].getLegend()
         .then((layers) => {
           console.log(layers);
         });

@@ -207,7 +207,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords> {
     const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
       const layerFilter = (layer: BaseLayer) => {
-        return layer === layerConfig.gvLayer;
+        if (layer === layerConfig?.gvLayer) console.log('SAME1');
+        const layerSource = layer.get('layerEntryConfig')?.source; if (!layerSource) return false;
+        const configSource = layerConfig?.source; if (!configSource) return false;
+        if (layerSource === configSource) console.log('SAME2');
+        return layerSource === configSource;
       };
       const { map } = api.map(this.mapId);
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });

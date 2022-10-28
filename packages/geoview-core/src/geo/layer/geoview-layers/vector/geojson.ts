@@ -136,7 +136,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (api.map(this.mapId).layer.isRegistered(layerEntryConfig)) {
         this.layerLoadError.push({
           layer: Layer.getLayerPath(layerEntryConfig),
-          consoleMessage: `Duplicate layerId (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+          consoleMessage: `Duplicate layerPath (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
         });
         return false;
       }
@@ -195,6 +195,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
+      if (!this.metadata) resolve();
       const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
       for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
       layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);

@@ -205,13 +205,11 @@ export abstract class AbstractGeoViewLayer {
   protected getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getServiceMetadata().then(() => {
-        if (this.metadata) {
-          if (this.listOfLayerEntryConfig.length) {
-            // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
-            this.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-            this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig).then(() => resolve());
-          } else resolve(); // no layer entry.
-        } else resolve(); // no metadata was read.
+        if (this.listOfLayerEntryConfig.length) {
+          // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
+          this.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+          this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig).then(() => resolve());
+        } else resolve(); // no layer entry.
       });
     });
     return promisedExecution;
@@ -478,7 +476,7 @@ export abstract class AbstractGeoViewLayer {
       const layerPath = Layer.getLayerPath(layerEntryConfig);
 
       // Register to panels that are already created.
-      api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
+      api.event.emit(GetFeatureInfoPayload.createLayerRegistrationPayload(this.mapId, layerPath));
 
       // Listen to events that request a layer inventory and emit a register payload if the map identifier is this.mapId.
       api.event.on(
@@ -486,7 +484,7 @@ export abstract class AbstractGeoViewLayer {
         (payload) => {
           if (payloadIsRequestLayerInventory(payload)) {
             const { handlerName } = payload;
-            if (handlerName === this.mapId) api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
+            if (handlerName === this.mapId) api.event.emit(GetFeatureInfoPayload.createLayerRegistrationPayload(this.mapId, layerPath));
           }
         },
         this.mapId
