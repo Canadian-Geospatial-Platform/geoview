@@ -235,7 +235,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
               zoom: currentView.getZoom()!,
               center: [centerCoordinate[0], centerCoordinate[1]],
             });
-            const mapLayers = api.map(mapId).layer.layers;
+            const mapLayers = api.map(mapId).layer.geoviewLayers;
             Object.entries(mapLayers).forEach((mapLayerEntry) => {
               const refreshBaseLayer = (baseLayer: BaseLayer | null) => {
                 if (baseLayer) {

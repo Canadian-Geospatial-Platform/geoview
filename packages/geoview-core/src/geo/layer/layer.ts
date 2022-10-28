@@ -24,7 +24,7 @@ import { EsriFeature, layerConfigIsEsriFeature } from './geoview-layers/vector/e
 import { layerConfigIsWFS, WFS } from './geoview-layers/vector/wfs';
 import { layerConfigIsOgcFeature, OgcFeature } from './geoview-layers/vector/ogc-feature';
 import { layerConfigIsXYZTiles, XYZTiles } from './geoview-layers/raster/xyz-tiles';
-import { GetFeatureInfoPayload } from '../../api/events/payloads/get-feature-info-payload';
+import { LayerSetPayload } from '../../api/events/payloads/layer-set-payload';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -34,10 +34,10 @@ import { GetFeatureInfoPayload } from '../../api/events/payloads/get-feature-inf
  */
 export class Layer {
   /** Layers with valid configuration for this map. */
-  registeredLayers: Partial<Record<string, TypeLayerEntryConfig>> = {};
+  registeredLayers: { [layerEntryConfigId: string]: TypeLayerEntryConfig } = {};
 
-  // variable used to store all added layers
-  layers: { [key: string]: AbstractGeoViewLayer } = {};
+  // variable used to store all added geoview layers
+  geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
   // used to access vector API to create and manage geometries
   vector: Vector | undefined;
@@ -204,8 +204,7 @@ export class Layer {
     } else {
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
 
-      // this.layers.push(geoviewLayer);
-      this.layers[geoviewLayer.geoviewLayerId] = geoviewLayer;
+      this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
       api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
     }
   }
@@ -217,24 +216,17 @@ export class Layer {
    * @param {string} partialLayerPath the path of the layer to be removed
    */
   removeLayersUsingPath = (partialLayerPath: string): void => {
-    this.registeredLayers = Object.keys(this.registeredLayers)
-      .filter((compleLayerPath) => {
-        if (compleLayerPath.startsWith(partialLayerPath)) {
-          this.registeredLayers[compleLayerPath]?.gvLayer!.dispose();
-          api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, compleLayerPath, 'remove'));
-          return false;
-        }
-        return true;
-      })
-      .reduce((newRegisteredLayers: Partial<Record<string, TypeLayerEntryConfig>>, compleLayerPath: string) => {
-        // eslint-disable-next-line no-param-reassign
-        newRegisteredLayers[compleLayerPath] = this.registeredLayers[compleLayerPath];
-        return newRegisteredLayers;
-      }, {});
+    Object.keys(this.registeredLayers).forEach((compleLayerPath) => {
+      if (compleLayerPath.startsWith(partialLayerPath)) {
+        this.registeredLayers[compleLayerPath]?.gvLayer!.dispose();
+        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, compleLayerPath, 'remove'));
+        delete this.registeredLayers[compleLayerPath];
+      }
+    });
 
-    if (this.layers[partialLayerPath]) {
-      this.layers[partialLayerPath].gvLayers!.dispose();
-      delete this.layers[partialLayerPath];
+    if (this.geoviewLayers[partialLayerPath]) {
+      this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
+      delete this.geoviewLayers[partialLayerPath];
     }
   };
 
@@ -275,6 +267,6 @@ export class Layer {
    * @returns the found layer data object
    */
   getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
-    return this.layers[geoviewLayerId];
+    return this.geoviewLayers[geoviewLayerId];
   };
 }

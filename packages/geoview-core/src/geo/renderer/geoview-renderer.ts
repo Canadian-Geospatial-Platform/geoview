@@ -3,7 +3,7 @@
 import { asArray, asString } from 'ol/color';
 import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
 import { LineString, Point, Polygon } from 'ol/geom';
-import { Options as IconOptions } from 'ol/style/Icon';
+import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
@@ -143,8 +143,8 @@ export class GeoviewRenderer {
     const size = pointStyle?.getImage().getSize() as Size;
     const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = width;
-    drawingCanvas.height = height;
+    drawingCanvas.width = 1.25 * width;
+    drawingCanvas.height = 1.25 * height;
     const drawingContext = toContext(drawingCanvas.getContext('2d')!);
     if (pointStyle) drawingContext.setStyle(pointStyle);
     drawingContext.drawGeometry(new Point([width / 2, height / 2]));
@@ -153,14 +153,14 @@ export class GeoviewRenderer {
 
   private createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
     const drawingContext = toContext(drawingCanvas.getContext('2d')!);
     if (lineStringStyle) drawingContext.setStyle(lineStringStyle);
     drawingContext.drawGeometry(
       new LineString([
-        [0, this.LEGEND_CANVAS_HEIGHT],
-        [this.LEGEND_CANVAS_WIDTH, 0],
+        [4, this.LEGEND_CANVAS_HEIGHT - 4],
+        [this.LEGEND_CANVAS_WIDTH - 4, 4],
       ])
     );
     return drawingCanvas;
@@ -168,18 +168,18 @@ export class GeoviewRenderer {
 
   private createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
     const drawingContext = toContext(drawingCanvas.getContext('2d')!);
     if (polygonStyle) drawingContext.setStyle(polygonStyle);
     drawingContext.drawGeometry(
       new Polygon([
         [
-          [0, 0],
-          [this.LEGEND_CANVAS_WIDTH, 0],
-          [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT],
-          [0, this.LEGEND_CANVAS_HEIGHT],
-          [0, 0],
+          [4, 4],
+          [this.LEGEND_CANVAS_WIDTH - 4, 4],
+          [this.LEGEND_CANVAS_WIDTH - 4, this.LEGEND_CANVAS_HEIGHT - 4],
+          [4, this.LEGEND_CANVAS_HEIGHT - 4],
+          [4, 4],
         ],
       ])
     );

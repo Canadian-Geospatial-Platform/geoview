@@ -254,7 +254,7 @@
       //     ],
       //     track: 'normal',
       //     customOnChange: (dates) => {
-      //       const result = cgpv.api.maps.UI1.layer.layers.geojsonHistoFlood.filterFeatures([
+      //       const result = cgpv.api.maps.UI1.layer.geoviewLayers.geojsonHistoFlood.filterFeatures([
       //         { field: 'year', operator: '>=', value: dates[0] },
       //         { connector: '&&', field: 'year', operator: '<=', value: dates[1] },
       //       ]);
@@ -273,7 +273,7 @@
     //   setTimeout(() => {
     //     cgpv.leaflet
     //       .heatLayer(
-    //         cgpv.api.maps.UI1.layer.layers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
+    //         cgpv.api.maps.UI1.layer.geoviewLayers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
     //         { radius: 20, blur: 15, maxZoom: 10 }
     //       )
     //       .addTo(map.map);
@@ -288,7 +288,7 @@
           // Check how to acccess OL library from our API like this for Leaflet
           // cgpv.leaflet
           //   .heatLayer(
-          //     cgpv.api.maps.UI1.layer.layers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
+          //     cgpv.api.maps.UI1.layer.geoviewLayers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
           //     { radius: 20, blur: 15, maxZoom: 10 }
           //   )
           //   .addTo(map.map);

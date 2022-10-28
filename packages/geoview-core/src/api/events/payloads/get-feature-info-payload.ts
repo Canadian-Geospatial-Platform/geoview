@@ -8,19 +8,15 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
+  EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
   EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT,
-  EVENT_NAMES.GET_FEATURE_INFO.REGISTER_LAYER,
-  EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY,
 ];
 
 export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
 
-export type TypeFeatureInfoEntry = Record<string, string | number | null> | Record<string, never>;
+export type TypeFeatureInfoEntry = Record<string, string | number | null>;
 export type TypeArrayOfRecords = TypeFeatureInfoEntry[];
-
-export type TypeFeatureInfoRegister = {
-  layerPath?: string;
-};
+export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfRecords | undefined };
 
 /**
  * Type Gard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload
@@ -45,6 +41,27 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
 }
 
 /**
+ * Type Gard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const payloadIsAllQueriesDone = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeAllQueriesDonePayload => {
+  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE;
+};
+
+/**
+ * Additional attributes needed to define a GetFeatureInfoPayload
+ */
+export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
+  // The layer set identifier
+  layerSetId: string;
+  resultSets: TypeFeatureInfoResultSets;
+}
+
+/**
  * Type Gard function that redefines a PayloadBaseClass as a TypeQueryResultPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
@@ -53,7 +70,7 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsQueryResult = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryResultPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER;
+  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT;
 };
 
 /**
@@ -64,47 +81,6 @@ export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
   layerPath: string;
   // the resultset of the query
   arrayOfRecords: TypeArrayOfRecords;
-}
-
-/**
- * Type Gard function that redefines a PayloadBaseClass as a TypeRegisterLayerPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsRegisterLayer = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeRegisterLayerPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY;
-};
-
-/**
- * Additional attribute needed to define a TypeRegisterLayerPayload
- */
-export interface TypeRegisterLayerPayload extends GetFeatureInfoPayload {
-  // the layer path to add to or remove from the inventory
-  action: 'add' | 'remove';
-  layerPath: string;
-}
-
-/**
- * Type Gard function that redefines a PayloadBaseClass as a TypeRequestLayerInventoryPayload
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsRequestLayerInventory = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeRequestLayerInventoryPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY;
-};
-
-/**
- * Additional attribute needed to define a TypeRequestLayerInventoryPayload
- */
-export interface TypeRequestLayerInventoryPayload extends GetFeatureInfoPayload {
-  // The object identifier that will receive the inventory
-  objectId: string;
 }
 
 /**
@@ -138,7 +114,7 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
   }
 
   /**
-   * Static method used to create a get feature info payload that will initiate a layer's query
+   * Static method used to create a "get feature info" payload that will run a query on all layers in the set.
    *
    * @param {string | null} handlerName the handler Name
    * @param {TypeQueryType} queryType the query type to perform
@@ -155,6 +131,28 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     queryLayerPayload.queryType = queryType;
     queryLayerPayload.location = location;
     return queryLayerPayload;
+  };
+
+  /**
+   * Static method used to create an "all queries done" payload.
+   *
+   * @param {string | null} handlerName the handler Name
+   * @param {string} layerSetId the layer set identifier
+   *
+   * @returns {TypeAllQueriesDonePayload} the TypeAllQueriesDonePayload object created
+   */
+  static createAllQueriesDonePayload = (
+    handlerName: string,
+    layerSetId: string,
+    resultSets: TypeFeatureInfoResultSets
+  ): TypeAllQueriesDonePayload => {
+    const allQueriesDonePayload = new GetFeatureInfoPayload(
+      EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+      handlerName
+    ) as TypeAllQueriesDonePayload;
+    allQueriesDonePayload.layerSetId = layerSetId;
+    allQueriesDonePayload.resultSets = resultSets;
+    return allQueriesDonePayload;
   };
 
   /**
@@ -176,57 +174,4 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
     queryResultPayload.arrayOfRecords = arrayOfRecords;
     return queryResultPayload;
   };
-
-  /**
-   * Static method used to create a get feature info payload that will register a new layer in the layer inventory
-   *
-   * @param {string | null} handlerName the handler Name
-   * @param {string} layerPath the layer path to add to the inventory
-   *
-   * @returns {TypeRegisterLayerPayload} the registerLayerPayload object created
-   */
-  static createRegisterLayerPayload = (
-    handlerName: string,
-    layerPath: string,
-    action: 'add' | 'remove' = 'add'
-  ): TypeRegisterLayerPayload => {
-    const registerLayerPayload = new GetFeatureInfoPayload(
-      EVENT_NAMES.GET_FEATURE_INFO.REGISTER_LAYER,
-      handlerName
-    ) as TypeRegisterLayerPayload;
-    registerLayerPayload.layerPath = layerPath;
-    registerLayerPayload.action = action;
-    return registerLayerPayload;
-  };
-
-  /**
-   * Static method used to create a get feature info payload requesting a layer inventory
-   *
-   * @param {string | null} handlerName the handler Name
-   * @param {string} objectId the object identifier that will receive the inventory
-   *
-   * @returns {TypeRequestLayerInventoryPayload} the requestLayerInventoryPayload object created
-   */
-  static createRequestLayerInventoryPayload = (handlerName: string, objectId: string): TypeRequestLayerInventoryPayload => {
-    const requestLayerInventoryPayload = new GetFeatureInfoPayload(
-      EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY,
-      handlerName
-    ) as TypeRequestLayerInventoryPayload;
-    requestLayerInventoryPayload.objectId = objectId;
-    return requestLayerInventoryPayload;
-  };
 }
-
-/**
- * Helper function used to instanciate a GetFeatureInfoPayload object. This function
- * avoids the "new GetFeatureInfoPayload" syntax.
- *
- * @param {EventStringId} event the event identifier for which the payload is constructed
- * @param {string | null} handlerName the handler Name
- * @param {Coordinate} lnglat the long lat values carried by the payload
- *
- * @returns {GetFeatureInfoPayload} the GetFeatureInfoPayload object created
- */
-export const getFeatureInfoPayload = (event: EventStringId, handlerName: string): GetFeatureInfoPayload => {
-  return new GetFeatureInfoPayload(event, handlerName);
-};
