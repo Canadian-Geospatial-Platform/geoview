@@ -35,7 +35,10 @@
       "layerId": "lines.json",
       "source": {
         "featureInfo": {
-          "queryable": "true"
+          "queryable": "true",
+          "nameField": { "en": "Road Number", "fr": "Road Number" },
+          "outfields": { "en": "Road Number,Province", "fr": "Road Number,Province" },
+          "aliasFields":  { "en": "Road Number,Province", "fr": "Numéro de route,Province" }
         }
       },
       "initialSettings": {

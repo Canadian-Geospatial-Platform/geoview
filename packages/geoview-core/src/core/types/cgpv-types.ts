@@ -105,6 +105,8 @@ export * from '../../geo/renderer/geoview-renderer-types';
 export * from '../../geo/renderer/esri-renderer';
 export * from '../../geo/renderer/geoview-renderer';
 export * from '../../geo/utils/constant';
+export * from '../../geo/utils/feature-info-layer-set';
+export * from '../../geo/utils/legend-layer-set';
 export * from '../../geo/utils/utilities';
 export * from '../../ui/autocomplete/autocomplete';
 export * from '../../ui/button/button';
