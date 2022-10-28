@@ -6,6 +6,7 @@ import { DRAWER } from './constants/drawer';
 import { FOOTERBAR } from './constants/footer-bar';
 import { FOOTER_TABS } from './constants/footer-tabs';
 import { GET_FEATURE_INFO } from './constants/get-feature-info';
+import { LAYER_SET } from './constants/layer-set';
 import { LAYER } from './constants/layer';
 import { MAP } from './constants/map';
 import { MARKER_ICON } from './constants/marker-icon';
@@ -29,6 +30,7 @@ export const EVENT_NAMES = {
   FOOTERBAR,
   FOOTER_TABS,
   GET_FEATURE_INFO,
+  LAYER_SET,
   LAYER,
   MAP,
   MARKER_ICON,
@@ -54,10 +56,11 @@ export type EventStringId =
   | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
+  | 'get_feature_info/all_queries_done'
   | 'get_feature_info/query_layer'
   | 'get_feature_info/query_result'
-  | 'get_feature_info/register_layer'
-  | 'get_feature_info/request_layer_inventory'
+  | 'layer_set/layer_registration'
+  | 'layer_set/request_layer_inventory'
   | 'layer/add'
   | 'layer/added'
   | 'layer/get_layers'
