@@ -24,7 +24,6 @@ import {
 import {
   GetFeatureInfoPayload,
   payloadIsQueryLayer,
-  payloadIsRequestLayerInventory,
   TypeArrayOfRecords,
   TypeQueryType,
 } from '../../../api/events/payloads/get-feature-info-payload';
@@ -33,6 +32,8 @@ import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { TypeJsonObject } from '../../../core/types/global-types';
 import { Layer } from '../layer';
+import { LayerSetPayload, payloadIsRequestLayerInventory } from '../../../api/events/payloads/layer-set-payload';
+import { GetLegendsPayload, payloadIsQueryLegend } from '../../../api/events/payloads/get-legends-payload';
 
 export type TypeLegend = {
   layerPath: string;
@@ -167,8 +168,8 @@ export abstract class AbstractGeoViewLayer {
    * have a service definition, the getAdditionalServiceDefinition method does nothing.
    *
    * Finally, the processListOfLayerEntryConfig is called to instantiate each layer identified by the listOfLayerEntryConfig
-   * attribute. This method will also register the layers to all panels that offer this possibility. For example, if a layer is
-   * queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
+   * attribute. This method will also register the layers to all layer sets that offer this possibility. For example, if a layer
+   * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
    */
@@ -205,13 +206,11 @@ export abstract class AbstractGeoViewLayer {
   protected getAdditionalServiceDefinition(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
       this.getServiceMetadata().then(() => {
-        if (this.metadata) {
-          if (this.listOfLayerEntryConfig.length) {
-            // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
-            this.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
-            this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig).then(() => resolve());
-          } else resolve(); // no layer entry.
-        } else resolve(); // no metadata was read.
+        if (this.listOfLayerEntryConfig.length) {
+          // Recursively process the configuration tree of layer entries by removing layers in error and processing valid layers.
+          this.listOfLayerEntryConfig = this.validateListOfLayerEntryConfig(this.listOfLayerEntryConfig);
+          this.processListOfLayerEntryMetadata(this.listOfLayerEntryConfig).then(() => resolve());
+        } else resolve(); // no layer entry.
       });
     });
     return promisedExecution;
@@ -310,7 +309,7 @@ export abstract class AbstractGeoViewLayer {
         } else {
           this.processOneLayerEntry(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig).then((baseLayer) => {
             if (baseLayer) {
-              this.registerToPanels(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
+              this.registerToLayerSets(listOfLayerEntryConfig[0] as TypeBaseLayerEntryConfig);
               resolve(baseLayer);
             } else {
               this.layerLoadError.push({
@@ -337,7 +336,7 @@ export abstract class AbstractGeoViewLayer {
               listOfLayerCreated.forEach((baseLayer, i) => {
                 if (baseLayer) {
                   if (!layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
-                    this.registerToPanels(listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig);
+                    this.registerToLayerSets(listOfLayerEntryConfig[i] as TypeBaseLayerEntryConfig);
                   layerGroup.getLayers().push(baseLayer);
                 } else if (layerEntryIsGroupLayer(listOfLayerEntryConfig[i]))
                   this.layerLoadError.push({
@@ -469,40 +468,51 @@ export abstract class AbstractGeoViewLayer {
   protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
 
   /** ***************************************************************************************************************************
-   * This method register the GeoView layer to panels that offer this possibility.
+   * This method register the layer entry to layer sets.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
    */
-  protected registerToPanels(layerEntryConfig: TypeBaseLayerEntryConfig) {
+  protected registerToLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
+    const layerPath = Layer.getLayerPath(layerEntryConfig);
+
+    // Register to layer sets that are already created.
+    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
+
+    // Listen to events that request a layer inventory and emit a register payload event.
+    // This will register all existing layers to a newly created layer set.
+    api.event.on(
+      EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
+      (payload) => {
+        if (payloadIsRequestLayerInventory(payload)) {
+          const { layerSetId } = payload;
+          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
+        }
+      },
+      this.mapId
+    );
+
+    api.event.on(
+      EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
+      (payload) => {
+        if (payloadIsQueryLegend(payload)) {
+          this.getLegend(layerPath).then((queryResult) => {
+            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
+          });
+        }
+      },
+      this.mapId
+    );
+
     if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
-      const layerPath = Layer.getLayerPath(layerEntryConfig);
-
-      // Register to panels that are already created.
-      api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
-
-      // Listen to events that request a layer inventory and emit a register payload if the map identifier is this.mapId.
-      api.event.on(
-        EVENT_NAMES.GET_FEATURE_INFO.REQUEST_LAYER_INVENTORY,
-        (payload) => {
-          if (payloadIsRequestLayerInventory(payload)) {
-            const { handlerName } = payload;
-            if (handlerName === this.mapId) api.event.emit(GetFeatureInfoPayload.createRegisterLayerPayload(this.mapId, layerPath));
-          }
-        },
-        this.mapId
-      );
-
       // Listen to events that request to query a layer and return the resultset to the requester.
       api.event.on(
         EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
         (payload) => {
           if (payloadIsQueryLayer(payload)) {
-            const { handlerName, queryType, location } = payload;
-            if (handlerName === this.mapId) {
-              this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
-                api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
-              });
-            }
+            const { queryType, location } = payload;
+            this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
+              api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
+            });
           }
         },
         this.mapId

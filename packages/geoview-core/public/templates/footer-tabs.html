@@ -78,14 +78,14 @@
       function LegendComponent() {
         const [layers, setLayers] = useState([]);
 
-        async function getWMSLegend(layerId) {
-          const res = await api.map(mapId).layer.layers[layerId].getLegendGraphic();
+        async function getWMSLegend(geoviewLayerId) {
+          const res = await api.map(mapId).layer.geoviewLayers[layerId].getLegendGraphic();
 
           return res;
         }
 
         async function getEsriDynamicLegend(layerId) {
-          const res = await api.map(mapId).layer.layers[layerId].getLegendJson();
+          const res = await api.map(mapId).layer.geoviewLayers[layerId].getLegendJson();
 
           return res;
         }

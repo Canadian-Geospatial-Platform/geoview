@@ -55,13 +55,13 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const onClick = () => setAddLayerVisible((state: boolean) => !state);
 
   useEffect(() => {
-    setMapLayers(() => ({ ...api.map(mapId!).layer.layers }));
+    setMapLayers(() => ({ ...api.map(mapId!).layer.geoviewLayers }));
 
     api.event.on(
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () =>
         setMapLayers(() => ({
-          ...api.map(mapId!).layer.layers,
+          ...api.map(mapId!).layer.geoviewLayers,
         })),
       mapId
     );
@@ -69,7 +69,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       () =>
         setMapLayers(() => ({
-          ...api.map(mapId!).layer.layers,
+          ...api.map(mapId!).layer.geoviewLayers,
         })),
       mapId
     );
