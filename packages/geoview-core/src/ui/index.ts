@@ -1,4 +1,5 @@
 export * from './autocomplete/autocomplete';
+export * from './avatar/avatar';
 export * from './button';
 export * from './button-group';
 export * from './card';
