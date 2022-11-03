@@ -35,6 +35,10 @@
       "projectFolder": "packages/geoview-layers-panel"
     },
     {
+      "packageName": "geoview-footer-panel",
+      "projectFolder": "packages/geoview-footer-panel"
+    },
+    {
       "packageName": "eslint-and-prettier-config",
       "projectFolder": "packages"
     }

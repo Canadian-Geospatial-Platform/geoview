@@ -991,7 +991,7 @@ export type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'o
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
  * Default = ['basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'].
  */
-export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'>;
+export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel' | 'footer-panel'>;
 
 /** ******************************************************************************************************************************
  * List of external packages to initialize on viewer load. Default = [].
