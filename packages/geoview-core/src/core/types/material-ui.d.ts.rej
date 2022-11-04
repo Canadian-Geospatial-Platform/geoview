@@ -5,10 +5,10 @@ diff a/packages/geoview-core/src/core/types/material-ui.d.ts b/packages/geoview-
      backdrop: string;
 +    selection: string;
    }
- 
+
    interface PaletteOptions {
      backdrop?: string;
 +    selection: string;
    }
  }
- 
+

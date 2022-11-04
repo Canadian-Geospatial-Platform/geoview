@@ -34,7 +34,7 @@ export type TypeActionButton = {
 };
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelWithAButtonIdAndTypePayload
+ * type guard function that redefines a PayloadBaseClass as a PanelWithAButtonIdAndTypePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -57,7 +57,7 @@ export interface PanelWithAButtonIdAndTypePayload extends PanelPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelAndActionPayload
+ * type guard function that redefines a PayloadBaseClass as a PanelAndActionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -80,7 +80,7 @@ export interface PanelAndActionPayload extends PanelPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelAndContentPayload
+ * type guard function that redefines a PayloadBaseClass as a PanelAndContentPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -103,7 +103,7 @@ export interface PanelAndContentPayload extends PanelPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelPayload
+ * type guard function that redefines a PayloadBaseClass as a PanelPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

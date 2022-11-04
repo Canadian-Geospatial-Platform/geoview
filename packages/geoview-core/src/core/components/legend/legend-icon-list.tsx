@@ -3,7 +3,7 @@ import React from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { Tooltip } from '../../../ui';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   listIconLabel: {
     paddingLeft: 20,
     fontSize: 14,

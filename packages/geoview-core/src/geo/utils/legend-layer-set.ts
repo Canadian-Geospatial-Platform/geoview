@@ -6,7 +6,6 @@ import {
   payloadIsTriggerLegend,
   TypeLegendResultSets,
 } from '../../api/events/payloads/get-legends-payload';
-import { payloadIsLayerSetUpdated } from '../../api/events/payloads/layer-set-payload';
 import { api } from '../../app';
 import { LayerSet } from './layer-set';
 

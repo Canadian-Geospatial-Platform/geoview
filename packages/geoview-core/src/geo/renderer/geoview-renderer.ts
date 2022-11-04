@@ -19,7 +19,6 @@ import {
   isLineStringVectorConfig,
   isSimpleSymbolVectorConfig,
   TypeBaseStyleType,
-  TypeClassBreakStyleConfig,
   TypeClassBreakStyleInfo,
   TypeFillStyle,
   TypePolygonVectorConfig,
@@ -31,7 +30,6 @@ import {
   TypeStyleConfigKey,
   TypeStyleSettings,
   TypeSymbol,
-  TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
   TypeVectorLayerEntryConfig,
   TypeVectorTileLayerEntryConfig,
@@ -39,7 +37,6 @@ import {
   TypeStyleConfig,
   TypeKindOfVectorSettings,
   isSimpleStyleConfig,
-  TypeBaseStyleConfig,
   isUniqueValueStyleConfig,
   isClassBreakStyleConfig,
   TypeBaseVectorConfig,
@@ -67,6 +64,7 @@ export class GeoviewRenderer {
   /** index used to select the default styles */
   private defaultColorIndex: number;
 
+  /** Table used to define line symbology to use when drawing lineString and polygon perimeters */
   private lineDashSettings: Record<TypeLineStyle, number[] | undefined> = {
     dash: [16, 4],
     'dash-dot': [16, 4, 2, 4],
@@ -81,7 +79,7 @@ export class GeoviewRenderer {
     solid: undefined,
   };
 
-  /** Table of function to process the style settings. */
+  /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
   private processStyle: Record<
     TypeBaseStyleType,
     Record<TypeStyleConfigKey, (styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike) => Style | undefined>
@@ -103,12 +101,7 @@ export class GeoviewRenderer {
     },
   };
 
-  private styleNotImplemented(styleSettings: TypeStyleSettings, feature: FeatureLike): Style | undefined {
-    // eslint-disable-next-line no-console
-    console.log('Style processing function is not implemented.');
-    return undefined;
-  }
-
+  /** Table of function to process simpleSymbol settings. */
   private processSymbol: Record<TypeSymbol, (settings: TypeSimpleSymbolVectorConfig) => Style | undefined> = {
     circle: this.processCircleSymbol,
     '+': this.processPlusSymbol,
@@ -119,6 +112,7 @@ export class GeoviewRenderer {
     star: this.processStarSymbol,
   };
 
+  /** Table of function to process polygon fill style settings. */
   private processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig) => Style | undefined> = {
     null: this.processNullFill,
     solid: this.processSolidFill,
@@ -130,304 +124,7 @@ export class GeoviewRenderer {
     vertical: this.processVerticalFill,
   };
 
-  private LEGEND_CANVAS_WIDTH = 50;
-
-  private LEGEND_CANVAS_HEIGHT = 50;
-
-  constructor(mapId: string) {
-    this.mapId = mapId;
-    this.defaultColorIndex = 0;
-  }
-
-  private createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
-    const size = pointStyle?.getImage().getSize() as Size;
-    const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
-    const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = 1.25 * width;
-    drawingCanvas.height = 1.25 * height;
-    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
-    if (pointStyle) drawingContext.setStyle(pointStyle);
-    drawingContext.drawGeometry(new Point([width / 2, height / 2]));
-    return drawingCanvas;
-  }
-
-  private createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
-    const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
-    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
-    if (lineStringStyle) drawingContext.setStyle(lineStringStyle);
-    drawingContext.drawGeometry(
-      new LineString([
-        [4, this.LEGEND_CANVAS_HEIGHT - 4],
-        [this.LEGEND_CANVAS_WIDTH - 4, 4],
-      ])
-    );
-    return drawingCanvas;
-  }
-
-  private createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
-    const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
-    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
-    if (polygonStyle) drawingContext.setStyle(polygonStyle);
-    drawingContext.drawGeometry(
-      new Polygon([
-        [
-          [4, 4],
-          [this.LEGEND_CANVAS_WIDTH - 4, 4],
-          [this.LEGEND_CANVAS_WIDTH - 4, this.LEGEND_CANVAS_HEIGHT - 4],
-          [4, this.LEGEND_CANVAS_HEIGHT - 4],
-          [4, 4],
-        ],
-      ])
-    );
-    return drawingCanvas;
-  }
-
-  getStyle(styleConfig: TypeStyleConfig): TypeLayerStyle {
-    const layerStyle: TypeLayerStyle = {};
-    if (styleConfig.Point) {
-      if (isSimpleStyleConfig(styleConfig.Point)) {
-        layerStyle.Point = this.createPointCanvas(this.processSimplePoint(styleConfig.Point));
-      } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.Point.uniqueValueStyleInfo.forEach((styleInfo) => {
-          styleArray.push(this.createPointCanvas(this.processSimplePoint(styleInfo.settings)));
-        });
-        layerStyle.Point = styleArray;
-      } else if (isClassBreakStyleConfig(styleConfig.Point)) {
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.Point.classBreakStyleInfos.forEach((styleInfo) => {
-          styleArray.push(this.createPointCanvas(this.processSimplePoint(styleInfo.settings)));
-        });
-        layerStyle.Point = styleArray;
-      }
-    }
-
-    if (styleConfig.LineString) {
-      if (isSimpleStyleConfig(styleConfig.LineString)) {
-        layerStyle.LineString = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
-      } else if (isUniqueValueStyleConfig(styleConfig.LineString)) {
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.LineString.uniqueValueStyleInfo.forEach((styleInfo) => {
-          styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
-        });
-        layerStyle.LineString = styleArray;
-      } else if (isClassBreakStyleConfig(styleConfig.LineString)) {
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.LineString.classBreakStyleInfos.forEach((styleInfo) => {
-          styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
-        });
-        layerStyle.LineString = styleArray;
-      }
-    }
-
-    if (styleConfig.Polygon) {
-      if (isSimpleStyleConfig(styleConfig.Polygon)) {
-        layerStyle.Polygon = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
-      } else if (isUniqueValueStyleConfig(styleConfig.Polygon)) {
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.Polygon.uniqueValueStyleInfo.forEach((styleInfo) => {
-          styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
-        });
-        layerStyle.Polygon = styleArray;
-      } else if (isClassBreakStyleConfig(styleConfig.Polygon)) {
-        const styleArray: HTMLCanvasElement[] = [];
-        styleConfig.Polygon.classBreakStyleInfos.forEach((styleInfo) => {
-          styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
-        });
-        layerStyle.Polygon = styleArray;
-      }
-    }
-    return layerStyle;
-  }
-
-  getFeatureStyle(
-    feature: FeatureLike,
-    layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
-  ): Style | undefined {
-    const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
-    // If style does not exist for the geometryType, create it.
-    let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
-    if (style === undefined || style[geometryType] === undefined)
-      style = this.createDefaultStyle(geometryType, layerEntryConfig as TypeVectorLayerEntryConfig);
-    // Get the style accordingly to its type and geometry.
-    if (style![geometryType] !== undefined) {
-      const styleSettings = style![geometryType]!;
-      const { styleType } = styleSettings;
-      return this.processStyle[styleType][geometryType].call(this, styleSettings, feature);
-    }
-    return undefined;
-  }
-
-  private incrementDefaultColorIndex() {
-    this.defaultColorIndex++;
-    if (this.defaultColorIndex === defaultColor.length) this.defaultColorIndex = 0;
-  }
-
-  private getDefaultColorAndIncrementIndex(alpha: number): string {
-    const color = asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), alpha));
-    this.incrementDefaultColorIndex();
-    return color;
-  }
-
-  private getDefaultColor(alpha: number): string {
-    return asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), alpha));
-  }
-
-  private createStrokeOptions(
-    settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig
-  ): StrokeOptions {
-    if (settings.stroke === undefined) settings.stroke = {};
-    if (settings.stroke.color === undefined) {
-      if ('color' in settings)
-        settings.stroke.color = asString(setAlphaColor(asArray((settings as TypeSimpleSymbolVectorConfig).color!), 1));
-      else settings.stroke.color = this.getDefaultColorAndIncrementIndex(1);
-    }
-    const strokeOptions: StrokeOptions = {
-      color: settings.stroke?.color,
-      width: settings.stroke?.width,
-      lineCap: 'butt',
-      lineJoin: 'bevel',
-      lineDash: this.lineDashSettings[settings.stroke?.lineStyle !== undefined ? settings.stroke?.lineStyle : 'solid'],
-    };
-    return strokeOptions;
-  }
-
-  private processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
-    const fillOptions: FillOptions = { color: settings.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size : 4 };
-    circleOptions.stroke = new Stroke(strokeOptions);
-    circleOptions.fill = new Fill(fillOptions);
-    if (settings.offset !== undefined) circleOptions.displacement = settings.offset;
-    if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
-    return new Style({
-      image: new StyleCircle(circleOptions),
-    });
-  }
-
-  private processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined {
-    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
-    const fillOptions: FillOptions = { color: settings.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const regularShapeOptions: RegularShapeOptions = {
-      radius1: settings.size !== undefined ? settings.size : 6,
-      radius2: settings.size !== undefined ? settings.size / 3 : 2,
-      angle,
-      points,
-    };
-    regularShapeOptions.stroke = new Stroke(strokeOptions);
-    regularShapeOptions.fill = new Fill(fillOptions);
-    if (settings.offset !== undefined) regularShapeOptions.displacement = settings.offset;
-    if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
-    return new Style({
-      image: new RegularShape(regularShapeOptions),
-    });
-  }
-
-  private processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processStarShapeSymbol(settings, 5, 0);
-  }
-
-  private processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processStarShapeSymbol(settings, 4, Math.PI / 4);
-  }
-
-  private processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processStarShapeSymbol(settings, 4, 0);
-  }
-
-  private processRegularShape(
-    settings: TypeSimpleSymbolVectorConfig,
-    points: number,
-    angle: number,
-    scale: [number, number]
-  ): Style | undefined {
-    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
-    const fillOptions: FillOptions = { color: settings.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const regularShapeOptions: RegularShapeOptions = {
-      radius: settings.size !== undefined ? settings.size : 6,
-      angle,
-      scale,
-      points,
-    };
-    regularShapeOptions.stroke = new Stroke(strokeOptions);
-    regularShapeOptions.fill = new Fill(fillOptions);
-    if (settings.offset !== undefined) regularShapeOptions.displacement = settings.offset;
-    if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
-    return new Style({
-      image: new RegularShape(regularShapeOptions),
-    });
-  }
-
-  private processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processRegularShape(settings, 4, Math.PI / 4, [1, 1]);
-  }
-
-  private processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processRegularShape(settings, 4, 0, [0.75, 1]);
-  }
-
-  private processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
-    return this.processRegularShape(settings, 3, 0, [1, 1]);
-  }
-
-  private processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
-    const iconOptions: IconOptions = {};
-    iconOptions.src = `data:${settings.mimeType};base64,${settings.src}`;
-    if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
-    if (settings.offset !== undefined) iconOptions.offset = settings.offset;
-    if (settings.rotation !== undefined) iconOptions.rotation = settings.rotation;
-    if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
-    return new Style({
-      image: new StyleIcon(iconOptions),
-    });
-  }
-
-  private processSimplePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
-    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeBaseVectorConfig;
-    if (isSimpleSymbolVectorConfig(settings)) {
-      const { symbol } = settings;
-      return this.processSymbol[symbol].call(this, settings);
-    }
-    if (isIconSymbolVectorConfig(settings)) return this.processIconSymbol(settings);
-    return undefined;
-  }
-
-  private processSimpleLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
-    const { settings } = styleSettings as TypeSimpleStyleConfig;
-    if (isLineStringVectorConfig(settings)) {
-      const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      return new Style({ stroke: new Stroke(strokeOptions) });
-    }
-    return undefined;
-  }
-
-  private processSolidFill(settings: TypePolygonVectorConfig): Style | undefined {
-    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
-    const fillOptions: FillOptions = { color: settings.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    return new Style({
-      stroke: new Stroke(strokeOptions),
-      fill: new Fill(fillOptions),
-    });
-  }
-
-  private processNullFill(settings: TypePolygonVectorConfig): Style | undefined {
-    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0);
-    const fillOptions: FillOptions = { color: settings.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    return new Style({
-      stroke: new Stroke(strokeOptions),
-      fill: new Fill(fillOptions),
-    });
-  }
-
+  /** Table used to define line symbology to use when drawing polygon fill */
   private fillPaternSettings: FillPaternSettings = {
     null: [],
     solid: [],
@@ -453,12 +150,594 @@ export class GeoviewRenderer {
     vertical: [{ moveTo: [1, 0], lineTo: [1, 2] }],
   };
 
+  // ******************************************************************************************************************************
+  /** Default value of the legend canvas width when the settings do not provide one. */
+  private LEGEND_CANVAS_WIDTH = 50;
+
+  /** Default value of the legend canvas height when the settings do not provide one. */
+  private LEGEND_CANVAS_HEIGHT = 50;
+
+  /** ***************************************************************************************************************************
+   * The class constructor saves parameters in attributes and initialize the default color index of the class.
+   *
+   * @param {string} mapId The identifier of the map that uses the geoview renderer instance.
+   */
+  constructor(mapId: string) {
+    this.mapId = mapId;
+    this.defaultColorIndex = 0;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method loads the image of an icon that compose the legend.
+   *
+   * @param {string} src The source information (base64 image) of the image to load.
+   *
+   * @returns {Promise<HTMLImageElement>} A promise that the image is loaded.
+   */
+  loadImage(src: string): Promise<HTMLImageElement> {
+    const promisedImage = new Promise<HTMLImageElement>((resolve) => {
+      const image = new Image();
+      image.onload = () => {
+        resolve(image);
+      };
+      image.src = src!;
+    });
+    return promisedImage;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates a canvas with the image of an icon that is defined in the point style.
+   *
+   * @param {Style} pointStyle The style associated to the point symbol.
+   *
+   * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   */
+  private createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement> {
+    const promisedCanvas = new Promise<HTMLCanvasElement>((resolve) => {
+      const iconStyle = pointStyle?.getImage() as Icon;
+      this.loadImage(iconStyle.getSrc()!).then((image) => {
+        const size = iconStyle.getSize() as Size;
+        const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
+        const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
+        const drawingCanvas = document.createElement('canvas');
+        drawingCanvas.width = 1.25 * width;
+        drawingCanvas.height = 1.25 * height;
+        const drawingContext = drawingCanvas.getContext('2d')!;
+        drawingContext.globalAlpha = iconStyle.getOpacity();
+        drawingContext.drawImage(image, 0, 0);
+        resolve(drawingCanvas);
+      });
+    });
+    return promisedCanvas;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates a canvas with the vector point settings that are defined in the point style.
+   *
+   * @param {Style} pointStyle The style associated to the point symbol.
+   *
+   * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   */
+  private createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
+    const size = pointStyle?.getImage().getSize() as Size;
+    const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = 1.25 * width;
+    drawingCanvas.height = 1.25 * height;
+    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    drawingContext.setStyle(pointStyle!);
+    drawingContext.drawGeometry(new Point([width / 2, height / 2]));
+    return drawingCanvas;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates a canvas with the lineString settings that are defined in the style.
+   *
+   * @param {Style} lineStringStyle The style associated to the lineString.
+   *
+   * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   */
+  private createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
+    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    drawingContext.setStyle(lineStringStyle!);
+    drawingContext.drawGeometry(
+      new LineString([
+        [4, this.LEGEND_CANVAS_HEIGHT - 4],
+        [this.LEGEND_CANVAS_WIDTH - 4, 4],
+      ])
+    );
+    return drawingCanvas;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method creates a canvas with the polygon settings that are defined in the style.
+   *
+   * @param {Style} polygonStyle The style associated to the polygon.
+   *
+   * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   */
+  private createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
+    const drawingCanvas = document.createElement('canvas');
+    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
+    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    drawingContext.setStyle(polygonStyle!);
+    drawingContext.drawGeometry(
+      new Polygon([
+        [
+          [4, 4],
+          [this.LEGEND_CANVAS_WIDTH - 4, 4],
+          [this.LEGEND_CANVAS_WIDTH - 4, this.LEGEND_CANVAS_HEIGHT - 4],
+          [4, this.LEGEND_CANVAS_HEIGHT - 4],
+          [4, 4],
+        ],
+      ])
+    );
+    return drawingCanvas;
+  }
+
+  private processArrayOfStyleConfig(
+    layerStyle: TypeLayerStyle,
+    pointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
+    resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void
+  ) {
+    // UniqueValue or ClassBreak point style configuration ============================================================
+    const styleArray: HTMLCanvasElement[] = [];
+    if (pointStyleConfig.length) {
+      // Use first element to determine the type (all other elements of the array have the same style)
+      if (isIconSymbolVectorConfig(pointStyleConfig[0].settings)) {
+        // Icon symbol ================================================================================================
+        const promiseOfCanvasCreated: Promise<HTMLCanvasElement>[] = [];
+        pointStyleConfig.forEach((styleInfo) => {
+          promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(styleInfo.settings)));
+        });
+        Promise.all(promiseOfCanvasCreated).then((listOfCanvasCreated) => {
+          listOfCanvasCreated.forEach((canvas) => {
+            styleArray.push(canvas);
+            layerStyle.Point = styleArray;
+            resolve(layerStyle);
+          });
+        });
+      } else {
+        // Simple vector symbol =======================================================================================
+        pointStyleConfig.forEach((styleInfo) => {
+          styleArray.push(this.createPointCanvas(this.processSimplePoint(styleInfo.settings)));
+        });
+        layerStyle.Point = styleArray;
+        resolve(layerStyle);
+      }
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * This method gets the style of the layer that has the specified style configuration.
+   *
+   * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
+   *
+   * @returns {Promise<TypeLayerStyle>} A promise that the layer style is processed.
+   */
+  getStyle(styleConfig: TypeStyleConfig): Promise<TypeLayerStyle> {
+    const promisedLayerStyle = new Promise<TypeLayerStyle>((resolve) => {
+      const layerStyle: TypeLayerStyle = {};
+
+      if (styleConfig.Point) {
+        // ======================================================================================================================
+        // Point style configuration ============================================================================================
+        if (isSimpleStyleConfig(styleConfig.Point)) {
+          // Simple point style configuration =========================================================================
+          if (isIconSymbolVectorConfig(styleConfig.Point.settings)) {
+            // Icon symbol ==================================================================================
+            this.createIconCanvas(this.processSimplePoint(styleConfig.Point)).then((canvas) => {
+              layerStyle.Point = canvas;
+              resolve(layerStyle);
+            });
+          } else {
+            // Simple vector symbol =========================================================================
+            layerStyle.Point = this.createPointCanvas(this.processSimplePoint(styleConfig.Point));
+            resolve(layerStyle);
+          }
+        } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
+          // UniqueValue point style configuration ====================================================================
+          this.processArrayOfStyleConfig(layerStyle, styleConfig.Point.uniqueValueStyleInfo, resolve);
+        } else if (isClassBreakStyleConfig(styleConfig.Point)) {
+          // ClassBreak point style configuration =====================================================================
+          this.processArrayOfStyleConfig(layerStyle, styleConfig.Point.classBreakStyleInfos, resolve);
+        }
+      }
+
+      // ========================================================================================================================
+      // LineString style configuration =========================================================================================
+      if (styleConfig.LineString) {
+        if (isSimpleStyleConfig(styleConfig.LineString)) {
+          // Simple lineString style configuration ====================================================================
+          layerStyle.LineString = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
+        } else if (isUniqueValueStyleConfig(styleConfig.LineString)) {
+          // UniqueValue lineString style configuration ===============================================================
+          const styleArray: HTMLCanvasElement[] = [];
+          styleConfig.LineString.uniqueValueStyleInfo.forEach((styleInfo) => {
+            styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
+          });
+          layerStyle.LineString = styleArray;
+        } else if (isClassBreakStyleConfig(styleConfig.LineString)) {
+          // ClassBreak lineString style configuration ================================================================
+          const styleArray: HTMLCanvasElement[] = [];
+          styleConfig.LineString.classBreakStyleInfos.forEach((styleInfo) => {
+            styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
+          });
+          layerStyle.LineString = styleArray;
+        }
+        resolve(layerStyle);
+      }
+
+      // ========================================================================================================================
+      // Polygon style configuration ============================================================================================
+      if (styleConfig.Polygon) {
+        if (isSimpleStyleConfig(styleConfig.Polygon)) {
+          // Simple polygon style configuration =======================================================================
+          layerStyle.Polygon = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
+        } else if (isUniqueValueStyleConfig(styleConfig.Polygon)) {
+          // UniqueValue polygon style configuration ==================================================================
+          const styleArray: HTMLCanvasElement[] = [];
+          styleConfig.Polygon.uniqueValueStyleInfo.forEach((styleInfo) => {
+            styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
+          });
+          layerStyle.Polygon = styleArray;
+        } else if (isClassBreakStyleConfig(styleConfig.Polygon)) {
+          // ClassBreak polygon style configuration ===================================================================
+          const styleArray: HTMLCanvasElement[] = [];
+          styleConfig.Polygon.classBreakStyleInfos.forEach((styleInfo) => {
+            styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
+          });
+          layerStyle.Polygon = styleArray;
+        }
+        resolve(layerStyle);
+      }
+    });
+    return promisedLayerStyle;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
+   * create it using the default style strategy.
+   *
+   * @param {FeatureLike} feature The feature that need its style to be defined.
+   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
+   * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
+   *
+   * @returns {Style | undefined} The style applied to the feature or undefined if not found.
+   */
+  getFeatureStyle(
+    feature: FeatureLike,
+    layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+  ): Style | undefined {
+    const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
+    // If style does not exist for the geometryType, create it.
+    let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
+    if (style === undefined || style[geometryType] === undefined)
+      style = this.createDefaultStyle(geometryType, layerEntryConfig as TypeVectorLayerEntryConfig);
+    // Get the style accordingly to its type and geometry.
+    if (style![geometryType] !== undefined) {
+      const styleSettings = style![geometryType]!;
+      const { styleType } = styleSettings;
+      return this.processStyle[styleType][geometryType].call(this, styleSettings, feature);
+    }
+    return undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Increment the default color index.
+   */
+  private incrementDefaultColorIndex() {
+    this.defaultColorIndex++;
+    if (this.defaultColorIndex === defaultColor.length) this.defaultColorIndex = 0;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the default color using the default color index an increment it to select the next color the next time.
+   *
+   * @param {number} alpha The alpha value to associate to the color.
+   *
+   * @returns {string} The current default color string.
+   */
+  private getDefaultColorAndIncrementIndex(alpha: number): string {
+    const color = asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), alpha));
+    this.incrementDefaultColorIndex();
+    return color;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the default color using the default color index.
+   *
+   * @param {number} alpha The alpha value to associate to the color.
+   *
+   * @returns {string} The current default color string.
+   */
+  private getDefaultColor(alpha: number): string {
+    return asString(setAlphaColor(asArray(defaultColor[this.defaultColorIndex]), alpha));
+  }
+
+  /** ***************************************************************************************************************************
+   * Create the stroke options using the specified settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig} settings The settings to use
+   * for the stroke options creation.
+   *
+   * @returns {StrokeOptions} The stroke options created.
+   */
+  private createStrokeOptions(
+    settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig
+  ): StrokeOptions {
+    if (settings.stroke === undefined) settings.stroke = {};
+    if (settings.stroke.color === undefined) {
+      if ('color' in settings)
+        settings.stroke.color = asString(setAlphaColor(asArray((settings as TypeSimpleSymbolVectorConfig).color!), 1));
+      else settings.stroke.color = this.getDefaultColorAndIncrementIndex(1);
+    }
+    const strokeOptions: StrokeOptions = {
+      color: settings.stroke?.color,
+      width: settings.stroke?.width,
+      lineCap: 'butt',
+      lineJoin: 'bevel',
+      lineDash: this.lineDashSettings[settings.stroke?.lineStyle !== undefined ? settings.stroke?.lineStyle : 'solid'],
+    };
+    return strokeOptions;
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a circle symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size : 4 };
+    circleOptions.stroke = new Stroke(strokeOptions);
+    circleOptions.fill = new Fill(fillOptions);
+    if (settings.offset !== undefined) circleOptions.displacement = settings.offset;
+    if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
+    return new Style({
+      image: new StyleCircle(circleOptions),
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a star shape symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   * @param {number} points The number of points needed to create the symbol.
+   * @param {number} angle The angle to use for the symbol creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    const regularShapeOptions: RegularShapeOptions = {
+      radius1: settings.size !== undefined ? settings.size : 6,
+      radius2: settings.size !== undefined ? settings.size / 3 : 2,
+      angle,
+      points,
+    };
+    regularShapeOptions.stroke = new Stroke(strokeOptions);
+    regularShapeOptions.fill = new Fill(fillOptions);
+    if (settings.offset !== undefined) regularShapeOptions.displacement = settings.offset;
+    if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
+    return new Style({
+      image: new RegularShape(regularShapeOptions),
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a star symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processStarShapeSymbol(settings, 5, 0);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a X symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processStarShapeSymbol(settings, 4, Math.PI / 4);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a + symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processStarShapeSymbol(settings, 4, 0);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a regular shape using the settings, the number of points, the angle and the scale.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   * @param {number} points The number of points needed to create the symbol.
+   * @param {number} angle The angle to use for the symbol creation.
+   * @param {[number, number]} scale The scale to use for the symbol creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processRegularShape(
+    settings: TypeSimpleSymbolVectorConfig,
+    points: number,
+    angle: number,
+    scale: [number, number]
+  ): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    const regularShapeOptions: RegularShapeOptions = {
+      radius: settings.size !== undefined ? settings.size : 6,
+      angle,
+      scale,
+      points,
+    };
+    regularShapeOptions.stroke = new Stroke(strokeOptions);
+    regularShapeOptions.fill = new Fill(fillOptions);
+    if (settings.offset !== undefined) regularShapeOptions.displacement = settings.offset;
+    if (settings.rotation !== undefined) regularShapeOptions.rotation = settings.rotation;
+    return new Style({
+      image: new RegularShape(regularShapeOptions),
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a square symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processRegularShape(settings, 4, Math.PI / 4, [1, 1]);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a Diamond symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processRegularShape(settings, 4, 0, [0.75, 1]);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a triangle symbol using the settings.
+   *
+   * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
+    return this.processRegularShape(settings, 3, 0, [1, 1]);
+  }
+
+  /** ***************************************************************************************************************************
+   * Process an icon symbol using the settings.
+   *
+   * @param {TypeIconSymbolVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
+    const iconOptions: IconOptions = {};
+    iconOptions.src = `data:${settings.mimeType};base64,${settings.src}`;
+    if (settings.width !== undefined && settings.height !== undefined) iconOptions.size = [settings.width, settings.height];
+    if (settings.offset !== undefined) iconOptions.offset = settings.offset;
+    if (settings.rotation !== undefined) iconOptions.rotation = settings.rotation;
+    if (settings.opacity !== undefined) iconOptions.opacity = settings.opacity;
+    return new Style({
+      image: new StyleIcon(iconOptions),
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a simple point symbol using the settings. Simple point symbol may be an icon or a vector symbol.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
+   * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processSimplePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
+    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeBaseVectorConfig;
+    if (isSimpleSymbolVectorConfig(settings)) {
+      const { symbol } = settings;
+      return this.processSymbol[symbol].call(this, settings);
+    }
+    if (isIconSymbolVectorConfig(settings)) return this.processIconSymbol(settings);
+    return undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a simple lineString using the settings.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
+   * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processSimpleLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
+    const { settings } = styleSettings as TypeSimpleStyleConfig;
+    if (isLineStringVectorConfig(settings)) {
+      const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+      return new Style({ stroke: new Stroke(strokeOptions) });
+    }
+    return undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a simple solid fill (polygon) using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processSolidFill(settings: TypePolygonVectorConfig): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    return new Style({
+      stroke: new Stroke(strokeOptions),
+      fill: new Fill(fillOptions),
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a null fill (polygon with fill opacity = 0) using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
+  private processNullFill(settings: TypePolygonVectorConfig): Style | undefined {
+    if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0);
+    const fillOptions: FillOptions = { color: settings.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
+    return new Style({
+      stroke: new Stroke(strokeOptions),
+      fill: new Fill(fillOptions),
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * Process a pattern fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   * @param {FillPaternLine[]} fillPaternLines The fill patern lines needed to create the fill.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: FillPaternLine[]): Style | undefined {
     const paternSize = settings.paternSize !== undefined ? settings.paternSize : 8;
     if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
 
+    // Canvas used to create the pattern fill. It is bigger to take into account the repeating aspect of the fill.
     const drawingCanvas = document.createElement('canvas');
     drawingCanvas.width = paternSize * 2;
     drawingCanvas.height = paternSize * 2;
@@ -474,6 +753,7 @@ export class GeoviewRenderer {
     }
     context!.stroke();
 
+    // extract the sub area that will define the pattern that will repeat properly.
     const outputCanvas = document.createElement('canvas');
     outputCanvas.width = paternSize;
     outputCanvas.height = paternSize;
@@ -487,30 +767,81 @@ export class GeoviewRenderer {
     });
   }
 
+  /** ***************************************************************************************************************************
+   * Process a backward diagonal fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processBackwardDiagonalFill(settings: TypePolygonVectorConfig): Style | undefined {
     return this.processPaternFill(settings, this.fillPaternSettings.backwardDiagonal);
   }
 
+  /** ***************************************************************************************************************************
+   * Process a forward diagonal fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processForwardDiagonalFill(settings: TypePolygonVectorConfig): Style | undefined {
     return this.processPaternFill(settings, this.fillPaternSettings.forwardDiagonal);
   }
 
+  /** ***************************************************************************************************************************
+   * Process a cross fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processCrossFill(settings: TypePolygonVectorConfig): Style | undefined {
     return this.processPaternFill(settings, this.fillPaternSettings.cross);
   }
 
+  /** ***************************************************************************************************************************
+   * Process a diagonal cross fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processDiagonalCrossFill(settings: TypePolygonVectorConfig): Style | undefined {
     return this.processPaternFill(settings, this.fillPaternSettings.diagonalCross);
   }
 
+  /** ***************************************************************************************************************************
+   * Process a horizontal fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processHorizontalFill(settings: TypePolygonVectorConfig): Style | undefined {
     return this.processPaternFill(settings, this.fillPaternSettings.horizontal);
   }
 
+  /** ***************************************************************************************************************************
+   * Process a vertical fill using the settings.
+   *
+   * @param {TypePolygonVectorConfig} settings The settings to use for the Style creation.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processVerticalFill(settings: TypePolygonVectorConfig): Style | undefined {
     return this.processPaternFill(settings, this.fillPaternSettings.vertical);
   }
 
+  /** ***************************************************************************************************************************
+   * Process a simple polygon using the settings.
+   *
+   * @param {TypePolTypeStyleSettings | TypeKindOfVectorSettingsygonVectorConfig} styleSettings The settings to use for the
+   * Style creation.
+   * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processSimplePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
     const { settings } = styleSettings as TypeSimpleStyleConfig;
     if (isFilledPolygonVectorConfig(settings)) {
@@ -520,6 +851,15 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Search the unique value entry using the field values stored in the feature.
+   *
+   * @param {string[]} fields The fields involved in the unique value definition.
+   * @param {TypeUniqueValueStyleInfo[]} uniqueValueStyleInfo The unique value configuration.
+   * @param {FeatureLike} feature The feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private searchUniqueValueEntry(
     fields: string[],
     uniqueValueStyleInfo: TypeUniqueValueStyleInfo[],
@@ -534,6 +874,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Process the unique value settings using a point feature to get its Style.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
+   * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processUniqueValuePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
@@ -544,6 +892,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Process the unique value settings using a lineString feature to get its Style.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
+   * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processUniqueLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
@@ -554,6 +910,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Process the unique value settings using a polygon feature to get its Style.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
+   * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processUniquePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
@@ -564,6 +928,15 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Search the class breakentry using the field value stored in the feature.
+   *
+   * @param {string[]} field The field involved in the class break definition.
+   * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfos The class break configuration.
+   * @param {FeatureLike} feature The feature used to test the class break conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private searchClassBreakEntry(field: string, classBreakStyleInfos: TypeClassBreakStyleInfo[], feature: FeatureLike): number | undefined {
     const fieldValue = feature.get(field) as number;
     if (fieldValue >= classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return 0;
@@ -574,6 +947,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Process the class break settings using a Point feature to get its Style.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
+   * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processClassBreaksPoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
@@ -584,6 +965,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Process the class break settings using a lineString feature to get its Style.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
+   * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processClassBreaksLineString(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
     feature: FeatureLike
@@ -597,6 +986,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Process the class break settings using a Polygon feature to get its Style.
+   *
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
+   * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   *
+   * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   */
   private processClassBreaksPolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
@@ -607,6 +1004,14 @@ export class GeoviewRenderer {
     return undefined;
   }
 
+  /** ***************************************************************************************************************************
+   * Create a default style to use with a vector feature that has no style configuration.
+   *
+   * @param {TypeStyleConfigKey} geometryType The type of geometry (Point, LineString, Polygon).
+   * @param {TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig the layer entry config to configure.
+   *
+   * @returns {TypeStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
+   */
   private createDefaultStyle(
     geometryType: TypeStyleConfigKey,
     layerEntryConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig

@@ -40,8 +40,41 @@ export type TypeLegend = {
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig;
-  legend: TypeLayerStyle | string | ArrayBuffer;
+  legend: TypeLayerStyle | HTMLCanvasElement;
 };
+
+/**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
+  return verifyIfLegend.type === 'ogcWms';
+};
+
+export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
+  legend: HTMLCanvasElement;
+}
+
+const validEvents: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs'];
+/**
+ * type guard function that redefines a TypeLegend as a TypeVectorLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
+  return validEvents.includes(verifyIfLegend.type);
+};
+
+export interface TypeVectorLegend extends TypeLegend {
+  legend: TypeLayerStyle;
+}
 
 export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>>;
 
@@ -495,9 +528,11 @@ export abstract class AbstractGeoViewLayer {
       EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
       (payload) => {
         if (payloadIsQueryLegend(payload)) {
-          this.getLegend(layerPath).then((queryResult) => {
-            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
-          });
+          if (payload.layerPath === layerPath) {
+            this.getLegend(layerPath).then((queryResult) => {
+              api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
+            });
+          }
         }
       },
       this.mapId
@@ -722,14 +757,16 @@ export abstract class AbstractGeoViewLayer {
       if (!layerConfig?.style) resolve(null);
       else {
         const { geoviewRenderer } = api.map(this.mapId);
-        const legend: TypeLegend = {
-          type: layerConfig.geoviewRootLayer!.geoviewLayerType,
-          layerPath: Layer.getLayerPath(layerConfig),
-          layerName: layerConfig.layerName!,
-          styleConfig: layerConfig?.style,
-          legend: geoviewRenderer.getStyle(layerConfig.style as TypeStyleConfig),
-        };
-        resolve(legend);
+        geoviewRenderer.getStyle(layerConfig.style as TypeStyleConfig).then((legendStyle) => {
+          const legend: TypeLegend = {
+            type: layerConfig.geoviewRootLayer!.geoviewLayerType,
+            layerPath: Layer.getLayerPath(layerConfig),
+            layerName: layerConfig.layerName!,
+            styleConfig: layerConfig?.style,
+            legend: legendStyle,
+          };
+          resolve(legend);
+        });
       }
     });
     return promisedLegend;

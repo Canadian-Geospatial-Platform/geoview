@@ -6,7 +6,7 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a InKeyfocusPayload
+ * type guard function that redefines a PayloadBaseClass as a InKeyfocusPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

@@ -19,7 +19,7 @@ export type TypeArrayOfRecords = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfRecords | undefined };
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -41,7 +41,7 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
+ * type guard function that redefines a PayloadBaseClass as a TypeAllQueriesDonePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -62,7 +62,7 @@ export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeQueryResultPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeQueryResultPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -84,7 +84,7 @@ export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a GetFeatureInfoPayload
+ * type guard function that redefines a PayloadBaseClass as a GetFeatureInfoPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
