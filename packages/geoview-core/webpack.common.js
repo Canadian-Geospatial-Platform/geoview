@@ -43,6 +43,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-footer-panel': {
+      import: '../geoview-footer-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

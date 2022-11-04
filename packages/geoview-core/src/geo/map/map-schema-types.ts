@@ -136,7 +136,7 @@ export type TypeBaseVectorConfig = {
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseVectorConfig as a TypeLineStringVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'lineString'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -149,7 +149,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): 
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseVectorConfig as a TypePolygonVectorConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseVectorConfig as a TypePolygonVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'filledPolygon'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -162,7 +162,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseVectorConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseVectorConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'simpleSymbol'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -175,7 +175,7 @@ export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig)
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseVectorConfig as a TypeIconSymbolVectorConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseVectorConfig as a TypeIconSymbolVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'iconSymbol'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -322,7 +322,7 @@ export type TypeBaseStyleConfig = {
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseStyleConfig as a TypeSimpleStyleConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseStyleConfig as a TypeSimpleStyleConfig if the type attribute of the
  * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -363,7 +363,7 @@ export type TypeUniqueValueStyleInfo = {
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseStyleConfig as a TypeUniqueValueStyleConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseStyleConfig as a TypeUniqueValueStyleConfig if the type attribute of the
  * verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -410,7 +410,7 @@ export type TypeClassBreakStyleInfo = {
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeBaseStyleConfig as a TypeClassBreakStyleConfig if the type attribute of the
+ * type guard function that redefines a TypeBaseStyleConfig as a TypeClassBreakStyleConfig if the type attribute of the
  * verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -463,7 +463,7 @@ export type TypeStyleConfig = Partial<Record<TypeStyleConfigKey, TypeStyleSettin
 export type TypeLayerEntryType = 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'geocore';
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeLayerGroupEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'group'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
@@ -475,7 +475,7 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): ver
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig if the entryType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'vector'. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -488,7 +488,7 @@ export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyI
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorHeatmapLayerEntryConfig if the entryType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorHeatmapLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'vectorHeatmap'. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -501,7 +501,7 @@ export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): 
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeVectorTileLayerEntryConfig if the entryType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeVectorTileLayerEntryConfig if the entryType attribute of the
  * verifyIfLayer parameter is 'vector' and the object has a style attribute. The type ascention applies only to the true block
  * of the if clause that use this function.
  *
@@ -514,7 +514,7 @@ export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): ver
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeImageLayerEntryConfig | TypeTileLayerEntryConfig if the
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeImageLayerEntryConfig | TypeTileLayerEntryConfig if the
  * entryType attribute of the verifyIfLayer parameter is 'raster'. The type ascention applies only to the true block of the if
  * clause that use this function.
  *
@@ -529,7 +529,7 @@ export const layerEntryIsRaster = (
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the entryType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the entryType attribute of
  * the verifyIfLayer parameter is 'geocore'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -991,7 +991,7 @@ export type TypeMapComponents = Array<'app-bar' | 'nav-bar' | 'north-arrow' | 'o
  * the same loaction as core config (<<core config name>>-<<package name>>.json).
  * Default = ['basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'].
  */
-export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel'>;
+export type TypeMapCorePackages = Array<'basemap-panel' | 'layers-panel' | 'details-panel' | 'geolocator-panel' | 'footer-panel'>;
 
 /** ******************************************************************************************************************************
  * List of external packages to initialize on viewer load. Default = [].

@@ -9,7 +9,7 @@ import { TypeJsonObject } from '../../../core/types/global-types';
 const validEvents: EventStringId[] = [EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MarkerDefinitionPayload
+ * type guard function that redefines a PayloadBaseClass as a MarkerDefinitionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

@@ -10,7 +10,7 @@ const validEvents: EventStringId[] = [
 ];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a SliderPayload
+ * type guard function that redefines a PayloadBaseClass as a SliderPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

@@ -24,6 +24,8 @@ This project is now a monorepo and contains the following packages under the `pa
 
 - [geoview-layers-panel](packages/geoview-layers-panel) - a package that displays a panel with a list of loaded layers and their legend.
 
+- [geoview-footer-panel](packages/geoview-footer-panel) - a package that displays a footer panel with a list of tabs (legend, details, data grid, ...) for basic view.
+
 ## Development
 
 Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a few extentions to help linting and formatting

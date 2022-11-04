@@ -43,7 +43,7 @@ export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig,
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriFeatureLayerConfig if the geoviewLayerType attribute
  * of the verifyIfLayer parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -56,7 +56,7 @@ export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig):
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as an EsriFeature if the type attribute of the verifyIfGeoViewLayer
+ * type guard function that redefines an AbstractGeoViewLayer as an EsriFeature if the type attribute of the verifyIfGeoViewLayer
  * parameter is ESRI_FEATURE. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
@@ -69,7 +69,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriFeatureLayerEntryConfig if the geoviewLayerType
  * attribute of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_FEATURE. The type ascention applies only to the true
  * block of the if clause that use this function.
  *

@@ -47,6 +47,7 @@ td {
   -moz-box-shadow: 2px 2px 5px 5px #666666;
   padding: 10px;
   font-size: 12px;
+  overflow: auto;
 }
 
 .toolbar {
@@ -83,6 +84,10 @@ td {
   height: 120px;
   width: 120px;
   text-align: left;
+}
+
+.page-link {
+  display: block;
 }
 
 .llwp-map {

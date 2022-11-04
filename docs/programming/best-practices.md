@@ -51,8 +51,8 @@ class, whether abstract or not, can be used as a parent at the root of the inher
 classes. Inheritance also allows to exploit polymorphism. To do this, you just need to define a variable with a base class as type,
 whether it is abstract or not. This variable can then be assigned any object of a derived class without having to negotiate the type.
 Polymorphism allows to expose the common characteristics of the different classes of the inheritance tree. When we want to use child
-specific fields, typescript allows us to code type gard functions that allow us to do a type ascension in a safer way than a blind
-cast. The type gard functions have as parameter a polymorphic variable whose type is a parent class and use the known attributes of
+specific fields, typescript allows us to code type guard functions that allow us to do a type ascension in a safer way than a blind
+cast. The type guard functions have as parameter a polymorphic variable whose type is a parent class and use the known attributes of
 this class to determine unambiguously that the type of the object passed as parameter corresponds to a child class of the inheritance
 tree. They return a boolean as output and perform a type ascension to the type of the child if the value of this boolean is true.
 Type guard functions are used in if clauses and when the boolean returned is true, the type of the parameter passed to the function
@@ -73,13 +73,13 @@ class Child_A extends BaseClass {
   }
 }
 
-// Type gard function for Child_A
+// type guard function for Child_A
 const childTypeIs_A = (verifyIfChildType: BaseClass): verifyIfChildType is Child_A => {
   return verifyIfChildType.type === 'child_a';
 };
 
-// Here, we could do something similar to define a class and a type gard for child_b
-const typeGardExample = () {
+// Here, we could do something similar to define a class and a type guard for child_b
+const typeGuardExample = () {
   const instance: BaseClass = getTheInstanceByAnyMeans(); // Here, instance type is BaseClass
 
   if (childTypeIs_A(instance)) {
@@ -89,7 +89,7 @@ const typeGardExample = () {
 }
 ```
 
-If you want to see how classes and type gards are used in the viewer, have a look at the
+If you want to see how classes and type guards are used in the viewer, have a look at the
 [payloads folder](../../../packages/geoview-core/src/api/events/payloads) and search where we use these payloads through the code.
 
 

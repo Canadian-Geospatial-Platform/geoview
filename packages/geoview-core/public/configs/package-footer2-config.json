@@ -1,0 +1,33 @@
+{
+  "map": {
+    "interaction": "static",
+    "viewSettings": {
+      "zoom": 6,
+      "center": [-110, 50],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "esriFeatureLYR4",
+        "geoviewLayerName": { "en": "Water quality at monitoring sites" },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          { "layerId": "8" }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "components": [],
+  "corePackages": ["footer-panel"],
+  "externalPackages": [],
+  "suportedLanguages": ["en"]
+}

@@ -40,7 +40,7 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
 }
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoJSONLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -53,7 +53,7 @@ export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): ver
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as a GeoJSON if the type attribute of the verifyIfGeoViewLayer
+ * type guard function that redefines an AbstractGeoViewLayer as a GeoJSON if the type attribute of the verifyIfGeoViewLayer
  * parameter is GEOJSON. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
@@ -66,7 +66,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
 };
 
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeGeoJSONLayerEntryConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoJSONLayerEntryConfig if the geoviewLayerType attribute of
  * the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOJSON. The type ascention applies only to the true block of the if
  * clause that use this function.
  *

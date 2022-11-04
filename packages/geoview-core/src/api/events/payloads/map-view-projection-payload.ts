@@ -7,7 +7,7 @@ import { TypeProjectionCodes } from '../../../geo/map/map-schema-types';
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MapViewProjectionPayload
+ * type guard function that redefines a PayloadBaseClass as a MapViewProjectionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

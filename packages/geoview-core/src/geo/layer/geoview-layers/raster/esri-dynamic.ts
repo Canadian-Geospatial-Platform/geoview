@@ -39,7 +39,7 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
 }
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -52,7 +52,7 @@ export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig):
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
+ * type guard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
  * parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
@@ -65,7 +65,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
 };
 
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *

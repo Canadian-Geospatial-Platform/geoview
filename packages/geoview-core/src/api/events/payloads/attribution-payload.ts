@@ -6,7 +6,7 @@ import { EventStringId, EVENT_NAMES } from '../event-types';
 const validEvents: EventStringId[] = [EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_UPDATE];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a AttributionPayload
+ * type guard function that redefines a PayloadBaseClass as a AttributionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

@@ -7,7 +7,7 @@ import { TypeGeoviewLayerConfig } from '../../../geo/map/map-schema-types';
 const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_ADD_LAYER];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a LayerConfigPayload
+ * type guard function that redefines a PayloadBaseClass as a LayerConfigPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

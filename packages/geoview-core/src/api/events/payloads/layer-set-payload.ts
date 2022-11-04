@@ -15,7 +15,7 @@ export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'usin
 export type TypeResultSets = { [layerPath: string]: any | null };
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeLayerRegistrationPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeLayerRegistrationPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -39,7 +39,7 @@ export interface TypeLayerRegistrationPayload extends LayerSetPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeRequestLayerInventoryPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeRequestLayerInventoryPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -59,7 +59,7 @@ export interface TypeRequestLayerInventoryPayload extends LayerSetPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypelayerSetUpdatedPayload
+ * type guard function that redefines a PayloadBaseClass as a TypelayerSetUpdatedPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -79,7 +79,7 @@ export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a LayerSetPayload
+ * type guard function that redefines a PayloadBaseClass as a LayerSetPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

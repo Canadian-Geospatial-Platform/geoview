@@ -7,7 +7,7 @@ import { AbstractGeoViewLayer } from '../../../geo/layer/geoview-layers/abstract
 const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a GeoViewLayerPayload
+ * type guard function that redefines a PayloadBaseClass as a GeoViewLayerPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

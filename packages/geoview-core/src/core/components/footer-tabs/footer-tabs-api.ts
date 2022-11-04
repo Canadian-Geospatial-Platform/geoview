@@ -1,6 +1,7 @@
 import { api } from '../../../app';
 
 import { EVENT_NAMES } from '../../../api/events/event-types';
+import { sanitizeHtmlContent } from '../../utils/utilities';
 
 import { tabPayload } from '../../../api/events/payloads/footer-tab-payload';
 
@@ -40,6 +41,10 @@ export class FooterTabsApi {
 
       // if tab does not exist, create it
       if (!tab) {
+        // if tab content is string HTML, sanitize
+        // eslint-disable-next-line no-param-reassign
+        if (typeof tabProps.content === 'string') tabProps.content = sanitizeHtmlContent(tabProps.content);
+
         // add the new tab to the footer tabs array
         this.tabs.push(tabProps);
 

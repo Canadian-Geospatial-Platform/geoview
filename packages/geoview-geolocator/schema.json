@@ -45,7 +45,7 @@
       "additionalProperties": false
     },
 
-    "languages": {
+    "suportedLanguages": {
       "type": "array",
       "uniqueItems": true,
       "items": {
@@ -62,5 +62,5 @@
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
   },
-  "required": ["languages"]
+  "required": ["suportedLanguages"]
 }

@@ -1,4 +1,4 @@
-import { createElement } from 'react';
+import { createElement, ReactElement } from 'react';
 
 import { AbstractGeoViewVector, api } from '../../../app';
 import { getLocalizedValue } from '../../utils/utilities';
@@ -16,7 +16,7 @@ export interface TypeLayerDataGridProps {
  * @class DataGridAPI
  */
 export class DataGridAPI {
-  mapId: string;
+  mapId!: string;
 
   /**
    * initialize the data grid api
@@ -31,9 +31,10 @@ export class DataGridAPI {
    * Create a data grid
    *
    * @param {TypeLayerDataGridProps} layerDataGridProps the properties of the data grid to be created
+   * @return {ReactElement} the data grid react element
    *
    */
-  createDataGrid = (props: TypeLayerDataGridProps) => {
+  createDataGrid = (props: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = props;
     const rootGeoViewLayer = api.map(this.mapId).layer.geoviewLayers[layerId];
     const values = (rootGeoViewLayer as AbstractGeoViewVector).getAllFeatureInfo();
