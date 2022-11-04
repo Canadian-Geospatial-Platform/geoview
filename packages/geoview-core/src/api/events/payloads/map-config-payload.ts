@@ -7,7 +7,7 @@ import { TypeMapFeaturesConfig } from '../../../core/types/global-types';
 const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_RELOAD];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MapFeaturesPayload
+ * type guard function that redefines a PayloadBaseClass as a MapFeaturesPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

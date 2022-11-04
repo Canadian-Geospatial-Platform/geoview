@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Footer Config Schema",
+  "type": "object",
+  "version": 1.0,
+  "comments": "Configuration for GeoView footer package.",
+  "additionalProperties": false,
+
+  "properties": {
+    "tabs": {
+      "type": "object",
+      "description": "Available tabs",
+      "properties": {
+        "defaultTabs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["legend", "details", "data-grid"]
+          },
+          "minItems": 0,
+          "default": ["legend", "details", "data-grid"],
+          "uniqueItems": true,
+          "description": "Defaut tabs of footer panel to use"
+        },
+        "customTabs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "defaultTabs": {
+                "type": "string"
+              },
+              "contentHTML": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 0,
+          "default": [],
+          "uniqueItems": true,
+          "description": "Custom tabs of footer panel to use"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "suportedLanguages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["en", "fr"]
+      },
+      "default": ["en", "fr"],
+      "description": "ISO 639-1 code indicating the languages supported by the configuration file.",
+      "minItems": 1
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    }
+  },
+  "required": ["suportedLanguages"]
+}

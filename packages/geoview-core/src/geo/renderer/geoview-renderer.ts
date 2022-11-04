@@ -404,7 +404,8 @@ export class GeoviewRenderer {
    * create it using the default style strategy.
    *
    * @param {FeatureLike} feature The feature that need its style to be defined.
-   * @param {FeatureLike} layerEntryConfig The layer entry config that may have a style configuration for the feature.
+   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
+   * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
    *
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
@@ -613,7 +614,7 @@ export class GeoviewRenderer {
   }
 
   /** ***************************************************************************************************************************
-   * Process a Diamound symbol using the settings.
+   * Process a Diamond symbol using the settings.
    *
    * @param {TypeSimpleSymbolVectorConfig} settings The settings to use for the Style creation.
    *

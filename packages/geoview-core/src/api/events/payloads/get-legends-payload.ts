@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [
 export type TypeLegendResultSets = { [layerPath: string]: TypeLegend | undefined | null };
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeAllLegendsDonePayload
+ * type guard function that redefines a PayloadBaseClass as a TypeAllLegendsDonePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -36,7 +36,7 @@ export interface TypeAllLegendsDonePayload extends GetLegendsPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeLegendInfoPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeLegendInfoPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -58,7 +58,7 @@ export interface TypeLegendInfoPayload extends GetLegendsPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeQueryLegendPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeQueryLegendPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -78,7 +78,7 @@ export interface TypeQueryLegendPayload extends GetLegendsPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a TypeTriggerLegendsPayload
+ * type guard function that redefines a PayloadBaseClass as a TypeTriggerLegendsPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -98,7 +98,7 @@ export interface TypeTriggerLegendsPayload extends GetLegendsPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a GetLegendsPayload
+ * type guard function that redefines a PayloadBaseClass as a GetLegendsPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

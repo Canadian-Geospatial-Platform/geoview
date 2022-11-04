@@ -1104,7 +1104,7 @@
       "type": "array",
       "uniqueItems": true,
       "items": {
-        "enum": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel"]
+        "enum": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel", "footer-panel"]
       },
       "default": ["basemap-panel", "layers-panel", "details-panel", "geolocator-panel"],
       "description": "Core packages to initialize on viewer load. The schema for those are on their own package. NOTE: config from packages are in the same loaction as core config (<<core config name>>-<<package name>>.json).",

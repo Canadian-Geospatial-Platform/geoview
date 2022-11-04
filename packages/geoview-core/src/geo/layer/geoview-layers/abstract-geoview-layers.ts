@@ -44,7 +44,7 @@ export type TypeLegend = {
 };
 
 /**
- * Type Gard function that redefines a TypeLegend as a TypeWmsLegend
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -59,8 +59,9 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement;
 }
 
+const validEvents: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs'];
 /**
- * Type Gard function that redefines a TypeLegend as a TypeVectorLegend
+ * type guard function that redefines a TypeLegend as a TypeVectorLegend
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -68,7 +69,7 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
  * @returns {boolean} returns true if the payload is valid
  */
 export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
-  return verifyIfLegend.type !== 'ogcWms' && verifyIfLegend.type !== 'xyzTiles';
+  return validEvents.includes(verifyIfLegend.type);
 };
 
 export interface TypeVectorLegend extends TypeLegend {

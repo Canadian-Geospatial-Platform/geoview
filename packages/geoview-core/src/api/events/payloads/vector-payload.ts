@@ -9,7 +9,7 @@ import { CONST_VECTOR_TYPES, TypeOfVector } from '../../../geo/layer/vector/vect
 const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED];
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a VectorPayload
+ * type guard function that redefines a PayloadBaseClass as a VectorPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -21,7 +21,7 @@ export const payloadIsAVector = (verifyIfPayload: PayloadBaseClass): verifyIfPay
 };
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a CirclePayload
+ * type guard function that redefines a PayloadBaseClass as a CirclePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -43,7 +43,7 @@ export interface CirclePayload extends VectorPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a CircleMarkerPayload
+ * type guard function that redefines a PayloadBaseClass as a CircleMarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -65,7 +65,7 @@ export interface CircleMarkerPayload extends VectorPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MarkerPayload
+ * type guard function that redefines a PayloadBaseClass as a MarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -87,7 +87,7 @@ export interface MarkerPayload extends VectorPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PolygonPayload
+ * type guard function that redefines a PayloadBaseClass as a PolygonPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
@@ -109,7 +109,7 @@ export interface PolygonPayload extends VectorPayload {
 }
 
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PolylinePayload
+ * type guard function that redefines a PayloadBaseClass as a PolylinePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *

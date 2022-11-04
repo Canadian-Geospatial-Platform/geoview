@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/rush.schema.json",
   "rushVersion": "5.62.3",
-  "pnpmVersion": "7.14.0",
+  "pnpmVersion": "7.14.2",
   "pnpmOptions": {
     "strictPeerDependencies": false,
     "useWorkspaces": true
@@ -33,6 +33,10 @@
     {
       "packageName": "geoview-layers-panel",
       "projectFolder": "packages/geoview-layers-panel"
+    },
+    {
+      "packageName": "geoview-footer-panel",
+      "projectFolder": "packages/geoview-footer-panel"
     },
     {
       "packageName": "eslint-and-prettier-config",
