@@ -499,13 +499,25 @@ export class WMS extends AbstractGeoViewRaster {
 
       this.getLegendImage(layerConfig!.layerId).then((legendImage) => {
         if (!legendImage) resolve(null);
-        const legend: TypeLegend = {
-          type: this.type,
-          layerPath: Layer.getLayerPath(layerConfig!),
-          layerName: layerConfig!.layerName,
-          legend: legendImage!,
-        };
-        resolve(legend);
+        else {
+          api
+            .map(this.mapId)
+            .geoviewRenderer.loadImage(legendImage as string)
+            .then((image) => {
+              const drawingCanvas = document.createElement('canvas');
+              drawingCanvas.width = image.width;
+              drawingCanvas.height = image.height;
+              const drawingContext = drawingCanvas.getContext('2d')!;
+              drawingContext.drawImage(image, 0, 0);
+              const legend: TypeLegend = {
+                type: this.type,
+                layerPath: Layer.getLayerPath(layerConfig!),
+                layerName: layerConfig!.layerName,
+                legend: drawingCanvas,
+              };
+              resolve(legend);
+            });
+        }
       });
     });
     return promisedLegend;

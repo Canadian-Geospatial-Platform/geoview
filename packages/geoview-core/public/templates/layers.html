@@ -692,7 +692,7 @@
       legendTable.appendChild(table);
       var createHeader = true;
       Object.keys(resultSets).forEach((layerPath) => {
-        if (typeof resultSets[layerPath].legend === 'string') {
+        if (resultSets[layerPath].type === 'ogcWms') {
           if (createHeader) {
             createHeader = false;
             const tableRow1 = document.createElement('tr');
@@ -702,9 +702,7 @@
           }
           const tableRow = document.createElement('tr');
           addData(resultSets[layerPath].layerPath, tableRow);
-          const image = document.createElement('img');
-          image.src = resultSets[layerPath].legend;
-          addData(image, tableRow);
+          addData(resultSets[layerPath].legend, tableRow);
           table.appendChild(tableRow);
         } else {
           const addRow = (layerPath, label, canvas) => {

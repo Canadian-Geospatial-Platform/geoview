@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,17 +21,14 @@ import {
   AbstractGeoViewLayer,
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
-  TypeStyleConfigKey,
   TypeUniqueValueStyleConfig,
   TypeLayerEntryConfig,
   TypeDisplayLanguage,
-  api,
-  MapContext,
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
-import { GetLegendsPayload, payloadIsAllLegendsDone, TypeAllLegendsDonePayload } from '../../../api/events/payloads/get-legends-payload';
+import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   legendItem: {
     padding: 0,
   },
@@ -69,9 +66,6 @@ export interface TypeLegendItemProps {
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const { layerId, rootGeoViewLayer, subLayerId, layerConfigEntry } = props;
 
-  const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
-
   const classes = useStyles();
 
   const { t, i18n } = useTranslation<string>();
@@ -85,20 +79,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [layerName, setLayerName] = useState<string>('');
-
-  function isBase64(l: string | Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>> | ArrayBuffer): l is string {
-    return typeof l === 'string';
-  }
-
-  function isCanvas(
-    l: string | Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>> | ArrayBuffer
-  ): l is Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>> {
-    return (
-      Object.keys(l as Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>).indexOf('Point') !== -1 ||
-      Object.keys(l as Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>).indexOf('LineString') !== -1 ||
-      Object.keys(l as Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>).indexOf('Polygon') !== -1
-    );
-  }
 
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
@@ -121,11 +101,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     rootGeoViewLayer?.getLegend(subLayerId).then((layerLegend) => {
       if (layerLegend) {
         // WMS layers just return a string
-        if (isBase64(layerLegend.legend)) {
+        if (isWmsLegend(layerLegend)) {
           setIconType('simple');
-          setIconImg(layerLegend.legend);
-        } else if (isCanvas(layerLegend.legend)) {
-          Object.entries(layerLegend.legend).forEach(([key, canvas]) => {
+          setIconImg(layerLegend.legend.toDataURL());
+        } else if (isVectorLegend(layerLegend)) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          Object.entries(layerLegend.legend).forEach(([key1, canvas]) => {
             if ('length' in canvas) {
               setIconType('list');
               const iconImageList = (canvas as HTMLCanvasElement[]).map((c) => {
@@ -133,7 +114,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               });
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
-                Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                Object.entries(layerLegend.styleConfig).forEach(([key2, styleSettings]) => {
                   if (styleSettings.styleType === 'classBreaks') {
                     const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfos.map((styleInfo) => {
                       return styleInfo.label;
@@ -154,9 +136,11 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             }
           });
         } else {
+          // eslint-disable-next-line no-console
           console.log(`${layerId} - UNHANDLED LEGEND TYPE`);
         }
       } else {
+        // eslint-disable-next-line no-console
         console.log(`${layerId} - NULL LAYER DATA`);
       }
     });
@@ -211,6 +195,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (!isGroup) {
       getLegendDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
