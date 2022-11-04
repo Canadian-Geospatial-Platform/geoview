@@ -1,0 +1,7 @@
+{
+  "tabs": {
+    "defaultTabs": ["legend", "details", "data-grid"],
+    "customTabs": []
+  },
+  "suportedLanguages": ["en", "fr"]
+}

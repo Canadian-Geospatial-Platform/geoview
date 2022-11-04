@@ -27,7 +27,7 @@
         <tr>
           <td><img class="logo" alt="logo" src="./img/Logo.png" /></td>
           <td class="header-title">
-            <h1><strong>Footer tabs</strong></h1>
+            <h1><strong>Footer tabs - Vanilla JavaScript</strong></h1>
           </td>
         </tr>
         <tr>
@@ -38,7 +38,7 @@
     <table>
       <tbody>
         <tr>
-          <td>This page is used to showcase using the footer tabs.</td>
+          <td>This page is used to showcase using the footer tabsuse in plain vanilla JavaScript.</td>
         </tr>
       </tbody>
     </table>
@@ -46,15 +46,10 @@
 
   <div id="mapWM" class="llwp-map" data-lang="en" data-config-url="./configs/footer-tabs-config.json"></div>
   <p>
-    The map will show how you can add footer tabs using GeoView core component. <br/>
-    Look at code snippet for a sample using <strong>Vanilla JavaScript</strong> using the <strong>React</strong>
-    <u>createElement</u> to access and create UI components from GeoView. You should do the same using an external
+    The map will show how you can add footer tabs using GeoView core component and <strong>Vanilla JavaScript</strong>
+    using the <strong>React</strong> <u>createElement</u> to access and create UI components from GeoView. You should do the same using an external
     package that uses JSX.
   </p>
-  <hr />
-
-  <button id="grid-sample-button" type="button" class="collapsible">Table in stand alone div</button>
-  <pre id="grid-sample" style="width: 100%" class="panel"></pre>
   <hr />
 
   <button type="button" class="collapsible">Code Snippet</button>
@@ -73,13 +68,12 @@
       // import react and api from the core
       const { react, api, ui } = cgpv;
 
-      // !!! Keep for reference
-      // // import the createElement function from React to create UI components, define it as h for short
-      // const { createElement: h, useState, useEffect, useCallback } = react;
+      // import the createElement function from React to create UI components, define it as h for short
+      const { createElement: h, useState, useEffect, useCallback } = react;
 
-      // !!! Keep for reference
-      // create a component that will be used as content for a footer tab
-      // the content will be the legend for enabled layers (demo only supports WMS and esriDynamic)
+      // !! Keep for reference
+      // // create a component that will be used as content for a footer tab
+      // // the content will be the legend for enabled layers (demo only supports WMS and esriDynamic)
       // function LegendComponent() {
       //   const [layers, setLayers] = useState([]);
 
@@ -218,64 +212,63 @@
       //   );
       // }
 
-      // !!! Keep for reference
-      // function TableComponent() {
-      //   const { Table } = ui.elements;
+      function TableComponent() {
+        const { Table } = ui.elements;
 
-      //   const columns = [
-      //     { field: 'id', headerName: 'ID', width: 90 },
-      //     {
-      //       field: 'firstName',
-      //       headerName: 'First name',
-      //       width: 150,
-      //       editable: true,
-      //     },
-      //     {
-      //       field: 'lastName',
-      //       headerName: 'Last name',
-      //       width: 150,
-      //       editable: true,
-      //     },
-      //     {
-      //       field: 'age',
-      //       headerName: 'Age',
-      //       type: 'number',
-      //       width: 110,
-      //       editable: true,
-      //     },
-      //     {
-      //       field: 'fullName',
-      //       headerName: 'Full name',
-      //       description: 'This column has a value getter and is not sortable.',
-      //       sortable: false,
-      //       width: 160,
-      //       valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-      //     },
-      //   ];
+        const columns = [
+          { field: 'id', headerName: 'ID', width: 90 },
+          {
+            field: 'firstName',
+            headerName: 'First name',
+            width: 150,
+            editable: true,
+          },
+          {
+            field: 'lastName',
+            headerName: 'Last name',
+            width: 150,
+            editable: true,
+          },
+          {
+            field: 'age',
+            headerName: 'Age',
+            type: 'number',
+            width: 110,
+            editable: true,
+          },
+          {
+            field: 'fullName',
+            headerName: 'Full name',
+            description: 'This column has a value getter and is not sortable.',
+            sortable: false,
+            width: 160,
+            valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+          },
+        ];
 
-      //   const rows = [
-      //     { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-      //     { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-      //     { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-      //     { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-      //     { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-      //     { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-      //     { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-      //     { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-      //     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-      //   ];
+        const rows = [
+          { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
+          { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
+          { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
+          { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
+          { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
+          { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
+          { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
+          { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
+          { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
+        ];
 
-      //   return h(
-      //     'div',
-      //     {
-      //       style: {
-      //         width: '100%',
-      //         height: 'auto',
-      //       },
-      //     },
-      //     h(Table, { columns, rows, pageSize: 5, rowsPerPageOptions: [5], autoHeight: true })
-      //   );
-      // }
+        return h(
+          'div',
+          {
+            style: {
+              width: '100%',
+              height: 'auto',
+            },
+          },
+          h(Table, { columns, rows, pageSize: 5, rowsPerPageOptions: [5], autoHeight: true })
+        );
+      }
 
       // import footerTabs from the core for the current map
       const { footerTabs } = api.map(mapId);
@@ -290,15 +283,7 @@
       footerTabs.createFooterTab({
         value: 1,
         label: 'Table',
-        content: LayerDataGridComponent,
-      });
-
-      // create new tab with a layer's table using the data-grid api, do the same thing in custom div
-      let isOpen = false;
-      function LayerDataGridComponent() { return cgpv.api.maps.mapWM.dataGrid.createDataGrid({ layerId: 'esriFeatureLYR4' })};
-      document.getElementById('grid-sample-button').addEventListener('click', () => {
-        if (!isOpen) cgpv.reactDOM.render(cgpv.api.maps.mapWM.dataGrid.createDataGrid({ layerId: 'esriFeatureLYR4' }), document.getElementById('grid-sample'));
-        isOpen = !isOpen;
+        content: TableComponent,
       });
     });
   </script>

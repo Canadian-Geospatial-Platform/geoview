@@ -4,6 +4,8 @@
 /* eslint-disable no-underscore-dangle */
 import ReactDOM from 'react-dom';
 
+import sanitizeHtml from 'sanitize-html';
+
 import { api } from '../../app';
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { EVENT_NAMES } from '../../api/events/event-types';
@@ -170,4 +172,16 @@ export function getXMLHttpRequest(url: string): Promise<string> {
  */
 export function addUiComponent(targetDivId: string, component: React.ReactElement) {
   ReactDOM.render(component, document.getElementById(targetDivId));
+}
+
+/**
+ * Sanitize HTML to remove threat
+ *
+ * @param {string} contentHtml HTML content to sanitize
+ * @returns {string} sanitze HTLM or empty string if all dirty
+ */
+export function sanitizeHtmlContent(contentHtml: string) {
+  const clean = sanitizeHtml(contentHtml);
+  console.log(clean);
+  return clean;
 }
