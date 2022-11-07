@@ -146,7 +146,7 @@
               }
             ]
           },
-          'theme': 'dark',
+          'theme': 'light',
           'components': [],
           'corePackages': [],
           'suportedLanguages': ['en']
@@ -401,9 +401,9 @@
       // call an api function to add a panel with a button in the default group
       api.map(mapIdFour).appBarButtons.createAppbarPanel(button, panel, null);
 
+      const legendDiv = document.getElementById('legend-item-example');
       const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({layerId: 'wmsLYR1-msi'})
-      const legendItemDiv = document.getElementById('legend-item-example');
-      reactDOM.render(legendItemOutside, legendItemDiv);
+      reactDOM.render(legendItemOutside, legendDiv);
 
     });
   </script>

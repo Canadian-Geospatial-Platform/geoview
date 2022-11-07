@@ -8,7 +8,7 @@ import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from './containers/shell';
-import { cgpvTheme } from '../ui/style/theme';
+import { getTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
 import { TypeMapFeaturesConfig } from './types/global-types';
 
@@ -64,7 +64,9 @@ function AppStart(props: AppStartProps): JSX.Element {
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
+          <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
+            <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
+          </ThemeProvider>
         </MapContext.Provider>
       </I18nextProvider>
     );
@@ -72,12 +74,8 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={cgpvTheme}>
-        <Suspense fallback="">
-          <CssBaseline />
-          {getInlineMaps()}
-        </Suspense>
-      </ThemeProvider>
+      <CssBaseline />
+      <Suspense fallback="">{getInlineMaps()}</Suspense>
     </StyledEngineProvider>
   );
 }

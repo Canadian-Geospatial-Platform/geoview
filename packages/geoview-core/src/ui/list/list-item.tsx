@@ -1,13 +1,6 @@
 import MaterialListItem from '@mui/material/ListItem';
-import makeStyles from '@mui/styles/makeStyles';
 
 import { ListItemProps } from '@mui/material';
-
-const useStyles = makeStyles((theme) => ({
-  listItem: {
-    //
-  },
-}));
 
 /**
  * Create a customized Material UI List Item
@@ -18,10 +11,8 @@ const useStyles = makeStyles((theme) => ({
 export function ListItem(props: ListItemProps): JSX.Element {
   const { children, className, style } = props;
 
-  const classes = useStyles();
-
   return (
-    <MaterialListItem className={`${classes.listItem} ${className || ''}`} style={style || undefined}>
+    <MaterialListItem sx={{ color: 'text.primary' }} className={`${className || ''}`} style={style || undefined}>
       {children !== undefined && children}
     </MaterialListItem>
   );
