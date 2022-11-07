@@ -5,7 +5,7 @@ import { ListItemProps } from '@mui/material';
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
-    //
+    color: theme.palette.text.primary,
   },
 }));
 

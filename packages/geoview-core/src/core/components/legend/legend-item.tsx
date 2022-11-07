@@ -45,9 +45,12 @@ const useStyles = makeStyles(() => ({
     borderColor: '#ABB2B9',
     paddingLeft: 10,
   },
-  icon: {
+  legendIconSize: {
     width: 24,
     height: 24,
+  },
+  solidBackground: {
+    background: 'rgba(255, 255, 255, 1)',
   },
 }));
 
@@ -226,17 +229,22 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             {groupItems.length > 0 && isGroupOpen && <ExpandMoreIcon onClick={handleExpandClick} />}
             {groupItems.length > 0 && !isGroupOpen && <ExpandLessIcon onClick={handleExpandClick} />}
             {iconType === 'simple' && iconImg !== null && (
-              <Avatar className={classes.icon} variant="square" src={isLegendOpen ? '' : iconImg} onClick={() => handleLegendClick()}>
+              <Avatar
+                className={classes.legendIconSize}
+                variant="square"
+                src={isLegendOpen ? '' : iconImg}
+                onClick={() => handleLegendClick()}
+              >
                 <CloseIcon />
               </Avatar>
             )}
             {iconType === 'list' && (
-              <Avatar className={classes.icon} variant="square" onClick={() => handleLegendClick()}>
+              <Avatar className={classes.legendIconSize} variant="square" onClick={() => handleLegendClick()}>
                 {isLegendOpen ? <CloseIcon /> : <ListAltIcon />}
               </Avatar>
             )}
             {groupItems.length === 0 && !iconType && (
-              <Avatar className={classes.icon} variant="square" onClick={() => handleLegendClick()}>
+              <Avatar className={classes.legendIconSize} variant="square" onClick={() => handleLegendClick()}>
                 <TodoIcon />
               </Avatar>
             )}
@@ -252,7 +260,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       <Collapse in={isLegendOpen} timeout="auto" unmountOnExit>
         <div className={classes.expandableIconContainer}>
           <div className={classes.expandableContainerBorder}>
-            {iconType === 'simple' && iconImg !== null && <img alt="" src={iconImg} />}
+            {iconType === 'simple' && iconImg !== null && <img alt="" className={classes.solidBackground} src={iconImg} />}
             {iconType === 'list' && iconList !== null && labelList !== null && (
               <LegendIconList iconImages={iconList} iconLabels={labelList} />
             )}

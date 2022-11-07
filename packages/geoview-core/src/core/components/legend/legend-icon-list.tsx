@@ -3,11 +3,12 @@ import React from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { Tooltip } from '../../../ui';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   listIconLabel: {
     paddingLeft: 20,
     fontSize: 14,
     noWrap: true,
+    color: theme.palette.text.primary,
   },
 }));
 

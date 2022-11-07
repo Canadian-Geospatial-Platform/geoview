@@ -128,7 +128,7 @@
               }
             ]
           },
-          'theme': 'dark',
+          'theme': 'light',
           'components': [],
           'corePackages': [],
           'suportedLanguages': ['en']
@@ -301,8 +301,9 @@
       ]
   }"></div>
   <p>Add a legend component in Panel.</p>
-  <div id="legend-item-example"></div>
-  <p>Add a single legend item component in div.</p>
+  <!-- TODO can't add in a div unless wrapped in ThemeProvider -->
+  <!-- <div id="legend-item-example"></div>
+  <p>Add a single legend item component in div.</p> -->
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="UC4CS" class="panel"></pre>
 
@@ -383,9 +384,10 @@
       // call an api function to add a panel with a button in the default group
       api.map(mapIdFour).appBarButtons.createAppbarPanel(button, panel, null);
 
-      const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({layerId: 'wmsLYR1-msi'})
-      const legendItemDiv = document.getElementById('legend-item-example');
-      reactDOM.render(legendItemOutside, legendItemDiv);
+      // TODO needs to be given a theme
+      // const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({layerId: 'wmsLYR1-msi'})
+      // const legendItemDiv = document.getElementById('legend-item-example');
+      // reactDOM.render(legendItemOutside, legendItemDiv);
 
     });
   </script>
