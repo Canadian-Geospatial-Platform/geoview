@@ -533,6 +533,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private formatFeatureInfoAtCoordinateResult(featureMember: TypeJsonObject, featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfRecords {
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+    const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
     const queryResult: TypeArrayOfRecords = [];
 
     const featureInfoEntry: TypeFeatureInfoEntry = {};
@@ -553,7 +554,10 @@ export class WMS extends AbstractGeoViewRaster {
     else {
       const filteredFeatureInfoEntry: TypeFeatureInfoEntry = {};
       Object.keys(featureInfoEntry).forEach((fieldName) => {
-        if (outfields.includes(fieldName)) filteredFeatureInfoEntry[fieldName] = featureInfoEntry[fieldName];
+        if (outfields?.includes(fieldName)) {
+          const aliasfieldIndex = outfields.indexOf(fieldName);
+          filteredFeatureInfoEntry[aliasFields![aliasfieldIndex]] = featureInfoEntry[fieldName];
+        }
       });
       queryResult.push(filteredFeatureInfoEntry);
     }

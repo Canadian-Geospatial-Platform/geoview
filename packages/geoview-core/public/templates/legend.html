@@ -112,7 +112,25 @@
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '0' }
+                  {
+                    'layerId': '0',
+                    'style': {
+                      'Polygon': {
+                        'styleType': 'simple',
+                        'label': 'Polygon label',
+                        'settings': {
+                          'type': 'filledPolygon',
+                          'paternSize': 10,
+                          'paternWidth': 2,
+                          'fillStyle': 'null',
+                          'stroke': {
+                            'color': 'rgba(0,128,128,1)',
+                            'lineStyle': 'shortDash-dot-dot'
+                          }
+                        }
+                      }
+                    }
+                  }
                 ]
               },
               {
@@ -179,7 +197,7 @@
   <p>Add a legend component.</p>
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="UC2CS" class="panel"></pre>
-  
+
   <div class="map-title-holder">
     <h4 id="HUC3">3. Group Layer</h4><a class="ref-link" href="#top">Top</a>
   </div>

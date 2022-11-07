@@ -388,13 +388,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   private formatFeatureInfoAtCoordinateResult(features: TypeJsonArray, featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfRecords {
     if (!features.length) return [];
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+    const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
     const queryResult: TypeArrayOfRecords = [];
     features.forEach((feature) => {
       const featureFields = Object.keys(feature.attributes);
       const featureInfoEntry: TypeFeatureInfoEntry = {};
       featureFields.forEach((fieldName) => {
-        if (!outfields || outfields.includes(fieldName))
-          featureInfoEntry[fieldName] = feature.attributes[fieldName] as string | number | null;
+        if (outfields?.includes(fieldName)) {
+          const aliasfieldIndex = outfields.indexOf(fieldName);
+          featureInfoEntry[aliasFields![aliasfieldIndex]] = feature.attributes[fieldName] as string | number | null;
+        } else if (!outfields) featureInfoEntry[fieldName] = feature.attributes[fieldName] as string | number | null;
       });
       queryResult.push(featureInfoEntry);
     });

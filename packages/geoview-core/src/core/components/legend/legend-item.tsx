@@ -27,6 +27,7 @@ import {
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
 
 const useStyles = makeStyles(() => ({
   legendItem: {
@@ -83,13 +84,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
     if (layerConfigEntry) {
-      if (layerConfigEntry.entryType === 'group') {
-        setGroupItems(layerConfigEntry.listOfLayerEntryConfig as TypeListOfLayerEntryConfig);
+      if (layerEntryIsGroupLayer(layerConfigEntry)) {
+        setGroupItems(layerConfigEntry.listOfLayerEntryConfig);
         isGroup = true;
       }
     } else if (
       rootGeoViewLayer?.listOfLayerEntryConfig &&
-      (rootGeoViewLayer?.listOfLayerEntryConfig.length > 1 || rootGeoViewLayer.listOfLayerEntryConfig[0].entryType === 'group')
+      (rootGeoViewLayer?.listOfLayerEntryConfig.length > 1 || layerEntryIsGroupLayer(rootGeoViewLayer.listOfLayerEntryConfig[0]))
     ) {
       setGroupItems(rootGeoViewLayer.listOfLayerEntryConfig);
       isGroup = true;
