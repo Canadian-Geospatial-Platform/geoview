@@ -14,7 +14,7 @@ export const useStyles = makeStyles((theme) => ({
   tabsContainer: {
     position: 'relative',
     paddingBottom: '50px',
-    backgroundColor: theme.palette.primary.light,
+    backgroundColor: theme.palette.background.default,
     width: '100%',
     height: '400px',
     transition: 'height 0.2s ease-out',
