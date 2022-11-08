@@ -6,12 +6,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const glob = require('glob');
+const childProcess = require('child_process');
 const package = require('./package.json');
 
-// get version numbers and the hash of the current commit
+// get date, version numbers and the hash of the current commit
+const date = new Date().toISOString();
 const [major, minor, patch] = package.version.split('.');
+const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString().trim());
+
 // eslint-disable-next-line no-console
-console.log(`Build CGP Viewer: ${major}.${minor}.${patch}`);
+console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
 
 // inject all sample files
 const multipleHtmlPlugins = glob.sync('./public/templates/*.html').map((name) => {
@@ -86,11 +90,6 @@ const config = {
       },
     ],
   },
-  // optimization: {
-  //     splitChunks: {
-  //         chunks: 'all',
-  //     },
-  // },
   plugins: [
     new LodashWebpackPlugin(),
     new HtmlWebpackPlugin({
@@ -112,6 +111,12 @@ const config = {
         { from: './public/favicon.ico' },
         { from: './public/templates/codedoc.js' },
       ],
+    }),
+    new webpack.BannerPlugin({
+      banner: `Package:[name]: ${major}.${minor}.${patch} - ${hash} - ${date}`,
+      raw: false,
+      entryOnly: true,
+      include: /\.js$/,
     }),
     new webpack.DefinePlugin({
       __VERSION__: {

@@ -10,7 +10,8 @@ const config = {
   mode: 'production',
   devtool: 'source-map',
   optimization: {
-    minimizer: [new TerserPlugin({})],
+    minimize: true,
+    minimizer: [new TerserPlugin({ extractComments: false })],
   },
   plugins: [
     new BundleAnalyzerPlugin({
