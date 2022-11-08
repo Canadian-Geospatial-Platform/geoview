@@ -104,7 +104,15 @@
                   'geoviewLayerType': 'ogcWms',
                   'listOfLayerEntryConfig': [
                     {
-                      'layerId': 'msi-94-or-more'
+                      'layerId': 'msi-94-or-more',
+                      'source': {
+                        'featureInfo': {
+                          'queryable': true,
+                          'nameField': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                          'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                          'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
+                        }
+                      }
                     }
                   ]
                 }
@@ -510,7 +518,7 @@
                   'fr': './geojson/'
                 },
                 'featureInfo': {
-                  'queryable': 'true',
+                  'queryable': true,
                   'nameField': { 'en': 'comment_en', 'fr': 'comment_fr' },
                   'outfields': { 'en': 'comment_en,death_en_1,end_date', 'fr': 'comment_fr,death_fr_1,end_date' },
                   'aliasFields':  { 'en': 'comment_en,death_en_1,end_date', 'fr': 'comment_fr,death_fr_1,end_date' }
