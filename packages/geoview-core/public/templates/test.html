@@ -16,35 +16,28 @@
   </head>
   <body>
     <button id="get-feature-info">Run getFeatureInfo</button><br />
-    <div id="mapId" class="llwp-map" data-lang="en" data-config="{
+    <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
           'zoom': 4,
           'center': [-100, 60],
-          'projection': 3978
+          'projection': 3857
         },
         'basemapOptions': {
-          'basemapId': 'nogeom',
-          'shaded': true,
+          'basemapId': 'transport',
+          'shaded': false,
           'labeled': false
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'geojsonLYR',
-            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-            'metadataAccessPath': { 'en': './geojson/metadata.json' },
-            'geoviewLayerType': 'GeoJSON',
+            'geoviewLayerId': 'wmsLYR1',
+            'geoviewLayerName': { 'en': 'Hydro Network' },
+            'metadataAccessPath': { 'en': 'https://maps.geogratis.gc.ca/wms/hydro_network_en' },
+            'geoviewLayerType': 'ogcWms',
             'listOfLayerEntryConfig': [
-              { 'layerId': 'polygons.json' },
               {
-                'entryType': 'group',
-                'layerId': 'Group',
-                'layerName': { 'en': 'Group' },
-                'listOfLayerEntryConfig': [
-                  { 'layerId': 'icon_points.json' },
-                  { 'layerId': 'points.json' }
-                ]
+                'layerId': 'hydro_network'
               }
             ]
           }
@@ -56,13 +49,15 @@
       'suportedLanguages': ['en']
     }">
     </div>
-    <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
-    <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
+    <button class="Get-wms-Legend">Get Legend</button>
+    <div id="wmsLegendsId-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre id="mapId-INFO" class="panel">Click on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll;"  id="wmsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
-    <button type="button" class="collapsible">Code Snippet</button>
-    <pre id="codeSnippet" class="panel"></pre>
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR1CS" class="panel"></pre>
+    <hr />
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
@@ -71,48 +66,105 @@
         //create snippets
         createCodeSnippet();
         createConfigSnippet();
+      });
+    // WMS ======================================================================================================================
+    const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+    }, 'LYR1');
 
-        // GeoJson
-        const featureInfoGeoJsonLayerSet = cgpv.api.createFeatureInfoLayerSet('mapId', 'mapId-INFO');
-        cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-          const {  layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-        }, 'mapId');
+    const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
+    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
+      const {  layerSetId, resultSets } = payload;
+      displayLegend(layerSetId, resultSets);
+    }, 'LYR1');
 
+    var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
+    addGeoJsonLegendButton.addEventListener('click', function (e) {
+      cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'wmsLegendsId' });
     });
 
-      // find the button element by ID
-      var addGeoJSONButton = document.getElementById('add-geojson');
-
-      // add an event listener when a button is clicked
-      // TODO: Repair
-      addGeoJSONButton.addEventListener('click', function (e) {
-        // adding a geojson layer requires a type of geojson and url
-        const layerID = cgpv.api.map('mapId').layer.addGeoviewLayer(
-          {
-            'geoviewLayerId': 'lines.json',
-            'geoviewLayerName': { 'en': 'GeoJSON Sample' },
-            'metadataAccessPath': { 'en': './geojson/metadata.json' },
-            'geoviewLayerType': 'GeoJSON',
-            'listOfLayerEntryConfig': [
-              { 'layerId': 'lines.json' }
-            ]
-          },
-          ['en']
-        );
-        document.getElementById('new-layer-id-label').innerText = layerID;
+    // ==========================================================================================================================
+    function displayLegend(layerSetId, resultSets) {
+      const addHeader = (title, container) => {
+        const tableHeader = document.createElement('th');
+        tableHeader.style = "text-align: center; vertical-align: middle;"
+        tableHeader.innerHTML =  title;
+        container.appendChild(tableHeader);
+      }
+      const addData = (data, container) => {
+        const tableData = document.createElement('td');
+        tableData.style.verticalAlign = 'middle';
+        tableData.style.textAlign = 'center';
+        if (typeof data === 'string') tableData.innerHTML =  data;
+        else tableData.appendChild(data);
+        container.appendChild(tableData);
+      }
+      var oldTable = document.getElementById(`${layerSetId}-table`);
+      if (oldTable) oldTable.parentNode.removeChild(oldTable)
+      var legendTable = document.getElementById(`${layerSetId}-table-div`);
+      const table = document.createElement('table');
+      table.id = `${layerSetId}-table`;
+      table.border="1";
+      table.style="width:50%";
+      legendTable.appendChild(table);
+      var createHeader = true;
+      Object.keys(resultSets).forEach((layerPath) => {
+        if (resultSets[layerPath]?.type === 'ogcWms') {
+          if (createHeader) {
+            createHeader = false;
+            const tableRow1 = document.createElement('tr');
+            table.appendChild(tableRow1);
+            addHeader("Layer Path", tableRow1);
+            addHeader("Symbology", tableRow1);
+          }
+          const tableRow = document.createElement('tr');
+          addData(resultSets[layerPath].layerPath, tableRow);
+          addData(resultSets[layerPath].legend, tableRow);
+          table.appendChild(tableRow);
+        } else {
+          const addRow = (layerPath, label, canvas) => {
+            const tableRow = document.createElement('tr');
+            addData(layerPath, tableRow);
+            addData(label, tableRow); // canvas.style = "border: 1px solid black;"
+            addData(canvas, tableRow);
+            table.appendChild(tableRow);
+          }
+          if (createHeader) {
+            createHeader = false;
+            const tableRow1 = document.createElement('tr');
+            table.appendChild(tableRow1);
+            addHeader("Layer Path", tableRow1);
+            addHeader("Label", tableRow1);
+            addHeader("Symbology", tableRow1);
+          }
+          if (resultSets[layerPath]?.legend) {
+            Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+              if (geometryKey) {
+                if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                    addRow(layerPath,
+                          resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                          resultSets[layerPath].legend[geometryKey][i]);
+                  }
+                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                    addRow(layerPath,
+                          resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                          resultSets[layerPath].legend[geometryKey][i]);
+                  }
+                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
+                  addRow(layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].label,
+                        resultSets[layerPath].legend[geometryKey]);
+                }
+              }
+            });
+          }
+        }
       });
-
-      // find the button element by ID
-      var removeGeoJSONButton = document.getElementById('remove-geojson');
-
-      // add an event listener when a button is clicked
-      removeGeoJSONButton.addEventListener('click', function (e) {
-        // removing a geojson layer using the ID
-        cgpv.api.map('mapId').layer.removeLayersUsingPath(document.getElementById('new-layer-id-label').innerText);
-        document.getElementById('new-layer-id-label').innerText = '';
-      });
-
+    }
     </script>
   </body>
 </html>

@@ -116,7 +116,7 @@ export class WMS extends AbstractGeoViewRaster {
         fetch(metadataUrl).then((response) => {
           response.text().then((capabilitiesString) => {
             this.metadata = parser.read(capabilitiesString);
-            if (this.metadata?.Service?.Abstract) this.attributions.push(this.metadata.Service.Abstract as string);
+            this.processMetadataInheritance();
             resolve();
           });
         });
@@ -126,7 +126,8 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the service metadata from the metadataAccessPath.
+   * This method reads the layer identifiers from the configuration to create a coma seperated string that will be used in the
+   * GetCapabilities.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
@@ -142,6 +143,50 @@ export class WMS extends AbstractGeoViewRaster {
       return comaSeparatedList;
     };
     return gatherLayerIds().slice(0, -1);
+  }
+
+  /** ***************************************************************************************************************************
+   * This method propagate the WMS metadata inherited values.
+   */
+  private processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject = this.metadata!.Capability.Layer) {
+    if (parentLayer && layer) {
+      // Table 7 — Inheritance of Layer properties specified in the standard with 'replace' behaviour.
+      if (layer.EX_GeographicBoundingBox === undefined) layer.EX_GeographicBoundingBox = parentLayer.EX_GeographicBoundingBox;
+      if (layer.queryable === undefined) layer.queryable = parentLayer.queryable;
+      if (layer.cascaded === undefined) layer.cascaded = parentLayer.cascaded;
+      if (layer.opaque === undefined) layer.opaque = parentLayer.opaque;
+      if (layer.noSubsets === undefined) layer.noSubsets = parentLayer.noSubsets;
+      if (layer.fixedWidth === undefined) layer.fixedWidth = parentLayer.fixedWidth;
+      if (layer.fixedHeight === undefined) layer.fixedHeight = parentLayer.fixedHeight;
+      if (layer.MinScaleDenominator === undefined) layer.MinScaleDenominator = parentLayer.MinScaleDenominator;
+      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
+      if (layer.BoundingBox === undefined) layer.BoundingBox = parentLayer.BoundingBox;
+      if (layer.Dimension === undefined) layer.Dimension = parentLayer.Dimension;
+      if (layer.Attribution === undefined) layer.Attribution = parentLayer.Attribution;
+      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
+      if (layer.MaxScaleDenominator === undefined) layer.MaxScaleDenominator = parentLayer.MaxScaleDenominator;
+      // Table 7 — Inheritance of Layer properties specified in the standard with 'add' behaviour.
+      // AuthorityURL inheritance is not implemented in the following code.
+      if (parentLayer.Style) {
+        if (!layer.Style as TypeJsonArray) (layer.Style as TypeJsonArray) = [];
+        (parentLayer.Style as TypeJsonArray).forEach((parentStyle) => {
+          // eslint-disable-next-line vars-on-top, no-var
+          for (var found = false, i = 0; i < layer.Style.length && !found; i++) found = layer.Style[i].Name === parentStyle.Name;
+          // eslint-disable-next-line block-scoped-var
+          if (!found) (layer.Style as TypeJsonArray).push(parentStyle);
+        });
+      }
+      if (parentLayer.CRS) {
+        if (!layer.CRS as TypeJsonArray) (layer.Style as TypeJsonArray) = [];
+        (parentLayer.CRS as TypeJsonArray).forEach((parentCRS) => {
+          // eslint-disable-next-line vars-on-top, no-var
+          for (var found = false, i = 0; i < layer.CRS.length && !found; i++) found = layer.CRS[i] === parentCRS;
+          // eslint-disable-next-line block-scoped-var
+          if (!found) (layer.CRS as TypeJsonArray).push(parentCRS);
+        });
+      }
+    }
+    if (layer.Layer !== undefined) (layer.Layer as TypeJsonArray).forEach((subLayer) => this.processMetadataInheritance(layer, subLayer));
   }
 
   /** ***************************************************************************************************************************
@@ -221,7 +266,7 @@ export class WMS extends AbstractGeoViewRaster {
     });
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
     switchToGroupLayer.entryType = 'group';
-    switchToGroupLayer.isDynamicLayerGroup = true;
+    switchToGroupLayer.isMetadataLayerGroup = true;
     switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
     api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
     return true;
@@ -315,14 +360,16 @@ export class WMS extends AbstractGeoViewRaster {
       if (geoviewEntryIsWMS(layerEntryConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
         if (layerCapabilities) {
+          if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution as string);
           if (!layerEntryConfig.source.featureInfo)
-            layerEntryConfig.source.featureInfo = { queryable: layerCapabilities.queryable as boolean };
+            layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable as boolean };
           if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
-            layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-          if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
-            layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
-          if (!layerEntryConfig.initialSettings?.extent) {
+          // ! TODO: The solution implemented in the following 4 lines is not right. scale and zoom are not the same things.
+          // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
+          // !   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
+          // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
+          // !   layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
+          if (!layerEntryConfig.initialSettings?.extent && layerCapabilities.EX_GeographicBoundingBox) {
             layerEntryConfig.initialSettings.extent = transformExtent(
               layerCapabilities.EX_GeographicBoundingBox as Extent,
               'EPSG:4326',
@@ -504,18 +551,20 @@ export class WMS extends AbstractGeoViewRaster {
             .map(this.mapId)
             .geoviewRenderer.loadImage(legendImage as string)
             .then((image) => {
-              const drawingCanvas = document.createElement('canvas');
-              drawingCanvas.width = image.width;
-              drawingCanvas.height = image.height;
-              const drawingContext = drawingCanvas.getContext('2d')!;
-              drawingContext.drawImage(image, 0, 0);
-              const legend: TypeLegend = {
-                type: this.type,
-                layerPath: Layer.getLayerPath(layerConfig!),
-                layerName: layerConfig!.layerName,
-                legend: drawingCanvas,
-              };
-              resolve(legend);
+              if (image) {
+                const drawingCanvas = document.createElement('canvas');
+                drawingCanvas.width = image.width;
+                drawingCanvas.height = image.height;
+                const drawingContext = drawingCanvas.getContext('2d')!;
+                drawingContext.drawImage(image, 0, 0);
+                const legend: TypeLegend = {
+                  type: this.type,
+                  layerPath: Layer.getLayerPath(layerConfig!),
+                  layerName: layerConfig!.layerName,
+                  legend: drawingCanvas,
+                };
+                resolve(legend);
+              } else resolve(null);
             });
         }
       });

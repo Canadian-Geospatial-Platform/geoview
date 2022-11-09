@@ -551,9 +551,9 @@ export type TypeBaseLayerEntryConfig = {
   parentLayerConfig?: TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig;
   /** This attribute is not part of the schema. It is used to link the displayed layer to its layer entry config. */
   gvLayer?: BaseLayer;
-  /** This attribute is not part of the schema. It is used internally to distinguish dynamic layer groups derived from the
+  /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
    * metadata. */
-  isDynamicLayerGroup?: boolean;
+  isMetadataLayerGroup?: boolean;
   /** Layer entry data type. */
   entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
   /** The id of the layer to display on the map. */
@@ -784,9 +784,9 @@ export type TypeSourceGeocoreConfig = {
  * Type used to define a layer group.
  */
 export interface TypeLayerGroupEntryConfig extends Omit<TypeBaseLayerEntryConfig, 'listOfLayerEntryConfig'> {
-  /** This attribute is not part of the schema. It is used internally to distinguish dynanic layer groups derived from the
+  /** This attribute is not part of the schema. It is used internally to distinguish layer groups derived from the
    * metadata. */
-  isDynamicLayerGroup?: boolean;
+  isMetadataLayerGroup?: boolean;
   /** Layer entry data type. */
   entryType: 'group';
   /** The source attribute does not exists on the layer group entry. */

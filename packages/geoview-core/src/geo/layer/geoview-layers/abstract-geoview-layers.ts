@@ -76,7 +76,7 @@ export interface TypeVectorLegend extends TypeLegend {
   legend: TypeLayerStyle;
 }
 
-export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | HTMLCanvasElement[]>>;
+export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | null | (HTMLCanvasElement | null)[]>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -280,7 +280,7 @@ export abstract class AbstractGeoViewLayer {
       const promisedAllLayerDone: Promise<void>[] = [];
       listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
         if (layerEntryIsGroupLayer(layerEntryConfig))
-          if (layerEntryConfig.isDynamicLayerGroup) promisedAllLayerDone.push(this.processDynamicGroupLayer(layerEntryConfig));
+          if (layerEntryConfig.isMetadataLayerGroup) promisedAllLayerDone.push(this.processMetadataGroupLayer(layerEntryConfig));
           else promisedAllLayerDone.push(this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig));
         else promisedAllLayerDone.push(this.processLayerMetadata(layerEntryConfig));
       });
@@ -290,15 +290,15 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * This method is used to process dynamic group layer entries. These layers behave as a GeoView group layer and also as a data
-   * layer (i.e. they have extent, visibility and query flag definition). Dynamic group layers can be identified by
-   * the presence of an isDynamicLayerGroup attribute set to true.
+   * This method is used to process metadata group layer entries. These layers behave as a GeoView group layer and also as a data
+   * layer (i.e. they have extent, visibility and query flag definition). Metadata group layers can be identified by
+   * the presence of an isMetadataLayerGroup attribute set to true.
    *
    * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
    *
    * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
    */
-  private processDynamicGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
+  private processMetadataGroupLayer(layerEntryConfig: TypeLayerGroupEntryConfig): Promise<void> {
     const promisedListOfLayerEntryProcessed = new Promise<void>((resolve) => {
       this.processLayerMetadata(layerEntryConfig).then(() => {
         this.processListOfLayerEntryMetadata(layerEntryConfig.listOfLayerEntryConfig!).then(() => resolve());
