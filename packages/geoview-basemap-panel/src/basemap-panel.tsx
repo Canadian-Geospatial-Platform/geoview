@@ -35,7 +35,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
 
   const useStyles = ui.makeStyles((theme) => ({
     basemapCard: {
-      backgroundColor: theme.palette.primary.dark,
+      backgroundColor: theme.palette.grey.A700,
       color: theme.palette.primary.light,
       display: 'flex',
       flexDirection: 'column',
@@ -49,7 +49,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
         marginBottom: 0,
       },
       '& .MuiCardHeader-root': {
-        backgroundColor: theme.palette.primary.dark,
+        backgroundColor: theme.palette.grey.A700,
         color: theme.basemapPanel.header,
         fontSize: 14,
         fontWeight: 400,

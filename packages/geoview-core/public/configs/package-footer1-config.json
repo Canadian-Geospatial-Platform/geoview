@@ -25,7 +25,7 @@
       }
     ]
   },
-  "theme": "dark",
+  "theme": "light",
   "components": ["nav-bar", "north-arrow", "overview-map"],
   "corePackages": ["footer-panel"],
   "externalPackages": [],
