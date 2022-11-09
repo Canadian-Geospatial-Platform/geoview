@@ -174,11 +174,16 @@ export class GeoviewRenderer {
    *
    * @returns {Promise<HTMLImageElement>} A promise that the image is loaded.
    */
-  loadImage(src: string): Promise<HTMLImageElement> {
-    const promisedImage = new Promise<HTMLImageElement>((resolve) => {
+  loadImage(src: string): Promise<HTMLImageElement | null> {
+    const promisedImage = new Promise<HTMLImageElement | null>((resolve) => {
       const image = new Image();
       image.onload = () => {
         resolve(image);
+      };
+      image.onerror = (reason) => {
+        // eslint-disable-next-line no-console
+        console.log('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src);
+        resolve(null);
       };
       image.src = src!;
     });
@@ -192,20 +197,22 @@ export class GeoviewRenderer {
    *
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
    */
-  private createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement> {
-    const promisedCanvas = new Promise<HTMLCanvasElement>((resolve) => {
+  private createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement | null> {
+    const promisedCanvas = new Promise<HTMLCanvasElement | null>((resolve) => {
       const iconStyle = pointStyle?.getImage() as Icon;
       this.loadImage(iconStyle.getSrc()!).then((image) => {
-        const size = iconStyle.getSize() as Size;
-        const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
-        const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
-        const drawingCanvas = document.createElement('canvas');
-        drawingCanvas.width = 1.25 * width;
-        drawingCanvas.height = 1.25 * height;
-        const drawingContext = drawingCanvas.getContext('2d')!;
-        drawingContext.globalAlpha = iconStyle.getOpacity();
-        drawingContext.drawImage(image, 0, 0);
-        resolve(drawingCanvas);
+        if (image) {
+          const size = iconStyle.getSize() as Size;
+          const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
+          const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
+          const drawingCanvas = document.createElement('canvas');
+          drawingCanvas.width = 1.25 * width;
+          drawingCanvas.height = 1.25 * height;
+          const drawingContext = drawingCanvas.getContext('2d')!;
+          drawingContext.globalAlpha = iconStyle.getOpacity();
+          drawingContext.drawImage(image, 0, 0);
+          resolve(drawingCanvas);
+        } else resolve(null);
       });
     });
     return promisedCanvas;
@@ -285,12 +292,12 @@ export class GeoviewRenderer {
     resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void
   ) {
     // UniqueValue or ClassBreak point style configuration ============================================================
-    const styleArray: HTMLCanvasElement[] = [];
+    const styleArray: (HTMLCanvasElement | null)[] = [];
     if (pointStyleConfig.length) {
       // Use first element to determine the type (all other elements of the array have the same style)
       if (isIconSymbolVectorConfig(pointStyleConfig[0].settings)) {
         // Icon symbol ================================================================================================
-        const promiseOfCanvasCreated: Promise<HTMLCanvasElement>[] = [];
+        const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
         pointStyleConfig.forEach((styleInfo) => {
           promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(styleInfo.settings)));
         });

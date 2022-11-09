@@ -199,7 +199,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         });
         const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
         switchToGroupLayer.entryType = 'group';
-        switchToGroupLayer.isDynamicLayerGroup = true;
+        switchToGroupLayer.isMetadataLayerGroup = true;
         switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
@@ -233,7 +233,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       // User-defined groups do not have metadata provided by the service endpoint.
-      if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isDynamicLayerGroup) resolve();
+      if (layerEntryIsGroupLayer(layerEntryConfig) && !layerEntryConfig.isMetadataLayerGroup) resolve();
       else {
         let queryUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
         if (queryUrl) {
@@ -241,7 +241,7 @@ export class EsriFeature extends AbstractGeoViewVector {
           const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
           queryResult.then((response) => {
             // layers must have a fields attribute except if it is an dynamic layer group.
-            if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isDynamicLayerGroup)
+            if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
             if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
               if (!layerEntryConfig.style) {
@@ -288,8 +288,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     layerEntryConfig: TypeEsriFeatureLayerEntryConfig
   ) {
     if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-    if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
-    if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
+    // ! TODO: TThe solution implemented in the following two lines is not right. scale and zoom are not the same things.
+    // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
+    // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
     if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings.visible = visibility;
     if (!layerEntryConfig.initialSettings?.extent) {
       const layerExtent: Extent = [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number];
@@ -319,7 +320,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   ) {
     if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
     // dynamic group layer doesn't have fields definition
-    if (!layerEntryConfig.isDynamicLayerGroup) {
+    if (!layerEntryConfig.isMetadataLayerGroup) {
       if (!layerEntryConfig.source.featureInfo.nameField)
         layerEntryConfig.source.featureInfo.nameField = {
           en: nameField,
