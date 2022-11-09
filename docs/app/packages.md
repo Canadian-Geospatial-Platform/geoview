@@ -204,4 +204,4 @@ The viewer is bundled with core packages, you can load them by passing their id 
 ></div>
 ```
 
-Available package ids `details-panel`, `layers-panel`, `basemap-panel`
+Available package ids `details-panel`, `layers-panel`, `basemap-panel`, `footer-panel`
