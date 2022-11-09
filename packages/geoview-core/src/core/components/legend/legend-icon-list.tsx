@@ -1,16 +1,19 @@
 import React from 'react';
 
-import makeStyles from '@mui/styles/makeStyles';
-import { Tooltip } from '../../../ui';
+import Box from '@mui/material/Box';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '../../../ui';
 
-const useStyles = makeStyles((theme) => ({
+const sxClasses = {
   listIconLabel: {
-    paddingLeft: 20,
+    color: 'text.primary',
     fontSize: 14,
     noWrap: true,
-    color: theme.palette.text.primary,
   },
-}));
+  listItem: {
+    margin: 0,
+    padding: 0,
+  },
+};
 
 export interface TypeLegendIconListProps {
   iconImages: string[];
@@ -22,26 +25,30 @@ export interface TypeLegendIconListProps {
  * @returns {JSX.Element} the list of icons
  */
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const classes = useStyles();
-
   const { iconImages, iconLabels } = props;
 
   return (
-    <>
+    <List>
       {iconImages.map((icon, index) => {
         return (
-          <div key={`icon-${iconLabels[index]}`}>
-            <div style={{ display: 'inline-flex' }}>
-              <Tooltip title={iconLabels[index]} enterDelay={1000}>
-                <div>
+          <Box key={iconLabels[index]}>
+            <ListItem sx={sxClasses.listItem}>
+              <ListItemButton>
+                <ListItemIcon>
                   <img alt={iconLabels[index]} src={icon} />
-                  <span className={classes.listIconLabel}>{iconLabels[index]}</span>
-                </div>
-              </Tooltip>
-            </div>
-          </div>
+                </ListItemIcon>
+                <Tooltip title={iconLabels[index]} placement="top" enterDelay={1000}>
+                  <ListItemText
+                    sx={sxClasses.listIconLabel}
+                    primaryTypographyProps={{ fontSize: 14, noWrap: true }}
+                    primary={iconLabels[index]}
+                  />
+                </Tooltip>
+              </ListItemButton>
+            </ListItem>
+          </Box>
         );
       })}
-    </>
+    </List>
   );
 }

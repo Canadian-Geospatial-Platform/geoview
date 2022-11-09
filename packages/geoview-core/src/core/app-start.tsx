@@ -8,7 +8,7 @@ import { ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { Shell } from './containers/shell';
-import { getTheme } from '../ui/style/theme';
+import { getTheme, cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
 import { TypeMapFeaturesConfig } from './types/global-types';
 
@@ -74,8 +74,10 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   return (
     <StyledEngineProvider injectFirst>
-      <CssBaseline />
-      <Suspense fallback="">{getInlineMaps()}</Suspense>
+      <ThemeProvider theme={cgpvTheme}>
+        <CssBaseline />
+        <Suspense fallback="">{getInlineMaps()}</Suspense>
+      </ThemeProvider>
     </StyledEngineProvider>
   );
 }
