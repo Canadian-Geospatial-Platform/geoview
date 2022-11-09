@@ -20,7 +20,7 @@ c is for center (an array of two elements, represents latitude and longtitude)
 l is for language (currently supported values: en, fr
 t is for theme (currently supported values: dark, light)
 b is for basemap options (an object with three properties, id, shaded, labeled)
-cp is for core packages to be loaded (array of strings) supported values: "details-panel", "layers-panel", "basemap-panel"
+cp is for core packages to be loaded (array of strings) supported values: "details-panel", "layers-panel", "basemap-panel", "footer-panel"
 keys is for layer uuid keys (the keys will match keys in the catalog, can be comma seperated)
 ```
 
