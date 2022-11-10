@@ -85,6 +85,8 @@
             'interaction': 'dynamic',
             'viewSettings': {
               'zoom': 4,
+              'minZoom': 4,
+              'maxZoom': 8,
               'center': [-100, 60],
               'projection': 3978
             },
@@ -101,8 +103,8 @@
         }"></div>
   <p>
     This map is in LLC projection with Trasnport basemap with shaded background and labeling. When in LCC, the map will
-    show a north
-    arrow to help user knows where the north is when zoomed in.
+    show a north arrow to help user knows where the north is when zoomed in. This maps has also a maxZoom properties to restrict zooming
+    past level 8.
   </p>
   <button type="button" class="collapsible">Configuration Snippet</button>
   <pre id="PRJ2CS" class="panel"></pre>

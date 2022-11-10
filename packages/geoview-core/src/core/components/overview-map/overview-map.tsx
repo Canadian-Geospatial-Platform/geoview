@@ -221,7 +221,7 @@ export function OverviewMap(): JSX.Element {
         });
 
         // add this layer to the basemap group
-        tileLayer.set('mapId', 'basemap');
+        tileLayer.set(mapId, 'basemap');
 
         return tileLayer;
       }),

@@ -56,9 +56,6 @@ export class Basemap {
   // the map id to be used in events
   #mapId: string;
 
-  // Pane Name for all basemap layers
-  private basemapsPaneName!: string;
-
   /**
    * initialize basemap
    *
@@ -212,7 +209,7 @@ export class Basemap {
   };
 
   /**
-   * Get basemap information (nbame and description)
+   * Get basemap information (name and description)
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
    * @param {TypeDisplayLanguage} displayLanguage basemap language
@@ -356,9 +353,9 @@ export class Basemap {
       opacity,
       origin,
       extent,
-      resolutions,
-      minScale: minZoom,
-      maxScale: maxZoom,
+      resolutions, // ? is this use somewhere, modifying values has no effect. Issue 643
+      minScale: minZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
+      maxScale: maxZoom, // ? is this use somewhere, modifying values has no effect. Issue 643
     };
   };
 
@@ -484,7 +481,7 @@ export class Basemap {
       ) {
         const info = this.getInfo(basemaplayerTypes, this.displayLanguage as TypeDisplayLanguage);
 
-        // id and typer are derived from the basemap type composition (shaded, label, transport, simple)
+        // id and type are derived from the basemap type composition (shaded, label, transport, simple)
         const basemap = this.createBasemap({
           basemapId: basemaplayerTypes.join(''),
           name: info[0],
