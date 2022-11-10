@@ -87,6 +87,7 @@ const useStyles = makeStyles(() => ({
  */
 export function Slider(props: TypeSliderProps): JSX.Element {
   const { ...properties } = props;
+  properties.sliderId = props.id!;
 
   const classes = useStyles();
 
