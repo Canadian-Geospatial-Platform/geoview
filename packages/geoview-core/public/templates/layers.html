@@ -710,7 +710,7 @@
       legendTable.appendChild(table);
       var createHeader = true;
       Object.keys(resultSets).forEach((layerPath) => {
-        if (resultSets[layerPath].type === 'ogcWms') {
+        if (resultSets[layerPath]?.type === 'ogcWms') {
           if (createHeader) {
             createHeader = false;
             const tableRow1 = document.createElement('tr');
@@ -738,26 +738,29 @@
             addHeader("Label", tableRow1);
             addHeader("Symbology", tableRow1);
           }
-          Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
-            if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
-              for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
-                addRow(layerPath,
-                       resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                       resultSets[layerPath].legend[geometryKey][i]);
+          if (resultSets[layerPath]?.legend) {
+            Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+              if (geometryKey) {
+                if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                    addRow(layerPath,
+                          resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                          resultSets[layerPath].legend[geometryKey][i]);
+                  }
+                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                    addRow(layerPath,
+                          resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                          resultSets[layerPath].legend[geometryKey][i]);
+                  }
+                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
+                  addRow(layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].label,
+                        resultSets[layerPath].legend[geometryKey]);
+                }
               }
-            } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
-              for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
-                addRow(layerPath,
-                       resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
-                       resultSets[layerPath].legend[geometryKey][i]);
-              }
-            } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
-              addRow(layerPath,
-                     resultSets[layerPath].styleConfig[geometryKey].label,
-                     resultSets[layerPath].legend[geometryKey]);
-            }
-
-          });
+            });
+          }
         }
       });
     }

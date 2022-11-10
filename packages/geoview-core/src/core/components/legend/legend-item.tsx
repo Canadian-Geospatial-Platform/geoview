@@ -112,7 +112,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         } else if (isVectorLegend(layerLegend)) {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           Object.entries(layerLegend.legend).forEach(([key1, canvas]) => {
-            if ('length' in canvas) {
+            if ('length' in canvas!) {
               setIconType('list');
               const iconImageList = (canvas as HTMLCanvasElement[]).map((c) => {
                 return c.toDataURL();
