@@ -27,7 +27,7 @@ import {
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
+import { isClassBreakStyleConfig, isUniqueValueStyleConfig, layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
 
 const useStyles = makeStyles(() => ({
   legendItem: {
@@ -110,34 +110,35 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           setIconType('simple');
           setIconImg(layerLegend.legend.toDataURL());
         } else if (isVectorLegend(layerLegend)) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          Object.entries(layerLegend.legend).forEach(([key1, canvas]) => {
-            if ('length' in canvas!) {
+          Object.entries(layerLegend.legend).forEach(([, styleRepresentation]) => {
+            if (styleRepresentation.arrayOfCanvas) {
               setIconType('list');
-              const iconImageList = (canvas as HTMLCanvasElement[]).map((c) => {
-                return c.toDataURL();
+              const iconImageList = (styleRepresentation.arrayOfCanvas as HTMLCanvasElement[]).map((canvas) => {
+                return canvas.toDataURL();
               });
+              if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                Object.entries(layerLegend.styleConfig).forEach(([key2, styleSettings]) => {
-                  if (styleSettings.styleType === 'classBreaks') {
+                Object.entries(layerLegend.styleConfig).forEach(([, styleSettings]) => {
+                  if (isClassBreakStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfos.map((styleInfo) => {
                       return styleInfo.label;
                     });
+                    if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
                     setLabelList(iconLabelList);
                   }
-                  if (styleSettings.styleType === 'uniqueValue') {
+                  if (isUniqueValueStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.map((styleInfo) => {
                       return styleInfo.label;
                     });
+                    if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
                     setLabelList(iconLabelList);
                   }
                 });
               }
             } else {
               setIconType('simple');
-              setIconImg((canvas as HTMLCanvasElement).toDataURL());
+              setIconImg((styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL());
             }
           });
         } else {

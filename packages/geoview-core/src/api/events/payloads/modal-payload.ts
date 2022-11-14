@@ -19,7 +19,7 @@ const validEvents: EventStringId[] = [
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAModal = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is ModalPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

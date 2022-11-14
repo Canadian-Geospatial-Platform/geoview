@@ -15,7 +15,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_U
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsABasemapLayerArray = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is BasemapLayerArrayPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

@@ -16,7 +16,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PA
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsALngLat = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is LngLatPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**
