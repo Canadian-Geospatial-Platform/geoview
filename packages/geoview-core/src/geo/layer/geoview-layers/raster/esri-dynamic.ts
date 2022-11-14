@@ -48,7 +48,7 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriDynamicLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /** ******************************************************************************************************************************
@@ -61,7 +61,7 @@ export const layerConfigIsEsriDynamic = (verifyIfLayer: TypeGeoviewLayerConfig):
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriDynamic => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 /** ******************************************************************************************************************************
@@ -77,7 +77,7 @@ export const geoviewLayerIsEsriDynamic = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsEsriDynamic = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriDynamicLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 };
 
 // ******************************************************************************************************************************

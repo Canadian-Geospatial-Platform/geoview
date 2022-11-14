@@ -40,10 +40,12 @@ import {
   isUniqueValueStyleConfig,
   isClassBreakStyleConfig,
   TypeBaseVectorConfig,
+  TypeUniqueValueStyleConfig,
+  TypeClassBreakStyleConfig,
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
-import { TypeLayerStyle } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStyle, TypeStyleRepresentation } from '../layer/geoview-layers/abstract-geoview-layers';
 
 type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
 type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
@@ -206,8 +208,8 @@ export class GeoviewRenderer {
           const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
           const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
           const drawingCanvas = document.createElement('canvas');
-          drawingCanvas.width = 1.25 * width;
-          drawingCanvas.height = 1.25 * height;
+          drawingCanvas.width = width;
+          drawingCanvas.height = height;
           const drawingContext = drawingCanvas.getContext('2d')!;
           drawingContext.globalAlpha = iconStyle.getOpacity();
           drawingContext.drawImage(image, 0, 0);
@@ -229,8 +231,8 @@ export class GeoviewRenderer {
     const size = pointStyle?.getImage().getSize() as Size;
     const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = 1.25 * width;
-    drawingCanvas.height = 1.25 * height;
+    drawingCanvas.width = width;
+    drawingCanvas.height = height;
     const drawingContext = toContext(drawingCanvas.getContext('2d')!);
     drawingContext.setStyle(pointStyle!);
     drawingContext.drawGeometry(new Point([width / 2, height / 2]));
@@ -246,9 +248,16 @@ export class GeoviewRenderer {
    */
   private createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
-    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+    const context = drawingCanvas.getContext('2d')!;
+    const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
+    gradient.addColorStop(0, '#7f7f7f');
+    gradient.addColorStop(0.667, '#ffffff');
+    gradient.addColorStop(1, '#ffffff');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    const drawingContext = toContext(context);
     drawingContext.setStyle(lineStringStyle!);
     drawingContext.drawGeometry(
       new LineString([
@@ -268,9 +277,16 @@ export class GeoviewRenderer {
    */
   private createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = 1.25 * this.LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = 1.25 * this.LEGEND_CANVAS_HEIGHT;
-    const drawingContext = toContext(drawingCanvas.getContext('2d')!);
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
+    const context = drawingCanvas.getContext('2d')!;
+    const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
+    gradient.addColorStop(0, '#7f7f7f');
+    gradient.addColorStop(0.667, '#ffffff');
+    gradient.addColorStop(1, '#ffffff');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    const drawingContext = toContext(context);
     drawingContext.setStyle(polygonStyle!);
     drawingContext.drawGeometry(
       new Polygon([
@@ -286,41 +302,86 @@ export class GeoviewRenderer {
     return drawingCanvas;
   }
 
-  private processArrayOfStyleConfig(
+  /** ***************************************************************************************************************************
+   * This method is used to process the array of point styles as described in the pointStyleConfig.
+   *
+   * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
+   * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]} arrayOfPointStyleConfig The array of point style
+   * configuration.
+   * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
+   * of the calling methode.
+   */
+  private processArrayOfPointStyleConfig(
     layerStyle: TypeLayerStyle,
-    pointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
+    arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
     resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void
   ) {
     // UniqueValue or ClassBreak point style configuration ============================================================
-    const styleArray: (HTMLCanvasElement | null)[] = [];
-    if (pointStyleConfig.length) {
-      // Use first element to determine the type (all other elements of the array have the same style)
-      if (isIconSymbolVectorConfig(pointStyleConfig[0].settings)) {
+    const styleArray: (HTMLCanvasElement | null)[] = layerStyle.Point!.arrayOfCanvas!;
+    const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
+    for (let i = 0; i < arrayOfPointStyleConfig.length; i++) {
+      if (isIconSymbolVectorConfig(arrayOfPointStyleConfig[i].settings))
         // Icon symbol ================================================================================================
-        const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
-        pointStyleConfig.forEach((styleInfo) => {
-          promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(styleInfo.settings)));
-        });
-        Promise.all(promiseOfCanvasCreated).then((listOfCanvasCreated) => {
-          listOfCanvasCreated.forEach((canvas) => {
-            styleArray.push(canvas);
-            layerStyle.Point = styleArray;
-            resolve(layerStyle);
-          });
+        promiseOfCanvasCreated.push(this.createIconCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
+      // Simple vector symbol =======================================================================================
+      else
+        promiseOfCanvasCreated.push(
+          new Promise<HTMLCanvasElement | null>((resolveSimpleVectorSymbol) => {
+            resolveSimpleVectorSymbol(this.createPointCanvas(this.processSimplePoint(arrayOfPointStyleConfig[i].settings)));
+          })
+        );
+    }
+    Promise.all(promiseOfCanvasCreated).then((listOfCanvasCreated) => {
+      listOfCanvasCreated.forEach((canvas) => {
+        styleArray.push(canvas);
+      });
+      resolve(layerStyle);
+    });
+  }
+
+  /** ***************************************************************************************************************************
+   * This method is a private sub routine used by the getStyle method to gets the style of the layer as specified by the style
+   * configuration.
+   *
+   * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
+   * @param {TypeKindOfVectorSettings | undefined} defaultSettings The settings associated to simple styles or default style of
+   * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
+   * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[] | undefined} arrayOfPointStyleConfig The array of point style
+   * configuration. When this parameter is undefined, no arrayOfCanvas is created.
+   * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
+   */
+  private getStyleSubRoutine(
+    resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void,
+    layerStyle: TypeLayerStyle,
+    defaultSettings?: TypeKindOfVectorSettings,
+    arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
+  ) {
+    if (defaultSettings) {
+      if (isIconSymbolVectorConfig(defaultSettings)) {
+        // Icon symbol ======================================================================================
+        this.createIconCanvas(this.processSimplePoint(defaultSettings)).then((canvas) => {
+          layerStyle.Point!.defaultCanvas = canvas;
+          if (arrayOfPointStyleConfig) {
+            layerStyle.Point!.arrayOfCanvas = [];
+            this.processArrayOfPointStyleConfig(layerStyle, arrayOfPointStyleConfig, resolve);
+          } else resolve(layerStyle);
         });
       } else {
-        // Simple vector symbol =======================================================================================
-        pointStyleConfig.forEach((styleInfo) => {
-          styleArray.push(this.createPointCanvas(this.processSimplePoint(styleInfo.settings)));
-        });
-        layerStyle.Point = styleArray;
-        resolve(layerStyle);
+        // Simple vector symbol =============================================================================
+        layerStyle.Point!.defaultCanvas = this.createPointCanvas(this.processSimplePoint(defaultSettings));
+        if (arrayOfPointStyleConfig) {
+          layerStyle.Point!.arrayOfCanvas = [];
+          this.processArrayOfPointStyleConfig(layerStyle, arrayOfPointStyleConfig, resolve);
+        } else resolve(layerStyle);
       }
+    } else {
+      layerStyle.Point!.arrayOfCanvas = [];
+      this.processArrayOfPointStyleConfig(layerStyle, arrayOfPointStyleConfig!, resolve);
     }
   }
 
   /** ***************************************************************************************************************************
-   * This method gets the style of the layer that has the specified style configuration.
+   * This method gets the style of the layer as specified by the style configuration.
    *
    * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
    *
@@ -333,72 +394,78 @@ export class GeoviewRenderer {
       if (styleConfig.Point) {
         // ======================================================================================================================
         // Point style configuration ============================================================================================
+        layerStyle.Point = {};
         if (isSimpleStyleConfig(styleConfig.Point)) {
-          // Simple point style configuration =========================================================================
-          if (isIconSymbolVectorConfig(styleConfig.Point.settings)) {
-            // Icon symbol ==================================================================================
-            this.createIconCanvas(this.processSimplePoint(styleConfig.Point)).then((canvas) => {
-              layerStyle.Point = canvas;
-              resolve(layerStyle);
-            });
-          } else {
-            // Simple vector symbol =========================================================================
-            layerStyle.Point = this.createPointCanvas(this.processSimplePoint(styleConfig.Point));
-            resolve(layerStyle);
-          }
+          this.getStyleSubRoutine(resolve, layerStyle, styleConfig.Point.settings);
         } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
-          // UniqueValue point style configuration ====================================================================
-          this.processArrayOfStyleConfig(layerStyle, styleConfig.Point.uniqueValueStyleInfo, resolve);
+          this.getStyleSubRoutine(
+            resolve,
+            layerStyle,
+            styleConfig.Point.defaultSettings,
+            (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
+          );
         } else if (isClassBreakStyleConfig(styleConfig.Point)) {
-          // ClassBreak point style configuration =====================================================================
-          this.processArrayOfStyleConfig(layerStyle, styleConfig.Point.classBreakStyleInfos, resolve);
+          this.getStyleSubRoutine(
+            resolve,
+            layerStyle,
+            styleConfig.Point.defaultSettings,
+            (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfos
+          );
         }
       }
 
-      // ========================================================================================================================
-      // LineString style configuration =========================================================================================
       if (styleConfig.LineString) {
+        // ======================================================================================================================
+        // LineString style configuration =======================================================================================
+        layerStyle.LineString = {};
         if (isSimpleStyleConfig(styleConfig.LineString)) {
-          // Simple lineString style configuration ====================================================================
-          layerStyle.LineString = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
+          layerStyle.LineString.defaultCanvas = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
         } else if (isUniqueValueStyleConfig(styleConfig.LineString)) {
-          // UniqueValue lineString style configuration ===============================================================
+          if (styleConfig.LineString.defaultSettings)
+            layerStyle.LineString.defaultCanvas = this.createLineStringCanvas(
+              this.processSimpleLineString(styleConfig.LineString.defaultSettings)
+            );
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.LineString.uniqueValueStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
           });
-          layerStyle.LineString = styleArray;
+          layerStyle.LineString.arrayOfCanvas = styleArray;
         } else if (isClassBreakStyleConfig(styleConfig.LineString)) {
-          // ClassBreak lineString style configuration ================================================================
+          if (styleConfig.LineString.defaultSettings)
+            layerStyle.LineString.defaultCanvas = this.createLineStringCanvas(
+              this.processSimpleLineString(styleConfig.LineString.defaultSettings)
+            );
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.LineString.classBreakStyleInfos.forEach((styleInfo) => {
             styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
           });
-          layerStyle.LineString = styleArray;
+          layerStyle.LineString.arrayOfCanvas = styleArray;
         }
         resolve(layerStyle);
       }
 
-      // ========================================================================================================================
-      // Polygon style configuration ============================================================================================
       if (styleConfig.Polygon) {
+        // ======================================================================================================================
+        // Polygon style configuration ==========================================================================================
+        layerStyle.Polygon = {};
         if (isSimpleStyleConfig(styleConfig.Polygon)) {
-          // Simple polygon style configuration =======================================================================
-          layerStyle.Polygon = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
+          layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
         } else if (isUniqueValueStyleConfig(styleConfig.Polygon)) {
-          // UniqueValue polygon style configuration ==================================================================
+          if (styleConfig.Polygon.defaultSettings)
+            layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.Polygon.uniqueValueStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
           });
-          layerStyle.Polygon = styleArray;
+          layerStyle.Polygon.arrayOfCanvas = styleArray;
         } else if (isClassBreakStyleConfig(styleConfig.Polygon)) {
-          // ClassBreak polygon style configuration ===================================================================
+          if (styleConfig.Polygon.defaultSettings)
+            layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.Polygon.classBreakStyleInfos.forEach((styleInfo) => {
             styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
           });
-          layerStyle.Polygon = styleArray;
+          layerStyle.Polygon.arrayOfCanvas = styleArray;
         }
         resolve(layerStyle);
       }
@@ -670,7 +737,7 @@ export class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processSimplePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
-    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeBaseVectorConfig;
+    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
     if (isSimpleSymbolVectorConfig(settings)) {
       const { symbol } = settings;
       return this.processSymbol[symbol].call(this, settings);
@@ -688,7 +755,7 @@ export class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processSimpleLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
-    const { settings } = styleSettings as TypeSimpleStyleConfig;
+    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
       return new Style({ stroke: new Stroke(strokeOptions) });
@@ -850,7 +917,7 @@ export class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processSimplePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
-    const { settings } = styleSettings as TypeSimpleStyleConfig;
+    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
     if (isFilledPolygonVectorConfig(settings)) {
       const { fillStyle } = settings;
       return this.processFillStyle[fillStyle].call(this, settings);

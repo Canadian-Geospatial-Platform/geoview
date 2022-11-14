@@ -48,7 +48,7 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWFSLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 /** *****************************************************************************************************************************
@@ -61,7 +61,7 @@ export const layerConfigIsWFS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WFS => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WFS;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.WFS;
 };
 
 /** *****************************************************************************************************************************
@@ -75,7 +75,7 @@ export const geoviewLayerIsWFS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWfsLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.WFS;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.WFS;
 };
 
 // ******************************************************************************************************************************

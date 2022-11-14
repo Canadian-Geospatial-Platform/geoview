@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_ZOOM_END];
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsANumber = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is NumberPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

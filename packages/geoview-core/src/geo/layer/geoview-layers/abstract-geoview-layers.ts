@@ -52,7 +52,7 @@ export type TypeLegend = {
  * @returns {boolean} returns true if the payload is valid
  */
 export const isWmsLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeWmsLegend => {
-  return verifyIfLegend.type === 'ogcWms';
+  return verifyIfLegend?.type === 'ogcWms';
 };
 
 export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
@@ -69,14 +69,22 @@ const validEvents: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeat
  * @returns {boolean} returns true if the payload is valid
  */
 export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is TypeVectorLegend => {
-  return validEvents.includes(verifyIfLegend.type);
+  return validEvents.includes(verifyIfLegend?.type);
 };
 
 export interface TypeVectorLegend extends TypeLegend {
   legend: TypeLayerStyle;
 }
 
-export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, HTMLCanvasElement | null | (HTMLCanvasElement | null)[]>>;
+export type TypeStyleRepresentation = {
+  /** The defaultCanvas property is used by WMS legends, Simple styles and default styles when defined in unique value and class
+   * break styles.
+   */
+  defaultCanvas?: HTMLCanvasElement | null;
+  /** The arrayOfCanvas property is used by unique value and class break styles. */
+  arrayOfCanvas?: (HTMLCanvasElement | null)[];
+};
+export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, TypeStyleRepresentation>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types

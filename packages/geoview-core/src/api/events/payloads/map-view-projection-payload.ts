@@ -15,7 +15,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMapViewProjection = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapViewProjectionPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

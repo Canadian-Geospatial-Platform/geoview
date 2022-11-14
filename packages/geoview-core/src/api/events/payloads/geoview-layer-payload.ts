@@ -15,7 +15,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, EVENT
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAGeoViewLayer = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is GeoViewLayerPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

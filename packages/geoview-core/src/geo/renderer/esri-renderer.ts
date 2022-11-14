@@ -45,7 +45,7 @@ type TypeEsriColor = [number, number, number, number];
  * @returns {boolean} true if the type ascention is valid.
  */
 export const esriRendererIsUniqueValue = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriUniqueValueRenderer => {
-  return verifyIfRenderer.type === 'uniqueValue';
+  return verifyIfRenderer?.type === 'uniqueValue';
 };
 
 export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
@@ -82,7 +82,7 @@ export type EsriBaseSymbol = {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleMarkerSymbol => {
-  return verifyIfSymbol.type === 'esriSMS';
+  return verifyIfSymbol?.type === 'esriSMS';
 };
 
 export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
@@ -105,7 +105,7 @@ export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isEsriSimpleFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleFillSymbol => {
-  return verifyIfSymbol.type === 'esriSFS';
+  return verifyIfSymbol?.type === 'esriSFS';
 };
 
 export interface EsriSimpleFillSymbol extends EsriBaseSymbol {
@@ -135,7 +135,7 @@ export type EsriFillStyle =
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleLineSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleLineSymbol => {
-  return verifyIfSymbol.type === 'esriSLS';
+  return verifyIfSymbol?.type === 'esriSLS';
 };
 
 export interface EsriSimpleLineSymbol extends EsriBaseSymbol {
@@ -170,7 +170,7 @@ export type EsriSymbolStyle = 'esriSMSCircle' | 'esriSMSCross' | 'esriSMSDiamond
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isPictureMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriPictureMarkerSymbol => {
-  return verifyIfSymbol.type === 'esriPMS';
+  return verifyIfSymbol?.type === 'esriPMS';
 };
 
 export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
@@ -193,7 +193,7 @@ export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const esriRendererIsSimple = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriSimpleRenderer => {
-  return verifyIfRenderer.type === 'simple';
+  return verifyIfRenderer?.type === 'simple';
 };
 
 export interface EsriSimpleRenderer extends EsriBaseRenderer {
@@ -215,7 +215,7 @@ export interface EsriSimpleRenderer extends EsriBaseRenderer {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriClassBreakRenderer => {
-  return verifyIfRenderer.type === 'classBreaks';
+  return verifyIfRenderer?.type === 'classBreaks';
 };
 
 type EsriClassBreakInfoEntry = {

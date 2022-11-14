@@ -26,7 +26,7 @@ export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsGeocore = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeocoreLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
 /** *****************************************************************************************************************************
@@ -39,7 +39,7 @@ export const geoviewEntryIsGeocore = (verifyIfGeoViewEntry: TypeLayerEntryConfig
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsGeoCore = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoCoreLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOCORE;
 };
 
 /**
