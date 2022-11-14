@@ -19,7 +19,7 @@ const validEvents: EventStringId[] = [
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsABoolean = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is BooleanPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

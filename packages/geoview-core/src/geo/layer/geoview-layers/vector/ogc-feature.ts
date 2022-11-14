@@ -51,7 +51,7 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeOgcFeatureLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 /** *****************************************************************************************************************************
@@ -65,7 +65,7 @@ export const layerConfigIsOgcFeature = (verifyIfLayer: TypeGeoviewLayerConfig): 
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is OgcFeature => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.OGC_FEATURE;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 /** *****************************************************************************************************************************
@@ -81,7 +81,7 @@ export const geoviewLayerIsOgcFeature = (verifyIfGeoViewLayer: AbstractGeoViewLa
 export const geoviewEntryIsOgcFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeOgcFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.OGC_FEATURE;
 };
 
 // ******************************************************************************************************************************

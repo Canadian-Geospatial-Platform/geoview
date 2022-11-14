@@ -145,7 +145,7 @@ export type TypeBaseVectorConfig = {
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeLineStringVectorConfig => {
-  return verifyIfConfig.type === 'lineString';
+  return verifyIfConfig?.type === 'lineString';
 };
 
 /** ******************************************************************************************************************************
@@ -158,7 +158,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): 
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypePolygonVectorConfig => {
-  return verifyIfConfig.type === 'filledPolygon';
+  return verifyIfConfig?.type === 'filledPolygon';
 };
 
 /** ******************************************************************************************************************************
@@ -171,7 +171,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorConfig
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeSimpleSymbolVectorConfig => {
-  return verifyIfConfig.type === 'simpleSymbol';
+  return verifyIfConfig?.type === 'simpleSymbol';
 };
 
 /** ******************************************************************************************************************************
@@ -184,7 +184,7 @@ export const isSimpleSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig)
  * @returns {boolean} true if the type ascention is valid.
  */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
-  return verifyIfConfig.type === 'iconSymbol';
+  return verifyIfConfig?.type === 'iconSymbol';
 };
 
 /** ******************************************************************************************************************************
@@ -333,7 +333,7 @@ export type TypeBaseStyleConfig = {
 export const isSimpleStyleConfig = (
   verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
 ): verifyIfConfig is TypeSimpleStyleConfig => {
-  return (verifyIfConfig as TypeStyleSettings).styleType === 'simple';
+  return (verifyIfConfig as TypeStyleSettings)?.styleType === 'simple';
 };
 
 /** ******************************************************************************************************************************
@@ -374,7 +374,7 @@ export type TypeUniqueValueStyleInfo = {
 export const isUniqueValueStyleConfig = (
   verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
 ): verifyIfConfig is TypeUniqueValueStyleConfig => {
-  return (verifyIfConfig as TypeStyleSettings).styleType === 'uniqueValue';
+  return (verifyIfConfig as TypeStyleSettings)?.styleType === 'uniqueValue';
 };
 
 /** ******************************************************************************************************************************
@@ -421,7 +421,7 @@ export type TypeClassBreakStyleInfo = {
 export const isClassBreakStyleConfig = (
   verifyIfConfig: TypeStyleSettings | TypeKindOfVectorSettings
 ): verifyIfConfig is TypeClassBreakStyleConfig => {
-  return (verifyIfConfig as TypeStyleSettings).styleType === 'classBreaks';
+  return (verifyIfConfig as TypeStyleSettings)?.styleType === 'classBreaks';
 };
 
 /** ******************************************************************************************************************************
@@ -471,7 +471,7 @@ export type TypeLayerEntryType = 'vector' | 'vectorTile' | 'vectorHeatmap' | 'ra
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeLayerGroupEntryConfig => {
-  return 'entryType' in verifyIfLayer && verifyIfLayer.entryType === 'group';
+  return verifyIfLayer?.entryType === 'group';
 };
 
 /** ******************************************************************************************************************************
@@ -484,7 +484,7 @@ export const layerEntryIsGroupLayer = (verifyIfLayer: TypeLayerEntryConfig): ver
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorLayerEntryConfig => {
-  return verifyIfLayer.entryType === 'vector';
+  return verifyIfLayer?.entryType === 'vector';
 };
 
 /** ******************************************************************************************************************************
@@ -497,7 +497,7 @@ export const layerEntryIsVector = (verifyIfLayer: TypeLayerEntryConfig): verifyI
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorHeatmapLayerEntryConfig => {
-  return verifyIfLayer.entryType === 'vectorHeatmap';
+  return verifyIfLayer?.entryType === 'vectorHeatmap';
 };
 
 /** ******************************************************************************************************************************
@@ -510,7 +510,7 @@ export const layerEntryIsVectorHeatmap = (verifyIfLayer: TypeLayerEntryConfig): 
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeVectorTileLayerEntryConfig => {
-  return verifyIfLayer.entryType === 'vectorTile';
+  return verifyIfLayer?.entryType === 'vectorTile';
 };
 
 /** ******************************************************************************************************************************
@@ -525,7 +525,7 @@ export const layerEntryIsVectorTile = (verifyIfLayer: TypeLayerEntryConfig): ver
 export const layerEntryIsRaster = (
   verifyIfLayer: TypeLayerEntryConfig
 ): verifyIfLayer is TypeImageLayerEntryConfig | TypeTileLayerEntryConfig => {
-  return verifyIfLayer.entryType === 'raster';
+  return verifyIfLayer?.entryType === 'raster';
 };
 
 /** ******************************************************************************************************************************
@@ -538,7 +538,7 @@ export const layerEntryIsRaster = (
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerEntryIsGeocore = (verifyIfLayer: TypeLayerEntryConfig): verifyIfLayer is TypeGeocoreLayerEntryConfig => {
-  return verifyIfLayer.entryType === 'geocore';
+  return verifyIfLayer?.entryType === 'geocore';
 };
 
 /** ******************************************************************************************************************************

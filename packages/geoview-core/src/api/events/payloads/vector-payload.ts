@@ -17,7 +17,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED];
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAVector = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is VectorPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**
@@ -30,7 +30,7 @@ export const payloadIsAVector = (verifyIfPayload: PayloadBaseClass): verifyIfPay
  */
 export const payloadIsACircle = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CirclePayload => {
   if (payloadIsAVector(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.CIRCLE;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE;
   }
   return false;
 };
@@ -52,7 +52,7 @@ export interface CirclePayload extends VectorPayload {
  */
 export const payloadIsACircleMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleMarkerPayload => {
   if (payloadIsAVector(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE_MARKER;
   }
   return false;
 };
@@ -74,7 +74,7 @@ export interface CircleMarkerPayload extends VectorPayload {
  */
 export const payloadIsAMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerPayload => {
   if (payloadIsAMarker(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.MARKER;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.MARKER;
   }
   return false;
 };
@@ -96,7 +96,7 @@ export interface MarkerPayload extends VectorPayload {
  */
 export const payloadIsAPolygon = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolygonPayload => {
   if (payloadIsAVector(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.POLYGON;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.POLYGON;
   }
   return false;
 };
@@ -118,7 +118,7 @@ export interface PolygonPayload extends VectorPayload {
  */
 export const payloadIsAPolyline = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolylinePayload => {
   if (payloadIsAVector(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.POLYLINE;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.POLYLINE;
   }
   return false;
 };

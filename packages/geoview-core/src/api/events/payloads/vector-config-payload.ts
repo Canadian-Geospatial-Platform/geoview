@@ -18,7 +18,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD, EVENT
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAVectorConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is VectorConfigPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**
@@ -31,7 +31,7 @@ export const payloadIsAVectorConfig = (verifyIfPayload: PayloadBaseClass): verif
  */
 export const payloadIsACircleConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleConfigPayload => {
   if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.CIRCLE;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE;
   }
   return false;
 };
@@ -60,7 +60,7 @@ export interface CircleConfigPayload extends VectorConfigPayload {
  */
 export const payloadIsACircleMarkerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleMarkerConfigPayload => {
   if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.CIRCLE_MARKER;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE_MARKER;
   }
   return false;
 };
@@ -89,7 +89,7 @@ export interface CircleMarkerConfigPayload extends VectorConfigPayload {
  */
 export const payloadIsAMarkerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerConfigPayload => {
   if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.MARKER;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.MARKER;
   }
   return false;
 };
@@ -116,7 +116,7 @@ export interface MarkerConfigPayload extends VectorConfigPayload {
  */
 export const payloadIsAPolygonConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolygonConfigPayload => {
   if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.POLYGON;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.POLYGON;
   }
   return false;
 };
@@ -143,7 +143,7 @@ export interface PolygonConfigPayload extends VectorConfigPayload {
  */
 export const payloadIsAPolylineConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PolylineConfigPayload => {
   if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload.type === CONST_VECTOR_TYPES.POLYLINE;
+    return verifyIfPayload?.type === CONST_VECTOR_TYPES.POLYLINE;
   }
   return false;
 };

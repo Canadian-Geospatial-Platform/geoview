@@ -52,7 +52,7 @@ export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig,
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeEsriFeatureLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 /** *****************************************************************************************************************************
@@ -65,7 +65,7 @@ export const layerConfigIsEsriFeature = (verifyIfLayer: TypeGeoviewLayerConfig):
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is EsriFeature => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.ESRI_FEATURE;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 /** *****************************************************************************************************************************
@@ -81,7 +81,7 @@ export const geoviewLayerIsEsriFeature = (verifyIfGeoViewLayer: AbstractGeoViewL
 export const geoviewEntryIsEsriFeature = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeEsriFeatureLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_FEATURE;
 };
 
 // ******************************************************************************************************************************

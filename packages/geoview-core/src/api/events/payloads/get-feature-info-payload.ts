@@ -27,7 +27,7 @@ export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfRecord
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsQueryLayer = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryLayerPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER;
 };
 
 /**
@@ -49,7 +49,7 @@ export interface TypeQueryLayerPayload extends GetFeatureInfoPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAllQueriesDone = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeAllQueriesDonePayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE;
 };
 
 /**
@@ -70,7 +70,7 @@ export interface TypeAllQueriesDonePayload extends GetFeatureInfoPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsQueryResult = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryResultPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT;
 };
 
 /**
@@ -92,7 +92,7 @@ export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsGetFeatureInfo = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is GetFeatureInfoPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

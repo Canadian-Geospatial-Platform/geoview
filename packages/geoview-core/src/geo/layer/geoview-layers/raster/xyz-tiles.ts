@@ -55,7 +55,7 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeXYZTilesConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 /** *****************************************************************************************************************************
@@ -68,7 +68,7 @@ export const layerConfigIsXYZTiles = (verifyIfLayer: TypeGeoviewLayerConfig): ve
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is XYZTiles => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.XYZ_TILES;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 /** *****************************************************************************************************************************
@@ -84,7 +84,7 @@ export const geoviewLayerIsXYZTiles = (verifyIfGeoViewLayer: AbstractGeoViewLaye
 export const geoviewEntryIsXYZTiles = (
   verifyIfGeoViewEntry: TypeLayerEntryConfig
 ): verifyIfGeoViewEntry is TypeXYZTilesLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES;
 };
 
 // ******************************************************************************************************************************

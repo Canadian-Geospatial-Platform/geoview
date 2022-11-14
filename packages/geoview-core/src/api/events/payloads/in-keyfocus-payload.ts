@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS];
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAInKeyfocus = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is InKeyfocusPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

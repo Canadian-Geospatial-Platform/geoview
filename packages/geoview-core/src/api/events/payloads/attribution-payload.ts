@@ -14,7 +14,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.ATTRIBUTION.EVENT_ATTRIBUTION_
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAttribution = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is AttributionPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

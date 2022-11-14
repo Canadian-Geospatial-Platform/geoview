@@ -15,7 +15,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.LAYER.EVENT_ADD_LAYER];
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsALayerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is LayerConfigPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

@@ -15,7 +15,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_RELOAD];
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAmapFeaturesConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapFeaturesPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

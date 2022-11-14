@@ -23,7 +23,7 @@ export type TypeResultSets = { [layerPath: string]: any | null };
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsLayerRegistration = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeLayerRegistrationPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION;
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION;
 };
 
 /**
@@ -47,7 +47,7 @@ export interface TypeLayerRegistrationPayload extends LayerSetPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsRequestLayerInventory = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeRequestLayerInventoryPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY;
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY;
 };
 
 /**
@@ -67,7 +67,7 @@ export interface TypeRequestLayerInventoryPayload extends LayerSetPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsLayerSetUpdated = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypelayerSetUpdatedPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.LAYER_SET.UPDATED;
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER_SET.UPDATED;
 };
 
 /**
@@ -87,7 +87,7 @@ export interface TypelayerSetUpdatedPayload extends LayerSetPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsLayerSet = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is LayerSetPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

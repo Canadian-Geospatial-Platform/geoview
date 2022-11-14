@@ -42,7 +42,7 @@ export type TypeActionButton = {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadHasAButtonIdAndType = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelWithAButtonIdAndTypePayload => {
-  return validEvents4ButtonIdAndType.includes(verifyIfPayload.event);
+  return validEvents4ButtonIdAndType.includes(verifyIfPayload?.event);
 };
 
 /**
@@ -65,7 +65,7 @@ export interface PanelWithAButtonIdAndTypePayload extends PanelPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPanelAction = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelAndActionPayload => {
-  return validEvents4Action.includes(verifyIfPayload.event);
+  return validEvents4Action.includes(verifyIfPayload?.event);
 };
 
 /**
@@ -88,7 +88,7 @@ export interface PanelAndActionPayload extends PanelPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPanelContent = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelAndContentPayload => {
-  return validEvents4Content.includes(verifyIfPayload.event);
+  return validEvents4Content.includes(verifyIfPayload?.event);
 };
 
 /**
@@ -111,7 +111,7 @@ export interface PanelAndContentPayload extends PanelPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAPanel = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is PanelPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

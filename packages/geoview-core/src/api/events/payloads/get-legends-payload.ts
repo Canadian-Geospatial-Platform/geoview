@@ -22,7 +22,7 @@ export type TypeLegendResultSets = { [layerPath: string]: TypeLegend | undefined
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAllLegendsDone = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeAllLegendsDonePayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE;
 };
 
 /**
@@ -44,7 +44,7 @@ export interface TypeAllLegendsDonePayload extends GetLegendsPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsLegendInfo = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeLegendInfoPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_LEGENDS.LEGEND_INFO;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_LEGENDS.LEGEND_INFO;
 };
 
 /**
@@ -66,7 +66,7 @@ export interface TypeLegendInfoPayload extends GetLegendsPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsQueryLegend = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeQueryLegendPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND;
 };
 
 /**
@@ -86,7 +86,7 @@ export interface TypeQueryLegendPayload extends GetLegendsPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsTriggerLegend = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeTriggerLegendsPayload => {
-  return verifyIfPayload.event === EVENT_NAMES.GET_LEGENDS.TRIGGER;
+  return verifyIfPayload?.event === EVENT_NAMES.GET_LEGENDS.TRIGGER;
 };
 
 /**
@@ -106,7 +106,7 @@ export interface TypeTriggerLegendsPayload extends GetLegendsPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsGetLegends = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is GetLegendsPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

@@ -20,7 +20,7 @@ const validEvents: EventStringId[] = [
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAButtonPanel = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is ButtonPanelPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**
