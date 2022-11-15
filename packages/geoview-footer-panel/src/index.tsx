@@ -51,12 +51,12 @@ class FooterPanelPlugin extends AbstractPlugin {
   translations = toJsonObject({
     en: {
       legend: 'Legend',
-      details: 'Detail',
+      details: 'Details',
       dataGrid: 'Data',
     },
     fr: {
       legend: 'Légende',
-      details: 'Détail',
+      details: 'Détails',
       dataGrid: 'Données',
     },
   });
@@ -87,6 +87,16 @@ class FooterPanelPlugin extends AbstractPlugin {
           value: tabsCounter,
           label: this.translations[displayLanguage].legend as string,
           content: api.map(mapId).legend.createLegend(),
+        });
+        tabsCounter++;
+      }
+
+      if (defaultTabs.includes('details')) {
+        // the call to create data grid element return the element and the footer content is waiting for a function.
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].details as string,
+          content: () => api.map(mapId).details.createDetails({ layerId: 'esriFeatureLYR4' }),
         });
         tabsCounter++;
       }
