@@ -222,7 +222,7 @@ export class ConfigValidation {
    *
    * @returns {number} A valid zoom level.
    */
-   private validateMinZoom(zoom?: number): number | undefined {
+  private validateMinZoom(zoom?: number): number | undefined {
     return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : undefined;
   }
 
@@ -232,7 +232,7 @@ export class ConfigValidation {
    *
    * @returns {number} A valid zoom level.
    */
-   private validateMaxZoom(zoom?: number): number | undefined {
+  private validateMaxZoom(zoom?: number): number | undefined {
     return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : undefined;
   }
 
