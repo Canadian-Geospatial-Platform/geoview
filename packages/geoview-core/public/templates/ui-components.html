@@ -167,7 +167,7 @@
           customOnChange: (zoomLevel) => {
             const lat = 50;
             const lng = -95;
-            cgpv.api.map('UI1').setView({ zoom: zoomLevel, center: [lng, lat] });
+            cgpv.api.map('UI1').getView().animate({ zoom: zoomLevel });
           },
         })
       )
@@ -213,9 +213,9 @@
       createConfigSnippet();
     });
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    // document.addEventListener('DOMContentLoaded', async () => {
       // get map
-      let map = cgpv.api.map('UI1');
+      // let map = cgpv.api.map('UI1');
 
       // zoom event to show hide layers
       // cgpv.api.event.on(
@@ -278,13 +278,10 @@
     //       )
     //       .addTo(map.map);
     //   }, 1000);
-    });
-  </script>
-</body>
 
-        // create heatmap layer
+      // create heatmap layer
         // TODO: repair with OpenLayers
-        setTimeout(() => {
+        // setTimeout(() => {
           // Check how to acccess OL library from our API like this for Leaflet
           // cgpv.leaflet
           //   .heatLayer(
@@ -292,8 +289,8 @@
           //     { radius: 20, blur: 15, maxZoom: 10 }
           //   )
           //   .addTo(map.map);
-        }, 1000);
-      });
-    </script>
-  </body>
+        // }, 1000);
+    // });
+  </script>
+</body>
 </html>
