@@ -1,11 +1,11 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 import { List } from '../../../ui';
 import { LegendItem } from './legend-item';
 
-export const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles(() => ({
   legend: {
     width: '100%',
     // maxWidth: 350, // for testing panel width

@@ -352,7 +352,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const sourceOptions: SourceOptions = {};
       sourceOptions.attributions = [(this.metadata.copyrightText ? this.metadata.copyrightText : '') as string];
       sourceOptions.url = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId);
-      sourceOptions.params = { LAYERS: layerEntryConfig.layerId };
+      sourceOptions.params = { LAYERS: `show:${layerEntryConfig.layerId}` };
       if (layerEntryConfig.source.transparent)
         Object.defineProperty(sourceOptions.params, 'transparent', layerEntryConfig.source.transparent!);
       if (layerEntryConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerEntryConfig.source.format!);
