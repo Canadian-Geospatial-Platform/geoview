@@ -1,7 +1,9 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
+const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
+
 const headingStyles = {
-  fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+  fontFamily: font,
   fontWeight: 700,
 };
 
@@ -189,7 +191,7 @@ const themeOptions: ThemeOptions = {
   typography: {
     fontSize: 16,
     htmlFontSize: 16,
-    fontFamily: "'Monserrat', 'Helvetica', 'Arial', sans-serif",
+    fontFamily: font,
     h1: headingStyles,
     h2: headingStyles,
     h3: headingStyles,

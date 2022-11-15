@@ -15,14 +15,13 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <button id="get-feature-info">Run getFeatureInfo</button><br />
     <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
           'zoom': 4,
           'center': [-100, 60],
-          'projection': 3857
+          'projection': 3978
         },
         'basemapOptions': {
           'basemapId': 'transport',
@@ -31,13 +30,13 @@
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'wmsLYR1',
-            'geoviewLayerName': { 'en': 'Hydro Network' },
-            'metadataAccessPath': { 'en': 'https://maps.geogratis.gc.ca/wms/hydro_network_en' },
-            'geoviewLayerType': 'ogcWms',
+            'geoviewLayerId': 'esriDynamicLYR3z',
+            'geoviewLayerName': { 'en': 'Energy (Esri-dynamic)' },
+            'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer' },
+            'geoviewLayerType': 'esriDynamic',
             'listOfLayerEntryConfig': [
               {
-                'layerId': 'hydro_network'
+                'layerId': '2'
               }
             ]
           }
@@ -49,12 +48,11 @@
       'suportedLanguages': ['en']
     }">
     </div>
-    <button class="Get-wms-Legend">Get Legend</button>
-    <div id="wmsLegendsId-table-div"></div>
+    <button class="Get-Legend">Get Legend</button>
+    <div id="legend-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll;"  id="wmsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
-    <p>This map has a wms layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
     <hr />
@@ -80,7 +78,7 @@
       displayLegend(layerSetId, resultSets);
     }, 'LYR1');
 
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
+    var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
       cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'wmsLegendsId' });
     });
@@ -97,13 +95,13 @@
         const tableData = document.createElement('td');
         tableData.style.verticalAlign = 'middle';
         tableData.style.textAlign = 'center';
-        if (typeof data === 'string') tableData.innerHTML =  data;
+        if (typeof data === 'string') tableData.innerHTML =  data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
         else tableData.appendChild(data);
         container.appendChild(tableData);
       }
       var oldTable = document.getElementById(`${layerSetId}-table`);
       if (oldTable) oldTable.parentNode.removeChild(oldTable)
-      var legendTable = document.getElementById(`${layerSetId}-table-div`);
+      var legendTable = document.getElementById('legend-table-div');
       const table = document.createElement('table');
       table.id = `${layerSetId}-table`;
       table.border="1";
@@ -143,21 +141,29 @@
             Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
               if (geometryKey) {
                 if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                    addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
                     addRow(layerPath,
                           resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                          resultSets[layerPath].legend[geometryKey][i]);
+                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
                   }
                 } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                    addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
                     addRow(layerPath,
                           resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
-                          resultSets[layerPath].legend[geometryKey][i]);
+                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
                   }
                 } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
                   addRow(layerPath,
                         resultSets[layerPath].styleConfig[geometryKey].label,
-                        resultSets[layerPath].legend[geometryKey]);
+                        resultSets[layerPath].legend[geometryKey].defaultCanvas);
                 }
               }
             });

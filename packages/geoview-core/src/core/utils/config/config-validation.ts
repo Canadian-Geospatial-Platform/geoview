@@ -217,6 +217,26 @@ export class ConfigValidation {
   }
 
   /** ***************************************************************************************************************************
+   * Validate min zoom level.
+   * @param {number} zoom The zoom level to validate.
+   *
+   * @returns {number} A valid zoom level.
+   */
+  private validateMinZoom(zoom?: number): number | undefined {
+    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Validate max zoom level.
+   * @param {number} zoom The zoom level to validate.
+   *
+   * @returns {number} A valid zoom level.
+   */
+  private validateMaxZoom(zoom?: number): number | undefined {
+    return zoom && !Number.isNaN(zoom) && zoom >= 0 && zoom <= 18 ? zoom : undefined;
+  }
+
+  /** ***************************************************************************************************************************
    * Validate projection.
    * @param {TypeProjectionCodes} projection The projection to validate.
    *
@@ -609,6 +629,8 @@ export class ConfigValidation {
     const zoom = this.validateZoom(tempMapFeaturesConfig?.map?.viewSettings?.zoom);
     const basemapOptions = this.validateBasemap(projection, tempMapFeaturesConfig?.map?.basemapOptions);
     const versionUsed = this.validateVersion(tempMapFeaturesConfig.versionUsed);
+    const minZoom = this.validateMinZoom(tempMapFeaturesConfig?.map?.viewSettings?.minZoom);
+    const maxZoom = this.validateMaxZoom(tempMapFeaturesConfig?.map?.viewSettings?.maxZoom);
 
     // recreate the prop object to remove unwanted items and check if same as original. Log the modifications
     const validMapFeaturesConfig: TypeMapFeaturesConfig = {
@@ -618,6 +640,8 @@ export class ConfigValidation {
           zoom,
           center,
           projection,
+          minZoom,
+          maxZoom,
         },
         interaction: tempMapFeaturesConfig.map.interaction,
         listOfGeoviewLayerConfig: tempMapFeaturesConfig.map.listOfGeoviewLayerConfig,

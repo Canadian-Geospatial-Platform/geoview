@@ -24,6 +24,8 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 import LiveHelp from '@mui/icons-material/LiveHelp';
 import ListAlt from '@mui/icons-material/ListAlt';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export {
   Layers as LayersIcon,
@@ -52,4 +54,6 @@ export {
   WhereToVoteIcon as ClickMapMarker,
   LiveHelp as TodoIcon,
   ListAlt as ListAltIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
 };

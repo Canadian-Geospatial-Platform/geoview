@@ -17,7 +17,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMarkerDefinition = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MarkerDefinitionPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import { useTranslation } from 'react-i18next';
+import Box from '@mui/material/Box';
 import {
   Avatar,
   Collapse,
@@ -9,13 +9,15 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Checkbox,
   CloseIcon,
   ExpandMoreIcon,
   ExpandLessIcon,
   TodoIcon,
   ListAltIcon,
   Tooltip,
+  VisibilityIcon,
+  VisibilityOffIcon,
+  IconButton,
 } from '../../../ui';
 import {
   AbstractGeoViewLayer,
@@ -27,10 +29,11 @@ import {
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
+import { isClassBreakStyleConfig, isUniqueValueStyleConfig, layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
 
-const useStyles = makeStyles(() => ({
+const sxClasses = {
   legendItem: {
+    color: 'text.primary',
     padding: 0,
   },
   expandableGroup: {
@@ -38,12 +41,6 @@ const useStyles = makeStyles(() => ({
     paddingLeft: 28,
   },
   expandableIconContainer: {
-    paddingLeft: 15,
-  },
-  expandableContainerBorder: {
-    borderLeftWidth: 2,
-    borderLeftStyle: 'solid',
-    borderColor: '#ABB2B9',
     paddingLeft: 10,
   },
   legendIcon: {
@@ -54,7 +51,7 @@ const useStyles = makeStyles(() => ({
   solidBackground: {
     background: '#fff',
   },
-}));
+};
 
 export interface TypeLegendItemProps {
   layerId: string;
@@ -70,8 +67,6 @@ export interface TypeLegendItemProps {
  */
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const { layerId, rootGeoViewLayer, subLayerId, layerConfigEntry } = props;
-
-  const classes = useStyles();
 
   const { t, i18n } = useTranslation<string>();
 
@@ -110,34 +105,35 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           setIconType('simple');
           setIconImg(layerLegend.legend.toDataURL());
         } else if (isVectorLegend(layerLegend)) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          Object.entries(layerLegend.legend).forEach(([key1, canvas]) => {
-            if ('length' in canvas!) {
+          Object.entries(layerLegend.legend).forEach(([, styleRepresentation]) => {
+            if (styleRepresentation.arrayOfCanvas) {
               setIconType('list');
-              const iconImageList = (canvas as HTMLCanvasElement[]).map((c) => {
-                return c.toDataURL();
+              const iconImageList = (styleRepresentation.arrayOfCanvas as HTMLCanvasElement[]).map((canvas) => {
+                return canvas.toDataURL();
               });
+              if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                Object.entries(layerLegend.styleConfig).forEach(([key2, styleSettings]) => {
-                  if (styleSettings.styleType === 'classBreaks') {
+                Object.entries(layerLegend.styleConfig).forEach(([, styleSettings]) => {
+                  if (isClassBreakStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfos.map((styleInfo) => {
                       return styleInfo.label;
                     });
+                    if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
                     setLabelList(iconLabelList);
                   }
-                  if (styleSettings.styleType === 'uniqueValue') {
+                  if (isUniqueValueStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.map((styleInfo) => {
                       return styleInfo.label;
                     });
+                    if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
                     setLabelList(iconLabelList);
                   }
                 });
               }
             } else {
               setIconType('simple');
-              setIconImg((canvas as HTMLCanvasElement).toDataURL());
+              setIconImg((styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL());
             }
           });
         } else {
@@ -225,23 +221,26 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   return (
     <>
-      <ListItem className={`${classes.legendItem}`}>
+      <ListItem sx={sxClasses.legendItem}>
         <ListItemButton>
           <ListItemIcon>
-            {groupItems.length > 0 && isGroupOpen && <ExpandMoreIcon onClick={handleExpandClick} />}
-            {groupItems.length > 0 && !isGroupOpen && <ExpandLessIcon onClick={handleExpandClick} />}
+            {groupItems.length > 0 && (
+              <IconButton color="primary" onClick={handleExpandClick}>
+                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              </IconButton>
+            )}
             {iconType === 'simple' && iconImg !== null && (
-              <Avatar className={classes.legendIcon} variant="square" src={isLegendOpen ? '' : iconImg} onClick={() => handleLegendClick()}>
+              <Avatar sx={sxClasses.legendIcon} variant="square" src={isLegendOpen ? '' : iconImg} onClick={() => handleLegendClick()}>
                 <CloseIcon />
               </Avatar>
             )}
             {iconType === 'list' && (
-              <Avatar className={classes.legendIcon} variant="square" onClick={() => handleLegendClick()}>
+              <Avatar sx={sxClasses.legendIcon} variant="square" onClick={() => handleLegendClick()}>
                 {isLegendOpen ? <CloseIcon /> : <ListAltIcon />}
               </Avatar>
             )}
             {groupItems.length === 0 && !iconType && (
-              <Avatar className={classes.legendIcon} variant="square" onClick={() => handleLegendClick()}>
+              <Avatar sx={sxClasses.legendIcon} variant="square" onClick={() => handleLegendClick()}>
                 <TodoIcon />
               </Avatar>
             )}
@@ -250,23 +249,25 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerName} />
           </Tooltip>
           <ListItemIcon>
-            <Checkbox checked={isChecked} onClick={() => handleToggleLayer()} />
+            <IconButton color="primary" onClick={() => handleToggleLayer()}>
+              {isChecked ? <VisibilityIcon /> : <VisibilityOffIcon />}
+            </IconButton>
           </ListItemIcon>
         </ListItemButton>
       </ListItem>
       <Collapse in={isLegendOpen} timeout="auto" unmountOnExit>
-        <div className={classes.expandableIconContainer}>
-          <div className={classes.expandableContainerBorder}>
-            {iconType === 'simple' && iconImg !== null && <img alt="" className={classes.solidBackground} src={iconImg} />}
+        <Box>
+          <Box sx={sxClasses.expandableIconContainer}>
+            {iconType === 'simple' && iconImg !== null && <img alt="" style={sxClasses.solidBackground} src={iconImg} />}
             {iconType === 'list' && iconList !== null && labelList !== null && (
               <LegendIconList iconImages={iconList} iconLabels={labelList} />
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
       </Collapse>
       <Collapse in={isGroupOpen} timeout="auto" unmountOnExit>
-        <div className={classes.expandableGroup}>
-          <div className={classes.expandableContainerBorder}>
+        <Box>
+          <Box sx={sxClasses.expandableIconContainer}>
             {groupItems.map((subItem) => (
               <LegendItem
                 key={`sub-${subItem.layerId}`}
@@ -276,8 +277,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 layerConfigEntry={subItem}
               />
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       </Collapse>
     </>
   );
