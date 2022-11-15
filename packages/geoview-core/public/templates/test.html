@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <button class="Test-Visibility">Test Visibility</button>
     <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
@@ -36,7 +37,7 @@
             'geoviewLayerType': 'esriDynamic',
             'listOfLayerEntryConfig': [
               {
-                'layerId': '2'
+                'layerId': '8'
               }
             ]
           }
@@ -171,6 +172,63 @@
         }
       });
     }
+
+    const cycleThroughtLayers = (delay) => {
+      setTimeout(() => {
+        cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/9');
+        cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/20');
+        setTimeout(() => {
+          cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/10');
+          cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/9');
+          setTimeout(() => {
+            cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/11');
+            cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/10');
+            setTimeout(() => {
+              cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/12');
+              cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/11');
+              setTimeout(() => {
+                cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/13');
+                cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/12');
+                setTimeout(() => {
+                  cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/14');
+                  cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/13');
+                  setTimeout(() => {
+                    cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/15');
+                    cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/14');
+                    setTimeout(() => {
+                      cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/16');
+                      cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/15');
+                      setTimeout(() => {
+                        cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/17');
+                        cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/16');
+                        setTimeout(() => {
+                          cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/18');
+                          cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/17');
+                          setTimeout(() => {
+                            cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/19');
+                            cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/18');
+                            setTimeout(() => {
+                              cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(delay, 'esriDynamicLYR3z/8/20');
+                              cgpv.api.maps.LYR1.layer.geoviewLayers.esriDynamicLYR3z.setVisible(false, 'esriDynamicLYR3z/8/19');
+                            }, delay);
+                          }, delay);
+                        }, delay);
+                      }, delay);
+                    }, delay);
+                  }, delay);
+                }, delay);
+              }, delay);
+            }, delay);
+          }, delay);
+        }, delay);
+      }, delay);
+    }
+
+    var testVisibility = document.getElementsByClassName('Test-Visibility')[0];
+    testVisibility.addEventListener('click', function (e) {
+      cycleThroughtLayers(0);
+      cycleThroughtLayers(2000);
+    });
     </script>
   </body>
 </html>
