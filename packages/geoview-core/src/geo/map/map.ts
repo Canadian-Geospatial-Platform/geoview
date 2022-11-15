@@ -22,6 +22,7 @@ import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
 import { LegendApi } from '../../core/components/legend/legend-api';
+import { DetailsAPI } from '../../core/components/details/details-api';
 import { DataGridAPI } from '../../core/components/data-grid/data-grid-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 
@@ -67,6 +68,9 @@ export class MapViewer {
 
   // used to access the legend api
   legend!: LegendApi;
+
+  // used to access the footer tabs api
+  details!: DetailsAPI;
 
   // used to access the footer tabs api
   dataGrid!: DataGridAPI;
@@ -126,6 +130,7 @@ export class MapViewer {
     this.navBarButtons = new NavbarButtons(this.mapId);
     this.footerTabs = new FooterTabsApi(this.mapId);
     this.legend = new LegendApi(this.mapId);
+    this.details = new DetailsAPI(this.mapId);
     this.dataGrid = new DataGridAPI(this.mapId);
 
     this.modal = new ModalApi(this.mapId);
