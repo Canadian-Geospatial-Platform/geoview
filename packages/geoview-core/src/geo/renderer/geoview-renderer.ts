@@ -347,7 +347,8 @@ export class GeoviewRenderer {
    * @param {TypeKindOfVectorSettings | undefined} defaultSettings The settings associated to simple styles or default style of
    * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
    * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[] | undefined} arrayOfPointStyleConfig The array of point style
-   * configuration. When this parameter is undefined, no arrayOfCanvas is created.
+   * configuration associated to unique value and class break styles. When this parameter is undefined, no arrayOfCanvas is
+   * created.
    * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
    */
   private getStyleSubRoutine(
