@@ -6,7 +6,7 @@ No style for React viewer component should be here. To add style specific to the
   - vendor.css to override a third party library style 
 */
 html {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 body {
