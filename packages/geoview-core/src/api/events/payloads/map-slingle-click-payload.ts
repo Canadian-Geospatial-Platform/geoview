@@ -23,7 +23,7 @@ export type TypeMapSingleClick = {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMapSingleClick = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapSingleClickPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

@@ -49,7 +49,7 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeGeoJSONLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /** *****************************************************************************************************************************
@@ -62,7 +62,7 @@ export const layerConfigIsGeoJSON = (verifyIfLayer: TypeGeoviewLayerConfig): ver
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is GeoJSON => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.GEOJSON;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.GEOJSON;
 };
 
 /** *****************************************************************************************************************************
@@ -76,7 +76,7 @@ export const geoviewLayerIsGeoJSON = (verifyIfGeoViewLayer: AbstractGeoViewLayer
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsGeoJSON = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeGeoJSONLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.GEOJSON;
 };
 
 // ******************************************************************************************************************************

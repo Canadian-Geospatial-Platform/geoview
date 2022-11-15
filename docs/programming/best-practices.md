@@ -75,7 +75,7 @@ class Child_A extends BaseClass {
 
 // type guard function for Child_A
 const childTypeIs_A = (verifyIfChildType: BaseClass): verifyIfChildType is Child_A => {
-  return verifyIfChildType.type === 'child_a';
+  return verifyIfChildType?.type === 'child_a';
 };
 
 // Here, we could do something similar to define a class and a type guard for child_b
