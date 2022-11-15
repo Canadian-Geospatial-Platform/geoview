@@ -51,7 +51,7 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  * @returns {boolean} true if the type ascention is valid.
  */
 export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyIfLayer is TypeWMSLayerConfig => {
-  return verifyIfLayer.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+  return verifyIfLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
 /** *****************************************************************************************************************************
@@ -64,7 +64,7 @@ export const layerConfigIsWMS = (verifyIfLayer: TypeGeoviewLayerConfig): verifyI
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): verifyIfGeoViewLayer is WMS => {
-  return verifyIfGeoViewLayer.type === CONST_LAYER_TYPES.WMS;
+  return verifyIfGeoViewLayer?.type === CONST_LAYER_TYPES.WMS;
 };
 
 /** *****************************************************************************************************************************
@@ -78,7 +78,7 @@ export const geoviewLayerIsWMS = (verifyIfGeoViewLayer: AbstractGeoViewLayer): v
  * @returns {boolean} true if the type ascention is valid.
  */
 export const geoviewEntryIsWMS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): verifyIfGeoViewEntry is TypeWmsLayerEntryConfig => {
-  return verifyIfGeoViewEntry.geoviewRootLayer!.geoviewLayerType === CONST_LAYER_TYPES.WMS;
+  return verifyIfGeoViewEntry?.geoviewRootLayer?.geoviewLayerType === CONST_LAYER_TYPES.WMS;
 };
 
 // ******************************************************************************************************************************
@@ -177,7 +177,7 @@ export class WMS extends AbstractGeoViewRaster {
         });
       }
       if (parentLayer.CRS) {
-        if (!layer.CRS as TypeJsonArray) (layer.Style as TypeJsonArray) = [];
+        if (!layer.CRS as TypeJsonArray) (layer.CRS as TypeJsonArray) = [];
         (parentLayer.CRS as TypeJsonArray).forEach((parentCRS) => {
           // eslint-disable-next-line vars-on-top, no-var
           for (var found = false, i = 0; i < layer.CRS.length && !found; i++) found = layer.CRS[i] === parentCRS;

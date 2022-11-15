@@ -252,11 +252,11 @@
                 'geoviewLayerId': 'esriFeatureLYR4',
                 'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
                 'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer'
+                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer'
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '8' }
+                  { 'layerId': '2' }
                 ]
               }
             ]
@@ -696,7 +696,7 @@
         const tableData = document.createElement('td');
         tableData.style.verticalAlign = 'middle';
         tableData.style.textAlign = 'center';
-        if (typeof data === 'string') tableData.innerHTML =  data;
+        if (typeof data === 'string') tableData.innerHTML =  data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
         else tableData.appendChild(data);
         container.appendChild(tableData);
       }
@@ -742,21 +742,29 @@
             Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
               if (geometryKey) {
                 if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                    addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
                     addRow(layerPath,
                           resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                          resultSets[layerPath].legend[geometryKey][i]);
+                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
                   }
                 } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].length; i++) {
+                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                    addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
                     addRow(layerPath,
                           resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
-                          resultSets[layerPath].legend[geometryKey][i]);
+                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
                   }
                 } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
                   addRow(layerPath,
                         resultSets[layerPath].styleConfig[geometryKey].label,
-                        resultSets[layerPath].legend[geometryKey]);
+                        resultSets[layerPath].legend[geometryKey].defaultCanvas);
                 }
               }
             });
@@ -764,6 +772,7 @@
         }
       });
     }
+
   </script>
 </body>
 

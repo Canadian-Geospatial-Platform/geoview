@@ -16,7 +16,7 @@ const validEvents: EventStringId[] = [EVENT_NAMES.MAP.EVENT_MAP_LOADED];
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsAMap = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is MapPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**

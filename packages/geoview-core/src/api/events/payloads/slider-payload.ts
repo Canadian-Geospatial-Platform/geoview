@@ -18,7 +18,7 @@ const validEvents: EventStringId[] = [
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsASlider = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is SliderPayload => {
-  return validEvents.includes(verifyIfPayload.event);
+  return validEvents.includes(verifyIfPayload?.event);
 };
 
 /**
