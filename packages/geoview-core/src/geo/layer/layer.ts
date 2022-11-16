@@ -210,7 +210,7 @@ export class Layer {
         console.log(`Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} has been loaded on map ${this.mapId}`);
         api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
       };
-      geoviewLayer.gvLayers?.once(['change', 'prerender'] as unknown as EventTypes, () => funcEvent());
+      geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => funcEvent());
 
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
       this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
