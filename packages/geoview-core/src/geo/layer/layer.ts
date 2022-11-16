@@ -202,10 +202,16 @@ export class Layer {
         console.log(consoleMessage);
       });
     } else {
-      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+      // trigger the layer added event when layer is loaded on to the map
+      const funcEvent = () => {
+        // eslint-disable-next-line no-console
+        console.log(`Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} has been loaded`);
+        api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
+      };
+      geoviewLayer.gvLayers?.once('change', () => funcEvent());
 
+      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
       this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
-      api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
     }
   }
 
