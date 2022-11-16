@@ -30,6 +30,7 @@ import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
+import { payloadIsAGeoViewLayer } from '../../api/events/payloads/geoview-layer-payload';
 import { generateId } from '../../core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
@@ -105,6 +106,9 @@ export class MapViewer {
   // GeoView renderer
   geoviewRenderer: GeoviewRenderer;
 
+  // number of configured layers to load
+  nbConfigLayers!: number;
+
   /**
    * Add the map instance to the maps array in the api
    *
@@ -154,6 +158,18 @@ export class MapViewer {
   initMap(cgpMap: OLMap): void {
     this.mapId = cgpMap.get('mapId');
     this.map = cgpMap;
+
+    // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
+    this.nbConfigLayers = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length || 0;
+    api.event.on(
+      EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
+      (payload) => {
+        if (payloadIsAGeoViewLayer(payload)) {
+          this.nbConfigLayers--;
+        }
+      },
+      this.mapId
+    );
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(this.mapId, this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
@@ -291,7 +307,13 @@ export class MapViewer {
    * Function called when the map has been rendered and ready to be customized
    */
   mapReady = (): void => {
-    api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
+    const layerInterval = setInterval(() => {
+      console.log(this.nbConfigLayers + ' ' + this.mapId)
+      if (this.nbConfigLayers <= 0) {
+        api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
+        clearInterval(layerInterval);
+      }
+    }, 500);
   };
 
   /**

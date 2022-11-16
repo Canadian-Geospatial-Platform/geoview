@@ -1,4 +1,6 @@
 /* eslint-disable no-underscore-dangle */
+import { EventTypes } from 'ol/Observable';
+
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
@@ -205,10 +207,10 @@ export class Layer {
       // trigger the layer added event when layer is loaded on to the map
       const funcEvent = () => {
         // eslint-disable-next-line no-console
-        console.log(`Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} has been loaded`);
+        console.log(`Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} has been loaded on map ${this.mapId}`);
         api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
       };
-      geoviewLayer.gvLayers?.once('change', () => funcEvent());
+      geoviewLayer.gvLayers?.once(['change', 'prerender'] as unknown as EventTypes, () => funcEvent());
 
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
       this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
