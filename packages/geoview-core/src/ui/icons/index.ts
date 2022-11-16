@@ -36,6 +36,7 @@ export {
   FullscreenExit as FullscreenExitIcon,
   Home as HomeIcon,
   Add as ZoomInIcon,
+  Add as AddIcon,
   Remove as ZoomOutIcon,
   Close as CloseIcon,
   Details as DetailsIcon,
