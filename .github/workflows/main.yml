@@ -16,6 +16,8 @@ jobs:
       - name: Echo PR info
         run: |
           echo User ${{ github.actor }} is about to ${{ github.event.action }} on this Pull Request.
+          echo The PR is merged: ${{ github.event.pull_request.merged }}
+          echo The PR head reference: ${{ github.head_ref }}
 
       - name: Check if contributor is an org member
         id: is_organization_member
@@ -39,26 +41,27 @@ jobs:
             fi
 
   install-build:
-    name: Develop build for demo files
+    name: Build for demo files
     needs: [check-member]
     uses: ./.github/workflows/build.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
-  deploy-pr-pages:
-    name: Deploy the files for PR
+  deploy:
+    name: Deploy on gh-pages
+    runs-on: ubuntu-latest
     needs: [install-build]
-    if: github.event.pull_request.merged == false
-    uses: ./.github/workflows/deploy.yml
-    with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-      folder: ${{github.head_ref}}
+    steps:
+      - name: PR deploy
+        if: github.event.pull_request.merged == false
+        uses: ./.github/workflows/deploy.yml
+        with:
+          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          folder: ${{github.head_ref}}
 
-  deploy-demo-pages:
-    name: Deploy the files on public demo
-    needs: [install-build]
-    if: github.event.pull_request.merged == true
-    uses: ./.github/workflows/deploy.yml
-    with:
-      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-      folder: public
+      - name: Public demo deploy
+        if: github.event.pull_request.merged == true
+        uses: ./.github/workflows/deploy.yml
+        with:
+          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+          folder: public
