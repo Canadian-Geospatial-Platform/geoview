@@ -1,7 +1,6 @@
 import { toJsonObject, TypeJsonObject, TypeWindow, TypeButtonPanel } from 'geoview-core';
 
 import LayerStepper from './layer-stepper';
-import LayersList from './layers-list';
 
 type TypePanelContentProps = {
   buttonPanel: TypeButtonPanel;
@@ -24,7 +23,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { useState, useEffect } = react;
   const [addLayerVisible, setAddLayerVisible] = useState(false);
   const [mapLayers, setMapLayers] = useState({});
-  const { Button } = ui.elements;
+  const { Typography, IconButton, AddIcon, Box } = ui.elements;
 
   const { displayLanguage } = api.map(mapId!);
 
@@ -37,26 +36,31 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     },
   });
 
-  const useStyles = ui.makeStyles(() => ({
+  const sxClasses = {
     mainContainer: {
       display: 'flex',
+      flexDirection: 'column',
+      height: 'inherit',
+    },
+    topControls: {
+      display: 'flex',
       flexDirection: 'row',
+      justifyContent: 'space-between',
     },
-    addLayerButton: {
-      width: 50,
-      minWidth: 50,
-      '& > div': {
-        textAlign: 'center',
-      },
+    addLayerSection: {
+      display: 'flex',
+      alignItems: 'center',
+      marginTop: 'auto',
+      justifyContent: 'end',
     },
-  }));
-  const classes = useStyles();
+  };
 
   const onClick = () => setAddLayerVisible((state: boolean) => !state);
 
+  const Legend = api.map(mapId!).legend.createLegend();
+
   useEffect(() => {
     setMapLayers(() => ({ ...api.map(mapId!).layer.geoviewLayers }));
-
     api.event.on(
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () =>
@@ -90,23 +94,22 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, [api, buttonPanel.buttonPanelId, mapId]);
 
   return (
-    <>
-      <div className={classes.mainContainer}>
-        <Button
-          className={classes.addLayerButton}
-          tooltip={translations[displayLanguage].addLayer as string}
-          tooltipPlacement="right"
-          variant="contained"
-          type="icon"
-          icon='<i class="material-icons">add</i>'
-          onClick={onClick}
-        />
-      </div>
+    <Box sx={sxClasses.mainContainer}>
       {addLayerVisible && <LayerStepper mapId={mapId!} setAddLayerVisible={setAddLayerVisible} />}
-      <div style={{ display: addLayerVisible ? 'none' : 'inherit' }}>
-        <LayersList mapId={mapId!} layers={mapLayers} displayLanguage={displayLanguage} />
+      {/* <Box sx={sxClasses.topControls} style={{ display: addLayerVisible ? 'none' : 'flex' }}>
+        <div>Expand All</div>
+        <div>Hide All</div>
+      </Box> */}
+      <div style={{ display: addLayerVisible ? 'none' : 'block' }}>
+        <Legend />
       </div>
-    </>
+      <Box sx={sxClasses.addLayerSection} onClick={onClick}>
+        <Typography>{translations[displayLanguage].addLayer}</Typography>
+        <IconButton>
+          <AddIcon />
+        </IconButton>
+      </Box>
+    </Box>
   );
 }
 
