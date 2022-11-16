@@ -8,6 +8,11 @@ on:
     branches:
       - 'develop'
 
+# Allow one concurrent deployment
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
 jobs:
   check-member:
     name: Check if we continue the process
@@ -41,14 +46,14 @@ jobs:
             fi
 
   install-build:
-    name: Build for demo files
+    name: Build demo files
     needs: [check-member]
     uses: ./.github/workflows/build.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
   deploy-pr:
-    name: Deploy pr gh-pages
+    name: Deploy pr
     needs: [install-build]
     if: github.event.pull_request.merged == false && ${{github.head_ref}} != ''
     uses: ./.github/workflows/deploy.yml
@@ -57,7 +62,7 @@ jobs:
       folder: ${{github.head_ref}}
 
   deploy-public:
-    name: Deploy public gh-pages
+    name: Deploy public
     needs: [install-build]
     if: github.event.pull_request.merged == true
     uses: ./.github/workflows/deploy.yml
