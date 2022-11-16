@@ -24,7 +24,7 @@ jobs:
           key: dist-${{ inputs.cache_sha }}
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
         with:
           branch: gh-pages
           folder: packages/geoview-core/dist
@@ -43,7 +43,7 @@ jobs:
             })
 
   cleanup-pages:
-    name: Cleanup gh-ages
+    name: Cleanup gh-pages
     runs-on: ubuntu-latest
     steps:
       ## Delete the PR demo from gh-pages when the PR is closed
