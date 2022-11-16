@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Echo PR info
         run: |
-          echo User ${{ github.actor }} is about to ${{ github.event.action }} on this Pull Request.
+          echo User ${{ github.actor }} is about to ${{ github.event.action }} this Pull Request.
           echo The PR is merged: ${{ github.event.pull_request.merged }}
           echo The PR head reference: ${{ github.head_ref }}
 
@@ -47,21 +47,20 @@ jobs:
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
 
-  deploy:
-    name: Deploy on gh-pages
-    runs-on: ubuntu-latest
+  deploy-pr:
+    name: Deploy pr gh-pages
     needs: [install-build]
-    steps:
-      - name: PR deploy
-        if: github.event.pull_request.merged == false
-        uses: ./.github/workflows/deploy.yml
-        with:
-          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-          folder: ${{github.head_ref}}
+    if: github.event.pull_request.merged == false && ${{github.head_ref}} != ''
+    uses: ./.github/workflows/deploy.yml
+    with:
+      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      folder: ${{github.head_ref}}
 
-      - name: Public demo deploy
-        if: github.event.pull_request.merged == true
-        uses: ./.github/workflows/deploy.yml
-        with:
-          cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-          folder: public
+  deploy-public:
+    name: Deploy public gh-pages
+    needs: [install-build]
+    if: github.event.pull_request.merged == true
+    uses: ./.github/workflows/deploy.yml
+    with:
+      cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      folder: public
