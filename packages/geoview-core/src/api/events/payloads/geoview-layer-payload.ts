@@ -25,7 +25,7 @@ export const payloadIsAGeoViewLayer = (verifyIfPayload: PayloadBaseClass): verif
  * @class GeoViewLayerPayload
  */
 export class GeoViewLayerPayload extends PayloadBaseClass {
-  geoviewLayer: AbstractGeoViewLayer;
+  geoviewLayer: AbstractGeoViewLayer | undefined;
 
   /**
    * Constructor for the class
@@ -34,7 +34,7 @@ export class GeoViewLayerPayload extends PayloadBaseClass {
    * @param {string | null} handlerName the handler Name
    * @param {AbstractGeoViewLayer} geoviewLayer the GeoView layer payload
    */
-  constructor(event: EventStringId, handlerName: string | null, geoviewLayer: AbstractGeoViewLayer) {
+  constructor(event: EventStringId, handlerName: string | null, geoviewLayer?: AbstractGeoViewLayer) {
     if (!validEvents.includes(event)) throw new Error(`GeoViewLayerPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.geoviewLayer = geoviewLayer;
@@ -54,7 +54,7 @@ export class GeoViewLayerPayload extends PayloadBaseClass {
 export const geoviewLayerPayload = (
   event: EventStringId,
   handlerName: string | null,
-  geoviewLayer: AbstractGeoViewLayer
+  geoviewLayer?: AbstractGeoViewLayer
 ): GeoViewLayerPayload => {
   return new GeoViewLayerPayload(event, handlerName, geoviewLayer);
 };
