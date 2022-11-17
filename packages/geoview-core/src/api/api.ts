@@ -14,6 +14,7 @@ import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '../geo/utils/legend-layer-set';
+import { payloadIsAGeoViewLayer } from './events/payloads/geoview-layer-payload';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -79,6 +80,21 @@ export class API {
     this.plugin = new Plugin();
     this.geoUtilities = new GeoUtilities();
     this.dateUtilities = new DateMgt();
+
+    // Run the callback if all maps are ready
+    this.event.on(
+      EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
+      (payload) => {
+        if (payloadIsAGeoViewLayer(payload)) {
+          let allMapsAreReady = true;
+          Object.keys(this.maps).forEach((mapKey) => {
+            allMapsAreReady &&= this.maps[mapKey].nbConfigLayers === 0;
+          });
+          if (allMapsAreReady && this.readyCallback) this.readyCallback();
+        }
+      },
+      'all-map-ready?'
+    );
   }
 
   /**
@@ -108,14 +124,7 @@ export class API {
    */
   callInitCallback = () => {
     // run the map ready function on each map instance
-    for (let mapIndex = 0; mapIndex < Object.keys(this.maps).length; mapIndex++) {
-      const mapId = Object.keys(this.maps)[mapIndex];
-
-      this.map(mapId).mapReady();
-    }
-
-    // Run the callback
-    if (this.readyCallback) this.readyCallback();
+    Object.keys(this.maps).forEach((mapKey) => this.maps[mapKey].mapReady());
   };
 
   /**

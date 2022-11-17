@@ -55,7 +55,7 @@ export class Layer {
    * @param {string} mapId a reference to the map
    * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
    */
-  constructor(mapId: string, layersConfig?: TypeGeoviewLayerConfig[]) {
+  constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     this.mapId = mapId;
 
     this.vector = new Vector(this.mapId);
@@ -71,15 +71,15 @@ export class Layer {
             if (layerConfigIsGeoCore(layerConfig)) {
               const geoCore = new GeoCore(this.mapId);
               geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
-                if (arrayOfListOfGeoviewLayerConfig.length > 0) {
-                  arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
-                    if (listOfGeoviewLayerConfig.length > 0) {
-                      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-                        this.addGeoviewLayer(geoviewLayerConfig);
-                      });
-                    }
+                arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
+                  // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
+                  // the list of geoview layer entries.
+                  api.maps[this.mapId].nbConfigLayers += listOfGeoviewLayerConfig.length - 1;
+                  api.maps[this.mapId].setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
+                  listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+                    this.addGeoviewLayer(geoviewLayerConfig);
                   });
-                }
+                });
               });
             } else if (layerConfigIsGeoJSON(layerConfig)) {
               const geoJSON = new GeoJSON(this.mapId, layerConfig);
@@ -129,16 +129,16 @@ export class Layer {
       (payload) => {
         if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
-          this.removeLayersUsingPath(payload.geoviewLayer.geoviewLayerId);
+          this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
         }
       },
       this.mapId
     );
 
     // Load layers that was passed in with the map config
-    if (layersConfig && layersConfig.length > 0) {
-      layersConfig?.forEach((layerConfig) =>
-        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, layerConfig))
+    if (geoviewLayerConfigs && geoviewLayerConfigs.length > 0) {
+      geoviewLayerConfigs?.forEach((geoviewLayerConfig) =>
+        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
       );
     }
   }
@@ -205,12 +205,11 @@ export class Layer {
       });
     } else {
       // trigger the layer added event when layer is loaded on to the map
-      const funcEvent = () => {
-        // eslint-disable-next-line no-console
-        console.log(`Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} has been loaded on map ${this.mapId}`);
-        api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
-      };
-      geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => funcEvent());
+      geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => {
+        if (!geoviewLayer.isLoaded) {
+          api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+        }
+      });
 
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
       this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
@@ -241,12 +240,13 @@ export class Layer {
   /**
    * Add a layer to the map
    *
-   * @param {TypeGeoviewLayerConfig} layerConfig the layer configuration to add
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig the geoview layer configuration to add
+   * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages an optional list of supported language
    */
   addGeoviewLayer = (geoviewLayerConfig: TypeGeoviewLayerConfig, optionalSuportedLanguages?: TypeListOfLocalizedLanguages): string => {
     // eslint-disable-next-line no-param-reassign
     geoviewLayerConfig.geoviewLayerId = generateId(geoviewLayerConfig.geoviewLayerId);
-    // create a new config for this map element
+    // create a new config object for this map element
     const config = new Config(api.map(this.mapId).map.getTargetElement());
 
     const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;

@@ -69,6 +69,9 @@ api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
  * @param {Function} callback optional callback function to run once the rendering is ready
  */
 async function init(callback: () => void) {
+  // set the API callback if a callback is provided
+  if (callback) api.readyCallback = callback;
+
   // apply focus to element when keyboard navigation is use
   api.geoUtilities.manageKeyboardFocus();
 
@@ -93,9 +96,6 @@ async function init(callback: () => void) {
       ReactDOM.render(<AppStart mapFeaturesConfig={configObj} />, mapElement);
     }
   }
-
-  // set the API callback if a callback is provided
-  if (callback) api.readyCallback = callback;
 }
 
 // cgpv object to be exported with the api for outside use
