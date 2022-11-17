@@ -9,8 +9,6 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.LAYER_SET.UPDATED,
 ];
 
-export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TypeResultSets = { [layerPath: string]: any | null };
 

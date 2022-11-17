@@ -55,7 +55,7 @@ export class Layer {
    * @param {string} mapId a reference to the map
    * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
    */
-  constructor(mapId: string, layersConfig?: TypeGeoviewLayerConfig[]) {
+  constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     this.mapId = mapId;
 
     this.vector = new Vector(this.mapId);
@@ -76,6 +76,19 @@ export class Layer {
                     if (listOfGeoviewLayerConfig.length > 0) {
                       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
                         this.addGeoviewLayer(geoviewLayerConfig);
+                        const layerInterval = setInterval(() => {
+                          const geoviewLayer = api.maps[this.mapId].layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId];
+                          if (geoviewLayer) {
+                            geoviewLayer!.isLoaded = true;
+                            const equalZero4TheFirstTime = api.maps[this.mapId].nbConfigLayers === 1;
+                            api.maps[this.mapId].nbConfigLayers = api.maps[this.mapId].nbConfigLayers
+                              ? api.maps[this.mapId].nbConfigLayers - 1
+                              : 0;
+                            if (equalZero4TheFirstTime)
+                              api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, 'api-all-map-ready'));
+                            clearInterval(layerInterval);
+                          }
+                        }, 500);
                       });
                     }
                   });
@@ -129,16 +142,16 @@ export class Layer {
       (payload) => {
         if (payloadIsAGeoViewLayer(payload)) {
           // remove layer from outside
-          this.removeLayersUsingPath(payload.geoviewLayer.geoviewLayerId);
+          this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
         }
       },
       this.mapId
     );
 
     // Load layers that was passed in with the map config
-    if (layersConfig && layersConfig.length > 0) {
-      layersConfig?.forEach((layerConfig) =>
-        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, layerConfig))
+    if (geoviewLayerConfigs && geoviewLayerConfigs.length > 0) {
+      geoviewLayerConfigs?.forEach((geoviewLayerConfig) =>
+        api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
       );
     }
   }
@@ -205,12 +218,15 @@ export class Layer {
       });
     } else {
       // trigger the layer added event when layer is loaded on to the map
-      const funcEvent = () => {
-        // eslint-disable-next-line no-console
-        console.log(`Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} has been loaded on map ${this.mapId}`);
-        api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer));
-      };
-      geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => funcEvent());
+      geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => {
+        if (!geoviewLayer.isLoaded) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Geoview Layer ${geoviewLayer.geoviewLayerId}, type: ${geoviewLayer.type} - Geoview layer named "${geoviewLayer.geoviewLayerName.en}" has been loaded on map ${this.mapId}`
+          );
+          api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+        }
+      });
 
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
       this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
