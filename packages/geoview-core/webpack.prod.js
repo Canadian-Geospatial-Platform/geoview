@@ -4,6 +4,9 @@ const TerserPlugin = require('terser-webpack-plugin');
 const { merge } = require('webpack-merge');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { WebpackBundleSizeAnalyzerPlugin } = require('webpack-bundle-size-analyzer');
+const CompressionPlugin = require('compression-webpack-plugin');
+const zlib = require('zlib');
+
 const common = require('./webpack.common');
 
 const config = {
@@ -20,6 +23,21 @@ const config = {
       reportFilename: '../analysis/bundle-analyzer.html',
     }),
     new WebpackBundleSizeAnalyzerPlugin('../analysis/bundle-size-analyzer.log'),
+    // compress file for our production build
+    // js file build for gh-page use the pre built gZip compression from GitHub
+    new CompressionPlugin({
+      filename: '[path][base].br',
+      algorithm: 'brotliCompress',
+      test: /\.(js|css|html|svg)$/,
+      compressionOptions: {
+        params: {
+          [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+        },
+      },
+      threshold: 10240,
+      minRatio: 0.8,
+      deleteOriginalAssets: false,
+    }),
   ],
 };
 

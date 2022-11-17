@@ -1,7 +1,7 @@
 /* eslint-disable no-console, no-underscore-dangle, no-param-reassign */
 import Ajv from 'ajv';
 
-import { defaultsDeep } from 'lodash';
+import defaultsDeep from 'lodash/defaultsDeep';
 import { generateId } from '../utilities';
 
 import schema from '../../../../schema.json';
