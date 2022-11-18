@@ -7,7 +7,7 @@ import { Image as ImageLayer } from 'ol/layer';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { transform, transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
 import { Cast, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';

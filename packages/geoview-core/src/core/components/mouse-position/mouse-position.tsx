@@ -7,7 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { useTranslation } from 'react-i18next';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import { api } from '../../../app';
 import { MapContext } from '../../app-start';

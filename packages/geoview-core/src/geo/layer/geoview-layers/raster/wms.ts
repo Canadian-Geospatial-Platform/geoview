@@ -12,7 +12,7 @@ import { Layer as gvLayer } from 'ol/layer';
 import { Extent } from 'ol/extent';
 import { transform, transformExtent } from 'ol/proj';
 
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 import { Cast, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';

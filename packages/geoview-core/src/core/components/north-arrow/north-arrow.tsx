@@ -8,7 +8,7 @@ import { toLonLat, fromLonLat } from 'ol/proj';
 import { useTheme } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import { PROJECTION_NAMES } from '../../../geo/projection/projection';
 
