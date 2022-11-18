@@ -30,11 +30,12 @@ import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
-import { payloadIsAGeoViewLayer } from '../../api/events/payloads/geoview-layer-payload';
+import { geoviewLayerPayload, payloadIsAGeoViewLayer } from '../../api/events/payloads/geoview-layer-payload';
 import { generateId } from '../../core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
 import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
+import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 
 interface TypeDcoument extends Document {
   webkitExitFullscreen: () => void;
@@ -148,6 +149,65 @@ export class MapViewer {
       this.mapFeaturesConfig.map.viewSettings.projection,
       this.mapId
     );
+
+    // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
+    const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig || [];
+    this.nbConfigLayers = listOfGeoviewLayerConfig.length;
+    this.setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
+  }
+
+  /**
+   * Utility function used to decrement the nbConfigLayers property, preventing it to become less that zero. The methode returns
+   * true when the zero value is reached for the first time.
+   *
+   * @returns true when the zero value is reached for the first time.
+   */
+  private nbConfigLayersIsDecrementedToZero4TheFirstTime(): boolean {
+    const equalZero4TheFirstTime = this.nbConfigLayers === 1;
+    this.nbConfigLayers = this.nbConfigLayers ? this.nbConfigLayers - 1 : 0;
+    return equalZero4TheFirstTime;
+  }
+
+  /**
+   * Set the layer added event listener and timeout function for the list of geoview layer configurations.
+   *
+   * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
+   */
+  setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) {
+    if (listOfGeoviewLayerConfig.length) {
+      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+        api.event.on(
+          EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
+          (payload) => {
+            if (payloadIsAGeoViewLayer(payload)) {
+              const { geoviewLayer } = payload;
+              geoviewLayer!.isLoaded = true;
+              if (this.nbConfigLayersIsDecrementedToZero4TheFirstTime())
+                api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, 'all-map-ready?'));
+            }
+          },
+          this.mapId,
+          geoviewLayerConfig.geoviewLayerId
+        );
+
+        // The timeout section is used to release the waiting for a layer that can not be loaded.
+        // It is executed even if the layer loads but doesn't trigger any events
+        setTimeout(() => {
+          if (this.nbConfigLayersIsDecrementedToZero4TheFirstTime())
+            api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, 'all-map-ready?'));
+          const isLoaded = this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId]?.isLoaded;
+          // In the following line, we test "isLoaded !== undefined" because geocore layers do not have an isLoaded flag.
+          if (isLoaded !== undefined && !isLoaded)
+            api.event.emit(
+              snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+                type: 'key',
+                value: 'validation.layer.loadfailed',
+                params: [geoviewLayerConfig.geoviewLayerId, this.mapId],
+              })
+            );
+        }, 10000);
+      });
+    } else api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, 'all-map-ready?'));
   }
 
   /**
@@ -158,18 +218,6 @@ export class MapViewer {
   initMap(cgpMap: OLMap): void {
     this.mapId = cgpMap.get('mapId');
     this.map = cgpMap;
-
-    // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
-    this.nbConfigLayers = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig?.length || 0;
-    api.event.on(
-      EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
-      (payload) => {
-        if (payloadIsAGeoViewLayer(payload)) {
-          this.nbConfigLayers--;
-        }
-      },
-      this.mapId
-    );
 
     // initialize layers and load the layers passed in from map config if any
     this.layer = new Layer(this.mapId, this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
@@ -308,12 +356,11 @@ export class MapViewer {
    */
   mapReady = (): void => {
     const layerInterval = setInterval(() => {
-      console.log(this.nbConfigLayers + ' ' + this.mapId)
-      if (this.nbConfigLayers <= 0) {
+      if (this.nbConfigLayers === 0) {
         api.event.emit(mapPayload(EVENT_NAMES.MAP.EVENT_MAP_LOADED, this.mapId, this.map));
         clearInterval(layerInterval);
       }
-    }, 500);
+    }, 250);
   };
 
   /**

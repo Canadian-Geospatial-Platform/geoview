@@ -14,7 +14,7 @@ import { Cast, TypeJsonArray, TypeJsonObject, TypeJsonValue } from '../types/glo
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 
 /**
- * Display a message in the snackbar
+ * Get the string associated to the current display language.
  *
  * @param {TypeLocalizedString} localizedString the localized string to process.
  * @param {string} mapId the map identifier that holds the localized string.

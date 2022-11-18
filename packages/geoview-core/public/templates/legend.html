@@ -68,7 +68,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerId': 'esriFeatureLYR2',
+                'geoviewLayerId': 'UC1-Layer1',
                 'geoviewLayerName': { 'en': 'Cities L2 (Esri-feature SIMPLE / base64 img)' },
                 'metadataAccessPath': {
                   'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer'
@@ -79,7 +79,7 @@
                 ]
               },
               {
-                'geoviewLayerId': 'wmsLYR1',
+                'geoviewLayerId': 'UC1-Layer2',
                 'geoviewLayerName': {
                   'en': 'Première Nation / First Nation (WMS)',
                   'fr': 'Première Nation / First Nationz'
@@ -92,7 +92,7 @@
                 'listOfLayerEntryConfig': [{ 'layerId': '0' }]
               },
               {
-                'geoviewLayerId': 'wmsLYR7',
+                'geoviewLayerId': 'UC1-Layer3',
                 'geoviewLayerName': {
                   'en': 'Geomet (WMS)',
                   'fr': 'Geomet'
@@ -105,7 +105,7 @@
                 'listOfLayerEntryConfig': [{ 'layerId': 'RAQDPS-FW.CE_PM2.5-DIFF-YAvg' }]
               },
               {
-                'geoviewLayerId': 'esriFeatureLYR3',
+                'geoviewLayerId': 'UC1-Layer4',
                 'geoviewLayerName': { 'en': 'Provinces (Esri-feature SIMPLE / vector)' },
                 'metadataAccessPath': {
                   'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Provinces/MapServer'
@@ -134,7 +134,7 @@
                 ]
               },
               {
-                'geoviewLayerId': 'esriFeatureLYR1x',
+                'geoviewLayerId': 'UC1-Layer5',
                 'geoviewLayerName': { 'en': 'Water quality at monitoring sites (Esri-feature UNIQUE VALUES)' },
                 'metadataAccessPath': {
                   'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer'
@@ -173,7 +173,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerId': 'esriDynamicLYR2',
+                'geoviewLayerId': 'UC2-Layer1',
                 'geoviewLayerName': {
                   'en': 'Water quality at monitoring sites',
                   'fr': 'Water quality at monitoring sites'
@@ -216,7 +216,7 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerId': 'esriDynamicLYR3z',
+                'geoviewLayerId': 'UC3-Layer1',
                 'geoviewLayerName': {
                   'en': 'Energy (Esri-dynamic)',
                   'fr': 'Energy'
@@ -262,7 +262,7 @@
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'wmsLYR1-Root',
+            'geoviewLayerId': 'UC4Layer1-Root',
             'geoviewLayerName': {
               'en': 'Root'
             },
@@ -276,7 +276,7 @@
             'listOfLayerEntryConfig': [
               {
                 'entryType': 'group',
-                'layerId': 'wmsLYR1-Group',
+                'layerId': 'UC4Layer1-Group',
                 'layerName': {
                   'en': 'Group'
                 },
@@ -292,7 +292,7 @@
             ]
           },
           {
-            'geoviewLayerId': 'wmsLYR1-msi',
+            'geoviewLayerId': 'UC4Layer2-msi',
             'geoviewLayerName': {
               'en': 'MSI'
             },
@@ -402,7 +402,7 @@
       api.map(mapIdFour).appBarButtons.createAppbarPanel(button, panel, null);
 
       const legendDiv = document.getElementById('legend-item-example');
-      const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({layerId: 'wmsLYR1-msi'})
+      const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({layerId: 'UC4Layer2-msi'})
       reactDOM.render(legendItemOutside, legendDiv);
 
     });

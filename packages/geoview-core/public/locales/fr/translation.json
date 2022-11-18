@@ -54,7 +54,7 @@
   },
   "validation": {
     "layer": {
-      "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__. Plus de détails dans la console.",
+      "loadfailed": "Le chargement de la couche [__param__] a échoué sur la carte __param__.",
       "notfound": "La sous couche __param__ de la couche GeoView __param__ n'existe pas sur le sereur",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la carte __param__"
     }
