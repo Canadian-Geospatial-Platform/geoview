@@ -25,3 +25,4 @@ export * from './text-field/text-field';
 export * from './tooltip/tooltip';
 export * from './typography/typography';
 export * from './layout';
+export * from './menu';

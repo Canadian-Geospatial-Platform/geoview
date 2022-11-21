@@ -445,6 +445,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.on(
       api.eventNames.LAYER.EVENT_LAYER_ADDED,
       () => {
+        api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
         setIsLoading(false);
         setAddLayerVisible(false);
       },

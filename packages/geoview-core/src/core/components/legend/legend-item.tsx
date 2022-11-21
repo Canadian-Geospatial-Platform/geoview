@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import {
@@ -10,22 +10,27 @@ import {
   ListItemIcon,
   ListItemText,
   CloseIcon,
-  ExpandMoreIcon,
-  ExpandLessIcon,
   TodoIcon,
   ListAltIcon,
   Tooltip,
   VisibilityIcon,
   VisibilityOffIcon,
   IconButton,
+  Menu,
+  MenuItem,
+  MoreVertIcon,
+  ArrowRightIcon,
+  ArrowDownIcon,
 } from '../../../ui';
 import {
+  api,
   AbstractGeoViewLayer,
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeUniqueValueStyleConfig,
   TypeLayerEntryConfig,
   TypeDisplayLanguage,
+  MapContext,
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
@@ -58,6 +63,7 @@ export interface TypeLegendItemProps {
   rootGeoViewLayer: AbstractGeoViewLayer;
   subLayerId?: string;
   layerConfigEntry?: TypeLayerEntryConfig;
+  isRemoveable?: boolean;
 }
 
 /**
@@ -66,9 +72,12 @@ export interface TypeLegendItemProps {
  * @returns {JSX.Element} the legend list item
  */
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
-  const { layerId, rootGeoViewLayer, subLayerId, layerConfigEntry } = props;
+  const { layerId, rootGeoViewLayer, subLayerId, layerConfigEntry, isRemoveable } = props;
 
   const { t, i18n } = useTranslation<string>();
+
+  const mapConfig = useContext(MapContext);
+  const { mapId } = mapConfig;
 
   const [isChecked, setChecked] = useState(true);
   const [isGroupOpen, setGroupOpen] = useState(false);
@@ -79,6 +88,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [layerName, setLayerName] = useState<string>('');
+  const [menuAnchorElement, setMenuAnchorElement] = React.useState<null | HTMLElement>(null);
+
+  const menuOpen = Boolean(menuAnchorElement);
 
   const getGroupsDetails = (): boolean => {
     let isGroup = false;
@@ -219,6 +231,18 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     setChecked(!isChecked);
   };
 
+  const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorElement(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setMenuAnchorElement(null);
+  };
+  const handleRemoveLayer = () => {
+    api.map(mapId).layer.removeGeoviewLayer(rootGeoViewLayer);
+    // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
+    handleCloseMenu();
+  };
+
   return (
     <>
       <ListItem sx={sxClasses.legendItem}>
@@ -226,7 +250,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           <ListItemIcon>
             {groupItems.length > 0 && (
               <IconButton color="primary" onClick={handleExpandClick}>
-                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+                {isGroupOpen ? <ArrowDownIcon /> : <ArrowRightIcon />}
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && (
@@ -249,12 +273,21 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerName} />
           </Tooltip>
           <ListItemIcon>
+            {isRemoveable && (
+              <IconButton onClick={handleMoreClick}>
+                <MoreVertIcon />
+              </IconButton>
+            )}
             <IconButton color="primary" onClick={() => handleToggleLayer()}>
               {isChecked ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
           </ListItemIcon>
         </ListItemButton>
       </ListItem>
+      <Menu anchorEl={menuAnchorElement} open={menuOpen} onClose={handleCloseMenu}>
+        {/* Add more layer options here - transparency, zoom to, reorder */}
+        {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
+      </Menu>
       <Collapse in={isLegendOpen} timeout="auto" unmountOnExit>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>

@@ -38,7 +38,8 @@
     "version": "Access GitHub repo"
   },
   "legend": {
-    "unknown": "Unknown Layer Title"
+    "unknown": "Unknown Layer Title",
+    "remove_layer": "Remove Layer"
   },
   "keyboardnav": {
     "start": "Skip after map element",

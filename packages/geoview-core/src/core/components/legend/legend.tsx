@@ -1,6 +1,6 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { MapContext } from '../../app-start';
-import { api } from '../../../app';
+import { AbstractGeoViewLayer, api, payloadIsALayerConfig } from '../../../app';
 import { List } from '../../../ui';
 import { LegendItem } from './legend-item';
 
@@ -20,18 +20,59 @@ export function Legend(): JSX.Element | null {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  const createLegendComponent = () => {
-    const { geoviewLayers } = api.map(mapId).layer;
-    return (
-      <div>
-        <List sx={sxStyles.legend}>
-          {Object.keys(geoviewLayers).map((layerId) => {
-            return <LegendItem key={layerId} layerId={layerId} rootGeoViewLayer={geoviewLayers[layerId]} />;
-          })}
-        </List>
-      </div>
-    );
-  };
+  const configLayerIds = api.map(mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig?.map((element) => element.geoviewLayerId) || [];
 
-  return createLegendComponent();
+  const [mapLayers, setMapLayers] = useState<{ [geoviewLayerId: string]: AbstractGeoViewLayer }>({});
+
+  useEffect(() => {
+    setMapLayers(api.map(mapId).layer.geoviewLayers);
+    api.event.on(
+      api.eventNames.LAYER.EVENT_REMOVE_LAYER,
+      () => {
+        setMapLayers(() => ({
+          ...api.map(mapId).layer.geoviewLayers,
+        }));
+      },
+      mapId
+    );
+    api.event.on(
+      api.eventNames.LAYER.EVENT_ADD_LAYER,
+      (payload) => {
+        if (payloadIsALayerConfig(payload)) {
+          api.event.on(
+            api.eventNames.LAYER.EVENT_LAYER_ADDED,
+            () => {
+              setMapLayers(() => ({
+                ...api.map(mapId).layer.geoviewLayers,
+              }));
+            },
+            mapId,
+            payload.layerConfig.geoviewLayerId
+          );
+        }
+      },
+      mapId
+    );
+    return () => {
+      api.event.off(api.eventNames.LAYER.EVENT_ADD_LAYER, mapId);
+      api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
+    };
+  }, []);
+
+  return (
+    <div>
+      <List sx={sxStyles.legend}>
+        {Object.keys(mapLayers).map((layerId) => {
+          return (
+            <LegendItem
+              key={layerId}
+              layerId={layerId}
+              rootGeoViewLayer={mapLayers[layerId]}
+              isRemoveable={!configLayerIds.includes(layerId)}
+            />
+          );
+        })}
+      </List>
+    </div>
+  );
 }
