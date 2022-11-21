@@ -22,7 +22,7 @@ Packages are collections of components that extend the functionality of the view
 A **Core Package** is a package developed and maintained by the viewer team. The viewer supports few core packages such as a [basemap panel](https://canadian-geospatial-platform.github.io/geoview/public/package-basemap-panel.html), details panel, layers panel or [footer panel](https://canadian-geospatial-platform.github.io/geoview/public/package-footer-panel.html). Core packages can be added to the map from the configuration via the following line:
 
 ```js
-'corePackages': ['details-panel', 'layers-panel', 'basemap-panel', 'footer-panel'],
+'corePackages': ['details-panel', 'layers-panel', 'basemap-panel', 'footer-panel', 'swiper'],
 ```
 
 Each of these packages is associated with a default schema and configuration. It is therefore possible to configure them to some extent according to our needs. For exemple, the basemap panel has this [schema](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-basemap-panel/schema.json) and [default configuration](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-basemap-panel/default-config-basemap-panel.json). If necessary, the user can customize the package by providing a custom configuration file to initialize the package.
