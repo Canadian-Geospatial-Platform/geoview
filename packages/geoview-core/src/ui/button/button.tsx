@@ -43,12 +43,6 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     width: '100%',
     height: 50,
-    backgroundColor: theme.palette.primary.light,
-    color: theme.palette.primary.dark,
-    '&:hover': {
-      backgroundColor: theme.palette.primary.light,
-      color: theme.palette.primary.dark,
-    },
   },
 }));
 
@@ -62,6 +56,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const [content, setContent] = useState<React.ReactNode>();
 
   const {
+    sx,
     variant,
     tooltip,
     tooltipPlacement,
@@ -186,6 +181,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
       <MaterialButton
+        sx={sx}
         variant={variant || 'text'}
         className={`${classes.buttonClass} ${className || ''}`}
         style={style}

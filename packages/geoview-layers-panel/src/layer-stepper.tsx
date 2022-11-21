@@ -1,17 +1,16 @@
 /* eslint-disable react/require-default-props */
 import {
   TypeWindow,
-  toJsonObject,
   TypeJsonArray,
   TypeEsriDynamicLayerEntryConfig,
   TypeWmsLayerEntryConfig,
-  TypeWMSLayerConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   SelectChangeEvent,
   snackbarMessagePayload,
   ButtonPropsLayerPanel,
   TypeListOfLayerEntryConfig,
+  TypeJsonObject,
 } from 'geoview-core';
 
 type Event = { target: { value: string } };
@@ -37,24 +36,24 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, react, ui } = cgpv;
 
-  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES } = api.layerTypes;
+  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
   const { useState } = react;
-  const { Select, Stepper, TextField, Button, ButtonGroup, Typography, Autocomplete } = ui.elements;
+  const { Select, Stepper, TextField, Button, ButtonGroup, Autocomplete, CircularProgressBase, Box } = ui.elements;
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
   const [layerType, setLayerType] = useState<TypeGeoviewLayerType | ''>('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
-  const [layerEntries, setLayerEntries] = useState<(TypeEsriDynamicLayerEntryConfig | TypeWMSLayerConfig)[]>([]);
+  const [layerEntries, setLayerEntries] = useState<TypeListOfLayerEntryConfig>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const useStyles = ui.makeStyles(() => ({
+  const sxClasses = {
     buttonGroup: {
       paddingTop: 12,
       gap: 6,
     },
-  }));
-  const classes = useStyles();
+  };
 
   const isMultiple = () => layerType === ESRI_DYNAMIC;
 
@@ -69,6 +68,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     [WFS, 'OGC Web Feature Service (WFS)'],
     [OGC_FEATURE, 'OGC API Features'],
     [XYZ_TILES, 'XYZ Raster Tiles'],
+    [GEOCORE, 'GeoCore'],
   ];
 
   /**
@@ -94,6 +94,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param textField label for the TextField input that cannot be empty
    */
   const emitErrorEmpty = (textField: string) => {
+    setIsLoading(false);
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
@@ -108,6 +109,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param serviceName type of service provided by the URL
    */
   const emitErrorServer = (serviceName: string) => {
+    setIsLoading(false);
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
@@ -123,6 +125,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param proj current map projection
    */
   const emitErrorProj = (serviceName: string, proj: string | undefined, supportedProj: TypeJsonArray | string[]) => {
+    setIsLoading(false);
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
@@ -150,15 +153,18 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            geoviewLayerId: layers[0][0] as string,
-            geoviewLayerType: 'ogcWms',
-            listOfLayerEntryConfig: [],
+            layerId: layers[0][0] as string,
           },
         ]);
-      } else setLayerList(layers);
+      } else {
+        setLayerList(layers);
+      }
     } catch (err) {
-      if (err === 'proj') emitErrorProj('WMS', proj, supportedProj);
-      else emitErrorServer('WMS');
+      if ((err as Error).message === 'proj') {
+        emitErrorProj('WMS', proj, supportedProj);
+      } else {
+        emitErrorServer('WMS');
+      }
       return false;
     }
     return true;
@@ -175,19 +181,19 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     try {
       const wfs = await api.geoUtilities.getWFSServiceMetadata(layerURL);
       const layers = (wfs.FeatureTypeList.FeatureType as TypeJsonArray).map((aFeatureType) => [
-        toJsonObject((aFeatureType.Name['#text'] as string).split(':')[1]),
+        (aFeatureType.Name['#text'] as string).split(':')[1] as TypeJsonObject,
         aFeatureType.Title['#text'],
       ]);
       if (layers.length === 1) {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            geoviewLayerId: layers[0][0] as string,
-            geoviewLayerType: 'ogcWms',
-            listOfLayerEntryConfig: [],
+            layerId: layers[0][0] as string,
           },
         ]);
-      } else setLayerList(layers);
+      } else {
+        setLayerList(layers);
+      }
     } catch (err) {
       emitErrorServer('WFS');
       return false;
@@ -212,14 +218,36 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            geoviewLayerId: layers[0][0] as string,
-            geoviewLayerType: 'ogcWms',
-            listOfLayerEntryConfig: [],
+            layerId: layers[0][0] as string,
           },
         ]);
-      } else setLayerList(layers);
+      } else {
+        setLayerList(layers);
+      }
     } catch (err) {
       emitErrorServer('OGC API Feature');
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Using the layerURL state object, check whether URL is a valid Geocore UUID.
+   *
+   * @returns {Promise<boolean>} True if layer passes validation
+   */
+  const geocoreValidation = async (): Promise<boolean> => {
+    try {
+      const isValid = layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32;
+      if (!isValid) throw new Error('err');
+      setLayerName('');
+      setLayerEntries([
+        {
+          layerId: layerURL,
+        },
+      ]);
+    } catch (err) {
+      emitErrorServer('GeoCore UUID');
       return false;
     }
     return true;
@@ -238,24 +266,21 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       if ((esri.capabilities as string).includes(esriOptions(type).capability)) {
         if ('layers' in esri) {
           const layers = (esri.layers as TypeJsonArray).map((aLayer) => [aLayer.id, aLayer.name]);
-
           if (layers.length === 1) {
             setLayerName(layers[0][1] as string);
             setLayerEntries([
               {
-                geoviewLayerId: layers[0][0] as string,
-                geoviewLayerType: 'ogcWms',
-                listOfLayerEntryConfig: [],
+                layerId: layers[0][0] as string,
               },
             ]);
-          } else setLayerList(layers);
+          } else {
+            setLayerList(layers);
+          }
         } else {
           setLayerName(esri.name as string);
           setLayerEntries([
             {
-              geoviewLayerId: esri.id as string,
-              geoviewLayerType: 'ogcWms',
-              listOfLayerEntryConfig: [],
+              layerId: esri.id as string,
             },
           ]);
         }
@@ -287,6 +312,19 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       emitErrorProj('XYZ Tiles', proj, ['EPSG:3857']);
       return false;
     }
+    const dataAccessPath = layerURL;
+    setLayerName('');
+    setLayerEntries([
+      {
+        layerId: layerURL,
+        source: {
+          dataAccessPath: {
+            en: dataAccessPath,
+            fr: dataAccessPath,
+          },
+        },
+      },
+    ]);
     return true;
   };
 
@@ -299,12 +337,52 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     try {
       const response = await fetch(layerURL);
       const json = await response.json();
-      if (!['FeatureCollection', 'Feature'].includes(json.type)) throw new Error('err');
+      if (!['FeatureCollection', 'Feature'].includes(json.type)) {
+        throw new Error('err');
+      }
+      const layerId = layerURL.split('/').pop() as string;
+      const dataAccessPath = layerURL.replace(layerId, '');
+      setLayerName(layerId);
+      setLayerEntries([
+        {
+          layerId,
+          source: {
+            dataAccessPath: {
+              en: dataAccessPath,
+              fr: dataAccessPath,
+            },
+          },
+        },
+      ]);
     } catch (err) {
       emitErrorServer('GeoJSON');
       return false;
     }
     return true;
+  };
+
+  /**
+   * Attempt to determine the layer type based on the URL format
+   */
+  const bestGuessLayerType = () => {
+    const layerTokens = layerURL.toUpperCase().split('/');
+    const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
+    if (layerURL.toUpperCase().endsWith('MAPSERVER') || layerURL.toUpperCase().endsWith('MAPSERVER/')) {
+      setLayerType(ESRI_DYNAMIC);
+    } else if (
+      layerURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
+      (layerURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
+    ) {
+      setLayerType(ESRI_FEATURE);
+    } else if (layerTokens.indexOf('WFS') !== -1) {
+      setLayerType(WFS);
+    } else if (layerURL.toUpperCase().endsWith('.JSON') || layerURL.toUpperCase().endsWith('.GEOJSON')) {
+      setLayerType(GEOJSON);
+    } else if (layerURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || layerURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
+      setLayerType(XYZ_TILES);
+    } else if (layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32) {
+      setLayerType(GEOCORE);
+    }
   };
 
   /**
@@ -316,26 +394,34 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       valid = false;
       emitErrorEmpty('URL');
     }
-    if (valid) setActiveStep(1);
+    if (valid) {
+      bestGuessLayerType();
+      setActiveStep(1);
+    }
   };
 
   /**
    * Handle the behavior of the 'Continue' button in the Stepper UI
    */
   const handleStep2 = async () => {
+    setIsLoading(true);
     let valid = true;
     if (layerType === undefined) {
       valid = false;
+      setIsLoading(false);
       emitErrorEmpty('Service Type');
-    }
-    if (layerType === WMS) valid = await wmsValidation();
-    if (layerType === WFS) valid = await wfsValidation();
-    if (layerType === OGC_FEATURE) valid = await ogcFeatureValidation();
+    } else if (layerType === WMS) valid = await wmsValidation();
+    else if (layerType === WFS) valid = await wfsValidation();
+    else if (layerType === OGC_FEATURE) valid = await ogcFeatureValidation();
     else if (layerType === XYZ_TILES) valid = xyzValidation();
     else if (layerType === ESRI_DYNAMIC) valid = await esriValidation(ESRI_DYNAMIC);
     else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
     else if (layerType === GEOJSON) valid = await geoJSONValidation();
-    if (valid) setActiveStep(2);
+    else if (layerType === GEOCORE) valid = await geocoreValidation();
+    if (valid) {
+      setIsLoading(false);
+      setActiveStep(2);
+    }
   };
 
   /**
@@ -354,15 +440,23 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * Handle the behavior of the 'Finish' button in the Stepper UI
    */
   const handleStepLast = () => {
+    setIsLoading(true);
+    const geoviewLayerId = api.generateId();
+    api.event.on(
+      api.eventNames.LAYER.EVENT_LAYER_ADDED,
+      () => {
+        setIsLoading(false);
+        setAddLayerVisible(false);
+      },
+      mapId,
+      geoviewLayerId
+    );
+
     let valid = true;
     const name = layerName;
     let url = layerURL;
-    let entries = layerEntries;
-    // if (Array.isArray(entries)) entries = entries.join(',');
-    if (layerType === ESRI_DYNAMIC) url = api.geoUtilities.getMapServerUrl(layerURL);
-    else if (layerType === ESRI_FEATURE) {
-      url = `${api.geoUtilities.getMapServerUrl(layerURL)}/${(layerEntries as TypeEsriDynamicLayerEntryConfig[])[0].layerId}`;
-      entries = [];
+    if (layerType === ESRI_DYNAMIC || layerType === ESRI_FEATURE) {
+      url = api.geoUtilities.getMapServerUrl(layerURL);
     }
 
     if (layerName === '') {
@@ -370,7 +464,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
     }
     const layerConfig: TypeGeoviewLayerConfig = {
-      geoviewLayerId: api.generateId(),
+      geoviewLayerId,
       geoviewLayerName: {
         en: name,
         fr: name,
@@ -380,11 +474,30 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         en: url,
         fr: url,
       },
-      listOfLayerEntryConfig: entries as TypeListOfLayerEntryConfig,
+      listOfLayerEntryConfig: layerEntries as TypeListOfLayerEntryConfig,
     };
+
+    if (layerType === GEOJSON || layerType === XYZ_TILES) {
+      // TODO probably want an option to add metadata if geojson
+      // need to clear our metadata path or it will give errors trying to find it
+      layerConfig.metadataAccessPath = {
+        en: '',
+        fr: '',
+      };
+    }
+    if (layerType === GEOCORE) {
+      delete layerConfig.metadataAccessPath;
+    }
     if (valid) {
+      // TODO issue #668 - geocore layers do not have same ID, it is impossible to use the added event
+      // workaround - close after 3 sec
+      if (layerType === GEOCORE) {
+        setTimeout(() => {
+          setIsLoading(false);
+          setAddLayerVisible(false);
+        }, 3000);
+      }
       api.map(mapId).layer.addGeoviewLayer(layerConfig);
-      setAddLayerVisible(false);
     }
   };
 
@@ -465,8 +578,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    */
   // eslint-disable-next-line react/no-unstable-nested-components
   function NavButtons({ isFirst = false, isLast = false, handleNext }: ButtonPropsLayerPanel): JSX.Element {
-    return (
-      <ButtonGroup className={classes.buttonGroup}>
+    return isLoading ? (
+      <Box sx={{ padding: 10 }}>
+        <CircularProgressBase />
+      </Box>
+    ) : (
+      <ButtonGroup sx={sxClasses.buttonGroup}>
         <Button variant="contained" type="text" onClick={handleNext}>
           {isLast ? 'Finish' : 'Continue'}
         </Button>
@@ -486,7 +603,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       steps={[
         {
           stepLabel: {
-            children: 'Enter URL',
+            children: 'Enter URL / UUID',
           },
           stepContent: {
             children: (
@@ -534,10 +651,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           stepContent: {
             children: (
               <>
-                {layerList.length === 0 && layerEntries.length === 0 && (
-                  <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
-                )}
-                {layerList.length === 0 && layerEntries.length > 0 && <Typography>{layerName}</Typography>}
+                {layerList.length === 0 && <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />}
                 {layerList.length > 1 && (
                   <Autocomplete
                     fullWidth
