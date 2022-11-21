@@ -1,0 +1,132 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 4,
+      "center": [-100, 60],
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "swipe0",
+        "geoviewLayerName": {
+          "en": "statmen toner"
+        },
+        "geoviewLayerType": "xyzTiles",
+        "initialSettings": {
+          "visible": true
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "toner",
+            "initialSettings": {
+              "minZoom": 3,
+              "maxZoom": 8
+            },
+            "source": {
+              "dataAccessPath": {
+                "en": "https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "swipe1",
+        "geoviewLayerName": {
+          "en": "MSI"
+        },
+        "metadataAccessPath": {
+          "en": "https://datacube.services.geo.ca/ows/msi"
+        },
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": {
+                  "en": "band-0-pixel-value",
+                  "fr": "band-0-pixel-value"
+                },
+                "outfields": {
+                  "en": "band-0-pixel-value",
+                  "fr": "band-0-pixel-value"
+                },
+                "aliasFields": {
+                  "en": "Pixel value",
+                  "fr": "Valeur du pixel"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "swipe4",
+        "geoviewLayerName": {
+          "en": "GeoJSON Sample"
+        },
+        "metadataAccessPath": {
+          "en": "./geojson/metadata.json"
+        },
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "swipe5",
+        "geoviewLayerName": {
+          "en": "Airport data"
+        },
+        "metadataAccessPath": {
+          "en": "https://giswebservices.massgis.state.ma.us/geoserver/wfs"
+        },
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "GISDATA.AIRPORTS_PT"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "swipe6",
+        "geoviewLayerName": {
+          "en": "Large Lakes"
+        },
+        "metadataAccessPath": {
+          "en": "https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev"
+        },
+        "geoviewLayerType": "ogcFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lakes"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "swipe7",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "light",
+  "components": ["nav-bar", "north-arrow", "overview-map"],
+  "corePackages": ["swiper"],
+  "externalPackages": [],
+  "suportedLanguages": ["en"]
+}
