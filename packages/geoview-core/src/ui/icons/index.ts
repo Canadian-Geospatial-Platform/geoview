@@ -26,6 +26,8 @@ import LiveHelp from '@mui/icons-material/LiveHelp';
 import ListAlt from '@mui/icons-material/ListAlt';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import MoreVert from '@mui/icons-material/MoreVert';
+import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 
 export {
   Layers as LayersIcon,
@@ -57,4 +59,7 @@ export {
   ListAlt as ListAltIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
+  MoreVert as MoreVertIcon,
+  ArrowRight as ArrowRightIcon,
+  ArrowDropDown as ArrowDownIcon,
 };

@@ -38,7 +38,8 @@
     "version": "Accéder au repo sur GitHub"
   },
   "legend": {
-    "unknown": "Titre de légende inconnu"
+    "unknown": "Titre de légende inconnu",
+    "remove_layer": "Supprimer le calque"
   },
   "keyboardnav": {
     "start": "Aller après l'élément carte",

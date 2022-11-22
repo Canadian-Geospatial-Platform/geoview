@@ -62,22 +62,6 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   useEffect(() => {
     setMapLayers(() => ({ ...api.map(mapId!).layer.geoviewLayers }));
     api.event.on(
-      api.eventNames.LAYER.EVENT_LAYER_ADDED,
-      () =>
-        setMapLayers(() => ({
-          ...api.map(mapId!).layer.geoviewLayers,
-        })),
-      mapId
-    );
-    api.event.on(
-      api.eventNames.LAYER.EVENT_REMOVE_LAYER,
-      () =>
-        setMapLayers(() => ({
-          ...api.map(mapId!).layer.geoviewLayers,
-        })),
-      mapId
-    );
-    api.event.on(
       api.eventNames.PANEL.EVENT_PANEL_CLOSE,
       () => {
         setAddLayerVisible(false);
@@ -87,8 +71,6 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     );
 
     return () => {
-      api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId);
-      api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
       api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId, buttonPanel.buttonPanelId);
     };
   }, [api, buttonPanel.buttonPanelId, mapId]);
