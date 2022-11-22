@@ -169,7 +169,7 @@ const darkPalette = {
   divider: 'rgba(255, 255, 255, 0.12)',
   background: {
     paper: '#121212',
-    default: '#111111',
+    default: '#232323',
   },
   action: {
     active: '#fff',
@@ -311,9 +311,9 @@ const themeOptions: ThemeOptions = {
   },
   // TODO colors below should move within light/dark palettes so theme can be used
   appBar: {
-    background: '#111111',
+    background: '#1E1E1E',
     border: '#444444',
-    btnActiveBg: '1e1e1e',
+    btnActiveBg: '#4B4B4B',
     btnDefaultBg: '#222222',
     btnFocusBg: '#333333',
     btnHoverBg: '#333333',
@@ -330,10 +330,10 @@ const themeOptions: ThemeOptions = {
     btnHoverColor: '#393939',
   },
   panel: {
-    background: '#1e1e1e',
+    background: '#232323',
     border: '#393939',
     borderLight: '#4f4f4f',
-    defaultBg: '#1e1e1e',
+    defaultBg: '#232323',
     hoverBg: '#393939',
     activeBg: '#4f4f4f',
   },

@@ -39,7 +39,8 @@
   },
   "legend": {
     "unknown": "Titre de légende inconnu",
-    "remove_layer": "Supprimer le calque"
+    "remove_layer": "Supprimer le calque",
+    "expand_legend": "Développer la légende"
   },
   "keyboardnav": {
     "start": "Aller après l'élément carte",
