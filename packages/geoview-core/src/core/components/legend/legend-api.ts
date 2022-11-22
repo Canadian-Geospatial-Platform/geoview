@@ -26,8 +26,6 @@ export class LegendApi {
    *
    */
   createLegend = () => {
-    // TODO emit create legend event instead see issue 576
-    // api.event.emit(legendPayload(EVENT_NAMES.FOOTER_TABS.EVENT_LEGEND_CREATE, this.mapId));
     return Legend;
   };
 
@@ -37,7 +35,7 @@ export class LegendApi {
    */
   createLegendItem = (props: TypeLegendItemProps) => {
     const { layerId } = props;
-    const rootGeoViewLayer = api.map(this.mapId).layer.geoviewLayers[layerId];
-    return createElement(LegendItem, { layerId, rootGeoViewLayer });
+    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+    return createElement(LegendItem, { layerId, geoviewLayerInstance });
   };
 }

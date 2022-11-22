@@ -60,7 +60,7 @@ const sxClasses = {
 
 export interface TypeLegendItemProps {
   layerId: string;
-  rootGeoViewLayer: AbstractGeoViewLayer;
+  geoviewLayerInstance: AbstractGeoViewLayer;
   subLayerId?: string;
   layerConfigEntry?: TypeLayerEntryConfig;
   isRemoveable?: boolean;
@@ -72,7 +72,7 @@ export interface TypeLegendItemProps {
  * @returns {JSX.Element} the legend list item
  */
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
-  const { layerId, rootGeoViewLayer, subLayerId, layerConfigEntry, isRemoveable } = props;
+  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable } = props;
 
   const { t, i18n } = useTranslation<string>();
 
@@ -100,17 +100,17 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         isGroup = true;
       }
     } else if (
-      rootGeoViewLayer?.listOfLayerEntryConfig &&
-      (rootGeoViewLayer?.listOfLayerEntryConfig.length > 1 || layerEntryIsGroupLayer(rootGeoViewLayer.listOfLayerEntryConfig[0]))
+      geoviewLayerInstance?.listOfLayerEntryConfig &&
+      (geoviewLayerInstance?.listOfLayerEntryConfig.length > 1 || layerEntryIsGroupLayer(geoviewLayerInstance.listOfLayerEntryConfig[0]))
     ) {
-      setGroupItems(rootGeoViewLayer.listOfLayerEntryConfig);
+      setGroupItems(geoviewLayerInstance.listOfLayerEntryConfig);
       isGroup = true;
     }
     return isGroup;
   };
 
   const getLegendDetails = () => {
-    rootGeoViewLayer?.getLegend(subLayerId).then((layerLegend) => {
+    geoviewLayerInstance?.getLegend(subLayerId).then((layerLegend) => {
       if (layerLegend) {
         // WMS layers just return a string
         if (isWmsLegend(layerLegend)) {
@@ -166,8 +166,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       } else if (t('legend.unknown')) {
         setLayerName(t('legend.unknown'));
       }
-    } else if (rootGeoViewLayer && rootGeoViewLayer.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
-      setLayerName(rootGeoViewLayer.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
+    } else if (geoviewLayerInstance && geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
+      setLayerName(geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
     } else if (t('legend.unknown')) {
       setLayerName(t('legend.unknown'));
     }
@@ -185,7 +185,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     //       if (subLayerId) {
     //         getLegendDetails(resultSets[`${subLayerId}`]);
     //       } else {
-    //         getLegendDetails(resultSets[`${layerId}/${rootGeoViewLayer.activeLayer.layerId}`]);
+    //         getLegendDetails(resultSets[`${layerId}/${geoviewLayerInstance.activeLayer.layerId}`]);
     //       }
     //     }
     //   },
@@ -213,20 +213,35 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   useEffect(() => {
     if (layerConfigEntry) {
-      rootGeoViewLayer.setVisible(isChecked, layerConfigEntry);
+      geoviewLayerInstance.setVisible(isChecked, layerConfigEntry);
     } else {
-      rootGeoViewLayer.setVisible(isChecked);
+      const setVisibleOnAllLayers = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+        listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+          geoviewLayerInstance.setVisible(isChecked, layerEntryConfig);
+          if (layerEntryIsGroupLayer(layerEntryConfig)) setVisibleOnAllLayers(layerEntryConfig.listOfLayerEntryConfig);
+        });
+      };
+      setVisibleOnAllLayers(geoviewLayerInstance.listOfLayerEntryConfig);
     }
-  }, [isChecked, layerConfigEntry, rootGeoViewLayer]);
+  }, [isChecked, layerConfigEntry, geoviewLayerInstance]);
 
-  const handleExpandClick = () => {
+  /**
+   * Handle expand/shrink of layer groups.
+   */
+  const handleExpandGroupClick = () => {
     setGroupOpen(!isGroupOpen);
   };
 
+  /**
+   * Handle expand/shrink of legends.
+   */
   const handleLegendClick = () => {
     setLegendOpen(!isLegendOpen);
   };
 
+  /**
+   * Handle view/hide layers.
+   */
   const handleToggleLayer = () => {
     setChecked(!isChecked);
   };
@@ -238,7 +253,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     setMenuAnchorElement(null);
   };
   const handleRemoveLayer = () => {
-    api.map(mapId).layer.removeGeoviewLayer(rootGeoViewLayer);
+    api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
   };
@@ -249,7 +264,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         <ListItemButton>
           <ListItemIcon>
             {groupItems.length > 0 && (
-              <IconButton color="primary" onClick={handleExpandClick}>
+              <IconButton color="primary" onClick={handleExpandGroupClick}>
                 {isGroupOpen ? <ArrowDownIcon /> : <ArrowRightIcon />}
               </IconButton>
             )}
@@ -305,7 +320,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               <LegendItem
                 key={`sub-${subItem.layerId}`}
                 layerId={layerId}
-                rootGeoViewLayer={rootGeoViewLayer}
+                geoviewLayerInstance={geoviewLayerInstance}
                 subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
                 layerConfigEntry={subItem}
               />

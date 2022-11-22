@@ -36,8 +36,8 @@ export class DataGridAPI {
    */
   createDataGrid = (props: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = props;
-    const rootGeoViewLayer = api.map(this.mapId).layer.geoviewLayers[layerId];
-    const values = (rootGeoViewLayer as AbstractGeoViewVector).getAllFeatureInfo();
+    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+    const values = (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo();
 
     // set columns
     const columnHeader = Object.keys(values[0]);
@@ -55,7 +55,7 @@ export class DataGridAPI {
     const rows = values;
 
     return createElement('div', {}, [
-      createElement('h4', { key: `${layerId}-title` }, getLocalizedValue(rootGeoViewLayer.geoviewLayerName, this.mapId)),
+      createElement('h4', { key: `${layerId}-title` }, getLocalizedValue(geoviewLayerInstance.geoviewLayerName, this.mapId)),
       createElement(LayerDataGrid, {
         key: `${layerId}-datagrid`,
         columns,

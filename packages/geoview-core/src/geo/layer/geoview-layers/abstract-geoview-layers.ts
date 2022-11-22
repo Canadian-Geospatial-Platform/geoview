@@ -24,7 +24,7 @@ import {
 import {
   GetFeatureInfoPayload,
   payloadIsQueryLayer,
-  TypeArrayOfRecords,
+  TypeArrayOfFeatureInfoEntries,
   TypeQueryType,
 } from '../../../api/events/payloads/get-feature-info-payload';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
@@ -428,8 +428,8 @@ export abstract class AbstractGeoViewLayer {
     location: Pixel | Coordinate | Coordinate[],
     layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
     queryType: TypeQueryType = 'at pixel'
-  ): Promise<TypeArrayOfRecords> {
-    const queryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const queryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       const layerConfig = (typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig) as
         | TypeVectorLayerEntryConfig
         | TypeImageLayerEntryConfig
@@ -469,7 +469,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
+  protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided coordinate.
@@ -479,7 +479,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
+  protected abstract getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features around the provided longitude latitude.
@@ -489,7 +492,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
+  protected abstract getFeatureInfoAtLongLat(
+    location: Coordinate,
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided bounding box.
@@ -499,7 +505,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
+  protected abstract getFeatureInfoUsingBBox(
+    location: Coordinate[],
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries>;
 
   /** ***************************************************************************************************************************
    * Return feature information for all the features in the provided polygon.
@@ -509,7 +518,10 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
-  protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords>;
+  protected abstract getFeatureInfoUsingPolygon(
+    location: Coordinate[],
+    layerConfig: TypeLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries>;
 
   /** ***************************************************************************************************************************
    * This method register the layer entry to layer sets.

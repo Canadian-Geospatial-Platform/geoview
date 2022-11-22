@@ -231,11 +231,12 @@ export class GeoviewRenderer {
     const size = pointStyle?.getImage().getSize() as Size;
     const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = width;
-    drawingCanvas.height = height;
+    drawingCanvas.width = width + 4;
+    drawingCanvas.height = height + 4;
     const drawingContext = toContext(drawingCanvas.getContext('2d')!);
     drawingContext.setStyle(pointStyle!);
-    drawingContext.drawGeometry(new Point([width / 2, height / 2]));
+    drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
+    drawingContext.drawGeometry(new Point([drawingCanvas.width / 2, drawingCanvas.width / 2]));
     return drawingCanvas;
   }
 
@@ -259,10 +260,11 @@ export class GeoviewRenderer {
     context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
     const drawingContext = toContext(context);
     drawingContext.setStyle(lineStringStyle!);
+    drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
     drawingContext.drawGeometry(
       new LineString([
-        [4, this.LEGEND_CANVAS_HEIGHT - 4],
-        [this.LEGEND_CANVAS_WIDTH - 4, 4],
+        [4, drawingCanvas.height - 4],
+        [drawingCanvas.width - 4, 4],
       ])
     );
     return drawingCanvas;
@@ -288,17 +290,19 @@ export class GeoviewRenderer {
     context.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
     const drawingContext = toContext(context);
     drawingContext.setStyle(polygonStyle!);
+    drawingContext.setTransform([1, 0, 0, 1, 0, 0]);
     drawingContext.drawGeometry(
       new Polygon([
         [
           [4, 4],
-          [this.LEGEND_CANVAS_WIDTH - 4, 4],
-          [this.LEGEND_CANVAS_WIDTH - 4, this.LEGEND_CANVAS_HEIGHT - 4],
-          [4, this.LEGEND_CANVAS_HEIGHT - 4],
+          [drawingCanvas.width - 4, 4],
+          [drawingCanvas.width - 4, drawingCanvas.height - 4],
+          [4, drawingCanvas.height - 4],
           [4, 4],
         ],
       ])
     );
+    const test = context.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
     return drawingCanvas;
   }
 

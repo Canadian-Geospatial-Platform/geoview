@@ -6,10 +6,10 @@ import { api } from '../../app';
 import { LayerSet } from './layer-set';
 
 /** ***************************************************************************************************************************
- * A class to hold a set of layers associated with an array of TypeArrayOfRecords. When this class is instantiated, all layers
- * already loaded on the specified map that are queryable will be added to the set. Layers added afterwards will be added to
- * the set if they are queryable. Deleted layers will be removed from the set. If you click on the map, all queryable layers
- * will execute a query and return their result set.
+ * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
+ * all layers already loaded on the specified map that are queryable will be added to the set. Layers added afterwards will be
+ * added to the set if they are queryable. Deleted layers will be removed from the set. If you click on the map, all queryable
+ * layers will execute a query and return their result set.
  *
  * @class FeatureInfoLayerSet
  */

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 import { ImageArcGISRest } from 'ol/source';
@@ -25,7 +26,7 @@ import {
   layerEntryIsGroupLayer,
   TypeFeatureInfoLayerConfig,
 } from '../../../map/map-schema-types';
-import { TypeFeatureInfoEntry, TypeArrayOfRecords } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 
@@ -383,18 +384,21 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Translate the get feature information at coordinate result set to the TypeArrayOfRecords used by GeoView.
+   * Translate the get feature information at coordinate result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
    *
    * @param {TypeJsonArray} features An array of found features formatted using the query syntax.
    * @param {TypeFeatureInfoLayerConfig} featureInfo Feature information describing the user's desired output format.
    *
-   * @returns {TypeArrayOfRecords} The feature info table.
+   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  private formatFeatureInfoAtCoordinateResult(features: TypeJsonArray, featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfRecords {
+  private formatFeatureInfoAtCoordinateResult(
+    features: TypeJsonArray,
+    featureInfo?: TypeFeatureInfoLayerConfig
+  ): TypeArrayOfFeatureInfoEntries {
     if (!features.length) return [];
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-    const queryResult: TypeArrayOfRecords = [];
+    const queryResult: TypeArrayOfFeatureInfoEntries = [];
     features.forEach((feature) => {
       const featureFields = Object.keys(feature.attributes);
       const featureInfoEntry: TypeFeatureInfoEntry = {};
@@ -415,11 +419,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       const { map } = api.map(this.mapId);
       resolve(this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerConfig));
     });
@@ -432,9 +435,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The promised feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfRecords> {
+  protected getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    layerConfig: TypeEsriDynamicLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
     const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
@@ -445,10 +451,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} lnglat The coordinate that will be used by the query.
    * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The promised feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
-  protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtLongLat(
+    lnglat: Coordinate,
+    layerConfig: TypeEsriDynamicLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve([]);
       else {
         if (!(layerConfig as TypeEsriDynamicLayerEntryConfig).source.featureInfo?.queryable) resolve([]);
@@ -494,11 +503,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingBBox(
+    location: Coordinate[],
+    layerConfig: TypeEsriDynamicLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -510,15 +521,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   protected getFeatureInfoUsingPolygon(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     location: Coordinate[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     layerConfig: TypeEsriDynamicLayerEntryConfig
-  ): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;

@@ -24,7 +24,7 @@ import {
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeArrayOfRecords } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -157,18 +157,18 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Convert the feature information to an array of TypeArrayOfRecords.
+   * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
    *
    * @param {Feature<Geometry>[]} features The array of features to convert.
    * @param {TypeFeatureInfoLayerConfig} featureInfo The featureInfo configuration.
    *
-   * @returns {TypeArrayOfRecords} The Array of feature information.
+   * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
    */
-  private formatFeatureInfoResult(features: Feature<Geometry>[], featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfRecords {
+  private formatFeatureInfoResult(features: Feature<Geometry>[], featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfFeatureInfoEntries {
     if (!features.length) return [];
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-    const queryResult: TypeArrayOfRecords = [];
+    const queryResult: TypeArrayOfFeatureInfoEntries = [];
     features.forEach((feature) => {
       const featureFields = feature.getKeys();
       const featureInfoEntry: TypeFeatureInfoEntry = {};
@@ -190,9 +190,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    *
-   * @returns {TypeArrayOfRecords} The feature info table.
+   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  getAllFeatureInfo(layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): TypeArrayOfRecords {
+  getAllFeatureInfo(layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): TypeArrayOfFeatureInfoEntries {
     const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
     if (!layerConfig?.gvLayer) return [];
     return this.formatFeatureInfoResult(
@@ -207,11 +207,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       const layerFilter = (layer: BaseLayer) => {
         const layerSource = layer.get('layerEntryConfig')?.source;
         const configSource = layerConfig?.source;
@@ -232,11 +232,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       const { map } = api.map(this.mapId);
       resolve(this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerConfig));
     });
@@ -249,11 +249,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       const { map } = api.map(this.mapId);
       const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
       resolve(this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerConfig));
@@ -267,11 +267,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -283,11 +283,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;

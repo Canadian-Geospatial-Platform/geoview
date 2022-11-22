@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
 import TileLayer from 'ol/layer/Tile';
 import { Options as TileOptions } from 'ol/layer/BaseTile';
@@ -20,7 +21,7 @@ import {
   layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
-import { TypeArrayOfRecords } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
@@ -270,11 +271,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -287,11 +287,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtCoordinate(
+    location: Coordinate,
+    layerConfig: TypeXYZTilesLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -304,11 +306,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtLongLat(
+    location: Coordinate,
+    layerConfig: TypeXYZTilesLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -321,11 +325,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingBBox(
+    location: Coordinate[],
+    layerConfig: TypeXYZTilesLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -338,11 +344,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingPolygon(
+    location: Coordinate[],
+    layerConfig: TypeXYZTilesLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
