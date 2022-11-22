@@ -44,9 +44,7 @@ export class Layer {
   // used to access vector API to create and manage geometries
   vector: Vector | undefined;
 
-  /**
-   * used to reference the map id
-   */
+  /** used to reference the map id */
   private mapId: string;
 
   /**
@@ -57,6 +55,8 @@ export class Layer {
    */
   constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     this.mapId = mapId;
+
+    const validGeoviewLayerConfigs = this.validateGeoviewLayerConfig(geoviewLayerConfigs);
 
     this.vector = new Vector(this.mapId);
 
@@ -136,11 +136,53 @@ export class Layer {
     );
 
     // Load layers that was passed in with the map config
-    if (geoviewLayerConfigs && geoviewLayerConfigs.length > 0) {
-      geoviewLayerConfigs?.forEach((geoviewLayerConfig) =>
+    if (validGeoviewLayerConfigs.length > 0) {
+      validGeoviewLayerConfigs.forEach((geoviewLayerConfig) =>
         api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig))
       );
     }
+  }
+
+  /**
+   * Validate the geoview layer configuration array to eliminate duplicate entries and inform the user.
+   * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs The geoview layer configurations to validate.
+   *
+   * @returns {TypeGeoviewLayerConfig} The new configuration with duplicate entries eliminated.
+   */
+  private validateGeoviewLayerConfig(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]): TypeGeoviewLayerConfig[] {
+    if (geoviewLayerConfigs && geoviewLayerConfigs.length > 0) {
+      const validGeoviewLayerConfigs = geoviewLayerConfigs.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
+        for (let configToTestIndex = 0; configToTestIndex < geoviewLayerConfigs.length; configToTestIndex++)
+          if (
+            configToCreateIndex !== configToTestIndex &&
+            geoviewLayerConfigToCreate.geoviewLayerId === geoviewLayerConfigs[configToTestIndex].geoviewLayerId &&
+            // We keep the first instance of the duplicat entry.
+            configToCreateIndex >= configToTestIndex
+          ) {
+            this.printGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            return false;
+          }
+        return true;
+      });
+      return validGeoviewLayerConfigs;
+    }
+    return [];
+  }
+
+  /**
+   * Print an error message for the duplicate geoview layer configuration.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
+   */
+  private printGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    api.event.emit(
+      snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
+        type: 'key',
+        value: 'validation.layer.usedtwice',
+        params: [geoviewLayerConfig.geoviewLayerId, this.mapId],
+      })
+    );
+    // eslint-disable-next-line no-console
+    console.log(`Duplicate use of geoview layer identifier ${geoviewLayerConfig.geoviewLayerId} on map ${this.mapId}`);
   }
 
   /**
@@ -252,7 +294,9 @@ export class Layer {
     const suportedLanguages = optionalSuportedLanguages || config.configValidation.defaultMapFeaturesConfig.suportedLanguages;
     config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
 
-    api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
+    if (geoviewLayerConfig.geoviewLayerId in api.maps[this.mapId].layer.geoviewLayers)
+      this.printGeoviewLayerConfigError(geoviewLayerConfig);
+    else api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
 
     return geoviewLayerConfig.geoviewLayerId;
   };

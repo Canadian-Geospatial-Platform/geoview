@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-param-reassign */
 import axios from 'axios';
 
@@ -26,7 +27,7 @@ import {
   TypeLayerGroupEntryConfig,
   TypeFeatureInfoLayerConfig,
 } from '../../../map/map-schema-types';
-import { TypeFeatureInfoEntry, TypeArrayOfRecords } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { getLocalizedValue, xmlToJson } from '../../../../core/utils/utilities';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
@@ -389,11 +390,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The pixel coordinate that will be used by the query.
    * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       const { map } = api.map(this.mapId);
       resolve(this.getFeatureInfoAtCoordinate(map.getCoordinateFromPixel(location), layerConfig));
     });
@@ -406,9 +406,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The promised feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
-  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfRecords> {
+  protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
     const convertedLocation = transform(location, `EPSG:${api.map(this.mapId).currentProjection}`, 'EPSG:4326');
     return this.getFeatureInfoAtLongLat(convertedLocation, layerConfig);
   }
@@ -419,10 +419,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} lnglat The coordinate that will be used by the query.
    * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The promised feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
    */
-  protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!this.getVisible(layerConfig) || !layerConfig.gvLayer) resolve([]);
       else {
         const viewResolution = api.map(this.mapId).getView().getResolution() as number;
@@ -453,11 +453,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -469,11 +468,13 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {Coordinate} location The coordinate that will be used by the query.
    * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
    *
-   * @returns {Promise<TypeArrayOfRecords>} The feature info table.
+   * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfRecords> {
-    const promisedQueryResult = new Promise<TypeArrayOfRecords>((resolve) => {
+  protected getFeatureInfoUsingPolygon(
+    location: Coordinate[],
+    layerConfig: TypeWmsLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       resolve([]);
     });
     return promisedQueryResult;
@@ -573,17 +574,20 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Translate the get feature information at coordinate result set to the TypeArrayOfRecords used by GeoView.
+   * Translate the get feature information at coordinate result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
    * @param {TypeFeatureInfoLayerConfig} featureInfo Feature information describing the user's desired output format.
    *
-   * @returns {TypeArrayOfRecords} The feature info table.
+   * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  private formatFeatureInfoAtCoordinateResult(featureMember: TypeJsonObject, featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfRecords {
+  private formatFeatureInfoAtCoordinateResult(
+    featureMember: TypeJsonObject,
+    featureInfo?: TypeFeatureInfoLayerConfig
+  ): TypeArrayOfFeatureInfoEntries {
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-    const queryResult: TypeArrayOfRecords = [];
+    const queryResult: TypeArrayOfFeatureInfoEntries = [];
 
     const featureInfoEntry: TypeFeatureInfoEntry = {};
     const createFieldEntries = (entry: TypeJsonObject, prefix = '') => {

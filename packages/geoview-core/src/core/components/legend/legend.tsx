@@ -57,6 +57,7 @@ export function Legend(): JSX.Element | null {
       api.event.off(api.eventNames.LAYER.EVENT_ADD_LAYER, mapId);
       api.event.off(api.eventNames.LAYER.EVENT_REMOVE_LAYER, mapId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -67,7 +68,7 @@ export function Legend(): JSX.Element | null {
             <LegendItem
               key={layerId}
               layerId={layerId}
-              rootGeoViewLayer={mapLayers[layerId]}
+              geoviewLayerInstance={mapLayers[layerId]}
               isRemoveable={!configLayerIds.includes(layerId)}
             />
           );

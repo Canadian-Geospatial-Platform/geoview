@@ -15,8 +15,8 @@ const validEvents: EventStringId[] = [
 export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
 
 export type TypeFeatureInfoEntry = Record<string, string | number | null>;
-export type TypeArrayOfRecords = TypeFeatureInfoEntry[];
-export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfRecords | undefined };
+export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
+export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined };
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload
@@ -80,7 +80,7 @@ export interface TypeQueryResultPayload extends GetFeatureInfoPayload {
   // the layer path used by the query
   layerPath: string;
   // the resultset of the query
-  arrayOfRecords: TypeArrayOfRecords;
+  arrayOfRecords: TypeArrayOfFeatureInfoEntries;
 }
 
 /**
@@ -160,14 +160,14 @@ export class GetFeatureInfoPayload extends PayloadBaseClass {
    *
    * @param {string | null} handlerName the handler Name
    * @param {string} layerPath the layer path
-   * @param {TypeArrayOfRecords} arrayOfRecords the resultset of the get feature info query
+   * @param {TypeArrayOfFeatureInfoEntries} arrayOfRecords the resultset of the get feature info query
    *
    * @returns {TypeQueryResultPayload} the queryResultPayload object created
    */
   static createQueryResultPayload = (
     handlerName: string,
     layerPath: string,
-    arrayOfRecords: TypeArrayOfRecords
+    arrayOfRecords: TypeArrayOfFeatureInfoEntries
   ): TypeQueryResultPayload => {
     const queryResultPayload = new GetFeatureInfoPayload(EVENT_NAMES.GET_FEATURE_INFO.QUERY_RESULT, handlerName) as TypeQueryResultPayload;
     queryResultPayload.layerPath = layerPath;

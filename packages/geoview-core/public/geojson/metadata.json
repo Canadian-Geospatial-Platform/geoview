@@ -21,10 +21,12 @@
           "label": "Polygon label",
           "settings": {
             "type": "filledPolygon",
+            "color": "rgba(0,0,255,0.25)",
             "paternSize": 10,
             "paternWidth": 2,
             "fillStyle": "diagonalCross",
             "stroke": {
+              "color": "rgba(128,0,0,1)",
               "lineStyle": "dot"
             }
           }

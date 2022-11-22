@@ -3,7 +3,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { ListItemButtonProps } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   listItemButton: {
     //
   },

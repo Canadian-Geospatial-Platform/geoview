@@ -4,9 +4,9 @@ import { LayerSetPayload, payloadIsLayerRegistration, TypeResultSets } from '../
 import { api } from '../../app';
 
 /** ***************************************************************************************************************************
- * A class to hold a set of layers associated with an array of TypeArrayOfRecords. When this class is instantiated, all layers
- * already loaded on the specified map that are queryable will be added to the set. Layers added afterwards will be added to
- * the set if they are queryable. Deleted layers will be removed from the set.
+ * A class to hold a set of layers associated with an array of TypeArrayOfFeatureInfoEntries. When this class is instantiated,
+ * all layers already loaded on the specified map that are queryable will be added to the set. Layers added afterwards will be
+ * added to the set if they are queryable. Deleted layers will be removed from the set.
  *
  * @class FeatureInfoLayerSet
  */

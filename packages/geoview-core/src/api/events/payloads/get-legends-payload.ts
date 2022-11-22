@@ -188,7 +188,7 @@ export class GetLegendsPayload extends PayloadBaseClass {
    * @returns {TypeTriggerLegendsPayload} the triggerLegendsPayload object created
    */
   static createTriggerLegendPayload = (handlerName: string, layerSetId: string): TypeTriggerLegendsPayload => {
-    const triggerLegendsPayload = new GetLegendsPayload(EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND, handlerName) as TypeTriggerLegendsPayload;
+    const triggerLegendsPayload = new GetLegendsPayload(EVENT_NAMES.GET_LEGENDS.TRIGGER, handlerName) as TypeTriggerLegendsPayload;
     triggerLegendsPayload.layerSetId = layerSetId;
     return triggerLegendsPayload;
   };
