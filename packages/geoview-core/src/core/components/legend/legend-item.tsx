@@ -3,7 +3,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import {
-  Avatar,
   Collapse,
   ListItem,
   ListItemButton,
@@ -11,7 +10,6 @@ import {
   ListItemText,
   CloseIcon,
   TodoIcon,
-  ListAltIcon,
   Tooltip,
   VisibilityIcon,
   VisibilityOffIcon,
@@ -49,8 +47,58 @@ const sxClasses = {
     paddingLeft: 10,
   },
   legendIcon: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     width: 24,
     height: 24,
+    background: '#fff',
+  },
+  legendIconTransparent: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 24,
+    height: 24,
+  },
+  maxIconImg: {
+    maxWidth: 24,
+    maxHeight: 24,
+  },
+  iconPreview: {
+    padding: 0,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'grey.600',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+  },
+  iconImg: {
+    padding: 3,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'grey.600',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    background: '#fff',
+  },
+  iconPreviewHoverable: {
+    left: -30,
+    top: -2,
+    padding: 0,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'grey.600',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    transition: 'transform .3s ease-in-out',
+    '&:hover': {
+      transform: 'rotate(-18deg) translateX(-8px)',
+    },
+  },
+  iconPreviewStacked: {
+    padding: 0,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'grey.600',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
   },
   solidBackground: {
@@ -85,6 +133,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
+  const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [layerName, setLayerName] = useState<string>('');
@@ -123,6 +172,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               const iconImageList = (styleRepresentation.arrayOfCanvas as HTMLCanvasElement[]).map((canvas) => {
                 return canvas.toDataURL();
               });
+              if (iconImageList.length > 0) setIconImg(iconImageList[0]);
+              if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
               if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
@@ -268,20 +319,36 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 {isGroupOpen ? <ArrowDownIcon /> : <ArrowRightIcon />}
               </IconButton>
             )}
-            {iconType === 'simple' && iconImg !== null && (
-              <Avatar sx={sxClasses.legendIcon} variant="square" src={isLegendOpen ? '' : iconImg} onClick={() => handleLegendClick()}>
+            {isLegendOpen && (
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
                 <CloseIcon />
-              </Avatar>
+              </IconButton>
             )}
-            {iconType === 'list' && (
-              <Avatar sx={sxClasses.legendIcon} variant="square" onClick={() => handleLegendClick()}>
-                {isLegendOpen ? <CloseIcon /> : <ListAltIcon />}
-              </Avatar>
+            {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+                <Box sx={sxClasses.legendIcon}>
+                  <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+                </Box>
+              </IconButton>
             )}
-            {groupItems.length === 0 && !iconType && (
-              <Avatar sx={sxClasses.legendIcon} variant="square" onClick={() => handleLegendClick()}>
+            {iconType === 'list' && !isLegendOpen && (
+              <Tooltip title={t('legend.expand_legend')} placement="top" enterDelay={1000}>
+                <Box>
+                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small">
+                    <Box sx={sxClasses.legendIconTransparent}>
+                      {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
+                    </Box>
+                  </IconButton>
+                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" onClick={handleLegendClick}>
+                    <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
+                  </IconButton>
+                </Box>
+              </Tooltip>
+            )}
+            {groupItems.length === 0 && !iconType && !isLegendOpen && (
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
                 <TodoIcon />
-              </Avatar>
+              </IconButton>
             )}
           </ListItemIcon>
           <Tooltip title={layerName} placement="top" enterDelay={1000}>
@@ -303,17 +370,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         {/* Add more layer options here - transparency, zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
       </Menu>
-      <Collapse in={isLegendOpen} timeout="auto" unmountOnExit>
+      <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
-            {iconType === 'simple' && iconImg !== null && <img alt="" style={sxClasses.solidBackground} src={iconImg} />}
+            {iconType === 'simple' && iconImg !== null && (
+              <img alt="" style={{ ...sxClasses.solidBackground, ...sxClasses.iconImg }} src={iconImg} />
+            )}
             {iconType === 'list' && iconList !== null && labelList !== null && (
               <LegendIconList iconImages={iconList} iconLabels={labelList} />
             )}
           </Box>
         </Box>
       </Collapse>
-      <Collapse in={isGroupOpen} timeout="auto" unmountOnExit>
+      <Collapse in={isGroupOpen} timeout="auto">
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
             {groupItems.map((subItem) => (

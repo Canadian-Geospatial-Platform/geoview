@@ -39,7 +39,8 @@
   },
   "legend": {
     "unknown": "Unknown Layer Title",
-    "remove_layer": "Remove Layer"
+    "remove_layer": "Remove Layer",
+    "expand_legend": "Expand Legend"
   },
   "keyboardnav": {
     "start": "Skip after map element",
