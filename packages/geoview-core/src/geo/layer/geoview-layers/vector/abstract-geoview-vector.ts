@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign, no-var */
 import Feature from 'ol/Feature';
-import { Vector as VectorSource } from 'ol/source';
+import { Cluster, Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import { Geometry } from 'ol/geom';
+import { Geometry, Point, Polygon, LineString } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
@@ -131,7 +131,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Create a vector layer. The layer has in its properties a reference to the layer entry configuration used at creation time.
-   * The layer entry configuration keeps a reference to the layer in the gvLayer attribute.
+   * The layer entry configuration keeps a reference to the layer in the gvLayer attribute. If clustering is enabled, creates a
+   * cluster source and uses that to create the layer.
    *
    * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry configuration used by the source.
    * @param {VectorSource<Geometry>} vectorSource The source configuration for the vector layer.
@@ -139,14 +140,44 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
   private createVectorLayer(layerEntryConfig: TypeBaseLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+    const configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerEntryConfig },
-      source: vectorSource,
+      source: configSource.cluster!.enable
+        ? new Cluster({
+            source: vectorSource,
+            distance: configSource.cluster!.distance,
+            minDistance: configSource.cluster!.minDistance,
+            geometryFunction: (feature) => {
+              if (feature.getGeometry() instanceof Polygon && configSource.cluster!.clusterPolygon) {
+                const geometry = feature.getGeometry() as Polygon;
+                return geometry.getInteriorPoint() !== undefined ? geometry.getInteriorPoint() : null;
+              }
+
+              if (feature.getGeometry() instanceof LineString && configSource.cluster!.clusterLineString) {
+                const geometry = feature.getGeometry() as LineString;
+                return geometry.getCoordinateAt(0.5) !== undefined ? new Point(geometry.getCoordinateAt(0.5)) : null;
+              }
+
+              if (feature.getGeometry() instanceof Point) {
+                return feature.getGeometry() !== undefined ? feature.getGeometry() : null;
+              }
+
+              return null;
+            },
+          })
+        : vectorSource,
       style: (feature) => {
+        const { geoviewRenderer } = api.map(this.mapId);
+
+        if (configSource.cluster!.enable && feature.get('features').length > 1) {
+          return geoviewRenderer.getClusterStyle(feature, layerEntryConfig);
+        }
+
         if ('style' in layerEntryConfig) {
-          const { geoviewRenderer } = api.map(this.mapId);
           return geoviewRenderer.getFeatureStyle(feature, layerEntryConfig);
         }
+
         return undefined;
       },
     };
