@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { MapContext } from '../../app-start';
-import { AbstractGeoViewLayer, api, payloadIsALayerConfig } from '../../../app';
+import { AbstractGeoViewLayer, api, payloadIsAGeoViewLayer, payloadIsALayerConfig } from '../../../app';
 import { List } from '../../../ui';
 import { LegendItem } from './legend-item';
 
@@ -23,15 +23,19 @@ export function Legend(): JSX.Element | null {
   const configLayerIds = api.map(mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig?.map((element) => element.geoviewLayerId) || [];
 
   const [mapLayers, setMapLayers] = useState<{ [geoviewLayerId: string]: AbstractGeoViewLayer }>({});
+  const [orderedMapLayers, setOrderedMapLayers] = useState<AbstractGeoViewLayer[]>([]);
 
   useEffect(() => {
     setMapLayers(api.map(mapId).layer.geoviewLayers);
     api.event.on(
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
-      () => {
-        setMapLayers(() => ({
-          ...api.map(mapId).layer.geoviewLayers,
-        }));
+      (payload) => {
+        if (payloadIsAGeoViewLayer(payload)) {
+          const removedGeoviewLayer = payload.geoviewLayer as AbstractGeoViewLayer;
+          setOrderedMapLayers((orderedLayers) =>
+            orderedLayers.filter((layer) => layer.geoviewLayerId !== removedGeoviewLayer.geoviewLayerId)
+          );
+        }
       },
       mapId
     );
@@ -42,9 +46,9 @@ export function Legend(): JSX.Element | null {
           api.event.on(
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
-              setMapLayers(() => ({
-                ...api.map(mapId).layer.geoviewLayers,
-              }));
+              const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
+              setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
+              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
             },
             mapId,
             payload.layerConfig.geoviewLayerId
@@ -60,16 +64,26 @@ export function Legend(): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(mapLayers).length !== 0) {
+      const layers: AbstractGeoViewLayer[] = [];
+      configLayerIds.forEach((configId) => {
+        layers.push(mapLayers[configId]);
+      });
+      setOrderedMapLayers(layers);
+    }
+  }, [mapLayers]);
+
   return (
     <div>
       <List sx={sxStyles.legend}>
-        {Object.keys(mapLayers).map((layerId) => {
+        {orderedMapLayers.map((geoViewLayer) => {
           return (
             <LegendItem
-              key={layerId}
-              layerId={layerId}
-              geoviewLayerInstance={mapLayers[layerId]}
-              isRemoveable={!configLayerIds.includes(layerId)}
+              key={geoViewLayer.geoviewLayerId}
+              layerId={geoViewLayer.geoviewLayerId}
+              geoviewLayerInstance={geoViewLayer}
+              isRemoveable={!configLayerIds.includes(geoViewLayer.geoviewLayerId)}
             />
           );
         })}
