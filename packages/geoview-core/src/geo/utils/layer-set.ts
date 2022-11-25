@@ -27,18 +27,18 @@ export class LayerSet {
    * The class constructor that instanciate a set of layer.
    *
    * @param {string} mapId The map identifier the layer set belongs to.
-   * @param {string} layerSetId The layer set identifier.
+   * @param {string} layerSetIdentifier The layer set identifier.
    * @param {TypeResultSets} resultSets An object that will contain the result sets indexed using the layer path.
    * @param {(layerPath: string) => boolean} registrationConditionFunction A function to decide if the layer can be added.
    */
   constructor(
     mapId: string,
-    layerSetId: string,
+    layerSetIdentifier: string,
     resultSets: TypeResultSets,
     registrationConditionFunction: (layerPath: string) => boolean
   ) {
     this.mapId = mapId;
-    this.layerSetId = layerSetId;
+    this.layerSetId = layerSetIdentifier;
     this.resultSets = resultSets;
     this.registrationConditionFunction = registrationConditionFunction;
 
@@ -47,12 +47,28 @@ export class LayerSet {
       EVENT_NAMES.LAYER_SET.LAYER_REGISTRATION,
       (payload) => {
         if (payloadIsLayerRegistration(payload)) {
-          const { action, layerPath } = payload;
-          // update the registration of all layer sets if !payload.layerSetId or only the specified layer set
-          if (!payload.layerSetId || payload.layerSetId === this.layerSetId) {
-            if (this.registrationConditionFunction(layerPath) && action === 'add') this.resultSets[layerPath] = undefined;
-            else delete this.resultSets[layerPath];
-            api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.mapId, this.layerSetId));
+          const { action, layerPath, layerSetId } = payload;
+          // update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
+          if (!layerSetId || layerSetId === this.layerSetId) {
+            if (this.registrationConditionFunction(layerPath) && action === 'add') {
+              api.event.once(
+                EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
+                () => {
+                  this.resultSets[layerPath] = undefined;
+                  const layerInterval = setInterval(() => {
+                    if (api.maps[this.mapId].mapIsReady()) {
+                      clearInterval(layerInterval);
+                      api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.mapId, this.layerSetId));
+                    }
+                  }, 250);
+                },
+                this.mapId,
+                layerPath.split('/')[0]
+              );
+            } else {
+              delete this.resultSets[layerPath];
+              api.event.emit(LayerSetPayload.createLayerSetUpdatedPayload(this.mapId, this.layerSetId));
+            }
           }
         }
       },

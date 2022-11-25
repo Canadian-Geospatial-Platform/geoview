@@ -11,6 +11,9 @@ const validEvents: EventStringId[] = [
   EVENT_NAMES.GET_LEGENDS.TRIGGER,
 ];
 
+/** The legend resultset type associate a layer path to a legend object. The undefined value indicate that the get legend query
+ * hasn't been run and the null value indicate that there was a get legend error.
+ */
 export type TypeLegendResultSets = { [layerPath: string]: TypeLegend | undefined | null };
 
 /**
@@ -29,8 +32,6 @@ export const payloadIsAllLegendsDone = (verifyIfPayload: PayloadBaseClass): veri
  * Additional attributes needed to define a TypeAllLegendsDonePayload
  */
 export interface TypeAllLegendsDonePayload extends GetLegendsPayload {
-  // The layer set identifier
-  layerSetId: string;
   // The result set containing all the legends of the active layers on the map.
   resultSets: TypeLegendResultSets;
 }
@@ -92,10 +93,7 @@ export const payloadIsTriggerLegend = (verifyIfPayload: PayloadBaseClass): verif
 /**
  * Additional attributes needed to define a TypeTriggerLegendsPayload
  */
-export interface TypeTriggerLegendsPayload extends GetLegendsPayload {
-  // The layer set identifier
-  layerSetId: string;
-}
+export type TypeTriggerLegendsPayload = GetLegendsPayload;
 
 /**
  * type guard function that redefines a PayloadBaseClass as a GetLegendsPayload
@@ -131,17 +129,11 @@ export class GetLegendsPayload extends PayloadBaseClass {
    * Static method used to create an "all legends done" payload.
    *
    * @param {string | null} handlerName the handler Name
-   * @param {string} layerSetId the layer set identifier
    *
    * @returns {TypeAlllegendsDonePayload} the TypeAllQueriesDonePayload object created
    */
-  static createAllQueriesDonePayload = (
-    handlerName: string,
-    layerSetId: string,
-    resultSets: TypeLegendResultSets
-  ): TypeAllLegendsDonePayload => {
+  static createAllQueriesDonePayload = (handlerName: string, resultSets: TypeLegendResultSets): TypeAllLegendsDonePayload => {
     const allLegendsDonePayload = new GetLegendsPayload(EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE, handlerName) as TypeAllLegendsDonePayload;
-    allLegendsDonePayload.layerSetId = layerSetId;
     allLegendsDonePayload.resultSets = resultSets;
     return allLegendsDonePayload;
   };
@@ -182,14 +174,11 @@ export class GetLegendsPayload extends PayloadBaseClass {
    * the legends layer up to date.
    *
    * @param {string | null} handlerName the handler Name
-   * @param {string} layerSetId the layer set identifier
-   * the set.
    *
    * @returns {TypeTriggerLegendsPayload} the triggerLegendsPayload object created
    */
-  static createTriggerLegendPayload = (handlerName: string, layerSetId: string): TypeTriggerLegendsPayload => {
+  static createTriggerLegendPayload = (handlerName: string): TypeTriggerLegendsPayload => {
     const triggerLegendsPayload = new GetLegendsPayload(EVENT_NAMES.GET_LEGENDS.TRIGGER, handlerName) as TypeTriggerLegendsPayload;
-    triggerLegendsPayload.layerSetId = layerSetId;
     return triggerLegendsPayload;
   };
 }

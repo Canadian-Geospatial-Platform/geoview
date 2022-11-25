@@ -72,6 +72,7 @@ export type EventStringId =
   | 'layer/added'
   | 'layer/get_layers'
   | 'layer/remove'
+  | 'layer/if_condition'
   | 'map/add_component'
   | 'map/crosshair_enable_disable'
   | 'map/fix_north'

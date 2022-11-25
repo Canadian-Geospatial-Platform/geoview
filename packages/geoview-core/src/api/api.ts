@@ -14,7 +14,7 @@ import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '../geo/utils/legend-layer-set';
-import { payloadIsAGeoViewLayer } from './events/payloads/geoview-layer-payload';
+import { payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -45,7 +45,7 @@ export class API {
   isReady = 0;
 
   // callback function to call after everything is ready
-  readyCallback?: () => void;
+  readyCallback?: (mapId?: string) => void;
 
   // load plugins API
   plugin: Plugin;
@@ -82,18 +82,47 @@ export class API {
     this.dateUtilities = new DateMgt();
 
     // Run the callback if all maps are ready
-    this.event.on(
-      EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
+    this.event.once(
+      EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
       (payload) => {
-        if (payloadIsAGeoViewLayer(payload)) {
-          let allMapsAreReady = true;
-          Object.keys(this.maps).forEach((mapKey) => {
-            allMapsAreReady &&= this.maps[mapKey].nbConfigLayers === 0;
-          });
-          if (allMapsAreReady && this.readyCallback) this.readyCallback();
+        if (payloadIsTestGeoViewLayers(payload)) {
+          let readyCallbackHasRun4AllMaps = false;
+          const intervalId = setInterval(() => {
+            let allMapsAreReady = true;
+            Object.keys(this.maps).forEach((mapId) => {
+              if (this.maps[mapId].mapIsReady()) {
+                if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
+                  if (this.readyCallback) this.readyCallback(mapId);
+                  this.maps[mapId].readyCallbackHasRun = true;
+                }
+              } else allMapsAreReady = false;
+              if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
+                clearInterval(intervalId);
+                readyCallbackHasRun4AllMaps = true;
+                this.readyCallback('allMaps');
+              }
+            });
+          }, 250);
+          /*
+            const arrayOfMapId = Object.keys(this.maps);
+            for (let i = 0; i < arrayOfMapId.length && allMapsAreReady; i++) {
+              allMapsAreReady &&= this.maps[arrayOfMapId[i]].remainingLayersThatNeedToBeLoaded === 0;
+              const arrayOfGeoviewLayerId = this.maps[arrayOfMapId[i]].layer?.geoviewLayers
+                ? Object.keys(this.maps[arrayOfMapId[i]].layer?.geoviewLayers)
+                : [];
+              for (let j = 0; j < arrayOfGeoviewLayerId.length && allMapsAreReady; j++) {
+                const geoviewLayer = this.maps[arrayOfMapId[i]].layer.geoviewLayers[arrayOfGeoviewLayerId[j]];
+                allMapsAreReady &&= geoviewLayer.isLoaded || geoviewLayer.loadError;
+              }
+            }
+            if (allMapsAreReady && this.readyCallback) {
+              clearInterval(layerInterval);
+              this.readyCallback();
+            }
+            */
         }
       },
-      'all-map-ready?'
+      'run cgpv.init callback?'
     );
   }
 

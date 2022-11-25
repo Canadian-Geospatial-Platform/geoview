@@ -6,22 +6,27 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the LAYER category */
-export type LayerEventKey = 'EVENT_ADD_LAYER' | 'EVENT_LAYER_ADDED' | 'EVENT_REMOVE_LAYER';
+export type LayerEventKey = 'EVENT_ADD_LAYER' | 'EVENT_LAYER_ADDED' | 'EVENT_REMOVE_LAYER' | 'EVENT_IF_CONDITION';
 
 /** Record that associates LAYER's event keys to their event string id */
 export const LAYER: Record<LayerEventKey, EventStringId> = {
   /**
-   * Event triggered when adding a new layer
+   * Event triggered to add a new layer
    */
   EVENT_ADD_LAYER: 'layer/add',
 
   /**
-   * Event triggered when adding a new layer
+   * Event triggered when a new layer has been added
    */
   EVENT_LAYER_ADDED: 'layer/added',
 
   /**
-   * Event triggered when removing a layer
+   * Event triggered to remove a layer
    */
   EVENT_REMOVE_LAYER: 'layer/remove',
+
+  /**
+   * Event triggered to test a condition related to the geoview layers
+   */
+  EVENT_IF_CONDITION: 'layer/if_condition',
 };

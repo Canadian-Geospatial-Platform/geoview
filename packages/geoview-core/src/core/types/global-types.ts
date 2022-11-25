@@ -14,13 +14,16 @@ export type { SelectChangeEvent } from '@mui/material';
 export type { Coordinate } from 'ol/coordinate';
 
 /** ******************************************************************************************************************************
- *  Definition of the map feature configuration according to what is specified in the schema.
+ * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
+ * type extension TypeMapFeaturesInstance.
  */
 export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
   mapId?: string;
   /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
   displayLanguage?: TypeDisplayLanguage;
+  /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */
+  triggerReadyCallback?: boolean;
 }
 
 /** ******************************************************************************************************************************

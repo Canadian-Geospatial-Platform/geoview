@@ -6,6 +6,7 @@ import {
   payloadIsTriggerLegend,
   TypeLegendResultSets,
 } from '../../api/events/payloads/get-legends-payload';
+import { payloadIsLayerSetUpdated } from '../../api/events/payloads/layer-set-payload';
 import { api } from '../../app';
 import { LayerSet } from './layer-set';
 
@@ -47,35 +48,52 @@ export class LegendsLayerSet {
     this.mapId = mapId;
     this.layerSet = new LayerSet(mapId, layerSetId, this.resultSets, registrationConditionFunction);
 
+    // This listener receives the legend information returned by the a layer's getLegend call and store it in the resultSets
+    // if all the registered layers has received their legend information, a EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE event
+    // is triggered.
     api.event.on(
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
       (payload) => {
         if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) this.resultSets[layerPath] = legendInfo;
-          if (isAllDone())
-            api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(this.mapId, this.layerSet.layerSetId, this.resultSets));
+          if (isAllDone()) api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(this.mapId, this.resultSets), layerSetId);
         }
       },
       this.mapId
     );
 
-    api.event.on(
+    // This listener reacts to EVENT_NAMES.GET_LEGENDS.TRIGGER events. It first queries the legend of all known layers.
+    // Then, it activates a listener to query the layers added afterwards or to delete the legends of the deleted layers.
+    api.event.once(
       EVENT_NAMES.GET_LEGENDS.TRIGGER,
       (payload) => {
         if (payloadIsTriggerLegend(payload)) {
-          if (payload.layerSetId === this.layerSet.layerSetId) {
-            if (isAllDone())
-              api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(this.mapId, this.layerSet.layerSetId, this.resultSets));
-            else
-              Object.keys(this.resultSets).forEach((layerPath) => {
-                if (this.resultSets[layerPath] === undefined)
-                  api.event.emit(GetLegendsPayload.createQueryLegendPayload(this.mapId, layerPath));
-              });
-          }
+          const queryUndefinedLegend = () => {
+            Object.keys(this.resultSets).forEach((layerPath) => {
+              if (this.resultSets[layerPath] === undefined)
+                api.event.emit(GetLegendsPayload.createQueryLegendPayload(this.mapId, layerPath), layerPath);
+            });
+          };
+
+          queryUndefinedLegend();
+
+          api.event.on(
+            EVENT_NAMES.LAYER_SET.UPDATED,
+            (layerUpdatedPayload) => {
+              if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
+                if (layerUpdatedPayload.layerSetId === layerSetId) {
+                  if (isAllDone()) api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(this.mapId, this.resultSets), layerSetId);
+                  else queryUndefinedLegend();
+                }
+              }
+            },
+            mapId
+          );
         }
       },
-      this.mapId
+      mapId,
+      layerSetId
     );
   }
 
