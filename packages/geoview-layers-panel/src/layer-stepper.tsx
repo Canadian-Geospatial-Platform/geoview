@@ -2,8 +2,6 @@
 import {
   TypeWindow,
   TypeJsonArray,
-  TypeEsriDynamicLayerEntryConfig,
-  TypeWmsLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   SelectChangeEvent,
@@ -55,7 +53,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     },
   };
 
-  const isMultiple = () => layerType === ESRI_DYNAMIC;
+  const isMultiple = () => layerType === ESRI_DYNAMIC || layerType === WMS || layerType === WFS;
 
   /**
    * List of layer types and labels
@@ -515,7 +513,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * @param e TextField event
    */
   const handleInput = (event: Event) => {
-    setLayerURL(event.target.value);
+    setLayerURL(event.target.value.trim());
     setLayerType('');
     setLayerList([]);
     setLayerName('');
@@ -544,20 +542,12 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     if (isMultiple()) {
       setLayerEntries(
         newValue.map((x: string) => {
-          if (layerType === ESRI_DYNAMIC) {
-            return { layerId: x[0] } as TypeEsriDynamicLayerEntryConfig;
-          }
-
-          return { layerId: x[0] as string } as TypeWmsLayerEntryConfig;
+          return { layerId: `${x[0]}` };
         })
       );
       setLayerName(newValue.map((x) => x[1]).join(', '));
     } else {
-      if (layerType === ESRI_DYNAMIC) {
-        setLayerEntries([{ layerId: newValue[0] } as TypeEsriDynamicLayerEntryConfig]);
-      } else {
-        setLayerEntries([{ layerId: newValue[0] } as TypeWmsLayerEntryConfig]);
-      }
+      setLayerEntries([{ layerId: `${newValue[0]}` }]);
       setLayerName(newValue[1]);
     }
   };
@@ -609,7 +599,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           stepContent: {
             children: (
               <>
-                <TextField sx={{ width: '100%' }} label="URL" variant="standard" value={layerURL} onChange={handleInput} />
+                <TextField sx={{ width: '100%' }} label="URL" variant="standard" value={layerURL} onChange={handleInput} multiline />
                 <br />
                 <NavButtons isFirst handleNext={handleStep1} />
               </>
@@ -663,15 +653,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                     options={layerList}
                     getOptionLabel={(option) => `${option[1]} (${option[0]})`}
                     renderOption={(props, option) => <span {...props}>{option[1]}</span>}
-                    // value={
-                    //   layerType === ESRI_DYNAMIC
-                    //     ? layerEntries.map((entry) => {
-                    //         return (entry as TypeDynamicLayerEntry).index.toString();
-                    //       })
-                    //     : layerEntries.map((entry) => {
-                    //         return (entry as TypeOgcLayerEntry).id;
-                    //       })
-                    // }
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onChange={handleSelectLayer as any}
                     renderInput={(params) => <TextField {...params} label="Select Layer" />}

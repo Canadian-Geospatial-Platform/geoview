@@ -46,9 +46,20 @@ export function Legend(): JSX.Element | null {
           api.event.on(
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
-              const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
-              setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
-              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(payload.layerConfig.geoviewLayerId)) {
+                const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
+                setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
+                api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              } else {
+                console.error('geoviewLayerId is not in the layers list');
+                // TODO see issue #692 group layer add event
+                // workaround => add artificial 3s delay then try to add the layer
+                setTimeout(() => {
+                  const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
+                  setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
+                  api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+                }, 3000);
+              }
             },
             mapId,
             payload.layerConfig.geoviewLayerId
