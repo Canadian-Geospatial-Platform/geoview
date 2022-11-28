@@ -297,6 +297,11 @@ const themeOptions: ThemeOptions = {
         },
       },
     },
+    MuiListItemButton: {
+      defaultProps: {
+        disableTouchRipple: true,
+      },
+    },
   },
   overrides: {
     button: {
