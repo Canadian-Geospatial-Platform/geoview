@@ -49,9 +49,13 @@ export function Legend(): JSX.Element | null {
           api.event.on(
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
-              const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
-              setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
-              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(payload.layerConfig.geoviewLayerId)) {
+                const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
+                setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
+                api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              } else {
+                console.error('geoviewLayerId is not in the layers list');
+              }
             },
             mapId,
             payload.layerConfig.geoviewLayerId
