@@ -112,6 +112,8 @@ export interface TypeLegendItemProps {
   subLayerId?: string;
   layerConfigEntry?: TypeLayerEntryConfig;
   isRemoveable?: boolean;
+  isParentVisible?: boolean;
+  toggleParentVisible?: () => void;
 }
 
 /**
@@ -120,7 +122,7 @@ export interface TypeLegendItemProps {
  * @returns {JSX.Element} the legend list item
  */
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
-  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable } = props;
+  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, isParentVisible, toggleParentVisible } = props;
 
   const { t, i18n } = useTranslation<string>();
 
@@ -294,6 +296,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
    * Handle view/hide layers.
    */
   const handleToggleLayer = () => {
+    if (isParentVisible !== undefined) {
+      if (toggleParentVisible !== undefined && isParentVisible === false) {
+        toggleParentVisible();
+        if (!isChecked) setChecked(!isChecked);
+        return;
+      }
+    }
     setChecked(!isChecked);
   };
 
@@ -361,7 +370,11 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
             <IconButton color="primary" onClick={() => handleToggleLayer()}>
-              {isChecked ? <VisibilityIcon /> : <VisibilityOffIcon />}
+              {(() => {
+                if (isParentVisible === false) return <VisibilityOffIcon />;
+                if (isChecked) return <VisibilityIcon />;
+                return <VisibilityOffIcon />;
+              })()}
             </IconButton>
           </ListItemIcon>
         </ListItemButton>
@@ -392,6 +405,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 geoviewLayerInstance={geoviewLayerInstance}
                 subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
                 layerConfigEntry={subItem}
+                isParentVisible={isParentVisible === false ? false : isChecked}
+                toggleParentVisible={handleToggleLayer}
               />
             ))}
           </Box>
