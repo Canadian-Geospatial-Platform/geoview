@@ -56,6 +56,23 @@ export class Config {
   }
 
   /** ***************************************************************************************************************************
+   * Get triggerReadyCallback value.
+   *
+   * @returns {boolean} The triggerReadyCallback flag of the Geoview map.
+   */
+  get triggerReadyCallback(): boolean {
+    return this.configValidation.triggerReadyCallback;
+  }
+
+  /** ***************************************************************************************************************************
+   * Set mapId value.
+   * @param {string} triggerReadyCallback The value to assign to the triggerReadyCallback flag for the Geoview map.
+   */
+  set triggerReadyCallback(triggerReadyCallback: boolean) {
+    this.configValidation.triggerReadyCallback = triggerReadyCallback;
+  }
+
+  /** ***************************************************************************************************************************
    * Get displayLanguage value.
    *
    * @returns {TypeDisplayLanguage} The display language of the Geoview map.
@@ -86,6 +103,12 @@ export class Config {
     // update map id if provided in map element
     if (mapId) this.mapId = mapId;
 
+    // get the triggerReadyCallback from the map element
+    const triggerReadyCallback = this.mapElement.getAttribute('triggerReadyCallback');
+
+    // update triggerReadyCallback if provided in map element
+    if (triggerReadyCallback) this.triggerReadyCallback = triggerReadyCallback === 'true';
+
     // get the display language from the map element
     const displayLanguage = this.mapElement.getAttribute('data-lang');
 
@@ -106,6 +129,12 @@ export class Config {
 
     // update map id if provided in map element
     if (mapId) this.mapId = mapId;
+
+    // get the triggerReadyCallback from the map element
+    const triggerReadyCallback = this.mapElement.getAttribute('triggerReadyCallback');
+
+    // update triggerReadyCallback if provided in map element
+    if (triggerReadyCallback) this.triggerReadyCallback = triggerReadyCallback === 'true';
 
     // get the display language from the map element
     const displayLanguage = this.mapElement.getAttribute('data-lang');

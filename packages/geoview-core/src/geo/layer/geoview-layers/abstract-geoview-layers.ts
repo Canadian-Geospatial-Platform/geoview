@@ -138,6 +138,9 @@ export abstract class AbstractGeoViewLayer {
   /** Flag used to indicate that the layer is loaded */
   isLoaded = false;
 
+  /** Flag used to indicate a layer load error */
+  loadError = false;
+
   /** The unique identifier of the map on which the GeoView layer will be drawn. */
   mapId: string;
 
@@ -531,9 +534,6 @@ export abstract class AbstractGeoViewLayer {
   protected registerToLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
 
-    // Register to layer sets that are already created.
-    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
-
     // Listen to events that request a layer inventory and emit a register payload event.
     // This will register all existing layers to a newly created layer set.
     api.event.on(
@@ -551,14 +551,13 @@ export abstract class AbstractGeoViewLayer {
       EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
       (payload) => {
         if (payloadIsQueryLegend(payload)) {
-          if (payload.layerPath === layerPath) {
-            this.getLegend(layerPath).then((queryResult) => {
-              api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
-            });
-          }
+          this.getLegend(layerPath).then((queryResult) => {
+            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
+          });
         }
       },
-      this.mapId
+      this.mapId,
+      layerPath
     );
 
     if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
@@ -576,6 +575,9 @@ export abstract class AbstractGeoViewLayer {
         this.mapId
       );
     }
+
+    // Register to layer sets that are already created.
+    api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
   }
 
   /** ***************************************************************************************************************************

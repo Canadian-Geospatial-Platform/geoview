@@ -817,6 +817,7 @@ export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
  *  Definition of the map feature configuration according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
+  /** map configuration. */
   map: TypeMapConfig;
   /** Display theme, default = dark. */
   theme?: 'dark' | 'light';

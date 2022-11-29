@@ -1,8 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import { MapContext } from '../../app-start';
-import { AbstractGeoViewLayer, api, payloadIsAGeoViewLayer, payloadIsALayerConfig } from '../../../app';
+import { api } from '../../../app';
 import { List } from '../../../ui';
 import { LegendItem } from './legend-item';
+import { payloadIsRemoveGeoViewLayer } from '../../../api/events/payloads/geoview-layer-payload';
+import { AbstractGeoViewLayer } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { payloadIsALayerConfig } from '../../../api/events/payloads/layer-config-payload';
 
 const sxStyles = {
   legend: {
@@ -30,7 +33,7 @@ export function Legend(): JSX.Element | null {
     api.event.on(
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
-        if (payloadIsAGeoViewLayer(payload)) {
+        if (payloadIsRemoveGeoViewLayer(payload)) {
           const removedGeoviewLayer = payload.geoviewLayer as AbstractGeoViewLayer;
           setOrderedMapLayers((orderedLayers) =>
             orderedLayers.filter((layer) => layer.geoviewLayerId !== removedGeoviewLayer.geoviewLayerId)
@@ -72,6 +75,7 @@ export function Legend(): JSX.Element | null {
       });
       setOrderedMapLayers(layers);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLayers]);
 
   return (

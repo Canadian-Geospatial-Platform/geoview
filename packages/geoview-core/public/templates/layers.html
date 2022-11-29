@@ -282,7 +282,7 @@
   <div class="map-title-holder">
     <h4 id="HLYR5">5. GeoJSON Layer</h4><a class="ref-link" href="#top">Top</a>
   </div>
-  <div id="LYR5" class="llwp-map" data-lang="en" data-config="{
+  <div id="LYR5" class="llwp-map" triggerReadyCallback="true" data-lang="en" data-config="{
     'map': {
       'interaction': 'dynamic',
       'viewSettings': {
@@ -489,13 +489,14 @@
   <script src="codedoc.js"></script>
   <script>
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function () {
-      console.log('api is ready');
+    cgpv.init(function (mapId) {
+      console.log(`api is ready for ${mapId}`);
 
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
-
+      if (mapId === 'allMaps') {
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
+      }
     });
 
     // find the button element by ID
@@ -555,13 +556,13 @@
 
     const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR1');
+      const {  resultSets } = payload;
+      displayLegend('wmsLegendsId', resultSets);
+    }, 'LYR1', 'wmsLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'wmsLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
     });
 
     // ESRI Dynamic =============================================================================================================
@@ -573,13 +574,13 @@
 
     const LegendsEsriDynamicLayerSet = cgpv.api.createLegendsLayerSet('LYR3', 'esriDynamicLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR3');
+      const {  resultSets } = payload;
+      displayLegend('esriDynamicLegendsId', resultSets);
+    }, 'LYR3', 'esriDynamicLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-dynamic-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'esriDynamicLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriDynamicLegendsId');
     });
 
     // ESRI Feature =============================================================================================================
@@ -591,13 +592,13 @@
 
     const LegendsEsriFeatureLayerSet = cgpv.api.createLegendsLayerSet('LYR4', 'esriFeatureLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR4');
+      const {  resultSets } = payload;
+      displayLegend('esriFeatureLegendsId', resultSets);
+    }, 'LYR4', 'esriFeatureLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-feature-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'esriFeatureLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriFeatureLegendsId');
     });
 
     // GeoJson ==================================================================================================================
@@ -609,13 +610,13 @@
 
     const LegendsGeoJsonLayerSet = cgpv.api.createLegendsLayerSet('LYR5', 'geojsonLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR5');
+      const {  resultSets } = payload;
+      displayLegend('geojsonLegendsId', resultSets);
+    }, 'LYR5', 'geojsonLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-geojson-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'geojsonLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geojsonLegendsId');
     });
 
     // WFS ======================================================================================================================
@@ -627,13 +628,13 @@
 
     const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR6');
+      const {  resultSets } = payload;
+      displayLegend('wfsLegendsId', resultSets);
+    }, 'LYR6', 'wfsLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'wfsLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
     });
 
     // OGC Feature API ==========================================================================================================
@@ -645,13 +646,13 @@
 
     const LegendsOgcApiLayerSet = cgpv.api.createLegendsLayerSet('LYR7', 'ogcApiLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR7');
+      const {  resultSets } = payload;
+      displayLegend('ogcApiLegendsId', resultSets);
+    }, 'LYR7', 'ogcApiLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-ogcApi-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'ogcApiLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'ogcApiLegendsId');
     });
 
     // GeoCore ==================================================================================================================
@@ -663,13 +664,13 @@
 
     const LegendsGeocoreLayerSet = cgpv.api.createLegendsLayerSet('LYR8', 'geocoreLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR8');
+      const {  resultSets } = payload;
+      displayLegend('geocoreLegendsId', resultSets);
+    }, 'LYR8', 'geocoreLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-geocore-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'geocoreLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geocoreLegendsId');
     });
 
     // ==========================================================================================================================

@@ -10,7 +10,7 @@ import { EVENT_NAMES } from '../../api/events/event-types';
 import { Config } from '../../core/utils/config/config';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
-import { payloadIsAGeoViewLayer, geoviewLayerPayload } from '../../api/events/payloads/geoview-layer-payload';
+import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
@@ -74,7 +74,7 @@ export class Layer {
                 arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
                   // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
                   // the list of geoview layer entries.
-                  api.maps[this.mapId].nbConfigLayers += listOfGeoviewLayerConfig.length - 1;
+                  api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
                   api.maps[this.mapId].setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
                   listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
                     this.addGeoviewLayer(geoviewLayerConfig);
@@ -127,7 +127,7 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
-        if (payloadIsAGeoViewLayer(payload)) {
+        if (payloadIsGeoViewLayerAdded(payload)) {
           // remove layer from outside
           this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
         }
@@ -159,7 +159,7 @@ export class Layer {
             // We keep the first instance of the duplicat entry.
             configToCreateIndex >= configToTestIndex
           ) {
-            this.printGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+            this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
             return false;
           }
         return true;
@@ -173,7 +173,7 @@ export class Layer {
    * Print an error message for the duplicate geoview layer configuration.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
    */
-  private printGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+  private printDuplicateGeoviewLayerConfigError(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     api.event.emit(
       snackbarMessagePayload(EVENT_NAMES.SNACKBAR.EVENT_SNACKBAR_OPEN, this.mapId, {
         type: 'key',
@@ -246,15 +246,14 @@ export class Layer {
         console.log(consoleMessage);
       });
     } else {
+      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+      this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
       // trigger the layer added event when layer is loaded on to the map
       geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => {
         if (!geoviewLayer.isLoaded) {
-          api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_LAYER_ADDED, this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
         }
       });
-
-      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
-      this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
     }
   }
 
@@ -274,6 +273,7 @@ export class Layer {
     });
 
     if (this.geoviewLayers[partialLayerPath]) {
+      clearTimeout(api.maps[this.mapId].layerLoadedTimeoutId[partialLayerPath]);
       this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
     }
@@ -295,8 +295,11 @@ export class Layer {
     config.configValidation.validateListOfGeoviewLayerConfig(suportedLanguages, [geoviewLayerConfig]);
 
     if (geoviewLayerConfig.geoviewLayerId in api.maps[this.mapId].layer.geoviewLayers)
-      this.printGeoviewLayerConfigError(geoviewLayerConfig);
-    else api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
+      this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
+    else {
+      api.maps[this.mapId].setEventListenerAndTimeout4ThisListOfLayer([geoviewLayerConfig]);
+      api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
+    }
 
     return geoviewLayerConfig.geoviewLayerId;
   };
@@ -307,7 +310,7 @@ export class Layer {
    * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
-    api.event.emit(geoviewLayerPayload(EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER, this.mapId, geoviewLayer));
+    api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
 
     return geoviewLayer.geoviewLayerId;
   };

@@ -86,13 +86,13 @@
 
     const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      displayLegend(layerSetId, resultSets);
-    }, 'LYR1');
+      const {  resultSets } = payload;
+      displayLegend('wmsLegendsId', resultSets);
+    }, 'LYR1', 'wmsLegendsId');
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER, layerSetId: 'wmsLegendsId' });
+      cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
     });
 
     // ==========================================================================================================================
