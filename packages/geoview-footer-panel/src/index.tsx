@@ -140,14 +140,7 @@ class FooterPanelPlugin extends AbstractPlugin {
       // access the api calls
       const { api } = cgpv;
 
-      if (this.buttonPanel) {
-        api.map(mapId).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-
-        // reset basemaps array
-        api.map(mapId).basemap.basemaps = [];
-        // reload default basemap
-        api.map(mapId).basemap.loadDefaultBasemaps();
-      }
+      // TODO: Enable the footer tabs removal
     }
   }
 }

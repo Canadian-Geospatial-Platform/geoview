@@ -52,6 +52,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-swiper': {
+      import: '../geoview-swiper/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

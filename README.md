@@ -26,6 +26,8 @@ This project is now a monorepo and contains the following packages under the `pa
 
 - [geoview-footer-panel](packages/geoview-footer-panel) - a package that displays a footer panel with a list of tabs (legend, details, data grid, ...) for basic view.
 
+- [geoview-swiper](packages/geoview-swiper) - a package that enable a swiper control to tooggle visibility of layers from one side to the other side of the swiper bar.
+
 ## Development
 
 Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a few extentions to help linting and formatting
