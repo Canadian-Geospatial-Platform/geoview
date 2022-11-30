@@ -4,6 +4,7 @@ import { AbstractGeoViewVector, api } from '../../../app';
 import { getLocalizedValue } from '../../utils/utilities';
 
 import { LayerDataGrid } from './layer-data-grid';
+import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
@@ -18,6 +19,8 @@ export interface TypeLayerDataGridProps {
 export class DataGridAPI {
   mapId!: string;
 
+  displayLanguage!: TypeDisplayLanguage;
+
   /**
    * initialize the data grid api
    *
@@ -25,6 +28,7 @@ export class DataGridAPI {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
+    this.displayLanguage = api.map(mapId).displayLanguage;
   }
 
   /**
@@ -48,6 +52,7 @@ export class DataGridAPI {
         headerName: columnHeader[i],
         width: 150,
         type: 'string',
+        hide: columnHeader[i] === 'featureKey',
       });
     }
 
@@ -63,6 +68,8 @@ export class DataGridAPI {
         pageSize: 50,
         rowsPerPageOptions: [25, 50, 100],
         autoHeight: true,
+        rowId: 'featureKey',
+        displayLanguage: this.displayLanguage,
       }),
     ]);
   };
