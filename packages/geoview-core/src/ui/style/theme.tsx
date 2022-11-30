@@ -7,6 +7,14 @@ const headingStyles = {
   fontWeight: 700,
 };
 
+const opacity = {
+  hoverOpacity: 0.08,
+  selectedOpacity: 0.16,
+  disabledOpacity: 0.38,
+  focusOpacity: 0.12,
+  activatedOpacity: 0.24,
+};
+
 /**
  * Make changes to MUI default LIGHT theme/mode here
  * see https://mui.com/material-ui/customization/palette/
@@ -83,16 +91,18 @@ const lightPalette = {
   },
   action: {
     active: 'rgba(0, 0, 0, 0.54)',
-    hover: 'rgba(0, 0, 0, 0.04)',
-    hoverOpacity: 0.04,
-    selected: 'rgba(0, 0, 0, 0.08)',
-    selectedOpacity: 0.08,
+    hover: `rgba(0, 0, 0, ${opacity.hoverOpacity})`,
+    hoverRow: `rgba(0, 255, 255, ${opacity.hoverOpacity})`,
+    hoverOpacity: opacity.hoverOpacity,
+    selected: `rgba(0, 0, 0, ${opacity.selectedOpacity})`,
+    selectedRow: `rgba(0, 255, 255, ${opacity.selectedOpacity})`,
+    selectedOpacity: opacity.selectedOpacity,
     disabled: 'rgba(0, 0, 0, 0.26)',
-    disabledBackground: 'rgba(0, 0, 0, 0.12)',
-    disabledOpacity: 0.38,
-    focus: 'rgba(0, 0, 0, 0.12)',
-    focusOpacity: 0.12,
-    activatedOpacity: 0.12,
+    disabledBackground: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
+    disabledOpacity: opacity.disabledOpacity,
+    focus: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
+    focusOpacity: opacity.focusOpacity,
+    activatedOpacity: opacity.activatedOpacity,
   },
 };
 
@@ -173,16 +183,16 @@ const darkPalette = {
   },
   action: {
     active: '#fff',
-    hover: 'rgba(255, 255, 255, 0.08)',
-    hoverOpacity: 0.08,
-    selected: 'rgba(255, 255, 255, 0.16)',
-    selectedOpacity: 0.16,
+    hover: `rgba(255, 255, 255, ${opacity.hoverOpacity})`,
+    hoverOpacity: opacity.hoverOpacity,
+    selected: `rgba(255, 255, 255, ${opacity.selectedOpacity})`,
+    selectedOpacity: opacity.selectedOpacity,
     disabled: 'rgba(255, 255, 255, 0.3)',
-    disabledBackground: 'rgba(255, 255, 255, 0.12)',
-    disabledOpacity: 0.38,
-    focus: 'rgba(255, 255, 255, 0.12)',
-    focusOpacity: 0.12,
-    activatedOpacity: 0.24,
+    disabledBackground: `rgba(255, 255, 255, ${opacity.focusOpacity})`,
+    disabledOpacity: opacity.disabledOpacity,
+    focus: `rgba(255, 255, 255, ${opacity.focusOpacity})`,
+    focusOpacity: opacity.focusOpacity,
+    activatedOpacity: opacity.activatedOpacity,
   },
 };
 

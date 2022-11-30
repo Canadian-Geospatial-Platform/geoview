@@ -169,9 +169,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
     const queryResult: TypeArrayOfFeatureInfoEntries = [];
+    let keyCounter = 0;
+
     features.forEach((feature) => {
-      const featureFields = feature.getKeys();
       const featureInfoEntry: TypeFeatureInfoEntry = {};
+
+      // add a key to the feature for building data-grid
+      featureInfoEntry.featureKey = keyCounter++;
+
+      // query feature info
+      const featureFields = feature.getKeys();
       featureFields.forEach((fieldName) => {
         if (fieldName !== 'geometry') {
           if (outfields?.includes(fieldName)) {
