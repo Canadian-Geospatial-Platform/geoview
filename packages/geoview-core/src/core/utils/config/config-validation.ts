@@ -307,6 +307,10 @@ export class ConfigValidation {
 
     // if config has been provided by user then validate it
     if (mapFeaturesConfigToValidate) {
+      // if the list of layer doesn't exist, add the key with empty array for the map to trigger
+      if (mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig === undefined)
+        mapFeaturesConfigToValidate.map.listOfGeoviewLayerConfig = [];
+
       // create a validator object
       const validator = new Ajv({
         strict: false,

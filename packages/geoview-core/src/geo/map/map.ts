@@ -239,7 +239,7 @@ export class MapViewer {
       const geoviewLayer = this.layer.geoviewLayers[arrayOfGeoviewLayerId[i]];
       allGeoviewLayersAreReady &&= geoviewLayer.isLoaded || geoviewLayer.loadError;
     }
-    return allGeoviewLayersAreReady;
+    return allGeoviewLayersAreReady && this.layer !== undefined;
   }
 
   /**
