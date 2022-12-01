@@ -90,12 +90,14 @@ export class API {
           const intervalId = setInterval(() => {
             let allMapsAreReady = true;
             Object.keys(this.maps).forEach((mapId) => {
-              if (this.maps[mapId].mapIsReady()) {
+              // make sure layer object is not undefined so when init call back is trigger, layer are accessible
+              if (this.maps[mapId].mapIsReady() && this.maps[mapId].layer !== undefined) {
                 if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
                   if (this.readyCallback) this.readyCallback(mapId);
                   this.maps[mapId].readyCallbackHasRun = true;
                 }
               } else allMapsAreReady = false;
+
               if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
                 clearInterval(intervalId);
                 readyCallbackHasRun4AllMaps = true;
@@ -103,6 +105,7 @@ export class API {
               }
             });
           }, 250);
+          // TODO: can we remove the following comment
           /*
             const arrayOfMapId = Object.keys(this.maps);
             for (let i = 0; i < arrayOfMapId.length && allMapsAreReady; i++) {
