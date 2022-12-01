@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 import { asArray, asString } from 'ol/color';
 import { Text, Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { LineString, Point, Polygon } from 'ol/geom';
+import { Geometry, LineString, Point, Polygon } from 'ol/geom';
 import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
@@ -31,7 +31,6 @@ import {
   TypeStyleConfigKey,
   TypeStyleSettings,
   TypeSymbol,
-  TypeTextVectorConfig,
   TypeUniqueValueStyleInfo,
   TypeVectorLayerEntryConfig,
   TypeVectorTileLayerEntryConfig,
@@ -44,6 +43,7 @@ import {
   TypeBaseVectorConfig,
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
+  TypeBaseSourceVectorInitialConfig,
 } from '../map/map-schema-types';
 import { defaultColor } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
@@ -117,7 +117,7 @@ export class GeoviewRenderer {
   };
 
   /** Table of function to process polygon fill style settings. */
-  private processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig) => Style | undefined> = {
+  private processFillStyle: Record<TypeFillStyle, (settings: TypePolygonVectorConfig, geometry?: Geometry) => Style | undefined> = {
     null: this.processNullFill,
     solid: this.processSolidFill,
     backwardDiagonal: this.processBackwardDiagonalFill,
@@ -518,46 +518,132 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
-  getClusterStyle(feature: FeatureLike, layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig): Style | undefined {
+  getClusterStyle(feature: FeatureLike, layerEntryConfig: TypeVectorLayerEntryConfig): Style | undefined {
     // If style does not exist for the geometryType, create it.
-    let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
-    if (style === undefined || style.Point === undefined)
-      style = this.createDefaultClusterStyle(layerEntryConfig as TypeVectorLayerEntryConfig);
-    // Get the style accordingly to its type and geometry.
-    if (style!.Point !== undefined) {
-      const styleSettings = style!.Point;
-      const textSettings: TypeTextVectorConfig = {};
-      return this.processClusterSymbol(styleSettings, textSettings, feature);
+    const configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
+    const textColor = configSource.cluster?.textColor !== undefined ? configSource.cluster?.textColor : '';
+    let { style } = layerEntryConfig;
+
+    // If settings exist for Geometry styles, use that stroke color, prioritizing point.
+    if (style?.Point !== undefined) {
+      this.setClusterColor(layerEntryConfig, style!.Point);
     }
+
+    if (style?.Polygon !== undefined) {
+      this.setClusterColor(layerEntryConfig, style!.Polygon);
+    }
+
+    if (style?.LineString !== undefined) {
+      this.setClusterColor(layerEntryConfig, style!.LineString);
+    }
+
+    if (style === undefined || style.Point === undefined) {
+      style = this.createDefaultClusterStyle(layerEntryConfig);
+    }
+
+    // Get the cluster point style if the feature is a cluster.
+    if (style.Point !== undefined && feature.get('features').length > 1) {
+      const styleSettings = (isSimpleStyleConfig(style.Point) ? style.Point.settings : style.Point) as TypeSimpleSymbolVectorConfig;
+
+      if (styleSettings?.color === undefined && styleSettings.stroke?.color === undefined) {
+        styleSettings.color =
+          layerEntryConfig.source!.cluster?.color !== undefined
+            ? asString(setAlphaColor(asArray(layerEntryConfig.source!.cluster!.color), 0.25))
+            : this.getDefaultColorAndIncrementIndex(0.25);
+      }
+
+      this.setClusterColor(layerEntryConfig, styleSettings);
+      const pointStyle = this.processClusterSymbol(styleSettings, feature, textColor);
+      return pointStyle;
+    }
+
+    // When there is only a single feature left, use that features original geometry
+    if (feature.get('features').length === 1) {
+      const originalFeature = feature.get('features')[0];
+
+      // If style does not exist for the geometryType, create it.
+      if (originalFeature.getGeometry() instanceof LineString && style!.LineString === undefined) {
+        const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
+        let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
+        label = label !== undefined ? label : styleId;
+        const settings: TypeLineStringVectorConfig = {
+          type: 'lineString',
+          stroke: {
+            color: layerEntryConfig.source!.cluster!.color,
+          },
+        };
+        const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
+        layerEntryConfig.style!.LineString = styleSettings;
+      }
+
+      if (originalFeature.getGeometry() instanceof Polygon && style!.Polygon === undefined) {
+        const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
+        let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
+        label = label !== undefined ? label : styleId;
+        const strokeColor = layerEntryConfig.source!.cluster?.color;
+        const fillColor = asString(setAlphaColor(asArray(strokeColor!), 0.25));
+        const settings: TypePolygonVectorConfig = {
+          type: 'filledPolygon',
+          color: fillColor,
+          stroke: { color: strokeColor },
+          fillStyle: 'solid',
+        };
+        const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
+        layerEntryConfig.style!.Polygon = styleSettings;
+      }
+
+      return this.getFeatureStyle(originalFeature, layerEntryConfig);
+    }
+
+    if ('style' in layerEntryConfig) {
+      return this.getFeatureStyle(feature, layerEntryConfig);
+    }
+
     return undefined;
   }
 
   /** ***************************************************************************************************************************
    * Create a default style to use with a cluster feature that has no style configuration.
    *
-   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
-   * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
+   * @param { TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style configuration for the
+   * feature. If style does not exist for the geometryType, create it.
    *
-   * @returns {Style | undefined} The style applied to the feature or undefined if not found.
+   * @returns {TypeStyleConfig} The style applied to the feature.
    */
-  createDefaultClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig): TypeStyleConfig | undefined {
+  private createDefaultClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig): TypeStyleConfig {
     if (layerEntryConfig.style === undefined) layerEntryConfig.style = {};
     const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
     let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
     label = label !== undefined ? label : styleId;
+    const layerColor = layerEntryConfig.source?.cluster?.color ? layerEntryConfig.source?.cluster?.color : undefined;
     const settings: TypeSimpleSymbolVectorConfig = {
       type: 'simpleSymbol',
-      color: this.getDefaultColor(0.25),
+      color: layerColor ? asString(setAlphaColor(asArray(layerColor!), 0.25)) : this.getDefaultColor(0.25),
       stroke: {
-        color: this.getDefaultColorAndIncrementIndex(1),
+        color: layerColor || this.getDefaultColorAndIncrementIndex(1),
         lineStyle: 'solid',
         width: 1,
       },
       symbol: 'circle',
     };
+    if (layerEntryConfig.source!.cluster!.color === undefined) layerEntryConfig.source!.cluster!.color = settings.stroke!.color;
     const clusterStyleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
     layerEntryConfig.style.Point = clusterStyleSettings;
     return layerEntryConfig.style;
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the color in the layer cluster settings for clustered elements.
+   *
+   * @param { TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config for the layer.
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the circle Style creation.
+   *
+   */
+  private setClusterColor(layerEntryConfig: TypeVectorLayerEntryConfig, styleSettings: TypeStyleSettings | TypeKindOfVectorSettings) {
+    const simpleSettings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeSimpleSymbolVectorConfig;
+    if (layerEntryConfig.source!.cluster!.color === undefined && simpleSettings.stroke?.color !== undefined) {
+      layerEntryConfig.source!.cluster!.color = simpleSettings.stroke!.color;
+    }
   }
 
   /** ***************************************************************************************************************************
@@ -790,27 +876,27 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * Process a cluster circle symbol using the settings.
    *
-   * @param {TypeSimpleSymbolVectorConfig} styleSettings The settings to use for the circle Style creation.
-   * @param {TypeTextVectorConfig} textSettings The settings to use for the text Style creation.
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the circle Style creation.
    * @param {FeatureLike} feature The feature that need its style to be defined.
+   * @param {string} textColor The color to use for the cluster feature count.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processClusterSymbol(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    textSettings: TypeTextVectorConfig,
-    feature: FeatureLike
+    feature: FeatureLike,
+    textColor?: string
   ): Style | undefined {
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeSimpleSymbolVectorConfig;
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size : 8 };
+    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size + 4 : 8 };
     circleOptions.stroke = new Stroke(strokeOptions);
     circleOptions.fill = new Fill(fillOptions);
     if (settings.offset !== undefined) circleOptions.displacement = settings.offset;
     if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
     const textOptions: TextOptions = { text: feature.get('features').length.toString() };
-    const textFillOptions: FillOptions = { color: textSettings.color !== undefined ? textSettings.color : '#fff' };
+    const textFillOptions: FillOptions = { color: textColor !== '' ? textColor : '#fff' };
     textOptions.fill = new Fill(textFillOptions);
     return new Style({
       image: new StyleCircle(circleOptions),
@@ -846,9 +932,13 @@ export class GeoviewRenderer {
    */
   private processSimpleLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
+    let geometry;
+    if (feature) {
+      geometry = feature.getGeometry() as Geometry;
+    }
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      return new Style({ stroke: new Stroke(strokeOptions) });
+      return new Style({ stroke: new Stroke(strokeOptions), geometry });
     }
     return undefined;
   }
@@ -860,13 +950,14 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processSolidFill(settings: TypePolygonVectorConfig): Style | undefined {
+  private processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
     return new Style({
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
+      geometry,
     });
   }
 
@@ -877,13 +968,14 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processNullFill(settings: TypePolygonVectorConfig): Style | undefined {
+  private processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0);
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
     return new Style({
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
+      geometry,
     });
   }
 
@@ -895,7 +987,7 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: FillPaternLine[]): Style | undefined {
+  private processPaternFill(settings: TypePolygonVectorConfig, fillPaternLines: FillPaternLine[], geometry?: Geometry): Style | undefined {
     const paternSize = settings.paternSize !== undefined ? settings.paternSize : 8;
     if (settings.color === undefined) settings.color = this.getDefaultColorAndIncrementIndex(0.25);
     const fillOptions: FillOptions = { color: settings.color };
@@ -928,6 +1020,7 @@ export class GeoviewRenderer {
     return new Style({
       stroke: new Stroke(strokeOptions),
       fill: new Fill(fillOptions),
+      geometry,
     });
   }
 
@@ -938,8 +1031,8 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processBackwardDiagonalFill(settings: TypePolygonVectorConfig): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.backwardDiagonal);
+  private processBackwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.backwardDiagonal, geometry);
   }
 
   /** ***************************************************************************************************************************
@@ -949,8 +1042,8 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processForwardDiagonalFill(settings: TypePolygonVectorConfig): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.forwardDiagonal);
+  private processForwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.forwardDiagonal, geometry);
   }
 
   /** ***************************************************************************************************************************
@@ -960,8 +1053,8 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processCrossFill(settings: TypePolygonVectorConfig): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.cross);
+  private processCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.cross, geometry);
   }
 
   /** ***************************************************************************************************************************
@@ -971,8 +1064,8 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processDiagonalCrossFill(settings: TypePolygonVectorConfig): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.diagonalCross);
+  private processDiagonalCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.diagonalCross, geometry);
   }
 
   /** ***************************************************************************************************************************
@@ -982,8 +1075,8 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processHorizontalFill(settings: TypePolygonVectorConfig): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.horizontal);
+  private processHorizontalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.horizontal, geometry);
   }
 
   /** ***************************************************************************************************************************
@@ -993,8 +1086,8 @@ export class GeoviewRenderer {
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processVerticalFill(settings: TypePolygonVectorConfig): Style | undefined {
-    return this.processPaternFill(settings, this.fillPaternSettings.vertical);
+  private processVerticalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
+    return this.processPaternFill(settings, this.fillPaternSettings.vertical, geometry);
   }
 
   /** ***************************************************************************************************************************
@@ -1008,8 +1101,15 @@ export class GeoviewRenderer {
    */
   private processSimplePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
+    let geometry;
+    if (feature) {
+      geometry = feature.getGeometry() as Geometry;
+    }
     if (isFilledPolygonVectorConfig(settings)) {
       const { fillStyle } = settings;
+      if (geometry !== undefined) {
+        return this.processFillStyle[fillStyle].call(this, settings, geometry);
+      }
       return this.processFillStyle[fillStyle].call(this, settings);
     }
     return undefined;

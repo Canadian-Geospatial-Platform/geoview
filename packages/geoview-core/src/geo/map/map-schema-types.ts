@@ -53,17 +53,17 @@ export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | '
 export type TypeSourceVectorClusterConfig = {
   /** Flag used to enable clustering. Default = false. */
   enable: boolean;
-  /** Flag used to enable clustering of polygons. Default = false. */
-  clusterPolygon?: boolean;
-  /** Flag used to enable clusteringof lineStrings. Default = false. */
-  clusterLineString?: boolean;
   /** Distance in pixels within which features will be clustered together (deafult 20px). */
-  distance: number;
+  distance?: number;
   /** Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is
    * guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer
    * be the center of all its features.
    */
-  minDistance: number;
+  minDistance?: number;
+  /** Color for the text showing the number of points in a cluster */
+  textColor?: string;
+  /** Color for the cluster symbol and clustered geometries */
+  color?: string;
 };
 
 /** ******************************************************************************************************************************
@@ -312,14 +312,6 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorConfig {
    * with the Canvas renderer.
    */
   crossOrigin?: string;
-}
-
-/** ******************************************************************************************************************************
- * Definition of the icon symbol vector settings type.
- */
-export interface TypeTextVectorConfig {
-  /** Fill color for text */
-  color?: string;
 }
 
 /** ******************************************************************************************************************************

@@ -1,0 +1,56 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 4,
+      "center": [-100, 60],
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "flood_cluster",
+        "geoviewLayerName": {
+          "en": "Cluster test",
+          "fr": ""
+        },
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lines.json",
+            "source": {
+              "dataAccessPath": {
+                "en": "./geojson/",
+                "fr": "./geojson/"
+              },
+              "cluster": {
+                "enable": true,
+                "textColor": "black"
+              }
+            }
+          },
+          {
+            "layerId": "polygons.json",
+            "source": {
+              "dataAccessPath": {
+                "en": "./geojson/",
+                "fr": "./geojson/"
+              },
+              "cluster": {
+                "enable": true
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "dark",
+  "components": [],
+  "corePackages": [],
+  "suportedLanguages": ["en"]
+}

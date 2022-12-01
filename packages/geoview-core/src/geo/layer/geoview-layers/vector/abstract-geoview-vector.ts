@@ -79,7 +79,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   protected processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null> {
     const promisedVectorLayer = new Promise<BaseLayer | null>((resolve) => {
       const vectorSource = this.createVectorSource(layerEntryConfig);
-      const vectorLayer = this.createVectorLayer(layerEntryConfig, vectorSource);
+      const vectorLayer = this.createVectorLayer(layerEntryConfig as TypeVectorLayerEntryConfig, vectorSource);
       resolve(vectorLayer);
     });
     return promisedVectorLayer;
@@ -139,8 +139,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {VectorLayer<VectorSource>} The vector layer created.
    */
-  private createVectorLayer(layerEntryConfig: TypeBaseLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
-    const configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
+  private createVectorLayer(layerEntryConfig: TypeVectorLayerEntryConfig, vectorSource: VectorSource<Geometry>): VectorLayer<VectorSource> {
+    let configSource: TypeBaseSourceVectorInitialConfig = {};
+    if (layerEntryConfig.source !== undefined) {
+      configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
+      if (configSource.cluster === undefined) {
+        configSource.cluster = { enable: false };
+      }
+    } else {
+      configSource = { cluster: { enable: false } };
+    }
+
     const layerOptions: VectorLayerOptions<VectorSource> = {
       properties: { layerEntryConfig },
       source: configSource.cluster!.enable
@@ -148,29 +157,29 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             source: vectorSource,
             distance: configSource.cluster!.distance,
             minDistance: configSource.cluster!.minDistance,
-            geometryFunction: (feature) => {
-              if (feature.getGeometry() instanceof Polygon && configSource.cluster!.clusterPolygon) {
+            geometryFunction: ((feature): Point | null => {
+              if (feature.getGeometry() instanceof Polygon) {
                 const geometry = feature.getGeometry() as Polygon;
                 return geometry.getInteriorPoint() !== undefined ? geometry.getInteriorPoint() : null;
               }
 
-              if (feature.getGeometry() instanceof LineString && configSource.cluster!.clusterLineString) {
+              if (feature.getGeometry() instanceof LineString) {
                 const geometry = feature.getGeometry() as LineString;
                 return geometry.getCoordinateAt(0.5) !== undefined ? new Point(geometry.getCoordinateAt(0.5)) : null;
               }
 
               if (feature.getGeometry() instanceof Point) {
-                return feature.getGeometry() !== undefined ? feature.getGeometry() : null;
+                return feature.getGeometry() !== undefined ? (feature.getGeometry() as Point) : null;
               }
 
               return null;
-            },
+            }) as (arg0: Feature<Geometry>) => Point,
           })
         : vectorSource,
       style: (feature) => {
         const { geoviewRenderer } = api.map(this.mapId);
 
-        if (configSource.cluster!.enable && feature.get('features').length > 1) {
+        if (configSource.cluster!.enable) {
           return geoviewRenderer.getClusterStyle(feature, layerEntryConfig);
         }
 

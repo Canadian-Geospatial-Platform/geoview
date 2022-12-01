@@ -419,16 +419,6 @@
           "type": "boolean",
           "default": false
         },
-        "clusterPolygon": {
-          "type": "boolean",
-          "default": false,
-          "description": "Flag used to enable clustering of polygons. Default = false."
-        },
-        "clusterLineString": {
-          "type": "boolean",
-          "default": false,
-          "description": "Flag used to enable clustering of LineStrings. Default = false."
-        },
         "distance": {
           "type": "integer",
           "description": "Distance in pixels within which features will be clustered together (deafult 20px)."
@@ -436,6 +426,14 @@
         "minDistance": {
           "type": "integer",
           "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Color for the text showing the number of points in a cluster"
+        },
+        "color": {
+          "type": "string",
+          "description": "Color for the cluster symbol and clustered geometries"
         }
       }
     },
