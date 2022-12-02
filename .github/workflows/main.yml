@@ -19,10 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo PR info
+        env:
+          ACTOR: ${{ github.actor }}
+          ACTION: ${{ github.event.action }}
+          MERGE: ${{ github.event.pull_request.merged }}
+          HEAD: ${{ github.head_ref }}
         run: |
-          echo User ${{ github.actor }} is about to ${{ github.event.action }} this Pull Request.
-          echo The PR is merged: ${{ github.event.pull_request.merged }}
-          echo The PR head reference: ${{ github.head_ref }}
+          echo 'User $ACTOR is about to $ACTION this Pull Request.'
+          echo 'The PR is merged: $MERGE.'
+          echo 'The PR head reference: $HEAD.'
           echo '${{ toJSON(github) }}'
 
       - name: Check if contributor is an org member
