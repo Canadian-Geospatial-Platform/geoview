@@ -23,6 +23,7 @@ jobs:
           echo User ${{ github.actor }} is about to ${{ github.event.action }} this Pull Request.
           echo The PR is merged: ${{ github.event.pull_request.merged }}
           echo The PR head reference: ${{ github.head_ref }}
+          echo '${{ toJSON(github) }}'
 
       - name: Check if contributor is an org member
         id: is_organization_member
