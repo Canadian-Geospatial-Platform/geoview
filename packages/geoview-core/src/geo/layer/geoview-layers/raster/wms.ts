@@ -112,12 +112,29 @@ export class WMS extends AbstractGeoViewRaster {
       let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
         const layersToQuery = this.getLayersToQuery();
-        if (layersToQuery) metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layersToQuery}`;
-        else metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
+        const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
+        if (!metadataAccessPathIsXmlFile) {
+          if (layersToQuery) metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layersToQuery}`;
+          else metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
+        }
         fetch(metadataUrl).then((response) => {
           response.text().then((capabilitiesString) => {
             this.metadata = parser.read(capabilitiesString);
-            this.processMetadataInheritance();
+            if (this.metadata) {
+              this.processMetadataInheritance();
+              if (metadataAccessPathIsXmlFile) {
+                const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+                const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+                  listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+                    if (layerEntryIsGroupLayer(layerEntryConfig)) setDataAccessPath(layerEntryConfig.listOfLayerEntryConfig);
+                    else {
+                      layerEntryConfig.source!.dataAccessPath![api.map(this.mapId).displayLanguage] = dataAccessPath;
+                    }
+                  });
+                };
+                setDataAccessPath(this.listOfLayerEntryConfig);
+              }
+            }
             resolve();
           });
         });
@@ -370,12 +387,8 @@ export class WMS extends AbstractGeoViewRaster {
           // !   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
           // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
           // !   layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
-          if (!layerEntryConfig.initialSettings?.extent && layerCapabilities.EX_GeographicBoundingBox) {
-            layerEntryConfig.initialSettings.extent = transformExtent(
-              layerCapabilities.EX_GeographicBoundingBox as Extent,
-              'EPSG:4326',
-              `EPSG:${api.map(this.mapId).currentProjection}`
-            ) as Extent;
+          if (!layerEntryConfig.initialSettings?.extent) {
+            layerEntryConfig.initialSettings.extent = api.map(this.mapId).map.getView().calculateExtent(api.map(this.mapId).map.getSize());
           }
         }
       }

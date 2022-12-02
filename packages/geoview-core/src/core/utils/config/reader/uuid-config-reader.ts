@@ -146,7 +146,7 @@ export class UUIDmapConfigReader {
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeWmsLayerEntryConfig => {
                   const wmsLayerEntryConfig: TypeWmsLayerEntryConfig = {
                     entryType: 'raster',
-                    layerId: `${item.index}`,
+                    layerId: `${item.id}`,
                     source: {
                       dataAccessPath: {
                         en: url as string,
@@ -174,7 +174,7 @@ export class UUIDmapConfigReader {
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeWfsLayerEntryConfig => {
                   const wfsLayerEntryConfig: TypeWfsLayerEntryConfig = {
                     entryType: 'vector',
-                    layerId: `${item.index}`,
+                    layerId: `${item.id}`,
                     source: {
                       format: 'WFS',
                       dataAccessPath: {
@@ -202,7 +202,7 @@ export class UUIDmapConfigReader {
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeOgcFeatureLayerEntryConfig => {
                   const ogcFeatureLayerEntryConfig: TypeOgcFeatureLayerEntryConfig = {
                     entryType: 'vector',
-                    layerId: `${item.index}`,
+                    layerId: `${item.id}`,
                     source: {
                       format: 'featureAPI',
                       dataAccessPath: {
@@ -230,7 +230,7 @@ export class UUIDmapConfigReader {
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeGeoJSONLayerEntryConfig => {
                   const geoJSONLayerEntryConfig: TypeGeoJSONLayerEntryConfig = {
                     entryType: 'vector',
-                    layerId: `${item.index}`,
+                    layerId: `${item.id}`,
                     source: {
                       format: 'GeoJSON',
                       dataAccessPath: {
@@ -258,7 +258,7 @@ export class UUIDmapConfigReader {
                 listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeXYZTilesLayerEntryConfig => {
                   const xyzTilesLayerEntryConfig: TypeXYZTilesLayerEntryConfig = {
                     entryType: 'raster',
-                    layerId: `${item.index}`,
+                    layerId: `${item.id}`,
                     source: {
                       dataAccessPath: {
                         en: url as string,

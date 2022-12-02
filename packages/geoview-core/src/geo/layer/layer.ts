@@ -56,7 +56,7 @@ export class Layer {
   constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]) {
     this.mapId = mapId;
 
-    const validGeoviewLayerConfigs = this.validateGeoviewLayerConfig(geoviewLayerConfigs);
+    const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
 
     this.vector = new Vector(this.mapId);
 
@@ -75,7 +75,6 @@ export class Layer {
                   // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
                   // the list of geoview layer entries.
                   api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
-                  api.maps[this.mapId].setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
                   listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
                     this.addGeoviewLayer(geoviewLayerConfig);
                   });
@@ -149,7 +148,7 @@ export class Layer {
    *
    * @returns {TypeGeoviewLayerConfig} The new configuration with duplicate entries eliminated.
    */
-  private validateGeoviewLayerConfig(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]): TypeGeoviewLayerConfig[] {
+  private deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs?: TypeGeoviewLayerConfig[]): TypeGeoviewLayerConfig[] {
     if (geoviewLayerConfigs && geoviewLayerConfigs.length > 0) {
       const validGeoviewLayerConfigs = geoviewLayerConfigs.filter((geoviewLayerConfigToCreate, configToCreateIndex) => {
         for (let configToTestIndex = 0; configToTestIndex < geoviewLayerConfigs.length; configToTestIndex++)
@@ -246,14 +245,14 @@ export class Layer {
         console.log(consoleMessage);
       });
     } else {
-      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
-      this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
       // trigger the layer added event when layer is loaded on to the map
       geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => {
         if (!geoviewLayer.isLoaded) {
           api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
         }
       });
+      api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
+      this.geoviewLayers[geoviewLayer.geoviewLayerId] = geoviewLayer;
     }
   }
 
