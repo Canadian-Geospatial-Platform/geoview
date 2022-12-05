@@ -53,7 +53,7 @@ export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | '
 export type TypeSourceVectorClusterConfig = {
   /** Flag used to enable clustering. Default = false. */
   enable: boolean;
-  /** Distance in pixels within which features will be clustered together (deafult 20px). */
+  /** Distance in pixels within which features will be clustered together (default 20px). */
   distance?: number;
   /** Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is
    * guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer
