@@ -111,35 +111,6 @@ export class API {
       'run cgpv.init callback?'
     );
   }
-  // // Run the callback if all maps are ready
-  // this.event.once(
-  //   EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
-  //   (payload) => {
-  //     if (payloadIsTestGeoViewLayers(payload)) {
-  //       let readyCallbackHasRun4AllMaps = false;
-  //       const intervalId = setInterval(() => {
-  //         let allMapsAreReady = true;
-  //         Object.keys(this.maps).forEach((mapId) => {
-  //           // make sure layer object is not undefined so when init call back is trigger, layer are accessible
-  //           if (this.maps[mapId].mapIsReady() && this.maps[mapId].layer !== undefined) {
-  //             if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
-  //               if (this.readyCallback) this.readyCallback(mapId);
-  //               this.maps[mapId].readyCallbackHasRun = true;
-  //             }
-  //           } else allMapsAreReady = false;
-
-  //           if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
-  //             clearInterval(intervalId);
-  //             readyCallbackHasRun4AllMaps = true;
-  //             this.readyCallback('allMaps');
-  //           }
-  //         });
-  //       }, 250);
-  //     }
-  //   },
-  //   'run cgpv.init callback?'
-  // );
-  // }
 
   /**
    */

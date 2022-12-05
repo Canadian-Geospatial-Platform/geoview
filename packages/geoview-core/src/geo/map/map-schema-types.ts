@@ -814,7 +814,7 @@ export type TypeLayerEntryConfig =
 export type TypeListOfLayerEntryConfig = TypeLayerEntryConfig[];
 
 /** ******************************************************************************************************************************
- *  Definition of the map feature configuration according to what is specified in the schema.
+ *  Definition of the map feature instance according to what is specified in the schema.
  */
 export type TypeMapFeaturesInstance = {
   /** map configuration. */

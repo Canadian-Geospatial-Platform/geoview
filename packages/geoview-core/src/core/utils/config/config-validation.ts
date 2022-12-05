@@ -471,8 +471,19 @@ export class ConfigValidation {
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'raster';
         // if layerEntryConfig.source.dataAccessPath is undefined, the metadataAccessPath defined on the root is used.
         if (!layerEntryConfig.source) layerEntryConfig.source = {};
-        if (!layerEntryConfig.source.dataAccessPath)
-          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        if (!layerEntryConfig.source.dataAccessPath) {
+          // When the dataAccessPath is undefined and the metadataAccessPath ends with ".xml", the dataAccessPath is temporarilly
+          // set to '' and will be filled in the getServiceMetadata method of the class WMS. So, we begin with the assumption
+          // that both en and fr end with ".xml". Be aware that in metadataAccessPath, one language can ends with ".xml" and the
+          // other not.
+          layerEntryConfig.source.dataAccessPath = { en: '', fr: '' };
+          // When the dataAccessPath is undefined and the metadataAccessPath does not end with ".xml", the dataAccessPath is set
+          // to the same value of the corresponding metadataAccessPath.
+          if (rootLayerConfig.metadataAccessPath!.en!.slice(-4).toLowerCase() !== '.xml')
+            layerEntryConfig.source.dataAccessPath.en = rootLayerConfig.metadataAccessPath!.en;
+          if (rootLayerConfig.metadataAccessPath!.fr!.slice(-4).toLowerCase() !== '.xml')
+            layerEntryConfig.source.dataAccessPath.fr = rootLayerConfig.metadataAccessPath!.fr;
+        }
         // Default value for layerEntryConfig.source.serverType is 'mapserver'.
         if (!layerEntryConfig.source.serverType) layerEntryConfig.source.serverType = 'mapserver';
       } else if (geoviewEntryIsXYZTiles(layerEntryConfig)) {

@@ -205,7 +205,7 @@ export class MapViewer {
                 })
               );
             }
-          }, 30000);
+          }, 15000);
 
           api.event.on(
             EVENT_NAMES.LAYER.EVENT_LAYER_ADDED,
