@@ -127,17 +127,23 @@
                 'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '6' }]
               },
               {
-                'geoviewLayerId': 'geojsonLYR4',
-                'geoviewLayerName': {
-                  'en': 'GeoJSON Line',
-                  'fr': 'GeoJSON Line'
-                },
-                'metadataAccessPath': {
-                  'en': './geojson/',
-                  'fr': './geojson/'
-                },
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': { 'en': 'GeoJSON Sample' },
+                'metadataAccessPath': { 'en': './geojson/metadata.json' },
                 'geoviewLayerType': 'GeoJSON',
-                'listOfLayerEntryConfig': [ { 'layerId': 'points.json' }, { 'layerId': 'lines.json' }, { 'layerId': 'polygons.json' }]
+                'listOfLayerEntryConfig': [
+                  { 'layerId': 'polygons.json' },
+                  { 'layerId': 'lines.json' },
+                  {
+                    'entryType': 'group',
+                    'layerId': 'point-feature-group',
+                    'layerName': { 'en': 'point-feature-group' },
+                    'listOfLayerEntryConfig': [
+                      { 'layerId': 'icon_points.json' },
+                      { 'layerId': 'points.json' }
+                    ]
+                  }
+                ]
               },
               {
                 'geoviewLayerId': 'wmsLYR7',
@@ -289,18 +295,20 @@
     }
 
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function () {
-      console.log('api is ready');
+    cgpv.init(function (mapId) {
+      if (mapId === 'allMaps') {
+        console.log('api is ready');
 
-      //create snippets
-      createCodeSnippet();
-      createConfigSnippet();
+        //create snippets
+        createCodeSnippet();
+        createConfigSnippet();
 
-      //add geometries to map
-      addPolyline('UC1');
-      addPolygon('UC1');
-      addCircle('UC1');
-      addCircleMarker('UC1');
+        //add geometries to map
+        addPolyline('UC1');
+        addPolygon('UC1');
+        addCircle('UC1');
+        addCircleMarker('UC1');
+      }
     });
   </script>
 </body>

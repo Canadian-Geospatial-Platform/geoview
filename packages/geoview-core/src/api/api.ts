@@ -81,7 +81,7 @@ export class API {
     this.geoUtilities = new GeoUtilities();
     this.dateUtilities = new DateMgt();
 
-    // Run the callback if all maps are ready
+    // Run the callback for maps that have the triggerReadyCallback set to true and when all the maps are ready
     this.event.once(
       EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
       (payload) => {
@@ -91,40 +91,55 @@ export class API {
             let allMapsAreReady = true;
             Object.keys(this.maps).forEach((mapId) => {
               if (this.maps[mapId].mapIsReady()) {
+                // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
                 if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
                   if (this.readyCallback) this.readyCallback(mapId);
                   this.maps[mapId].readyCallbackHasRun = true;
                 }
               } else allMapsAreReady = false;
-              if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
-                clearInterval(intervalId);
-                readyCallbackHasRun4AllMaps = true;
-                this.readyCallback('allMaps');
-              }
             });
+
+            // Run the callback when all the maps are ready using allMaps for the parameter value
+            if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
+              clearInterval(intervalId);
+              readyCallbackHasRun4AllMaps = true;
+              this.readyCallback('allMaps');
+            }
           }, 250);
-          /*
-            const arrayOfMapId = Object.keys(this.maps);
-            for (let i = 0; i < arrayOfMapId.length && allMapsAreReady; i++) {
-              allMapsAreReady &&= this.maps[arrayOfMapId[i]].remainingLayersThatNeedToBeLoaded === 0;
-              const arrayOfGeoviewLayerId = this.maps[arrayOfMapId[i]].layer?.geoviewLayers
-                ? Object.keys(this.maps[arrayOfMapId[i]].layer?.geoviewLayers)
-                : [];
-              for (let j = 0; j < arrayOfGeoviewLayerId.length && allMapsAreReady; j++) {
-                const geoviewLayer = this.maps[arrayOfMapId[i]].layer.geoviewLayers[arrayOfGeoviewLayerId[j]];
-                allMapsAreReady &&= geoviewLayer.isLoaded || geoviewLayer.loadError;
-              }
-            }
-            if (allMapsAreReady && this.readyCallback) {
-              clearInterval(layerInterval);
-              this.readyCallback();
-            }
-            */
         }
       },
       'run cgpv.init callback?'
     );
   }
+  // // Run the callback if all maps are ready
+  // this.event.once(
+  //   EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
+  //   (payload) => {
+  //     if (payloadIsTestGeoViewLayers(payload)) {
+  //       let readyCallbackHasRun4AllMaps = false;
+  //       const intervalId = setInterval(() => {
+  //         let allMapsAreReady = true;
+  //         Object.keys(this.maps).forEach((mapId) => {
+  //           // make sure layer object is not undefined so when init call back is trigger, layer are accessible
+  //           if (this.maps[mapId].mapIsReady() && this.maps[mapId].layer !== undefined) {
+  //             if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
+  //               if (this.readyCallback) this.readyCallback(mapId);
+  //               this.maps[mapId].readyCallbackHasRun = true;
+  //             }
+  //           } else allMapsAreReady = false;
+
+  //           if (allMapsAreReady && !readyCallbackHasRun4AllMaps && this.readyCallback) {
+  //             clearInterval(intervalId);
+  //             readyCallbackHasRun4AllMaps = true;
+  //             this.readyCallback('allMaps');
+  //           }
+  //         });
+  //       }, 250);
+  //     }
+  //   },
+  //   'run cgpv.init callback?'
+  // );
+  // }
 
   /**
    */
