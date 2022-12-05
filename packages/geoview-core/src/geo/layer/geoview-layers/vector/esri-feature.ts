@@ -26,7 +26,7 @@ import {
 
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { EsriBaseRenderer, getStyleFromEsriRenderer } from '../../../renderer/esri-renderer';
-import { api } from '../../../../app';
+import { api, TimeDimension, TimeDimensionESRI } from '../../../../app';
 import { Layer } from '../../layer';
 
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
@@ -35,6 +35,7 @@ export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourc
 
 export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
   source: TypeSourceEsriFeatureInitialConfig;
+  temporalDimension?: TimeDimension;
 }
 
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -263,6 +264,7 @@ export class EsriFeature extends AbstractGeoViewVector {
                 response.data.extent,
                 layerEntryConfig
               );
+              this.processTemporalDimension(response.data.timeInfo as TypeJsonObject, layerEntryConfig);
             }
             resolve();
           });
@@ -361,6 +363,17 @@ export class EsriFeature extends AbstractGeoViewVector {
         layerEntryConfig.source.featureInfo!.outfields!.fr = layerEntryConfig.source.featureInfo!.outfields?.en;
         layerEntryConfig.source.featureInfo!.aliasFields!.fr = layerEntryConfig.source.featureInfo!.aliasFields?.en;
       }
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * This method will create a Geoview temporal dimension if it exist in the service metadata
+   * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
+   * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry to configure
+   */
+  private processTemporalDimension(esriTimeDimension: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig) {
+    if (esriTimeDimension !== undefined) {
+      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromESRI(esriTimeDimension as unknown as TimeDimensionESRI);
     }
   }
 
