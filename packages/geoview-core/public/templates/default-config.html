@@ -1,39 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
-    type="text/css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel="stylesheet" href="css/style.css" />
-
-  <script>
-    // add url params
-    if (document.location.search.length === 0)
-      // reload page with new params
-      document.location.search =
-        '?' +
-          'p=3857&' +
-          'z=4&' +
-          'c=-100,40&' +
-          'l=en&' +
-          't=dark&' +
-          'b={basemapId:transport,shaded:false,labeled:true}&' +
-          'i=dynamic&' +
-          'cc=overview-map&' +
-          'keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9';
-  </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      <%= htmlWebpackPlugin.options.title %>
+    </title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
+      type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
@@ -46,6 +29,10 @@
             <h1><strong>Default Configuration</strong></h1>
           </td>
         </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
         <tr>
           <td>
             <a href="./index.html">Main</a><br />
@@ -68,7 +55,6 @@
       </tbody>
     </table>
   </div>
-
   <div class="map-title-holder">
     <h4 id="HLCONF1">1. Load from no config object</h4><a class="ref-link" href="#top">Top</a>
   </div>
@@ -195,7 +181,7 @@
   <script src="codedoc.js"></script>
   <script>
     // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function () {
+    cgpv.init(function (mapId) {
       console.log('api is ready');
 
       if (cgpv.api.map('CONF7')) {
@@ -203,27 +189,28 @@
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 8,
+              'zoom': 4,
               'center': [-100, 60],
               'projection': 3978
             },
             'basemapOptions': {
-              'basemapId': 'simple',
-              'shaded': true,
-              'labeled': false
-            }
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
           },
-          'components': ['nav-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
         }`);
       }
-    });
 
-    //create snippets
-    createConfigSnippet();
-    createCodeSnippet();
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
+    });
   </script>
 </body>
 

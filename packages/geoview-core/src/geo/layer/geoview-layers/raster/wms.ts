@@ -32,11 +32,12 @@ import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../..
 import { getLocalizedValue, xmlToJson } from '../../../../core/utils/utilities';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
-import { api } from '../../../../app';
+import { api, TimeDimension } from '../../../../app';
 import { Layer } from '../../layer';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;
+  temporalDimension?: TimeDimension;
 }
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -412,11 +413,24 @@ export class WMS extends AbstractGeoViewRaster {
               `EPSG:${api.map(this.mapId).currentProjection}`
             );
           }
+
+          this.processTemporalDimension(layerCapabilities.Dimension[0] as TypeJsonObject, layerEntryConfig);
         }
       }
       resolve();
     });
     return promiseOfExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method will create a Geoview temporal dimension if ot exist in the service metadata
+   * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
+   * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry to configure
+   */
+  private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig) {
+    if (wmsTimeDimension !== undefined) {
+      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+    }
   }
 
   /** ***************************************************************************************************************************
