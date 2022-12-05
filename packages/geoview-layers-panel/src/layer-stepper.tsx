@@ -35,7 +35,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { api, react, ui } = cgpv;
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
-  const { useState } = react;
+  const { useState, useEffect } = react;
   const { Select, Stepper, TextField, Button, ButtonGroup, Autocomplete, CircularProgressBase, Box } = ui.elements;
 
   const [activeStep, setActiveStep] = useState(0);
@@ -68,6 +68,23 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     [XYZ_TILES, 'XYZ Raster Tiles'],
     [GEOCORE, 'GeoCore'],
   ];
+
+  useEffect(() => {
+    api.event.on(
+      api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN,
+      (payload) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (payload.message && payload.message.value === 'validation.layer.loadfailed') {
+          setIsLoading(false);
+        }
+      },
+      mapId
+    );
+    return () => {
+      api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId);
+    };
+  }, []);
 
   /**
    * Returns the appropriate error config for ESRI layer types
@@ -143,7 +160,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     const proj = api.projection.projections[api.map(mapId).currentProjection].getCode();
     let supportedProj: string[] = [];
     try {
-      const wms = await api.geoUtilities.getWMSServiceMetadata(layerURL, '');
+      const [baseUrl, queryString] = layerURL.split('?');
+      const urlParams = new URLSearchParams(queryString);
+      const layersParam = urlParams.get('layers');
+      const wms = await api.geoUtilities.getWMSServiceMetadata(baseUrl, layersParam ?? '');
       supportedProj = wms.Capability.Layer.CRS as string[];
       if (!supportedProj.includes(proj)) throw new Error('proj');
       const layers = (wms.Capability.Layer.Layer as TypeJsonArray).map((aLayer) => [aLayer.Name, aLayer.Title]);
@@ -151,7 +171,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
           {
-            layerId: layers[0][0] as string,
+            layerId: (layersParam ?? layers[0][0]) as string,
           },
         ]);
       } else {
@@ -380,6 +400,8 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       setLayerType(XYZ_TILES);
     } else if (layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32) {
       setLayerType(GEOCORE);
+    } else if (layerURL.toUpperCase().indexOf('WMS') !== -1) {
+      setLayerType(WMS);
     }
   };
 
@@ -456,6 +478,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let url = layerURL;
     if (layerType === ESRI_DYNAMIC || layerType === ESRI_FEATURE) {
       url = api.geoUtilities.getMapServerUrl(layerURL);
+    }
+    if (layerType === WMS) {
+      [url] = layerURL.split('?');
     }
 
     if (layerName === '') {
