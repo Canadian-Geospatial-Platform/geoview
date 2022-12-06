@@ -21,7 +21,7 @@ import {
 } from '../../../ui';
 import { AbstractGeoViewLayer } from '../../../app';
 import { TypeJsonObject } from '../../types/global-types';
-import { typeLayrSetData } from './details';
+import { TypeLayerSetData } from './details';
 import { FeatureInfo } from './feature-info';
 
 const sxClasses = {
