@@ -1,9 +1,19 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContext } from '../../app-start';
-import { AbstractGeoViewLayer, api, TypeDisplayLanguage } from '../../../app';
+import { api, TypeDisplayLanguage } from '../../../app';
+import { TypeJsonArray } from '../../types/global-types';
 import { LayersList } from './layers-list';
 
+export interface TypeLayerData {
+  layerName: string;
+  features: TypeJsonArray;
+}
+
+export interface TypeLayerSetData {
+  layerSetName: string;
+  layerData: Record<string, TypeLayerData>;
+}
 /**
  * The Details component is used to display a list of layers and their content.
  *
@@ -18,7 +28,7 @@ export function Details(): JSX.Element | null {
 
   const { t, i18n } = useTranslation<string>();
 
-  const [layersData, setLayersData] = useState<Record<string, AbstractGeoViewLayer>>({});
+  const [layersData, setLayersData] = useState<Record<string, TypeLayerSetData>>({});
   
   useEffect(() => {
     // get the map service layers from the API
@@ -30,21 +40,29 @@ export function Details(): JSX.Element | null {
 
     arrayOfgeoviewLayerId.forEach(async (geoviewLayerId: string) => {
       const mapLayer = mapLayers[geoviewLayerId];
-      console.log(mapLayer);
+      // console.log(mapLayer);
       const featureInfoLayerSet = api.createFeatureInfoLayerSet(mapId, mapLayer.geoviewLayerId);
       const layerSetName = mapLayer.geoviewLayerName[i18n.language as TypeDisplayLanguage];
       if (featureInfoLayerSet) {
         // console.log(featureInfoEsriFeatureLayerSet);
         api.event.on(
           EVENT_NAMES.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-          (payload) => {
+          (payload: any) => {
             const { layerSetId, resultSets } = payload;
-            const layerData = {};
-            Object.keys(resultSets).forEach((layerId) => {
-              const layerName = mapLayer.listOfLayerEntryConfig.find( ( l ) => { return l.layerId == layerId.replace(`${layerSetId}\/`,'') })?.layerName[i18n.language as TypeDisplayLanguage];
-              layerData[layerId] = { layerName, features: resultSets[layerId] };
+            const layerData: Record<string, TypeLayerData> = {};
+            Object.keys(resultSets).forEach((layerId: string) => {
+              const subId = layerId.replace(`${layerSetId}/`, '');
+              const subLayer = mapLayer?.listOfLayerEntryConfig?.find((l) => {
+                return l.layerId == subId;
+              });
+              if (subLayer && subLayer.layerName) {
+                const layerName = subLayer.layerName[i18n.language as TypeDisplayLanguage];
+                layerData[layerId] = { layerName: layerName === undefined ? 'UNDEFINED' : layerName, features: resultSets[layerId] };
+              }
             });
-            setLayersData({[layerSetId]: { layerSetName, layerData }});
+            const layerSetData: Record<string, TypeLayerSetData> = {};
+            layerSetData[layerSetId] = { layerSetName: layerSetName === undefined ? 'UNDEFINED' : layerSetName, layerData };
+            setLayersData(layerSetData);
           },
           mapId
         );

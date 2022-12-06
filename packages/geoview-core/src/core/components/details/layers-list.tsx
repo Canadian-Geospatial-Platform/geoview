@@ -19,7 +19,9 @@ import {
   VisibilityOffIcon,
   IconButton,
 } from '../../../ui';
+import { AbstractGeoViewLayer } from '../../../app';
 import { TypeJsonObject } from '../../types/global-types';
+import { typeLayrSetData } from './details';
 import { FeatureInfo } from './feature-info';
 
 const sxClasses = {
@@ -47,13 +49,16 @@ const sxClasses = {
     background: '#fff',
   },
 };
+interface TypeLayersListProps {
+  layersData: Record<string, TypeLayerSetData>;
+}
 
 /**
  * Legend Item for a Legend list
  *
  * @returns {JSX.Element} the legend list item
  */
-export function LayersList(props: TypeJsonObject): JSX.Element {
+export function LayersList(props: TypeLayersListProps): JSX.Element {
   const { layersData } = props;
   const { t, i18n } = useTranslation<string>();
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
@@ -114,11 +119,10 @@ export function LayersList(props: TypeJsonObject): JSX.Element {
                     <Collapse in={layerOpen === layerId} timeout="auto" unmountOnExit>
                       <Box>
                         <Box sx={sxClasses.expandableIconContainer}>
-                          {features.map((feature, index)=>{
-                             return (
-                              <FeatureInfo key={index} feature={feature} isOpen={false} />
-                             )    
-                          })}
+                            {Array.isArray(features) &&
+                            features.map((feature: TypeJsonObject, index: number) => {
+                              return <FeatureInfo key={index} feature={feature} />
+                            })}
                         </Box>
                       </Box>
                     </Collapse>

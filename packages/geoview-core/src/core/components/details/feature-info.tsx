@@ -100,17 +100,17 @@ const useStyles = makeStyles(() => ({
 
 
 export interface TypeFeatureProps {
+  key: number;
   feature: TypeJsonObject;
-  isOpen: boolean;
-  setOpen: () => void;
+  opened?: boolean;
 }
 /**
  * Legend Item for a Legend list
  *
  * @returns {JSX.Element} the legend list item
  */
-export function FeatureInfo(props: TypeJsonObject): JSX.Element {
-  const { feature } = props;
+export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
+  const { feature, opened } = props;
   const [isOpen, setOpen] = useState<boolean>(false);
   const classes = useStyles();
   return (
