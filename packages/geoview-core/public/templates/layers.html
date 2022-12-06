@@ -205,12 +205,12 @@
                   'en': 'Flood'
                 },
                 'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer/'
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer'
                 },
                 'geoviewLayerType': 'esriDynamic',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': '0'
+                    'layerId': '4'
                   }
                 ]
               }
@@ -252,11 +252,11 @@
                 'geoviewLayerId': 'esriFeatureLYR4',
                 'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
                 'metadataAccessPath': {
-                  'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/Overlays/Cities/MapServer'
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer'
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '2' }
+                  { 'layerId': '4' }
                 ]
               }
             ]
@@ -465,6 +465,9 @@
                   },
                   {
                     'layerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326'
+                  },
+                  {
+                    'layerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
                   }
                 ]
               }
@@ -565,6 +568,14 @@
 
     var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
     addGeoJsonLegendButton.addEventListener('click', function (e) {
+      const geoviewLayerIds = Object.keys(cgpv.api.map('LYR1').layer.geoviewLayers);
+      geoviewLayerIds.forEach((geoviewLayerId) => {
+        const pathArray = Object.keys(cgpv.api.map('LYR1').layer.registeredLayers);
+        for (let i = 0; i < pathArray.length; i++) {
+          if (pathArray[i].startsWith(geoviewLayerId))
+            console.log(cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].getBounds(pathArray[i]));
+        }
+      });
       cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
     });
 

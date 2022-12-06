@@ -20,7 +20,7 @@ import {
   TypeDisplayLanguage,
   TypeLayerEntryConfig,
   TypeLocalizedString,
-  TypeProjectionCodes,
+  TypeValidMapProjectionCodes,
   TypeValidVersions,
   TypeListOfLayerEntryConfig,
   TypeLayerGroupEntryConfig,
@@ -85,25 +85,25 @@ export class ConfigValidation {
   };
 
   // valid basemap ids
-  private _basemapId: Record<TypeProjectionCodes, TypeBasemapId[]> = {
+  private _basemapId: Record<TypeValidMapProjectionCodes, TypeBasemapId[]> = {
     3857: VALID_BASEMAP_ID,
     3978: VALID_BASEMAP_ID,
   };
 
   // valid shaded basemap values for each projection
-  private _basemapShaded: Record<TypeProjectionCodes, boolean[]> = {
+  private _basemapShaded: Record<TypeValidMapProjectionCodes, boolean[]> = {
     3857: [true, false],
     3978: [true, false],
   };
 
   // valid labeled basemap values for each projection
-  private _basemaplabeled: Record<TypeProjectionCodes, boolean[]> = {
+  private _basemaplabeled: Record<TypeValidMapProjectionCodes, boolean[]> = {
     3857: [true, false],
     3978: [true, false],
   };
 
   // valid center levels from each projection
-  private _center: Record<TypeProjectionCodes, Record<string, number[]>> = {
+  private _center: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
     3857: { lat: [-90, 90], long: [-180, 180] },
     3978: { lat: [40, 90], long: [-140, 40] },
   };
@@ -181,12 +181,12 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate basemap options.
-   * @param {TypeProjectionCodes} projection The projection code of the basemap.
+   * @param {TypeValidMapProjectionCodes} projection The projection code of the basemap.
    * @param {TypeBasemapOptions} basemapOptions The basemap options to validate.
    *
    * @returns {TypeBasemapOptions} A valid basemap options.
    */
-  validateBasemap(projection?: TypeProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions {
+  validateBasemap(projection?: TypeValidMapProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions {
     if (projection && basemapOptions) {
       const basemapId = this._basemapId[projection].includes(basemapOptions.basemapId)
         ? basemapOptions.basemapId
@@ -260,11 +260,11 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate projection.
-   * @param {TypeProjectionCodes} projection The projection to validate.
+   * @param {TypeValidMapProjectionCodes} projection The projection to validate.
    *
-   * @returns {TypeProjectionCodes} A valid projection.
+   * @returns {TypeValidMapProjectionCodes} A valid projection.
    */
-  private validateProjection(projection?: TypeProjectionCodes): TypeProjectionCodes {
+  private validateProjection(projection?: TypeValidMapProjectionCodes): TypeValidMapProjectionCodes {
     return projection && VALID_PROJECTION_CODES.includes(projection)
       ? projection
       : this._defaultMapFeaturesConfig.map.viewSettings.projection;
@@ -272,12 +272,12 @@ export class ConfigValidation {
 
   /** ***************************************************************************************************************************
    * Validate the center.
-   * @param {TypeProjectionCodes} projection The projection used by the map.
+   * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
    * @param {[number, number]} center The map center to valdate.
    *
    * @returns {[number, number]} A valid map center.
    */
-  private validateCenter(projection?: TypeProjectionCodes, center?: [number, number]): [number, number] {
+  private validateCenter(projection?: TypeValidMapProjectionCodes, center?: [number, number]): [number, number] {
     if (projection && center) {
       const xVal = Number(center[0]);
       const yVal = Number(center[1]);
