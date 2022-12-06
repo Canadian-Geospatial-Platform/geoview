@@ -347,6 +347,15 @@
           "default": true,
           "description": "Initial visibility setting."
         },
+        "bounds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
+          "description": "The bounding box that contains all the layer's features."
+        },
         "extent": {
           "type": "array",
           "minItems": 4,
@@ -522,20 +531,11 @@
       "properties": {
         "extent": {
           "type": "array",
-          "prefixItems": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            }
-          ],
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "origin": {
@@ -559,14 +559,11 @@
         },
         "tileSize": {
           "type": "array",
-          "prefixItems": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            }
-          ],
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          },
           "default": [256, 256],
           "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
         }
@@ -686,63 +683,7 @@
           "description": "The projection code of the source. Used only for GeoJSON format. Default value is EPSG:4326."
         },
         "featureInfo": { "$ref": "#/definitions/TypeFeatureInfoLayerConfig" },
-        "tileGrid": {
-          "additionalProperties": false,
-          "type": "object",
-          "properties": {
-            "extent": {
-              "type": "array",
-              "prefixItems": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ],
-              "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
-            },
-            "origin": {
-              "type": "array",
-              "prefixItems": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ],
-              "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
-            },
-            "resolutions": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              },
-              "description": "Resolutions. The array index of each resolution needs to match the zoom level. This means that even if a minZoom is configured, the resolutions array will have a length of maxZoom + 1."
-            },
-            "tileSize": {
-              "type": "array",
-              "prefixItems": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "number"
-                }
-              ],
-              "default": [256, 256],
-              "description": "The tile grid origin, i.e. where the x and y axes meet ([z, 0, 0]). Tile coordinates increase left to right and downwards. If not specified, extent must be provided."
-            }
-          },
-          "required": ["origin", "resolutions"]
-        }
+        "tileGrid": { "$ref": "#/definitions/TypeTileGrid" }
       }
     },
 
@@ -1014,20 +955,11 @@
         },
         "extent": {
           "type": "array",
-          "prefixItems": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            },
-            {
-              "type": "number"
-            }
-          ],
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          },
           "description": "The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates."
         },
         "minZoom": {
@@ -1042,7 +974,7 @@
           "minimum": 0,
           "maximum": 50
         },
-        "projection": { "$ref": "#/definitions/TypeProjectionCodes" },
+        "projection": { "$ref": "#/definitions/TypeValidMapProjectionCodes" },
         "rotation": {
           "type": "integer",
           "minimum": -360,
@@ -1061,7 +993,7 @@
       "required": ["zoom", "center"]
     },
 
-    "TypeProjectionCodes": {
+    "TypeValidMapProjectionCodes": {
       "enum": [3978, 3857],
       "default": 3978,
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
@@ -1189,7 +1121,7 @@
         "navBar": { "$ref": "#/definitions/TypeNavBarProps" },
         "components": { "$ref": "#/definitions/TypeMapComponents" },
         "corePackages": { "$ref": "#/definitions/TypeMapCorePackages" },
-        "externalPackages": { "$ref": "#/definitionsTypeExternalPackages" },
+        "externalPackages": { "$ref": "#/definitions/TypeExternalPackages" },
         "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
         "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
         "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }

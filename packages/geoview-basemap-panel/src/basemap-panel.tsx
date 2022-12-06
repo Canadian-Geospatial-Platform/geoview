@@ -8,7 +8,7 @@ import {
   TypeViewSettings,
   mapViewProjectionPayload,
   TypeBasemapOptions,
-  TypeProjectionCodes,
+  TypeValidMapProjectionCodes,
 } from 'geoview-core';
 
 const w = window as TypeWindow;
@@ -134,7 +134,7 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    *
    * @param {number} projection the projection to create basemaps for
    */
-  const createBasemapArray = async (projection: TypeProjectionCodes) => {
+  const createBasemapArray = async (projection: TypeValidMapProjectionCodes) => {
     const basemapsArray = toJsonObject(
       (config.supportedProjections as Array<TypeJsonObject>).find((obj: TypeJsonObject) => obj.projectionCode === projection)
     );
@@ -182,18 +182,18 @@ export function BasemapPanel(props: BaseMapPanelProps): JSX.Element {
    * @param {SelectChangeEvent} event select change element event
    */
   const setSelectedProjection = (event: SelectChangeEvent<unknown>) => {
-    const projection = event.target.value as TypeProjectionCodes;
+    const projection = event.target.value as TypeValidMapProjectionCodes;
 
     // set basemap to no geom to clean up the view
     setBasemap('nogeom');
-    setMapProjection(projection as TypeProjectionCodes);
+    setMapProjection(projection as TypeValidMapProjectionCodes);
 
     // get view status (center and projection) to calculate new center
     const currentView = myMap.getView();
     const currentCenter = currentView.getCenter();
     const currentProjection = currentView.getProjection().getCode();
     const newCenter = api.projection.transformPoints(currentCenter, currentProjection, 'EPSG:4326')[0];
-    const newProjection = event.target.value as TypeProjectionCodes;
+    const newProjection = event.target.value as TypeValidMapProjectionCodes;
 
     const newView: TypeViewSettings = {
       zoom: currentView.getZoom() as number,

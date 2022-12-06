@@ -4,6 +4,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
+import { transformExtent } from 'ol/proj';
 
 import { generateId } from '../../../core/utils/utilities';
 import {
@@ -627,6 +628,25 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
+   * Return the bounds of the layer or undefined if it is not defined in the layer configuration or the metadata.
+   * if projectionCode is set, returns the bounds in the specified projection otherwise use the map projection.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+   *
+   * @returns {Extent} The layer bounding box.
+   */
+  getBounds(
+    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
+    projectionCode: string | number | undefined = undefined
+  ): Extent | undefined {
+    const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+    if (projectionCode && layerConfig?.initialSettings?.bounds)
+      return transformExtent(layerConfig.initialSettings.bounds, `EPSG:${api.map(this.mapId).currentProjection}`, `EPSG:${projectionCode}`);
+    return layerConfig ? layerConfig.initialSettings?.bounds : undefined;
+  }
+
+  /** ***************************************************************************************************************************
    * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
    * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
    * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null.
@@ -635,7 +655,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Extent} The layer extent.
    */
-  getBounds(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Extent | undefined {
+  getExtent(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Extent | undefined {
     const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
     return gvLayer ? gvLayer.getExtent() : undefined;
   }
@@ -648,7 +668,7 @@ export abstract class AbstractGeoViewLayer {
    * @param {Extent} layerExtent The extent to assign to the layer.
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    */
-  setBounds(layerExtent: Extent, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+  setExtent(layerExtent: Extent, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
     const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
     if (gvLayer) gvLayer.setExtent(layerExtent);
   }

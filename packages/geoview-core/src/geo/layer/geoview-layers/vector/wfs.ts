@@ -1,5 +1,4 @@
 /* eslint-disable no-var, vars-on-top, block-scoped-var, no-param-reassign */
-import { Extent } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { all } from 'ol/loadingstrategy';
@@ -161,7 +160,7 @@ export class WFS extends AbstractGeoViewVector {
         return false;
       }
 
-      // Note that the code assumes wfs feature type list does not contains layer group. If you need layer group,
+      // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.FeatureTypeList?.FeatureType)) {
         const metadataLayerList = this.metadata?.FeatureTypeList.FeatureType as Array<TypeJsonObject>;
@@ -177,17 +176,33 @@ export class WFS extends AbstractGeoViewVector {
           return false;
         }
 
-        if (metadataLayerList[i]['ows:WGS84BoundingBox']) {
-          const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
-          const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
-          const extent = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-          const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent: layerExtent };
-          else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = layerExtent;
-          api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
-          return true;
+        if (layerEntryConfig.initialSettings?.extent)
+          layerEntryConfig.initialSettings.extent = transformExtent(
+            layerEntryConfig.initialSettings.extent,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
+
+        if (layerEntryConfig.initialSettings?.bounds)
+          layerEntryConfig.initialSettings.bounds = transformExtent(
+            layerEntryConfig.initialSettings.bounds,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
+        else {
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+          if (metadataLayerList[i]['ows:WGS84BoundingBox']) {
+            const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
+            const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
+            const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
+            layerEntryConfig.initialSettings.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
+          }
         }
+
+        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+        return true;
       }
+
       this.layerLoadError.push({
         layer: Layer.getLayerPath(layerEntryConfig),
         consoleMessage: `Invalid feature type list in WFS metadata prevent loading of layer (mapId:  ${
