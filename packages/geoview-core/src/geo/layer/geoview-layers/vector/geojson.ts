@@ -1,6 +1,5 @@
 /* eslint-disable block-scoped-var, no-var, vars-on-top, no-param-reassign */
 import { transformExtent } from 'ol/proj';
-import { Extent } from 'ol/extent';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { all } from 'ol/loadingstrategy';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
@@ -202,10 +201,20 @@ export class GeoJSON extends AbstractGeoViewVector {
         layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);
         layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerList[i].initialSettings);
         layerEntryConfig.style = defaultsDeep(layerEntryConfig.style, metadataLayerList[i].style);
-        const extent = layerEntryConfig.initialSettings?.extent;
-        if (extent) {
-          const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
-          layerEntryConfig.initialSettings!.extent = layerExtent;
+
+        if (layerEntryConfig.initialSettings?.extent)
+          layerEntryConfig.initialSettings.extent = transformExtent(
+            layerEntryConfig.initialSettings.extent,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
+
+        if (layerEntryConfig.initialSettings?.bounds) {
+          layerEntryConfig.initialSettings.bounds = transformExtent(
+            layerEntryConfig.initialSettings.bounds,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
         }
         resolve();
       }

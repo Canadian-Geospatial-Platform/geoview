@@ -3,7 +3,7 @@ import {
   TypeListOfGeoviewLayerConfig,
   TypeInteraction,
   TypeMapCorePackages,
-  TypeProjectionCodes,
+  TypeValidMapProjectionCodes,
   TypeValidVersions,
   TypeDisplayLanguage,
   TypeMapComponents,
@@ -153,7 +153,7 @@ export class URLmapConfigReader {
           viewSettings: {
             zoom: parseInt(urlParams.z as TypeJsonValue as string, 10),
             center: [parseInt(center[0], 10), parseInt(center[1], 10)],
-            projection: parseInt(urlParams.p as string, 10) as TypeProjectionCodes,
+            projection: parseInt(urlParams.p as string, 10) as TypeValidMapProjectionCodes,
           },
           basemapOptions,
           listOfGeoviewLayerConfig,

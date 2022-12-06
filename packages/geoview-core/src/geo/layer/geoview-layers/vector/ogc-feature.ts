@@ -2,7 +2,6 @@
 import axios from 'axios';
 
 import { get, transformExtent } from 'ol/proj';
-import { Extent } from 'ol/extent';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { all } from 'ol/loadingstrategy';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
@@ -157,7 +156,7 @@ export class OgcFeature extends AbstractGeoViewVector {
         return false;
       }
 
-      // Note that the code assumes ogc-feature collections does not contains layer group. If you need layer group,
+      // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
         for (var i = 0; i < this.metadata!.collections.length; i++)
@@ -175,18 +174,35 @@ export class OgcFeature extends AbstractGeoViewVector {
             en: this.metadata!.collections[i].description as string,
             fr: this.metadata!.collections[i].description as string,
           };
-        if (this.metadata?.collections[i].extent?.spatial?.bbox && this.metadata?.collections[i].extent?.spatial?.crs) {
-          const extent = transformExtent(
-            this.metadata.collections[i].extent.spatial.bbox[0] as number[],
-            get(this.metadata.collections[i].extent.spatial.crs as string)!,
+
+        if (layerEntryConfig.initialSettings?.extent)
+          layerEntryConfig.initialSettings.extent = transformExtent(
+            layerEntryConfig.initialSettings.extent,
+            'EPSG:4326',
             `EPSG:${api.map(this.mapId).currentProjection}`
-          ) as Extent;
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = { extent };
-          else if (!layerEntryConfig.initialSettings.extent) layerEntryConfig.initialSettings.extent = extent;
+          );
+
+        if (layerEntryConfig.initialSettings?.bounds)
+          layerEntryConfig.initialSettings.bounds = transformExtent(
+            layerEntryConfig.initialSettings.bounds,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
+        else {
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+          if (this.metadata?.collections[i].extent?.spatial?.bbox && this.metadata?.collections[i].extent?.spatial?.crs) {
+            layerEntryConfig.initialSettings.bounds = transformExtent(
+              this.metadata.collections[i].extent.spatial.bbox[0] as number[],
+              get(this.metadata.collections[i].extent.spatial.crs as string)!,
+              `EPSG:${api.map(this.mapId).currentProjection}`
+            );
+          }
         }
+
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
       }
+
       this.layerLoadError.push({
         layer: Layer.getLayerPath(layerEntryConfig),
         consoleMessage: `Invalid collection's metadata prevent loading of layer (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(

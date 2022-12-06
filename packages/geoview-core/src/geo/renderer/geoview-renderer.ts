@@ -9,7 +9,7 @@ import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as TextOptions } from 'ol/style/Text';
-import { FeatureLike } from 'ol/Feature';
+import Feature, { FeatureLike } from 'ol/Feature';
 import { toContext } from 'ol/render';
 import { Size } from 'ol/size';
 
@@ -1131,8 +1131,13 @@ export class GeoviewRenderer {
   ): number | undefined {
     for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
       for (let j = 0; j < fields.length; j++) {
+        // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
+        // unique value definition.
+        const featureKey = (feature as Feature).getKeys().filter((key) => {
+          return key.toLowerCase() === fields[j].toLowerCase();
+        });
         // eslint-disable-next-line eqeqeq
-        if (feature.get(fields[j]) == uniqueValueStyleInfo[i].values[j] && j + 1 === fields.length) return i;
+        if (feature.get(featureKey[0]) == uniqueValueStyleInfo[i].values[j] && j + 1 === fields.length) return i;
       }
     }
     return undefined;
@@ -1202,7 +1207,12 @@ export class GeoviewRenderer {
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private searchClassBreakEntry(field: string, classBreakStyleInfos: TypeClassBreakStyleInfo[], feature: FeatureLike): number | undefined {
-    const fieldValue = feature.get(field) as number;
+    // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
+    // class break definition.
+    const featureKey = (feature as Feature).getKeys().filter((key) => {
+      return key.toLowerCase() === field.toLowerCase();
+    });
+    const fieldValue = feature.get(featureKey[0]) as number;
     if (fieldValue >= classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return 0;
 
     for (let i = 1; i < classBreakStyleInfos.length; i++) {

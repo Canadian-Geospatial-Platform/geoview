@@ -15,7 +15,7 @@ import { TypeJsonObject, toJsonObject, TypeJsonArray } from '../../../core/types
 import { generateId, showMessage } from '../../../core/utils/utilities';
 import { basemapLayerArrayPayload } from '../../../api/events/payloads/basemap-layers-payload';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
-import { TypeDisplayLanguage, TypeProjectionCodes, TypeLocalizedString } from '../../map/map-schema-types';
+import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeLocalizedString } from '../../map/map-schema-types';
 
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
@@ -51,7 +51,7 @@ export class Basemap {
   basemapOptions: TypeBasemapOptions;
 
   // the projection number
-  private projection: TypeProjectionCodes;
+  private projection: TypeValidMapProjectionCodes;
 
   // the map id to be used in events
   #mapId: string;
@@ -61,10 +61,10 @@ export class Basemap {
    *
    * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
    * @param {TypeDisplayLanguage} displayLanguage language to be used, either en or fr
-   * @param {TypeProjectionCodes} projection projection number
+   * @param {TypeValidMapProjectionCodes} projection projection number
    * @param {string} mapId the map id
    */
-  constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeProjectionCodes, mapId: string) {
+  constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeValidMapProjectionCodes, mapId: string) {
     this.#mapId = mapId;
 
     this.basemapOptions = basemapOptions;
@@ -148,12 +148,12 @@ export class Basemap {
    * Get basemap thumbnail url
    *
    * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-   * @param {TypeProjectionCodes} projection basemap projection
+   * @param {TypeValidMapProjectionCodes} projection basemap projection
    * @param {TypeDisplayLanguage} displayLanguage basemap language
    *
    * @returns {string[]} array of thumbnail urls
    */
-  private getThumbnailUrl = (basemapTypes: string[], projection: TypeProjectionCodes, displayLanguage: TypeDisplayLanguage): string[] => {
+  private getThumbnailUrl = (basemapTypes: string[], projection: TypeValidMapProjectionCodes, displayLanguage: TypeDisplayLanguage): string[] => {
     const thumbnailUrls: string[] = [];
 
     for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
@@ -492,7 +492,7 @@ export class Basemap {
           altText: info[1],
           thumbnailUrl: this.getThumbnailUrl(
             basemaplayerTypes,
-            projectionCode as TypeProjectionCodes,
+            projectionCode as TypeValidMapProjectionCodes,
             this.displayLanguage as TypeDisplayLanguage
           ),
           attribution: this.attribution,
