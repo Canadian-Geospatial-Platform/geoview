@@ -1,0 +1,59 @@
+name: Build types on merge
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  update_types:
+    if: ${{ github.event.pull_request.merged || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Build geoview-core to update types
+        run: |
+          npm install -g @microsoft/rush
+          rush update
+          rush build:core
+
+      - name: Create new branch with just types and package.json
+        run: |
+          exists=$(git ls-remote --heads origin new-types | wc -l)
+          if [ ${exists} != 0 ];
+          then
+            echo "Delete branch new-types (and close associated PR, if necessary) and run the action again."
+            exit 1
+          fi
+
+          git checkout types
+          git checkout -b new-types
+          rm -r src
+          cp -r ./packages/geoview-core/types/* ./
+          rm -r common
+          rm -r packages
+
+          git config --global user.name $USER
+          git add .
+          git status
+          CHANGES=$(git status -s | wc -l)
+          if [ $CHANGES == 0 ];
+          then
+            echo "No changes made."
+            exit 1
+          fi
+
+          git commit -m "types updated"
+          git push -u origin HEAD:new-types
+
+      - name: Open pull request to types branch
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "new-types"
+          destination_branch: "types"
+          pr_title: "Update to types"
+          pr_body: |
+            *An automated PR*
