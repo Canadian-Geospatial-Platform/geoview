@@ -1137,7 +1137,7 @@ export class GeoviewRenderer {
           return key.toLowerCase() === fields[j].toLowerCase();
         });
         // eslint-disable-next-line eqeqeq
-        if (feature.get(featureKey[0]) == uniqueValueStyleInfo[i].values[j] && j + 1 === fields.length) return i;
+        if (featureKey.length && feature.get(featureKey[0]) == uniqueValueStyleInfo[i].values[j] && j + 1 === fields.length) return i;
       }
     }
     return undefined;
@@ -1212,7 +1212,10 @@ export class GeoviewRenderer {
     const featureKey = (feature as Feature).getKeys().filter((key) => {
       return key.toLowerCase() === field.toLowerCase();
     });
+    if (featureKey.length !== 1) return undefined;
+
     const fieldValue = feature.get(featureKey[0]) as number;
+
     if (fieldValue >= classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return 0;
 
     for (let i = 1; i < classBreakStyleInfos.length; i++) {
