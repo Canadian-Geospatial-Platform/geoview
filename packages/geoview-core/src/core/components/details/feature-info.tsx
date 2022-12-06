@@ -1,22 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from 'react';
+// import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import makeStyles from '@mui/styles/makeStyles';
 import {
   Collapse,
-  List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  CloseIcon,
   ExpandMoreIcon,
   ExpandLessIcon,
-  TodoIcon,
-  ListAltIcon,
   Tooltip,
-  VisibilityIcon,
-  VisibilityOffIcon,
   IconButton,
 } from '../../../ui';
 
@@ -98,11 +92,10 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-
 export interface TypeFeatureProps {
+  // eslint-disable-next-line react/no-unused-prop-types
   key: number;
   feature: TypeJsonObject;
-  opened?: boolean;
 }
 /**
  * Legend Item for a Legend list
@@ -110,35 +103,39 @@ export interface TypeFeatureProps {
  * @returns {JSX.Element} the legend list item
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
-  const { feature, opened } = props;
+  const { feature } = props;
   const [isOpen, setOpen] = useState<boolean>(false);
   const classes = useStyles();
   return (
     <>
       <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
-        <Tooltip title={feature['OBJECTID']} placement="top" enterDelay={1000}>
-          <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={feature['OBJECTID']} />
-        </Tooltip>
+          <ListItemIcon>
+            <IconButton color="primary">{!isOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+          </ListItemIcon>
+          <Tooltip title={feature.OBJECTID} placement="top" enterDelay={1000}>
+            <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={feature.OBJECTID} />
+          </Tooltip>
         </ListItemButton>
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
-      <Box>
-        <Box sx={sxClasses.expandableIconContainer}>  
-        {
-          // loop through each layer in the map server
-          Object.keys(feature).map((featureKey, index) => {
-            return (
-              <div key={index} className={index%2 > 0 ? classes.featureInfoItem : classes.featureInfoItemOdd} >
-                <span className={classes.featureInfoItemKey}>{featureKey}</span>
-                <span className={classes.featureInfoItemValue}>{feature[featureKey]}</span>
-              </div>
-            );
-          })
-        }
+        <Box>
+          <Box sx={sxClasses.expandableIconContainer}>
+            {
+              // loop through each layer in the map server
+              Object.keys(feature).map((featureKey, index) => {
+                return (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <div key={index} className={index % 2 > 0 ? classes.featureInfoItem : classes.featureInfoItemOdd}>
+                    <span className={classes.featureInfoItemKey}>{featureKey}</span>
+                    <span className={classes.featureInfoItemValue}>{feature[featureKey]}</span>
+                  </div>
+                );
+              })
+            }
+          </Box>
         </Box>
-      </Box>
       </Collapse>
-      </>
-    );
-  }
+    </>
+  );
+}
