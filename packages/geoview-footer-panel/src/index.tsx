@@ -96,7 +96,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         footerTabs.createFooterTab({
           value: tabsCounter,
           label: this.translations[displayLanguage].details as string,
-          content: () => api.map(mapId).details.createDetails({ layerId: 'esriFeatureLYR4' }),
+          content: api.map(mapId).details.createDetails(),
         });
         tabsCounter++;
       }
