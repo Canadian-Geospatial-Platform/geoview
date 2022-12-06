@@ -74,7 +74,19 @@
       "properties": {
         "color": { "type": "string" },
         "lineStyle": {
-          "enum": ["dash", "dash-dot", "dash-dot-dot", "dot", "longDash", "longDash-dot", "null", "shortDash", "shortDash-dot", "shortDash-dot-dot", "solid"]
+          "enum": [
+            "dash",
+            "dash-dot",
+            "dash-dot-dot",
+            "dot",
+            "longDash",
+            "longDash-dot",
+            "null",
+            "shortDash",
+            "shortDash-dot",
+            "shortDash-dot-dot",
+            "solid"
+          ]
         },
         "width": { "type": "number" }
       }
@@ -325,9 +337,9 @@
       "minProperties": 1,
       "type": "object",
       "properties": {
-        "Point":  { "$ref": "#/definitions/TypeStyleSettings" },
-        "LineString":  { "$ref": "#/definitions/TypeStyleSettings" },
-        "Polygon":  { "$ref": "#/definitions/TypeStyleSettings" }
+        "Point": { "$ref": "#/definitions/TypeStyleSettings" },
+        "LineString": { "$ref": "#/definitions/TypeStyleSettings" },
+        "Polygon": { "$ref": "#/definitions/TypeStyleSettings" }
       }
     },
 
@@ -414,15 +426,20 @@
         "minDistance": {
           "type": "integer",
           "description": "Minimum distance in pixels between clusters. Will be capped at the configured distance. By default no minimum distance is guaranteed. This config can be used to avoid overlapping icons. As a tradoff, the cluster feature's position will no longer be the center of all its features."
+        },
+        "textColor": {
+          "type": "string",
+          "description": "Color for the text showing the number of points in a cluster"
+        },
+        "color": {
+          "type": "string",
+          "description": "Color for the cluster symbol and clustered geometries"
         }
       }
     },
 
     "TypeSourceImageInitialConfig": {
-      "anyOf": [
-        { "$ref": "#/definitions/TypeSourceImageWmsInitialConfig" },
-        { "$ref": "#/definitions/TypeSourceImageEsriInitialConfig" }
-      ]
+      "anyOf": [{ "$ref": "#/definitions/TypeSourceImageWmsInitialConfig" }, { "$ref": "#/definitions/TypeSourceImageEsriInitialConfig" }]
     },
 
     "TypeSourceImageWmsInitialConfig": {
@@ -815,7 +832,7 @@
       "type": "object",
       "description": "Layer source providing geocore data.",
       "properties": {
-        "dataAccessPath":  {
+        "dataAccessPath": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The url path to the geoCore endpoint (optional, this value should be embeded in the GeoView API)."
         }
@@ -946,7 +963,7 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The GeoView layer access path (English/French)."
         },
-        "geoviewLayerType":  {
+        "geoviewLayerType": {
           "$ref": "#/definitions/TypeGeoviewLayerType",
           "description": "Type of GeoView layer."
         },
@@ -959,26 +976,13 @@
           "description": "The layer entries to use from the GeoView layer."
         }
       },
-      "required": [
-        "geoviewLayerId",
-        "geoviewLayerType",
-        "listOfLayerEntryConfig"
-      ]
+      "required": ["geoviewLayerId", "geoviewLayerType", "listOfLayerEntryConfig"]
     },
 
     "TypeGeoviewLayerType": {
       "type": "string",
       "items": {
-        "enum": [
-          "esriDynamic",
-          "esriFeature",
-          "GeoJSON",
-          "geoCore",
-          "xyzTiles",
-          "ogcFeature",
-          "ogcWfs",
-          "ogcWms"
-        ]
+        "enum": ["esriDynamic", "esriFeature", "GeoJSON", "geoCore", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms"]
       },
       "description": "Type of GeoView layer."
     },
