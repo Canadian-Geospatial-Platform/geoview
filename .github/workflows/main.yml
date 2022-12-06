@@ -53,6 +53,7 @@ jobs:
   install-build:
     name: Build demo files
     needs: [check-member]
+    if: github.event.pull_request.merged == false || github.event.pull_request.merged == true
     uses: ./.github/workflows/build.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -69,7 +70,7 @@ jobs:
   deploy-public:
     name: Deploy public
     needs: [install-build]
-    if: github.event.pull_request.true == false && github.head_ref != ''
+    if: github.event.pull_request.merged == true && github.head_ref != ''
     uses: ./.github/workflows/deploy.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
