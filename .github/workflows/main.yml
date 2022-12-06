@@ -69,7 +69,7 @@ jobs:
   deploy-public:
     name: Deploy public
     needs: [install-build]
-    if: github.head_ref == ''
+    if: github.event.pull_request.true == false && github.head_ref != ''
     uses: ./.github/workflows/deploy.yml
     with:
       cache_sha: ${{ github.event.pull_request.head.sha || github.sha }}
