@@ -283,17 +283,31 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerEntryConfig: TypeEsriDynamicLayerEntryConfig
   ) {
     if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-    // ! TODO: TThe solution implemented in the following two lines is not right. scale and zoom are not the same things.
+    if (!layerEntryConfig.initialSettings?.visible) layerEntryConfig.initialSettings.visible = visibility;
+    // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
     // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
     // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
-    if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings.visible = visibility;
-    if (!layerEntryConfig.initialSettings?.extent) {
-      const layerExtent: Extent = [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number];
+    if (layerEntryConfig.initialSettings?.extent)
       layerEntryConfig.initialSettings.extent = transformExtent(
+        layerEntryConfig.initialSettings.extent,
+        'EPSG:4326',
+        `EPSG:${api.map(this.mapId).currentProjection}`
+      );
+
+    if (layerEntryConfig.initialSettings?.bounds)
+      layerEntryConfig.initialSettings.bounds = transformExtent(
+        layerEntryConfig.initialSettings.bounds,
+        'EPSG:4326',
+        `EPSG:${api.map(this.mapId).currentProjection}`
+      );
+    else {
+      if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+      const layerExtent = [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
+      layerEntryConfig.initialSettings.bounds = transformExtent(
         layerExtent,
         `EPSG:${extent.spatialReference.wkid as number}`,
         `EPSG:${api.map(this.mapId).currentProjection}`
-      ) as Extent;
+      );
     }
   }
 
@@ -314,7 +328,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerEntryConfig: TypeEsriDynamicLayerEntryConfig
   ) {
     if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: capabilities.includes('Query') };
-    // dynamic group layer doesn't have fields definition
+    // metadata layer group doesn't have fields definition
     if (!layerEntryConfig.isMetadataLayerGroup) {
       if (!layerEntryConfig.source.featureInfo.nameField)
         layerEntryConfig.source.featureInfo.nameField = {

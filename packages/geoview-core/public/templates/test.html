@@ -15,13 +15,13 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div id="LYR8" class="llwp-map" data-lang="en" data-config="{
+    <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
           'zoom': 4,
           'center': [-100, 60],
-          'projection': 3978
+          'projection': 3857
         },
         'basemapOptions': {
           'basemapId': 'transport',
@@ -30,11 +30,17 @@
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'LYR8',
-            'geoviewLayerType': 'geoCore',
+            'geoviewLayerId': 'wmsLYR1-Root',
+            'geoviewLayerName': { 'en': 'HRDEM Mosaic Hillshade DSM' },
+            'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/elevation' },
+            'geoviewLayerType': 'ogcWms',
+            'initialSettings': {
+              'visible': true,
+              'extent': [-149.79297785997943, 35.77540615585467, -32.353404567984725, 85]
+            },
             'listOfLayerEntryConfig': [
               {
-                'layerId': '0fe65119-e96e-4a57-8bfe-9d9245fba06b'
+                'layerId': 'dsm-hillshade'
               }
             ]
           }
@@ -45,14 +51,58 @@
       'theme': 'dark',
       'suportedLanguages': ['en']
     }">
-</div>
-<button class="Get-Legend">Get Legend</button>
+    </div>
+    <button class="Get-Legend">Get Legend</button>
+    <button class="Show-Bounds-wms">Show Bounds</button>
     <div id="legend-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll;"  id="wmsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
+    <hr />
+    <div id="LYR6" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 8,
+              'center': [-71.370748, 42.001058],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'wfsLYR6',
+                'geoviewLayerName': {
+                  'en': 'Airport data'
+                },
+                'metadataAccessPath': {
+                  'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
+                },
+                'geoviewLayerType': 'ogcWfs',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'GISDATA.AIRPORTS_PT'
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map', 'nav-bar'],
+          'corePackages': [],
+          'theme': 'dark',
+          'suportedLanguages': ['en']
+        }">
+    </div>
+    <button class="Get-wfs-Legend">Get Legend</button>
+    <button class="Show-Bounds-wfs">Show Bounds</button>
+    <div id="wfsLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll;"  id="wfsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
     <script src="codedoc.js"></script>
     <script>
@@ -63,112 +113,165 @@
         createCodeSnippet();
         createConfigSnippet();
       });
-    // WMS ======================================================================================================================
-    const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR8', 'wmsResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR8');
+      // WMS ======================================================================================================================
+      const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
+      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+        const {  layerSetId, resultSets } = payload;
+        document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+      }, 'LYR1');
 
-    const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR8', 'wmsLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('wmsLegendsId', resultSets);
-    }, 'LYR8', 'wmsLegendsId');
+      const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
+      cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
+        const {  resultSets } = payload;
+        displayLegend('wmsLegendsId', resultSets);
+      }, 'LYR1', 'wmsLegendsId');
 
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
-    });
-
-    // ==========================================================================================================================
-    function displayLegend(layerSetId, resultSets) {
-      const addHeader = (title, container) => {
-        const tableHeader = document.createElement('th');
-        tableHeader.style = "text-align: center; vertical-align: middle;"
-        tableHeader.innerHTML =  title;
-        container.appendChild(tableHeader);
-      }
-      const addData = (data, container) => {
-        const tableData = document.createElement('td');
-        tableData.style.verticalAlign = 'middle';
-        tableData.style.textAlign = 'center';
-        if (typeof data === 'string') tableData.innerHTML =  data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-        else tableData.appendChild(data);
-        container.appendChild(tableData);
-      }
-      var oldTable = document.getElementById(`${layerSetId}-table`);
-      if (oldTable) oldTable.parentNode.removeChild(oldTable)
-      var legendTable = document.getElementById('legend-table-div');
-      const table = document.createElement('table');
-      table.id = `${layerSetId}-table`;
-      table.border="1";
-      table.style="width:50%";
-      legendTable.appendChild(table);
-      var createHeader = true;
-      Object.keys(resultSets).forEach((layerPath) => {
-        if (resultSets[layerPath]?.type === 'ogcWms') {
-          if (createHeader) {
-            createHeader = false;
-            const tableRow1 = document.createElement('tr');
-            table.appendChild(tableRow1);
-            addHeader("Layer Path", tableRow1);
-            addHeader("Symbology", tableRow1);
-          }
-          const tableRow = document.createElement('tr');
-          addData(resultSets[layerPath].layerPath, tableRow);
-          addData(resultSets[layerPath].legend, tableRow);
-          table.appendChild(tableRow);
-        } else {
-          const addRow = (layerPath, label, canvas) => {
-            const tableRow = document.createElement('tr');
-            addData(layerPath, tableRow);
-            addData(label, tableRow); // canvas.style = "border: 1px solid black;"
-            addData(canvas, tableRow);
-            table.appendChild(tableRow);
-          }
-          if (createHeader) {
-            createHeader = false;
-            const tableRow1 = document.createElement('tr');
-            table.appendChild(tableRow1);
-            addHeader("Layer Path", tableRow1);
-            addHeader("Label", tableRow1);
-            addHeader("Symbology", tableRow1);
-          }
-          if (resultSets[layerPath]?.legend) {
-            Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
-              if (geometryKey) {
-                if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
-                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                    addRow(layerPath,
-                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                    addRow(layerPath,
-                          resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
-                  }
-                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
-                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                    addRow(layerPath,
-                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                    addRow(layerPath,
-                          resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
-                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
-                  }
-                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
-                  addRow(layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].label,
-                        resultSets[layerPath].legend[geometryKey].defaultCanvas);
-                }
-              }
-            });
-          }
-        }
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
       });
-    }
+
+      var showBoundsButton = document.getElementsByClassName('Show-Bounds-wms')[0];
+      showBoundsButton.addEventListener('click', function (e) {
+          addBoundsPolygon('LYR1', 'wmsLYR1-Root', 'dsm-hillshade');
+        });
+
+      // WFS ======================================================================================================================
+      const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
+      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+        const {  layerSetId, resultSets } = payload;
+        document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+      }, 'LYR6');
+
+      const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
+      cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
+        const {  resultSets } = payload;
+        displayLegend('wfsLegendsId', resultSets);
+      }, 'LYR6', 'wfsLegendsId');
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
+      });
+
+      var showBoundsButton = document.getElementsByClassName('Show-Bounds-wfs')[0];
+      showBoundsButton.addEventListener('click', function (e) {
+          addBoundsPolygon('LYR6', 'wfsLYR6', 'GISDATA.AIRPORTS_PT');
+        });
+
+      // ==========================================================================================================================
+      function addBoundsPolygon(map, geoviewLayerId, subLayerId) {
+        cgpv.api.map(map).layer.vector.setActiveGeometryGroup();
+        // call an api function to draw a polygon
+        const bbox = cgpv.api.map(map).layer.geoviewLayers[geoviewLayerId].getBounds(`${geoviewLayerId}/${subLayerId}`, 4326);
+        cgpv.api.map(map).fitBounds(bbox, 4326);
+        const polygon = cgpv.api.map(map).layer.vector.addPolygon(
+          [
+            [
+              [bbox[0], bbox[1]],
+              [bbox[0], bbox[3]],
+              [bbox[2], bbox[3]],
+              [bbox[2], bbox[1]],
+            ],
+          ],
+          {
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+            },
+          }
+        );
+      }
+
+      // ==========================================================================================================================
+      function displayLegend(layerSetId, resultSets) {
+        const addHeader = (title, container) => {
+          const tableHeader = document.createElement('th');
+          tableHeader.style = "text-align: center; vertical-align: middle;"
+          tableHeader.innerHTML =  title;
+          container.appendChild(tableHeader);
+        }
+        const addData = (data, container) => {
+          const tableData = document.createElement('td');
+          tableData.style.verticalAlign = 'middle';
+          tableData.style.textAlign = 'center';
+          if (typeof data === 'string') tableData.innerHTML =  data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+          else tableData.appendChild(data);
+          container.appendChild(tableData);
+        }
+        var oldTable = document.getElementById(`${layerSetId}-table`);
+        if (oldTable) oldTable.parentNode.removeChild(oldTable)
+        var legendTable = document.getElementById('legend-table-div');
+        const table = document.createElement('table');
+        table.id = `${layerSetId}-table`;
+        table.border="1";
+        table.style="width:50%";
+        legendTable.appendChild(table);
+        var createHeader = true;
+        Object.keys(resultSets).forEach((layerPath) => {
+          if (resultSets[layerPath]?.type === 'ogcWms') {
+            if (createHeader) {
+              createHeader = false;
+              const tableRow1 = document.createElement('tr');
+              table.appendChild(tableRow1);
+              addHeader("Layer Path", tableRow1);
+              addHeader("Symbology", tableRow1);
+            }
+            const tableRow = document.createElement('tr');
+            addData(resultSets[layerPath].layerPath, tableRow);
+            addData(resultSets[layerPath].legend, tableRow);
+            table.appendChild(tableRow);
+          } else {
+            const addRow = (layerPath, label, canvas) => {
+              const tableRow = document.createElement('tr');
+              addData(layerPath, tableRow);
+              addData(label, tableRow); // canvas.style = "border: 1px solid black;"
+              addData(canvas, tableRow);
+              table.appendChild(tableRow);
+            }
+            if (createHeader) {
+              createHeader = false;
+              const tableRow1 = document.createElement('tr');
+              table.appendChild(tableRow1);
+              addHeader("Layer Path", tableRow1);
+              addHeader("Label", tableRow1);
+              addHeader("Symbology", tableRow1);
+            }
+            if (resultSets[layerPath]?.legend) {
+              Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+                if (geometryKey) {
+                  if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
+                    if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                      addRow(layerPath,
+                              resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                              resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                    for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                      addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                            resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
+                    }
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
+                    if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                      addRow(layerPath,
+                              resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                              resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                    for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                      addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                            resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
+                    }
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
+                    addRow(layerPath,
+                          resultSets[layerPath].styleConfig[geometryKey].label,
+                          resultSets[layerPath].legend[geometryKey].defaultCanvas);
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
     </script>
   </body>
 </html>

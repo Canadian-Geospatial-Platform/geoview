@@ -14,6 +14,7 @@ import { Extent } from 'ol/extent';
 import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
+
 import { Cast, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
@@ -379,16 +380,35 @@ export class WMS extends AbstractGeoViewRaster {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
         if (layerCapabilities) {
           if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution as string);
-          if (!layerEntryConfig.source.featureInfo)
-            layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable as boolean };
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          // ! TODO: The solution implemented in the following 4 lines is not right. scale and zoom are not the same things.
-          // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
-          // !   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-          // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
-          // !   layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
-          if (!layerEntryConfig.initialSettings?.extent) {
-            layerEntryConfig.initialSettings.extent = api.map(this.mapId).map.getView().calculateExtent(api.map(this.mapId).map.getSize());
+          if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
+          // ! TODO: The solution implemented in the following 5 lines is not right. scale and zoom are not the same things.
+          // if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+          // if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
+          //   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
+          // if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
+          //   layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
+          if (layerEntryConfig.initialSettings?.extent)
+            layerEntryConfig.initialSettings.extent = transformExtent(
+              layerEntryConfig.initialSettings.extent,
+              'EPSG:4326',
+              `EPSG:${api.map(this.mapId).currentProjection}`
+            );
+
+          if (layerEntryConfig.initialSettings?.bounds)
+            layerEntryConfig.initialSettings.bounds = transformExtent(
+              layerEntryConfig.initialSettings.bounds,
+              'EPSG:4326',
+              `EPSG:${api.map(this.mapId).currentProjection}`
+            );
+          else {
+            if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+            if (layerCapabilities.EX_GeographicBoundingBox) {
+              layerEntryConfig.initialSettings.bounds = transformExtent(
+                layerCapabilities.EX_GeographicBoundingBox as Extent,
+                'EPSG:4326',
+                `EPSG:${api.map(this.mapId).currentProjection}`
+              );
+            }
           }
         }
       }

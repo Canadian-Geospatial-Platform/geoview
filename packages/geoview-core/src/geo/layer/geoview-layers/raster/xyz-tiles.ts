@@ -253,11 +253,20 @@ export class XYZTiles extends AbstractGeoViewRaster {
         for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
         layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);
         layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerList[i].initialSettings);
-        const extent = layerEntryConfig.initialSettings?.extent;
-        if (extent) {
-          const layerExtent = transformExtent(extent, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`) as Extent;
-          layerEntryConfig.initialSettings!.extent = layerExtent;
-        }
+
+        if (layerEntryConfig.initialSettings?.extent)
+          layerEntryConfig.initialSettings.extent = transformExtent(
+            layerEntryConfig.initialSettings.extent,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
+
+        if (layerEntryConfig.initialSettings?.bounds)
+          layerEntryConfig.initialSettings!.bounds = transformExtent(
+            layerEntryConfig.initialSettings.bounds,
+            'EPSG:4326',
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
         resolve();
       }
     });

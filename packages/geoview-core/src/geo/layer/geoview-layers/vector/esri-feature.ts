@@ -292,13 +292,27 @@ export class EsriFeature extends AbstractGeoViewVector {
     // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
     // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
     if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings.visible = visibility;
-    if (!layerEntryConfig.initialSettings?.extent) {
-      const layerExtent: Extent = [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number];
+
+    if (layerEntryConfig.initialSettings?.extent)
       layerEntryConfig.initialSettings.extent = transformExtent(
+        layerEntryConfig.initialSettings.extent,
+        'EPSG:4326',
+        `EPSG:${api.map(this.mapId).currentProjection}`
+      );
+    if (layerEntryConfig.initialSettings?.bounds)
+      layerEntryConfig.initialSettings.bounds = transformExtent(
+        layerEntryConfig.initialSettings.bounds,
+        'EPSG:4326',
+        `EPSG:${api.map(this.mapId).currentProjection}`
+      );
+    else {
+      if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
+      const layerExtent: Extent = [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number];
+      layerEntryConfig.initialSettings.bounds = transformExtent(
         layerExtent,
         `EPSG:${extent.spatialReference.wkid as number}`,
         `EPSG:${api.map(this.mapId).currentProjection}`
-      ) as Extent;
+      );
     }
   }
 
@@ -354,6 +368,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Create a source configuration for the vector layer.
    *
    * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry configuration.
+   * @param {SourceOptions} sourceOptions The source options (default: { strategy: all }).
+   * @param {ReadOptions} readOptions The read options (default: {}).
    *
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
    */
