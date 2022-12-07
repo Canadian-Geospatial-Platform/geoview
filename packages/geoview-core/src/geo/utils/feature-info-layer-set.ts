@@ -62,7 +62,9 @@ export class FeatureInfoLayerSet {
       (payload) => {
         if (payloadIsQueryResult(payload)) {
           const { layerPath, arrayOfRecords } = payload;
-          if (layerPath in this.resultSets) this.resultSets[layerPath] = arrayOfRecords;
+          if (layerPath in this.resultSets) {
+            this.resultSets[layerPath] = arrayOfRecords;
+          } else this.resultSets.test = arrayOfRecords;
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
             return doneFlag && this.resultSets[layerPathToTest] !== undefined;
           }, true);

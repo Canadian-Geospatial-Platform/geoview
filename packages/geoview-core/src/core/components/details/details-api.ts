@@ -32,7 +32,12 @@ export class DetailsAPI {
    * @return {ReactElement} the details react element
    *
    */
-  createDetails = () => {
-    return Details;
+  createDetails = (detailsElements) => {
+    return createElement('div', {}, [
+      createElement(Details, {
+        key: `details-grid`,
+        details: detailsElements,
+      }),
+    ]);
   };
 }
