@@ -628,8 +628,11 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Return the bounds of the layer or undefined if it is not defined in the layer configuration or the metadata.
-   * if projectionCode is set, returns the bounds in the specified projection otherwise use the map projection.
+   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata.
+   * If projectionCode is defined, returns the bounds in the specified projection otherwise use the map projection.
+   * The bounds are different from the extent. They are mainly used for display purposes to show the bounding box in which
+   * the data resides and to zoom in on the entire layer data. It is not used by openlayer to limit the display of data on
+   * the map.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
@@ -649,7 +652,8 @@ export abstract class AbstractGeoViewLayer {
   /** ***************************************************************************************************************************
    * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
    * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
-   * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null.
+   * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null. The extent
+   * is used to clip the data displayed on the map.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    *
