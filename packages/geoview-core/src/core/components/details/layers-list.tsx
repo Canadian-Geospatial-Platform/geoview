@@ -43,7 +43,7 @@ const sxClasses = {
   },
 };
 interface TypeLayersListProps {
-  layersData: Record<string, TypeLayerSetData>;
+  layerData: TypeLayerData;
 }
 
 /**
@@ -52,36 +52,23 @@ interface TypeLayersListProps {
  * @returns {JSX.Element} the layers list
  */
 export function LayersList(props: TypeLayersListProps): JSX.Element {
-  const { layersData } = props;
+  const { layerData } = props;
   // const { t, i18n } = useTranslation<string>();
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
   const [layerOpen, setLayerOpen] = useState<string>('');
 
-  useEffect(() => {
-    const layerSetIds = Object.keys(layersData);
-    if (layerSetIds.length === 1) {
-      setLayerSetOpen(layerSetIds[0]);
-      const layerIds = Object.keys(layersData[layerSetIds[0]].layerData);
-      if (layerIds.length === 1) {
-        setLayerOpen(layerIds[0]);
-      }
-    }
-  }, [layersData]);
-
   return (
     <List sx={sxClasses.details}>
       {
-        // loop through each map server layer
-        Object.keys(layersData).map((layerSetId) => {
-          const { layerSetName, layerData } = layersData[layerSetId];
-
-          return (
-            <div key={layerSetId}>
-              <ListItem sx={sxClasses.layerItem} onClick={() => setLayerSetOpen(layerSetOpen !== layerSetId ? layerSetId : '')}>
-                <ListItemButton>
-                  <ListItemIcon>
-                    <IconButton color="primary">{layerSetOpen !== layerSetId ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
-                    {/* {iconType === 'simple' && iconImg !== null && (
+        <div key={layerData.layerName}>
+          <ListItem
+            sx={sxClasses.layerItem}
+            onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerName ? layerData.layerName : '')}
+          >
+            <ListItemButton>
+              <ListItemIcon>
+                <IconButton color="primary">{layerSetOpen !== layerData.layerName ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+                {/* {iconType === 'simple' && iconImg !== null && (
                       <Avatar sx={sxClasses.legendIcon} variant="square" src={isLegendOpen ? '' : iconImg} onClick={() => handleLegendClick()}>
                         <CloseIcon />
                       </Avatar>
@@ -96,58 +83,19 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
                         <TodoIcon />
                       </Avatar>
                     )} */}
-                  </ListItemIcon>
-                  <Tooltip title={layerSetId} placement="top" enterDelay={1000}>
-                    <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerSetName} />
-                  </Tooltip>
-                </ListItemButton>
-              </ListItem>
-              <Collapse in={layerSetOpen === layerSetId} timeout="auto" unmountOnExit>
-                <Box>
-                  <Box sx={sxClasses.expandableIconContainer}>
-                    {
-                      // loop through each layer in the map server
-                      Object.keys(layerData).map((layerId) => {
-                        const { layerName, features } = layerData[layerId];
-
-                        return (
-                          <div key={layerId}>
-                            <ListItem
-                              sx={sxClasses.layerItem}
-                              onClick={() => setLayerOpen(layerSetOpen !== layerSetId || layerOpen !== layerId ? layerId : '')}
-                            >
-                              <ListItemButton>
-                                <ListItemIcon>
-                                  <IconButton color="primary">
-                                    {layerSetOpen !== layerSetId || layerOpen !== layerId ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-                                  </IconButton>
-                                </ListItemIcon>
-                                <Tooltip title={layerId} placement="top" enterDelay={1000}>
-                                  <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerName} />
-                                </Tooltip>
-                              </ListItemButton>
-                            </ListItem>
-                            <Collapse in={layerOpen === layerId} timeout="auto" unmountOnExit>
-                              <Box>
-                                <Box sx={sxClasses.expandableIconContainer}>
-                                  {Array.isArray(features) &&
-                                    features.map((feature: TypeJsonObject, index: number) => {
-                                      // eslint-disable-next-line react/no-array-index-key
-                                      return <FeatureInfo key={index} feature={feature} />;
-                                    })}
-                                </Box>
-                              </Box>
-                            </Collapse>
-                          </div>
-                        );
-                      })
-                    }
-                  </Box>
-                </Box>
-              </Collapse>
-            </div>
-          );
-        })
+              </ListItemIcon>
+              <Tooltip title={layerData.layerName} placement="top" enterDelay={1000}>
+                <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerData.layerName} />
+              </Tooltip>
+            </ListItemButton>
+          </ListItem>
+          <Box sx={sxClasses.expandableIconContainer}>
+            {layerData.features.map((feature: TypeJsonObject, index: number) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <FeatureInfo key={index} feature={feature} />
+            ))}
+          </Box>
+        </div>
       }
     </List>
   );
