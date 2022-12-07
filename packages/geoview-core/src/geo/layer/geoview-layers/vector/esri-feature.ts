@@ -159,7 +159,12 @@ export class EsriFeature extends AbstractGeoViewVector {
         return false;
       }
 
-      const esriIndex = Number(layerEntryConfig.layerId);
+      let esriIndex = Number(layerEntryConfig.layerId);
+      if (this.metadata && this.metadata.layers) {
+        const layerIndex = (this.metadata.layers as TypeJsonArray).findIndex((layerInfo: TypeJsonObject) => layerInfo.id === esriIndex);
+        if (layerIndex !== -1) esriIndex = layerIndex;
+      }
+
       if (Number.isNaN(esriIndex)) {
         this.layerLoadError.push({
           layer: Layer.getLayerPath(layerEntryConfig),
