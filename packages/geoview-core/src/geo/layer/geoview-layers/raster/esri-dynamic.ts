@@ -183,28 +183,37 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return false;
       }
 
-      if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
-        const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
-        (this.metadata!.layers[esriIndex].subLayerIds as TypeJsonArray).forEach((layerId) => {
-          const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerEntryConfig);
-          subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
-          subLayerEntryConfig.layerId = `${layerId}`;
-          subLayerEntryConfig.layerName = {
-            en: this.metadata!.layers[layerId as number].name as string,
-            fr: this.metadata!.layers[layerId as number].name as string,
+      const processLayerGroups = (idx: number, layerConfig: TypeLayerEntryConfig) => {
+        if (this.metadata!.layers[idx].type === 'Group Layer') {
+          const newListOfLayerEntryConfig: TypeListOfLayerEntryConfig = [];
+          (this.metadata!.layers[idx].subLayerIds as TypeJsonArray).forEach((layerId) => {
+            const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerConfig);
+            subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+            subLayerEntryConfig.layerId = `${layerId}`;
+            subLayerEntryConfig.layerName = {
+              en: this.metadata!.layers[layerId as number].name as string,
+              fr: this.metadata!.layers[layerId as number].name as string,
+            };
+            newListOfLayerEntryConfig.push(subLayerEntryConfig);
+            api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
+            if (this.metadata!.layers[layerId as number].type === 'Group Layer') {
+              processLayerGroups(layerId as number, subLayerEntryConfig);
+            }
+          });
+          const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerConfig);
+          switchToGroupLayer.entryType = 'group';
+          switchToGroupLayer.layerName = {
+            en: this.metadata!.layers[idx].name as string,
+            fr: this.metadata!.layers[idx].name as string,
           };
-          newListOfLayerEntryConfig.push(subLayerEntryConfig);
-          api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
-        });
-        const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
-        switchToGroupLayer.entryType = 'group';
-        switchToGroupLayer.layerName = {
-          en: this.metadata!.layers[esriIndex].name as string,
-          fr: this.metadata!.layers[esriIndex].name as string,
-        };
-        switchToGroupLayer.isMetadataLayerGroup = true;
-        switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
-        api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+          switchToGroupLayer.isMetadataLayerGroup = true;
+          switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
+          api.map(this.mapId).layer.registerLayerConfig(layerConfig);
+        }
+      };
+
+      if (this.metadata!.layers[esriIndex].type === 'Group Layer') {
+        processLayerGroups(esriIndex, layerEntryConfig);
         return true;
       }
 
