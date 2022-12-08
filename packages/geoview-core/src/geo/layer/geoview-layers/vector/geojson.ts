@@ -174,6 +174,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
         return true;
       }
+
       this.layerLoadError.push({
         layer: Layer.getLayerPath(layerEntryConfig),
         consoleMessage: `Invalid GeoJSON metadata (listOfLayerEntryConfig) prevent loading of layer (mapId:  ${

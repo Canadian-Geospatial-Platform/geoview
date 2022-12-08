@@ -172,7 +172,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         return true;
       }
 
-      // Note that geojson metadata as we defined it does not contains layer group. If you need geogson layer group,
+      // Note that geojson metadata as we defined it does not contains metadata layer group. If you need geogson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);

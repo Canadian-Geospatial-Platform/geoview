@@ -166,7 +166,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return false;
       }
 
-      const esriIndex = Number(layerEntryConfig.layerId);
+      let esriIndex = Number(layerEntryConfig.layerId);
       if (Number.isNaN(esriIndex)) {
         this.layerLoadError.push({
           layer: Layer.getLayerPath(layerEntryConfig),
@@ -175,7 +175,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return false;
       }
 
-      if (this.metadata?.layers[esriIndex] === undefined) {
+      esriIndex = this.metadata?.layers
+        ? (this.metadata.layers as TypeJsonArray).findIndex((layerInfo: TypeJsonObject) => layerInfo.id === esriIndex)
+        : -1;
+
+      if (esriIndex === -1) {
         this.layerLoadError.push({
           layer: Layer.getLayerPath(layerEntryConfig),
           consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
@@ -194,7 +198,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             fr: this.metadata!.layers[layerId as number].name as string,
           };
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
-          api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
         });
         const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
         switchToGroupLayer.entryType = 'group';
@@ -205,6 +208,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         switchToGroupLayer.isMetadataLayerGroup = true;
         switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+        this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
         return true;
       }
 
@@ -212,6 +216,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
+
       api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       return true;
     });
@@ -235,7 +240,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerEntryConfig.layerId}` : `${queryUrl}/${layerEntryConfig.layerId}`;
           const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
           queryResult.then((response) => {
-            // layers must have a fields attribute except if it is an dynamic layer group.
+            // layers must have a fields attribute except if it is an metadata layer group.
             if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
             if (geoviewEntryIsEsriDynamic(layerEntryConfig)) {

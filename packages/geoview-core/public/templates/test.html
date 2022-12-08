@@ -31,16 +31,12 @@
         'listOfGeoviewLayerConfig': [
           {
             'geoviewLayerId': 'wmsLYR1-Root',
-            'geoviewLayerName': { 'en': 'HRDEM Mosaic Hillshade DSM' },
-            'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/ows/elevation' },
-            'geoviewLayerType': 'ogcWms',
-            'initialSettings': {
-              'visible': true,
-              'extent': [-149.79297785997943, 35.77540615585467, -32.353404567984725, 85]
-            },
-            'listOfLayerEntryConfig': [
+            'geoviewLayerName': { 'en': '900A' },
+            'metadataAccessPath': { 'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer' },
+            'geoviewLayerType': 'esriFeature',
+           'listOfLayerEntryConfig': [
               {
-                'layerId': 'dsm-hillshade'
+                'layerId': '1'
               }
             ]
           }
@@ -133,8 +129,10 @@
 
       var showBoundsButton = document.getElementsByClassName('Show-Bounds-wms')[0];
       showBoundsButton.addEventListener('click', function (e) {
-          addBoundsPolygon('LYR1', 'wmsLYR1-Root', 'dsm-hillshade');
+        Object.keys(cgpv.api.map('LYR1').layer.registeredLayers).forEach((layerPath) => {
+          addBoundsPolygon('LYR1', 'wmsLYR1-Root', layerPath);
         });
+      });
 
       // WFS ======================================================================================================================
       const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
@@ -156,14 +154,14 @@
 
       var showBoundsButton = document.getElementsByClassName('Show-Bounds-wfs')[0];
       showBoundsButton.addEventListener('click', function (e) {
-          addBoundsPolygon('LYR6', 'wfsLYR6', 'GISDATA.AIRPORTS_PT');
+          addBoundsPolygon('LYR6', 'wfsLYR6', 'wfsLYR6/GISDATA.AIRPORTS_PT');
         });
 
       // ==========================================================================================================================
-      function addBoundsPolygon(map, geoviewLayerId, subLayerId) {
+      function addBoundsPolygon(map, geoviewLayerId, layerPath) {
         cgpv.api.map(map).layer.vector.setActiveGeometryGroup();
         // call an api function to draw a polygon
-        const bbox = cgpv.api.map(map).layer.geoviewLayers[geoviewLayerId].getBounds(`${geoviewLayerId}/${subLayerId}`, 4326);
+        const bbox = cgpv.api.map(map).layer.geoviewLayers[geoviewLayerId].getBounds(layerPath, 4326);
         cgpv.api.map(map).fitBounds(bbox, 4326);
         const polygon = cgpv.api.map(map).layer.vector.addPolygon(
           [
