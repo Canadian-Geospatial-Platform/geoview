@@ -159,7 +159,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         return false;
       }
 
-      const esriIndex = Number(layerEntryConfig.layerId);
+      let esriIndex = Number(layerEntryConfig.layerId);
       if (Number.isNaN(esriIndex)) {
         this.layerLoadError.push({
           layer: Layer.getLayerPath(layerEntryConfig),
@@ -168,7 +168,11 @@ export class EsriFeature extends AbstractGeoViewVector {
         return false;
       }
 
-      if (this.metadata?.layers[esriIndex] === undefined) {
+      esriIndex = this.metadata?.layers
+        ? (this.metadata.layers as TypeJsonArray).findIndex((layerInfo: TypeJsonObject) => layerInfo.id === esriIndex)
+        : -1;
+
+      if (esriIndex === -1) {
         this.layerLoadError.push({
           layer: Layer.getLayerPath(layerEntryConfig),
           consoleMessage: `ESRI layerId not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
@@ -182,26 +186,22 @@ export class EsriFeature extends AbstractGeoViewVector {
           const subLayerEntryConfig: TypeLayerEntryConfig = cloneDeep(layerEntryConfig);
           subLayerEntryConfig.parentLayerConfig = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
           subLayerEntryConfig.layerId = `${layerId}`;
-          let enDataAccessPath = layerEntryConfig.source!.dataAccessPath!.en!;
-          let frDataAccessPath = layerEntryConfig.source!.dataAccessPath!.fr!;
-          enDataAccessPath = `${enDataAccessPath.slice(0, enDataAccessPath.lastIndexOf('/'))}/${layerId}`;
-          frDataAccessPath = `${frDataAccessPath.slice(0, frDataAccessPath.lastIndexOf('/'))}/${layerId}`;
-          subLayerEntryConfig.source!.dataAccessPath = {
-            en: enDataAccessPath,
-            fr: frDataAccessPath,
-          };
           subLayerEntryConfig.layerName = {
             en: this.metadata!.layers[layerId as number].name as string,
             fr: this.metadata!.layers[layerId as number].name as string,
           };
           newListOfLayerEntryConfig.push(subLayerEntryConfig);
-          api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
         });
         const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
         switchToGroupLayer.entryType = 'group';
+        switchToGroupLayer.layerName = {
+          en: this.metadata!.layers[esriIndex].name as string,
+          fr: this.metadata!.layers[esriIndex].name as string,
+        };
         switchToGroupLayer.isMetadataLayerGroup = true;
         switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+        this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
         return true;
       }
 
@@ -217,6 +217,7 @@ export class EsriFeature extends AbstractGeoViewVector {
         en: this.metadata!.layers[esriIndex].name as string,
         fr: this.metadata!.layers[esriIndex].name as string,
       };
+
       api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       return true;
     });
@@ -240,7 +241,7 @@ export class EsriFeature extends AbstractGeoViewVector {
           queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerEntryConfig.layerId}` : `${queryUrl}/${layerEntryConfig.layerId}`;
           const queryResult = axios.get<TypeJsonObject>(`${queryUrl}?f=pjson`);
           queryResult.then((response) => {
-            // layers must have a fields attribute except if it is an dynamic layer group.
+            // layers must have a fields attribute except if it is an metadata layer group.
             if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
             if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
@@ -379,7 +380,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}/query?f=pjson&outfields=*&where=1%3D1`;
+    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId}/query?f=pjson&outfields=*&where=1%3D1`;
     sourceOptions.format = new EsriJSON();
     const vectorSource = super.createVectorSource(layerEntryConfig, sourceOptions, readOptions);
     return vectorSource;

@@ -643,10 +643,29 @@ export abstract class AbstractGeoViewLayer {
     layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
     projectionCode: string | number | undefined = undefined
   ): Extent | undefined {
+    let bounds: Extent | undefined;
+    const processGroupLayerBounds = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+      listOfLayerEntryConfig.forEach((layerConfig) => {
+        if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
+        else if (layerConfig.initialSettings?.bounds) {
+          if (!bounds) bounds = layerConfig.initialSettings.bounds;
+          else
+            bounds = [
+              Math.min(layerConfig.initialSettings.bounds[0], bounds[0]),
+              Math.min(layerConfig.initialSettings.bounds[1], bounds[1]),
+              Math.max(layerConfig.initialSettings.bounds[2], bounds[2]),
+              Math.max(layerConfig.initialSettings.bounds[3], bounds[3]),
+            ];
+        }
+      });
+    };
     const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-    if (projectionCode && layerConfig?.initialSettings?.bounds)
-      return transformExtent(layerConfig.initialSettings.bounds, `EPSG:${api.map(this.mapId).currentProjection}`, `EPSG:${projectionCode}`);
-    return layerConfig ? layerConfig.initialSettings?.bounds : undefined;
+    if (layerConfig) {
+      processGroupLayerBounds([layerConfig]);
+      if (projectionCode && bounds)
+        return transformExtent(bounds, `EPSG:${api.map(this.mapId).currentProjection}`, `EPSG:${projectionCode}`);
+    }
+    return bounds;
   }
 
   /** ***************************************************************************************************************************

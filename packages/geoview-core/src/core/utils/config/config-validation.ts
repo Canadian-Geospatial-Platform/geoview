@@ -522,12 +522,6 @@ export class ConfigValidation {
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'EsriJSON';
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
-        layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
-          ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
-          : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
-        layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
-          ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
-          : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
       } else if (geoviewEntryIsWFS(layerEntryConfig)) {
         // Default value for layerEntryConfig.entryType is vector
         if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';

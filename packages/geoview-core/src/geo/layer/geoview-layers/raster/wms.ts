@@ -256,6 +256,7 @@ export class WMS extends AbstractGeoViewRaster {
         en: layerFound.Title as string,
         fr: layerFound.Title as string,
       };
+
       api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       return true;
     });
@@ -280,14 +281,18 @@ export class WMS extends AbstractGeoViewRaster {
         fr: subLayer.Title as string,
       };
       newListOfLayerEntryConfig.push(subLayerEntryConfig);
-      api.map(this.mapId).layer.registerLayerConfig(subLayerEntryConfig);
-      if ('Layer' in subLayer) this.createGroupLayer(subLayer, subLayerEntryConfig);
     });
+
     const switchToGroupLayer = Cast<TypeLayerGroupEntryConfig>(layerEntryConfig);
     switchToGroupLayer.entryType = 'group';
+    switchToGroupLayer.layerName = {
+      en: layer.Title as string,
+      fr: layer.Title as string,
+    };
     switchToGroupLayer.isMetadataLayerGroup = true;
     switchToGroupLayer.listOfLayerEntryConfig = newListOfLayerEntryConfig;
     api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
+    this.validateListOfLayerEntryConfig(newListOfLayerEntryConfig);
     return true;
   }
 
