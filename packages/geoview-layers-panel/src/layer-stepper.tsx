@@ -85,6 +85,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     return () => {
       api.event.off(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**

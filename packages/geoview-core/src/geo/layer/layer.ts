@@ -10,7 +10,7 @@ import { EVENT_NAMES } from '../../api/events/event-types';
 import { Config } from '../../core/utils/config/config';
 import { generateId } from '../../core/utils/utilities';
 import { layerConfigPayload, payloadIsALayerConfig } from '../../api/events/payloads/layer-config-payload';
-import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '../../api/events/payloads/geoview-layer-payload';
+import { GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '../../api/events/payloads/geoview-layer-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
@@ -126,7 +126,7 @@ export class Layer {
     api.event.on(
       EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
-        if (payloadIsGeoViewLayerAdded(payload)) {
+        if (payloadIsRemoveGeoViewLayer(payload)) {
           // remove layer from outside
           this.removeLayersUsingPath(payload.geoviewLayer!.geoviewLayerId);
         }
@@ -248,7 +248,12 @@ export class Layer {
       // trigger the layer added event when layer is loaded on to the map
       geoviewLayer.gvLayers?.once(['change', 'prerender'] as EventTypes[], () => {
         if (!geoviewLayer.isLoaded) {
-          api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+          const layerInterval = setInterval(() => {
+            if (this.geoviewLayers[geoviewLayer.geoviewLayerId]) {
+              clearInterval(layerInterval);
+              api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+            }
+          }, 10);
         }
       });
       api.map(this.mapId).map.addLayer(geoviewLayer.gvLayers!);
@@ -263,15 +268,21 @@ export class Layer {
    * @param {string} partialLayerPath the path of the layer to be removed
    */
   removeLayersUsingPath = (partialLayerPath: string): void => {
-    Object.keys(this.registeredLayers).forEach((compleLayerPath) => {
-      if (compleLayerPath.startsWith(partialLayerPath)) {
-        this.registeredLayers[compleLayerPath]?.gvLayer!.dispose();
-        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, compleLayerPath, 'remove'));
-        delete this.registeredLayers[compleLayerPath];
+    Object.keys(this.registeredLayers).forEach((completeLayerPath) => {
+      if (completeLayerPath.startsWith(partialLayerPath)) {
+        this.registeredLayers[completeLayerPath]?.gvLayer!.dispose();
+        const layerId = partialLayerPath.split('/').slice(-1)[0];
+        const listOfLayerEntryConfig = this.registeredLayers[completeLayerPath].parentLayerConfig?.listOfLayerEntryConfig;
+        const layerIndex = listOfLayerEntryConfig!.findIndex((layerConfig) => layerConfig.layerId === layerId);
+        delete listOfLayerEntryConfig![layerIndex];
+        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, completeLayerPath, 'remove'));
+        delete this.registeredLayers[completeLayerPath];
       }
     });
 
     if (this.geoviewLayers[partialLayerPath]) {
+      // The clearTimeout is there for those rare extreme cases where you create a layer and then immediately destroy
+      // it before the creation process is completed
       clearTimeout(api.maps[this.mapId].layerLoadedTimeoutId[partialLayerPath]);
       this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
@@ -296,7 +307,8 @@ export class Layer {
     if (geoviewLayerConfig.geoviewLayerId in api.maps[this.mapId].layer.geoviewLayers)
       this.printDuplicateGeoviewLayerConfigError(geoviewLayerConfig);
     else {
-      api.maps[this.mapId].setEventListenerAndTimeout4ThisListOfLayer([geoviewLayerConfig]);
+      api.map(this.mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig!.push(geoviewLayerConfig);
+      api.map(this.mapId).setEventListenerAndTimeout4ThisListOfLayer([geoviewLayerConfig]);
       api.event.emit(layerConfigPayload(EVENT_NAMES.LAYER.EVENT_ADD_LAYER, this.mapId, geoviewLayerConfig));
     }
 

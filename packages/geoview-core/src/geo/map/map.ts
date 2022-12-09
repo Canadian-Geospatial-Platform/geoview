@@ -109,7 +109,7 @@ export class MapViewer {
   geoviewRenderer: GeoviewRenderer;
 
   // number of remaining layers that need to be loaded
-  remainingLayersThatNeedToBeLoaded!: number;
+  remainingLayersThatNeedToBeLoaded = 0;
 
   // flag used to indicate that the ready callback routine has been called once
   readyCallbackHasRun = false;
@@ -159,7 +159,6 @@ export class MapViewer {
 
     // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig || [];
-    this.remainingLayersThatNeedToBeLoaded = listOfGeoviewLayerConfig.length;
     this.setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
   }
 
@@ -181,6 +180,7 @@ export class MapViewer {
    * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
    */
   setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig) {
+    this.remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length;
     if (listOfGeoviewLayerConfig.length) {
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         if (!layerConfigIsGeoCore(geoviewLayerConfig)) {
