@@ -20,7 +20,7 @@ const validEvents: EventStringId[] = [
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsGeoViewLayerAdded = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeGeoviewLayerAddedPayload => {
-  return validEvents.includes(verifyIfPayload?.event);
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER.EVENT_LAYER_ADDED;
 };
 
 /**
@@ -41,7 +41,7 @@ export interface TypeGeoviewLayerAddedPayload extends GeoViewLayerPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsRemoveGeoViewLayer = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeRemoveGeoviewLayerPayload => {
-  return validEvents.includes(verifyIfPayload?.event);
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER.EVENT_REMOVE_LAYER;
 };
 
 /**
@@ -62,7 +62,7 @@ export interface TypeRemoveGeoviewLayerPayload extends GeoViewLayerPayload {
  * @returns {boolean} returns true if the payload is valid
  */
 export const payloadIsTestGeoViewLayers = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is TypeTestGeoviewLayersPayload => {
-  return validEvents.includes(verifyIfPayload?.event);
+  return verifyIfPayload?.event === EVENT_NAMES.LAYER.EVENT_IF_CONDITION;
 };
 
 /**

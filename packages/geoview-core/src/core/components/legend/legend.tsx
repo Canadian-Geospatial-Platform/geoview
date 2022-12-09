@@ -54,6 +54,7 @@ export function Legend(): JSX.Element | null {
                 setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
                 api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
               } else {
+                // eslint-disable-next-line no-console
                 console.error('geoviewLayerId is not in the layers list');
               }
             },
