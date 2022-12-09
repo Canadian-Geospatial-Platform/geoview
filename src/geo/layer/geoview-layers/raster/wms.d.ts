@@ -3,7 +3,7 @@ import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
     source: TypeSourceImageWmsInitialConfig;
 }
@@ -12,7 +12,7 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
     listOfLayerEntryConfig: TypeWmsLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWMSLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
@@ -21,7 +21,7 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  */
 export declare const layerConfigIsWMS: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeWMSLayerConfig;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as a WMS if the type attribute of the verifyIfGeoViewLayer
+ * type guard function that redefines an AbstractGeoViewLayer as a WMS if the type attribute of the verifyIfGeoViewLayer
  * parameter is WMS. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
@@ -31,7 +31,7 @@ export declare const layerConfigIsWMS: (verifyIfLayer: TypeGeoviewLayerConfig) =
  */
 export declare const geoviewLayerIsWMS: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is WMS;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWmsLayerEntryConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeWmsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewRootLayer attribute is WMS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -61,11 +61,16 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     protected getServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
-     * This method reads the service metadata from the metadataAccessPath.
+     * This method reads the layer identifiers from the configuration to create a coma seperated string that will be used in the
+     * GetCapabilities.
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
     private getLayersToQuery;
+    /** ***************************************************************************************************************************
+     * This method propagate the WMS metadata inherited values.
+     */
+    private processMetadataInheritance;
     /** ***************************************************************************************************************************
      * This method recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
      *
@@ -113,45 +118,45 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
      * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided projection coordinate.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided coordinate.
      *
      * @param {Coordinate} lnglat The coordinate that will be used by the query.
      * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features in the provided bounding box.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features in the provided polygon.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeWmsLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeWmsLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
      *
@@ -169,21 +174,22 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     private getLegendImage;
     /** ***************************************************************************************************************************
-     * Return the legend of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-     * return null when the layer specified is not found.
+     * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+     * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
+     * is null or the selected layerConfig is undefined or null.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {Promise<TypeLegend | null>} The legend of the layer.
      */
-    getLegend(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): Promise<TypeLegend | null>;
+    getLegend(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
-     * Translate the get feature information at coordinate result set to the TypeFeatureInfoResult used by GeoView.
+     * Translate the get feature information at coordinate result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
      *
      * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
      * @param {TypeFeatureInfoLayerConfig} featureInfo Feature information describing the user's desired output format.
      *
-     * @returns {TypeFeatureInfoResult} The feature info table.
+     * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
     private formatFeatureInfoAtCoordinateResult;
     /** ***************************************************************************************************************************

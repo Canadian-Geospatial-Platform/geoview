@@ -3,7 +3,7 @@ import { TextFieldProps } from '@mui/material';
 /**
  * Custom Material UI Textfield properties
  */
-declare type TypeTextFieldProps = TextFieldProps & {
+type TypeTextFieldProps = TextFieldProps & {
     mapId?: string;
 };
 /**

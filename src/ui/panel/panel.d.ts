@@ -4,7 +4,7 @@ import { TypeIconButtonProps } from '../icon-button/icon-button-types';
 /**
  * Interface for panel properties
  */
-declare type TypePanelAppProps = {
+type TypePanelAppProps = {
     panel: PanelApi;
     button: TypeIconButtonProps;
 };

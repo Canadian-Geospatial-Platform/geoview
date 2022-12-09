@@ -2,12 +2,12 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 /**
- * Type Gard function that redefines a PayloadBaseClass as a ButtonPanelPayload
+ * type guard function that redefines a PayloadBaseClass as a ButtonPanelPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAButtonPanel: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is ButtonPanelPayload;
 /**

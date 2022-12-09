@@ -1,5 +1,5 @@
 import { TypeBasemapOptions } from '../../../geo/layer/basemap/basemap-types';
-import { TypeDisplayLanguage, TypeProjectionCodes, TypeValidVersions, TypeListOfGeoviewLayerConfig, TypeListOfLocalizedLanguages } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeValidMapProjectionCodes, TypeValidVersions, TypeListOfGeoviewLayerConfig, TypeListOfLocalizedLanguages } from '../../../geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
 /** *****************************************************************************************************************************
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
@@ -9,6 +9,8 @@ import { TypeMapFeaturesConfig } from '../../types/global-types';
 export declare class ConfigValidation {
     /** The map ID associated to the configuration. If it is undefined, a unique value will be generated and assign to it. */
     private _mapId;
+    /** The triggerReadyCallback flag associated to the configuration. Default value is false. */
+    private _triggerReadyCallback;
     /** The language that will be used to display the GeoView layer. */
     private _displayLanguage;
     /** default configuration if provided configuration is missing or wrong */
@@ -41,6 +43,17 @@ export declare class ConfigValidation {
      */
     set mapId(mapId: string);
     /** ***************************************************************************************************************************
+     * Get triggerReadyCallback value.
+     *
+     * @returns {boolean} The triggerReadyCallback flag of the Geoview map.
+     */
+    get triggerReadyCallback(): boolean;
+    /** ***************************************************************************************************************************
+     * Set triggerReadyCallback value.
+     * @param {boolean} triggerReadyCallback The value to assign to the triggerReadyCallback flag for the Geoview map.
+     */
+    set triggerReadyCallback(triggerReadyCallback: boolean);
+    /** ***************************************************************************************************************************
      * Get displayLanguage value.
      *
      * @returns {TypeDisplayLanguage} The display language of the Geoview map.
@@ -53,12 +66,12 @@ export declare class ConfigValidation {
     set displayLanguage(displayLanguage: TypeDisplayLanguage);
     /** ***************************************************************************************************************************
      * Validate basemap options.
-     * @param {TypeProjectionCodes} projection The projection code of the basemap.
+     * @param {TypeValidMapProjectionCodes} projection The projection code of the basemap.
      * @param {TypeBasemapOptions} basemapOptions The basemap options to validate.
      *
      * @returns {TypeBasemapOptions} A valid basemap options.
      */
-    validateBasemap(projection?: TypeProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions;
+    validateBasemap(projection?: TypeValidMapProjectionCodes, basemapOptions?: TypeBasemapOptions): TypeBasemapOptions;
     /** ***************************************************************************************************************************
      * Validate map version.
      * @param {TypeValidVersions} version The version to validate.
@@ -81,15 +94,29 @@ export declare class ConfigValidation {
      */
     private validateZoom;
     /** ***************************************************************************************************************************
-     * Validate projection.
-     * @param {TypeProjectionCodes} projection The projection to validate.
+     * Validate min zoom level.
+     * @param {number} zoom The zoom level to validate.
      *
-     * @returns {TypeProjectionCodes} A valid projection.
+     * @returns {number} A valid zoom level.
+     */
+    private validateMinZoom;
+    /** ***************************************************************************************************************************
+     * Validate max zoom level.
+     * @param {number} zoom The zoom level to validate.
+     *
+     * @returns {number} A valid zoom level.
+     */
+    private validateMaxZoom;
+    /** ***************************************************************************************************************************
+     * Validate projection.
+     * @param {TypeValidMapProjectionCodes} projection The projection to validate.
+     *
+     * @returns {TypeValidMapProjectionCodes} A valid projection.
      */
     private validateProjection;
     /** ***************************************************************************************************************************
      * Validate the center.
-     * @param {TypeProjectionCodes} projection The projection used by the map.
+     * @param {TypeValidMapProjectionCodes} projection The projection used by the map.
      * @param {[number, number]} center The map center to valdate.
      *
      * @returns {[number, number]} A valid map center.
@@ -108,7 +135,7 @@ export declare class ConfigValidation {
      * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and
      * validate.
      */
-    validateUUIDConfigAgainstSchema(suportedLanguages: TypeListOfLocalizedLanguages, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void;
+    validateListOfGeoviewLayerConfig(suportedLanguages: TypeListOfLocalizedLanguages, listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig): void;
     /** ***************************************************************************************************************************
      * Do extra validation that schema can not do.
      * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of GeoView layer configuration to adjust and

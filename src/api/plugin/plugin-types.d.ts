@@ -6,7 +6,7 @@ import { API } from '../api';
 /** ******************************************************************************************************************************
  * interface used when creating the actual plugin.
  */
-export declare type TypePluginStructure = {
+export type TypePluginStructure = {
     pluginId: string;
     api: API;
     createElement: typeof React.createElement;
@@ -24,7 +24,7 @@ export declare type TypePluginStructure = {
 /** ******************************************************************************************************************************
  * Record of plugins.
  */
-export declare type TypeRecordOfPlugin = {
+export type TypeRecordOfPlugin = {
     [MapId: string]: {
         [pluginId: string]: TypePluginStructure;
     };

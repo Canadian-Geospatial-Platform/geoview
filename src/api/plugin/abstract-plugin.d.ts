@@ -2,7 +2,7 @@ import { TypeJsonObject } from '../../core/types/global-types';
 /** ******************************************************************************************************************************
  * interface used by all plugins to define their options.
  */
-export declare type TypePluginOptions = {
+export type TypePluginOptions = {
     mapId: string;
 };
 /** ******************************************************************************************************************************

@@ -4,11 +4,11 @@ import { TypeLocalizedLanguages } from '../../geo/map/map-schema-types';
 /** ******************************************************************************************************************************
  * Type used to define the date precision pattern to use.
  */
-declare type DatePrecision = 'year' | 'month' | 'day';
+type DatePrecision = 'year' | 'month' | 'day';
 /** ******************************************************************************************************************************
  * Type used to define the time precision pattern to use.
  */
-declare type TimePrecision = 'hour' | 'minute' | 'second';
+type TimePrecision = 'hour' | 'minute' | 'second';
 /**
  * Class used to handle date as ISO 8601
  *

@@ -1,11 +1,11 @@
 import { TypeStyleConfig, TypeLayerEntryConfig } from '../map/map-schema-types';
-export declare type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
-export declare type EsriBaseRenderer = {
+export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
+export type EsriBaseRenderer = {
     type: EsriRendererTypes;
 };
-declare type TypeEsriColor = [number, number, number, number];
+type TypeEsriColor = [number, number, number, number];
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
+ * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -25,18 +25,18 @@ export interface EsriUniqueValueRenderer extends EsriBaseRenderer {
     rotationType: 'arithmetic' | 'geographic';
     uniqueValueInfos: EsriUniqueValueInfo[];
 }
-export declare type EsriUniqueValueInfo = {
+export type EsriUniqueValueInfo = {
     description: string;
     label: string;
     symbol: EsriSymbol;
     value: string;
 };
-export declare type EsriSymbol = EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriPictureMarkerSymbol;
-export declare type EsriBaseSymbol = {
+export type EsriSymbol = EsriBaseSymbol | EsriSimpleMarkerSymbol | EsriSimpleLineSymbol | EsriPictureMarkerSymbol;
+export type EsriBaseSymbol = {
     type: 'esriSMS' | 'esriSLS' | 'esriPMS' | 'esriSFS';
 };
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseSymbol as an EsriSimpleMarkerSymbol if the type attribute of the verifyIfSymbol
+ * type guard function that redefines an EsriBaseSymbol as an EsriSimpleMarkerSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSMS'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
@@ -55,7 +55,7 @@ export interface EsriSimpleMarkerSymbol extends EsriBaseSymbol {
     yoffset: number;
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseSymbol as an EsriSimpleFillSymbol if the type attribute of the verifyIfSymbol
+ * type guard function that redefines an EsriBaseSymbol as an EsriSimpleFillSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSFS'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
@@ -70,9 +70,9 @@ export interface EsriSimpleFillSymbol extends EsriBaseSymbol {
     type: 'esriSFS';
     width: number;
 }
-export declare type EsriFillStyle = 'esriSFSBackwardDiagonal' | 'esriSFSCross' | 'esriSFSDiagonalCross' | 'esriSFSForwardDiagonal' | 'esriSFSHorizontal' | 'esriSFSNull' | 'esriSFSSolid' | 'esriSFSVertical';
+export type EsriFillStyle = 'esriSFSBackwardDiagonal' | 'esriSFSCross' | 'esriSFSDiagonalCross' | 'esriSFSForwardDiagonal' | 'esriSFSHorizontal' | 'esriSFSNull' | 'esriSFSSolid' | 'esriSFSVertical';
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseSymbol as an EsriSimpleLineSymbol if the type attribute of the verifyIfSymbol
+ * type guard function that redefines an EsriBaseSymbol as an EsriSimpleLineSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriSLS'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
@@ -86,10 +86,10 @@ export interface EsriSimpleLineSymbol extends EsriBaseSymbol {
     type: 'esriSLS';
     width: number;
 }
-export declare type EsriLineStyle = 'esriSLSDash' | 'esriSLSDashDot' | 'esriSLSDashDotDot' | 'esriSLSDot' | 'esriSLSLongDash' | 'esriSLSLongDashDot' | 'esriSLSNull' | 'esriSLSShortDash' | 'esriSLSShortDashDot' | 'esriSLSShortDashDotDot' | 'esriSLSShortDot' | 'esriSLSSolid';
-export declare type EsriSymbolStyle = 'esriSMSCircle' | 'esriSMSCross' | 'esriSMSDiamond' | 'esriSMSSquare' | 'esriSMSTriangle' | 'esriSMSX';
+export type EsriLineStyle = 'esriSLSDash' | 'esriSLSDashDot' | 'esriSLSDashDotDot' | 'esriSLSDot' | 'esriSLSLongDash' | 'esriSLSLongDashDot' | 'esriSLSNull' | 'esriSLSShortDash' | 'esriSLSShortDashDot' | 'esriSLSShortDashDotDot' | 'esriSLSShortDot' | 'esriSLSSolid';
+export type EsriSymbolStyle = 'esriSMSCircle' | 'esriSMSCross' | 'esriSMSDiamond' | 'esriSMSSquare' | 'esriSMSTriangle' | 'esriSMSX';
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseSymbol as an EsriPictureMarkerSymbol if the type attribute of the verifyIfSymbol
+ * type guard function that redefines an EsriBaseSymbol as an EsriPictureMarkerSymbol if the type attribute of the verifyIfSymbol
  * parameter is 'esriPMS'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {EsriBaseSymbol} verifyIfSymbol Polymorphic object to test in order to determine if the type ascention is valid.
@@ -108,7 +108,7 @@ export interface EsriPictureMarkerSymbol extends EsriBaseSymbol {
     yoffset: number;
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseRenderer as an EsriSimpleRenderer if the type attribute of the verifyIfRenderer
+ * type guard function that redefines an EsriBaseRenderer as an EsriSimpleRenderer if the type attribute of the verifyIfRenderer
  * parameter is 'simple'. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {EsriBaseRenderer} verifyIfRenderer Polymorphic object to test in order to determine if the type ascention is valid.
@@ -125,7 +125,7 @@ export interface EsriSimpleRenderer extends EsriBaseRenderer {
     symbol: EsriSymbol;
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
+ * type guard function that redefines an EsriBaseRenderer as an EsriClassBreakRenderer if the type attribute of the
  * verifyIfRenderer parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -134,7 +134,7 @@ export interface EsriSimpleRenderer extends EsriBaseRenderer {
  * @returns {boolean} true if the type ascention is valid.
  */
 export declare const esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriClassBreakRenderer;
-declare type EsriClassBreakInfoEntry = {
+type EsriClassBreakInfoEntry = {
     classMaxValue: number;
     classMinValue: number | undefined | null;
     description: string;

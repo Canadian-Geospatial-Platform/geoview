@@ -23,7 +23,7 @@ export interface modalFooter {
 /**
  * Properties definition of the modal
  */
-export declare type TypeModalProps = {
+export type TypeModalProps = {
     modalId?: string;
     header?: modalHeader;
     content: React.ReactNode | string;

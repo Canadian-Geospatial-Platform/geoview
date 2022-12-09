@@ -10,7 +10,7 @@ interface TypeTooltipProps extends TooltipProps {
  * Create a Material UI Tooltip component
  *
  * @param {TypeTooltipProps} props custom tooltip properties
- * @returns {JSX.Element} the auto complete ui component
+ * @returns {JSX.Element} the tooltip ui component
  */
 export declare function Tooltip(props: TypeTooltipProps): JSX.Element;
 export {};

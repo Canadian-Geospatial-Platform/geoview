@@ -17,7 +17,7 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
     listOfLayerEntryConfig: TypeWfsLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeWFSLayerConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is WFS. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
@@ -26,7 +26,7 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
  */
 export declare const layerConfigIsWFS: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeWFSLayerConfig;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as a WFS if the type attribute of the verifyIfGeoViewLayer parameter
+ * type guard function that redefines an AbstractGeoViewLayer as a WFS if the type attribute of the verifyIfGeoViewLayer parameter
  * is WFS. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
@@ -36,7 +36,7 @@ export declare const layerConfigIsWFS: (verifyIfLayer: TypeGeoviewLayerConfig) =
  */
 export declare const geoviewLayerIsWFS: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is WFS;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeWfsLayerEntryConfig if the geoviewLayerType attribute of the
  * verifyIfGeoViewEntry.geoviewRootLayer attribute is WFS. The type ascention applies only to the true block of
  * the if clause that use this function.
  *

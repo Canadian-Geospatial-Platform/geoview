@@ -3,7 +3,7 @@ import { SwitchProps } from '@mui/material';
 /**
  * Custom Material UI Switch properties
  */
-export declare type TypeSwitchProps = SwitchProps & {
+export type TypeSwitchProps = SwitchProps & {
     mapId?: string;
 };
 /**

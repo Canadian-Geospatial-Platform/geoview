@@ -6,6 +6,8 @@ import { GeoUtilities } from '../geo/utils/utilities';
 import { DateMgt } from '../core/utils/date-mgt';
 import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
+import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
+import { LegendsLayerSet } from '../geo/utils/legend-layer-set';
 /**
  * Class used to handle api calls (events, functions etc...)
  *
@@ -23,6 +25,8 @@ export declare class API {
         FOOTERBAR: Record<"EVENT_FOOTERBAR_EXPAND_COLLAPSE", import("./events/event-types").EventStringId>;
         FOOTER_TABS: Record<import("../app").FooterTabsEventKey, import("./events/event-types").EventStringId>;
         GET_FEATURE_INFO: Record<import("../app").GetFeatureInfoEventKey, import("./events/event-types").EventStringId>;
+        GET_LEGENDS: Record<import("../app").GetLegendsEventKey, import("./events/event-types").EventStringId>;
+        LAYER_SET: Record<import("../app").LayerSetEventKey, import("./events/event-types").EventStringId>;
         LAYER: Record<import("../app").LayerEventKey, import("./events/event-types").EventStringId>;
         MAP: Record<import("../app").MapEventKey, import("./events/event-types").EventStringId>;
         MARKER_ICON: Record<import("../app").MarkerIconEventKey, import("./events/event-types").EventStringId>;
@@ -43,13 +47,15 @@ export declare class API {
     layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "GEOJSON" | "GEOCORE" | "XYZ_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("../geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
     maps: Record<string, MapViewer>;
     isReady: number;
-    readyCallback?: () => void;
+    readyCallback?: (mapId?: string) => void;
     plugin: Plugin;
     geoUtilities: GeoUtilities;
     dateUtilities: DateMgt;
     markerDefinitions: typeof MarkerDefinitions;
     generateId: typeof generateId;
     addUiComponent: typeof addUiComponent;
+    createFeatureInfoLayerSet: typeof FeatureInfoLayerSet.create;
+    createLegendsLayerSet: typeof LegendsLayerSet.create;
     /**
      * Initiate the event and projection objects
      */

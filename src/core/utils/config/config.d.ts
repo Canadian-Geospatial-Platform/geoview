@@ -1,5 +1,6 @@
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
 import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { ConfigValidation } from './config-validation';
 export declare const catalogUrl = "https://maps.canada.ca/geonetwork/srv/api/v2/docs";
 /** *****************************************************************************************************************************
  * Class to read and validate the GeoView map features configuration. Will validate every item for structure and valid values.
@@ -12,7 +13,7 @@ export declare class Config {
     /** The element associated to the map properties configuration.. */
     private mapElement;
     /** Config validation object used to validate the configuration and define default values */
-    private configValidation;
+    configValidation: ConfigValidation;
     /** ***************************************************************************************************************************
      * The Config class constructor used to instanciate an object of this type.
      * @param {Element} mapElement The map element.
@@ -31,6 +32,17 @@ export declare class Config {
      * @param {string} mapId The ID of the Geoview map.
      */
     set mapId(mapId: string);
+    /** ***************************************************************************************************************************
+     * Get triggerReadyCallback value.
+     *
+     * @returns {boolean} The triggerReadyCallback flag of the Geoview map.
+     */
+    get triggerReadyCallback(): boolean;
+    /** ***************************************************************************************************************************
+     * Set mapId value.
+     * @param {string} triggerReadyCallback The value to assign to the triggerReadyCallback flag for the Geoview map.
+     */
+    set triggerReadyCallback(triggerReadyCallback: boolean);
     /** ***************************************************************************************************************************
      * Get displayLanguage value.
      *

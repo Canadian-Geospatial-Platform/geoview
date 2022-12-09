@@ -4,7 +4,7 @@ import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageEsriInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
     source: TypeSourceImageEsriInitialConfig;
 }
@@ -13,7 +13,7 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
     listOfLayerEntryConfig: TypeEsriDynamicLayerEntryConfig[];
 }
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeEsriDynamicLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
@@ -23,7 +23,7 @@ export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig,
  */
 export declare const layerConfigIsEsriDynamic: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeEsriDynamicLayerConfig;
 /** ******************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
+ * type guard function that redefines an AbstractGeoViewLayer as an EsriDynamic if the type attribute of the verifyIfGeoViewLayer
  * parameter is ESRI_DYNAMIC. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
@@ -33,7 +33,7 @@ export declare const layerConfigIsEsriDynamic: (verifyIfLayer: TypeGeoviewLayerC
  */
 export declare const geoviewLayerIsEsriDynamic: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is EsriDynamic;
 /** ******************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeEsriDynamicLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is ESRI_DYNAMIC. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -111,12 +111,12 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     processOneLayerEntry(layerEntryConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeBaseRasterLayer | null>;
     /** ***************************************************************************************************************************
-     * Translate the get feature information at coordinate result set to the TypeFeatureInfoResult used by GeoView.
+     * Translate the get feature information at coordinate result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
      *
      * @param {TypeJsonArray} features An array of found features formatted using the query syntax.
      * @param {TypeFeatureInfoLayerConfig} featureInfo Feature information describing the user's desired output format.
      *
-     * @returns {TypeFeatureInfoResult} The feature info table.
+     * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
     private formatFeatureInfoAtCoordinateResult;
     /** ***************************************************************************************************************************
@@ -125,43 +125,43 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
      * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided projection coordinate.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided coordinate.
      *
      * @param {Coordinate} lnglat The coordinate that will be used by the query.
      * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The promised feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The promised feature info table.
      */
-    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLongLat(lnglat: Coordinate, layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features in the provided bounding box.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features in the provided polygon.
      *
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeEsriDynamicLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
 }

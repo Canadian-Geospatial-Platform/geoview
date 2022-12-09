@@ -2,12 +2,12 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeMapFeaturesConfig } from '../../../core/types/global-types';
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MapFeaturesPayload
+ * type guard function that redefines a PayloadBaseClass as a MapFeaturesPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAmapFeaturesConfig: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is MapFeaturesPayload;
 /**
