@@ -343,13 +343,13 @@
       // import footerTabs from the core for the current map
       const { footerTabs: ft1 } = api.map(mapIdOne);
 
-      const legendOne = api.map(mapIdOne).legend.createLegend();
+      const legendOne = api.map(mapIdOne).legend.createLegend({layerIds: ['UC1-Layer1', 'UC1-Layer2', 'UC1-Layer3', 'UC1-Layer4', 'UC1-Layer5']});
 
       // create new tab and add the LegendComponent to the footer tab
       ft1.createFooterTab({
         value: 0,
         label: 'Legend',
-        content: legendOne
+        content: () => legendOne
       });
 
       const mapIdTwo = 'UC2';
@@ -357,13 +357,13 @@
       // import footerTabs from the core for the current map
       const { footerTabs: ft2 } = api.map(mapIdTwo);
 
-      const legendTwo = api.map(mapIdTwo).legend.createLegend();
+      const legendTwo = api.map(mapIdTwo).legend.createLegend({layerIds: ['UC2-Layer1']});
 
       // create new tab and add the LegendComponent to the footer tab
       ft2.createFooterTab({
         value: 0,
         label: 'Legend',
-        content: legendTwo
+        content: () => legendTwo
       });
 
 
@@ -372,18 +372,18 @@
       // import footerTabs from the core for the current map
       const { footerTabs: ft3 } = api.map(mapIdThree);
 
-      const legendThree = api.map(mapIdThree).legend.createLegend();
+      const legendThree = api.map(mapIdThree).legend.createLegend({layerIds: ['UC3-Layer1']});
 
       // create new tab and add the LegendComponent to the footer tab
       ft3.createFooterTab({
         value: 0,
         label: 'Legend',
-        content: legendThree
+        content: () => legendThree
       });
 
       // Legend in a panel
       const mapIdFour = 'UC4';
-      const legendFour = api.map(mapIdFour).legend.createLegend();
+      const legendFour = api.map(mapIdFour).legend.createLegend({layerIds: ['UC4Layer1-Root', 'UC4Layer2-msi']});
       const button = {
         id: 'AppbarPanelButtonId',
         tooltip: 'Legend',
@@ -394,7 +394,7 @@
       const panel = {
         panelId: 'AppbarPanelId',
         title: 'Legend',
-        content: react.createElement(legendFour),
+        content: legendFour,
         width: 200,
       };
 

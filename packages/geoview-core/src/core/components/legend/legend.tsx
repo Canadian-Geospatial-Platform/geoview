@@ -28,6 +28,15 @@ export function Legend(): JSX.Element | null {
   const [mapLayers, setMapLayers] = useState<{ [geoviewLayerId: string]: AbstractGeoViewLayer }>({});
   const [orderedMapLayers, setOrderedMapLayers] = useState<AbstractGeoViewLayer[]>([]);
 
+  const addLayer = (geoviewLayerId: string) => {
+    if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(geoviewLayerId)) {
+      const newLayer = api.map(mapId).layer.geoviewLayers[geoviewLayerId];
+      setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
+    } else {
+      console.error('geoviewLayerId is not in the layers list');
+    }
+  };
+
   useEffect(() => {
     setMapLayers(api.map(mapId).layer.geoviewLayers);
     api.event.on(
@@ -49,14 +58,8 @@ export function Legend(): JSX.Element | null {
           api.event.on(
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
-              if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(payload.layerConfig.geoviewLayerId)) {
-                const newLayer = api.map(mapId).layer.geoviewLayers[payload.layerConfig.geoviewLayerId];
-                setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
-                api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
-              } else {
-                // eslint-disable-next-line no-console
-                console.error('geoviewLayerId is not in the layers list');
-              }
+              addLayer(payload.layerConfig.geoviewLayerId);
+              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
             },
             mapId,
             payload.layerConfig.geoviewLayerId
