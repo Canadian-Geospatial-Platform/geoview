@@ -169,8 +169,9 @@ export class Vector {
       );
     }
 
-    // set an id to this geometry
+    // set a feature id and a geometry group index for this geometry
     polyline.set('featureId', featureId);
+    polyline.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polyline);
@@ -239,8 +240,9 @@ export class Vector {
       );
     }
 
-    // set an id to this geometry
+    // set a feature id and a geometry group index for this geometry
     polygon.set('featureId', featureId);
+    polygon.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(polygon);
@@ -311,8 +313,9 @@ export class Vector {
       );
     }
 
-    // set an id to this geometry
+    // set a feature id and a geometry group index for this geometry
     circle.set('featureId', featureId);
+    circle.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circle);
@@ -383,8 +386,9 @@ export class Vector {
       );
     }
 
-    // set an id to this geometry
+    // set a feature id and a geometry group index for this geometry
     circleMarker.set('featureId', featureId);
+    circleMarker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(circleMarker);
@@ -453,8 +457,9 @@ export class Vector {
       );
     }
 
-    // set an id to this geometry
+    // set a feature id and a geometry group index for this geometry
     marker.set('featureId', featureId);
+    marker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
 
     // add geometry to feature collection
     this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
@@ -573,15 +578,13 @@ export class Vector {
    *
    * @returns the geomtry group
    */
-  getGeometryGroup = (geometryGroupId?: string): FeatureCollection => {
-    let geometryGroup: FeatureCollection;
+  getGeometryGroup = (geometryGroupId?: string): FeatureCollection | undefined => {
     if (geometryGroupId) {
-      [geometryGroup] = this.geometryGroups.filter((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
-    } else {
-      geometryGroup = this.geometryGroups[this.activeGeometryGroupIndex];
+      const geometryGroupIndex = this.geometryGroups.findIndex((theGeometryGroup) => theGeometryGroup.geometryGroupId === geometryGroupId);
+      if (geometryGroupIndex === -1) return undefined;
+      return this.geometryGroups[geometryGroupIndex];
     }
-
-    return geometryGroup;
+    return this.geometryGroups[this.activeGeometryGroupIndex];
   };
 
   /**
@@ -612,7 +615,7 @@ export class Vector {
    * @param {string} geometryGroupId optional the id of the group to show on the map
    */
   setGeometryGroupAsVisible = (geometryGroupId?: string): void => {
-    const geometryGroup = this.getGeometryGroup(geometryGroupId);
+    const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
 
     geometryGroup.vectorLayer.setVisible(true);
     geometryGroup.vectorLayer.changed();
@@ -625,7 +628,7 @@ export class Vector {
    * @param {string} geometryGroupId optional the id of the group to show on the map
    */
   setGeometryGroupAsInvisible = (geometryGroupId?: string): void => {
-    const geometryGroup = this.getGeometryGroup(geometryGroupId);
+    const geometryGroup = this.getGeometryGroup(geometryGroupId)!;
 
     geometryGroup.vectorLayer.setVisible(false);
     geometryGroup.vectorLayer.changed();
@@ -668,12 +671,12 @@ export class Vector {
       this.geometryGroups[i].vectorLayer
         .getSource()
         ?.getFeatures()
-        .forEach((layer) => {
-          if (geometry === layer) {
+        .forEach((layerGeometry) => {
+          if (geometry === layerGeometry) {
             this.geometryGroups[i].vectorLayer.getSource()?.removeFeature(geometry);
-            this.geometryGroups[i].vectorLayer.changed();
           }
         });
+      this.geometryGroups[i].vectorLayer.changed();
     }
   };
 
@@ -686,15 +689,16 @@ export class Vector {
    */
   deleteGeometryFromGroup = (featureId: string, geometryGroupid?: string): void => {
     const geometry = this.getGeometry(featureId);
-    const geometryGroup = this.getGeometryGroup(geometryGroupid);
+    const geometryGroup = this.getGeometryGroup(geometryGroupid)!;
     geometryGroup.vectorLayer
       .getSource()
       ?.getFeatures()
-      .forEach((layer) => {
-        if (geometry === layer) {
-          geometryGroup.vectorLayer.getSource()?.removeFeature(layer);
+      .forEach((layerGeometry) => {
+        if (geometry === layerGeometry) {
+          geometryGroup.vectorLayer.getSource()?.removeFeature(geometry);
         }
       });
+    geometryGroup.vectorLayer.changed();
   };
 
   /**
@@ -705,9 +709,14 @@ export class Vector {
    * @returns {FeatureCollection} the group with empty layers
    */
   deleteGeometriesFromGroup = (geometryGroupid?: string): FeatureCollection => {
-    const geometryGroup = this.getGeometryGroup(geometryGroupid);
-    geometryGroup.vectorLayer.dispose();
-    api.map(this.#mapId).map.removeLayer(geometryGroup.vectorLayer);
+    const geometryGroup = this.getGeometryGroup(geometryGroupid)!;
+    geometryGroup.vectorLayer
+      .getSource()
+      ?.getFeatures()
+      .forEach((geometry) => {
+        geometryGroup.vectorLayer.getSource()?.removeFeature(geometry);
+      });
+    geometryGroup.vectorLayer.changed();
 
     return geometryGroup;
   };

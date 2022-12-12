@@ -56,9 +56,8 @@
   </div>
   <button class="delete-group-btn">Delete Group</button>
   <label>
-    The Delete Group button will delete remove the group if group name was provided above. if not will clear all
-    geometries from default
-    group
+    The Delete Group button will delete the group provided above. if the input field is empty, all the geometries
+    created in the default group will be deleted. If the group name is invalid, nothing is done and the input field is cleared.
   </label>
   <div id="mapWM" class="llwp-map" data-lang="en" data-config="{
         'map': {
@@ -192,9 +191,18 @@
       var deleteGeometryGroup = document.getElementsByClassName('delete-group-btn')[0];
       deleteGeometryGroup.addEventListener('click', function (e) {
         // call an api function to  delete the geometry group
-        var group = groupNames.length > 0 ? groupNames[groupNames.length - 1] : '';
-        cgpv.api.map('mapWM').layer.vector.deleteGeometryGroup(group);
-        groupNames.splice(-1);
+        var groupName = document.getElementById('groupname').value ? document.getElementById('groupname').value : '';
+        if (groupName) {
+          const groupIndex = groupNames.findIndex((groupNameFromArray) => groupNameFromArray === groupName);
+          if (groupIndex === -1) document.getElementById('groupname').value = '';
+          else {
+            groupNames.splice(groupIndex, 1);
+            cgpv.api.map('mapWM').layer.vector.deleteGeometryGroup(groupName);
+          }
+        } else {
+          cgpv.api.map('mapWM').layer.vector.setActiveGeometryGroup();
+          cgpv.api.map('mapWM').layer.vector.deleteGeometryGroup();
+        }
         document.getElementById('created-group').textContent = groupNames.join(', ');
       });
 
@@ -202,7 +210,7 @@
       var createGeometryFromGroup = document.getElementsByClassName('create-group-btn')[0];
       createGeometryFromGroup.addEventListener('click', function (e) {
         // call an api function to  delete the geometry group
-        var name = document.getElementById('groupname').value !== '' ? document.getElementById('groupname').value : '';
+        var name = document.getElementById('groupname').value ? document.getElementById('groupname').value : '';
         cgpv.api.map('mapWM').layer.vector.createGeometryGroup(name);
         groupNames.push(name);
         document.getElementById('created-group').textContent = groupNames.join(', ');
