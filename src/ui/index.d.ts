@@ -1,7 +1,9 @@
 export * from './autocomplete/autocomplete';
+export * from './avatar/avatar';
 export * from './button';
 export * from './button-group';
 export * from './card';
+export * from './circular-progress/circular-progress-base';
 export * from './circular-progress/circular-progress';
 export * from './checkbox/checkbox';
 export * from './divider/divider';
@@ -22,3 +24,5 @@ export * from './tabs/tabs';
 export * from './text-field/text-field';
 export * from './tooltip/tooltip';
 export * from './typography/typography';
+export * from './layout';
+export * from './menu';

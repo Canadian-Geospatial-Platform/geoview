@@ -5,8 +5,8 @@ import { Pixel } from 'ol/pixel';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeLayerEntryConfig, TypeSourceTileInitialConfig, TypeTileLayerEntryConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeFeatureInfoResult } from '../../../../api/events/payloads/get-feature-info-payload';
-export declare type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
+import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesLayerEntryConfig extends Omit<TypeTileLayerEntryConfig, 'source'> {
     source: TypeSourceImageXYZTilesInitialConfig;
 }
@@ -15,7 +15,7 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
     listOfLayerEntryConfig: TypeXYZTilesLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeXYZTilesConfig if the geoviewLayerType attribute of the
  * verifyIfLayer parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -25,7 +25,7 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  */
 export declare const layerConfigIsXYZTiles: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeXYZTilesConfig;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as an XYZTiles if the type attribute of the verifyIfGeoViewLayer
+ * type guard function that redefines an AbstractGeoViewLayer as an XYZTiles if the type attribute of the verifyIfGeoViewLayer
  * parameter is XYZ_TILES. The type ascention applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention
@@ -35,7 +35,7 @@ export declare const layerConfigIsXYZTiles: (verifyIfLayer: TypeGeoviewLayerConf
  */
 export declare const geoviewLayerIsXYZTiles: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is XYZTiles;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeXYZTilesLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is XYZ_TILES. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
@@ -99,9 +99,9 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param {Coordinate} location The pixel coordinate that will be used by the query.
      * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
      * method returns information for all the features around the provided coordinate.
@@ -109,9 +109,9 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
      * method returns feature information for all the features around the provided longitude latitude.
@@ -119,9 +119,9 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
      * method returns feature information for all the features in the provided bounding box.
@@ -129,9 +129,9 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * XYZ tiles return null because these services do not support getFeatureInfo queries. When getFeatureInfo is supported this
      * method returns feature information for all the features in the provided polygon.
@@ -139,7 +139,7 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * @param {Coordinate} location The coordinate that will be used by the query.
      * @param {TypeXYZTilesLayerEntryConfig} layerConfig The layer configuration.
      *
-     * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
+     * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
-    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeXYZTilesLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
 }

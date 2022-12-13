@@ -4,7 +4,7 @@ export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
     listOfLayerEntryConfig: TypeGeocoreLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeGeocoreLayerEntryConfig if the geoviewLayerType attribute of
  * the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOCORE. The type ascention applies only to the true block of the if
  * clause that use this function.
  *
@@ -15,7 +15,7 @@ export interface TypeGeoCoreLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
  */
 export declare const geoviewEntryIsGeocore: (verifyIfGeoViewEntry: TypeLayerEntryConfig) => verifyIfGeoViewEntry is TypeGeocoreLayerEntryConfig;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeGeoCoreLayerConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoCoreLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is GEOCORE. The type ascention applies only to the true block of the if clause that use this
  * function.
  *

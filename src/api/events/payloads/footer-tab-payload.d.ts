@@ -2,12 +2,12 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeTabs } from '../../../ui/tabs/tabs';
 /**
- * Type Gard function that redefines a PayloadBaseClass as a FooterTabPayload
+ * type guard function that redefines a PayloadBaseClass as a FooterTabPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAFooterTab: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is FooterTabPayload;
 /**

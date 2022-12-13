@@ -3,7 +3,7 @@ import { Extent } from 'ol/extent';
 /** ******************************************************************************************************************************
  *  Definition of the basemap options type.
  */
-export declare type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
+export type TypeBasemapId = 'transport' | 'osm' | 'simple' | 'nogeom' | 'shaded';
 /** ******************************************************************************************************************************
  *  Definition of the basemap options type.
  */
@@ -11,7 +11,7 @@ export declare const VALID_BASEMAP_ID: TypeBasemapId[];
 /** ******************************************************************************************************************************
  *  Definition of the basemap options type.
  */
-export declare type TypeBasemapOptions = {
+export type TypeBasemapOptions = {
     /** Id of the basemap to use. */
     basemapId: TypeBasemapId;
     /** Enable or disable shaded basemap (if basemap id is set to shaded then this should be false). */
@@ -22,7 +22,7 @@ export declare type TypeBasemapOptions = {
 /** ******************************************************************************************************************************
  * interface used to define a new basemap.
  */
-export declare type TypeBasemapProps = {
+export type TypeBasemapProps = {
     basemapId?: string;
     name: string;
     type: string;
@@ -43,7 +43,7 @@ export declare type TypeBasemapProps = {
 /** ******************************************************************************************************************************
  * interface used to define a new basemap layer
  */
-export declare type TypeBasemapLayer = {
+export type TypeBasemapLayer = {
     basemapId: string;
     url?: string;
     jsonUrl?: string;

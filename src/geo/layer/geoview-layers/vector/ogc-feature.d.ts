@@ -16,7 +16,7 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
     listOfLayerEntryConfig: TypeOgcFeatureLayerEntryConfig[];
 }
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
  * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
@@ -26,7 +26,7 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
  */
 export declare const layerConfigIsOgcFeature: (verifyIfLayer: TypeGeoviewLayerConfig) => verifyIfLayer is TypeOgcFeatureLayerConfig;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines an AbstractGeoViewLayer as an OgcFeature
+ * type guard function that redefines an AbstractGeoViewLayer as an OgcFeature
  * if the type attribute of the verifyIfGeoViewLayer parameter is OGC_FEATURE. The type ascention
  * applies only to the true block of the if clause that use this function.
  *
@@ -37,7 +37,7 @@ export declare const layerConfigIsOgcFeature: (verifyIfLayer: TypeGeoviewLayerCo
  */
 export declare const geoviewLayerIsOgcFeature: (verifyIfGeoViewLayer: AbstractGeoViewLayer) => verifyIfGeoViewLayer is OgcFeature;
 /** *****************************************************************************************************************************
- * Type Gard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute
  * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is OGC_FEATURE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *

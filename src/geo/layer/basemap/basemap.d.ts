@@ -1,7 +1,7 @@
 import { Extent } from 'ol/extent';
 import { TypeJsonObject } from '../../../core/types/global-types';
 import { TypeBasemapProps, TypeBasemapOptions, TypeBasemapLayer } from './basemap-types';
-import { TypeDisplayLanguage, TypeProjectionCodes } from '../../map/map-schema-types';
+import { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '../../map/map-schema-types';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,
@@ -21,16 +21,15 @@ export declare class Basemap {
     displayLanguage: TypeDisplayLanguage;
     basemapOptions: TypeBasemapOptions;
     private projection;
-    private basemapsPaneName;
     /**
      * initialize basemap
      *
      * @param {TypeBasemapOptions} basemapOptions optional basemap option properties, passed in from map config
      * @param {TypeDisplayLanguage} displayLanguage language to be used, either en or fr
-     * @param {TypeProjectionCodes} projection projection number
+     * @param {TypeValidMapProjectionCodes} projection projection number
      * @param {string} mapId the map id
      */
-    constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeProjectionCodes, mapId: string);
+    constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeValidMapProjectionCodes, mapId: string);
     /**
      * basemap list
      */
@@ -52,14 +51,14 @@ export declare class Basemap {
      * Get basemap thumbnail url
      *
      * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
-     * @param {TypeProjectionCodes} projection basemap projection
+     * @param {TypeValidMapProjectionCodes} projection basemap projection
      * @param {TypeDisplayLanguage} displayLanguage basemap language
      *
      * @returns {string[]} array of thumbnail urls
      */
     private getThumbnailUrl;
     /**
-     * Get basemap information (nbame and description)
+     * Get basemap information (name and description)
      *
      * @param {string[]} basemapTypes basemap layer type (shaded, transport, label, simple)
      * @param {TypeDisplayLanguage} displayLanguage basemap language

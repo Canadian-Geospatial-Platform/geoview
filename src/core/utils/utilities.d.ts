@@ -2,7 +2,7 @@
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
 /**
- * Display a message in the snackbar
+ * Get the string associated to the current display language.
  *
  * @param {TypeLocalizedString} localizedString the localized string to process.
  * @param {string} mapId the map identifier that holds the localized string.
@@ -57,3 +57,10 @@ export declare function getXMLHttpRequest(url: string): Promise<string>;
  * @param {string} targetDivId the div id to insert the component in
  */
 export declare function addUiComponent(targetDivId: string, component: React.ReactElement): void;
+/**
+ * Sanitize HTML to remove threat
+ *
+ * @param {string} contentHtml HTML content to sanitize
+ * @returns {string} sanitze HTLM or empty string if all dirty
+ */
+export declare function sanitizeHtmlContent(contentHtml: string): string;

@@ -2,19 +2,19 @@
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 /** Type used to define an action button  */
-export declare type TypeActionButton = {
+export type TypeActionButton = {
     actionButtonId: string;
     title?: string;
     children?: string | React.ReactElement | Element;
     action?: () => void;
 };
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelWithAButtonIdAndTypePayload
+ * type guard function that redefines a PayloadBaseClass as a PanelWithAButtonIdAndTypePayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadHasAButtonIdAndType: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is PanelWithAButtonIdAndTypePayload;
 /**
@@ -25,12 +25,12 @@ export interface PanelWithAButtonIdAndTypePayload extends PanelPayload {
     type: string;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelAndActionPayload
+ * type guard function that redefines a PayloadBaseClass as a PanelAndActionPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAPanelAction: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is PanelAndActionPayload;
 /**
@@ -41,12 +41,12 @@ export interface PanelAndActionPayload extends PanelPayload {
     actionButton: TypeActionButton;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelAndContentPayload
+ * type guard function that redefines a PayloadBaseClass as a PanelAndContentPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAPanelContent: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is PanelAndContentPayload;
 /**
@@ -57,12 +57,12 @@ export interface PanelAndContentPayload extends PanelPayload {
     content: Element | React.ReactNode;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PanelPayload
+ * type guard function that redefines a PayloadBaseClass as a PanelPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAPanel: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is PanelPayload;
 /**

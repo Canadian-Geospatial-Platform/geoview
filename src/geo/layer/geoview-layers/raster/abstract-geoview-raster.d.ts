@@ -3,7 +3,7 @@ import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 /** *****************************************************************************************************************************
  * AbstractGeoViewRaster types
  */
-export declare type TypeBaseRasterLayer = BaseLayer;
+export type TypeBaseRasterLayer = BaseLayer;
 /** *****************************************************************************************************************************
  * The AbstractGeoViewRaster class is a direct descendant of AbstractGeoViewLayer. As its name indicates, it is used to
  * instanciate GeoView raster layers. In addition to the components of the parent class, there is an attribute named

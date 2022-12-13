@@ -6,7 +6,7 @@ import { PanelApi } from './panel-api';
 /** ******************************************************************************************************************************
  * Interface used to initialize a button panel.
  */
-export declare type TypeButtonPanelProps = {
+export type TypeButtonPanelProps = {
     /** Panel properties. */
     panel: TypePanelProps;
     /** Button properties. */
@@ -15,7 +15,7 @@ export declare type TypeButtonPanelProps = {
 /** ******************************************************************************************************************************
  * type for the panel properties used when creating a new panel.
  */
-export declare type TypePanelProps = {
+export type TypePanelProps = {
     /** Panel id. */
     panelId?: string;
     /** Panel type (app-bar, nav-bar). */
@@ -63,7 +63,7 @@ export interface ButtonPropsLayerPanel {
 /** ******************************************************************************************************************************
  * Interface used when creating a new button panel.
  */
-export declare type TypeButtonPanel = {
+export type TypeButtonPanel = {
     /** Panel identifier. */
     buttonPanelId: string;
     /** Pasnel API. */

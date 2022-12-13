@@ -2,20 +2,54 @@ import BaseLayer from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
-import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig } from '../../map/map-schema-types';
-import { TypeFeatureInfoResult, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
+import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeStyleConfigKey } from '../../map/map-schema-types';
+import { TypeArrayOfFeatureInfoEntries, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
 import { TypeJsonObject } from '../../../core/types/global-types';
-export declare type TypeLegend = {
+export type TypeLegend = {
     layerPath: string;
     layerName?: TypeLocalizedString;
     type: TypeGeoviewLayerType;
-    legend: TypeStyleConfig | string | ArrayBuffer;
+    styleConfig?: TypeStyleConfig;
+    legend: TypeLayerStyle | HTMLCanvasElement;
 };
-declare type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+/**
+ * type guard function that redefines a TypeLegend as a TypeWmsLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const isWmsLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeWmsLegend;
+export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
+    legend: HTMLCanvasElement;
+}
+/**
+ * type guard function that redefines a TypeLegend as a TypeVectorLegend
+ * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const isVectorLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeVectorLegend;
+export interface TypeVectorLegend extends TypeLegend {
+    legend: TypeLayerStyle;
+}
+export type TypeStyleRepresentation = {
+    /** The defaultCanvas property is used by WMS legends, Simple styles and default styles when defined in unique value and class
+     * break styles.
+     */
+    defaultCanvas?: HTMLCanvasElement | null;
+    /** The arrayOfCanvas property is used by unique value and class break styles. */
+    arrayOfCanvas?: (HTMLCanvasElement | null)[];
+};
+export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, TypeStyleRepresentation>>;
+type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
  */
-export declare type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 /**
  * Definition of the GeoView layer constants
  */
@@ -28,6 +62,10 @@ export declare const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerTy
  * metadataAccessPath attribute whose value is passed as an attribute of the mapLayerConfig object.
  */
 export declare abstract class AbstractGeoViewLayer {
+    /** Flag used to indicate that the layer is loaded */
+    isLoaded: boolean;
+    /** Flag used to indicate a layer load error */
+    loadError: boolean;
     /** The unique identifier of the map on which the GeoView layer will be drawn. */
     mapId: string;
     /** The type of GeoView layer that is instantiated. */
@@ -83,8 +121,8 @@ export declare abstract class AbstractGeoViewLayer {
      * have a service definition, the getAdditionalServiceDefinition method does nothing.
      *
      * Finally, the processListOfLayerEntryConfig is called to instantiate each layer identified by the listOfLayerEntryConfig
-     * attribute. This method will also register the layers to all panels that offer this possibility. For example, if a layer is
-     * queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
+     * attribute. This method will also register the layers to all layer sets that offer this possibility. For example, if a layer
+     * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
      * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
      * the details-panel.
      */
@@ -118,15 +156,15 @@ export declare abstract class AbstractGeoViewLayer {
      */
     protected processListOfLayerEntryMetadata(listOfLayerEntryConfig?: TypeListOfLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
-     * This method is used to process dynamic group layer entries. These layers behave as a GeoView group layer and also as a data
-     * layer (i.e. they have extent, visibility and query flag definition). Dynamic group layers can be identified by
-     * the presence of an isDynamicLayerGroup attribute set to true.
+     * This method is used to process metadata group layer entries. These layers behave as a GeoView group layer and also as a data
+     * layer (i.e. they have extent, visibility and query flag definition). Metadata group layers can be identified by
+     * the presence of an isMetadataLayerGroup attribute set to true.
      *
      * @param {TypeLayerGroupEntryConfig} layerEntryConfig The layer entry configuration to process.
      *
      * @returns {Promise<void>} A promise that the vector layer configuration has its metadata and group layers processed.
      */
-    private processDynamicGroupLayer;
+    private processMetadataGroupLayer;
     /** ***************************************************************************************************************************
      * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
      * initial settings, fields and aliases).
@@ -156,12 +194,12 @@ export declare abstract class AbstractGeoViewLayer {
      * Return feature information for the layer specified. If layerId is undefined, this.activeLayer is used.
      *
      * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      * @param {TypeQueryType} queryType Optional query type, default value is 'at pixel'.
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    getFeatureInfo(location: Pixel | Coordinate | Coordinate[], layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined, queryType?: TypeQueryType): Promise<TypeFeatureInfoResult>;
+    getFeatureInfo(location: Pixel | Coordinate | Coordinate[], layerPathOrConfig?: string | TypeLayerEntryConfig | null, queryType?: TypeQueryType): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
@@ -170,7 +208,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected abstract getFeatureInfoAtPixel(location: Pixel, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided coordinate.
      *
@@ -179,7 +217,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected abstract getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided longitude latitude.
      *
@@ -188,7 +226,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected abstract getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features in the provided bounding box.
      *
@@ -197,7 +235,7 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected abstract getFeatureInfoUsingBBox(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features in the provided polygon.
      *
@@ -206,13 +244,13 @@ export declare abstract class AbstractGeoViewLayer {
      *
      * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
      */
-    protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeFeatureInfoResult>;
+    protected abstract getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
-     * This method register the GeoView layer to panels that offer this possibility.
+     * This method register the layer entry to layer sets.
      *
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
      */
-    protected registerToPanels(layerEntryConfig: TypeBaseLayerEntryConfig): void;
+    protected registerToLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method create a layer group. it uses the layer initial settings of the GeoView layer configuration.
      *
@@ -220,122 +258,141 @@ export declare abstract class AbstractGeoViewLayer {
      */
     private createLayerGroup;
     /** ***************************************************************************************************************************
-     * Set the active layer. It is the layer that will be used in some functions when the optional layerId is undefined.
-     * The parameter can be a layer identifier (string) or a layer configuration. When the parameter is a layer identifier that
+     * Set the active layer. It is the layer that will be used in some functions when the optional layer path is undefined.
+     * The parameter can be a layer path (string) or a layer configuration. When the parameter is a layer path that
      * can not be found, the active layer remain unchanged.
      *
-     * @param {string | TypeLayerEntryConfig} layerId The layer identifier.
+     * @param {string | TypeLayerEntryConfig} layerPathOrConfig The layer identifier.
      */
-    setActiveLayer(layer: string | TypeLayerEntryConfig): void;
+    setActiveLayer(layerPathOrConfig: string | TypeLayerEntryConfig): void;
     /** ***************************************************************************************************************************
-     * Get the layer configuration of the specified layerId. If the layer identifier is undefined, the active layer is returned.
+     * Get the layer configuration of the specified layer path. If the layer path is undefined, the active layer is returned.
      *
-     * @param {string} layerId The layer identifier.
+     * @param {string} layerPath The layer path.
      *
      * @returns {TypeLayerEntryConfig | null} The layer configuration or null if not found.
      */
-    getLayerConfig(layerId?: string): TypeLayerEntryConfig | null;
+    getLayerConfig(layerPath?: string): TypeLayerEntryConfig | null | undefined;
+    /** ***************************************************************************************************************************
+     * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata.
+     * If projectionCode is defined, returns the bounds in the specified projection otherwise use the map projection.
+     * The bounds are different from the extent. They are mainly used for display purposes to show the bounding box in which
+     * the data resides and to zoom in on the entire layer data. It is not used by openlayer to limit the display of data on
+     * the map.
+     *
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
+     *
+     * @returns {Extent} The layer bounding box.
+     */
+    getBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | null, projectionCode?: string | number | undefined): Extent | undefined;
     /** ***************************************************************************************************************************
      * Return the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
-     * numbers representing an extent: [minx, miny, maxx, maxy]. If no layer config is specified, the activeLayer of the class
-     * will be used. This routine return undefined when no layer config is specified and the active layer is null.
+     * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
+     * will be used. This routine return undefined when no layerPathOrConfig is specified and the active layer is null. The extent
+     * is used to clip the data displayed on the map.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {Extent} The layer extent.
      */
-    getBounds(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): Extent | undefined;
+    getExtent(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Extent | undefined;
     /** ***************************************************************************************************************************
      * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
-     * numbers representing an extent: [minx, miny, maxx, maxy]. If no layer config is specified, the activeLayer of the class
-     * will be used. This routine does nothing when no layer config is specified and the active layer is null.
+     * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
+     * will be used. This routine does nothing when no layerPathOrConfig is specified and the active layer is null.
      *
      * @param {Extent} layerExtent The extent to assign to the layer.
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      */
-    setBounds(layerExtent: Extent, layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): void;
+    setExtent(layerExtent: Extent, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
     /** ***************************************************************************************************************************
-     * Return the opacity of the layer (between 0 and 1). When no layer identifier is specified, the activeLayer of the class is
-     * used. This routine return undefined when the layerId specified is not found or when the layerId is undefined and the active
-     * layer is null.
+     * Return the opacity of the layer (between 0 and 1). When layerPathOrConfig is undefined, the activeLayer of the class is
+     * used. This routine return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and
+     * the active layer is null.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {number} The opacity of the layer.
      */
-    getOpacity(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): number | undefined;
+    getOpacity(layerPathOrConfig?: string | TypeLayerEntryConfig | null): number | undefined;
     /** ***************************************************************************************************************************
-     * Set the opacity of the layer (between 0 and 1). When no layer identifier is specified, the activeLayer of the class is used.
-     * This routine does nothing when the layerId specified is not found or when the layerId is undefined and the active layer is
-     * null.
+     * Set the opacity of the layer (between 0 and 1). When layerPathOrConfig is undefined, the activeLayer of the class is used.
+     * This routine does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the
+     * active layer is null.
      *
      * @param {number} layerOpacity The opacity of the layer.
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      */
-    setOpacity(layerOpacity: number, layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): void;
+    setOpacity(layerOpacity: number, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
     /** ***************************************************************************************************************************
-     * Return the visibility of the layer (true or false). When no layer identifier is specified, the activeLayer of the class is
-     * used. This routine return undefined when the layerId specified is not found or when the layerId is undefined and the active
-     * layer is null.
+     * Return the visibility of the layer (true or false). When layerPathOrConfig is undefined, the activeLayer of the class is
+     * used. This routine return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and
+     * the active layer is null.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {boolean} The visibility of the layer.
      */
-    getVisible(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): boolean | undefined;
+    getVisible(layerPathOrConfig?: string | TypeLayerEntryConfig | null): boolean | undefined;
     /** ***************************************************************************************************************************
-     * Set the visibility of the layer (true or false). When no layer identifier is specified, the activeLayer of the class is
-     * used. This routine does nothing when the layerId specified is not found or when the layerId is undefined and the active
-     * layer is null.
+     * Set the visibility of the layer (true or false). When layerPathOrConfig is undefined, the activeLayer of the class is
+     * used. This routine does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the
+     * active layer is null.
      *
      * @param {boolean} layerVisibility The visibility of the layer.
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      */
-    setVisible(layerVisibility: boolean, layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): void;
+    setVisible(layerVisibility: boolean, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
     /** ***************************************************************************************************************************
-     * Return the min zoom of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-     * return undefined when the layerId specified is not found or when the layerId is undefined and the active layer is null.
+     * Return the min zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+     * return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
+     * is null.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {boolean} The visibility of the layer.
      */
-    getMinZoom(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): number | undefined;
+    getMinZoom(layerPathOrConfig?: string | TypeLayerEntryConfig | null): number | undefined;
     /** ***************************************************************************************************************************
-     * Set the min zoom of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-     * does nothing when the layerId specified is not found or when the layerId is undefined and the active layer is null.
+     * Set the min zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+     * does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer is
+     * null.
      *
      * @param {boolean} layerVisibility The visibility of the layer.
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      */
-    setMinZoom(minZoom: number, layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): void;
+    setMinZoom(minZoom: number, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
     /** ***************************************************************************************************************************
-     * Return the max zoom of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-     * return undefined when the layer specified is not found.
+     * Return the max zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+     * return undefined when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
+     * is null.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {boolean} The visibility of the layer.
      */
-    getMaxZoom(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): number | undefined;
+    getMaxZoom(layerPathOrConfig?: string | TypeLayerEntryConfig | null): number | undefined;
     /** ***************************************************************************************************************************
-     * Set the max zoom of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-     * does nothing when the layerId specified is not found or when the layerId is undefined and the active layer is null.
+     * Set the max zoom of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+     * does nothing when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer is
+     * null.
      *
      * @param {boolean} layerVisibility The visibility of the layer.
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      */
-    setMaxZoom(maxZoom: number, layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): void;
+    setMaxZoom(maxZoom: number, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
     /** ***************************************************************************************************************************
-     * Return the legend of the layer. When no layer identifier is specified, the activeLayer of the class is used. This routine
-     * return null when the layer specified is not found.
+     * Return the legend of the layer. When layerPathOrConfig is undefined, the activeLayer of the class is used. This routine
+     * return null when the layerPath specified is not found or when the layerPathOrConfig is undefined and the active layer
+     * is null or the layerConfig.style property is undefined.
      *
-     * @param {string | TypeLayerEntryConfig | null | undefined} layerIdOrConfig Optional layer identifier or configuration.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {Promise<TypeLegend | null>} The legend of the layer.
      */
-    getLegend(layerIdOrConfig?: string | TypeLayerEntryConfig | null | undefined): Promise<TypeLegend | null>;
+    getLegend(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
      * Utility method use to add an entry to the outfields or aliasFields attribute of the layerEntryConfig.source.featureInfo.
      *

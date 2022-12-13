@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /// <reference types="react" />
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
@@ -9,6 +10,9 @@ import { Layer } from '../layer/layer';
 import { AppbarButtons } from '../../core/components/app-bar/app-bar-buttons';
 import { NavbarButtons } from '../../core/components/nav-bar/nav-bar-buttons';
 import { FooterTabsApi } from '../../core/components/footer-tabs/footer-tabs-api';
+import { LegendApi } from '../../core/components/legend/legend-api';
+import { DetailsAPI } from '../../core/components/details/details-api';
+import { DataGridAPI } from '../../core/components/data-grid/data-grid-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
 import { ModalApi } from '../../ui';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
@@ -27,6 +31,9 @@ export declare class MapViewer {
     appBarButtons: AppbarButtons;
     navBarButtons: NavbarButtons;
     footerTabs: FooterTabsApi;
+    legend: LegendApi;
+    details: DetailsAPI;
+    dataGrid: DataGridAPI;
     basemap: Basemap;
     layer: Layer;
     displayLanguage: TypeDisplayLanguage;
@@ -37,6 +44,9 @@ export declare class MapViewer {
     i18nInstance: i18n;
     modal: ModalApi;
     geoviewRenderer: GeoviewRenderer;
+    remainingLayersThatNeedToBeLoaded: number;
+    readyCallbackHasRun: boolean;
+    layerLoadedTimeoutId: Record<string, NodeJS.Timeout>;
     /**
      * Add the map instance to the maps array in the api
      *
@@ -44,6 +54,25 @@ export declare class MapViewer {
      * @param {i18n} i18instance language instance
      */
     constructor(mapFeaturesConfig: TypeMapFeaturesConfig, i18instance: i18n);
+    /**
+     * Utility function used to decrement the remainingLayersThatNeedToBeLoaded property, preventing it to become less that zero.
+     * The methode returns true when the zero value is reached for the first time.
+     *
+     * @returns true when the zero value is reached for the first time.
+     */
+    private remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime;
+    /**
+     * Set the layer added event listener and timeout function for the list of geoview layer configurations.
+     *
+     * @param {TypeListOfGeoviewLayerConfig} listOfGeoviewLayerConfig The list of geoview layer configurations.
+     */
+    setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig): void;
+    /**
+     * Method used to test all geoview layers ready flag to determine if a map is ready.
+     *
+     * @returns true if all geoview layers on the map are loaded or detected as a load error.
+     */
+    mapIsReady(): boolean;
     /**
      * Initialize layers, basemap and projection
      *
@@ -91,12 +120,6 @@ export declare class MapViewer {
      */
     mapReady: () => void;
     /**
-     * Return the language code prefix from localized language
-     *
-     * @returns {TypeDisplayLanguage} returns the language code prefix from localized language. Ex: en, fr
-     */
-    getLanguageCodePrefix: () => TypeDisplayLanguage;
-    /**
      * Change the display language of the map
      *
      * @param {TypeDisplayLanguage} displayLanguage the language to use (en, fr)
@@ -116,10 +139,12 @@ export declare class MapViewer {
      */
     toggleMapInteraction: (interaction: string) => void;
     /**
-     * Create bounds on map
+     * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
+     * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
      *
      * @param {Extent} bounds map bounds
+     * @param {string | number | undefined} projectionCode Optional projection code used by the bounds.
      * @returns the bounds
      */
-    fitBounds: (bounds: Extent) => void;
+    fitBounds: (bounds: Extent, projectionCode?: string | number | undefined) => void;
 }

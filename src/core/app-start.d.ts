@@ -10,7 +10,7 @@ export declare const MapContext: React.Context<TypeMapContext>;
 /**
  * Type used for the map context
  */
-declare type TypeMapContext = {
+type TypeMapContext = {
     mapId: string;
     interaction: string;
 };

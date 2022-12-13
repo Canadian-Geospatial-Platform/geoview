@@ -1,6 +1,6 @@
 import { Vector } from './vector/vector';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLocalizedLanguages } from '../map/map-schema-types';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
@@ -9,14 +9,14 @@ import { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '../map/map-schema-
  */
 export declare class Layer {
     /** Layers with valid configuration for this map. */
-    registeredLayers: Record<string, TypeLayerEntryConfig>;
-    layers: {
-        [key: string]: AbstractGeoViewLayer;
+    registeredLayers: {
+        [layerEntryConfigId: string]: TypeLayerEntryConfig;
+    };
+    geoviewLayers: {
+        [geoviewLayerId: string]: AbstractGeoViewLayer;
     };
     vector: Vector | undefined;
-    /**
-     * used to reference the map id
-     */
+    /** used to reference the map id */
     private mapId;
     /**
      * Initialize layer types and listen to add/remove layer events from outside
@@ -24,9 +24,21 @@ export declare class Layer {
      * @param {string} mapId a reference to the map
      * @param {TypeGeoviewLayerConfig} layersConfig an optional array containing layers passed within the map config
      */
-    constructor(mapId: string, layersConfig?: TypeGeoviewLayerConfig[]);
+    constructor(mapId: string, geoviewLayerConfigs?: TypeGeoviewLayerConfig[]);
     /**
-     * Get the layer Path of the layer parameter.
+     * Validate the geoview layer configuration array to eliminate duplicate entries and inform the user.
+     * @param {TypeGeoviewLayerConfig[]} geoviewLayerConfigs The geoview layer configurations to validate.
+     *
+     * @returns {TypeGeoviewLayerConfig} The new configuration with duplicate entries eliminated.
+     */
+    private deleteDuplicatGeoviewLayerConfig;
+    /**
+     * Print an error message for the duplicate geoview layer configuration.
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The geoview layer configuration in error.
+     */
+    private printDuplicateGeoviewLayerConfigError;
+    /**
+     * Get the layer Path of the layer configuration parameter.
      * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
      *
      * @returns {string} Returns the layer path.
@@ -52,23 +64,25 @@ export declare class Layer {
      */
     private addToMap;
     /**
-     * Remove a layer from the map
+     * Remove a layer from the map using its layer path. The path may point to the root geoview layer
+     * or a sub layer.
      *
-     * @param {string} id the id of the layer to be removed
+     * @param {string} partialLayerPath the path of the layer to be removed
      */
-    removeGeoviewLayerById: (geoviewLayerId: string) => void;
+    removeLayersUsingPath: (partialLayerPath: string) => void;
     /**
      * Add a layer to the map
      *
-     * @param {TypeGeoviewLayerConfig} layerConfig the layer configuration to add
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig the geoview layer configuration to add
+     * @param {TypeListOfLocalizedLanguages} optionalSuportedLanguages an optional list of supported language
      */
-    addLayer: (layerConfig: TypeGeoviewLayerConfig) => string;
+    addGeoviewLayer: (geoviewLayerConfig: TypeGeoviewLayerConfig, optionalSuportedLanguages?: TypeListOfLocalizedLanguages) => string;
     /**
-     * Remove a layer from the map
+     * Remove a geoview layer from the map
      *
      * @param {TypeGeoviewLayerConfig} layer the layer configuration to remove
      */
-    removeLayer: (geoviewLayer: AbstractGeoViewLayer) => string;
+    removeGeoviewLayer: (geoviewLayer: AbstractGeoViewLayer) => string;
     /**
      * Search for a layer using it's id and return the layer data
      *

@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
@@ -10,13 +11,16 @@ import { TypeDisplayLanguage, TypeMapFeaturesInstance } from '../../geo/map/map-
 export type { SelectChangeEvent } from '@mui/material';
 export type { Coordinate } from 'ol/coordinate';
 /** ******************************************************************************************************************************
- *  Definition of the map feature configuration according to what is specified in the schema.
+ * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
+ * type extension TypeMapFeaturesInstance.
  */
 export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
     /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
     mapId?: string;
     /** This attribute is not part of the schema. It is placed here to keep the 'data-lang' attribute of the HTML div of the map. */
     displayLanguage?: TypeDisplayLanguage;
+    /** If true, the ready callback 'cgpv.init(mapId)' is called with the mapId as a parameter when the map is ready */
+    triggerReadyCallback?: boolean;
 }
 /** ******************************************************************************************************************************
  *  Definition of a global Window type.
@@ -41,10 +45,11 @@ export interface TypeWindow extends Window {
 /** ******************************************************************************************************************************
  * Type used for exporting core.
  */
-export declare type TypeCGPV = {
+export type TypeCGPV = {
     init: TypeCallback;
     api: TypeApi;
     react: typeof React;
+    reactDOM: typeof ReactDOM;
     ui: TypeCGPVUI;
     useTranslation: typeof useTranslation;
     types: typeof import('./cgpv-types');
@@ -52,7 +57,7 @@ export declare type TypeCGPV = {
 /** ******************************************************************************************************************************
  * Type used for a callback function.
  */
-export declare type TypeCallback = (callback: () => void) => void;
+export type TypeCallback = (callback: () => void) => void;
 /** ******************************************************************************************************************************
  * Interface TypeApi extends API, Event, Projection, Plugin {} // #427
  */
@@ -61,7 +66,7 @@ export interface TypeApi extends API, Event, Plugin {
 /** ******************************************************************************************************************************
  * Type used for exporting UI
  */
-export declare type TypeCGPVUI = {
+export type TypeCGPVUI = {
     useTheme: typeof useTheme;
     useMediaQuery: typeof useMediaQuery;
     makeStyles: typeof makeStyles;
@@ -78,17 +83,17 @@ export declare function Cast<TargetType = never>(p: unknown): TargetType;
 /**
  * Type used for a value within a json object
  */
-export declare type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | {
+export type TypeJsonValue = null | string | number | boolean | TypeJsonObject[] | {
     [key: string]: TypeJsonObject;
 };
 /** ------------------------------------------------------------------------------------------------------------------------------
  * Type used for an array of objects
  */
-export declare type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
+export type TypeJsonArray = TypeJsonValue & TypeJsonObject[];
 /** ------------------------------------------------------------------------------------------------------------------------------
  * Type used for a json object
  */
-export declare type TypeJsonObject = TypeJsonValue & {
+export type TypeJsonObject = TypeJsonValue & {
     [key: string]: TypeJsonObject;
 };
 /** ------------------------------------------------------------------------------------------------------------------------------

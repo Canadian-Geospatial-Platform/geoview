@@ -3,21 +3,21 @@ import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 import { TypeOfVector } from '../../../geo/layer/vector/vector-types';
 /**
- * Type Gard function that redefines a PayloadBaseClass as a VectorPayload
+ * type guard function that redefines a PayloadBaseClass as a VectorPayload
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAVector: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is VectorPayload;
 /**
- * Type Gard function that redefines a PayloadBaseClass as a CirclePayload
+ * type guard function that redefines a PayloadBaseClass as a CirclePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsACircle: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is CirclePayload;
 /**
@@ -27,12 +27,12 @@ export interface CirclePayload extends VectorPayload {
     circle: Feature;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a CircleMarkerPayload
+ * type guard function that redefines a PayloadBaseClass as a CircleMarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsACircleMarker: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is CircleMarkerPayload;
 /**
@@ -42,12 +42,12 @@ export interface CircleMarkerPayload extends VectorPayload {
     circleMarker: Feature;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a MarkerPayload
+ * type guard function that redefines a PayloadBaseClass as a MarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAMarker: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is MarkerPayload;
 /**
@@ -57,12 +57,12 @@ export interface MarkerPayload extends VectorPayload {
     marker: Feature;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PolygonPayload
+ * type guard function that redefines a PayloadBaseClass as a PolygonPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAPolygon: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is PolygonPayload;
 /**
@@ -72,12 +72,12 @@ export interface PolygonPayload extends VectorPayload {
     polygon: Feature;
 }
 /**
- * Type Gard function that redefines a PayloadBaseClass as a PolylinePayload
+ * type guard function that redefines a PayloadBaseClass as a PolylinePayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
  *
  * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true of the payload is valid
+ * @returns {boolean} returns true if the payload is valid
  */
 export declare const payloadIsAPolyline: (verifyIfPayload: PayloadBaseClass) => verifyIfPayload is PolylinePayload;
 /**

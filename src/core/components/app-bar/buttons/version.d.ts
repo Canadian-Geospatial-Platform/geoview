@@ -5,7 +5,7 @@
  * @export
  * @interface TypeAppVersion
  */
-export declare type TypeAppVersion = {
+export type TypeAppVersion = {
     hash: string;
     major: number;
     minor: number;
