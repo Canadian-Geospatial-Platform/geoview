@@ -4,7 +4,7 @@ import { i18n } from 'i18next';
 
 import OLMap from 'ol/Map';
 import View, { ViewOptions } from 'ol/View';
-import { fromLonLat, toLonLat, transformExtent } from 'ol/proj';
+import { fromLonLat, ProjectionLike, toLonLat, transform as olTransform, transformExtent as olTransformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 
@@ -457,15 +457,82 @@ export class MapViewer {
    * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
    * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
    *
-   * @param {Extent} bounds map bounds
+   * @param {Extent} bounds bounding box to zoom to
    * @param {string | number | undefined} projectionCode Optional projection code used by the bounds.
    * @returns the bounds
    */
-  fitBounds = (bounds: Extent, projectionCode: string | number | undefined = undefined) => {
-    const mapBounds = projectionCode
-      ? transformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.currentProjection])
-      : bounds;
-    this.map.getView().fit(mapBounds, { size: this.map.getSize() });
-    this.map.getView().setZoom(this.map.getView().getZoom()! - 0.15);
+  fitBounds = (bounds?: Extent, projectionCode: string | number | undefined = undefined) => {
+    let mapBounds: Extent | undefined;
+    if (bounds)
+      mapBounds = projectionCode
+        ? olTransformExtent(bounds, `EPSG:${projectionCode}`, api.projection.projections[this.currentProjection], 20)
+        : olTransformExtent(
+            bounds,
+            api.projection.projections[this.currentProjection],
+            api.projection.projections[this.currentProjection],
+            25
+          );
+    else {
+      Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
+        if (!mapBounds)
+          mapBounds = this.layer.geoviewLayers[geoviewLayerId].getBounds(this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig);
+        else {
+          const newMapBounds = this.layer.geoviewLayers[geoviewLayerId].getBounds(
+            this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig
+          );
+          if (newMapBounds) {
+            mapBounds = [
+              Math.min(newMapBounds[0], mapBounds[0]),
+              Math.min(newMapBounds[1], mapBounds[1]),
+              Math.max(newMapBounds[2], mapBounds[2]),
+              Math.max(newMapBounds[3], mapBounds[3]),
+            ];
+          }
+        }
+      });
+    }
+
+    if (mapBounds) {
+      this.map.getView().fit(mapBounds, { size: this.map.getSize() });
+      this.map.getView().setZoom(this.map.getView().getZoom()! - 0.15);
+    }
+  };
+
+  /**
+   * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+   * original).
+   *
+   * @param {Extent} extent The extent to transform.
+   * @param {ProjectionLike} source Source projection-like.
+   * @param {ProjectionLike} destination Destination projection-like.
+   * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+   *
+   * @returns The new extent transformed in the destination projection.
+   */
+  transformExtent = (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined): Extent => {
+    return olTransformExtent(extent, source, destination, stops);
+  };
+
+  /**
+   * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+   * original).
+   *
+   * @param {Extent} extent The extent to transform.
+   * @param {ProjectionLike} source Source projection-like.
+   * @param {ProjectionLike} destination Destination projection-like.
+   * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
+   *
+   * @returns The densified extent transformed in the destination projection.
+   */
+  transformAndDensifyExtent = (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops = 25): Coordinate[] => {
+    const coordinates = [];
+    const width = extent[2] - extent[0];
+    const height = extent[3] - extent[1];
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[0] + (width * i) / stops, extent[1]]);
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[2], extent[1] + (height * i) / stops]);
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[2] - (width * i) / stops, extent[3]]);
+    for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
+    for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
+    return coordinates;
   };
 }

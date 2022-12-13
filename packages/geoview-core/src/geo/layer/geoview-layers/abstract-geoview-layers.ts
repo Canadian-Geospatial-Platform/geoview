@@ -628,19 +628,20 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata.
-   * If projectionCode is defined, returns the bounds in the specified projection otherwise use the map projection.
-   * The bounds are different from the extent. They are mainly used for display purposes to show the bounding box in which
-   * the data resides and to zoom in on the entire layer data. It is not used by openlayer to limit the display of data on
-   * the map.
+   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. if layerPathOrConfig is
+   * undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified projection otherwise
+   * use the map projection. The bounds are different from the extent. They are mainly used for display purposes to show the
+   * bounding box in which the data resides and to zoom in on the entire layer data. It is not used by openlayer to limit the
+   * display of data on the map.
    *
-   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null} layerPathOrConfig Optional layer path or
+   * configuration.
    * @param {string | number | undefined} projectionCode Optional projection code to use for the returned bounds.
    *
    * @returns {Extent} The layer bounding box.
    */
   getBounds(
-    layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer,
+    layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
     projectionCode: string | number | undefined = undefined
   ): Extent | undefined {
     let bounds: Extent | undefined;
@@ -661,7 +662,8 @@ export abstract class AbstractGeoViewLayer {
     };
     const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
     if (layerConfig) {
-      processGroupLayerBounds([layerConfig]);
+      if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
+      else processGroupLayerBounds([layerConfig]);
       if (projectionCode && bounds)
         return transformExtent(bounds, `EPSG:${api.map(this.mapId).currentProjection}`, `EPSG:${projectionCode}`);
     }
