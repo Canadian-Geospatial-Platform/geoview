@@ -227,35 +227,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   };
 
   useEffect(() => {
-    // TODO EVENT OPTION 1 - Issue #615 not efficient becuase it gets all legends for a single legend item, have to match up geolayerView with layerPath in resultSet
-    // const legendLayerSet = api.createLegendsLayerSet(mapId, 'wmsLegendsId');
-    // api.event.on(
-    //   api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
-    //   (payload) => {
-    //     if (payloadIsAllLegendsDone(payload)) {
-    //       api.event.off(api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, mapId);
-    //       const { layerSetId, resultSets } = payload;
-    //       if (subLayerId) {
-    //         getLegendDetails(resultSets[`${subLayerId}`]);
-    //       } else {
-    //         getLegendDetails(resultSets[`${layerId}/${geoviewLayerInstance.activeLayer.layerId}`]);
-    //       }
-    //     }
-    //   },
-    //   mapId
-    // );
-    // api.event.emit(GetLegendsPayload.createTriggerLegendPayload(mapId, layerId));
-
-    // TODO EVENT OPTION 2 - Issue #615 trying to get individual legend info, but this only works when handler=mapId so its the same as option 1
-    // api.event.on(
-    //   api.eventNames.GET_LEGENDS.LEGEND_INFO,
-    //   (payload) => {
-    //     api.event.off(api.eventNames.GET_LEGENDS.LEGEND_INFO, mapId);
-    //     getLegendDetails(payload.legendInfo);
-    //   },
-    //   mapId
-    // );
-    // api.event.emit({ handlerName: mapId, event: api.eventNames.GET_LEGENDS.QUERY_LEGEND, layerPath: layerId });
     getLayerName();
     const isGroup = getGroupsDetails();
     if (!isGroup) {

@@ -277,7 +277,7 @@
       footerTabs.createFooterTab({
         value: 0,
         label: 'Legend',
-        content: api.map(mapId).legend.createLegend()
+        content: () => api.map(mapId).legend.createLegend({layerIds: ['wmsLYR1', 'esriDynamicLYR2', 'esriFeatureLYR4']})
       });
 
       footerTabs.createFooterTab({

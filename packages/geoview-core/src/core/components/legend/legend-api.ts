@@ -2,6 +2,12 @@ import { createElement } from 'react';
 import { api } from '../../../app';
 import { Legend } from './legend';
 import { LegendItem, TypeLegendItemProps } from './legend-item';
+import { List } from '../../../ui';
+
+export interface TypeLegendProps {
+  layerIds: string[];
+  isRemoveable?: boolean;
+}
 
 /**
  * API to manage legend component
@@ -22,11 +28,24 @@ export class LegendApi {
   }
 
   /**
-   * Create a legend
+   * Create a legend as a component
+   * @deprecated
+   */
+  createLegendComponent = () => {
+    return Legend;
+  };
+
+  /**
+   * Create a legend as an element
    *
    */
-  createLegend = () => {
-    return Legend;
+  createLegend = (props: TypeLegendProps) => {
+    const { layerIds, isRemoveable } = props;
+    const legendItems = layerIds.map((layerId) => {
+      const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+      return createElement(LegendItem, { key: `layerKey-${layerId}`, layerId, geoviewLayerInstance, isRemoveable });
+    });
+    return createElement('div', {}, createElement(List, { sx: { width: '100%' } }, legendItems));
   };
 
   /**
