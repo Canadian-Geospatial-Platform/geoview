@@ -40,6 +40,7 @@
   "legend": {
     "unknown": "Titre de légende inconnu",
     "remove_layer": "Supprimer le calque",
+    "opacity": "Opacité",
     "expand_legend": "Développer la légende"
   },
   "keyboardnav": {

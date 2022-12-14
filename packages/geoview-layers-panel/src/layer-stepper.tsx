@@ -36,7 +36,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
   const { useState, useEffect } = react;
-  const { Select, Stepper, TextField, Button, ButtonGroup, Autocomplete, CircularProgressBase, Box } = ui.elements;
+  const { Select, Stepper, TextField, Button, ButtonGroup, Autocomplete, CircularProgressBase, Box, IconButton, CloseIcon } = ui.elements;
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
@@ -627,100 +627,108 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   }
 
   return (
-    <Stepper
-      activeStep={activeStep}
-      orientation="vertical"
-      steps={[
-        {
-          stepLabel: {
-            children: 'Enter URL / UUID',
+    <>
+      <Box sx={{ display: 'flex', justifyContent: 'end', zIndex: 2 }}>
+        <IconButton color="primary" onClick={() => setAddLayerVisible(false)}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Stepper
+        sx={{ position: 'relative', top: '-30px', zIndex: 1 }}
+        activeStep={activeStep}
+        orientation="vertical"
+        steps={[
+          {
+            stepLabel: {
+              children: 'Enter URL / UUID',
+            },
+            stepContent: {
+              children: (
+                <>
+                  <TextField sx={{ width: '100%' }} label="URL" variant="standard" value={layerURL} onChange={handleInput} multiline />
+                  <br />
+                  <NavButtons isFirst handleNext={handleStep1} />
+                </>
+              ),
+            },
           },
-          stepContent: {
-            children: (
-              <>
-                <TextField sx={{ width: '100%' }} label="URL" variant="standard" value={layerURL} onChange={handleInput} multiline />
-                <br />
-                <NavButtons isFirst handleNext={handleStep1} />
-              </>
-            ),
-          },
-        },
-        {
-          stepLabel: {
-            children: 'Select format',
-          },
-          stepContent: {
-            children: (
-              <>
-                <Select
-                  fullWidth
-                  labelId="service-type-label"
-                  value={layerType}
-                  onChange={handleSelectType}
-                  label="Service Type"
-                  inputLabel={{
-                    id: 'service-type-label',
-                  }}
-                  menuItems={layerOptions.map(([value, label]) => ({
-                    key: value,
-                    item: {
-                      value,
-                      children: label,
-                    },
-                  }))}
-                />
-                <NavButtons handleNext={handleStep2} />
-              </>
-            ),
-          },
-        },
-        {
-          stepLabel: {
-            children: 'Configure layer',
-          },
-          stepContent: {
-            children: (
-              <>
-                {layerList.length === 0 && <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />}
-                {layerList.length > 1 && (
-                  <Autocomplete
+          {
+            stepLabel: {
+              children: 'Select format',
+            },
+            stepContent: {
+              children: (
+                <>
+                  <Select
                     fullWidth
-                    multiple={isMultiple()}
-                    disableCloseOnSelect
-                    disableClearable={!isMultiple()}
-                    id="service-layer-label"
-                    options={layerList}
-                    getOptionLabel={(option) => `${option[1]} (${option[0]})`}
-                    renderOption={(props, option) => <span {...props}>{option[1]}</span>}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onChange={handleSelectLayer as any}
-                    renderInput={(params) => <TextField {...params} label="Select Layer" />}
+                    labelId="service-type-label"
+                    value={layerType}
+                    onChange={handleSelectType}
+                    label="Service Type"
+                    inputLabel={{
+                      id: 'service-type-label',
+                    }}
+                    menuItems={layerOptions.map(([value, label]) => ({
+                      key: value,
+                      item: {
+                        value,
+                        children: label,
+                      },
+                    }))}
                   />
-                )}
-                <br />
-                <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
-              </>
-            ),
+                  <NavButtons handleNext={handleStep2} />
+                </>
+              ),
+            },
           },
-        },
-        isMultiple()
-          ? {
-              stepLabel: {
-                children: 'Enter Name',
-              },
-              stepContent: {
-                children: (
-                  <>
-                    <TextField sx={{ width: '100%' }} label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
-                    <br />
-                    <NavButtons isLast handleNext={handleStepLast} />
-                  </>
-                ),
-              },
-            }
-          : null,
-      ]}
-    />
+          {
+            stepLabel: {
+              children: 'Configure layer',
+            },
+            stepContent: {
+              children: (
+                <>
+                  {layerList.length === 0 && <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />}
+                  {layerList.length > 1 && (
+                    <Autocomplete
+                      fullWidth
+                      multiple={isMultiple()}
+                      disableCloseOnSelect
+                      disableClearable={!isMultiple()}
+                      id="service-layer-label"
+                      options={layerList}
+                      getOptionLabel={(option) => `${option[1]} (${option[0]})`}
+                      renderOption={(props, option) => <span {...props}>{option[1]}</span>}
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      onChange={handleSelectLayer as any}
+                      renderInput={(params) => <TextField {...params} label="Select Layer" />}
+                    />
+                  )}
+                  <br />
+                  <NavButtons isLast={!isMultiple()} handleNext={isMultiple() ? handleStep3 : handleStepLast} />
+                </>
+              ),
+            },
+          },
+          isMultiple()
+            ? {
+                stepLabel: {
+                  children: 'Enter Name',
+                },
+                stepContent: {
+                  children: (
+                    <>
+                      <TextField sx={{ width: '100%' }} label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
+                      <br />
+                      <NavButtons isLast handleNext={handleStepLast} />
+                    </>
+                  ),
+                },
+              }
+            : null,
+        ]}
+      />
+    </>
   );
 }
 

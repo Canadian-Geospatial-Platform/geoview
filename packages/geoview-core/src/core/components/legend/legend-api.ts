@@ -7,6 +7,9 @@ import { List } from '../../../ui';
 export interface TypeLegendProps {
   layerIds: string[];
   isRemoveable?: boolean;
+  canSetOpacity?: boolean;
+  expandAll?: boolean;
+  hideAll?: boolean;
 }
 
 /**
@@ -40,10 +43,18 @@ export class LegendApi {
    *
    */
   createLegend = (props: TypeLegendProps) => {
-    const { layerIds, isRemoveable } = props;
+    const { layerIds, isRemoveable, canSetOpacity, expandAll, hideAll } = props;
     const legendItems = layerIds.map((layerId) => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      return createElement(LegendItem, { key: `layerKey-${layerId}`, layerId, geoviewLayerInstance, isRemoveable });
+      return createElement(LegendItem, {
+        key: `layerKey-${layerId}`,
+        layerId,
+        geoviewLayerInstance,
+        isRemoveable,
+        canSetOpacity,
+        expandAll,
+        hideAll,
+      });
     });
     return createElement('div', {}, createElement(List, { sx: { width: '100%' } }, legendItems));
   };

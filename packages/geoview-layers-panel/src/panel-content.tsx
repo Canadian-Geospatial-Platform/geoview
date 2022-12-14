@@ -33,16 +33,40 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const [mapLayers, setMapLayers] = useState<string[]>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [legend, setLegend] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
-  const { Typography, IconButton, AddIcon, Box } = ui.elements;
+  const [actionMenuAnchorElement, setActionMenuAnchorElement] = useState<null | HTMLElement>(null);
+  const [isExpandAll, setExpandAll] = useState<boolean>(false);
+  const [isHideAll, setHideAll] = useState<boolean>(false);
+  const {
+    IconButton,
+    AddIcon,
+    Box,
+    ArrowDownIcon,
+    ArrowRightIcon,
+    VisibilityIcon,
+    VisibilityOffIcon,
+    Menu,
+    MenuItem,
+    MenuIcon,
+    ListItemIcon,
+    ListItemText,
+  } = ui.elements;
 
   const { displayLanguage } = api.map(mapId!);
 
   const translations: TypeJsonObject = toJsonObject({
     en: {
       addLayer: 'Add Layer',
+      expandAll: 'Expand Groups',
+      collapseAll: 'Collapse Groups',
+      showAll: 'Show All',
+      hideAll: 'Hide All',
     },
     fr: {
       addLayer: 'Ajouter Couche',
+      expandAll: 'Élargir les groupes',
+      collapseAll: 'Réduire les groupes',
+      showAll: 'Montrer tout',
+      hideAll: 'Cacher tout',
     },
   });
 
@@ -65,7 +89,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     },
   };
 
-  const onClick = () => setAddLayerVisible((state: boolean) => !state);
+  const actionMenuOpen = Boolean(actionMenuAnchorElement);
 
   const addLayer = (addGeoviewLayerId: string) => {
     if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(addGeoviewLayerId)) {
@@ -115,7 +139,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true }));
+    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLayers]);
 
@@ -134,21 +158,86 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     };
   }, [api, buttonPanel.buttonPanelId, mapId]);
 
+  useEffect(() => {
+    setLegend(
+      api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, expandAll: isExpandAll })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExpandAll]);
+
+  useEffect(() => {
+    setLegend(api.map(mapId!).legend.createLegend({ layerIds: mapLayers, isRemoveable: true, canSetOpacity: true, hideAll: isHideAll }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHideAll]);
+
+  const handleShowAddLayer = () => {
+    // actionMenuOpen = Boolean(actionMenuAnchorElement);
+    setAddLayerVisible((state: boolean) => !state);
+  };
+
+  const handleExpandMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setActionMenuAnchorElement(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setActionMenuAnchorElement(null);
+  };
+
+  const handleExpandAllClick = (isExpand: boolean) => {
+    setExpandAll(isExpand);
+    handleCloseMenu();
+  };
+
+  const handleShowAllClick = (isShow: boolean) => {
+    setHideAll(!isShow);
+    handleCloseMenu();
+  };
+
   return (
-    <Box sx={sxClasses.mainContainer}>
-      {addLayerVisible && <LayerStepper mapId={mapId!} setAddLayerVisible={setAddLayerVisible} />}
-      {/* <Box sx={sxClasses.topControls} style={{ display: addLayerVisible ? 'none' : 'flex' }}>
-        <div>Expand All</div>
-        <div>Hide All</div>
-      </Box> */}
-      <div style={{ display: addLayerVisible ? 'none' : 'block' }}>{legend}</div>
-      <Box sx={sxClasses.addLayerSection} onClick={onClick}>
-        <Typography>{translations[displayLanguage].addLayer}</Typography>
-        <IconButton>
-          <AddIcon />
-        </IconButton>
+    <>
+      <Menu anchorEl={actionMenuAnchorElement} open={actionMenuOpen} onClose={handleCloseMenu}>
+        <MenuItem onClick={() => handleExpandAllClick(true)}>
+          <ListItemIcon>
+            <ArrowDownIcon />
+          </ListItemIcon>
+          <ListItemText>{translations[displayLanguage].expandAll}</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleExpandAllClick(false)}>
+          <ListItemIcon>
+            <ArrowRightIcon />
+          </ListItemIcon>
+          <ListItemText>{translations[displayLanguage].collapseAll}</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleShowAllClick(true)}>
+          <ListItemIcon>
+            <VisibilityIcon />
+          </ListItemIcon>
+          <ListItemText>{translations[displayLanguage].showAll}</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleShowAllClick(false)}>
+          <ListItemIcon>
+            <VisibilityOffIcon />
+          </ListItemIcon>
+          <ListItemText>{translations[displayLanguage].hideAll}</ListItemText>
+        </MenuItem>
+      </Menu>
+      <Box sx={sxClasses.mainContainer}>
+        {addLayerVisible && <LayerStepper mapId={mapId!} setAddLayerVisible={setAddLayerVisible} />}
+        <Box sx={sxClasses.topControls} style={{ display: addLayerVisible ? 'none' : 'flex' }}>
+          <div>
+            <IconButton color="primary" onClick={handleExpandMenuClick}>
+              <MenuIcon />
+            </IconButton>
+          </div>
+          <Box onClick={handleShowAddLayer}>
+            {translations[displayLanguage].addLayer}
+            <IconButton>
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Box>
+        <div style={{ display: addLayerVisible ? 'none' : 'block' }}>{legend}</div>
       </Box>
-    </Box>
+    </>
   );
 }
 

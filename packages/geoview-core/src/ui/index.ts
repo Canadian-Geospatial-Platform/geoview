@@ -16,6 +16,7 @@ export * from './modal';
 export * from './panel';
 export * from './select/select';
 export * from './slider/slider';
+export * from './slider/slider-base';
 export * from './snackbar/snackbar';
 export * from './stepper/stepper';
 export * from './switch/switch';
