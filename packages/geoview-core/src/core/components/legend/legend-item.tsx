@@ -19,6 +19,8 @@ import {
   MoreVertIcon,
   ArrowRightIcon,
   ArrowDownIcon,
+  OpacityIcon,
+  SliderBase,
 } from '../../../ui';
 import {
   api,
@@ -104,6 +106,11 @@ const sxClasses = {
   solidBackground: {
     background: '#fff',
   },
+  opacityMenu: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+  },
 };
 
 export interface TypeLegendItemProps {
@@ -112,8 +119,11 @@ export interface TypeLegendItemProps {
   subLayerId?: string;
   layerConfigEntry?: TypeLayerEntryConfig;
   isRemoveable?: boolean;
+  canSetOpacity?: boolean;
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
+  expandAll?: boolean;
+  hideAll?: boolean;
 }
 
 /**
@@ -122,7 +132,18 @@ export interface TypeLegendItemProps {
  * @returns {JSX.Element} the legend list item
  */
 export function LegendItem(props: TypeLegendItemProps): JSX.Element {
-  const { layerId, geoviewLayerInstance, subLayerId, layerConfigEntry, isRemoveable, isParentVisible, toggleParentVisible } = props;
+  const {
+    layerId,
+    geoviewLayerInstance,
+    subLayerId,
+    layerConfigEntry,
+    isRemoveable,
+    canSetOpacity,
+    isParentVisible,
+    toggleParentVisible,
+    expandAll,
+    hideAll,
+  } = props;
 
   const { t, i18n } = useTranslation<string>();
 
@@ -130,6 +151,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const { mapId } = mapConfig;
 
   const [isChecked, setChecked] = useState(true);
+  const [isOpacityOpen, setOpacityOpen] = useState(false);
   const [isGroupOpen, setGroupOpen] = useState(false);
   const [isLegendOpen, setLegendOpen] = useState(false);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
@@ -139,7 +161,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [layerName, setLayerName] = useState<string>('');
-  const [menuAnchorElement, setMenuAnchorElement] = React.useState<null | HTMLElement>(null);
+  const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
+  const [opacity, setOpacity] = useState<number>(1);
 
   const menuOpen = Boolean(menuAnchorElement);
 
@@ -232,8 +255,17 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (!isGroup) {
       getLegendDetails();
     }
+    setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (expandAll !== undefined) setGroupOpen(expandAll);
+  }, [expandAll]);
+
+  useEffect(() => {
+    if (hideAll !== undefined) setChecked(!hideAll);
+  }, [hideAll]);
 
   useEffect(() => {
     if (layerConfigEntry) {
@@ -287,6 +319,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     // NOTE: parent component needs to deal with removing this legend-item when recieving the layer remove event
     handleCloseMenu();
   };
+  const handleOpacityOpen = () => {
+    setOpacityOpen(!isOpacityOpen);
+    handleCloseMenu();
+  };
+  const handleSetOpacity = (opacityValue: number | number[]) => {
+    if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
+    else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
+  };
 
   return (
     <>
@@ -334,7 +374,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerName} />
           </Tooltip>
           <ListItemIcon>
-            {isRemoveable && (
+            {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
               <IconButton onClick={handleMoreClick}>
                 <MoreVertIcon />
               </IconButton>
@@ -350,9 +390,21 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         </ListItemButton>
       </ListItem>
       <Menu anchorEl={menuAnchorElement} open={menuOpen} onClose={handleCloseMenu}>
-        {/* Add more layer options here - transparency, zoom to, reorder */}
+        {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
+        {canSetOpacity && groupItems.length === 0 && <MenuItem onClick={handleOpacityOpen}>{t('legend.opacity')}</MenuItem>}
       </Menu>
+      <Collapse in={isOpacityOpen} timeout="auto">
+        <Box sx={sxClasses.opacityMenu}>
+          <Tooltip title={t('legend.opacity')}>
+            <OpacityIcon />
+          </Tooltip>
+          <SliderBase min={0} max={100} value={opacity * 100} customOnChange={handleSetOpacity} />
+          <IconButton color="primary" onClick={() => setOpacityOpen(!isOpacityOpen)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </Collapse>
       <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
@@ -376,7 +428,10 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 subLayerId={subLayerId ? `${subLayerId}/${subItem.layerId}` : `${layerId}/${subItem.layerId}`}
                 layerConfigEntry={subItem}
                 isParentVisible={isParentVisible === false ? false : isChecked}
+                canSetOpacity={canSetOpacity}
                 toggleParentVisible={handleToggleLayer}
+                expandAll={expandAll}
+                hideAll={hideAll}
               />
             ))}
           </Box>
