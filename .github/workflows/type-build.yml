@@ -36,7 +36,9 @@ jobs:
           rm -r common
           rm -r packages
 
-          git config --global user.name $USER
+          git config --global user.name "DamonU2"
+          git config --global user.email "damonulmi@gmail.com"
+
           git add .
           git status
           CHANGES=$(git status -s | wc -l)
