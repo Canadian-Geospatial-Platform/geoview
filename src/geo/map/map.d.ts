@@ -3,6 +3,7 @@
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
 import View from 'ol/View';
+import { ProjectionLike } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
 import { Basemap } from '../layer/basemap/basemap';
@@ -142,9 +143,33 @@ export declare class MapViewer {
      * Fit the map to its boundaries. It is assumed that the boundaries use the map projection. If projectionCode is undefined,
      * the boundaries are used as is, otherwise they are reprojected from the specified projection code to the map projection.
      *
-     * @param {Extent} bounds map bounds
+     * @param {Extent} bounds bounding box to zoom to
      * @param {string | number | undefined} projectionCode Optional projection code used by the bounds.
      * @returns the bounds
      */
-    fitBounds: (bounds: Extent, projectionCode?: string | number | undefined) => void;
+    fitBounds: (bounds?: Extent, projectionCode?: string | number | undefined) => void;
+    /**
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
+     * @param {ProjectionLike} source Source projection-like.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. By default only the corners are used.
+     *
+     * @returns The new extent transformed in the destination projection.
+     */
+    transformExtent: (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number | undefined) => Extent;
+    /**
+     * Transforms an extent from source projection to destination projection. This returns a new extent (and does not modify the
+     * original).
+     *
+     * @param {Extent} extent The extent to transform.
+     * @param {ProjectionLike} source Source projection-like.
+     * @param {ProjectionLike} destination Destination projection-like.
+     * @param {number} stops Optional number of stops per side used for the transform. The default value is 20.
+     *
+     * @returns The densified extent transformed in the destination projection.
+     */
+    transformAndDensifyExtent: (extent: Extent, source: ProjectionLike, destination: ProjectionLike, stops?: number) => Coordinate[];
 }

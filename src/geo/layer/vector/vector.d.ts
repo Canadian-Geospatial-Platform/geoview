@@ -143,7 +143,7 @@ export declare class Vector {
      *
      * @returns the geomtry group
      */
-    getGeometryGroup: (geometryGroupId?: string) => FeatureCollection;
+    getGeometryGroup: (geometryGroupId?: string) => FeatureCollection | undefined;
     /**
      * Find the groups that contain the geometry using it's id
      *

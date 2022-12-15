@@ -1,6 +1,10 @@
 /// <reference types="react" />
 import { Legend } from './legend';
 import { TypeLegendItemProps } from './legend-item';
+export interface TypeLegendProps {
+    layerIds: string[];
+    isRemoveable?: boolean;
+}
 /**
  * API to manage legend component
  *
@@ -16,10 +20,15 @@ export declare class LegendApi {
      */
     constructor(mapId: string);
     /**
-     * Create a legend
+     * Create a legend as a component
+     * @deprecated
+     */
+    createLegendComponent: () => typeof Legend;
+    /**
+     * Create a legend as an element
      *
      */
-    createLegend: () => typeof Legend;
+    createLegend: (props: TypeLegendProps) => import("react").DetailedReactHTMLElement<{}, HTMLElement>;
     /**
      * Create an individual legend item
      *
