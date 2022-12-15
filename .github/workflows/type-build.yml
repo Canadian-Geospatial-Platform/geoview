@@ -9,6 +9,9 @@ jobs:
   update_types:
     if: ${{ github.event.pull_request.merged || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -36,8 +39,7 @@ jobs:
           rm -r common
           rm -r packages
 
-          git config --global user.name "DamonU2"
-          git config --global user.email "damonulmi@gmail.com"
+          git config --global user.name $USER
 
           git add .
           git status
@@ -58,4 +60,4 @@ jobs:
           destination_branch: "types"
           pr_title: "Update to types"
           pr_body: |
-            *An automated PR*
+            *An automated PR* - please delete branch after merge
