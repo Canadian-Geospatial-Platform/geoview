@@ -21,7 +21,7 @@
         'viewSettings': {
           'zoom': 4,
           'center': [-100, 60],
-          'projection': 3857
+          'projection': 3978
         },
         'basemapOptions': {
           'basemapId': 'transport',
@@ -30,13 +30,24 @@
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'wmsLYR1-Root',
-            'geoviewLayerName': { 'en': '900A' },
-            'metadataAccessPath': { 'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer' },
+            'geoviewLayerId': 'LYR1-MultiPolygon',
+            'geoviewLayerName': { 'en': 'MultiPolygon' },
+            'metadataAccessPath': { 'en': 'https://ws.lioservices.lrc.gov.on.ca/arcgis1071a/rest/services/LIO_OPEN_DATA/LIO_Open08/MapServer' },
             'geoviewLayerType': 'esriFeature',
-           'listOfLayerEntryConfig': [
+            'listOfLayerEntryConfig': [
               {
-                'layerId': '1'
+                'layerId': '9'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'LYR1-MultiPoint',
+            'geoviewLayerName': { 'en': 'MultiPoint' },
+            'metadataAccessPath': { 'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer' },
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': '0'
               }
             ]
           }
@@ -50,6 +61,8 @@
     </div>
     <button class="Get-Legend">Get Legend</button>
     <button class="Show-Bounds-wms">Show Bounds</button>
+    <button class="Show-MultiPolygons">Find multi-polygons</button>
+    <button class="Show-MultiPoints">Find multi-points</button>
     <div id="legend-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll;"  id="wmsResultSetId" class="panel">Click on feature on the map</pre>
@@ -57,57 +70,27 @@
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
     <hr />
-    <div id="LYR6" class="llwp-map" data-lang="en" data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 8,
-              'center': [-71.370748, 42.001058],
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': false,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'wfsLYR6',
-                'geoviewLayerName': {
-                  'en': 'Airport data'
-                },
-                'metadataAccessPath': {
-                  'en': 'https://giswebservices.massgis.state.ma.us/geoserver/wfs'
-                },
-                'geoviewLayerType': 'ogcWfs',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': 'GISDATA.AIRPORTS_PT'
-                  }
-                ]
-              }
-            ]
-          },
-          'components': ['overview-map', 'nav-bar'],
-          'corePackages': [],
-          'theme': 'dark',
-          'suportedLanguages': ['en']
-        }">
-    </div>
-    <button class="Get-wfs-Legend">Get Legend</button>
-    <button class="Show-Bounds-wfs">Show Bounds</button>
-    <div id="wfsLegendsId-table-div"></div>
-    <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll;"  id="wfsResultSetId" class="panel">Click on feature on the map</pre>
-    <hr />
     <script src="codedoc.js"></script>
     <script>
+      const showBoundsFunction = () => {
+        cgpv.api.map('LYR1').layer.vector.deleteGeometryGroup();
+        Object.keys(cgpv.api.map('LYR1').layer.geoviewLayers).forEach((geoviewLayerId) => {
+          Object.keys(cgpv.api.map('LYR1').layer.registeredLayers).forEach((layerPath) => {
+            if (layerPath.startsWith(geoviewLayerId)) {
+              const bbox = cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].getBounds(layerPath, 4326);
+              addBoundsPolygon(bbox, 4326, 4326);
+            }
+          });
+        });
+        cgpv.api.map('LYR1').fitBounds();
+      }
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
         //create snippets
         createCodeSnippet();
         createConfigSnippet();
+        showBoundsFunction();
       });
       // WMS ======================================================================================================================
       const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
@@ -129,49 +112,29 @@
 
       var showBoundsButton = document.getElementsByClassName('Show-Bounds-wms')[0];
       showBoundsButton.addEventListener('click', function (e) {
-        Object.keys(cgpv.api.map('LYR1').layer.registeredLayers).forEach((layerPath) => {
-          addBoundsPolygon('LYR1', 'wmsLYR1-Root', layerPath);
-        });
+        showBoundsFunction();
       });
 
-      // WFS ======================================================================================================================
-      const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
-      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-        const {  layerSetId, resultSets } = payload;
-        document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-      }, 'LYR6');
-
-      const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
-      cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-        const {  resultSets } = payload;
-        displayLegend('wfsLegendsId', resultSets);
-      }, 'LYR6', 'wfsLegendsId');
-
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
+      var showMultiPolygons = document.getElementsByClassName('Show-MultiPolygons')[0];
+      showMultiPolygons.addEventListener('click', function (e) {
+        cgpv.api.map('LYR1').layer.vector.deleteGeometryGroup();
+        cycleThroughAllMultiPolygons('LYR1');
       });
 
-      var showBoundsButton = document.getElementsByClassName('Show-Bounds-wfs')[0];
-      showBoundsButton.addEventListener('click', function (e) {
-          addBoundsPolygon('LYR6', 'wfsLYR6', 'wfsLYR6/GISDATA.AIRPORTS_PT');
-        });
+      var showMultiPoints = document.getElementsByClassName('Show-MultiPoints')[0];
+      showMultiPoints.addEventListener('click', function (e) {
+        cgpv.api.map('LYR1').layer.vector.deleteGeometryGroup();
+        cycleThroughAllMultiPoints('LYR1');
+      });
 
       // ==========================================================================================================================
-      function addBoundsPolygon(map, geoviewLayerId, layerPath) {
-        cgpv.api.map(map).layer.vector.setActiveGeometryGroup();
-        // call an api function to draw a polygon
-        const bbox = cgpv.api.map(map).layer.geoviewLayers[geoviewLayerId].getBounds(layerPath, 4326);
-        cgpv.api.map(map).fitBounds(bbox, 4326);
-        const polygon = cgpv.api.map(map).layer.vector.addPolygon(
-          [
-            [
-              [bbox[0], bbox[1]],
-              [bbox[0], bbox[3]],
-              [bbox[2], bbox[3]],
-              [bbox[2], bbox[1]],
-            ],
-          ],
+      function addBoundsPolygon(bbox, source, destination) {
+        const newBbox = cgpv.api.map('LYR1').transformAndDensifyExtent(bbox, `EPSG:${source}`, `EPSG:${destination}`);
+
+        cgpv.api.map('LYR1').layer.vector.setActiveGeometryGroup();
+
+        const polygon = cgpv.api.map('LYR1').layer.vector.addPolygon(
+          [ newBbox ],
           {
             style: {
               strokeColor: '#000',
@@ -180,6 +143,40 @@
             },
           }
         );
+      }
+
+      // ==========================================================================================================================
+      let i = 0;
+      let polygons = [];
+      function cycleThroughAllMultiPolygons(map) {
+        if (polygons.length === 0) {
+          cgpv.api.map(map).layer.registeredLayers['LYR1-MultiPolygon/9'].gvLayer.getSource().forEachFeature((feature) => {
+            if (feature.getGeometry()?.getType() === 'MultiPolygon') polygons.push(feature);
+          });
+        }
+        if (i === polygons.length) i = 0;
+        if (polygons.length) {
+          const extent = polygons[i++].getGeometry()?.getExtent();
+          addBoundsPolygon(extent, cgpv.api.map('LYR1').currentProjection, 4326);
+          cgpv.api.map(map).fitBounds(extent);
+        }
+      }
+
+      // ==========================================================================================================================
+      let j = 0;
+      let points = [];
+      function cycleThroughAllMultiPoints(map) {
+        if (points.length === 0) {
+          cgpv.api.map(map).layer.registeredLayers['LYR1-MultiPoint/0'].gvLayer.getSource().forEachFeature((feature) => {
+            if (feature.getGeometry()?.getType() === 'MultiPoint' && feature.getGeometry()?.flatCoordinates.length !== 2) points.push(feature);
+          });
+        }
+        if (j === points.length) j = 0;
+        if (points.length) {
+          const extent = points[j++].getGeometry()?.getExtent();
+          addBoundsPolygon(extent, cgpv.api.map('LYR1').currentProjection, 4326);
+          cgpv.api.map(map).fitBounds(extent);
+        }
       }
 
       // ==========================================================================================================================

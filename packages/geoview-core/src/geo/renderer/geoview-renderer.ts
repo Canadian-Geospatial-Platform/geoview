@@ -494,7 +494,8 @@ export class GeoviewRenderer {
     feature: FeatureLike,
     layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
-    const geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
+    let geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
+    geometryType = geometryType.startsWith('Multi') ? (geometryType.slice(5) as TypeStyleConfigKey) : geometryType;
     // If style does not exist for the geometryType, create it.
     let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
