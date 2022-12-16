@@ -94,13 +94,13 @@ class FooterPanelPlugin extends AbstractPlugin {
 
       // create the listener to return the details
       // TODO: layer path are not define when layer is created, no result are assigned
-      const myLayerSet = api.createFeatureInfoLayerSet(mapId, `${mapId}resultSetId`);
+      // const myLayerSet = api.createFeatureInfoLayerSet(mapId, `${mapId}resultSetId`);
       if (defaultTabs.includes('details')) {
         // the call to create details element return the element and the footer content is waiting for a function.
         footerTabs.createFooterTab({
           value: tabsCounter,
           label: this.translations[displayLanguage].details as string,
-          content: () => <DetailsItem mapId={mapId} layerSet={myLayerSet} />,
+          content: () => <DetailsItem mapId={mapId} />,
         });
         tabsCounter++;
       }
@@ -135,15 +135,14 @@ class FooterPanelPlugin extends AbstractPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginProps;
+    // const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
 
     if (cgpv) {
       // access the api calls
-      const { api } = cgpv;
-
+      // const { api } = cgpv;
       // TODO: Enable the footer tabs removal
     }
   }

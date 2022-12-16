@@ -68,7 +68,11 @@ export class FeatureInfoLayerSet {
           const allDone = Object.keys(this.resultSets).reduce((doneFlag, layerPathToTest) => {
             return doneFlag && this.resultSets[layerPathToTest] !== undefined;
           }, true);
-          if (allDone) api.event.emit(GetFeatureInfoPayload.createAllQueriesDonePayload(this.mapId, this.layerSetId, this.resultSets));
+          if (allDone)
+            api.event.emit(
+              GetFeatureInfoPayload.createAllQueriesDonePayload(this.mapId, this.layerSetId, this.resultSets),
+              this.layerSetId
+            );
         }
       },
       this.mapId

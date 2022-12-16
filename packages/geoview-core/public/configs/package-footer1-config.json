@@ -22,6 +22,35 @@
         "listOfLayerEntryConfig": [
           { "layerId": "8" }
         ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR5",
+        "geoviewLayerName": { "en": "GeoJSON Sample" },
+        "metadataAccessPath": { "en": "./geojson/metadata.json" },
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": { "en": "Polygons" }
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": { "en": "Lines" }
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": { "en": "point-feature-group" },
+            "listOfLayerEntryConfig": [
+              { "layerId": "icon_points.json",
+              "layerName": { "en": "Icons" }
+            },
+              { "layerId": "points.json",
+              "layerName": { "en": "Points" }
+            }
+            ]
+          }
+        ]
       }
     ]
   },
