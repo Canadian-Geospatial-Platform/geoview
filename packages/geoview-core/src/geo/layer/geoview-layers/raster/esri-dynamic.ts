@@ -420,12 +420,16 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const queryResult: TypeArrayOfFeatureInfoEntries = [];
     features.forEach((feature) => {
       const featureFields = Object.keys(feature.attributes);
-      const featureInfoEntry: TypeFeatureInfoEntry = {};
+      const featureInfoEntry: TypeFeatureInfoEntry = {
+        // feature key for building the data-grid
+        featureKey: 0,
+        featureInfo: {},
+      };
       featureFields.forEach((fieldName) => {
         if (outfields?.includes(fieldName)) {
           const aliasfieldIndex = outfields.indexOf(fieldName);
-          featureInfoEntry[aliasFields![aliasfieldIndex]] = feature.attributes[fieldName] as string | number | null;
-        } else if (!outfields) featureInfoEntry[fieldName] = feature.attributes[fieldName] as string | number | null;
+          featureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = feature.attributes[fieldName] as string | number | null;
+        } else if (!outfields) featureInfoEntry.featureInfo[fieldName] = feature.attributes[fieldName] as string | number | null;
       });
       queryResult.push(featureInfoEntry);
     });

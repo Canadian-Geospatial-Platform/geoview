@@ -14,7 +14,7 @@ import {
   IconButton,
 } from '../../../ui';
 
-import { TypeJsonObject } from '../../types/global-types';
+import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
 
 const sxClasses = {
   details: {
@@ -95,7 +95,7 @@ const useStyles = makeStyles(() => ({
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   key: number;
-  feature: TypeJsonObject;
+  feature: TypeFeatureInfoEntry;
 }
 /**
  * Legend Item for a Legend list
@@ -104,6 +104,7 @@ export interface TypeFeatureProps {
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature } = props;
+  const featureId = 'OBJECTID' in feature.featureInfo ? feature.featureInfo.OBJECTID : feature.featureKey;
   const [isOpen, setOpen] = useState<boolean>(false);
   const classes = useStyles();
   return (
@@ -113,8 +114,8 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           <ListItemIcon>
             <IconButton color="primary">{!isOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
           </ListItemIcon>
-          <Tooltip title={feature.OBJECTID} placement="top" enterDelay={1000}>
-            <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={feature.OBJECTID} />
+          <Tooltip title={featureId} placement="top" enterDelay={1000}>
+            <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
           </Tooltip>
         </ListItemButton>
       </ListItem>
@@ -123,12 +124,12 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           <Box sx={sxClasses.expandableIconContainer}>
             {
               // loop through each layer in the map server
-              Object.keys(feature).map((featureKey, index) => {
+              Object.keys(feature.featureInfo).map((featureKey, index) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
                   <div key={index} className={index % 2 > 0 ? classes.featureInfoItem : classes.featureInfoItemOdd}>
                     <span className={classes.featureInfoItemKey}>{featureKey}</span>
-                    <span className={classes.featureInfoItemValue}>{feature[featureKey]}</span>
+                    <span className={classes.featureInfoItemValue}>{feature.featureInfo[featureKey]}</span>
                   </div>
                 );
               })

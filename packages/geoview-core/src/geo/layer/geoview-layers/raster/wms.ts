@@ -627,14 +627,19 @@ export class WMS extends AbstractGeoViewRaster {
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
     const queryResult: TypeArrayOfFeatureInfoEntries = [];
 
-    const featureInfoEntry: TypeFeatureInfoEntry = {};
+    const featureInfoEntry: TypeFeatureInfoEntry = {
+      // feature key for building the data-grid
+      featureKey: 0,
+      featureInfo: {},
+    };
     const createFieldEntries = (entry: TypeJsonObject, prefix = '') => {
       const keys = Object.keys(entry);
       keys.forEach((key) => {
         if (!key.endsWith('Geometry') && !key.startsWith('@')) {
-          const splitKey = key.split(':');
-          const fieldName = splitKey[splitKey.length - 1];
-          if ('#text' in entry[key]) featureInfoEntry[`${prefix}${prefix ? '.' : ''}${fieldName}`] = entry[key]['#text'] as string;
+          const splitedKey = key.split(':');
+          const fieldName = splitedKey[splitedKey.length - 1];
+          if ('#text' in entry[key])
+            featureInfoEntry.featureInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = entry[key]['#text'] as string;
           else createFieldEntries(entry[key], fieldName);
         }
       });
@@ -643,11 +648,15 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (!outfields) queryResult.push(featureInfoEntry);
     else {
-      const filteredFeatureInfoEntry: TypeFeatureInfoEntry = {};
+      const filteredFeatureInfoEntry: TypeFeatureInfoEntry = {
+        // feature key for building the data-grid
+        featureKey: 0,
+        featureInfo: {},
+      };
       Object.keys(featureInfoEntry).forEach((fieldName) => {
         if (outfields?.includes(fieldName)) {
           const aliasfieldIndex = outfields.indexOf(fieldName);
-          filteredFeatureInfoEntry[aliasFields![aliasfieldIndex]] = featureInfoEntry[fieldName];
+          filteredFeatureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = featureInfoEntry.featureInfo[fieldName];
         }
       });
       queryResult.push(filteredFeatureInfoEntry);
