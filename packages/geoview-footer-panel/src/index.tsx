@@ -133,14 +133,14 @@ class FooterPanelPlugin extends AbstractPlugin {
    * Function called when the plugin is removed, used for clean up
    */
   removed(): void {
-    const { mapId } = this.pluginProps;
+    // const { mapId } = this.pluginProps;
 
     // access the cgpv object from the window object
     const { cgpv } = w;
 
     if (cgpv) {
       // access the api calls
-      const { api } = cgpv;
+      // const { api } = cgpv;
       // TODO: Enable the footer tabs removal
     }
   }

@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { DetailedReactHTMLElement } from 'react';
+import { ReactElement } from 'react';
 
 import { TypeWindow, payloadIsAllQueriesDone, TypeArrayOfLayerData, getLocalizedValue } from 'geoview-core';
 
@@ -21,7 +21,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const [list, setList] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
+  const [list, setList] = useState<ReactElement>();
 
   useEffect(() => {
     // create the listener to return the details
