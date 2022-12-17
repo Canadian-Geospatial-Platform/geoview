@@ -307,7 +307,6 @@ export class EsriFeature extends AbstractGeoViewVector {
         `EPSG:${api.map(this.mapId).currentProjection}`
       );
     else {
-      if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
       const layerExtent: Extent = [extent.xmin as number, extent.ymin as number, extent.xmax as number, extent.ymax as number];
       layerEntryConfig.initialSettings.bounds = transformExtent(
         layerExtent,
