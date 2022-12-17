@@ -573,7 +573,7 @@
         const pathArray = Object.keys(cgpv.api.map('LYR1').layer.registeredLayers);
         for (let i = 0; i < pathArray.length; i++) {
           if (pathArray[i].startsWith(geoviewLayerId))
-            console.log(cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].getBounds(pathArray[i]));
+            console.log(cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].getMetadataBounds(pathArray[i]));
         }
       });
       cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');

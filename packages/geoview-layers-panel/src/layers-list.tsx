@@ -164,7 +164,7 @@ function LayersList(props: TypeLayersPanelListProps): JSX.Element {
       const layerValue = layers[layerKey];
 
       // eslint-disable-next-line no-await-in-loop
-      const bounds = await layerValue.getBounds();
+      const bounds = await layerValue.getMetadataBounds()!;
       setLayerBounds((state) => ({ ...state, [layerValue.geoviewLayerId]: bounds }));
     }
   };

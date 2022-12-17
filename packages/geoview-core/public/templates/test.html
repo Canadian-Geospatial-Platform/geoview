@@ -74,15 +74,23 @@
     <script>
       const showBoundsFunction = () => {
         cgpv.api.map('LYR1').layer.vector.deleteGeometryGroup();
+        var allBounds;
         Object.keys(cgpv.api.map('LYR1').layer.geoviewLayers).forEach((geoviewLayerId) => {
           Object.keys(cgpv.api.map('LYR1').layer.registeredLayers).forEach((layerPath) => {
             if (layerPath.startsWith(geoviewLayerId)) {
-              const bbox = cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].getBounds(layerPath, 4326);
+              const bbox = cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].calculateBounds(layerPath, 4326);
               addBoundsPolygon(bbox, 4326, 4326);
+              if (!allBounds) allBounds = bbox;
+              else allBounds = [
+                Math.min(allBounds[0], bbox[0]),
+                Math.min(allBounds[1], bbox[1]),
+                Math.max(allBounds[2], bbox[2]),
+                Math.max(allBounds[3], bbox[3]),
+              ];
             }
           });
         });
-        cgpv.api.map('LYR1').fitBounds();
+        cgpv.api.map('LYR1').fitBounds(allBounds, 4326);
       }
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
