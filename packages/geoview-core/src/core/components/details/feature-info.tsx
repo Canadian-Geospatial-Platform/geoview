@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import makeStyles from '@mui/styles/makeStyles';
 import {
   Collapse,
   List,
@@ -12,6 +10,7 @@ import {
   ExpandLessIcon,
   Tooltip,
   IconButton,
+  Box,
 } from '../../../ui';
 
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
