@@ -29,6 +29,8 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import MoreVert from '@mui/icons-material/MoreVert';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import DragHandle from '@mui/icons-material/DragHandle';
+import Opacity from '@mui/icons-material/Opacity';
+import Menu from '@mui/icons-material/Menu';
 
 export {
   Layers as LayersIcon,
@@ -64,4 +66,6 @@ export {
   ArrowRight as ArrowRightIcon,
   ArrowDropDown as ArrowDownIcon,
   DragHandle as HandleIcon,
+  Opacity as OpacityIcon,
+  Menu as MenuIcon,
 };
