@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
 import React, { useState } from 'react';
-// import Box from '@mui/material/Box';
 import {
   Collapse,
   List,
