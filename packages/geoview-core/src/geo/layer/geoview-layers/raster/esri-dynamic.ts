@@ -418,11 +418,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
     const queryResult: TypeArrayOfFeatureInfoEntries = [];
+    let keyCounter = 0;
     features.forEach((feature) => {
       const featureFields = Object.keys(feature.attributes);
       const featureInfoEntry: TypeFeatureInfoEntry = {
         // feature key for building the data-grid
-        featureKey: 0,
+        featureKey: keyCounter++,
         featureInfo: {},
       };
       featureFields.forEach((fieldName) => {

@@ -41,7 +41,7 @@ export class DetailsAPI {
   createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
     return createElement('div', {}, [
       createElement(Details, {
-        key: `details-grid`,
+        key: `${mapId}-details-sets`,
         arrayOfLayerData: detailsElements,
       }),
     ]);
