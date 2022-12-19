@@ -628,7 +628,7 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. if layerPathOrConfig is
+   * Returns the layer bounds or undefined if not defined in the layer configuration or the metadata. If layerPathOrConfig is
    * undefined, the active layer is used. If projectionCode is defined, returns the bounds in the specified projection otherwise
    * use the map projection. The bounds are different from the extent. They are mainly used for display purposes to show the
    * bounding box in which the data resides and to zoom in on the entire layer data. It is not used by openlayer to limit the
@@ -640,7 +640,7 @@ export abstract class AbstractGeoViewLayer {
    *
    * @returns {Extent} The layer bounding box.
    */
-  getBounds(
+  getMetadataBounds(
     layerPathOrConfig: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null = this.activeLayer,
     projectionCode: string | number | undefined = undefined
   ): Extent | undefined {
@@ -649,7 +649,13 @@ export abstract class AbstractGeoViewLayer {
       listOfLayerEntryConfig.forEach((layerConfig) => {
         if (layerEntryIsGroupLayer(layerConfig)) processGroupLayerBounds(layerConfig.listOfLayerEntryConfig);
         else if (layerConfig.initialSettings?.bounds) {
-          if (!bounds) bounds = layerConfig.initialSettings.bounds;
+          if (!bounds)
+            bounds = [
+              layerConfig.initialSettings.bounds[0],
+              layerConfig.initialSettings.bounds[1],
+              layerConfig.initialSettings.bounds[2],
+              layerConfig.initialSettings.bounds[3],
+            ];
           else
             bounds = [
               Math.min(layerConfig.initialSettings.bounds[0], bounds[0]),

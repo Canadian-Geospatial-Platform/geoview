@@ -475,9 +475,11 @@ export class MapViewer {
     else {
       Object.keys(this.layer.geoviewLayers).forEach((geoviewLayerId) => {
         if (!mapBounds)
-          mapBounds = this.layer.geoviewLayers[geoviewLayerId].getBounds(this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig);
+          mapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(
+            this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig
+          );
         else {
-          const newMapBounds = this.layer.geoviewLayers[geoviewLayerId].getBounds(
+          const newMapBounds = this.layer.geoviewLayers[geoviewLayerId].getMetadataBounds(
             this.layer.geoviewLayers[geoviewLayerId].listOfLayerEntryConfig
           );
           if (newMapBounds) {
