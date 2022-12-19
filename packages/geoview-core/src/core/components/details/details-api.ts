@@ -1,4 +1,4 @@
-import { createElement } from 'react';
+import { createElement, ReactElement } from 'react';
 import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
 import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
 import { api } from '../../../app';
@@ -32,13 +32,13 @@ export class DetailsAPI {
   }
 
   /**
-   * Create a data grid
+   * Create a details as as an element
    *
    * @param {TypeLayerDetailsProps} layerDetailsProps the properties of the details to be created
    * @return {ReactElement} the details react element
    *
    */
-  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData) => {
+  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
     return createElement('div', {}, [
       createElement(Details, {
         key: `details-grid`,
