@@ -19,7 +19,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   const { useState, useEffect } = react;
 
-  const [details, setDetails] = useState<TypeArrayOfLayerData>([{ layerPath: '', layerName: '', features: [] }]);
+  const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
 
@@ -41,10 +41,10 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
           if (newDetails.length > 0) {
             setDetails(newDetails);
           } else {
-            setDetails([{ layerPath: '', layerName: '', features: [] }]);
+            setDetails([]);
           }
         } else {
-          setDetails([{ layerPath: '', layerName: '', features: [] }]);
+          setDetails([]);
         }
       },
       mapId,
@@ -55,13 +55,6 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // useEffect(() => {
-  //   setDetails({
-  //     layerName: 'This is the layer',
-  //     features: layerSet.resultSets['esriFeatureLYR4/8'] !== undefined ? layerSet.resultSets['esriFeatureLYR4/8'] : [],
-  //   });
-  // }, [layerSet]);
 
   useEffect(() => {
     setList(api.map(mapId).details.createDetails(mapId, details));

@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
 import React, { useState } from 'react';
-// import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import {
   Collapse,
@@ -52,9 +51,7 @@ interface TypeLayersListProps {
  */
 export function LayersList(props: TypeLayersListProps): JSX.Element {
   const { arrayOfLayerData } = props;
-  // const { t, i18n } = useTranslation<string>();
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
-  // const [layerOpen, setLayerOpen] = useState<string>('');
 
   return (
     <List sx={sxClasses.details}>

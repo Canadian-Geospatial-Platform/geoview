@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-// import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
 import makeStyles from '@mui/styles/makeStyles';
 import {
   Collapse,
+  List,
   ListItem,
   ListItemButton,
   ListItemIcon,
@@ -19,7 +19,6 @@ import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-i
 const sxClasses = {
   details: {
     width: '100%',
-    // maxWidth: 350, // for testing panel width
   },
   layerItem: {
     color: 'text.primary',
@@ -39,36 +38,6 @@ const sxClasses = {
   },
   solidBackground: {
     background: '#fff',
-  },
-};
-
-const useStyles = makeStyles(() => ({
-  featureInfoContainer: {
-    width: '100%',
-  },
-  featureInfoHeader: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  featureInfoHeaderIconContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '32px',
-    minWidth: '32px',
-    height: '32px',
-    boxShadow: '0 1px 3px 0 rgb(0 0 0 / 20%), 0 1px 1px 0 rgb(0 0 0 / 14%), 0 2px 1px -1px rgb(0 0 0 / 12%)',
-  },
-  featureInfoHeaderIcon: {},
-  featureInfoHeaderText: {
-    marginLeft: '10px',
-    width: '100%',
-    fontSize: 18,
-  },
-  featureInfoItemsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginTop: 20,
   },
   featureInfoItem: {
     display: 'flex',
@@ -90,23 +59,27 @@ const useStyles = makeStyles(() => ({
     fontSize: '0.7em',
     width: '40%',
   },
-}));
+};
 
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   key: number;
   feature: TypeFeatureInfoEntry;
 }
+
 /**
- * Legend Item for a Legend list
+ * feature info for a layer list
  *
- * @returns {JSX.Element} the legend list item
+ * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature } = props;
-  const featureId = 'OBJECTID' in feature.featureInfo ? feature.featureInfo.OBJECTID : feature.featureKey;
+  const featureId = `Feature Info ${feature.featureKey}`;
   const [isOpen, setOpen] = useState<boolean>(false);
-  const classes = useStyles();
+  const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
+    return { key: featureKey, value: feature.featureInfo[featureKey] };
+  });
+
   return (
     <>
       <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
@@ -121,20 +94,20 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
         <Box>
-          <Box sx={sxClasses.expandableIconContainer}>
+          <List sx={sxClasses.expandableIconContainer}>
             {
               // loop through each layer in the map server
-              Object.keys(feature.featureInfo).map((featureKey, index) => {
+              featureInfoList.map((featureInfoItem, index) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <div key={index} className={index % 2 > 0 ? classes.featureInfoItem : classes.featureInfoItemOdd}>
-                    <span className={classes.featureInfoItemKey}>{featureKey}</span>
-                    <span className={classes.featureInfoItemValue}>{feature.featureInfo[featureKey]}</span>
-                  </div>
+                  <ListItem sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
+                    <Box sx={sxClasses.featureInfoItemKey}>{featureInfoItem.key}</Box>
+                    <Box sx={sxClasses.featureInfoItemValue}>{featureInfoItem.value}</Box>
+                  </ListItem>
                 );
               })
             }
-          </Box>
+          </List>
         </Box>
       </Collapse>
     </>

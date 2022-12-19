@@ -3,7 +3,6 @@ import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-
 import { LayersList } from './layers-list';
 
 export interface TypeDetailsProps {
-  key: string;
   arrayOfLayerData: TypeArrayOfLayerData;
 }
 
@@ -15,13 +14,13 @@ export interface TypeLayerData {
 export type TypeArrayOfLayerData = TypeLayerData[];
 
 /**
- * The Details component is used to display a list of layers and their content.
+ * The Details component is used to display selected features information.
  *
  * @returns {JSX.Element} returns the Details component
  */
 export function Details(props: TypeDetailsProps): JSX.Element | null {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { key, arrayOfLayerData } = props;
+  const { arrayOfLayerData } = props;
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
 
   useEffect(() => {
