@@ -3,13 +3,26 @@ import MaterialListItem from '@mui/material/ListItem';
 import { ListItemProps } from '@mui/material';
 
 /**
+ * Custom MUI ListItem Props
+ */
+interface TypeListItemProps extends ListItemProps {
+  // eslint-disable-next-line react/require-default-props
+  innerref?: (element: HTMLElement | null) => void;
+}
+
+/**
  * Create a customized Material UI List Item
  *
- * @param {ListItemProps} props the properties passed to the List Item element
+ * @param {TypeListItemProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
-export function ListItem(props: ListItemProps): JSX.Element {
+export function ListItem(props: TypeListItemProps): JSX.Element {
   const { children } = props;
+  const { innerref, ...propsWithoutRefs } = props;
 
-  return <MaterialListItem {...props}>{children !== undefined && children}</MaterialListItem>;
+  return (
+    <MaterialListItem ref={innerref} {...propsWithoutRefs}>
+      {children !== undefined && children}
+    </MaterialListItem>
+  );
 }
