@@ -1,5 +1,5 @@
+/* eslint-disable react/require-default-props */
 import MaterialList from '@mui/material/List';
-import makeStyles from '@mui/styles/makeStyles';
 
 import { ListProps } from '@mui/material';
 
@@ -7,15 +7,15 @@ import { ListProps } from '@mui/material';
  * Properties for the List UI
  */
 export interface TypeListProps extends ListProps {
-  // eslint-disable-next-line react/require-default-props
   type?: 'ul' | 'ol';
+  innerref?: (element: HTMLElement | null) => void;
 }
 
-const useStyles = makeStyles(() => ({
+const sxClasses = {
   list: {
     padding: 0,
   },
-}));
+};
 
 /**
  * Create a customized Material UI List
@@ -24,12 +24,16 @@ const useStyles = makeStyles(() => ({
  * @returns {JSX.Element} the created List element
  */
 export function List(props: TypeListProps): JSX.Element {
-  const { children, className, style, type } = props;
-
-  const classes = useStyles();
+  const { children, className, style, type, sx, innerref } = props;
 
   return (
-    <MaterialList className={`${classes.list} ${className || ''}`} style={style || undefined} component={type || 'ul'}>
+    <MaterialList
+      ref={innerref}
+      sx={{ ...sxClasses.list, ...sx }}
+      className={`${className || ''}`}
+      style={style || undefined}
+      component={type || 'ul'}
+    >
       {children !== undefined && children}
     </MaterialList>
   );

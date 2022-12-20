@@ -31,6 +31,7 @@ import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import DragHandle from '@mui/icons-material/DragHandle';
 import Opacity from '@mui/icons-material/Opacity';
 import Menu from '@mui/icons-material/Menu';
+import ImportExport from '@mui/icons-material/ImportExport';
 
 export {
   Layers as LayersIcon,
@@ -68,4 +69,5 @@ export {
   DragHandle as HandleIcon,
   Opacity as OpacityIcon,
   Menu as MenuIcon,
+  ImportExport as ReorderIcon,
 };

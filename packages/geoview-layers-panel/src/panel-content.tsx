@@ -9,6 +9,7 @@ import {
 import { DetailedReactHTMLElement } from 'react';
 
 import LayerStepper from './layer-stepper';
+import ReorderLayersList from './reorder-layers-list';
 
 type TypePanelContentProps = {
   buttonPanel: TypeButtonPanel;
@@ -30,6 +31,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   const { api, react, ui } = cgpv;
   const { useState, useEffect } = react;
   const [addLayerVisible, setAddLayerVisible] = useState(false);
+  const [reorderLayersVisible, setReorderLayersVisible] = useState(false);
   const [mapLayers, setMapLayers] = useState<string[]>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [legend, setLegend] = useState<DetailedReactHTMLElement<{}, HTMLElement>>();
@@ -49,6 +51,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     MenuIcon,
     ListItemIcon,
     ListItemText,
+    ReorderIcon,
   } = ui.elements;
 
   const { displayLanguage } = api.map(mapId!);
@@ -60,6 +63,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       collapseAll: 'Collapse Groups',
       showAll: 'Show All',
       hideAll: 'Hide All',
+      reorderLayers: 'Reorder Layers',
     },
     fr: {
       addLayer: 'Ajouter Couche',
@@ -67,6 +71,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       collapseAll: 'Réduire les groupes',
       showAll: 'Montrer tout',
       hideAll: 'Cacher tout',
+      reorderLayers: 'Réorganiser les couches',
     },
   });
 
@@ -171,7 +176,6 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   }, [isHideAll]);
 
   const handleShowAddLayer = () => {
-    // actionMenuOpen = Boolean(actionMenuAnchorElement);
     setAddLayerVisible((state: boolean) => !state);
   };
 
@@ -189,6 +193,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
 
   const handleShowAllClick = (isShow: boolean) => {
     setHideAll(!isShow);
+    handleCloseMenu();
+  };
+
+  const handleReorderLayersClick = (isReorder: boolean) => {
+    setReorderLayersVisible(isReorder);
     handleCloseMenu();
   };
 
@@ -219,10 +228,25 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
           </ListItemIcon>
           <ListItemText>{translations[displayLanguage].hideAll}</ListItemText>
         </MenuItem>
+        <MenuItem onClick={() => handleReorderLayersClick(true)}>
+          <ListItemIcon>
+            <ReorderIcon />
+          </ListItemIcon>
+          <ListItemText>{translations[displayLanguage].reorderLayers}</ListItemText>
+        </MenuItem>
       </Menu>
       <Box sx={sxClasses.mainContainer}>
         {addLayerVisible && <LayerStepper mapId={mapId!} setAddLayerVisible={setAddLayerVisible} />}
-        <Box sx={sxClasses.topControls} style={{ display: addLayerVisible ? 'none' : 'flex' }}>
+        {reorderLayersVisible && (
+          <ReorderLayersList
+            mapId={mapId!}
+            title={translations[displayLanguage].reorderLayers as string}
+            layerIds={mapLayers}
+            setMapLayers={setMapLayers}
+            setReorderLayersVisible={setReorderLayersVisible}
+          />
+        )}
+        <Box sx={sxClasses.topControls} style={{ display: addLayerVisible || reorderLayersVisible ? 'none' : 'flex' }}>
           <div>
             <IconButton color="primary" onClick={handleExpandMenuClick}>
               <MenuIcon />
@@ -235,7 +259,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             </IconButton>
           </Box>
         </Box>
-        <div style={{ display: addLayerVisible ? 'none' : 'block' }}>{legend}</div>
+        <div style={{ display: addLayerVisible || reorderLayersVisible ? 'none' : 'block' }}>{legend}</div>
       </Box>
     </>
   );

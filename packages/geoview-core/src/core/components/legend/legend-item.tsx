@@ -1,8 +1,8 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import Box from '@mui/material/Box';
 import {
+  Box,
   Collapse,
   ListItem,
   ListItemButton,
