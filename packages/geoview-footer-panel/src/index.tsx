@@ -12,6 +12,7 @@ import {
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
+import { LegendItem } from './legend-item';
 
 const w = window as TypeWindow;
 
@@ -87,7 +88,7 @@ class FooterPanelPlugin extends AbstractPlugin {
         footerTabs.createFooterTab({
           value: tabsCounter,
           label: this.translations[displayLanguage].legend as string,
-          content: () => api.map(mapId).legend.createLegend({ layerIds: ['esriFeatureLYR4'] }),
+          content: () => <LegendItem mapId={mapId} />,
         });
         tabsCounter++;
       }
