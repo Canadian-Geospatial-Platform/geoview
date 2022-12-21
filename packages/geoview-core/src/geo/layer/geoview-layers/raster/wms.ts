@@ -384,10 +384,10 @@ export class WMS extends AbstractGeoViewRaster {
       if (geoviewEntryIsWMS(layerEntryConfig)) {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
         if (layerCapabilities) {
+          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
           if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution as string);
           if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
           // ! TODO: The solution implemented in the following 5 lines is not right. scale and zoom are not the same things.
-          // if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
           // if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
           //   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
           // if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
@@ -405,15 +405,12 @@ export class WMS extends AbstractGeoViewRaster {
               'EPSG:4326',
               `EPSG:${api.map(this.mapId).currentProjection}`
             );
-          else {
-            if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-            if (layerCapabilities.EX_GeographicBoundingBox) {
-              layerEntryConfig.initialSettings.bounds = transformExtent(
-                layerCapabilities.EX_GeographicBoundingBox as Extent,
-                'EPSG:4326',
-                `EPSG:${api.map(this.mapId).currentProjection}`
-              );
-            }
+          else if (layerCapabilities.EX_GeographicBoundingBox) {
+            layerEntryConfig.initialSettings.bounds = transformExtent(
+              layerCapabilities.EX_GeographicBoundingBox as Extent,
+              'EPSG:4326',
+              `EPSG:${api.map(this.mapId).currentProjection}`
+            );
           }
         }
       }
@@ -465,21 +462,31 @@ export class WMS extends AbstractGeoViewRaster {
       else {
         const viewResolution = api.map(this.mapId).getView().getResolution() as number;
         const crs = `EPSG:${api.map(this.mapId).currentProjection}`;
-        const wmsSource = (layerConfig.gvLayer as gvLayer).getSource() as ImageWMS;
-        const featureInfoUrl = wmsSource.getFeatureInfoUrl(transform(lnglat, 'EPSG:4326', crs), viewResolution, crs, {
-          INFO_FORMAT: 'text/xml',
-        });
-        if (featureInfoUrl) {
-          axios(featureInfoUrl).then((response) => {
-            const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
-            const xmlJsonResponse = xmlToJson(xmlDomResponse);
-            const featureCollection = this.getAttribute(xmlJsonResponse, 'FeatureCollection');
-            if (featureCollection) {
-              const featureMember = this.getAttribute(featureCollection, 'featureMember');
-              if (featureMember) resolve(this.formatFeatureInfoAtCoordinateResult(featureMember, layerConfig.source.featureInfo));
-            }
+        const clickCoordinate = transform(lnglat, 'EPSG:4326', crs);
+        if (
+          clickCoordinate[0] < layerConfig.initialSettings!.bounds![0] ||
+          layerConfig.initialSettings!.bounds![2] < clickCoordinate[0] ||
+          clickCoordinate[1] < layerConfig.initialSettings!.bounds![1] ||
+          layerConfig.initialSettings!.bounds![3] < clickCoordinate[1]
+        )
+          resolve([]);
+        else {
+          const wmsSource = (layerConfig.gvLayer as gvLayer).getSource() as ImageWMS;
+          const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
+            INFO_FORMAT: 'text/xml',
           });
-        } else resolve([]);
+          if (featureInfoUrl) {
+            axios(featureInfoUrl).then((response) => {
+              const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
+              const xmlJsonResponse = xmlToJson(xmlDomResponse);
+              const featureCollection = this.getAttribute(xmlJsonResponse, 'FeatureCollection');
+              if (featureCollection) {
+                const featureMember = this.getAttribute(featureCollection, 'featureMember');
+                if (featureMember) resolve(this.formatFeatureInfoAtCoordinateResult(featureMember, layerConfig.source.featureInfo));
+              }
+            });
+          } else resolve([]);
+        }
       }
     });
     return promisedQueryResult;

@@ -558,7 +558,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR1');
+    }, 'LYR1', 'wmsResultSetId');
 
     const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -584,7 +584,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR3');
+    }, 'LYR3', 'esriDynamicResultSetId');
 
     const LegendsEsriDynamicLayerSet = cgpv.api.createLegendsLayerSet('LYR3', 'esriDynamicLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -602,7 +602,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR4');
+    }, 'LYR4', 'esriFeatureResultSetId');
 
     const LegendsEsriFeatureLayerSet = cgpv.api.createLegendsLayerSet('LYR4', 'esriFeatureLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -620,7 +620,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR5');
+    }, 'LYR5', 'geoJsonResultSetId');
 
     const LegendsGeoJsonLayerSet = cgpv.api.createLegendsLayerSet('LYR5', 'geojsonLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -638,7 +638,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR6');
+    }, 'LYR6', 'wfsResultSetId');
 
     const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -656,7 +656,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR7');
+    }, 'LYR7', 'ogcFeatureResultSetId');
 
     const LegendsOgcApiLayerSet = cgpv.api.createLegendsLayerSet('LYR7', 'ogcApiLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -674,7 +674,7 @@
     cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
       const {  layerSetId, resultSets } = payload;
       document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR8');
+    }, 'LYR8', 'geocoreResultSetId');
 
     const LegendsGeocoreLayerSet = cgpv.api.createLegendsLayerSet('LYR8', 'geocoreLegendsId');
     cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
