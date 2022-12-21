@@ -97,6 +97,11 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           components={{
             Toolbar: GridToolbar,
           }}
+          /**
+           * logLevel={false} will suppress useResizeContainer warnings if the data grid is rendered in an un-selected tab
+           * You may wish to remove this line when working on the data grid
+           */
+          logLevel={false}
         />
       </div>
     </div>
