@@ -252,7 +252,7 @@ export class EsriFeature extends AbstractGeoViewVector {
               this.processFeatureInfoConfig(
                 response.data.capabilities as string,
                 response.data.displayField as string,
-                response.data.geometryField.name as string,
+                response.data.geometryField?.name as string,
                 response.data.fields as TypeJsonArray,
                 layerEntryConfig
               );

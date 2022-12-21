@@ -30,24 +30,24 @@
         },
         'listOfGeoviewLayerConfig': [
           {
-            'geoviewLayerId': 'LYR1-MultiPolygon',
-            'geoviewLayerName': { 'en': 'MultiPolygon' },
-            'metadataAccessPath': { 'en': 'https://ws.lioservices.lrc.gov.on.ca/arcgis1071a/rest/services/LIO_OPEN_DATA/LIO_Open08/MapServer' },
-            'geoviewLayerType': 'esriFeature',
-            'listOfLayerEntryConfig': [
-              {
-                'layerId': '9'
-              }
-            ]
-          },
-          {
-            'geoviewLayerId': 'LYR1-MultiPoint',
-            'geoviewLayerName': { 'en': 'MultiPoint' },
-            'metadataAccessPath': { 'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer' },
+            'geoviewLayerId': 'wmsLYR1-Root',
+            'geoviewLayerName': { 'en': '900A' },
+            'metadataAccessPath': { 'en': 'https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/' },
             'geoviewLayerType': 'esriFeature',
             'listOfLayerEntryConfig': [
               {
                 'layerId': '0'
+              }
+            ]
+          },
+          {
+            'geoviewLayerId': 'wmsLYR1-aerial',
+            'geoviewLayerName': { 'en': 'aerial' },
+            'metadataAccessPath': { 'en': 'https://datacube.services.geo.ca/web/aerial.xml' },
+            'geoviewLayerType': 'ogcWms',
+            'listOfLayerEntryConfig': [
+              {
+                'layerId': 'regina'
               }
             ]
           }
@@ -105,7 +105,7 @@
       cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
         const {  layerSetId, resultSets } = payload;
         document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-      }, 'LYR1');
+      }, 'LYR1', 'wmsResultSetId');
 
       const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
       cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
@@ -123,10 +123,22 @@
         showBoundsFunction();
       });
 
-      var showMultiPolygons = document.getElementsByClassName('Show-MultiPolygons')[0];
-      showMultiPolygons.addEventListener('click', function (e) {
-        cgpv.api.map('LYR1').layer.vector.deleteGeometryGroup();
-        cycleThroughAllMultiPolygons('LYR1');
+      // WFS ======================================================================================================================
+      const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
+      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+        const {  layerSetId, resultSets } = payload;
+        document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+      }, 'LYR6', 'wfsResultSetId');
+
+      const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
+      cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
+        const {  resultSets } = payload;
+        displayLegend('wfsLegendsId', resultSets);
+      }, 'LYR6', 'wfsLegendsId');
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
       });
 
       var showMultiPoints = document.getElementsByClassName('Show-MultiPoints')[0];
