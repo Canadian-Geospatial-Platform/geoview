@@ -17,7 +17,7 @@
       "commandKind": "global",
       "name": "build:core",
       "summary": "Build the packages and move them to the dist directory",
-      "shellCommand": "npm run --prefix packages/geoview-core build && node common/scripts/push-types.js"
+      "shellCommand": "npm run --prefix packages/geoview-core build"
     },
     {
       "commandKind": "bulk",
