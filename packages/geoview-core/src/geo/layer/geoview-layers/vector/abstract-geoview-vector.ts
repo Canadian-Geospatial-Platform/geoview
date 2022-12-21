@@ -216,10 +216,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     let keyCounter = 0;
 
     features.forEach((feature) => {
-      const featureInfoEntry: TypeFeatureInfoEntry = {};
-
-      // add a key to the feature for building data-grid
-      featureInfoEntry.featureKey = keyCounter++;
+      const featureInfoEntry: TypeFeatureInfoEntry = {
+        // feature key for building the data-grid
+        featureKey: keyCounter++,
+        featureInfo: {},
+      };
 
       // query feature info
       const featureFields = feature.getKeys();
@@ -227,8 +228,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         if (fieldName !== 'geometry') {
           if (outfields?.includes(fieldName)) {
             const aliasfieldIndex = outfields.indexOf(fieldName);
-            featureInfoEntry[aliasFields![aliasfieldIndex]] = feature.get(fieldName);
-          } else if (!outfields) featureInfoEntry[fieldName] = feature.get(fieldName);
+            featureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = feature.get(fieldName);
+          } else if (!outfields) featureInfoEntry.featureInfo[fieldName] = feature.get(fieldName);
         }
       });
       queryResult.push(featureInfoEntry);

@@ -1,12 +1,13 @@
 import { createElement, ReactElement } from 'react';
+import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
+import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
+import { api } from '../../../app';
 
-import { AbstractGeoViewVector, api } from '../../../app';
-import { getLocalizedValue } from '../../utils/utilities';
-
-import { LayerDetails } from './layer-details';
+import { Details, TypeArrayOfLayerData } from './details';
 
 export interface TypeLayerDetailsProps {
-  layerId: string;
+  layerPath: string;
+  features: TypeArrayOfFeatureInfoEntries;
 }
 
 /**
@@ -18,6 +19,8 @@ export interface TypeLayerDetailsProps {
 export class DetailsAPI {
   mapId!: string;
 
+  featureInfoLayerSet!: FeatureInfoLayerSet;
+
   /**
    * initialize the details api
    *
@@ -25,44 +28,21 @@ export class DetailsAPI {
    */
   constructor(mapId: string) {
     this.mapId = mapId;
+    this.featureInfoLayerSet = api.createFeatureInfoLayerSet(mapId, `${mapId}-DetailsAPI`);
   }
 
   /**
-   * Create a data grid
+   * Create a details as as an element
    *
    * @param {TypeLayerDetailsProps} layerDetailsProps the properties of the details to be created
    * @return {ReactElement} the details react element
    *
    */
-  createDetails = (props: TypeLayerDetailsProps): ReactElement => {
-    const { layerId } = props;
-    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-    const values = (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo();
-
-    // set columns
-    const columnHeader = Object.keys(values[0]);
-    const columns = [];
-    for (let i = 0; i < columnHeader.length - 1; i++) {
-      columns.push({
-        field: columnHeader[i],
-        headerName: columnHeader[i],
-        width: 150,
-        type: 'string',
-      });
-    }
-
-    // set rows
-    const rows = values;
-
+  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
     return createElement('div', {}, [
-      createElement('h4', { key: `${layerId}-title` }, getLocalizedValue(geoviewLayerInstance.geoviewLayerName, this.mapId)),
-      createElement(LayerDetails, {
-        key: `${layerId}-details`,
-        columns,
-        rows,
-        pageSize: 50,
-        rowsPerPageOptions: [25, 50, 100],
-        autoHeight: true,
+      createElement(Details, {
+        key: `${mapId}-details-sets`,
+        arrayOfLayerData: detailsElements,
       }),
     ]);
   };

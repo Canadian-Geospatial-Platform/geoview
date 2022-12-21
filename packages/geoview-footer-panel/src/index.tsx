@@ -11,6 +11,7 @@ import {
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
+import { DetailsItem } from './details-item';
 
 const w = window as TypeWindow;
 
@@ -91,12 +92,13 @@ class FooterPanelPlugin extends AbstractPlugin {
         tabsCounter++;
       }
 
+      // create the listener to return the details
       if (defaultTabs.includes('details')) {
-        // the call to create data grid element return the element and the footer content is waiting for a function.
+        // the call to create details element return the element and the footer content is waiting for a function.
         footerTabs.createFooterTab({
           value: tabsCounter,
           label: this.translations[displayLanguage].details as string,
-          content: () => api.map(mapId).details.createDetails({ layerId: 'esriFeatureLYR4' }),
+          content: () => <DetailsItem mapId={mapId} />,
         });
         tabsCounter++;
       }
@@ -139,7 +141,6 @@ class FooterPanelPlugin extends AbstractPlugin {
     if (cgpv) {
       // access the api calls
       const { api } = cgpv;
-
       // TODO: Enable the footer tabs removal
     }
   }

@@ -3,6 +3,7 @@
   "listOfLayerEntryConfig": [
     {
       "layerId": "polygons.json",
+      "layerName": { "en": "Polygons" },
       "source": {
         "featureInfo": {
           "queryable": "true",
@@ -35,6 +36,7 @@
     },
     {
       "layerId": "lines.json",
+      "layerName": { "en": "Lines" },
       "source": {
         "featureInfo": {
           "queryable": "true",
@@ -62,6 +64,7 @@
     },
     {
       "layerId": "icon_points.json",
+      "layerName": { "en": "Icons" },
       "source": {
         "featureInfo": {
           "queryable": "true",
@@ -89,6 +92,7 @@
     },
     {
       "layerId": "points.json",
+      "layerName": { "en": "Points" },
       "source": {
         "featureInfo": {
           "queryable": "true",
