@@ -85,6 +85,7 @@ export function Shell(props: ShellProps): JSX.Element {
 
   const classes = useStyles();
 
+  // eslint-disable-next-line prettier/prettier
   const extraStyle = mapFeaturesConfig.map.extraOptions && mapFeaturesConfig.map.extraOptions.style ? mapFeaturesConfig.map.extraOptions.style : {};
 
   const { t } = useTranslation<string>();
