@@ -30,7 +30,7 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
       {...other}
       style={{ height: '100%', overflow: 'auto' }}
     >
-      {value === index && <MaterialBox sx={{ p: 3 }}>{children}</MaterialBox>}
+      <MaterialBox sx={{ p: 3 }}>{children}</MaterialBox>
     </div>
   );
 }
