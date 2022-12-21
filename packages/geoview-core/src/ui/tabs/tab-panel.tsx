@@ -28,7 +28,7 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
-      style={{ height: '100%', overflow: 'auto' }}
+      style={{ height: 'calc( 100% - 55px )', overflow: 'auto' }}
     >
       <MaterialBox sx={{ p: 3 }}>{children}</MaterialBox>
     </div>

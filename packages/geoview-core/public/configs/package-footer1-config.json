@@ -11,6 +11,9 @@
       "shaded": false,
       "labeled": true
     },
+    "extraOptions": {
+      "style": { "height": "calc( 100% - 300px )" }
+    },
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "esriFeatureLYR4",

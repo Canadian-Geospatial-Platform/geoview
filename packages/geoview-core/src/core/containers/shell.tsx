@@ -84,6 +84,9 @@ export function Shell(props: ShellProps): JSX.Element {
   const { shellId, mapFeaturesConfig } = props;
 
   const classes = useStyles();
+
+  const extraStyle = mapFeaturesConfig.map.extraOptions && mapFeaturesConfig.map.extraOptions.style ? mapFeaturesConfig.map.extraOptions.style : {};
+
   const { t } = useTranslation<string>();
 
   // set the active trap value for FocusTrap and pass the callback to the dialog window
@@ -189,7 +192,7 @@ export function Shell(props: ShellProps): JSX.Element {
         <a id={`toplink-${shellId}`} href={`#bottomlink-${shellId}`} className={classes.skip} style={{ top: '0px' }}>
           {t('keyboardnav.start')}
         </a>
-        <div className={classes.mapContainer}>
+        <div className={classes.mapContainer} style={extraStyle}>
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && <Appbar />}
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('nav-bar') > -1 && <Navbar />}
