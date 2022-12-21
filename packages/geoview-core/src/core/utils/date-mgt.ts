@@ -6,6 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import 'dayjs/locale/en-ca';
 import 'dayjs/locale/fr-ca';
 import { TypeLocalizedLanguages } from '../../geo/map/map-schema-types';
+import { TypeJsonObject } from '../types/global-types';
 
 /** ******************************************************************************************************************************
  * constant/interface used to define the precision for date object (yyyy, mm, dd).
@@ -26,14 +27,55 @@ type DatePrecision = 'year' | 'month' | 'day';
  */
 const DEFAULT_TIME_PRECISION = {
   hour: 'THHZ',
-  minute: 'THH:MMZ',
-  second: 'THH:MM:SSZ',
+  minute: 'THH:mmZ',
+  second: 'THH:mm:ssZ',
+};
+
+/** ******************************************************************************************************************************
+ * constant used to define the ESRI unit to OGC period conversion.
+ */
+const timeUnitsESRI = {
+  esriTimeUnitsHours: 'H',
+  esriTimeUnitsDays: 'D',
+  esriTimeUnitsWeeks: 'W',
+  esriTimeUnitsMonths: 'M',
+  esriTimeUnitsYears: 'Y',
 };
 
 /** ******************************************************************************************************************************
  * Type used to define the time precision pattern to use.
  */
 type TimePrecision = 'hour' | 'minute' | 'second';
+
+/** ******************************************************************************************************************************
+ * Type used to define the range values for an OGC time dimension.
+ */
+type RangeItems = {
+  type: string;
+  range: string[];
+};
+
+/** ******************************************************************************************************************************
+ * Type used to define the GeoView OGC time dimension.
+ */
+export type TimeDimension = {
+  field: string;
+  default: string;
+  unitSymbol?: string;
+  range: RangeItems;
+  nearestValues: 'discrete' | 'absolute';
+  singleHandle: boolean;
+};
+
+/** ******************************************************************************************************************************
+ * Type used to validate the ESRI time dimension.
+ */
+export type TimeDimensionESRI = {
+  startTimeField: string;
+  timeExtent: number[];
+  timeInterval: number;
+  timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
+};
 
 dayjs.extend(utc);
 dayjs.extend(duration);
@@ -103,8 +145,8 @@ const INVALID_TIME_DIMENSION_DURATION = 'Invalid Time Dimension Duration';
 const isValidDate = (date: string) => dayjs(date).isValid();
 const isValidDuration = (durationCheck: string) => dayjs.isDuration(dayjs.duration(durationCheck));
 const isDiscreteRange = (ogcTimeDimension: string) => ogcTimeDimension.split(',').length > 1;
-const isAbsoluteRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/').length > 1;
-const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/')[1].substring(0, 1) === 'P';
+const isAbsoluteRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/').length === 3;
+const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/').length === 2;
 
 /**
  * Class used to handle date as ISO 8601
@@ -115,7 +157,7 @@ const isRelativeRange = (ogcTimeDimension: string) => ogcTimeDimension.split('/'
 export class DateMgt {
   /**
    * Convert a UTC date to a local date
-   * @param date {Date | string} date to use
+   * @param {Date | string} date date to use
    * @returns {string} local date
    */
   convertToLocal(date: Date | string): string {
@@ -128,7 +170,7 @@ export class DateMgt {
 
   /**
    * Convert a date local to a UTC date
-   * @param date {Date | string} date to use
+   * @param {Date | string} date date to use
    * @returns {string} UTC date
    */
   convertToUTC(date: Date | string): string {
@@ -141,9 +183,9 @@ export class DateMgt {
 
   /**
    * Format a date to a pattern
-   * @param date {Date | string} date to use
-   * @param datePattern {DatePrecision} the date precision pattern to use
-   * @param timePattern {TimePrecision} the time precision pattern to use
+   * @param {Date | string} date date to use
+   * @param {DatePrecision} datePattern the date precision pattern to use
+   * @param {TimePrecision}timePattern the time precision pattern to use
    * @returns {string} formatted date
    */
   format(date: Date | string, datePattern: DatePrecision, timePattern?: TimePrecision): string {
@@ -159,7 +201,7 @@ export class DateMgt {
 
   /**
    * Convert a date to milliseconds
-   * @param date {Date | string} date to use
+   * @param {Date | string} date date to use
    * @returns {number} date as milliseconds
    */
   convertToMilliseconds(date: Date | string): number {
@@ -171,17 +213,17 @@ export class DateMgt {
 
   /**
    * Convert a milliseconds date to string date
-   * @param date {number} milliseconds date
+   * @param {number} date milliseconds date
    * @returns {string} date string
    */
-  convertToDate(date: number): string {
+  convertToDate(date: number, dateFormat = 'YYYY-MM-DDTHH:mm:ss'): string {
     // TODO check if date is in UTC or local
-    return dayjs(date).utc(true).format();
+    return dayjs(date).utc(true).format(dateFormat);
   }
 
   /**
    * Extract pattern to use to format the date
-   * @param dateOGC {string} date as an ISO 8601 date
+   * @param {string} dateOGC date as an ISO 8601 date
    * @returns {string} the formatted date
    */
   extractDateFormat(dateOGC: string): string {
@@ -210,24 +252,80 @@ export class DateMgt {
   }
 
   /**
-   * Create a range of date object from OGC time dimension following ISO 8601
-   * @param ogcTimeDimension {string} OGC time dimension following ISO 8001
-   * @returns {string[]} array of date from the dimension
+   * Create the Geoview time dimension from ESRI dimension
+   * @param {TimeDimensionESRI} timeDimensionESRI esri time dimension object
+   * @returns {TimeDimension} the Geoview time dimension
    */
-  createRangeOGC(ogcTimeDimension: string): string[] {
-    let rangeItems: string[] = [];
+  createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI): TimeDimension {
+    const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
+
+    // create interval string
+    const calcDuration = () => {
+      let interval = '';
+      if (timeIntervalUnits !== undefined && timeInterval !== undefined) {
+        if (timeUnitsESRI[timeIntervalUnits] !== undefined) {
+          interval = `/P${timeInterval}${timeUnitsESRI[timeIntervalUnits]}`;
+        }
+      }
+
+      return interval;
+    };
+
+    const dimensionValues = `${this.convertToDate(timeExtent[0])}/${this.convertToDate(timeExtent[1])}${calcDuration()}`;
+    const rangeItem = this.createRangeOGC(dimensionValues);
+    const timeDimension: TimeDimension = {
+      field: startTimeField,
+      default: rangeItem.range[0],
+      unitSymbol: '',
+      range: rangeItem,
+      nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
+      singleHandle: false,
+    };
+
+    return timeDimension;
+  }
+
+  /**
+   * Create the Geoview time dimension from OGC dimension
+   * @param {TypeJsonObject | string} ogcTimeDimension The OGC time dimension object or string
+   * @returns {TimeDimension} the Geoview time dimension
+   */
+  createDimensionFromOGC(ogcTimeDimension: TypeJsonObject | string): TimeDimension {
+    const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(<string>ogcTimeDimension);
+    const timeDimension: TimeDimension = {
+      field: dimensionObject.name,
+      default: dimensionObject.default,
+      unitSymbol: dimensionObject.unitSymbol || '',
+      range: this.createRangeOGC(dimensionObject.values),
+      nearestValues: dimensionObject.nearestValues ? 'absolute' : 'discrete',
+      singleHandle: false,
+    };
+
+    return timeDimension;
+  }
+
+  /**
+   * Create a range of date object from OGC time dimension following ISO 8601
+   * @param {string} ogcTimeDimension OGC time dimension values following
+   * @returns {RangeItems} array of date from the dimension
+   */
+  createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
+    let rangeItems: RangeItems = { type: 'none', range: [] };
 
     // find what type of dimension it is:
     //    discrete = 1696, 1701, 1734, 1741
-    //    absolute 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M or 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
-    //    relative 2022-04-27T14:50:00Z/PT10M
+    //    discrete 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z/PT10M
+    //    relative 2022-04-27T14:50:00Z/PT10M OR 2022-04-27T14:50:00Z/2022-04-27T17:50:00Z
     // and create the range object
-    if (isDiscreteRange(ogcTimeDimension)) rangeItems = ogcTimeDimension.split(',');
-    else if (isRelativeRange(ogcTimeDimension)) rangeItems = this.#createRelativeIntervale(ogcTimeDimension);
-    else if (isAbsoluteRange(ogcTimeDimension)) rangeItems = this.#createAbsoluteInterval(ogcTimeDimension);
+    if (isDiscreteRange(ogcTimeDimensionValues))
+      rangeItems = { type: 'discrete', range: ogcTimeDimensionValues.replace(/\s/g, '').split(',') };
+    else if (isRelativeRange(ogcTimeDimensionValues))
+      rangeItems = { type: 'relative', range: this.#createRelativeIntervale(ogcTimeDimensionValues) };
+    else if (isAbsoluteRange(ogcTimeDimensionValues))
+      rangeItems = { type: 'discrete', range: this.#createAbsoluteInterval(ogcTimeDimensionValues) };
 
-    // cheak if dimension is valid
-    if (rangeItems.length === 0) throw INVALID_TIME_DIMENSION;
+    // check if dimension is valid
+    if (rangeItems.range.length === 0) throw INVALID_TIME_DIMENSION;
 
     // create marker array from OGC time dimension
     return rangeItems;
@@ -256,8 +354,8 @@ export class DateMgt {
    */
   #createAbsoluteInterval(ogcTimeDimension: string): string[] {
     // Absolute interval:
-    // A client may request information over a continuous interval instead of a single instant by specifying a start and end time, separated by a / character.
-    // 2002-09-01T00:00:00.0Z/2002-09-30T23:59:59.999Z
+    // A client may request information over an interval instead of a single instant by specifying a start and end time, separated by a / character with a duration.
+    // 2002-09-01T00:00:00.0Z/2002-09-30T23:59:59.999Z/P1D
     const [date1, date2, durationCheck]: string[] = ogcTimeDimension.split('/');
 
     // check if dates are valid
@@ -275,11 +373,12 @@ export class DateMgt {
     // create intervalle items
     const msDuration: number = dayjs.duration(durationCheck).asMilliseconds();
     const items: string[] = [];
-    let i = 0;
+    let i = 1;
 
     // TODO: handle leap year
+    items.push(min);
     do {
-      const calcDuration = i * msDuration;
+      const calcDuration = dayjs.duration({ milliseconds: i * msDuration });
       items.push(dayjs(min).add(calcDuration).format(format));
       i++;
     } while (dayjs(items[items.length - 1]).isBefore(max));
@@ -299,21 +398,22 @@ export class DateMgt {
   #createRelativeIntervale(ogcTimeDimension: string): string[] {
     // Relative interval:
     // A client may request information over a relative time interval instead of a set time range by specifying a start or end time with an associated duration, separated by a / character.
+    // A client may request information over a continuous interval instead of a single instant by specifying a start and end time, separated by a / character.
     // One end of the interval must be a time value, but the other may be a duration
-    // 2002-09-01T00:00:00.0Z/P1M or !!! NOT SUPPORTED FOR NOW PT36H/PRESENT
+    // 2002-09-01T00:00:00.0Z/P1M or 2002-09-01T00:00:00.0Z/2022-12-01T00:00:00.0Z !!! NOT SUPPORTED FOR NOW PT36H/PRESENT
     const [date, durationCheck]: string[] = ogcTimeDimension.split('/');
 
     // check if date and duration are valid
-    if (!isValidDuration(durationCheck)) throw INVALID_TIME_DIMENSION_DURATION;
+    if (!isValidDuration(durationCheck) && !isValidDate(durationCheck)) throw INVALID_TIME_DIMENSION_DURATION;
     if (!isValidDate(date)) throw INVALID_DATE;
 
     // get the date format
     const format: string = this.extractDateFormat(date);
 
-    // set min and maxs
+    // set min and max (from duration or date)
     const msDuration = dayjs.duration(durationCheck);
     const min: string = dayjs(date).format(format);
-    const max: Dayjs = dayjs(date).add(msDuration);
+    const max: Dayjs = !isValidDate(durationCheck) ? dayjs(date).add(msDuration) : dayjs(durationCheck);
 
     return [min, dayjs(max).format(format)];
   }
