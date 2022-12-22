@@ -84,6 +84,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const { shellId, mapFeaturesConfig } = props;
 
   const classes = useStyles();
+
   const { t } = useTranslation<string>();
 
   // set the active trap value for FocusTrap and pass the callback to the dialog window

@@ -13,10 +13,9 @@ import { ExpandLessIcon, ExpandMoreIcon, IconButton, Tabs, TypeTabs } from '../.
 export const useStyles = makeStyles((theme) => ({
   tabsContainer: {
     position: 'relative',
-    paddingBottom: '50px',
     backgroundColor: theme.palette.background.default,
     width: '100%',
-    height: '400px',
+    height: '300px',
     transition: 'height 0.2s ease-out',
   },
   collapseButton: {
@@ -78,12 +77,15 @@ export function FooterTabs(): JSX.Element | null {
     // check if tabs component is created
     if (tabsContainerRef && tabsContainerRef.current) {
       const tabsContaine = tabsContainerRef.current as HTMLDivElement;
+      const mapContaine = tabsContaine.previousElementSibling as HTMLDivElement;
 
       // check if the tabs container is collapsed
       if (isCollapsed) {
         tabsContaine.style.height = '55px';
+        mapContaine.style.height = 'calc( 100% - 55px)';
       } else {
-        tabsContaine.style.height = '400px';
+        tabsContaine.style.height = '300px';
+        mapContaine.style.height = 'calc( 100% - 300px)';
       }
     }
 
@@ -121,7 +123,6 @@ export function FooterTabs(): JSX.Element | null {
       },
       mapId
     );
-
     return () => {
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, mapId);
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId);
