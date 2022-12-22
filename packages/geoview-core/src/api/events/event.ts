@@ -84,7 +84,7 @@ export class Event {
       let listenerPayload: PayloadBaseClass;
 
       // if a handler name was specefieid, callback will return that data if found
-      if (handlerName && payload.handlerName === handlerName) {
+      if (handlerName && payload.handlerName === handlerName && this.events[eventNameId] && this.events[eventNameId][handlerName]) {
         listenerPayload = this.events[eventNameId][handlerName];
       } else {
         listenerPayload = payload;
