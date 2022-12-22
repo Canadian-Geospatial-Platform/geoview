@@ -414,7 +414,7 @@ export class WMS extends AbstractGeoViewRaster {
             );
           }
 
-          this.processTemporalDimension(layerCapabilities.Dimension[0] as TypeJsonObject, layerEntryConfig);
+          this.processTemporalDimension(layerCapabilities.Dimension as TypeJsonObject, layerEntryConfig);
         }
       }
       resolve();
@@ -429,7 +429,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension[0]);
     }
   }
 
