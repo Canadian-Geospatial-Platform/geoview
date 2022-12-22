@@ -230,9 +230,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
       if (layerEntryConfig.initialSettings?.opacity !== undefined) tileLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
       if (layerEntryConfig.initialSettings?.visible !== undefined) tileLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
 
-      const xyzLayer = new TileLayer(tileLayerOptions);
-
-      resolve(xyzLayer);
+      layerEntryConfig.gvLayer = new TileLayer(tileLayerOptions);
+      resolve(layerEntryConfig.gvLayer);
     });
     return promisedVectorLayer;
   }
