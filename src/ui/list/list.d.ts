@@ -5,6 +5,7 @@ import { ListProps } from '@mui/material';
  */
 export interface TypeListProps extends ListProps {
     type?: 'ul' | 'ol';
+    innerref?: (element: HTMLElement | null) => void;
 }
 /**
  * Create a customized Material UI List

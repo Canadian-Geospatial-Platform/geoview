@@ -3,7 +3,10 @@ import { Pixel } from 'ol/pixel';
 import { PayloadBaseClass } from './payload-base-class';
 import { EventStringId } from '../event-types';
 export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
-export type TypeFeatureInfoEntry = Record<string, string | number | null>;
+export type TypeFeatureInfoEntry = {
+    featureKey: number;
+    featureInfo: Record<string, string | number | null>;
+};
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = {
     [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined;

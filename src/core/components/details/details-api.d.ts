@@ -1,6 +1,10 @@
 import { ReactElement } from 'react';
+import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
+import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
+import { TypeArrayOfLayerData } from './details';
 export interface TypeLayerDetailsProps {
-    layerId: string;
+    layerPath: string;
+    features: TypeArrayOfFeatureInfoEntries;
 }
 /**
  * API to manage details component
@@ -10,6 +14,7 @@ export interface TypeLayerDetailsProps {
  */
 export declare class DetailsAPI {
     mapId: string;
+    featureInfoLayerSet: FeatureInfoLayerSet;
     /**
      * initialize the details api
      *
@@ -17,11 +22,11 @@ export declare class DetailsAPI {
      */
     constructor(mapId: string);
     /**
-     * Create a data grid
+     * Create a details as as an element
      *
      * @param {TypeLayerDetailsProps} layerDetailsProps the properties of the details to be created
      * @return {ReactElement} the details react element
      *
      */
-    createDetails: (props: TypeLayerDetailsProps) => ReactElement;
+    createDetails: (mapId: string, detailsElements: TypeArrayOfLayerData) => ReactElement;
 }

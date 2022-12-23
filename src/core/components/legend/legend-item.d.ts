@@ -6,8 +6,11 @@ export interface TypeLegendItemProps {
     subLayerId?: string;
     layerConfigEntry?: TypeLayerEntryConfig;
     isRemoveable?: boolean;
+    canSetOpacity?: boolean;
     isParentVisible?: boolean;
     toggleParentVisible?: () => void;
+    expandAll?: boolean;
+    hideAll?: boolean;
 }
 /**
  * Legend Item for a Legend list
