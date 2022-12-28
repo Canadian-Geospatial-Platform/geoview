@@ -10,6 +10,7 @@ import { TypeWMSLayerConfig, TypeWmsLayerEntryConfig } from '../../../../geo/lay
 import { TypeWFSLayerConfig, TypeWfsLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/wfs';
 import { TypeOgcFeatureLayerConfig, TypeOgcFeatureLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { TypeGeoJSONLayerConfig, TypeGeoJSONLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geojson';
+import { TypeGeoPackageLayerConfig, TypeGeoPackageLayerEntryConfig } from '../../../../geo/layer/geoview-layers/vector/geopackage';
 import { TypeXYZTilesConfig, TypeXYZTilesLayerEntryConfig } from '../../../../geo/layer/geoview-layers/raster/xyz-tiles';
 import { api } from '../../../../app';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
@@ -267,6 +268,34 @@ export class UUIDmapConfigReader {
                     },
                   };
                   return xyzTilesLayerEntryConfig;
+                }),
+              };
+              listOfGeoviewLayerConfig.push(layerConfig);
+            } else if (layerType === CONST_LAYER_TYPES.GEOPACKAGE) {
+              const layerConfig: TypeGeoPackageLayerConfig = {
+                geoviewLayerId: `${id}`,
+                geoviewLayerName: {
+                  en: name as string,
+                  fr: name as string,
+                },
+                metadataAccessPath: {
+                  en: url as string,
+                  fr: url as string,
+                },
+                geoviewLayerType: 'GeoPackage',
+                listOfLayerEntryConfig: (layerEntries as TypeJsonArray).map((item): TypeGeoPackageLayerEntryConfig => {
+                  const geoPackageLayerEntryConfig: TypeGeoPackageLayerEntryConfig = {
+                    entryType: 'vector',
+                    layerId: `${item.id}`,
+                    source: {
+                      format: 'GeoPackage',
+                      dataAccessPath: {
+                        en: url as string,
+                        fr: url as string,
+                      },
+                    },
+                  };
+                  return geoPackageLayerEntryConfig;
                 }),
               };
               listOfGeoviewLayerConfig.push(layerConfig);

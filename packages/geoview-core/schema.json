@@ -397,7 +397,7 @@
     },
 
     "TypeVectorSourceFormats": {
-      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI"],
+      "enum": ["GeoJSON", "EsriJSON", "KML", "WFS", "featureAPI", "GeoPackage"],
       "description": "The feature format used by the XHR feature loader when access path is set."
     },
 
@@ -923,7 +923,7 @@
     "TypeGeoviewLayerType": {
       "type": "string",
       "items": {
-        "enum": ["esriDynamic", "esriFeature", "GeoJSON", "geoCore", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms"]
+        "enum": ["esriDynamic", "esriFeature", "GeoJSON", "geoCore", "GeoPackage", "xyzTiles", "ogcFeature", "ogcWfs", "ogcWms"]
       },
       "description": "Type of GeoView layer."
     },
