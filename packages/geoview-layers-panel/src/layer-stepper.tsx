@@ -34,7 +34,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, react, ui } = cgpv;
 
-  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
+  const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
   const { useState, useEffect } = react;
   const { Select, Stepper, TextField, Button, ButtonGroup, Autocomplete, CircularProgressBase, Box } = ui.elements;
 
@@ -63,6 +63,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     [ESRI_DYNAMIC, 'ESRI Dynamic Service'],
     [ESRI_FEATURE, 'ESRI Feature Service'],
     [GEOJSON, 'GeoJSON'],
+    [GEOPACKAGE, 'GeoPackage'],
     [WMS, 'OGC Web Map Service (WMS)'],
     [WFS, 'OGC Web Feature Service (WFS)'],
     [OGC_FEATURE, 'OGC API Features'],
@@ -394,6 +395,26 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   /**
+   * Using the layerURL state object, check whether URL is a valid GeoPackage.
+   *
+   * @returns {Promise<boolean>} True if layer passes validation
+   */
+  const geoPackageValidation = async (): Promise<boolean> => {
+    try {
+      const sqlPromise = initSqlJs({
+        locateFile: (file) => `./node_modules/sql.js/dist/${file}`,
+      });
+      const dataPromise = fetch(layerURL).then((res) => res.arrayBuffer());
+      const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
+      const db = new SQL.Database(new Uint8Array(buf));
+    } catch (err) {
+      emitErrorServer('GeoPackage');
+      return false;
+    }
+    return true;
+  };
+
+  /**
    * Attempt to determine the layer type based on the URL format
    */
   const bestGuessLayerType = () => {
@@ -410,6 +431,8 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       setLayerType(WFS);
     } else if (layerURL.toUpperCase().endsWith('.JSON') || layerURL.toUpperCase().endsWith('.GEOJSON')) {
       setLayerType(GEOJSON);
+    } else if (layerURL.toUpperCase().endsWith('.GPKG')) {
+      setLayerType(GEOPACKAGE);
     } else if (layerURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || layerURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
       setLayerType(XYZ_TILES);
     } else if (layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32) {
@@ -451,6 +474,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     else if (layerType === ESRI_DYNAMIC) valid = await esriValidation(ESRI_DYNAMIC);
     else if (layerType === ESRI_FEATURE) valid = await esriValidation(ESRI_FEATURE);
     else if (layerType === GEOJSON) valid = await geoJSONValidation();
+    else if (layerType === GEOPACKAGE) valid = await geoPackageValidation();
     else if (layerType === GEOCORE) valid = await geocoreValidation();
     if (valid) {
       setIsLoading(false);

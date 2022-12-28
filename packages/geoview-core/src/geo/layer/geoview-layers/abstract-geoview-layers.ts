@@ -60,7 +60,7 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
   legend: HTMLCanvasElement;
 }
 
-const validEvents: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs'];
+const validEvents: TypeGeoviewLayerType[] = ['GeoJSON', 'esriDynamic', 'esriFeature', 'ogcFeature', 'ogcWfs', 'GeoPackage'];
 /**
  * type guard function that redefines a TypeLegend as a TypeVectorLegend
  * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
@@ -97,6 +97,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   esriFeature: 'Esri Feature Layer',
   GeoJSON: 'GeoJson Layer',
   geoCore: 'GeoCore Layer',
+  GeoPackage: 'GeoPackage Layer',
   xyzTiles: 'XYZ Tiles',
   ogcFeature: 'OGC Feature Layer',
   ogcWfs: 'WFS Layer',
@@ -104,12 +105,21 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
 };
 
 // Definition of the keys used to create the constants of the GeoView layer
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 
 /**
  * Type of GeoView layers
  */
-export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType =
+  | 'esriDynamic'
+  | 'esriFeature'
+  | 'GeoJSON'
+  | 'geoCore'
+  | 'GeoPackage'
+  | 'xyzTiles'
+  | 'ogcFeature'
+  | 'ogcWfs'
+  | 'ogcWms';
 
 /**
  * Definition of the GeoView layer constants
@@ -119,6 +129,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   ESRI_FEATURE: 'esriFeature',
   GEOJSON: 'GeoJSON',
   GEOCORE: 'geoCore',
+  GEOPACKAGE: 'GeoPackage',
   XYZ_TILES: 'xyzTiles',
   OGC_FEATURE: 'ogcFeature',
   WFS: 'ogcWfs',

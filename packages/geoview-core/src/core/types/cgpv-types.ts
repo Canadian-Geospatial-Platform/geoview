@@ -98,6 +98,7 @@ export * from '../../geo/layer/geoview-layers/raster/xyz-tiles';
 export * from '../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
 export * from '../../geo/layer/geoview-layers/vector/esri-feature';
 export * from '../../geo/layer/geoview-layers/vector/geojson';
+export * from '../../geo/layer/geoview-layers/vector/geopackage';
 export * from '../../geo/layer/geoview-layers/vector/ogc-feature';
 export * from '../../geo/layer/geoview-layers/vector/wfs';
 export * from '../../geo/layer/other/geocore';
