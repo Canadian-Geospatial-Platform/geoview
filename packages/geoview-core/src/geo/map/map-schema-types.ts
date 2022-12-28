@@ -46,7 +46,7 @@ export type TypeLayerInitialSettings = {
 /** ******************************************************************************************************************************
  * Type that defines the vector layer source formats.
  */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'GeoPackage';
 
 /** ******************************************************************************************************************************
  * Type used to configure the cluster feature of a vector layer. Works out of the box with point geometries. If another geometry is

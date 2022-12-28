@@ -20,6 +20,7 @@ import {
   TypeListOfLocalizedLanguages,
 } from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
+import { GeoPackage, layerConfigIsGeoPackage } from './geoview-layers/vector/geopackage';
 import { layerConfigIsWMS, WMS } from './geoview-layers/raster/wms';
 import { EsriDynamic, layerConfigIsEsriDynamic } from './geoview-layers/raster/esri-dynamic';
 import { EsriFeature, layerConfigIsEsriFeature } from './geoview-layers/vector/esri-feature';
@@ -84,6 +85,11 @@ export class Layer {
               const geoJSON = new GeoJSON(this.mapId, layerConfig);
               geoJSON.createGeoViewLayers().then(() => {
                 this.addToMap(geoJSON);
+              });
+            } else if (layerConfigIsGeoPackage(layerConfig)) {
+              const geoPackage = new GeoPackage(this.mapId, layerConfig);
+              geoPackage.createGeoViewLayers().then(() => {
+                this.addToMap(geoPackage);
               });
             } else if (layerConfigIsWMS(layerConfig)) {
               const wmsLayer = new WMS(this.mapId, layerConfig);
