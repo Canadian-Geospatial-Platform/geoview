@@ -4,6 +4,9 @@ import { TypeLegendItemProps } from './legend-item';
 export interface TypeLegendProps {
     layerIds: string[];
     isRemoveable?: boolean;
+    canSetOpacity?: boolean;
+    expandAll?: boolean;
+    hideAll?: boolean;
 }
 /**
  * API to manage legend component

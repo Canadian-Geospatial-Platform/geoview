@@ -4,8 +4,10 @@ import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TimeDimension } from '../../../../app';
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
     source: TypeSourceImageWmsInitialConfig;
+    temporalDimension?: TimeDimension;
 }
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'ogcWms';
@@ -112,6 +114,12 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
      */
     protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+    /** ***************************************************************************************************************************
+     * This method will create a Geoview temporal dimension if ot exist in the service metadata
+     * @param {TypeJsonObject} wmsTimeDimension The WMS time dimension object
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry to configure
+     */
+    private processTemporalDimension;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *

@@ -5,11 +5,13 @@ import { ReadOptions } from 'ol/format/Feature';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
+import { TimeDimension } from '../../../../app';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }
 export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
     source: TypeSourceEsriFeatureInitialConfig;
+    temporalDimension?: TimeDimension;
 }
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'esriFeature';
@@ -104,6 +106,12 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
+    /** ***************************************************************************************************************************
+     * This method will create a Geoview temporal dimension if it exist in the service metadata
+     * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
+     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry to configure
+     */
+    private processTemporalDimension;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

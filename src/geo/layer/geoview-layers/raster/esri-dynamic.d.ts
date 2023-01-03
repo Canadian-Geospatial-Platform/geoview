@@ -5,8 +5,10 @@ import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageEsriInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TimeDimension } from '../../../../core/utils/date-mgt';
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
     source: TypeSourceImageEsriInitialConfig;
+    temporalDimension?: TimeDimension;
 }
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'esriDynamic';
@@ -102,6 +104,12 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param {TypeEsriDynamicLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
      */
     private processFeatureInfoConfig;
+    /** ***************************************************************************************************************************
+     * This method will create a Geoview temporal dimension if it exist in the service metadata
+     * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
+     * @param {TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+     */
+    private processTemporalDimension;
     /** ****************************************************************************************************************************
      * This method creates a GeoView EsriDynamic layer using the definition provided in the layerEntryConfig parameter.
      *
