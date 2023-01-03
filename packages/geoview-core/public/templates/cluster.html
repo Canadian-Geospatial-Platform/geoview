@@ -32,8 +32,9 @@
           <tr>
             <td>
               <a href="./index.html">Main</a><br />
-              <a href="#cluster-config">1. Clusters loaded from config file</a><br />
-              <a href="#cluster-set">2. Clusters loaded from HTML</a><br />
+              <a href="#Hcluster-config">1. Clusters loaded from config file</a><br />
+              <a href="#Hcluster-set">2. Clusters loaded from HTML</a><br />
+              <a href="#Hflood-cluster">3. Flood data with clustering</a><br />
             </td>
           </tr>
         </tbody>
@@ -48,11 +49,15 @@
     </div>
     
     <div class="map-title-holder">
-      <h4 id="cluster">Cluster</h4>
+      <h4 id="Hcluster-config">1. Clusters loaded from config file</h4><a class="ref-link" href="#top">Top</a>
     </div>
     <hr />
     <div id="cluster-config" class="llwp-map" data-lang="en" data-config-url="./configs/cluster-config.json"></div>
+    </div>
     <hr />
+
+    <div class="map-title-holder">
+      <h4 id="Hcluster-set">2. Clusters loaded from HTML</h4><a class="ref-link" href="#top">Top</a>
     </div>
     <div id="cluster-set" class="llwp-map" data-lang="en" data-config="{
       'map': {
@@ -112,6 +117,48 @@
     }">
     </div>
     <hr />
+    
+    <div class="map-title-holder">
+      <h4 id="Hflood-cluster">3. Flood data with clustering</h4><a class="ref-link" href="#top">Top</a>
+    </div>
+    <div id="flood-cluster" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 4,
+          'center': [-100, 60],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+          {
+            'geoviewLayerId': 'historical-flood',
+            'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
+            'metadataAccessPath': {
+              'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
+            },
+            'geoviewLayerType': 'esriFeature',
+            'listOfLayerEntryConfig': [
+              { 'layerId': '0',
+                'source': {
+                  'cluster': {'enable': true}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      'components': ['overview-map', 'nav-bar', 'north-arrow'],
+      'corePackages': [],
+      'theme': 'dark',
+      'suportedLanguages': ['en']
+    }"></div>
+    <hr />
+    </div>
     <script src="codedoc.js"></script>
     <script>
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready

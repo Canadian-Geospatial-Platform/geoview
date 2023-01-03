@@ -4,15 +4,15 @@ import { Cluster, Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import { Geometry, Point, Polygon, LineString } from 'ol/geom';
+import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
 import LayerGroup from 'ol/layer/Group';
 import { Coordinate } from 'ol/coordinate';
+import { getCenter, Extent } from 'ol/extent';
 import { Pixel } from 'ol/pixel';
 import { transform } from 'ol/proj';
-import { Extent } from 'ol/extent';
 
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
@@ -174,6 +174,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
               if (feature.getGeometry() instanceof Point) {
                 return feature.getGeometry() !== undefined ? (feature.getGeometry() as Point) : null;
+              }
+
+              if (feature.getGeometry() instanceof MultiPoint) {
+                const geometry = feature.getGeometry() as MultiPoint;
+                const center = getCenter(geometry.getExtent() as Extent) as Coordinate;
+                return center !== undefined ? new Point(center) : null;
               }
 
               return null;
