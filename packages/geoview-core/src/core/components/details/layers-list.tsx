@@ -17,27 +17,8 @@ import { TypeArrayOfLayerData } from './details';
 import { FeatureInfo } from './feature-info';
 
 const sxClasses = {
-  details: {
-    width: '100%',
-  },
-  layerItem: {
-    color: 'text.primary',
-    padding: 0,
-  },
-  expandableGroup: {
-    paddingRight: 0,
-    paddingLeft: 28,
-  },
   expandableIconContainer: {
     paddingLeft: 10,
-  },
-  legendIcon: {
-    width: 24,
-    height: 24,
-    background: '#fff',
-  },
-  solidBackground: {
-    background: '#fff',
   },
 };
 interface TypeLayersListProps {
@@ -54,23 +35,17 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
 
   return (
-    <List sx={sxClasses.details}>
+    <List>
       {arrayOfLayerData.map((layerData) => {
         return (
           <div key={layerData.layerPath}>
-            <ListItem
-              sx={sxClasses.layerItem}
-              onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}
-            >
+            <ListItem onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}>
               <ListItemButton>
                 <ListItemIcon>
                   <IconButton color="primary">{layerSetOpen !== layerData.layerPath ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
                 </ListItemIcon>
                 <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>
-                  <ListItemText
-                    primaryTypographyProps={{ fontSize: 14, noWrap: true }}
-                    primary={layerData.layerPath ? layerData.layerName : 'Click on map'}
-                  />
+                  <ListItemText primary={layerData.layerPath ? layerData.layerName : 'Click on map'} />
                 </Tooltip>
               </ListItemButton>
             </ListItem>

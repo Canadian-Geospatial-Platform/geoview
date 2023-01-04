@@ -7,13 +7,6 @@ import { payloadIsRemoveGeoViewLayer } from '../../../api/events/payloads/geovie
 import { AbstractGeoViewLayer } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import { payloadIsALayerConfig } from '../../../api/events/payloads/layer-config-payload';
 
-const sxStyles = {
-  legend: {
-    width: '100%',
-    // maxWidth: 350, // for testing panel width
-  },
-};
-
 /**
  * The Legend component is used to display a list of layers and their content.
  *
@@ -88,7 +81,7 @@ export function Legend(): JSX.Element | null {
 
   return (
     <div>
-      <List sx={sxStyles.legend}>
+      <List>
         {orderedMapLayers.map((geoViewLayer) => {
           return (
             <LegendItem
