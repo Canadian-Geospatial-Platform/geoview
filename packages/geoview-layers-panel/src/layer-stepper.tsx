@@ -234,18 +234,37 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   /**
-   * Using the layerURL state object, check whether URL is a valid OGC API.
+   * Using the layerURL state object, check whether URL is a valid OGC API. You can either provide a single
+   * layer URL or the root OGC API where the user can select any number of layers in the collection
    *
    * @returns {Promise<boolean>} True if layer passes validation
    */
   const ogcFeatureValidation = async (): Promise<boolean> => {
-    const keys = ['collections', 'links'];
+    const keysSingleLayer = ['id', 'title'];
+    const responseSingle = await fetch(`${layerURL}/?f=json`);
+    if (responseSingle.status !== 200) {
+      emitErrorServer('OGC API Feature');
+      return false;
+    }
+    const jsonSingle = await responseSingle.json();
+    const isSingleLayerValid = keysSingleLayer.every((key) => Object.keys(jsonSingle).includes(key));
+    if (isSingleLayerValid) {
+      setLayerEntries([
+        {
+          layerId: jsonSingle.id,
+        },
+      ]);
+      setLayerName(jsonSingle.title);
+      return true;
+    }
+
     try {
-      const response = await fetch(`${layerURL}/collections?f=json`);
-      const json = await response.json();
-      const isValid = keys.every((key) => Object.keys(json).includes(key));
-      if (!isValid) throw new Error('err');
-      const layers = (json.collections as TypeJsonArray).map((aFeatureType) => [aFeatureType.id, aFeatureType.title]);
+      const keys = ['collections', 'links'];
+      const responseCollection = await fetch(`${layerURL}/collections?f=json`);
+      const jsonCollection = await responseCollection.json();
+      const isCollectionValid = keys.every((key) => Object.keys(jsonCollection).includes(key));
+      if (!isCollectionValid) throw new Error('err');
+      const layers = (jsonCollection.collections as TypeJsonArray).map((aFeatureType) => [aFeatureType.id, aFeatureType.title]);
       if (layers.length === 1) {
         setLayerName(layers[0][1] as string);
         setLayerEntries([
@@ -525,6 +544,13 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     }
     if (layerType === GEOCORE) {
       delete layerConfig.metadataAccessPath;
+    }
+    if (layerType === OGC_FEATURE) {
+      // make sure the metadataAccessPath is the root OGC API URL
+      layerConfig.metadataAccessPath = {
+        en: api.geoUtilities.getOGCServerUrl(layerURL),
+        fr: api.geoUtilities.getOGCServerUrl(layerURL),
+      };
     }
     if (valid) {
       // TODO issue #668 - geocore layers do not have same ID, it is impossible to use the added event

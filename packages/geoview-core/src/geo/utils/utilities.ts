@@ -130,6 +130,20 @@ export class GeoUtilities {
   };
 
   /**
+   * Return the root server url from a OGC layer service
+   *
+   * @param {string} url the service url for an ogc layer
+   * @returns the root ogc server url
+   */
+  getOGCServerUrl = (url: string): string => {
+    let ogcServerUrl = url;
+    if (ogcServerUrl.includes('collections')) {
+      ogcServerUrl = ogcServerUrl.slice(0, ogcServerUrl.indexOf('collections'));
+    }
+    return ogcServerUrl;
+  };
+
+  /**
    * Gets computed translate values
    * https://zellwk.com/blog/css-translate-values-in-javascript/
    * @param {HTMLElement} element the HTML element to get value for
