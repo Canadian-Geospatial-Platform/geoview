@@ -1,14 +1,11 @@
 import React from 'react';
 import MaterialListItemText from '@mui/material/ListItemText';
-import makeStyles from '@mui/styles/makeStyles';
-
 import { ListItemTextProps } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  listItemText: {
-    //
-  },
-}));
+const typographyProps = {
+  fontSize: 14,
+  noWrap: true,
+};
 
 /**
  * Create a customized Material UI List Item Text
@@ -17,5 +14,5 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the created List Item element
  */
 export const ListItemText = React.forwardRef((props: ListItemTextProps, ref): JSX.Element => {
-  return <MaterialListItemText ref={ref} {...props} />;
+  return <MaterialListItemText ref={ref} {...props} primaryTypographyProps={typographyProps} />;
 });

@@ -14,6 +14,8 @@ export interface TypeListProps extends ListProps {
 const sxClasses = {
   list: {
     padding: 0,
+    width: '100%',
+    // maxWidth: 350, // for testing panel width
   },
 };
 

@@ -10,6 +10,13 @@ interface TypeListItemProps extends ListItemProps {
   innerref?: (element: HTMLElement | null) => void;
 }
 
+const sxClasses = {
+  listItem: {
+    color: 'text.primary',
+    padding: 0,
+  },
+};
+
 /**
  * Create a customized Material UI List Item
  *
@@ -21,7 +28,7 @@ export function ListItem(props: TypeListItemProps): JSX.Element {
   const { innerref, ...propsWithoutRefs } = props;
 
   return (
-    <MaterialListItem ref={innerref} {...propsWithoutRefs}>
+    <MaterialListItem sx={sxClasses.listItem} ref={innerref} {...propsWithoutRefs}>
       {children !== undefined && children}
     </MaterialListItem>
   );
