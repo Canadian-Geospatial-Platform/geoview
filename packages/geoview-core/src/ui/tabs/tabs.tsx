@@ -6,7 +6,7 @@ import { SyntheticEvent, useEffect, useState } from 'react';
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import MaterialTabs from '@mui/material/Tabs';
 import MaterialTab from '@mui/material/Tab';
-import MaterialBox from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
@@ -32,6 +32,7 @@ export interface TypeTabsProps {
   boxProps?: BoxProps;
   tabsProps?: TabsProps;
   tabProps?: TabProps;
+  rightButtons?: unknown;
 }
 
 /**
@@ -41,7 +42,7 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, selectedTab } = props;
+  const { tabs, rightButtons, selectedTab } = props;
 
   const [value, setValue] = useState(0);
 
@@ -61,23 +62,28 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   }, [selectedTab]);
 
   return (
-    <MaterialBox {...props.boxProps} sx={{ width: '100%', height: '100%' }}>
-      <MaterialBox sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <MaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs example">
+    <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
+      <Grid item xs={10}>
+        <MaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs">
           {tabs.map((tab, index) => {
             return <MaterialTab label={tab.label} key={index} {...props.tabProps} id={`tab-${index}`} />;
           })}
         </MaterialTabs>
-      </MaterialBox>
-      {tabs.map((tab, index) => {
-        const TabContent = tab.content as React.ElementType;
+      </Grid>
+      <Grid item xs={2} sx={{ textAlign: 'right' }}>
+        {rightButtons}
+      </Grid>
+      <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider' }}>
+        {tabs.map((tab, index) => {
+          const TabContent = tab.content as React.ElementType;
 
-        return (
-          <TabPanel key={index} value={value} index={index}>
-            {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
-          </TabPanel>
-        );
-      })}
-    </MaterialBox>
+          return (
+            <TabPanel key={index} value={value} index={index}>
+              {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
+            </TabPanel>
+          );
+        })}
+      </Grid>
+    </Grid>
   );
 }
