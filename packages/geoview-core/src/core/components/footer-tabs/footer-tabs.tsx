@@ -1,5 +1,5 @@
 import { MutableRefObject, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import Grid from '@mui/material/Grid';
+import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
@@ -9,19 +9,15 @@ import { FooterTabPayload, payloadIsAFooterTab } from '../../../api/events/paylo
 
 import { ExpandLessIcon, ExpandMoreIcon, FullscreenIcon, FullscreenExitIcon, IconButton, Tabs, TypeTabs } from '../../../ui';
 
-const sxClasses = {
+export const useStyles = makeStyles((theme) => ({
   tabsContainer: {
     position: 'relative',
+    backgroundColor: theme.palette.background.default,
     width: '100%',
     height: '300px',
-    transition: 'height 0.2s ease-out',
+    transition: 'height 0.2s ease-in-out',
   },
-  collapseButton: {
-    position: 'absolute',
-    top: 5,
-    right: 10,
-  },
-};
+}));
 /**
  * The FooterTabs component is used to display a list of tabs and their content.
  *
@@ -33,6 +29,8 @@ export function FooterTabs(): JSX.Element | null {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const classes = useStyles();
 
   const mapConfig = useContext(MapContext);
 
@@ -103,13 +101,9 @@ export function FooterTabs(): JSX.Element | null {
       // check if the tabs container is collapsed
       if (isFullscreen) {
         // eslint-disable-next-line no-lonely-if
-        if (isCollapsed) {
-          tabsContaine.style.height = '300px';
-          mapContaine.style.height = 'calc( 100% - 300px)';
-        } else {
-          tabsContaine.style.height = '55px';
-          mapContaine.style.height = 'calc( 100% - 55px)';
-        }
+        tabsContaine.style.height = '300px';
+        mapContaine.style.height = 'calc( 100% - 300px)';
+        setIsCollapsed(true);
       } else {
         tabsContaine.style.height = 'calc( 100% - 1px )';
         mapContaine.style.height = '1px';
@@ -157,23 +151,21 @@ export function FooterTabs(): JSX.Element | null {
   }, [addTab, mapId, removeTab]);
 
   return api.map(mapId).footerTabs.tabs.length > 0 ? (
-    <Grid ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} container spacing={1} sx={sxClasses.tabsContainer}>
-      <Grid item xs={12} sx={{ height: '100%' }}>
-        <Tabs
-          tabsProps={{
-            variant: 'scrollable',
-          }}
-          tabs={footerTabs.map((tab) => {
-            return {
-              ...tab,
-            };
-          })}
-        />
-      </Grid>
-      <Grid item xs={2} sx={sxClasses.collapseButton}>
-        {!isFullscreen && <IconButton onClick={handleCollapse}>{isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
-        <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
-      </Grid>
-    </Grid>
+    <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
+      <Tabs
+        tabsProps={{ variant: 'scrollable' }}
+        tabs={footerTabs.map((tab) => {
+          return {
+            ...tab,
+          };
+        })}
+        rightButtons={
+          <>
+            {!isFullscreen && <IconButton onClick={handleCollapse}>{isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
+            <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
+          </>
+        }
+      />
+    </div>
   ) : null;
 }

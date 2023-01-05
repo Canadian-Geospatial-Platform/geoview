@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import MaterialBox from '@mui/material/Box';
+// import MaterialBox from '@mui/material/Box';
 
 type TypeChildren = React.ReactNode;
 
@@ -28,9 +28,9 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
-      style={{ height: 'calc( 100% - 55px )', overflow: 'auto' }}
+      style={{ height: '100%', overflow: 'auto' }}
     >
-      <MaterialBox sx={{ p: 3 }}>{children}</MaterialBox>
+      {children}
     </div>
   );
 }
