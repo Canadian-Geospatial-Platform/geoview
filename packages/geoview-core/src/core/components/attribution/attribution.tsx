@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import OLAttribution, { Options } from 'ol/control/Attribution';
 
@@ -7,7 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
-
+import { Tooltip } from '../../../ui';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
@@ -95,7 +95,7 @@ class CustomAttribution extends OLAttribution {
   }
 
   /**
-   * Format the attribution element by removing duplicate and add tooltip (title)
+   * Format the attribution element by removing duplicate
    */
   formatAttribution() {
     // find ul element in attribution control
@@ -114,7 +114,6 @@ class CustomAttribution extends OLAttribution {
 
           // if elemetn doat not exist, add. Otherwise remove
           if (!compAttribution.includes(attributionText.toLowerCase().replaceAll(' ', ''))) {
-            liElement.setAttribute('title', attributionText);
             this.attributions.push(attributionText);
             compAttribution.push(attributionText.toLowerCase().replaceAll(' ', ''));
           } else {
@@ -145,17 +144,18 @@ export function Attribution(): JSX.Element {
   const classes = useStyles();
 
   const mapConfig = useContext(MapContext);
+  const [attributionText, setAttributionText] = useState('');
 
   const { mapId } = mapConfig;
 
   useEffect(() => {
     const { map } = api.map(mapId);
 
-    const attributionText = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
+    const attributionTextElement = document.getElementById(`${mapId}-attribution-text`) as HTMLElement;
 
     const attributionControl = new CustomAttribution(
       {
-        target: attributionText,
+        target: attributionTextElement,
         collapsible: false,
         collapsed: false,
         label: document.createElement('div'),
@@ -168,6 +168,15 @@ export function Attribution(): JSX.Element {
       EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
       (payload) => {
         if (payloadIsABoolean(payload)) {
+          if (attributionTextElement) {
+            const liElements = attributionTextElement.getElementsByTagName('LI');
+            if (liElements && liElements.length > 0) {
+              for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
+                const liElement = liElements[liElementIndex] as HTMLElement;
+                setAttributionText(liElement.innerText);
+              }
+            }
+          }
           if (payload.handlerName!.includes(mapId) && payload.status) {
             attributionControl.formatAttribution();
           }
@@ -179,5 +188,9 @@ export function Attribution(): JSX.Element {
     map.addControl(attributionControl);
   }, [mapId]);
 
-  return <div id={`${mapId}-attribution-text`} className={classes.attributionContainer} />;
+  return (
+    <Tooltip title={attributionText}>
+      <div id={`${mapId}-attribution-text`} className={classes.attributionContainer} />
+    </Tooltip>
+  );
 }

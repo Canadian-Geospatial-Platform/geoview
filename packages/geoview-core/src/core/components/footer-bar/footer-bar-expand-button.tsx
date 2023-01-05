@@ -1,7 +1,5 @@
 import { useContext, useState } from 'react';
 
-import makeStyles from '@mui/styles/makeStyles';
-
 import { ExpandMoreIcon, ExpandLessIcon, IconButton } from '../../../ui';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
@@ -9,15 +7,16 @@ import { api } from '../../../app';
 import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 
-const useStyles = makeStyles((theme) => ({
+const sxClasses = {
   expandbuttonContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: `${theme.palette.primary.light}`,
-    padding: `0px 5px`,
+    color: 'primary.light',
+    padding: '0px 5px',
+    transition: 'padding 300ms ease',
   },
-}));
+};
 
 /**
  * Footerbar Expand Button component
@@ -27,8 +26,6 @@ const useStyles = makeStyles((theme) => ({
 export function FooterbarExpandButton(): JSX.Element {
   const [status, setStatus] = useState<boolean>(false);
 
-  const classes = useStyles();
-
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
@@ -36,11 +33,16 @@ export function FooterbarExpandButton(): JSX.Element {
    * Expand the footer bar
    */
   const expandFooterbar = () => {
-    const footerBar = document.getElementById(`${mapId}-footerBar`);
+    const footerExpandIconButton = document.getElementById(`${mapId}-footerExpandIconButton`);
+    if (footerExpandIconButton) {
+      footerExpandIconButton.style.padding = '5px';
+    }
 
+    const footerBar = document.getElementById(`${mapId}-footerBar`);
     if (footerBar) {
-      footerBar.style.transition = 'max-height 1s ease-in';
-      footerBar.style.maxHeight = '100%';
+      footerBar.style.transition = 'max-height 300ms ease-in';
+      footerBar.style.maxHeight = '55px';
+      footerBar.style.height = '55px';
 
       const ulElement = footerBar.querySelector('.ol-attribution ul') as HTMLElement;
 
@@ -58,6 +60,11 @@ export function FooterbarExpandButton(): JSX.Element {
    * Collapse footer bar
    */
   const collapseFooterbar = () => {
+    const footerExpandIconButton = document.getElementById(`${mapId}-footerExpandIconButton`);
+    if (footerExpandIconButton) {
+      footerExpandIconButton.style.padding = '0px 5px';
+    }
+
     const footerBar = document.getElementById(`${mapId}-footerBar`);
 
     if (footerBar) {
@@ -77,7 +84,11 @@ export function FooterbarExpandButton(): JSX.Element {
   };
 
   return (
-    <IconButton className={`${classes.expandbuttonContainer}`} onClick={() => (status ? collapseFooterbar() : expandFooterbar())}>
+    <IconButton
+      id={`${mapId}-footerExpandIconButton`}
+      sx={sxClasses.expandbuttonContainer}
+      onClick={() => (status ? collapseFooterbar() : expandFooterbar())}
+    >
       {status ? <ExpandMoreIcon /> : <ExpandLessIcon />}
     </IconButton>
   );
