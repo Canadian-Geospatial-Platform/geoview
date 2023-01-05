@@ -4,8 +4,6 @@ import { View } from 'ol';
 
 import { useTranslation } from 'react-i18next';
 
-import makeStyles from '@mui/styles/makeStyles';
-
 import { ArrowUpIcon, IconButton } from '../../../ui';
 
 import { MapContext } from '../../app-start';
@@ -14,12 +12,16 @@ import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-view-projection-payload';
 
-const useStyles = makeStyles((theme) => ({
-  rotationIcon: {
-    fontSize: `${theme.typography.fontSize}px !important`,
-    color: `${theme.palette.primary.light}`,
+const sxClasses = {
+  rotationButton: {
+    height: '25px',
+    width: '25px',
   },
-}));
+  rotationIcon: {
+    fontSize: 'fontSize',
+    color: 'primary.light',
+  },
+};
 
 /**
  * Footerbar Rotation Button component
@@ -27,8 +29,6 @@ const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} the rotation buttons
  */
 export function FooterbarRotationButton(): JSX.Element {
-  const classes = useStyles();
-
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
@@ -95,12 +95,13 @@ export function FooterbarRotationButton(): JSX.Element {
 
   return (
     <IconButton
+      sx={sxClasses.rotationButton}
       tooltipPlacement="bottom"
       tooltip={t('mapctrl.rotation.resetRotation')}
       title={t('mapctrl.rotation.resetRotation')}
       onClick={() => resetRotation()}
     >
-      <ArrowUpIcon ref={iconRef} className={`${classes.rotationIcon}`} />
+      <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationIcon} />
     </IconButton>
   );
 }
