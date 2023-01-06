@@ -549,8 +549,8 @@ export class GeoviewRenderer {
       if (styleSettings?.color === undefined && styleSettings.stroke?.color === undefined) {
         styleSettings.color =
           layerEntryConfig.source!.cluster?.color !== undefined
-            ? asString(setAlphaColor(asArray(layerEntryConfig.source!.cluster!.color), 0.25))
-            : this.getDefaultColorAndIncrementIndex(0.25);
+            ? asString(setAlphaColor(asArray(layerEntryConfig.source!.cluster!.color), 0.45))
+            : this.getDefaultColorAndIncrementIndex(0.45);
       }
 
       this.setClusterColor(layerEntryConfig, styleSettings);
@@ -619,7 +619,7 @@ export class GeoviewRenderer {
     const layerColor = layerEntryConfig.source?.cluster?.color ? layerEntryConfig.source?.cluster?.color : undefined;
     const settings: TypeSimpleSymbolVectorConfig = {
       type: 'simpleSymbol',
-      color: layerColor ? asString(setAlphaColor(asArray(layerColor!), 0.25)) : this.getDefaultColor(0.25),
+      color: layerColor ? asString(setAlphaColor(asArray(layerColor!), 0.45)) : this.getDefaultColor(0.45),
       stroke: {
         color: layerColor || this.getDefaultColorAndIncrementIndex(1),
         lineStyle: 'solid',
@@ -891,14 +891,16 @@ export class GeoviewRenderer {
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeSimpleSymbolVectorConfig;
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size + 4 : 8 };
+    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size + 10 : 14 };
     circleOptions.stroke = new Stroke(strokeOptions);
     circleOptions.fill = new Fill(fillOptions);
     if (settings.offset !== undefined) circleOptions.displacement = settings.offset;
     if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
-    const textOptions: TextOptions = { text: feature.get('features').length.toString() };
+    const textOptions: TextOptions = { text: feature.get('features').length.toString(), font: '12px sans-serif' };
     const textFillOptions: FillOptions = { color: textColor !== '' ? textColor : '#fff' };
     textOptions.fill = new Fill(textFillOptions);
+    const textStrokeOptions: StrokeOptions = { color: '#000', width: 2 };
+    textOptions.stroke = new Stroke(textStrokeOptions);
     return new Style({
       image: new StyleCircle(circleOptions),
       text: new Text(textOptions),
