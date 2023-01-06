@@ -1,5 +1,5 @@
 {
-  "copyrightText": "© Her Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
   "listOfLayerEntryConfig": [
     {
       "layerId": "polygons.json",
@@ -9,7 +9,7 @@
           "queryable": "true",
           "nameField": { "en": "number", "fr": "number" },
           "outfields": { "en": "number", "fr": "number" },
-          "aliasFields":  { "en": "number", "fr": "nombre" }
+          "aliasFields": { "en": "number", "fr": "nombre" }
         }
       },
       "initialSettings": {
@@ -42,7 +42,7 @@
           "queryable": "true",
           "nameField": { "en": "Road Number", "fr": "Road Number" },
           "outfields": { "en": "Road Number,Province", "fr": "Road Number,Province" },
-          "aliasFields":  { "en": "Road Number,Province", "fr": "Numéro de route,Province" }
+          "aliasFields": { "en": "Road Number,Province", "fr": "Numéro de route,Province" }
         }
       },
       "initialSettings": {
@@ -70,7 +70,7 @@
           "queryable": "true",
           "nameField": { "en": "data", "fr": "data" },
           "outfields": { "en": "data,label", "fr": "data, label" },
-          "aliasFields":  { "en": "data,label", "fr": "données,étiquette" }
+          "aliasFields": { "en": "data,label", "fr": "données,étiquette" }
         }
       },
       "initialSettings": {
@@ -98,7 +98,7 @@
           "queryable": "true",
           "nameField": { "en": "Red", "fr": "Red" },
           "outfields": { "en": "Red,Green,Blue,Yellow,Orange", "fr": "Red,Green,Blue,Yellow,Orange" },
-          "aliasFields":  { "en": "Red,Green,Blue,Yellow,Orange", "fr": "Rouge,Vert,Bleu,Jaune,Orange" }
+          "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange", "fr": "Rouge,Vert,Bleu,Jaune,Orange" }
         }
       },
       "initialSettings": {

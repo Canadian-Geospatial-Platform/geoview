@@ -338,7 +338,11 @@ export class WMS extends AbstractGeoViewRaster {
         };
         sourceOptions.attributions = this.attributions;
         sourceOptions.serverType = layerEntryConfig.source.serverType;
-        if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+        if (layerEntryConfig.source.crossOrigin) {
+          sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+        } else {
+          sourceOptions.crossOrigin = 'Anonymous';
+        }
         if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
 
         const imageLayerOptions: ImageOptions<ImageWMS> = {
