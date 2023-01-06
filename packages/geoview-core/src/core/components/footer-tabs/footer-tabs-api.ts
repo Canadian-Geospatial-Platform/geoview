@@ -71,4 +71,18 @@ export class FooterTabsApi {
       api.event.emit(tabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, this.mapId, tabToRemove));
     }
   };
+
+  /**
+   * Select a tab by value
+   *
+   * @param {number} value the value of the tab to be selected
+   */
+  selectFooterTab = (value: number): void => {
+    // find the tab to be selected
+    const tabToSelect = this.tabs.find((tab) => tab.value === value);
+    if (tabToSelect) {
+      // trigger an event to select the tab
+      api.event.emit(tabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, this.mapId, tabToSelect));
+    }
+  };
 }

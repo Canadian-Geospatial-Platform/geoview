@@ -58,6 +58,7 @@ export type EventStringId =
   | 'footerbar/expand_collapse'
   | 'footer_tabs/tab_create'
   | 'footer_tabs/tab_remove'
+  | 'footer_tabs/tab_select'
   | 'get_feature_info/all_queries_done'
   | 'get_feature_info/query_layer'
   | 'get_feature_info/query_result'
