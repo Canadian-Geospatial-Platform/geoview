@@ -891,13 +891,13 @@ export class GeoviewRenderer {
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeSimpleSymbolVectorConfig;
     const fillOptions: FillOptions = { color: settings.color };
     const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size + 4 : 8 };
+    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size + 10 : 14 };
     circleOptions.stroke = new Stroke(strokeOptions);
     circleOptions.fill = new Fill(fillOptions);
     if (settings.offset !== undefined) circleOptions.displacement = settings.offset;
     if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
-    const textOptions: TextOptions = { text: feature.get('features').length.toString() };
-    const textFillOptions: FillOptions = { color: textColor !== '' ? textColor : '#fff' };
+    const textOptions: TextOptions = { text: feature.get('features').length.toString(), font: 'bold 12px sans-serif' };
+    const textFillOptions: FillOptions = { color: textColor !== '' ? textColor : '#000' };
     textOptions.fill = new Fill(textFillOptions);
     return new Style({
       image: new StyleCircle(circleOptions),
