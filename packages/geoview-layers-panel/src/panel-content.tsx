@@ -42,8 +42,8 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     IconButton,
     AddIcon,
     Box,
-    ArrowDownIcon,
-    ArrowRightIcon,
+    ExpandMoreIcon,
+    ExpandLessIcon,
     VisibilityIcon,
     VisibilityOffIcon,
     Menu,
@@ -206,13 +206,13 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       <Menu anchorEl={actionMenuAnchorElement} open={actionMenuOpen} onClose={handleCloseMenu}>
         <MenuItem onClick={() => handleExpandAllClick(true)}>
           <ListItemIcon>
-            <ArrowDownIcon />
+            <ExpandMoreIcon />
           </ListItemIcon>
           <ListItemText>{translations[displayLanguage].expandAll}</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleExpandAllClick(false)}>
           <ListItemIcon>
-            <ArrowRightIcon />
+            <ExpandLessIcon />
           </ListItemIcon>
           <ListItemText>{translations[displayLanguage].collapseAll}</ListItemText>
         </MenuItem>

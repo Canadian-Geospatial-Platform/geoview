@@ -1,13 +1,5 @@
 import MaterialListItemIcon from '@mui/material/ListItemIcon';
-import makeStyles from '@mui/styles/makeStyles';
-
 import { ListItemIconProps } from '@mui/material';
-
-const useStyles = makeStyles(() => ({
-  listItemIcon: {
-    //
-  },
-}));
 
 /**
  * Create a customized Material UI List Item
@@ -18,10 +10,8 @@ const useStyles = makeStyles(() => ({
 export function ListItemIcon(props: ListItemIconProps): JSX.Element {
   const { children, className, style } = props;
 
-  const classes = useStyles();
-
   return (
-    <MaterialListItemIcon className={`${classes.listItemIcon} ${className || ''}`} style={style || undefined}>
+    <MaterialListItemIcon className={`${className || ''}`} style={style || undefined}>
       {children !== undefined && children}
     </MaterialListItemIcon>
   );

@@ -17,8 +17,8 @@ import {
   Menu,
   MenuItem,
   MoreVertIcon,
-  ArrowRightIcon,
-  ArrowDownIcon,
+  ExpandMoreIcon,
+  ExpandLessIcon,
   OpacityIcon,
   SliderBase,
 } from '../../../ui';
@@ -37,10 +37,6 @@ import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/a
 import { isClassBreakStyleConfig, isUniqueValueStyleConfig, layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
 
 const sxClasses = {
-  legendItem: {
-    color: 'text.primary',
-    padding: 0,
-  },
   expandableGroup: {
     paddingRight: 0,
     paddingLeft: 28,
@@ -330,12 +326,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   return (
     <>
-      <ListItem sx={sxClasses.legendItem}>
+      <ListItem>
         <ListItemButton>
           <ListItemIcon>
             {groupItems.length > 0 && (
               <IconButton color="primary" onClick={handleExpandGroupClick}>
-                {isGroupOpen ? <ArrowDownIcon /> : <ArrowRightIcon />}
+                {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
             {isLegendOpen && (
@@ -371,7 +367,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
           </ListItemIcon>
           <Tooltip title={layerName} placement="top" enterDelay={1000}>
-            <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={layerName} />
+            <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
           <ListItemIcon>
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (

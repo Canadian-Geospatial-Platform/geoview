@@ -1,13 +1,5 @@
 import MaterialCollapse from '@mui/material/Collapse';
-import makeStyles from '@mui/styles/makeStyles';
-
 import { CollapseProps } from '@mui/material';
-
-const useStyles = makeStyles((theme) => ({
-  collapse: {
-    //
-  },
-}));
 
 /**
  * Create a customized Material UI Collapse
@@ -20,11 +12,9 @@ export function Collapse(props: CollapseProps): JSX.Element {
   // eslint-disable-next-line react/destructuring-assignment
   const inProp = props.in;
 
-  const classes = useStyles();
-
   return (
     <MaterialCollapse
-      className={`${classes.collapse} ${className || ''}`}
+      className={`${className || ''}`}
       style={style || undefined}
       in={inProp}
       timeout={timeout}
