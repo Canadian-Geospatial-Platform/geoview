@@ -46,9 +46,10 @@ export class DataGridAPI {
       return { featureKey, ...featureInfo };
     });
 
-    if (values) {
+    if (values !== undefined && values[0] !== undefined) {
       // set columns
       const columnHeader = Object.keys(values[0]);
+
       const columns = [];
       for (let i = 0; i < columnHeader.length - 1; i++) {
         columns.push({
@@ -64,7 +65,6 @@ export class DataGridAPI {
       const rows = values;
 
       return createElement('div', {}, [
-        createElement('h4', { key: `${layerId}-title` }, getLocalizedValue(geoviewLayerInstance.geoviewLayerName, this.mapId)),
         createElement(LayerDataGrid, {
           key: `${layerId}-datagrid`,
           columns,

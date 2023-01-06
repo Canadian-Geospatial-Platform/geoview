@@ -15,6 +15,7 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-footer-panel.json';
 import { DetailsItem } from './details-item';
 import { LegendItem } from './legend-item';
+import { DataItem } from './data-item';
 
 const w = window as TypeWindow;
 
@@ -101,7 +102,7 @@ class FooterPanelPlugin extends AbstractPlugin {
 
       // create the listener to return the details
       if (defaultTabs.includes('details')) {
-        // the call to create details element return the element and the footer content is waiting for a function.
+        // create new tab and add the DetailComponent to the footer tab
         const detailsTabValue = tabsCounter;
         footerTabs.createFooterTab({
           value: detailsTabValue,
@@ -130,11 +131,11 @@ class FooterPanelPlugin extends AbstractPlugin {
       }
 
       if (defaultTabs.includes('data-grid')) {
-        // the call to create data grid element return the element and the footer content is waiting for a function.
+        /// create new tab and add the DataGridComponent to the footer tab
         footerTabs.createFooterTab({
           value: tabsCounter,
           label: this.translations[displayLanguage].dataGrid as string,
-          content: () => api.map(mapId).dataGrid.createDataGrid({ layerId: 'esriFeatureLYR4' }),
+          content: () => <DataItem mapId={mapId} />,
         });
         tabsCounter++;
       }
