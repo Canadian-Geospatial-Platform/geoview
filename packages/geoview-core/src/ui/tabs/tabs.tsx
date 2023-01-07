@@ -57,14 +57,15 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
 
   return (
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item xs={10}>
+      <Grid item xs={7} sm={10}>
         <MaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs">
           {tabs.map((tab, index) => {
-            return <MaterialTab label={tab.label} key={index} {...props.tabProps} id={`tab-${index}`} />;
+            // eslint-disable-next-line prettier/prettier
+            return <MaterialTab label={tab.label} key={index} {...props.tabProps} id={`tab-${index}`} sx={{ fontSize: 'min(3vw, 24px)', minWidth: 'min(4vw, 24px)', padding: '12px 2%' }} />;
           })}
         </MaterialTabs>
       </Grid>
-      <Grid item xs={2} sx={{ textAlign: 'right' }}>
+      <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
         {rightButtons}
       </Grid>
       <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider' }}>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Grid from '@mui/material/Grid';
 import {
   Collapse,
   List,
@@ -80,7 +81,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   });
 
   return (
-    <>
+    <Grid item sm={12} md={6} lg={4}>
       <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
@@ -109,6 +110,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           </List>
         </Box>
       </Collapse>
-    </>
+    </Grid>
   );
 }
