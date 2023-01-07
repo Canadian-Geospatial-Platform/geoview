@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useState } from 'react';
+import Grid from '@mui/material/Grid';
 import {
   Collapse,
   List,
@@ -7,7 +8,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Box,
   ExpandMoreIcon,
   ExpandLessIcon,
   Tooltip,
@@ -50,12 +50,12 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
               </ListItemButton>
             </ListItem>
             <Collapse in={layerSetOpen === layerData.layerPath} timeout="auto" unmountOnExit>
-              <Box sx={sxClasses.expandableIconContainer}>
+              <Grid container spacing={2} sx={sxClasses.expandableIconContainer}>
                 {layerData.features.map((feature, index: number) => (
                   // eslint-disable-next-line react/no-array-index-key
                   <FeatureInfo key={index} feature={feature} />
                 ))}
-              </Box>
+              </Grid>
             </Collapse>
           </div>
         );

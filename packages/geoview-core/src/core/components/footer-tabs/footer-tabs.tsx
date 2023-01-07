@@ -15,7 +15,7 @@ export const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.default,
     width: '100%',
     height: '300px',
-    transition: 'height 0.2s ease-in-out',
+    transition: 'height 0.2s ease-out',
   },
 }));
 /**
@@ -74,7 +74,7 @@ export function FooterTabs(): JSX.Element | null {
     if (tabsContainerRef && tabsContainerRef.current) {
       const tabsContaine = tabsContainerRef.current as HTMLDivElement;
       const mapContaine = tabsContaine.previousElementSibling as HTMLDivElement;
-
+      mapContaine.style.transition = 'height 0.2s ease-out';
       // check if the tabs container is collapsed
       if (isCollapsed) {
         tabsContaine.style.height = '55px';
@@ -90,7 +90,7 @@ export function FooterTabs(): JSX.Element | null {
     // update map container size
     setTimeout(() => {
       api.map(mapId).map.updateSize();
-    }, 200);
+    }, 1000);
   };
 
   const handleFullscreen = () => {
@@ -98,7 +98,7 @@ export function FooterTabs(): JSX.Element | null {
     if (tabsContainerRef && tabsContainerRef.current) {
       const tabsContaine = tabsContainerRef.current as HTMLDivElement;
       const mapContaine = tabsContaine.previousElementSibling as HTMLDivElement;
-
+      mapContaine.style.transition = 'height 0.2s ease-out';
       // check if the tabs container is collapsed
       if (isFullscreen) {
         // eslint-disable-next-line no-lonely-if
@@ -106,8 +106,8 @@ export function FooterTabs(): JSX.Element | null {
         mapContaine.style.height = 'calc( 100% - 300px)';
         setIsCollapsed(true);
       } else {
-        tabsContaine.style.height = 'calc( 100% - 1px )';
-        mapContaine.style.height = '1px';
+        tabsContaine.style.height = '100%';
+        mapContaine.style.height = '0';
       }
     }
 
@@ -116,7 +116,7 @@ export function FooterTabs(): JSX.Element | null {
     // update map container size
     setTimeout(() => {
       api.map(mapId).map.updateSize();
-    }, 200);
+    }, 1500);
   };
 
   useEffect(() => {
