@@ -7,6 +7,8 @@ import {
   toJsonObject,
   TypeJsonObject,
   AnySchemaObject,
+  payloadIsAllQueriesDone,
+  TypeArrayOfFeatureInfoEntries,
 } from 'geoview-core';
 
 import schema from '../schema.json';
@@ -100,12 +102,31 @@ class FooterPanelPlugin extends AbstractPlugin {
       // create the listener to return the details
       if (defaultTabs.includes('details')) {
         // the call to create details element return the element and the footer content is waiting for a function.
+        const detailsTabValue = tabsCounter;
         footerTabs.createFooterTab({
-          value: tabsCounter,
+          value: detailsTabValue,
           label: this.translations[displayLanguage].details as string,
           content: () => <DetailsItem mapId={mapId} />,
         });
         tabsCounter++;
+        // select the details tab when map click queries are done
+        api.event.on(
+          api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+          (payload) => {
+            if (payloadIsAllQueriesDone(payload)) {
+              const { resultSets } = payload;
+              let features: TypeArrayOfFeatureInfoEntries = [];
+              Object.keys(resultSets).forEach((layerPath) => {
+                features = features.concat(resultSets[layerPath]!);
+              });
+              if (features.length > 0) {
+                footerTabs.selectFooterTab(detailsTabValue);
+              }
+            }
+          },
+          mapId,
+          `${mapId}-DetailsAPI`
+        );
       }
 
       if (defaultTabs.includes('data-grid')) {

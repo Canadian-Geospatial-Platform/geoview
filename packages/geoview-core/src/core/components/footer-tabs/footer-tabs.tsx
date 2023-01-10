@@ -8,7 +8,7 @@ import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { FooterTabPayload, payloadIsAFooterTab } from '../../../api/events/payloads/footer-tab-payload';
 
-import { ExpandLessIcon, ExpandMoreIcon, IconButton, Tabs, TypeTabs } from '../../../ui';
+import { Box, ExpandLessIcon, ExpandMoreIcon, IconButton, Tabs, TypeTabs } from '../../../ui';
 
 export const useStyles = makeStyles((theme) => ({
   tabsContainer: {
@@ -31,6 +31,7 @@ export const useStyles = makeStyles((theme) => ({
  * @returns {JSX.Element} returns the Footer Tabs component
  */
 export function FooterTabs(): JSX.Element | null {
+  const [selectedTab, setSelectedTab] = useState<number | undefined>();
   const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
 
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -123,24 +124,42 @@ export function FooterTabs(): JSX.Element | null {
       },
       mapId
     );
+
+    // listen for tab selection
+    api.event.on(
+      EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT,
+      (payload) => {
+        if (payloadIsAFooterTab(payload)) {
+          if (payload.handlerName && payload.handlerName === mapId) {
+            setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
+            setSelectedTab(payload.tab.value);
+          }
+        }
+      },
+      mapId
+    );
     return () => {
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, mapId);
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, mapId);
     };
   }, [addTab, mapId, removeTab]);
 
   return api.map(mapId).footerTabs.tabs.length > 0 ? (
     <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
-      <Tabs
-        tabsProps={{
-          variant: 'scrollable',
-        }}
-        tabs={footerTabs.map((tab) => {
-          return {
-            ...tab,
-          };
-        })}
-      />
+      <Box component="span" onClick={isCollapsed ? undefined : handleCollapse}>
+        <Tabs
+          selectedTab={selectedTab}
+          tabsProps={{
+            variant: 'scrollable',
+          }}
+          tabs={footerTabs.map((tab) => {
+            return {
+              ...tab,
+            };
+          })}
+        />
+      </Box>
       <div className={classes.collapseButton}>
         <IconButton onClick={handleCollapse}>{isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
       </div>

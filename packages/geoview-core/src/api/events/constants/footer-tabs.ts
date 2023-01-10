@@ -6,7 +6,7 @@ import { EventStringId } from '../event-types';
  */
 
 /** Valid keys for the FOOTER_TABS category */
-export type FooterTabsEventKey = 'EVENT_FOOTER_TABS_TAB_CREATE' | 'EVENT_FOOTER_TABS_TAB_REMOVE';
+export type FooterTabsEventKey = 'EVENT_FOOTER_TABS_TAB_CREATE' | 'EVENT_FOOTER_TABS_TAB_REMOVE' | 'EVENT_FOOTER_TABS_TAB_SELECT';
 
 /** Record that associates FOOTER_TABS's event keys to their event string id */
 export const FOOTER_TABS: Record<FooterTabsEventKey, EventStringId> = {
@@ -19,4 +19,9 @@ export const FOOTER_TABS: Record<FooterTabsEventKey, EventStringId> = {
    * Event triggered when a footer tabs tab has been removed
    */
   EVENT_FOOTER_TABS_TAB_REMOVE: 'footer_tabs/tab_remove',
+
+  /**
+   * Event triggered to select a footer tab
+   */
+  EVENT_FOOTER_TABS_TAB_SELECT: 'footer_tabs/tab_select',
 };

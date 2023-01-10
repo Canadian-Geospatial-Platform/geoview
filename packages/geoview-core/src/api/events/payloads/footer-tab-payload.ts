@@ -8,6 +8,7 @@ import { TypeTabs } from '../../../ui/tabs/tabs';
 const validEvents: EventStringId[] = [
   EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE,
   EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE,
+  EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT,
 ];
 
 /**

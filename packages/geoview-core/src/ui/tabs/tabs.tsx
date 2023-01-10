@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
-import { SyntheticEvent, useState } from 'react';
+import { SyntheticEvent, useEffect, useState } from 'react';
 
 import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import MaterialTabs from '@mui/material/Tabs';
@@ -28,6 +28,7 @@ export type TypeTabs = {
  */
 export interface TypeTabsProps {
   tabs: TypeTabs[];
+  selectedTab?: number;
   boxProps?: BoxProps;
   tabsProps?: TabsProps;
   tabProps?: TabProps;
@@ -40,7 +41,7 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs } = props;
+  const { tabs, selectedTab } = props;
 
   const [value, setValue] = useState(0);
 
@@ -53,6 +54,11 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
     setValue(newValue);
   };
+
+  useEffect(() => {
+    if (selectedTab && value !== selectedTab) setValue(selectedTab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab]);
 
   return (
     <MaterialBox {...props.boxProps} sx={{ width: '100%', height: '100%' }}>
