@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import Grid from '@mui/material/Grid';
 import {
   Box,
   Collapse,
@@ -325,7 +326,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   };
 
   return (
-    <>
+    <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
       <ListItem>
         <ListItemButton>
           <ListItemIcon>
@@ -433,6 +434,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </Box>
         </Box>
       </Collapse>
-    </>
+    </Grid>
   );
 }

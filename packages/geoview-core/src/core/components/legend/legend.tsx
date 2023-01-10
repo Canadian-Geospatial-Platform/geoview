@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
+import Grid from '@mui/material/Grid';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
-import { List } from '../../../ui';
 import { LegendItem } from './legend-item';
 import { payloadIsRemoveGeoViewLayer } from '../../../api/events/payloads/geoview-layer-payload';
 import { AbstractGeoViewLayer } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
@@ -80,19 +80,17 @@ export function Legend(): JSX.Element | null {
   }, [mapLayers]);
 
   return (
-    <div>
-      <List>
-        {orderedMapLayers.map((geoViewLayer) => {
-          return (
-            <LegendItem
-              key={geoViewLayer.geoviewLayerId}
-              layerId={geoViewLayer.geoviewLayerId}
-              geoviewLayerInstance={geoViewLayer}
-              isRemoveable={!configLayerIds.includes(geoViewLayer.geoviewLayerId)}
-            />
-          );
-        })}
-      </List>
-    </div>
+    <Grid container spacing={2}>
+      {orderedMapLayers.map((geoViewLayer) => {
+        return (
+          <LegendItem
+            key={geoViewLayer.geoviewLayerId}
+            layerId={geoViewLayer.geoviewLayerId}
+            geoviewLayerInstance={geoViewLayer}
+            isRemoveable={!configLayerIds.includes(geoViewLayer.geoviewLayerId)}
+          />
+        );
+      })}
+    </Grid>
   );
 }
