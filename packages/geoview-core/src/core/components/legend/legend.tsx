@@ -81,7 +81,6 @@ export function Legend(): JSX.Element | null {
 
   return (
     <Grid container spacing={2}>
-      {/* // <List> */}
       {orderedMapLayers.map((geoViewLayer) => {
         return (
           <LegendItem
@@ -92,7 +91,6 @@ export function Legend(): JSX.Element | null {
           />
         );
       })}
-      {/* </List> */}
     </Grid>
   );
 }
