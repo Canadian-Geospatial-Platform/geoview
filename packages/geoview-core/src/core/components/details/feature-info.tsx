@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable react/require-default-props */
+import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import {
   Collapse,
@@ -65,6 +66,7 @@ export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   key: number;
   feature: TypeFeatureInfoEntry;
+  startOpen?: boolean;
 }
 
 /**
@@ -73,19 +75,27 @@ export interface TypeFeatureProps {
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
-  const { feature } = props;
+  const { feature, startOpen } = props;
   const featureId = `Feature Info ${feature.featureKey}`;
   const [isOpen, setOpen] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
     return { key: featureKey, value: feature.featureInfo[featureKey] };
   });
 
+  useEffect(() => {
+    // a list of FeatureInfo with only one element will pass down the startOpen prop
+    if (startOpen) {
+      setOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Grid item sm={12} md={6} lg={4}>
       <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
-            <IconButton color="primary">{!isOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+            <IconButton color="primary">{!isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
