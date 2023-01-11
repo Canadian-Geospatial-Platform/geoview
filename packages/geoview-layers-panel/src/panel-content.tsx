@@ -201,6 +201,21 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     handleCloseMenu();
   };
 
+  useEffect(() => {
+    // this will disable all scrolling when the user is trying to reorder layers
+    // TODO see issue #754 and atlassian/react-beautiful-dnd#460 - there may be a more elegant solution eventually if supported from the react-beautiful-dnd library
+    if (reorderLayersVisible) {
+      const x = w.scrollX;
+      const y = w.scrollY;
+      w.onscroll = () => {
+        w.scrollTo(x, y);
+      };
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      w.onscroll = () => {};
+    }
+  }, [reorderLayersVisible]);
+
   return (
     <>
       <Menu anchorEl={actionMenuAnchorElement} open={actionMenuOpen} onClose={handleCloseMenu}>
