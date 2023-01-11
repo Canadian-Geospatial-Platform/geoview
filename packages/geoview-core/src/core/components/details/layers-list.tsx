@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import {
   Collapse,
@@ -34,6 +34,15 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
   const { arrayOfLayerData } = props;
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
 
+  useEffect(() => {
+    // if there is only one layer in the list, open it
+    if (arrayOfLayerData.length === 1) {
+      setLayerSetOpen(arrayOfLayerData[0].layerPath);
+    } else {
+      setLayerSetOpen('');
+    }
+  }, [arrayOfLayerData]);
+
   return (
     <List>
       {arrayOfLayerData.map((layerData) => {
@@ -42,7 +51,7 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
             <ListItem onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}>
               <ListItemButton>
                 <ListItemIcon>
-                  <IconButton color="primary">{layerSetOpen !== layerData.layerPath ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+                  <IconButton color="primary">{layerSetOpen !== layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 </ListItemIcon>
                 <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>
                   <ListItemText primary={layerData.layerPath ? layerData.layerName : 'Click on map'} />
@@ -53,7 +62,7 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
               <Grid container spacing={2} sx={sxClasses.expandableIconContainer}>
                 {layerData.features.map((feature, index: number) => (
                   // eslint-disable-next-line react/no-array-index-key
-                  <FeatureInfo key={index} feature={feature} />
+                  <FeatureInfo key={index} feature={feature} startOpen={layerData.features.length === 1} />
                 ))}
               </Grid>
             </Collapse>
