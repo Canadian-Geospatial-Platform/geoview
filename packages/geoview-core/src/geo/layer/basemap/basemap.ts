@@ -64,7 +64,12 @@ export class Basemap {
    * @param {TypeValidMapProjectionCodes} projection projection number
    * @param {string} mapId the map id
    */
-  constructor(basemapOptions: TypeBasemapOptions, displayLanguage: TypeDisplayLanguage, projection: TypeValidMapProjectionCodes, mapId: string) {
+  constructor(
+    basemapOptions: TypeBasemapOptions,
+    displayLanguage: TypeDisplayLanguage,
+    projection: TypeValidMapProjectionCodes,
+    mapId: string
+  ) {
     this.#mapId = mapId;
 
     this.basemapOptions = basemapOptions;
@@ -153,7 +158,11 @@ export class Basemap {
    *
    * @returns {string[]} array of thumbnail urls
    */
-  private getThumbnailUrl = (basemapTypes: string[], projection: TypeValidMapProjectionCodes, displayLanguage: TypeDisplayLanguage): string[] => {
+  private getThumbnailUrl = (
+    basemapTypes: string[],
+    projection: TypeValidMapProjectionCodes,
+    displayLanguage: TypeDisplayLanguage
+  ): string[] => {
     const thumbnailUrls: string[] = [];
 
     for (let typeIndex = 0; typeIndex < basemapTypes.length; typeIndex++) {
@@ -344,6 +353,7 @@ export class Basemap {
         attributions: this.attribution,
         projection: api.projection.projections[urlProj],
         url: basemapLayer.url as string,
+        crossOrigin: 'Anonymous',
         tileGrid: new TileGrid({
           extent,
           origin,
@@ -437,7 +447,7 @@ export class Basemap {
           basemapLayers.push({
             basemapId: 'osm',
             type: 'osm',
-            source: new OSM(),
+            source: new OSM({ crossOrigin: 'Anonymous' }),
             opacity: coreBasemapOptions.shaded ? 0.75 : defaultOpacity,
             origin: [],
             extent: [],
@@ -542,6 +552,7 @@ export class Basemap {
           attributions: attribution[this.displayLanguage],
           projection: api.projection.projections[this.projection],
           url: this.displayLanguage === 'en' ? (layer.url as unknown as bilingual).en : (layer.url as unknown as bilingual).fr,
+          crossOrigin: 'Anonymous',
           tileGrid: new TileGrid({
             extent: this.defaultExtent,
             origin: this.defaultOrigin,

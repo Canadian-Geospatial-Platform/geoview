@@ -394,7 +394,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       if (layerEntryConfig.source.transparent)
         Object.defineProperty(sourceOptions.params, 'transparent', layerEntryConfig.source.transparent!);
       if (layerEntryConfig.source.format) Object.defineProperty(sourceOptions.params, 'format', layerEntryConfig.source.format!);
-      if (layerEntryConfig.source.crossOrigin) sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+      if (layerEntryConfig.source.crossOrigin) {
+        sourceOptions.crossOrigin = layerEntryConfig.source.crossOrigin;
+      } else {
+        sourceOptions.crossOrigin = 'Anonymous';
+      }
       if (layerEntryConfig.source.projection) sourceOptions.projection = `EPSG:${layerEntryConfig.source.projection}`;
 
       const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
