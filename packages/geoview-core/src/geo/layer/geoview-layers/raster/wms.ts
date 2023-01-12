@@ -110,63 +110,201 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected getServiceMetadata(): Promise<void> {
     const promisedExecution = new Promise<void>((resolve) => {
-      const parser = new WMSCapabilities();
-      let metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
       if (metadataUrl) {
-        const layersToQuery = this.getLayersToQuery();
         const metadataAccessPathIsXmlFile = metadataUrl.slice(-4).toLowerCase() === '.xml';
-        if (!metadataAccessPathIsXmlFile) {
-          if (layersToQuery) metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layersToQuery}`;
-          else metadataUrl = `${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`;
-        }
-        fetch(metadataUrl).then((response) => {
-          response.text().then((capabilitiesString) => {
-            this.metadata = parser.read(capabilitiesString);
-            if (this.metadata) {
-              this.processMetadataInheritance();
-              if (metadataAccessPathIsXmlFile) {
-                const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
-                const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
-                  listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-                    if (layerEntryIsGroupLayer(layerEntryConfig)) setDataAccessPath(layerEntryConfig.listOfLayerEntryConfig);
-                    else {
-                      layerEntryConfig.source!.dataAccessPath![api.map(this.mapId).displayLanguage] = dataAccessPath;
-                    }
-                  });
-                };
-                setDataAccessPath(this.listOfLayerEntryConfig);
-              }
-            }
+        if (metadataAccessPathIsXmlFile) {
+          // XML metadata is a special case that does not use GetCapabilities to get the metadata
+          this.getXmlServiceMetadata(metadataUrl).then(() => {
             resolve();
           });
-        });
+        } else {
+          const layersToQuery = this.getLayersToQuery();
+          if (layersToQuery.length === 0) {
+            // Use GetCapabilities to get the metadata
+            this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities`).then((metadata) => {
+              if (metadata) {
+                this.metadata = metadata;
+                this.processMetadataInheritance();
+                resolve();
+              }
+            });
+          } else {
+            // Uses GetCapabilities to get the metadata. However, to allow geomet metadata to be retrieved using the non-standard
+            // "Layers" parameter on the command line, we need to process each layer individually and merge all layer metadata at
+            // the end. Even though the "Layers" parameter is ignored by other WMS servers, the drawback of this method is
+            // sending unnecessary requests while only one GetCapabilities could be used when the server publishes a small set of
+            // metadata. Which is not the case for the Geomet service.
+            const promisedArrayOfMetadata: Promise<TypeJsonObject | null>[] = [];
+            layersToQuery.forEach((layerName: string) => {
+              promisedArrayOfMetadata.push(
+                this.fetchServiceMetadata(`${metadataUrl}?service=WMS&version=1.3.0&request=GetCapabilities&Layers=${layerName}`)
+              );
+            });
+            Promise.all(promisedArrayOfMetadata).then((arrayOfMetadata) => {
+              [this.metadata] = arrayOfMetadata;
+              if (this.metadata) {
+                for (let i = 1; i < arrayOfMetadata.length; i++) {
+                  if (!this.getLayerMetadataEntry(layersToQuery[i])) {
+                    if (arrayOfMetadata[i]) {
+                      const metadataLayerPathToAdd = this.getMetadataLayerPath(layersToQuery[i], arrayOfMetadata[i]!.Capability.Layer);
+                      this.addLayerToMetadataInstance(
+                        metadataLayerPathToAdd,
+                        this.metadata!.Capability.Layer,
+                        arrayOfMetadata[i]!.Capability.Layer
+                      );
+                    }
+                  }
+                }
+              }
+              this.processMetadataInheritance();
+              resolve();
+            });
+          }
+        }
       } else throw new Error(`Cant't read service metadata for layer ${this.geoviewLayerId} of map ${this.mapId}.`);
     });
     return promisedExecution;
   }
 
   /** ***************************************************************************************************************************
-   * This method reads the layer identifiers from the configuration to create a coma seperated string that will be used in the
-   * GetCapabilities.
+   * This method reads the service metadata using a GetCapabilities request.
+   *
+   * @param {string} metadataUrl The GetCapabilities query to execute
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  private getLayersToQuery(): string {
+  private fetchServiceMetadata(url: string): Promise<TypeJsonObject | null> {
+    const promisedJsonObject = new Promise<TypeJsonObject | null>((resolve) => {
+      fetch(url).then((response) => {
+        response.text().then((capabilitiesString) => {
+          const parser = new WMSCapabilities();
+          const metadata: TypeJsonObject = parser.read(capabilitiesString);
+          resolve(metadata);
+        });
+      });
+    });
+    return promisedJsonObject;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method reads the service metadata from a XML metadataAccessPath.
+   *
+   * @param {string} metadataUrl The localized value of the metadataAccessPath
+   *
+   * @returns {Promise<void>} A promise that the execution is completed.
+   */
+  private getXmlServiceMetadata(metadataUrl: string): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      const parser = new WMSCapabilities();
+      fetch(metadataUrl).then((response) => {
+        response.text().then((capabilitiesString) => {
+          this.metadata = parser.read(capabilitiesString);
+          if (this.metadata) {
+            this.processMetadataInheritance();
+            const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+            const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
+              listOfLayerEntryConfig.forEach((layerEntryConfig) => {
+                if (layerEntryIsGroupLayer(layerEntryConfig)) setDataAccessPath(layerEntryConfig.listOfLayerEntryConfig);
+                else {
+                  layerEntryConfig.source!.dataAccessPath!.en = dataAccessPath;
+                  layerEntryConfig.source!.dataAccessPath!.fr = dataAccessPath;
+                }
+              });
+            };
+            setDataAccessPath(this.listOfLayerEntryConfig);
+          }
+          resolve();
+        });
+      });
+    });
+    return promisedExecution;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method find the layer path that lead to the layer identified by the layerName. Values stored in the array tell us which
+   * direction to use to get to the layer. A value of -1 tells us that the Layer property is an object. Other values tell us that
+   * the Layer property is an array and the value is the index to follow. If the layer can not be found, the returned value is
+   * an empty array.
+   *
+   * @param {string} layerName The layer name to be found
+   * @param {TypeJsonObject} layerProperty The layer property from the metadata
+   * @param {number[]} pathToTheLayerProperty The path leading to the parent of the layerProperty parameter
+   *
+   * @returns {number[]} An array containing the path to the layer or [] if not found.
+   */
+  private getMetadataLayerPath(layerName: string, layerProperty: TypeJsonObject, pathToTheParentLayer: number[] = []): number[] {
+    const newLayerPath = [...pathToTheParentLayer];
+    if (Array.isArray(layerProperty)) {
+      for (let i = 0; i < layerProperty.length; i++) {
+        newLayerPath.push(i);
+        if ('Name' in layerProperty[i] && layerProperty[i].Name === layerName) return newLayerPath;
+        if ('Layer' in layerProperty[i]) {
+          return this.getMetadataLayerPath(layerName, layerProperty[i].Layer, newLayerPath);
+        }
+      }
+    } else {
+      newLayerPath.push(-1);
+      if ('Name' in layerProperty && layerProperty.Name === layerName) return newLayerPath;
+      if ('Layer' in layerProperty) {
+        return this.getMetadataLayerPath(layerName, layerProperty.Layer, newLayerPath);
+      }
+    }
+    return [];
+  }
+
+  /** ***************************************************************************************************************************
+   * This method merge the layer identified by the path stored in the metadataLayerPathToAdd array to the metadata property of
+   * the WMS instance. Values stored in the path array tell us which direction to use to get to the layer. A value of -1 tells us
+   * that the Layer property is an object. In this case, it is assumed that the metadata objects at this level only differ by the
+   * layer property to add. Other values tell us that the Layer property is an array and the value is the index to follow. If at
+   * this level in the path the layers have the same name, we move to the next level. Otherwise, the layer can be added.
+   *
+   * @param {number[]} metadataLayerPathToAdd The layer name to be found
+   * @param {TypeJsonObject} metadataLayer The metadata layer that will receive the new layer
+   * @param {TypeJsonObject} layerToAdd The layer property to add
+   */
+  private addLayerToMetadataInstance(metadataLayerPathToAdd: number[], metadataLayer: TypeJsonObject, layerToAdd: TypeJsonObject) {
+    if (metadataLayerPathToAdd.length === 0) return;
+    if (metadataLayerPathToAdd[0] === -1)
+      this.addLayerToMetadataInstance(metadataLayerPathToAdd.slice(1), metadataLayer.Layer, layerToAdd.Layer);
+    else {
+      let i: number;
+      for (i = 0; i < metadataLayer.length; i++) if (metadataLayer[i].Name === layerToAdd[metadataLayerPathToAdd[0]].Name) break;
+      if (i < metadataLayer.length)
+        this.addLayerToMetadataInstance(
+          metadataLayerPathToAdd.slice(1),
+          metadataLayer[i].Layer,
+          layerToAdd[metadataLayerPathToAdd[0]].Layer
+        );
+      else (metadataLayer as TypeJsonArray).push(layerToAdd[metadataLayerPathToAdd[0]]);
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * This method reads the layer identifiers from the configuration to create an array that will be used in the GetCapabilities.
+   *
+   * @returns {string[]} The array of layer identifiers.
+   */
+  private getLayersToQuery(): string[] {
+    const arrayOfLayerIds: string[] = [];
     const gatherLayerIds = (listOfLayerEntryConfig = this.listOfLayerEntryConfig) => {
-      let comaSeparatedList = '';
       if (listOfLayerEntryConfig.length) {
         listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-          if (layerEntryIsGroupLayer(layerEntryConfig)) comaSeparatedList += gatherLayerIds(layerEntryConfig.listOfLayerEntryConfig);
-          else comaSeparatedList += `${layerEntryConfig.layerId},`;
+          if (layerEntryIsGroupLayer(layerEntryConfig)) gatherLayerIds(layerEntryConfig.listOfLayerEntryConfig);
+          else arrayOfLayerIds.push(layerEntryConfig.layerId);
         });
       }
-      return comaSeparatedList;
     };
-    return gatherLayerIds().slice(0, -1);
+    gatherLayerIds();
+    return arrayOfLayerIds;
   }
 
   /** ***************************************************************************************************************************
    * This method propagate the WMS metadata inherited values.
+   *
+   * @param {TypeJsonObject} parentLayer The parent layer that contains the inherited values
+   * @param {TypeJsonObject} layer The layer property from the metadata that will inherit the values
    */
   private processMetadataInheritance(parentLayer?: TypeJsonObject, layer: TypeJsonObject = this.metadata!.Capability.Layer) {
     if (parentLayer && layer) {
@@ -414,7 +552,12 @@ export class WMS extends AbstractGeoViewRaster {
             );
           }
 
-          this.processTemporalDimension(layerCapabilities.Dimension as TypeJsonObject, layerEntryConfig);
+          if (layerCapabilities.Dimension) {
+            const temporalDimension: TypeJsonObject | undefined = (layerCapabilities.Dimension as TypeJsonArray).find(
+              (dimension) => dimension.name === 'time'
+            );
+            if (temporalDimension) this.processTemporalDimension(temporalDimension, layerEntryConfig);
+          }
         }
       }
       resolve();
@@ -429,7 +572,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension[0]);
+      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -486,18 +629,25 @@ export class WMS extends AbstractGeoViewRaster {
           resolve([]);
         else {
           const wmsSource = (layerConfig.gvLayer as gvLayer).getSource() as ImageWMS;
+          let infoFormat = 'text/xml';
+          if (!(this.metadata!.Capability.Request.GetFeatureInfo.Format as TypeJsonArray).includes('text/xml' as TypeJsonObject))
+            if ((this.metadata!.Capability.Request.GetFeatureInfo.Format as TypeJsonArray).includes('text/plain' as TypeJsonObject))
+              infoFormat = 'text/plain';
+            else throw new Error('Parameter info_format of GetFeatureInfo only support text/xml and text/plain for WMS services.');
+
           const featureInfoUrl = wmsSource.getFeatureInfoUrl(clickCoordinate, viewResolution, crs, {
-            INFO_FORMAT: 'text/xml',
+            INFO_FORMAT: infoFormat,
           });
           if (featureInfoUrl) {
+            let featureMember: TypeJsonObject | null;
             axios(featureInfoUrl).then((response) => {
-              const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
-              const xmlJsonResponse = xmlToJson(xmlDomResponse);
-              const featureCollection = this.getAttribute(xmlJsonResponse, 'FeatureCollection');
-              if (featureCollection) {
-                const featureMember = this.getAttribute(featureCollection, 'featureMember');
-                if (featureMember) resolve(this.formatFeatureInfoAtCoordinateResult(featureMember, layerConfig.source.featureInfo));
-              }
+              if (infoFormat === 'text/xml') {
+                const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
+                const jsonResponse = xmlToJson(xmlDomResponse);
+                const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
+                if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
+              } else featureMember = { plain_text: { '#text': response.data } };
+              if (featureMember) resolve(this.formatFeatureInfoAtCoordinateResult(featureMember, layerConfig.source.featureInfo));
             });
           } else resolve([]);
         }
@@ -674,7 +824,7 @@ export class WMS extends AbstractGeoViewRaster {
         featureKey: 0,
         featureInfo: {},
       };
-      Object.keys(featureInfoEntry).forEach((fieldName) => {
+      Object.keys(featureInfoEntry.featureInfo).forEach((fieldName) => {
         if (outfields?.includes(fieldName)) {
           const aliasfieldIndex = outfields.indexOf(fieldName);
           filteredFeatureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = featureInfoEntry.featureInfo[fieldName];
