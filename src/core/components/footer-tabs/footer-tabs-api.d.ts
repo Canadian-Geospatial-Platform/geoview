@@ -27,4 +27,10 @@ export declare class FooterTabsApi {
      * @param {number} value the value of the tab to be removed
      */
     removeFooterTab: (value: number) => void;
+    /**
+     * Select a tab by value
+     *
+     * @param {number} value the value of the tab to be selected
+     */
+    selectFooterTab: (value: number) => void;
 }
