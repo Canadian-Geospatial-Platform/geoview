@@ -10,7 +10,7 @@ import { IconButton } from '../../../ui';
 const useStyles = makeStyles((theme) => {
   return {
     exportIcon: {
-      fontSize: `${theme.typography.fontSize}px !important`,
+      fontSize: `14px !important`,
       color: `${theme.palette.primary.light}`,
     },
   };
@@ -93,7 +93,7 @@ export function FooterBarExportPngButton(): JSX.Element {
   return (
     <IconButton id="export-button" tooltip="appbar.export" tooltipPlacement="bottom" type="button" onClick={() => exportPNG()} className="">
       <div className={classes.exportIcon}>
-        <small>PNG</small>
+        <small>Export PNG</small>
       </div>
     </IconButton>
   );
