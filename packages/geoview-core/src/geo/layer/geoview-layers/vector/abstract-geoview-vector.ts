@@ -222,23 +222,28 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     let keyCounter = 0;
 
     features.forEach((feature) => {
-      const featureInfoEntry: TypeFeatureInfoEntry = {
-        // feature key for building the data-grid
-        featureKey: keyCounter++,
-        featureInfo: {},
-      };
+      if (feature.get('features')) {
+        const clusterFeatureInfo = this.formatFeatureInfoResult(feature.get('features'), featureInfo);
+        queryResult.push(...clusterFeatureInfo);
+      } else {
+        const featureInfoEntry: TypeFeatureInfoEntry = {
+          // feature key for building the data-grid
+          featureKey: keyCounter++,
+          featureInfo: {},
+        };
 
-      // query feature info
-      const featureFields = feature.getKeys();
-      featureFields.forEach((fieldName) => {
-        if (fieldName !== 'geometry') {
-          if (outfields?.includes(fieldName)) {
-            const aliasfieldIndex = outfields.indexOf(fieldName);
-            featureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = feature.get(fieldName);
-          } else if (!outfields) featureInfoEntry.featureInfo[fieldName] = feature.get(fieldName);
-        }
-      });
-      queryResult.push(featureInfoEntry);
+        // query feature info
+        const featureFields = feature.getKeys();
+        featureFields.forEach((fieldName) => {
+          if (fieldName !== 'geometry') {
+            if (outfields?.includes(fieldName)) {
+              const aliasfieldIndex = outfields.indexOf(fieldName);
+              featureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = feature.get(fieldName);
+            } else if (!outfields) featureInfoEntry.featureInfo[fieldName] = feature.get(fieldName);
+          }
+        });
+        queryResult.push(featureInfoEntry);
+      }
     });
     return queryResult;
   }
