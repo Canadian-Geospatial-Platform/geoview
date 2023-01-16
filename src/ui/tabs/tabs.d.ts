@@ -14,9 +14,11 @@ export type TypeTabs = {
  */
 export interface TypeTabsProps {
     tabs: TypeTabs[];
+    selectedTab?: number;
     boxProps?: BoxProps;
     tabsProps?: TabsProps;
     tabProps?: TabProps;
+    rightButtons?: unknown;
 }
 /**
  * Create a tabs ui

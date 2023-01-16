@@ -3,6 +3,7 @@ import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-i
 export interface TypeFeatureProps {
     key: number;
     feature: TypeFeatureInfoEntry;
+    startOpen?: boolean;
 }
 /**
  * feature info for a layer list
