@@ -38,42 +38,45 @@ export class DataGridAPI {
    * @return {ReactElement} the data grid react element
    *
    */
-  createDataGrid = (props: TypeLayerDataGridProps): ReactElement => {
-    const { layerId } = props;
+  createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
+    const { layerId } = layerDataGridProps;
     const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-    const values = (geoviewLayerInstance as AbstractGeoViewVector).getAllFeatureInfo().map((f) => {
-      const { featureKey, featureInfo } = f;
+    const values = (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo().map((feature) => {
+      const { featureKey, featureInfo } = feature;
       return { featureKey, ...featureInfo };
     });
 
-    // set columns
-    const columnHeader = Object.keys(values[0]);
-    const columns = [];
-    for (let i = 0; i < columnHeader.length - 1; i++) {
-      columns.push({
-        field: columnHeader[i],
-        headerName: columnHeader[i],
-        width: 150,
-        type: 'string',
-        hide: columnHeader[i] === 'featureKey',
-      });
+    if (values) {
+      // set columns
+      const columnHeader = Object.keys(values[0]);
+      const columns = [];
+      for (let i = 0; i < columnHeader.length - 1; i++) {
+        columns.push({
+          field: columnHeader[i],
+          headerName: columnHeader[i],
+          width: 150,
+          type: 'string',
+          hide: columnHeader[i] === 'featureKey',
+        });
+      }
+
+      // set rows
+      const rows = values;
+
+      return createElement('div', {}, [
+        createElement('h4', { key: `${layerId}-title` }, getLocalizedValue(geoviewLayerInstance.geoviewLayerName, this.mapId)),
+        createElement(LayerDataGrid, {
+          key: `${layerId}-datagrid`,
+          columns,
+          rows,
+          pageSize: 50,
+          rowsPerPageOptions: [25, 50, 100],
+          autoHeight: true,
+          rowId: 'featureKey',
+          displayLanguage: this.displayLanguage,
+        }),
+      ]);
     }
-
-    // set rows
-    const rows = values;
-
-    return createElement('div', {}, [
-      createElement('h4', { key: `${layerId}-title` }, getLocalizedValue(geoviewLayerInstance.geoviewLayerName, this.mapId)),
-      createElement(LayerDataGrid, {
-        key: `${layerId}-datagrid`,
-        columns,
-        rows,
-        pageSize: 50,
-        rowsPerPageOptions: [25, 50, 100],
-        autoHeight: true,
-        rowId: 'featureKey',
-        displayLanguage: this.displayLanguage,
-      }),
-    ]);
+    return createElement('div', {}, []);
   };
 }
