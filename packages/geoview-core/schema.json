@@ -407,7 +407,7 @@
       "properties": {
         "dataAccessPath": {
           "$ref": "#/definitions/TypeLocalizedString",
-          "description": "The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it."
+          "description": "The path (English/French) to reach the data to display. If not specified, metadataAccessPath will be assigned to it."
         },
         "format": { "$ref": "#/definitions/TypeVectorSourceFormats" },
         "dataProjection": {
