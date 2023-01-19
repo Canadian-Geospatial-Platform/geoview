@@ -25,7 +25,7 @@ export function TabPanel(props: TypeTabPanelProps): JSX.Element {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
+      id={`${`simple-tabpanel`}-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
       style={{ height: '100%', overflow: 'auto' }}

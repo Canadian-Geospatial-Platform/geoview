@@ -79,7 +79,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           const TabContent = tab.content as React.ElementType;
 
           return (
-            <TabPanel key={index} value={value} index={index}>
+            <TabPanel key={index} value={value} index={index} >
               {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
             </TabPanel>
           );
