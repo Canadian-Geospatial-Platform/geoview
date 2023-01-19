@@ -6,11 +6,11 @@ import { WKB as FormatWKB } from 'ol/format';
 import { ReadOptions } from 'ol/format/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
+
 import initSqlJs from 'sql.js';
 
-import { List } from 'immutable';
 import { Feature } from 'ol';
-import { TypeJsonObject } from '../../../../core/types/global-types';
+import { toJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import {
@@ -21,10 +21,10 @@ import {
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
   TypeBaseLayerEntryConfig,
-  TypeBaseSourceVectorInitialConfig,
 } from '../../../map/map-schema-types';
 
-import { getLocalizedValue } from '../../../../core/utils/utilities';
+import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
+
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 
@@ -42,8 +42,8 @@ export interface TypeGeoPackageLayerConfig extends Omit<TypeGeoviewLayerConfig, 
 }
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeGeoviewLayerConfig as a TypeOgcFeatureLayerConfig if the geoviewLayerType attribute of
- * the verifyIfLayer parameter is OGC_FEATURE. The type ascention applies only to the true block of the if clause that use this
+ * type guard function that redefines a TypeGeoviewLayerConfig as a TypeGeoPackageFeatureLayerConfig if the geoviewLayerType attribute of
+ * the verifyIfLayer parameter is GEOPACKAGE. The type ascention applies only to the true block of the if clause that use this
  * function.
  *
  * @param {TypeGeoviewLayerConfig} verifyIfLayer Polymorphic object to test in order to determine if the type ascention is valid.
@@ -55,8 +55,8 @@ export const layerConfigIsGeoPackage = (verifyIfLayer: TypeGeoviewLayerConfig): 
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines an AbstractGeoViewLayer as an OgcFeature
- * if the type attribute of the verifyIfGeoViewLayer parameter is OGC_FEATURE. The type ascention
+ * type guard function that redefines an AbstractGeoViewLayer as a GeoPackage
+ * if the type attribute of the verifyIfGeoViewLayer parameter is GEOPACKAGE. The type ascention
  * applies only to the true block of the if clause that use this function.
  *
  * @param {AbstractGeoViewLayer} verifyIfGeoViewLayer Polymorphic object to test in order to determine if the type ascention is
@@ -69,8 +69,8 @@ export const geoviewLayerIsGeoPackage = (verifyIfGeoViewLayer: AbstractGeoViewLa
 };
 
 /** *****************************************************************************************************************************
- * type guard function that redefines a TypeLayerEntryConfig as a TypeOgcFeatureLayerEntryConfig if the geoviewLayerType attribute
- * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is OGC_FEATURE. The type ascention applies only to the true block of
+ * type guard function that redefines a TypeLayerEntryConfig as a TypeGeoPackageLayerEntryConfig if the geoviewLayerType attribute
+ * of the verifyIfGeoViewEntry.geoviewRootLayer attribute is GEOPACKAGE. The type ascention applies only to the true block of
  * the if clause that use this function.
  *
  * @param {TypeLayerEntryConfig} verifyIfGeoViewEntry Polymorphic object to test in order to determine if the type ascention is
@@ -87,7 +87,7 @@ export const geoviewEntryIsGeoPackage = (
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** ******************************************************************************************************************************
- * A class to add OGC api feature layer.
+ * A class to add GeoPackage api feature layer.
  *
  * @exports
  * @class GeoPackage
@@ -109,8 +109,22 @@ export class GeoPackage extends AbstractGeoViewVector {
    *
    * @returns {Promise<void>} A promise that the execution is completed.
    */
-  protected async getServiceMetadata(): Promise<void> {
-    const promisedExecution = new Promise<void>();
+  protected getServiceMetadata(): Promise<void> {
+    const promisedExecution = new Promise<void>((resolve) => {
+      const metadataUrl = getLocalizedValue(this.metadataAccessPath, this.mapId);
+      if (metadataUrl) {
+        getXMLHttpRequest(`${metadataUrl}?f=json`).then((metadataString) => {
+          if (metadataString === '{}')
+            throw new Error(`Cant't read service metadata for GeoView layer ${this.geoviewLayerId} of map ${this.mapId}.`);
+          else {
+            this.metadata = toJsonObject(JSON.parse(metadataString));
+            const { copyrightText } = this.metadata;
+            if (copyrightText) this.attributions.push(copyrightText as string);
+            resolve();
+          }
+        });
+      } else resolve();
+    });
     return promisedExecution;
   }
 
@@ -151,7 +165,7 @@ export class GeoPackage extends AbstractGeoViewVector {
         return true;
       }
 
-      // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
+      // Note that the code assumes geopackage does not contains metadata layer group. If you need layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata!.collections)) {
         for (var i = 0; i < this.metadata!.collections.length; i++)
@@ -159,7 +173,9 @@ export class GeoPackage extends AbstractGeoViewVector {
         if (i === this.metadata!.collections.length) {
           this.layerLoadError.push({
             layer: Layer.getLayerPath(layerEntryConfig),
-            consoleMessage: `OGC feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
+            consoleMessage: `GeoPackage feature layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(
+              layerEntryConfig
+            )})`,
           });
           return false;
         }
@@ -218,6 +234,8 @@ export class GeoPackage extends AbstractGeoViewVector {
    */
   protected processLayerMetadata(layerEntryConfig: TypeVectorLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
+      if (!layerEntryConfig.source) layerEntryConfig.source = {};
+      if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
       resolve();
     });
     return promiseOfExecution;
@@ -235,14 +253,17 @@ export class GeoPackage extends AbstractGeoViewVector {
     sourceOptions: SourceOptions = { strategy: all },
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
+    sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
+    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId}`;
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
       const url = vectorSource.getUrl();
       const xhr = new XMLHttpRequest();
+      xhr.responseType = 'arraybuffer';
       initSqlJs({
-        locateFile: (file) => `./node_modules/sql.js/dist/${file}`,
+        locateFile: (file) => `https://sql.js.org/dist/${file}`,
       }).then((SQL) => {
         xhr.open('GET', url as string);
         const onError = () => {
@@ -252,8 +273,8 @@ export class GeoPackage extends AbstractGeoViewVector {
         xhr.onerror = onError;
         xhr.onload = () => {
           if (xhr.status === 200) {
-            const buf = xhr.response.arrayBuffer();
-            const db = new SQL.Database(new Uint8Array(buf));
+            const res = xhr.response as ArrayBuffer;
+            const db = new SQL.Database(new Uint8Array(res));
             var featureTableNames = [];
             let stmt = db.prepare(`
             SELECT gpkg_contents.table_name, gpkg_contents.srs_id,
@@ -276,13 +297,13 @@ export class GeoPackage extends AbstractGeoViewVector {
             const tableName = table.table_name;
             const tableDataProjection = `EPSG:${table.srs_id}`;
             stmt = db.prepare(`SELECT * FROM '${tableName}'`);
-            const columnName = table.geometry_column_name;
+            const columnName = table.geometry_column_name as string;
             const features: Feature<Geometry>[] = [];
-            let properties = {};
+            let properties;
 
             while (stmt.step()) {
               properties = stmt.getAsObject();
-              const geomProp = properties[columnName];
+              const geomProp = properties[columnName] as Uint8Array;
               delete properties[columnName];
               const feature = this.parseGpkgGeom(geomProp);
               const formattedFeature = format.readFeatures(feature, {

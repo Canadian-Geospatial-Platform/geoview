@@ -1,67 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="msapplication-config" content="./img/browserconfig.xml" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="msapplication-TileColor" content="#da532c" />
-  <meta name="theme-color" content="#ffffff" />
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel="stylesheet" href="css/style.css" />
-</head>
+  <body>
+    <div class="header-table">
+      <table>
+        <tbody>
+          <tr>
+            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+            <td class="header-title">
+              <h1><strong>Layers</strong></h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <a href="./index.html">Main</a><br />
+              <a href="#HLYR1">1. WMS Layer</a><br />
+              <a href="#HLYR2">2. XYZ Tiles Layer</a><br />
+              <a href="#HLYR3">3. Esri Dynamic Service Layer</a><br />
+              <a href="#HLYR4">4. Esri Feature Service Layer</a><br />
+              <a href="#HLYR5">5. GeoJSON Layer</a><br />
+              <a href="#HLYR6">6. WFS Layer</a><br />
+              <a href="#HLYR7">7. OGC API Feature Layer</a><br />
+              <a href="#HLYR8">8. GeoCore UUID Layer</a><br />
+              <a href="#HLYR9">9. GeoPackage Layer</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <tbody>
+          <tr>
+            <td>This page is used to showcase how the viewer may show different layer types</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<body>
-  <div class="header-table">
-    <table>
-      <tbody>
-        <tr>
-          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-          <td class="header-title">
-            <h1><strong>Layers</strong></h1>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>
-            <a href="./index.html">Main</a><br />
-            <a href="#HLYR1">1. WMS Layer</a><br />
-            <a href="#HLYR2">2. XYZ Tiles Layer</a><br />
-            <a href="#HLYR3">3. Esri Dynamic Service Layer</a><br />
-            <a href="#HLYR4">4. Esri Feature Service Layer</a><br />
-            <a href="#HLYR5">5. GeoJSON Layer</a><br />
-            <a href="#HLYR6">6. WFS Layer</a><br />
-            <a href="#HLYR7">7. OGC API Feature Layer</a><br />
-            <a href="#HLYR8">8. GeoCore UUID Layer</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <table>
-      <tbody>
-        <tr>
-          <td>This page is used to showcase how the viewer may show different layer types</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="map-title-holder">
-    <h4 id="HLYR1">1.WMS Layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
-  <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR1">1.WMS Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <button class="test-refresh-WMS-btn">Test Refresh WMS</button>
+    <div
+      id="LYR1"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
             'map': {
               'interaction': 'dynamic',
               'viewSettings': {
@@ -125,22 +127,27 @@
             'corePackages': [],
             'theme': 'dark',
             'suportedLanguages': ['en']
-          }">
-  </div>
-  <button class="Get-wms-Legend">Get Legend</button>
-  <div id="wmsLegendsId-table-div"></div>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;"  id="wmsResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a wms layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR1CS" class="panel"></pre>
-  <hr />
+          }"
+    ></div>
+    <button class="Get-wms-Legend">Get Legend</button>
+    <div id="wmsLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="wmsResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a wms layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR1CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR2">2. XYZ Tiles Layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR2" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR2">2. XYZ Tiles Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR2"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -179,16 +186,22 @@
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
-        }"></div>
-  <p>This map has a XYZ Tiles layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR2CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <p>This map has a XYZ Tiles layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR2CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR3">3. Esri dynamic layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR3" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR3">3. Esri dynamic layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR3"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -223,21 +236,27 @@
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
-        }"></div>
-  <button class="Get-esri-dynamic-Legend">Get Legend</button>
-  <div id="esriDynamicLegendsId-table-div"></div>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;" id="esriDynamicResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has an Esri dynamic layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR3CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <button class="Get-esri-dynamic-Legend">Get Legend</button>
+    <div id="esriDynamicLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="esriDynamicResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has an Esri dynamic layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR3CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR4">4. Esri feature layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR4" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR4">4. Esri feature layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR4"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -268,24 +287,31 @@
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
-        }"></div>
-  <button class="Get-esri-feature-Legend">Get Legend</button>
-  <div id="esriFeatureLegendsId-table-div"></div>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;"  id="esriFeatureResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <button id="LYR4grid-button" type="button" class="collapsible">Get Data Grid</button>
-  <pre id="LYR4grid" style="width: 100%" class="panel"></pre>
-  <hr />
-  <p>This map has a Esri feature layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR4CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <button class="Get-esri-feature-Legend">Get Legend</button>
+    <div id="esriFeatureLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="esriFeatureResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <button id="LYR4grid-button" type="button" class="collapsible">Get Data Grid</button>
+    <pre id="LYR4grid" style="width: 100%" class="panel"></pre>
+    <hr />
+    <p>This map has a Esri feature layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR4CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR5">5. GeoJSON Layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR5" class="llwp-map" triggerReadyCallback="true" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR5">5. GeoJSON Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR5"
+      class="llwp-map"
+      triggerReadyCallback="true"
+      data-lang="en"
+      data-config="{
     'map': {
       'interaction': 'dynamic',
       'viewSettings': {
@@ -324,25 +350,29 @@
     'corePackages': [],
     'theme': 'dark',
     'suportedLanguages': ['en']
-  }">
-  </div>
-  <button class="Get-geojson-Legend">Get Legend</button>
-  <div id="geojsonLegendsId-table-div"></div>
-  <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
-  <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;"  id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
-    the buttons</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR5CS" class="panel"></pre>
-  <hr />
+  }"
+    ></div>
+    <button class="Get-geojson-Legend">Get Legend</button>
+    <div id="geojsonLegendsId-table-div"></div>
+    <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
+    <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking the buttons</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR5CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR6">6. WFS Layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR6" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR6">6. WFS Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR6"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
         'map': {
           'interaction': 'dynamic',
           'viewSettings': {
@@ -377,22 +407,27 @@
         'corePackages': [],
         'theme': 'dark',
         'suportedLanguages': ['en']
-      }">
-  </div>
-  <button class="Get-wfs-Legend">Get Legend</button>
-  <div id="wfsLegendsId-table-div"></div>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;"  id="wfsResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has a WFS layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR6CS" class="panel"></pre>
-  <hr />
+      }"
+    ></div>
+    <button class="Get-wfs-Legend">Get Legend</button>
+    <div id="wfsLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="wfsResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a WFS layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR6CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR7">7. OGC API Feature Layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR7" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR7">7. OGC API Feature Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR7"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -427,22 +462,27 @@
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
-        }">
-  </div>
-  <button class="Get-ogcApi-Legend">Get Legend</button>
-  <div id="ogcApiLegendsId-table-div"></div>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;"  id="ogcFeatureResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map has an OGC API feature layer added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR7CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <button class="Get-ogcApi-Legend">Get Legend</button>
+    <div id="ogcApiLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ogcFeatureResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has an OGC API feature layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR7CS" class="panel"></pre>
+    <hr />
 
-  <div class="map-title-holder">
-    <h4 id="HLYR8">8. GeoCore UUID Layer</h4><a class="ref-link" href="#top">Top</a>
-  </div>
-  <div id="LYR8" class="llwp-map" data-lang="en" data-config="{
+    <div class="map-title-holder">
+      <h4 id="HLYR8">8. GeoCore UUID Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="LYR8"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -480,313 +520,482 @@
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
-        }">
-  </div>
-  <button class="Get-geocore-Legend">Get Legend</button>
-  <div id="geocoreLegendsId-table-div"></div>
-  <button type="button" class="collapsible">Get Feature Info</button>
-  <pre style="height: 20pc; overflow-y: scroll;"  id="geocoreResultSetId" class="panel">Click on feature on the map</pre>
-  <hr />
-  <p>This map requests a layer from the catalog using uuid added from configuration.</p>
-  <button type="button" class="collapsible">Configuration Snippet</button>
-  <pre id="LYR8CS" class="panel"></pre>
-  <hr />
+        }"
+    ></div>
+    <button class="Get-geocore-Legend">Get Legend</button>
+    <div id="geocoreLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="geocoreResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map requests a layer from the catalog using uuid added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR8CS" class="panel"></pre>
+    <hr />
 
-  <button type="button" class="collapsible">Code Snippet</button>
-  <pre id="codeSnippet" class="panel"></pre>
-
-  <script src="codedoc.js"></script>
-  <script>
-    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-    cgpv.init(function (mapId) {
-      console.log(`api is ready for ${mapId}`);
-
-      if (mapId === 'allMaps') {
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
-      }
-    });
-
-    // find the button element by ID
-    var addGeoJSONButton = document.getElementById('add-geojson');
-
-    // add an event listener when a button is clicked
-    addGeoJSONButton.addEventListener('click', function (e) {
-      // adding a geojson layer requires a type of geojson and url
-      const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+    <div class="map-title-holder">
+      <h4 id="HLYR9">9. GeoPackage Layer</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <hr />
+    <div
+      id="LYR9"
+      class="llwp-map"
+      data-lang="en"
+      data-config="{
+    'map': {
+      'interaction': 'dynamic',
+      'viewSettings': {
+        'zoom': 4,
+        'center': [-100, 60],
+        'projection': 3857
+      },
+      'basemapOptions': {
+        'basemapId': 'transport',
+        'shaded': false,
+        'labeled': true
+      },
+      'listOfGeoviewLayerConfig': [
         {
-          'geoviewLayerId': 'geoJsonSample',
+          'geoviewLayerId': 'GeoPackageLYR9',
           'geoviewLayerName': {
-            'en': 'geojson sample',
-            'fr': 'exemple geojson'
+            'en': 'Rivers'
           },
-          'geoviewLayerType': 'GeoJSON',
+          'geoviewLayerType': 'GeoPackage',
           'listOfLayerEntryConfig': [
             {
-              'layerId': 'historical_flood_0.geojson',
+              'layerId': 'rivers.gpkg',
               'source': {
                 'dataAccessPath': {
-                  'en': './geojson/',
-                  'fr': './geojson/'
-                },
-                'featureInfo': {
-                  'queryable': true,
-                  'nameField': { 'en': 'comment_en', 'fr': 'comment_fr' },
-                  'outfields': { 'en': 'comment_en,death_en_1,end_date', 'fr': 'comment_fr,death_fr_1,end_date' },
-                  'aliasFields':  { 'en': 'comment_en,death_en_1,end_date', 'fr': 'comment_fr,death_fr_1,end_date' }
+                  'en': './geojson',
+                  'fr': './geojson'
                 }
               }
             }
-          ],
-        },
-        ['en', 'fr']
-      );
-      document.getElementById('new-layer-id-label').innerText = layerID;
-    });
+          ]
+        }
+      ]
+    },
+    'components': ['overview-map', 'nav-bar'],
+    'corePackages': [],
+    'theme': 'dark',
+    'suportedLanguages': ['en']
+  }"
+    ></div>
+    <button class="Get-Geopackage-Legend">Get Legend</button>
+    <div id="geopackageLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Get Feature Info</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="geopackageResultSetId" class="panel">Click on feature on the map</pre>
+    <hr />
+    <p>This map has a GeoPackage feature layer added from configuration.</p>
+    <button type="button" class="collapsible">Configuration Snippet</button>
+    <pre id="LYR9CS" class="panel"></pre>
+    <hr />
 
-    // find the button element by ID
-    var removeGeoJSONButton = document.getElementById('remove-geojson');
+    <button type="button" class="collapsible">Code Snippet</button>
+    <pre id="codeSnippet" class="panel"></pre>
 
-    // add an event listener when a button is clicked
-    removeGeoJSONButton.addEventListener('click', function (e) {
-      // removing a geojson layer using the ID
-      const layerPath = document.getElementById('new-layer-id-label').innerText;
-      if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
-      document.getElementById('new-layer-id-label').innerText = '';
-    });
+    <script src="codedoc.js"></script>
+    <script>
+      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function (mapId) {
+        console.log(`api is ready for ${mapId}`);
 
-    // WMS ======================================================================================================================
-    const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR1', 'wmsResultSetId');
-
-    const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('wmsLegendsId', resultSets);
-    }, 'LYR1', 'wmsLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
-    });
-
-    // ESRI Dynamic =============================================================================================================
-    const featureInfoEsriDynamicLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR3', 'esriDynamicResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR3', 'esriDynamicResultSetId');
-
-    const LegendsEsriDynamicLayerSet = cgpv.api.createLegendsLayerSet('LYR3', 'esriDynamicLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('esriDynamicLegendsId', resultSets);
-    }, 'LYR3', 'esriDynamicLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-dynamic-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriDynamicLegendsId');
-    });
-
-    // ESRI Feature =============================================================================================================
-    const featureInfoEsriFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR4', 'esriFeatureResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR4', 'esriFeatureResultSetId');
-
-    const LegendsEsriFeatureLayerSet = cgpv.api.createLegendsLayerSet('LYR4', 'esriFeatureLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('esriFeatureLegendsId', resultSets);
-    }, 'LYR4', 'esriFeatureLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-feature-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriFeatureLegendsId');
-    });
-
-    // GeoJson ==================================================================================================================
-    const featureInfoGeoJsonLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR5', 'geoJsonResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR5', 'geoJsonResultSetId');
-
-    const LegendsGeoJsonLayerSet = cgpv.api.createLegendsLayerSet('LYR5', 'geojsonLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('geojsonLegendsId', resultSets);
-    }, 'LYR5', 'geojsonLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-geojson-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geojsonLegendsId');
-    });
-
-    // WFS ======================================================================================================================
-    const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR6', 'wfsResultSetId');
-
-    const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('wfsLegendsId', resultSets);
-    }, 'LYR6', 'wfsLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
-    });
-
-    // OGC Feature API ==========================================================================================================
-    const featureInfoOgcFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR7', 'ogcFeatureResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR7', 'ogcFeatureResultSetId');
-
-    const LegendsOgcApiLayerSet = cgpv.api.createLegendsLayerSet('LYR7', 'ogcApiLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('ogcApiLegendsId', resultSets);
-    }, 'LYR7', 'ogcApiLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-ogcApi-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'ogcApiLegendsId');
-    });
-
-    // GeoCore ==================================================================================================================
-    const featureInfoGeocoreFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR8', 'geocoreResultSetId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
-      const {  layerSetId, resultSets } = payload;
-      document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-    }, 'LYR8', 'geocoreResultSetId');
-
-    const LegendsGeocoreLayerSet = cgpv.api.createLegendsLayerSet('LYR8', 'geocoreLegendsId');
-    cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
-      const {  resultSets } = payload;
-      displayLegend('geocoreLegendsId', resultSets);
-    }, 'LYR8', 'geocoreLegendsId');
-
-    var addGeoJsonLegendButton = document.getElementsByClassName('Get-geocore-Legend')[0];
-    addGeoJsonLegendButton.addEventListener('click', function (e) {
-      cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geocoreLegendsId');
-    });
-
-    // ==========================================================================================================================
-    // Test a refresh WMS from projection change
-    var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
-    testRefreshBtn.addEventListener('click', function (e) {
-      cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
-    });
-
-    // ========================================================================================================================
-    // DATA GRID create new tab with a layer's table using the data-grid api, do the same thing in custom div
-    let isOpenLYR4 = false;
-    document.getElementById('LYR4grid-button').addEventListener('click', () => {
-      if (!isOpenLYR4) cgpv.reactDOM.render(cgpv.api.map('LYR4').dataGrid.createDataGrid({ layerId: 'esriFeatureLYR4' }), document.getElementById('LYR4grid'));
-      isOpenLYR4 = !isOpenLYR4;
-    });
-
-    // ==========================================================================================================================
-    function displayLegend(layerSetId, resultSets) {
-      const addHeader = (title, container) => {
-        const tableHeader = document.createElement('th');
-        tableHeader.style = "text-align: center; vertical-align: middle;"
-        tableHeader.innerHTML =  title;
-        container.appendChild(tableHeader);
-      }
-      const addData = (data, container) => {
-        const tableData = document.createElement('td');
-        tableData.style.verticalAlign = 'middle';
-        tableData.style.textAlign = 'center';
-        if (typeof data === 'string') tableData.innerHTML =  data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-        else tableData.appendChild(data);
-        container.appendChild(tableData);
-      }
-      var oldTable = document.getElementById(`${layerSetId}-table`);
-      if (oldTable) oldTable.parentNode.removeChild(oldTable)
-      var legendTable = document.getElementById(`${layerSetId}-table-div`);
-      const table = document.createElement('table');
-      table.id = `${layerSetId}-table`;
-      table.border="1";
-      table.style="width:50%";
-      legendTable.appendChild(table);
-      var createHeader = true;
-      Object.keys(resultSets).forEach((layerPath) => {
-        if (resultSets[layerPath]?.type === 'ogcWms') {
-          if (createHeader) {
-            createHeader = false;
-            const tableRow1 = document.createElement('tr');
-            table.appendChild(tableRow1);
-            addHeader("Layer Path", tableRow1);
-            addHeader("Symbology", tableRow1);
-          }
-          const tableRow = document.createElement('tr');
-          addData(resultSets[layerPath].layerPath, tableRow);
-          addData(resultSets[layerPath].legend, tableRow);
-          table.appendChild(tableRow);
-        } else {
-          const addRow = (layerPath, label, canvas) => {
-            const tableRow = document.createElement('tr');
-            addData(layerPath, tableRow);
-            addData(label, tableRow); // canvas.style = "border: 1px solid black;"
-            addData(canvas, tableRow);
-            table.appendChild(tableRow);
-          }
-          if (createHeader) {
-            createHeader = false;
-            const tableRow1 = document.createElement('tr');
-            table.appendChild(tableRow1);
-            addHeader("Layer Path", tableRow1);
-            addHeader("Label", tableRow1);
-            addHeader("Symbology", tableRow1);
-          }
-          if (resultSets[layerPath]?.legend) {
-            Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
-              if (geometryKey) {
-                if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
-                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                    addRow(layerPath,
-                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                    addRow(layerPath,
-                          resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
-                  }
-                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
-                  if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                    addRow(layerPath,
-                            resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                            resultSets[layerPath].legend[geometryKey].defaultCanvas);
-                  for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                    addRow(layerPath,
-                          resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
-                          resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
-                  }
-                } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
-                  addRow(layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].label,
-                        resultSets[layerPath].legend[geometryKey].defaultCanvas);
-                }
-              }
-            });
-          }
+        if (mapId === 'allMaps') {
+          //create snippets
+          createCodeSnippet();
+          createConfigSnippet();
         }
       });
-    }
 
-  </script>
-</body>
+      // find the button element by ID
+      var addGeoJSONButton = document.getElementById('add-geojson');
 
+      // add an event listener when a button is clicked
+      addGeoJSONButton.addEventListener('click', function (e) {
+        // adding a geojson layer requires a type of geojson and url
+        const layerID = cgpv.api.map('LYR5').layer.addGeoviewLayer(
+          {
+            geoviewLayerId: 'geoJsonSample',
+            geoviewLayerName: {
+              en: 'geojson sample',
+              fr: 'exemple geojson',
+            },
+            geoviewLayerType: 'GeoJSON',
+            listOfLayerEntryConfig: [
+              {
+                layerId: 'historical_flood_0.geojson',
+                source: {
+                  dataAccessPath: {
+                    en: './geojson/',
+                    fr: './geojson/',
+                  },
+                  featureInfo: {
+                    queryable: true,
+                    nameField: { en: 'comment_en', fr: 'comment_fr' },
+                    outfields: { en: 'comment_en,death_en_1,end_date', fr: 'comment_fr,death_fr_1,end_date' },
+                    aliasFields: { en: 'comment_en,death_en_1,end_date', fr: 'comment_fr,death_fr_1,end_date' },
+                  },
+                },
+              },
+            ],
+          },
+          ['en', 'fr']
+        );
+        document.getElementById('new-layer-id-label').innerText = layerID;
+      });
+
+      // find the button element by ID
+      var removeGeoJSONButton = document.getElementById('remove-geojson');
+
+      // add an event listener when a button is clicked
+      removeGeoJSONButton.addEventListener('click', function (e) {
+        // removing a geojson layer using the ID
+        const layerPath = document.getElementById('new-layer-id-label').innerText;
+        if (layerPath) cgpv.api.map('LYR5').layer.removeLayersUsingPath(layerPath);
+        document.getElementById('new-layer-id-label').innerText = '';
+      });
+
+      // WMS ======================================================================================================================
+      const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR1',
+        'wmsResultSetId'
+      );
+
+      const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('wmsLegendsId', resultSets);
+        },
+        'LYR1',
+        'wmsLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
+      });
+
+      // ESRI Dynamic =============================================================================================================
+      const featureInfoEsriDynamicLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR3', 'esriDynamicResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR3',
+        'esriDynamicResultSetId'
+      );
+
+      const LegendsEsriDynamicLayerSet = cgpv.api.createLegendsLayerSet('LYR3', 'esriDynamicLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('esriDynamicLegendsId', resultSets);
+        },
+        'LYR3',
+        'esriDynamicLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-dynamic-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriDynamicLegendsId');
+      });
+
+      // ESRI Feature =============================================================================================================
+      const featureInfoEsriFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR4', 'esriFeatureResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR4',
+        'esriFeatureResultSetId'
+      );
+
+      const LegendsEsriFeatureLayerSet = cgpv.api.createLegendsLayerSet('LYR4', 'esriFeatureLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('esriFeatureLegendsId', resultSets);
+        },
+        'LYR4',
+        'esriFeatureLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-feature-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriFeatureLegendsId');
+      });
+
+      // GeoJson ==================================================================================================================
+      const featureInfoGeoJsonLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR5', 'geoJsonResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR5',
+        'geoJsonResultSetId'
+      );
+
+      const LegendsGeoJsonLayerSet = cgpv.api.createLegendsLayerSet('LYR5', 'geojsonLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('geojsonLegendsId', resultSets);
+        },
+        'LYR5',
+        'geojsonLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-geojson-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geojsonLegendsId');
+      });
+
+      // WFS ======================================================================================================================
+      const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR6',
+        'wfsResultSetId'
+      );
+
+      const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('wfsLegendsId', resultSets);
+        },
+        'LYR6',
+        'wfsLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
+      });
+
+      // OGC Feature API ==========================================================================================================
+      const featureInfoOgcFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR7', 'ogcFeatureResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR7',
+        'ogcFeatureResultSetId'
+      );
+
+      const LegendsOgcApiLayerSet = cgpv.api.createLegendsLayerSet('LYR7', 'ogcApiLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('ogcApiLegendsId', resultSets);
+        },
+        'LYR7',
+        'ogcApiLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-ogcApi-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'ogcApiLegendsId');
+      });
+
+      // GeoCore ==================================================================================================================
+      const featureInfoGeocoreFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR8', 'geocoreResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR8',
+        'geocoreResultSetId'
+      );
+
+      const LegendsGeocoreLayerSet = cgpv.api.createLegendsLayerSet('LYR8', 'geocoreLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('geocoreLegendsId', resultSets);
+        },
+        'LYR8',
+        'geocoreLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-geocore-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geocoreLegendsId');
+      });
+
+      // GeoPackage =============================================================================================================
+      const featureInfoGeopackageLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR9', 'geopackageResultSetId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+        (payload) => {
+          const { layerSetId, resultSets } = payload;
+          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+        },
+        'LYR9',
+        'geopackageResultSetId'
+      );
+
+      const LegendsGeopackageLayerSet = cgpv.api.createLegendsLayerSet('LYR9', 'geopackageLegendsId');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+        (payload) => {
+          const { resultSets } = payload;
+          displayLegend('geopackageLegendsId', resultSets);
+        },
+        'LYR9',
+        'geopackageLegendsId'
+      );
+
+      var addGeoJsonLegendButton = document.getElementsByClassName('Get-Geopackage-Legend')[0];
+      addGeoJsonLegendButton.addEventListener('click', function (e) {
+        cgpv.api.event.emit({ handlerName: 'LYR9', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geopackageLegendsId');
+      });
+
+      // ==========================================================================================================================
+      // Test a refresh WMS from projection change
+      var testRefreshBtn = document.getElementsByClassName('test-refresh-WMS-btn')[0];
+      testRefreshBtn.addEventListener('click', function (e) {
+        cgpv.api.event.emit(cgpv.types.mapViewProjectionPayload(cgpv.api.eventNames.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE, 'LYR1', 3978));
+      });
+
+      // ========================================================================================================================
+      // DATA GRID create new tab with a layer's table using the data-grid api, do the same thing in custom div
+      let isOpenLYR4 = false;
+      document.getElementById('LYR4grid-button').addEventListener('click', () => {
+        if (!isOpenLYR4)
+          cgpv.reactDOM.render(
+            cgpv.api.map('LYR4').dataGrid.createDataGrid({ layerId: 'esriFeatureLYR4' }),
+            document.getElementById('LYR4grid')
+          );
+        isOpenLYR4 = !isOpenLYR4;
+      });
+
+      // ==========================================================================================================================
+      function displayLegend(layerSetId, resultSets) {
+        const addHeader = (title, container) => {
+          const tableHeader = document.createElement('th');
+          tableHeader.style = 'text-align: center; vertical-align: middle;';
+          tableHeader.innerHTML = title;
+          container.appendChild(tableHeader);
+        };
+        const addData = (data, container) => {
+          const tableData = document.createElement('td');
+          tableData.style.verticalAlign = 'middle';
+          tableData.style.textAlign = 'center';
+          if (typeof data === 'string') tableData.innerHTML = data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+          else tableData.appendChild(data);
+          container.appendChild(tableData);
+        };
+        var oldTable = document.getElementById(`${layerSetId}-table`);
+        if (oldTable) oldTable.parentNode.removeChild(oldTable);
+        var legendTable = document.getElementById(`${layerSetId}-table-div`);
+        const table = document.createElement('table');
+        table.id = `${layerSetId}-table`;
+        table.border = '1';
+        table.style = 'width:50%';
+        legendTable.appendChild(table);
+        var createHeader = true;
+        Object.keys(resultSets).forEach((layerPath) => {
+          if (resultSets[layerPath]?.type === 'ogcWms') {
+            if (createHeader) {
+              createHeader = false;
+              const tableRow1 = document.createElement('tr');
+              table.appendChild(tableRow1);
+              addHeader('Layer Path', tableRow1);
+              addHeader('Symbology', tableRow1);
+            }
+            const tableRow = document.createElement('tr');
+            addData(resultSets[layerPath].layerPath, tableRow);
+            addData(resultSets[layerPath].legend, tableRow);
+            table.appendChild(tableRow);
+          } else {
+            const addRow = (layerPath, label, canvas) => {
+              const tableRow = document.createElement('tr');
+              addData(layerPath, tableRow);
+              addData(label, tableRow); // canvas.style = "border: 1px solid black;"
+              addData(canvas, tableRow);
+              table.appendChild(tableRow);
+            };
+            if (createHeader) {
+              createHeader = false;
+              const tableRow1 = document.createElement('tr');
+              table.appendChild(tableRow1);
+              addHeader('Layer Path', tableRow1);
+              addHeader('Label', tableRow1);
+              addHeader('Symbology', tableRow1);
+            }
+            if (resultSets[layerPath]?.legend) {
+              Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
+                if (geometryKey) {
+                  if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'uniqueValue') {
+                    if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                        resultSets[layerPath].legend[geometryKey].defaultCanvas
+                      );
+                    for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                        resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                      );
+                    }
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'classBreaks') {
+                    if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                        resultSets[layerPath].legend[geometryKey].defaultCanvas
+                      );
+                    for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
+                      addRow(
+                        layerPath,
+                        resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                        resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
+                      );
+                    }
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'simple') {
+                    addRow(
+                      layerPath,
+                      resultSets[layerPath].styleConfig[geometryKey].label,
+                      resultSets[layerPath].legend[geometryKey].defaultCanvas
+                    );
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+    </script>
+  </body>
 </html>
