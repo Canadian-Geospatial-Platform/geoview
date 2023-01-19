@@ -10,7 +10,7 @@ body:
     options:
     - label: I have searched the existing issues
       required: true
-- type: textarea
+- type: input
   attributes:
     label: Who request this Feature
     description: Individual, team, project, organization...
