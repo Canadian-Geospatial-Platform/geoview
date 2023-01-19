@@ -1,0 +1,77 @@
+name: Feature
+description: File a new feature request
+title: "[FEATURE] <title>"
+labels: ["addition: feature", triage]
+body:
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for this feature.
+    options:
+    - label: I have searched the existing issues
+      required: true
+- type: textarea
+  attributes:
+    label: Who request this Feature
+    description: Individual, team, project, organization...
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: User Story
+    description: A concise description of what you expected to happen (one paragraph).
+    placeholder: |
+      As a [user type], I would like ... 
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Implementation UI
+    description: If needed, what user interface do you suggest, feel free to add mockups.
+  validations:
+    required: false
+
+     
+    
+    
+    Please Describe The Problem To Be Solved (Replace This Text: Please present a concise description of the problem to be addressed by this feature request. Please be clear what parts of the problem are considered to be in-scope and out-of-scope.)
+
+(Optional): Suggest A Solution (Replace This Text: A concise description of your preferred solution. Things to address include:
+
+Details of the technical implementation
+Tradeoffs made in design decisions
+Caveats and considerations for the future
+If there are multiple solutions, please present each one separately. Save comparisons for the very end.)
+
+---
+name: Feature request
+about: Suggest an idea for this project
+title: Feature request
+labels: feature
+
+---
+
+### Summary
+
+One paragraph explanation of the feature.
+
+### Motivation
+
+Why is this feature of general interest?
+
+### Implementation
+
+What user interface do you suggest?
+
+### Formatting
+
+Please use markdown in your issue message. A useful summary of commands can be found [here](https://guides.github.com/pdfs/markdown-cheatsheet-online.pdf).
+- type: textarea
+  attributes:
+    label: Anything else?
+    description: |
+      Links? References? Anything that will give us more context about the issue you are encountering!
+
+      Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+  validations:
+    required: false
