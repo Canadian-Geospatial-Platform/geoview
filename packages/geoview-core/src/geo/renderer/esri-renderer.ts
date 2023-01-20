@@ -17,7 +17,7 @@ import {
   TypeSimpleStyleConfig,
   TypeSimpleSymbolVectorConfig,
   TypeStyleConfig,
-  TypeStyleConfigKey,
+  TypeStyleGeometry,
   TypeSymbol,
   TypeUniqueValueStyleConfig,
   TypeUniqueValueStyleInfo,
@@ -425,9 +425,9 @@ function convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined
  *
  * @param {TypeKindOfVectorSettings} settings The GeoView settings.
  *
- * @returns {TypeStyleConfigKey | undefined} The Geoview style key or undefined if it can not be determined.
+ * @returns {TypeStyleGeometry | undefined} The Geoview style key or undefined if it can not be determined.
  */
-function getStyleConfigKey(settings: TypeKindOfVectorSettings): TypeStyleConfigKey | undefined {
+function getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry | undefined {
   if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'Point';
   if (isFilledPolygonVectorConfig(settings)) return 'Polygon';
   if (isLineStringVectorConfig(settings)) return 'LineString';
@@ -446,6 +446,7 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
   const style: TypeStyleConfig = {};
   const styleType = 'uniqueValue';
   const defaultLabel = renderer.defaultLabel === null ? undefined : renderer.defaultLabel;
+  const defaultVisible = true;
   const defaultSettings = convertSymbol(renderer.defaultSymbol);
   const fields = [renderer.field1];
   if (renderer.field2) fields.push(renderer.field2);
@@ -458,15 +459,24 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
         settings.rotation = Math.PI / 2 - settings.rotation!;
       uniqueValueStyleInfo.push({
         label: symbolInfo.label,
+        visible: true,
         values: symbolInfo.value.split(renderer.fieldDelimiter),
         settings,
       });
     }
   });
-  const styleConfigKey = getStyleConfigKey(uniqueValueStyleInfo[0].settings);
-  const styleSettings: TypeUniqueValueStyleConfig = { styleId, styleType, defaultLabel, defaultSettings, fields, uniqueValueStyleInfo };
-  if (styleConfigKey) {
-    style[styleConfigKey] = styleSettings;
+  const styleGeometry = getStyleGeometry(uniqueValueStyleInfo[0].settings);
+  const styleSettings: TypeUniqueValueStyleConfig = {
+    styleId,
+    styleType,
+    defaultLabel,
+    defaultVisible,
+    defaultSettings,
+    fields,
+    uniqueValueStyleInfo,
+  };
+  if (styleGeometry) {
+    style[styleGeometry] = styleSettings;
     return style;
   }
   return undefined;
@@ -487,10 +497,10 @@ function processSimpleRenderer(styleId: string, renderer: EsriSimpleRenderer): T
   if (settings) {
     if (renderer.rotationType === 'geographic' && (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)))
       settings.rotation = Math.PI / 2 - settings.rotation!;
-    const styleConfigKey = getStyleConfigKey(settings);
+    const styleGeometry = getStyleGeometry(settings);
     const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-    if (styleConfigKey) {
-      style[styleConfigKey] = styleSettings;
+    if (styleGeometry) {
+      style[styleGeometry] = styleSettings;
       return style;
     }
   }
@@ -510,8 +520,9 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
   const styleType = 'classBreaks';
   const defaultLabel = EsriRenderer.defaultLabel === null ? undefined : EsriRenderer.defaultLabel;
   const defaultSettings = convertSymbol(EsriRenderer.defaultSymbol);
+  const defaultVisible = true;
   const { field } = EsriRenderer;
-  const classBreakStyleInfos: TypeClassBreakStyleInfo[] = [];
+  const classBreakStyleInfo: TypeClassBreakStyleInfo[] = [];
   for (let i = 0; i < EsriRenderer.classBreakInfos.length; i++) {
     const settings = convertSymbol(EsriRenderer.classBreakInfos[i].symbol);
     if (settings) {
@@ -519,22 +530,31 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
         settings.rotation = Math.PI / 2 - settings.rotation!;
       const geoviewClassBreakInfo: TypeClassBreakStyleInfo = {
         label: EsriRenderer.classBreakInfos[i].label,
+        visible: true,
         minValue: EsriRenderer.classBreakInfos[i].classMinValue,
         maxValue: EsriRenderer.classBreakInfos[i].classMaxValue,
         settings,
       };
-      classBreakStyleInfos.push(geoviewClassBreakInfo);
+      classBreakStyleInfo.push(geoviewClassBreakInfo);
       if (EsriRenderer.classBreakInfos[i].classMinValue || EsriRenderer.classBreakInfos[i].classMinValue === 0)
-        classBreakStyleInfos[i].minValue = EsriRenderer.classBreakInfos[i].classMinValue;
-      else if (i === 0) classBreakStyleInfos[i].minValue = EsriRenderer.minValue;
-      else classBreakStyleInfos[i].minValue = EsriRenderer.classBreakInfos[i - 1].classMaxValue;
+        classBreakStyleInfo[i].minValue = EsriRenderer.classBreakInfos[i].classMinValue;
+      else if (i === 0) classBreakStyleInfo[i].minValue = EsriRenderer.minValue;
+      else classBreakStyleInfo[i].minValue = EsriRenderer.classBreakInfos[i - 1].classMaxValue;
     }
   }
 
-  const styleConfigKey = getStyleConfigKey(classBreakStyleInfos[0].settings);
-  const styleSettings: TypeClassBreakStyleConfig = { styleId, styleType, defaultLabel, defaultSettings, field, classBreakStyleInfos };
-  if (styleConfigKey) {
-    style[styleConfigKey] = styleSettings;
+  const styleGeometry = getStyleGeometry(classBreakStyleInfo[0].settings);
+  const styleSettings: TypeClassBreakStyleConfig = {
+    styleId,
+    styleType,
+    defaultVisible,
+    defaultLabel,
+    defaultSettings,
+    field,
+    classBreakStyleInfo,
+  };
+  if (styleGeometry) {
+    style[styleGeometry] = styleSettings;
     return style;
   }
   return undefined;

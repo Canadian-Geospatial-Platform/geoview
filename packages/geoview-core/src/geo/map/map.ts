@@ -194,7 +194,11 @@ export class MapViewer {
               if (geoviewLayerConfig.geoviewLayerId in this.layer.geoviewLayers)
                 this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId].loadError = true;
               // Force the creation of an empty geoview layer with the two flags needed to signal a load error
-              else (this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId] as unknown) = { isLoaded: false, loadError: true };
+              else
+                (this.layer.geoviewLayers[geoviewLayerConfig.geoviewLayerId] as { isLoaded: boolean; loadError: boolean }) = {
+                  isLoaded: false,
+                  loadError: true,
+                };
               // eslint-disable-next-line no-console
               console.log(`Layer ${geoviewLayerConfig.geoviewLayerId} failed to load on map ${this.mapId}`);
               api.event.emit(

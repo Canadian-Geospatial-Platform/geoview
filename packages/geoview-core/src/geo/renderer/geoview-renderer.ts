@@ -28,7 +28,7 @@ import {
   TypeLineStringVectorConfig,
   TypeSimpleStyleConfig,
   TypeSimpleSymbolVectorConfig,
-  TypeStyleConfigKey,
+  TypeStyleGeometry,
   TypeStyleSettings,
   TypeSymbol,
   TypeUniqueValueStyleInfo,
@@ -86,7 +86,7 @@ export class GeoviewRenderer {
   /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
   private processStyle: Record<
     TypeBaseStyleType,
-    Record<TypeStyleConfigKey, (styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike) => Style | undefined>
+    Record<TypeStyleGeometry, (styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike) => Style | undefined>
   > = {
     simple: {
       Point: this.processSimplePoint,
@@ -416,7 +416,7 @@ export class GeoviewRenderer {
             resolve,
             layerStyle,
             styleConfig.Point.defaultSettings,
-            (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfos
+            (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
           );
         }
       }
@@ -443,7 +443,7 @@ export class GeoviewRenderer {
               this.processSimpleLineString(styleConfig.LineString.defaultSettings)
             );
           const styleArray: HTMLCanvasElement[] = [];
-          styleConfig.LineString.classBreakStyleInfos.forEach((styleInfo) => {
+          styleConfig.LineString.classBreakStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
           });
           layerStyle.LineString.arrayOfCanvas = styleArray;
@@ -469,7 +469,7 @@ export class GeoviewRenderer {
           if (styleConfig.Polygon.defaultSettings)
             layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
           const styleArray: HTMLCanvasElement[] = [];
-          styleConfig.Polygon.classBreakStyleInfos.forEach((styleInfo) => {
+          styleConfig.Polygon.classBreakStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
           });
           layerStyle.Polygon.arrayOfCanvas = styleArray;
@@ -494,8 +494,8 @@ export class GeoviewRenderer {
     feature: FeatureLike,
     layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
-    let geometryType = feature.getGeometry()?.getType() as TypeStyleConfigKey;
-    geometryType = geometryType.startsWith('Multi') ? (geometryType.slice(5) as TypeStyleConfigKey) : geometryType;
+    let geometryType = feature.getGeometry()?.getType() as TypeStyleGeometry;
+    geometryType = geometryType.startsWith('Multi') ? (geometryType.slice(5) as TypeStyleGeometry) : geometryType;
     // If style does not exist for the geometryType, create it.
     let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
@@ -1204,12 +1204,12 @@ export class GeoviewRenderer {
    * Search the class breakentry using the field value stored in the feature.
    *
    * @param {string[]} field The field involved in the class break definition.
-   * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfos The class break configuration.
+   * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfo The class break configuration.
    * @param {FeatureLike} feature The feature used to test the class break conditions.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private searchClassBreakEntry(field: string, classBreakStyleInfos: TypeClassBreakStyleInfo[], feature: FeatureLike): number | undefined {
+  private searchClassBreakEntry(field: string, classBreakStyleInfo: TypeClassBreakStyleInfo[], feature: FeatureLike): number | undefined {
     // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
     // class break definition.
     const featureKey = (feature as Feature).getKeys().filter((key) => {
@@ -1219,10 +1219,10 @@ export class GeoviewRenderer {
 
     const fieldValue = feature.get(featureKey[0]) as number;
 
-    if (fieldValue >= classBreakStyleInfos[0].minValue! && fieldValue <= classBreakStyleInfos[0].maxValue) return 0;
+    if (fieldValue >= classBreakStyleInfo[0].minValue! && fieldValue <= classBreakStyleInfo[0].maxValue) return 0;
 
-    for (let i = 1; i < classBreakStyleInfos.length; i++) {
-      if (fieldValue > classBreakStyleInfos[i].minValue! && fieldValue <= classBreakStyleInfos[i].maxValue) return i;
+    for (let i = 1; i < classBreakStyleInfo.length; i++) {
+      if (fieldValue > classBreakStyleInfo[i].minValue! && fieldValue <= classBreakStyleInfo[i].maxValue) return i;
     }
     return undefined;
   }
@@ -1237,9 +1237,9 @@ export class GeoviewRenderer {
    */
   private processClassBreaksPoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isClassBreakStyleConfig(styleSettings)) {
-      const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
-      const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-      if (i !== undefined) return this.processSimplePoint(classBreakStyleInfos[i].settings);
+      const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
+      if (i !== undefined) return this.processSimplePoint(classBreakStyleInfo[i].settings);
       if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings);
     }
     return undefined;
@@ -1258,9 +1258,9 @@ export class GeoviewRenderer {
     feature: FeatureLike
   ): Style | undefined {
     if (isClassBreakStyleConfig(styleSettings)) {
-      const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
-      const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-      if (i !== undefined) return this.processSimpleLineString(classBreakStyleInfos[i].settings, feature);
+      const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
+      if (i !== undefined) return this.processSimpleLineString(classBreakStyleInfo[i].settings, feature);
       if (defaultSettings !== undefined) return this.processSimpleLineString(defaultSettings, feature);
     }
     return undefined;
@@ -1276,9 +1276,9 @@ export class GeoviewRenderer {
    */
   private processClassBreaksPolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
     if (isClassBreakStyleConfig(styleSettings)) {
-      const { defaultSettings, field, classBreakStyleInfos } = styleSettings;
-      const i = this.searchClassBreakEntry(field, classBreakStyleInfos, feature);
-      if (i !== undefined) return this.processSimplePolygon(classBreakStyleInfos[i].settings, feature);
+      const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
+      if (i !== undefined) return this.processSimplePolygon(classBreakStyleInfo[i].settings, feature);
       if (defaultSettings !== undefined) return this.processSimplePolygon(defaultSettings, feature);
     }
     return undefined;
@@ -1287,13 +1287,13 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * Create a default style to use with a vector feature that has no style configuration.
    *
-   * @param {TypeStyleConfigKey} geometryType The type of geometry (Point, LineString, Polygon).
+   * @param {TypeStyleGeometry} geometryType The type of geometry (Point, LineString, Polygon).
    * @param {TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig the layer entry config to configure.
    *
    * @returns {TypeStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.
    */
   private createDefaultStyle(
-    geometryType: TypeStyleConfigKey,
+    geometryType: TypeStyleGeometry,
     layerEntryConfig: TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): TypeStyleConfig | undefined {
     if (layerEntryConfig.style === undefined) layerEntryConfig.style = {};

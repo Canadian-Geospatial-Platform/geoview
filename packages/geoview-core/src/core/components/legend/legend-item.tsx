@@ -201,7 +201,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               if (layerLegend.styleConfig) {
                 Object.entries(layerLegend.styleConfig).forEach(([, styleSettings]) => {
                   if (isClassBreakStyleConfig(styleSettings)) {
-                    const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfos.map((styleInfo) => {
+                    const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo.map((styleInfo) => {
                       return styleInfo.label;
                     });
                     if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);

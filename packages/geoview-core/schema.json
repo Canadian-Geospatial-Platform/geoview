@@ -233,6 +233,10 @@
           "type": "string",
           "description": "Label used if field/value association is not found."
         },
+        "defaultVisible": {
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default true)."
+        },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
           "description": "Settings used if field/value association is not found."
@@ -253,19 +257,26 @@
       "type": "array",
       "items": {
         "additionalProperties": false,
-        "label": {
-          "type": "string"
-        },
-        "values": {
-          "type": "array",
-          "items": {
+        "type": "object",
+        "properties": {
+          "label": {
             "type": "string"
           },
-          "minItems": 1
-        },
-        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+          "visible": {
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default true)."
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+        }
       },
-      "minItems": 2,
+      "minItems": 1,
       "required": ["label", "values", "options"]
     },
 
@@ -283,6 +294,10 @@
           "type": "string",
           "description": "Label used if field/value association is not found."
         },
+        "defaultVisible": {
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default true)."
+        },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
           "description": "Settings used if field/value association is not found."
@@ -290,9 +305,9 @@
         "field": {
           "type": "string"
         },
-        "classBreakStyleInfos": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
+        "classBreakStyleInfo": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
       },
-      "required": ["styleType", "label", "field", "classBreakStyleInfo"]
+      "required": ["styleType", "field", "classBreakStyleInfo"]
     },
 
     "TypeClassBreakStyleInfo": {
@@ -300,19 +315,26 @@
       "type": "array",
       "items": {
         "additionalProperties": false,
-        "label": {
-          "type": "string"
-        },
-        "minValue": {
-          "type": "number"
-        },
-        "maxValue": {
-          "type": "number"
-        },
-        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default true)."
+          },
+          "minValue": {
+            "type": "number"
+          },
+          "maxValue": {
+            "type": "number"
+          },
+          "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+        }
       },
-      "minItems": 2,
-      "required": ["label", "minValue", "maxValue", "options"]
+      "minItems": 1,
+      "required": ["label", "minValue", "maxValue", "settings"]
     },
 
     "TypeKindOfVectorSettings": {
@@ -645,6 +667,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
+        "layerFilter": {
+          "type": "string",
+          "description": "Filter to apply on feature of this layer."
+        },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
           "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
@@ -668,6 +694,10 @@
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "layerFilter": {
+          "type": "string",
+          "description": "Filter to apply on feature of this layer."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -716,6 +746,10 @@
         "layerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "styleFilter": {
+          "type": "string",
+          "description": "Style filter to apply on feature of this style."
         },
         "initialSettings": {
           "$ref": "#/definitions/TypeLayerInitialSettings",
@@ -808,7 +842,7 @@
           "description": "The list of layer entry configurations to use from the GeoView layer group."
         }
       },
-      "required": ["entryType", "layerId", "layerName", "listOfLayerEntryConfig"]
+      "required": ["entryType", "layerId", "listOfLayerEntryConfig"]
     },
 
     "TypeLayerEntryConfig": {
