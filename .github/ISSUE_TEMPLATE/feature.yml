@@ -1,0 +1,32 @@
+name: Feature
+description: File a new feature request
+title: "[FEATURE] <title>"
+labels: ["addition: feature", triage]
+body:
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for this feature.
+    options:
+    - label: I have searched the existing issues
+      required: true
+- type: input
+  attributes:
+    label: Who request this Feature
+    description: Individual, team, project, organization...
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: User Story
+    description: A concise description of what you expected to happen (one paragraph).
+    placeholder: |
+      As a [user type], I would like ... 
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Implementation UI
+    description: If needed, what user interface do you suggest, feel free to add mockups.
+  validations:
+    required: false
