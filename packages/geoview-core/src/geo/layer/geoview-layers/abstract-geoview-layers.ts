@@ -20,7 +20,7 @@ import {
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeImageLayerEntryConfig,
-  TypeStyleConfigKey,
+  TypeStyleGeometry,
 } from '../../map/map-schema-types';
 import {
   GetFeatureInfoPayload,
@@ -85,7 +85,7 @@ export type TypeStyleRepresentation = {
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, TypeStyleRepresentation>>;
+export type TypeLayerStyle = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types

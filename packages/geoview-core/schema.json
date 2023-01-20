@@ -214,6 +214,10 @@
         "label": {
           "type": "string"
         },
+        "styleFilter": {
+          "type": "string",
+          "description": "Style filter to apply on feature of this style."
+        },
         "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
       },
       "required": ["styleType", "label", "settings"]
@@ -229,9 +233,17 @@
         "styleType": {
           "enum": ["uniqueValue"]
         },
+        "styleFilter": {
+          "type": "string",
+          "description": "Style filter to apply on feature of this style."
+        },
         "defaultLabel": {
           "type": "string",
           "description": "Label used if field/value association is not found."
+        },
+        "defaultVisible": {
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default true)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -253,19 +265,26 @@
       "type": "array",
       "items": {
         "additionalProperties": false,
-        "label": {
-          "type": "string"
-        },
-        "values": {
-          "type": "array",
-          "items": {
+        "type": "object",
+        "properties": {
+          "label": {
             "type": "string"
           },
-          "minItems": 1
-        },
-        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+          "visible": {
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default true)."
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+        }
       },
-      "minItems": 2,
+      "minItems": 1,
       "required": ["label", "values", "options"]
     },
 
@@ -279,9 +298,17 @@
         "styleType": {
           "enum": ["classBreaks"]
         },
+        "styleFilter": {
+          "type": "string",
+          "description": "Style filter to apply on feature of this style."
+        },
         "defaultLabel": {
           "type": "string",
           "description": "Label used if field/value association is not found."
+        },
+        "defaultVisible": {
+          "type": "boolean",
+          "description": "Flag used to show/hide features associated to the default label (default true)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -290,9 +317,9 @@
         "field": {
           "type": "string"
         },
-        "classBreakStyleInfos": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
+        "classBreakStyleInfo": { "$ref": "#/definitions/TypeClassBreakStyleInfo" }
       },
-      "required": ["styleType", "label", "field", "classBreakStyleInfo"]
+      "required": ["styleType", "field", "classBreakStyleInfo"]
     },
 
     "TypeClassBreakStyleInfo": {
@@ -300,19 +327,26 @@
       "type": "array",
       "items": {
         "additionalProperties": false,
-        "label": {
-          "type": "string"
-        },
-        "minValue": {
-          "type": "number"
-        },
-        "maxValue": {
-          "type": "number"
-        },
-        "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "visible": {
+            "type": "boolean",
+            "description": "Flag used to show/hide features associated to the label (default true)."
+          },
+          "minValue": {
+            "type": "number"
+          },
+          "maxValue": {
+            "type": "number"
+          },
+          "settings": { "$ref": "#/definitions/TypeKindOfVectorSettings" }
+        }
       },
-      "minItems": 2,
-      "required": ["label", "minValue", "maxValue", "options"]
+      "minItems": 1,
+      "required": ["label", "minValue", "maxValue", "settings"]
     },
 
     "TypeKindOfVectorSettings": {

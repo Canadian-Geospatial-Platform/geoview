@@ -7,10 +7,10 @@ import { Options as ImageOptions } from 'ol/layer/BaseImage';
 import { Image as ImageLayer } from 'ol/layer';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
-
-import cloneDeep from 'lodash/cloneDeep';
 import { transform, transformExtent } from 'ol/proj';
 import { Extent } from 'ol/extent';
+
+import cloneDeep from 'lodash/cloneDeep';
 import { Cast, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES } from '../abstract-geoview-layers';
@@ -25,11 +25,19 @@ import {
   TypeLayerGroupEntryConfig,
   layerEntryIsGroupLayer,
   TypeFeatureInfoLayerConfig,
+  TypeStyleGeometry,
+  isUniqueValueStyleConfig,
+  isClassBreakStyleConfig,
+  TypeUniqueValueStyleConfig,
+  TypeClassBreakStyleConfig,
+  isSimpleStyleConfig,
+  TypeBaseStyleConfig,
 } from '../../../map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
 import { TimeDimension, TimeDimensionESRI } from '../../../../core/utils/date-mgt';
+import { EVENT_NAMES } from '../../../../api/events/event-types';
 
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;
@@ -249,6 +257,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               if (!(layerEntryConfig as TypeImageLayerEntryConfig).style) {
                 const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
                 if (renderer) layerEntryConfig.style = getStyleFromEsriRenderer(this.mapId, layerEntryConfig, renderer);
+              } else {
+                // Replace all ` with ' in the styleFilter provided in the configuration because SQL string are between apostrophes
+                const styleSettings = layerEntryConfig.style![
+                  Object.keys(layerEntryConfig.style!)[0] as TypeStyleGeometry
+                ] as TypeBaseStyleConfig;
+                styleSettings.styleFilter = styleSettings.styleFilter?.split('`').join("'");
               }
               this.processFeatureInfoConfig(
                 response.data.capabilities as string,
@@ -291,7 +305,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerEntryConfig: TypeEsriDynamicLayerEntryConfig
   ) {
     if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-    if (!layerEntryConfig.initialSettings?.visible) layerEntryConfig.initialSettings.visible = visibility;
+    if (layerEntryConfig.initialSettings?.visible === undefined) layerEntryConfig.initialSettings.visible = visibility;
     // ! TODO: The solution implemented in the following two lines is not right. scale and zoom are not the same things.
     // ! if (layerEntryConfig.initialSettings?.minZoom === undefined && minScale !== 0) layerEntryConfig.initialSettings.minZoom = minScale;
     // ! if (layerEntryConfig.initialSettings?.maxZoom === undefined && maxScale !== 0) layerEntryConfig.initialSettings.maxZoom = maxScale;
@@ -411,9 +425,19 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       if (layerEntryConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
       if (layerEntryConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
       if (layerEntryConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-      if (layerEntryConfig.initialSettings?.visible !== undefined) imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+      // If all layers on the map have an initialSettings.visible set to false, a loading error occurs because nothing is drawn on the
+      // map and the 'change' or 'prerender' events are never sent to the addToMap method of the layer.ts file. The workaround is to
+      // postpone the setVisible action until all layers have been loaded on the map.
+      api.event.once(
+        EVENT_NAMES.LAYER.EVENT_IF_CONDITION,
+        (payload) => {
+          this.setVisible(layerEntryConfig.initialSettings!.visible!, layerEntryConfig);
+        },
+        `${this.mapId}/visibilityTest`
+      );
 
       layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
+      this.applyViewFilter(layerEntryConfig);
 
       resolve(layerEntryConfig.gvLayer);
     });
@@ -573,5 +597,187 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       resolve([]);
     });
     return promisedQueryResult;
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and an extra filter
+   * associated to the layer.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {string} the filter associated to the layerPath
+   */
+  getViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeEsriDynamicLayerEntryConfig;
+    const layerPath = typeof layerPathOrConfig === 'string' ? layerPathOrConfig : Layer.getLayerPath(layerEntryConfig);
+
+    if (layerEntryConfig.style) {
+      const setAllUndefinedVisibilityFlagsToTrue = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
+        // default value is true for all undefined visibility flags
+        if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
+        const settings = isUniqueValueStyleConfig(styleConfig) ? styleConfig.uniqueValueStyleInfo : styleConfig.classBreakStyleInfo;
+        for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = true;
+      };
+
+      const featuresAreAllVisible = (defaultVisibility: boolean, settings: { visible: boolean }[]): boolean => {
+        let allVisible = defaultVisibility;
+        for (let i = 0; i < settings.length; i++) {
+          allVisible &&= settings[i].visible;
+        }
+        return allVisible;
+      };
+
+      const styleSettings = layerEntryConfig.style[Object.keys(layerEntryConfig.style)[0] as TypeStyleGeometry]!;
+
+      if (isSimpleStyleConfig(styleSettings)) {
+        return styleSettings.styleFilter || '(1=1)';
+      }
+      if (isUniqueValueStyleConfig(styleSettings)) {
+        setAllUndefinedVisibilityFlagsToTrue(styleSettings);
+        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: boolean }[]))
+          return `(1=1)${styleSettings.styleFilter ? ` and (${styleSettings.styleFilter})` : ''}`;
+
+        const fieldNames = styleSettings.fields
+          .reduce((fieldConcatenation, fieldName) => {
+            return `${fieldConcatenation}||'~+~'||${fieldName}`;
+          }, '')
+          .slice(9);
+
+        const fieldValues = styleSettings.uniqueValueStyleInfo
+          .reduce((valueConcatenation, fieldEntry) => {
+            if ((!fieldEntry.visible && styleSettings.defaultVisible) || (fieldEntry.visible && !styleSettings.defaultVisible)) {
+              const fieldEntryValues: string = fieldEntry.values
+                .reduce((fieldValuesConcatenation, nextFieldValue) => {
+                  return `${fieldValuesConcatenation}~+~${nextFieldValue}`;
+                }, '')
+                .slice(3);
+              return `${valueConcatenation},'${fieldEntryValues}'`;
+            }
+            return valueConcatenation;
+          }, '')
+          .slice(1);
+
+        const selectionOperator = styleSettings.defaultVisible ? 'not in' : 'in';
+        const filterValue = `(${fieldNames} ${selectionOperator} (${fieldValues || "''"}))`;
+
+        return `${filterValue}${styleSettings.styleFilter ? ` and (${styleSettings.styleFilter})` : ''}`;
+      }
+
+      if (isClassBreakStyleConfig(styleSettings)) {
+        setAllUndefinedVisibilityFlagsToTrue(styleSettings);
+        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: boolean }[]))
+          return `(1=1)${styleSettings.styleFilter ? ` and (${styleSettings.styleFilter})` : ''}`;
+
+        const filterArray = [];
+        let visibleWhenGreatherThisIndex = -1;
+        for (let i = 0; i < styleSettings.classBreakStyleInfo.length; i++) {
+          if (filterArray.length % 2 === 0) {
+            if (i === 0) {
+              if (styleSettings.classBreakStyleInfo[0].visible && !styleSettings.defaultVisible)
+                filterArray.push(`${styleSettings.field} >= ${styleSettings.classBreakStyleInfo[0].minValue}`);
+              else if (!styleSettings.classBreakStyleInfo[0].visible && styleSettings.defaultVisible) {
+                filterArray.push(`${styleSettings.field} < ${styleSettings.classBreakStyleInfo[0].minValue}`);
+                visibleWhenGreatherThisIndex = i;
+              }
+            } else if (styleSettings.classBreakStyleInfo[i].visible && !styleSettings.defaultVisible) {
+              filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[i].minValue}`);
+              if (i + 1 === styleSettings.classBreakStyleInfo.length)
+                filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].maxValue}`);
+            } else if (!styleSettings.classBreakStyleInfo[i].visible && styleSettings.defaultVisible) {
+              filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].minValue}`);
+              visibleWhenGreatherThisIndex = i;
+            }
+          } else if (!styleSettings.defaultVisible) {
+            if (!styleSettings.classBreakStyleInfo[i].visible) {
+              filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i - 1].maxValue}`);
+            } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
+              filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].maxValue}`);
+            }
+          } else if (styleSettings.classBreakStyleInfo[i].visible) {
+            filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[i - 1].maxValue}`);
+            visibleWhenGreatherThisIndex = -1;
+          } else {
+            visibleWhenGreatherThisIndex = i;
+          }
+        }
+        if (visibleWhenGreatherThisIndex !== -1)
+          filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue}`);
+
+        if (styleSettings.defaultVisible) {
+          const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
+            if (i === 0) return `(${filterNode} or `;
+            if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;
+            return `${previousFilterValue}(${filterNode}`;
+          }, '')}${filterArray.slice(-1)[0]})`;
+          return `${filterValue}${styleSettings.styleFilter ? ` and (${styleSettings.styleFilter})` : ''}`;
+        }
+
+        const filterValue = filterArray.length
+          ? `${filterArray.reduce((previousFilterValue, filterNode, i) => {
+              if (i === 0) return `((${filterNode} and `;
+              if (i % 2 === 0) return `${previousFilterValue} or (${filterNode} and `;
+              return `${previousFilterValue}${filterNode})`;
+            }, '')})`
+          : '(1=0)';
+        // We use '(1=0)' as false to select nothing
+        return `${filterValue}${styleSettings.styleFilter ? ` and (${styleSettings.styleFilter})` : ''}`;
+      }
+    }
+    return '(1=1)';
+  }
+
+  /** ***************************************************************************************************************************
+   * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the feature
+   * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
+   * (feature filters) and (styleFilter). Feature filters are derived from the uniqueValue or classBreaks style of the layer.
+   * When the layer config is invalid, nothing is done.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   * @param {string} filter An aptional filter to be used in place of the getViewFilter value.
+   */
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+    const layerEntryConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+    if (layerEntryConfig) {
+      const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
+      source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filter || this.getViewFilter(layerEntryConfig)}"}` });
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the styleFilter that will be applied with the feature filters derived from the uniqueValue or classBreabs style of
+   * the layer. The resulting filter will be (feature filters) and (styleFilter). When the layer config is invalid, nothing is
+   * done.
+   *
+   * @param {string} filterValue The filter to associate to the layer.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   */
+  setStyleFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeEsriDynamicLayerEntryConfig;
+    if (layerEntryConfig && layerEntryConfig.style) {
+      const styleSettings = layerEntryConfig.style[Object.keys(layerEntryConfig.style)[0] as TypeStyleGeometry] as TypeBaseStyleConfig;
+      styleSettings.styleFilter = filterValue;
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the styleFilter that is associated to the layer. Returns undefined when the layer config is invalid.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {string | undefined} The filter associated to the layer or undefined.
+   */
+  getStyleFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeEsriDynamicLayerEntryConfig;
+    if (layerEntryConfig && layerEntryConfig.style) {
+      const styleSettings = layerEntryConfig.style[Object.keys(layerEntryConfig.style)[0] as TypeStyleGeometry] as TypeBaseStyleConfig;
+      return styleSettings.styleFilter;
+    }
+    return undefined;
   }
 }

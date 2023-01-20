@@ -327,6 +327,8 @@ export type TypeBaseStyleType = 'simple' | 'uniqueValue' | 'classBreaks';
 export type TypeBaseStyleConfig = {
   /** Type of style. */
   styleType: TypeBaseStyleType;
+  /** Style filter to apply on feature of this style */
+  styleFilter?: string;
 };
 
 /** ******************************************************************************************************************************
@@ -334,7 +336,8 @@ export type TypeBaseStyleConfig = {
  * verifyIfConfig parameter is 'simple'. The type ascention applies only to the true block of the if clause that use
  * this function.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if
+ * the type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
@@ -365,17 +368,20 @@ export type TypeUniqueValueStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Values associated to the style. */
+  visible?: boolean;
+  /** Flag used to show/hide features associated to the label (default true). */
   values: string[];
   /** options associated to the style. */
   settings: TypeKindOfVectorSettings;
 };
 
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeBaseStyleConfig as a TypeUniqueValueStyleConfig if the type attribute of the
- * verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
- * this function.
+ * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeUniqueValueStyleConfig if the
+ * styleType attribute of the verifyIfConfig parameter is 'uniqueValue'. The type ascention applies only to the true block of the
+ * if clause that use this function.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the
+ * type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
@@ -396,6 +402,8 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
+  defaultVisible?: boolean;
+  /** Flag used to show/hide features associated to the default label (default true). */
   defaultSettings?: TypeKindOfVectorSettings;
   /** Fields used by the style. */
   fields: string[];
@@ -410,6 +418,8 @@ export type TypeClassBreakStyleInfo = {
   /** Label used by the style. */
   label: string;
   /** Minimum values associated to the style. */
+  visible?: boolean;
+  /** Flag used to show/hide features associated to the label (default true). */
   minValue: number | undefined | null;
   /** Maximum values associated to the style. */
   maxValue: number;
@@ -418,11 +428,12 @@ export type TypeClassBreakStyleInfo = {
 };
 
 /** ******************************************************************************************************************************
- * type guard function that redefines a TypeBaseStyleConfig as a TypeClassBreakStyleConfig if the type attribute of the
- * verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the if clause that use
- * this function.
+ * type guard function that redefines a TypeStyleSettings | TypeKindOfVectorSettings as a TypeClassBreakStyleConfig if the
+ * styleType attribute of the verifyIfConfig parameter is 'classBreaks'. The type ascention applies only to the true block of the
+ * if clause that use this function.
  *
- * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the type ascention is valid.
+ * @param {TypeStyleSettings | TypeKindOfVectorSettings} verifyIfConfig Polymorphic object to test in order to determine if the
+ * type ascention is valid.
  *
  * @returns {boolean} true if the type ascention is valid.
  */
@@ -443,11 +454,13 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
   /** Label used if field/value association is not found. */
   defaultLabel?: string;
   /** Options used if field/value association is not found. */
+  defaultVisible?: boolean;
+  /** Flag used to show/hide features associated to the default label (default true). */
   defaultSettings?: TypeKindOfVectorSettings;
   /** Field used by the style. */
   field: string;
   /** Class break style information configuration. */
-  classBreakStyleInfos: TypeClassBreakStyleInfo[];
+  classBreakStyleInfo: TypeClassBreakStyleInfo[];
 }
 
 /** ******************************************************************************************************************************
@@ -458,12 +471,12 @@ export type TypeStyleSettings = TypeBaseStyleConfig | TypeSimpleStyleConfig | Ty
 /** ******************************************************************************************************************************
  * Valid keys for the TypeStyleConfig object.
  */
-export type TypeStyleConfigKey = 'Point' | 'LineString' | 'Polygon';
+export type TypeStyleGeometry = 'Point' | 'LineString' | 'Polygon';
 
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer based on geometry types.
  */
-export type TypeStyleConfig = Partial<Record<TypeStyleConfigKey, TypeStyleSettings>>;
+export type TypeStyleConfig = Partial<Record<TypeStyleGeometry, TypeStyleSettings>>;
 
 /** ******************************************************************************************************************************
  * Type of Style to apply to the GeoView vector layer source at creation time.
