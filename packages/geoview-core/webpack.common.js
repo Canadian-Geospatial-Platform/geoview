@@ -65,6 +65,14 @@ const config = {
   },
   resolve: {
     extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx'],
+    fallback: {
+      crypto: false,
+      path: false,
+      stream: false,
+      events: false,
+      buffer: false,
+      fs: false,
+    },
   },
   module: {
     rules: [

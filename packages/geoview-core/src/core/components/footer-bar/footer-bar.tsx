@@ -14,7 +14,6 @@ import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
 import { FooterBarExportPngButton } from './footer-bar-exportpng-button';
-import { FooterBarExportPdfButton } from './footer-bar-exportpdf-button';
 
 const useStyles = makeStyles((theme) => ({
   footerBarContainer: {
@@ -45,11 +44,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  exportText: {
-    display: 'flex',
-    fontSize: `0.8rem`,
-    color: `${theme.palette.primary.light}`,
-  },
 }));
 
 /**
@@ -79,12 +73,8 @@ export function Footerbar(): JSX.Element {
         {deviceSizeMedUp && <MousePosition mousePositionMapId={mapId} />}
         <Scale />
       </div>
-      <span className={classes.exportText}>Export:</span>
       <div>
         <FooterBarExportPngButton />
-      </div>
-      <div>
-        <FooterBarExportPdfButton />
       </div>
       <div className={classes.rotationControlsContainer}>
         <FooterbarRotationButton />

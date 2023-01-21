@@ -13,6 +13,7 @@ import { geoviewEntryIsEsriFeature } from '../../../geo/layer/geoview-layers/vec
 import { geoviewEntryIsWFS } from '../../../geo/layer/geoview-layers/vector/wfs';
 import { geoviewEntryIsOgcFeature } from '../../../geo/layer/geoview-layers/vector/ogc-feature';
 import { geoviewEntryIsGeoJSON } from '../../../geo/layer/geoview-layers/vector/geojson';
+import { geoviewEntryIsGeoPackage } from '../../../geo/layer/geoview-layers/vector/geopackage';
 import { geoviewEntryIsGeocore } from '../../../geo/layer/other/geocore';
 import {
   layerEntryIsGroupLayer,
@@ -410,6 +411,9 @@ export class ConfigValidation {
           case 'geoCore':
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
+          case 'GeoPackage':
+            this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+            break;
           case 'xyzTiles':
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
@@ -543,6 +547,18 @@ export class ConfigValidation {
         // Value for layerEntryConfig.source.format can only be WFS.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'featureAPI' };
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'featureAPI';
+        if (!layerEntryConfig.source.dataAccessPath)
+          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
+      } else if (geoviewEntryIsGeoPackage(layerEntryConfig)) {
+        // Default value for layerEntryConfig.entryType is vector
+        if (!layerEntryConfig.entryType) layerEntryConfig.entryType = 'vector';
+        // Attribute 'style' must exist in layerEntryConfig even if it is undefined
+        if (!('style' in layerEntryConfig)) layerEntryConfig.style = undefined;
+        // if layerEntryConfig.source.dataAccessPath is undefined, we assign the metadataAccessPath of the GeoView layer to it.
+        // Value for layerEntryConfig.source.format can only be GeoPackage.
+        if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'GeoPackage' };
+        if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'GeoPackage';
         if (!layerEntryConfig.source.dataAccessPath)
           layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
