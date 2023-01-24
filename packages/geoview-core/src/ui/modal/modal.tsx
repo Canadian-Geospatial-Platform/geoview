@@ -68,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     padding: theme.spacing(5, 0),
+    whiteSpace: 'pre-line',
   },
   modalTitleContainer: {
     display: 'flex',

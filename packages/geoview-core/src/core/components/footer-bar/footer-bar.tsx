@@ -30,7 +30,6 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     left: 0,
     bottom: 0,
-    zIndex: theme.zIndex.tooltip,
   },
   mouseScaleControlsContainer: {
     display: 'flex',

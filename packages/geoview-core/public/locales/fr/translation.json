@@ -48,7 +48,7 @@
     "end": "Aller avant l'élément carte",
     "focusdialog": {
       "title": "Navigation clavier",
-      "main": "Si activé, le focus sera verrouillé sur le visualiseur. Pour sortir, appuyez sur <strong>CTRL + Q</strong>.",
+      "main": "Si activé, le focus sera verrouillé sur le visualiseur. \nPour sortir, appuyez sur <strong>CTRL + Q</strong>.",
       "button": {
         "enable": "Activer",
         "skip": "Sauter"
