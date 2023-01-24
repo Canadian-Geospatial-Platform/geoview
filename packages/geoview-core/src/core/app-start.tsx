@@ -64,7 +64,7 @@ function AppStart(props: AppStartProps): JSX.Element {
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')}>
+          <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
             <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
           </ThemeProvider>
         </MapContext.Provider>
