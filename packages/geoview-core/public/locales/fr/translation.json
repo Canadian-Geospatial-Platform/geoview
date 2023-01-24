@@ -5,6 +5,7 @@
   },
   "mapnav": {
     "arianavbar": "groupe de buttons vertical pour navigation sur la carte",
+    "export": "Exporter la carte en PNG",
     "fullscreen": "Plein Écran",
     "home": "Retour à la vue initiale",
     "zoomIn": "Zoom avant",
