@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export function Navbar(this: unknown): JSX.Element {
+export function Navbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
 
