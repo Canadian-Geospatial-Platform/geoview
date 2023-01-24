@@ -49,7 +49,7 @@ const sxClasses = {
     display: 'flex',
     width: '100%',
     margin: '5px 0',
-    backgroundColor: '#ddd',
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   featureInfoItemKey: {
     fontWeight: 'bold',
@@ -67,6 +67,8 @@ export interface TypeFeatureProps {
   key: number;
   feature: TypeFeatureInfoEntry;
   startOpen?: boolean;
+  backgroundStyle?: string;
+  singleColumn?: boolean;
 }
 
 /**
@@ -75,12 +77,13 @@ export interface TypeFeatureProps {
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
-  const { feature, startOpen } = props;
+  const { feature, startOpen, backgroundStyle, singleColumn } = props;
   const featureId = `Feature Info ${feature.featureKey}`;
   const [isOpen, setOpen] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
     return { key: featureKey, value: feature.featureInfo[featureKey] };
   });
+  const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
 
   useEffect(() => {
     // a list of FeatureInfo with only one element will pass down the startOpen prop
@@ -91,11 +94,13 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   }, []);
 
   return (
-    <Grid item sm={12} md={6} lg={4}>
-      <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
+    <Grid item sm={12} md={singleColumn ? 12 : 6} lg={singleColumn ? 12 : 4}>
+      <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
-            <IconButton color="primary">{!isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+            <IconButton color="primary" sx={fontColor}>
+              {!isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />

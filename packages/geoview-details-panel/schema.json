@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "GeoView Layers/Legend Config Schema",
+  "title": "GeoView Details Panel/Legend Config Schema",
   "type": "object",
   "version": 1.0,
   "comments": "Configuration for GeoView layers package.",

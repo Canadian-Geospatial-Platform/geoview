@@ -2,8 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
 import { LayersList } from './layers-list';
 
+export interface DetailsStyleProps {
+  backgroundStyle?: string;
+  singleColumn?: boolean;
+}
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
+  detailsStyle: DetailsStyleProps;
 }
 
 export interface TypeLayerData {
@@ -20,12 +25,12 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  */
 export function Details(props: TypeDetailsProps): JSX.Element | null {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { arrayOfLayerData } = props;
+  const { arrayOfLayerData, detailsStyle } = props;
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
 
   useEffect(() => {
     setDetails(arrayOfLayerData);
   }, [arrayOfLayerData]);
 
-  return <LayersList arrayOfLayerData={details} />;
+  return <LayersList arrayOfLayerData={details} detailsStyle={detailsStyle} />;
 }
