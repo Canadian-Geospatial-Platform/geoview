@@ -2,15 +2,20 @@
 import {
   Cast,
   AbstractPlugin,
+  toJsonObject,
+  TypeJsonObject,
+  TypeWindow,
   TypePluginOptions,
   TypeButtonPanel,
-  toJsonObject,
   TypeIconButtonProps,
   TypePanelProps,
-  TypeWindow,
+  AnySchemaObject,
 } from 'geoview-core';
-import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
 import PanelContent from './panel-content';
+// import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
+
+import schema from '../schema.json';
+import defaultConfig from '../default-config-details-panel.json';
 
 const w = window as TypeWindow;
 
@@ -25,6 +30,20 @@ class DetailsPlugin extends AbstractPlugin {
     super(pluginId, props);
     this.buttonPanel = null;
   }
+
+  /**
+   * Return the schema that is defined for this package
+   *
+   * @returns {AnySchemaObject} returns the schema for this package
+   */
+  schema = (): AnySchemaObject => schema;
+
+  /**
+   * Return the default config for this package
+   *
+   * @returns {TypeJsonObject} the default config
+   */
+  defaultConfig = (): TypeJsonObject => toJsonObject(defaultConfig);
 
   /**
    * translations object to inject to the viewer translations
@@ -58,9 +77,12 @@ class DetailsPlugin extends AbstractPlugin {
     const { DetailsIcon } = ui.elements;
     const { displayLanguage } = api.map(mapId);
 
+    let panelStatus = false;
+
+    panelStatus = this.configObj?.isOpen?.large as boolean;
+
     // button props
     const button: TypeIconButtonProps = {
-      // set ID to detailsPanel so that it can be accessed from the core viewer
       id: 'detailsPanelButton',
       tooltip: this.translations[displayLanguage].detailsPanel as string,
       tooltipPlacement: 'right',
@@ -73,13 +95,14 @@ class DetailsPlugin extends AbstractPlugin {
       title: this.translations[displayLanguage].detailsPanel,
       icon: '<i class="material-icons">details</i>',
       width: 300,
+      status: panelStatus,
     };
 
     // create a new button panel on the app-bar
-    this.buttonPanel = api.map(mapId as string).appBarButtons.createAppbarPanel(button, panel, null);
+    this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId as string} />);
+    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
   };
 
   /**
@@ -96,7 +119,7 @@ class DetailsPlugin extends AbstractPlugin {
 
     if (this.buttonPanel) {
       api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-      api.event.emit(payloadBaseClass(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
+      // api.event.emit(payloadBaseClass(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
     }
   }
 }
