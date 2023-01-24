@@ -11,7 +11,8 @@ import {
   TypePanelProps,
   AnySchemaObject,
 } from 'geoview-core';
-import PanelContent from './panel-content';
+import { DetailsItem } from './details-item';
+// import PanelContent from './panel-content';
 // import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
 
 import schema from '../schema.json';
@@ -102,7 +103,7 @@ class DetailsPlugin extends AbstractPlugin {
     this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(<PanelContent buttonPanel={this.buttonPanel} mapId={mapId} />);
+    this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} />);
   };
 
   /**

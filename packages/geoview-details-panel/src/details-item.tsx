@@ -57,7 +57,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setList(api.map(mapId).details.createDetails(mapId, details, {}));
+    setList(api.map(mapId).details.createDetails(mapId, details, { backgroundStyle: 'dark', singleColumn: true }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details]);
 
