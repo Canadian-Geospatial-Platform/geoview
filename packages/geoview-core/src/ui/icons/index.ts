@@ -32,6 +32,7 @@ import DragHandle from '@mui/icons-material/DragHandle';
 import Opacity from '@mui/icons-material/Opacity';
 import Menu from '@mui/icons-material/Menu';
 import ImportExport from '@mui/icons-material/ImportExport';
+import DownloadIcon from '@mui/icons-material/Download';
 
 export {
   Layers as LayersIcon,
@@ -70,4 +71,5 @@ export {
   Opacity as OpacityIcon,
   Menu as MenuIcon,
   ImportExport as ReorderIcon,
+  DownloadIcon,
 };

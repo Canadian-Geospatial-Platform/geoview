@@ -2,7 +2,7 @@ name: Build types every Friday evening
 on:
   workflow_dispatch:
   schedule:
-    - cron: "42 9 * * 5"
+    - cron: "42 21 * * 5"
 
 jobs:
   update_types:

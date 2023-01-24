@@ -1,28 +1,33 @@
-import { useContext } from 'react';
+import { MouseEventHandler, useContext } from 'react';
 
-import makeStyles from '@mui/styles/makeStyles';
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
-import { IconButton } from '../../../ui';
-
-const useStyles = makeStyles((theme) => {
-  return {
-    exportIcon: {
-      fontSize: `14px !important`,
-      color: `${theme.palette.primary.light}`,
-    },
-  };
-});
+/**
+ * Interface used for home button properties
+ */
+interface ExportModalProps {
+  className?: string | undefined;
+  isShown: boolean;
+  closeModal: MouseEventHandler<HTMLElement>;
+}
 
 /**
- * Footerbar Export PNG Button component
+ * default properties values
+ */
+const defaultProps = {
+  className: '',
+};
+
+/**
+ * Export PNG Button component
  *
  * @returns {JSX.Element} the export button
  */
-export function FooterBarExportPngButton(): JSX.Element {
-  const classes = useStyles();
+export default function ExportModal(props: ExportModalProps): JSX.Element {
+  const { className, isShown, closeModal } = props;
 
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
@@ -91,10 +96,29 @@ export function FooterBarExportPngButton(): JSX.Element {
   }
 
   return (
-    <IconButton id="export-button" tooltip="appbar.export" tooltipPlacement="bottom" type="button" onClick={() => exportPNG()} className="">
-      <div className={classes.exportIcon}>
-        <small>Export PNG</small>
-      </div>
-    </IconButton>
+    // eslint-disable-next-line react/jsx-no-bind
+    <Dialog open={isShown} onClose={closeModal} className={className}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          exportPNG();
+        }}
+      >
+        <DialogTitle>Export PNG</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Choose elements to include:</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeModal} size="small">
+            Cancel
+          </Button>
+          <Button type="submit" onClick={closeModal} size="small">
+            Export
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
+
+ExportModal.defaultProps = defaultProps;
