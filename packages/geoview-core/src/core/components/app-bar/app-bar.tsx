@@ -12,6 +12,9 @@ import { MapContext } from '../../app-start';
 import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/payloads/button-panel-payload';
 import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
+import Export from './buttons/export';
+import ExportModal from '../nav-bar/export-modal';
+
 const useStyles = makeStyles((theme) => ({
   appBar: {
     display: 'flex',
@@ -35,6 +38,11 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.primary.light,
       },
     },
+  },
+
+  exportButtonDiv: {
+    position: 'absolute',
+    bottom: 0,
   },
 
   appBarButtons: {
@@ -82,6 +90,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Appbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
+  const [ModalIsShown, setModalIsShown] = useState(false);
 
   const classes = useStyles();
 
@@ -90,6 +99,14 @@ export function Appbar(): JSX.Element {
   const mapConfig = useContext(MapContext);
 
   const { mapId } = mapConfig;
+
+  const openModal = () => {
+    setModalIsShown(true);
+  };
+
+  const closeModal = () => {
+    setModalIsShown(false);
+  };
 
   const addButtonPanel = useCallback(
     (payload: ButtonPanelPayload) => {
@@ -195,6 +212,13 @@ export function Appbar(): JSX.Element {
               </List>
             );
           })}
+          <div className={classes.exportButtonDiv}>
+            <List className={classes.appBarList}>
+              <ListItem>
+                <Export className={classes.appBarButton} openModal={openModal} />
+              </ListItem>
+            </List>
+          </div>
         </div>
       )}
       {Object.keys(buttonPanelGroups).map((groupName: string) => {
@@ -213,6 +237,7 @@ export function Appbar(): JSX.Element {
           </div>
         );
       })}
+      <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
     </div>
   );
 }
