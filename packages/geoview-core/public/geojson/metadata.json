@@ -18,9 +18,10 @@
       },
       "style": {
         "Polygon": {
-          "styleType": "simple",
-          "label": "Polygon label",
-          "settings": {
+          "styleId": "uniqueValueId",
+          "defaultLabel": "One",
+          "styleType": "uniqueValue",
+          "defaultSettings": {
             "type": "filledPolygon",
             "color": "rgba(0,0,255,0.25)",
             "paternSize": 10,
@@ -30,7 +31,43 @@
               "color": "rgba(128,0,0,1)",
               "lineStyle": "dot"
             }
-          }
+          },
+          "defaultVisible": false,
+          "fields": ["number"],
+          "uniqueValueStyleInfo": [
+            {
+              "label": "Two",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(0,255,255,0.25)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(128,128,0,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["Two"],
+              "visible": false
+            },
+            {
+              "label": "Three",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,0,255,0.25)",
+                "paternSize": 10,
+                "paternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(128,0,128,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["Three"],
+              "visible": false
+            }
+          ]
         }
       }
     },

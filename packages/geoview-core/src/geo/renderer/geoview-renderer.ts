@@ -357,7 +357,7 @@ export class GeoviewRenderer {
    * created.
    * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
    */
-  private getStyleSubRoutine(
+  private getPointStyleSubRoutine(
     resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void,
     layerStyle: TypeLayerStyle,
     defaultSettings?: TypeKindOfVectorSettings,
@@ -388,7 +388,7 @@ export class GeoviewRenderer {
   }
 
   /** ***************************************************************************************************************************
-   * This method gets the style of the layer as specified by the style configuration.
+   * This method gets the point style of the layer as specified by the style configuration.
    *
    * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
    *
@@ -403,16 +403,16 @@ export class GeoviewRenderer {
         // Point style configuration ============================================================================================
         layerStyle.Point = {};
         if (isSimpleStyleConfig(styleConfig.Point)) {
-          this.getStyleSubRoutine(resolve, layerStyle, styleConfig.Point.settings);
+          this.getPointStyleSubRoutine(resolve, layerStyle, styleConfig.Point.settings);
         } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
-          this.getStyleSubRoutine(
+          this.getPointStyleSubRoutine(
             resolve,
             layerStyle,
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
           );
         } else if (isClassBreakStyleConfig(styleConfig.Point)) {
-          this.getStyleSubRoutine(
+          this.getPointStyleSubRoutine(
             resolve,
             layerStyle,
             styleConfig.Point.defaultSettings,
@@ -1158,8 +1158,8 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined) return this.processSimplePoint(uniqueValueStyleInfo[i].settings);
-      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings);
+      if (i !== undefined && uniqueValueStyleInfo[i].visible) return this.processSimplePoint(uniqueValueStyleInfo[i].settings);
+      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined) return this.processSimplePoint(defaultSettings);
     }
     return undefined;
   }
@@ -1176,8 +1176,10 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined) return this.processSimpleLineString(uniqueValueStyleInfo[i].settings, feature);
-      if (defaultSettings !== undefined) return this.processSimpleLineString(defaultSettings, feature);
+      if (i !== undefined && uniqueValueStyleInfo[i].visible)
+        return this.processSimpleLineString(uniqueValueStyleInfo[i].settings, feature);
+      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
+        return this.processSimpleLineString(defaultSettings, feature);
     }
     return undefined;
   }
@@ -1194,8 +1196,11 @@ export class GeoviewRenderer {
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
       const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined) return this.processSimplePolygon(uniqueValueStyleInfo[i].settings, feature);
-      if (defaultSettings !== undefined) return this.processSimplePolygon(defaultSettings, feature);
+      if (i !== undefined && uniqueValueStyleInfo[i].visible) {
+        return this.processSimplePolygon(uniqueValueStyleInfo[i].settings, feature);
+      }
+      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
+        return this.processSimplePolygon(defaultSettings, feature);
     }
     return undefined;
   }
@@ -1239,8 +1244,8 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
-      if (i !== undefined) return this.processSimplePoint(classBreakStyleInfo[i].settings);
-      if (defaultSettings !== undefined) return this.processSimplePoint(defaultSettings);
+      if (i !== undefined && classBreakStyleInfo[i].visible) return this.processSimplePoint(classBreakStyleInfo[i].settings);
+      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined) return this.processSimplePoint(defaultSettings);
     }
     return undefined;
   }
@@ -1260,8 +1265,9 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
-      if (i !== undefined) return this.processSimpleLineString(classBreakStyleInfo[i].settings, feature);
-      if (defaultSettings !== undefined) return this.processSimpleLineString(defaultSettings, feature);
+      if (i !== undefined && classBreakStyleInfo[i].visible) return this.processSimpleLineString(classBreakStyleInfo[i].settings, feature);
+      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
+        return this.processSimpleLineString(defaultSettings, feature);
     }
     return undefined;
   }
@@ -1278,8 +1284,9 @@ export class GeoviewRenderer {
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
       const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
-      if (i !== undefined) return this.processSimplePolygon(classBreakStyleInfo[i].settings, feature);
-      if (defaultSettings !== undefined) return this.processSimplePolygon(defaultSettings, feature);
+      if (i !== undefined && classBreakStyleInfo[i].visible) return this.processSimplePolygon(classBreakStyleInfo[i].settings, feature);
+      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
+        return this.processSimplePolygon(defaultSettings, feature);
     }
     return undefined;
   }
