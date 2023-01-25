@@ -8,6 +8,9 @@ import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
+import Export from './buttons/export';
+
+import ExportModal from './export-modal';
 
 import { api } from '../../../app';
 import { Panel, ButtonGroup, IconButton } from '../../../ui';
@@ -91,6 +94,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Navbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
+  const [ModalIsShown, setModalIsShown] = useState(false);
 
   const classes = useStyles();
 
@@ -129,6 +133,14 @@ export function Navbar(): JSX.Element {
     },
     [setButtonPanelGroups]
   );
+
+  const openModal = () => {
+    setModalIsShown(true);
+  };
+
+  const closeModal = () => {
+    setModalIsShown(false);
+  };
 
   useEffect(() => {
     // listen to new nav-bar panel creation
@@ -181,7 +193,6 @@ export function Navbar(): JSX.Element {
         }
         return null;
       })}
-
       <div className={classes.navBtnGroupContainer}>
         {Object.keys(buttonPanelGroups).map((groupName) => {
           const buttonPanelGroup = buttonPanelGroups[groupName];
@@ -243,7 +254,9 @@ export function Navbar(): JSX.Element {
         <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" classes={{ root: classes.navBtnGroup }}>
           <Fullscreen className={classes.navBarButton} />
           <Home className={classes.navBarButton} />
+          <Export className={classes.navBarButton} openModal={openModal} />
         </ButtonGroup>
+        <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
       </div>
     </div>
   );

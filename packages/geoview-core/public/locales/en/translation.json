@@ -7,6 +7,7 @@
     "arianavbar": "vertical button group for map navigation",
     "fullscreen": "Full Screen",
     "home": "Reset to initial view",
+    "export": "Export map as PNG",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out"
   },

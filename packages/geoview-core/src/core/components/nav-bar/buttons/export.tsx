@@ -25,7 +25,7 @@ export default function Export(props: ExportProps): JSX.Element {
   const { className, openModal } = props;
 
   return (
-    <IconButton id="export" tooltip="appbar.export" tooltipPlacement="bottom-end" onClick={openModal} className={className}>
+    <IconButton id="export" tooltip="mapnav.export" tooltipPlacement="left" onClick={openModal} className={className}>
       <DownloadIcon />
     </IconButton>
   );
