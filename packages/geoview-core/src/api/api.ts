@@ -14,7 +14,7 @@ import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '../geo/utils/legend-layer-set';
-import { payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
+import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -93,6 +93,7 @@ export class API {
               if (this.maps[mapId].mapIsReady()) {
                 // Run the callback for maps that have the triggerReadyCallback set using the mapId for the parameter value
                 if (this.maps[mapId].mapFeaturesConfig.triggerReadyCallback && !this.maps[mapId].readyCallbackHasRun) {
+                  this.event.emit(GeoViewLayerPayload.createTestGeoviewLayersPayload(`${mapId}/visibilityTest`));
                   if (this.readyCallback) this.readyCallback(mapId);
                   this.maps[mapId].readyCallbackHasRun = true;
                 }

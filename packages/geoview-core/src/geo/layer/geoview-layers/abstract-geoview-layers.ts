@@ -20,7 +20,7 @@ import {
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeImageLayerEntryConfig,
-  TypeStyleConfigKey,
+  TypeStyleGeometry,
 } from '../../map/map-schema-types';
 import {
   GetFeatureInfoPayload,
@@ -85,7 +85,7 @@ export type TypeStyleRepresentation = {
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, TypeStyleRepresentation>>;
+export type TypeLayerStyle = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -431,7 +431,7 @@ export abstract class AbstractGeoViewLayer {
   protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
 
   /** ***************************************************************************************************************************
-   * Return feature information for the layer specified. If layerId is undefined, this.activeLayer is used.
+   * Return feature information for the layer specified. If layerPathOrConfig is undefined, this.activeLayer is used.
    *
    * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
