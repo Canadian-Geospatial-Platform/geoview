@@ -767,7 +767,10 @@ export abstract class AbstractGeoViewLayer {
    */
   setVisible(layerVisibility: boolean, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
     const gvLayer = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig)?.gvLayer : layerPathOrConfig?.gvLayer;
-    if (gvLayer) gvLayer.setVisible(layerVisibility);
+    if (gvLayer) {
+      gvLayer.setVisible(layerVisibility);
+      gvLayer.changed();
+    }
   }
 
   /** ***************************************************************************************************************************
