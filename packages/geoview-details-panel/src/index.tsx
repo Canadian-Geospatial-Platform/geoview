@@ -12,8 +12,6 @@ import {
   AnySchemaObject,
 } from 'geoview-core';
 import { DetailsItem } from './details-item';
-// import PanelContent from './panel-content';
-// import { payloadBaseClass } from 'geoview-core/src/api/events/payloads/payload-base-class';
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-details-panel.json';
@@ -78,10 +76,6 @@ class DetailsPlugin extends AbstractPlugin {
     const { DetailsIcon } = ui.elements;
     const { displayLanguage } = api.map(mapId);
 
-    let panelStatus = false;
-
-    panelStatus = this.configObj?.isOpen?.large as boolean;
-
     // button props
     const button: TypeIconButtonProps = {
       id: 'detailsPanelButton',
@@ -96,7 +90,6 @@ class DetailsPlugin extends AbstractPlugin {
       title: this.translations[displayLanguage].detailsPanel,
       icon: '<i class="material-icons">details</i>',
       width: 300,
-      status: panelStatus,
     };
 
     // create a new button panel on the app-bar
@@ -120,7 +113,6 @@ class DetailsPlugin extends AbstractPlugin {
 
     if (this.buttonPanel) {
       api.map(mapId as string).appBarButtons.removeAppbarPanel(this.buttonPanel.buttonPanelId);
-      // api.event.emit(payloadBaseClass(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_HIDE, mapId));
     }
   }
 }
