@@ -13,7 +13,7 @@ import {
   Tooltip,
   IconButton,
 } from '../../../ui';
-import { TypeArrayOfLayerData } from './details';
+import { TypeArrayOfLayerData, DetailsStyleProps } from './details';
 import { FeatureInfo } from './feature-info';
 
 const sxClasses = {
@@ -23,6 +23,7 @@ const sxClasses = {
 };
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
+  detailsStyle: DetailsStyleProps;
 }
 
 /**
@@ -31,8 +32,10 @@ interface TypeLayersListProps {
  * @returns {JSX.Element} the layers list
  */
 export function LayersList(props: TypeLayersListProps): JSX.Element {
-  const { arrayOfLayerData } = props;
+  const { arrayOfLayerData, detailsStyle } = props;
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
+
+  const fontColor = detailsStyle.backgroundStyle === 'dark' ? { color: '#fff' } : {};
 
   useEffect(() => {
     // if there is only one layer in the list, open it
@@ -48,10 +51,12 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
       {arrayOfLayerData.map((layerData) => {
         return (
           <div key={layerData.layerPath}>
-            <ListItem onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}>
+            <ListItem onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')} sx={fontColor}>
               <ListItemButton>
                 <ListItemIcon>
-                  <IconButton color="primary">{layerSetOpen !== layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
+                  <IconButton color="primary" sx={fontColor}>
+                    {layerSetOpen !== layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  </IconButton>
                 </ListItemIcon>
                 <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>
                   <ListItemText primary={layerData.layerPath ? layerData.layerName : 'Click on map'} />
@@ -61,8 +66,8 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
             <Collapse in={layerSetOpen === layerData.layerPath} timeout="auto" unmountOnExit>
               <Grid container spacing={2} sx={sxClasses.expandableIconContainer}>
                 {layerData.features.map((feature, index: number) => (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <FeatureInfo key={index} feature={feature} startOpen={layerData.features.length === 1} />
+                  // eslint-disable-next-line react/no-array-index-key, prettier/prettier
+                  <FeatureInfo key={index} feature={feature} startOpen={layerData.features.length === 1} backgroundStyle={detailsStyle.backgroundStyle} singleColumn={detailsStyle.singleColumn} />
                 ))}
               </Grid>
             </Collapse>
