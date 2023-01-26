@@ -3,7 +3,7 @@ import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-
 import { FeatureInfoLayerSet } from '../../../geo/utils/feature-info-layer-set';
 import { api } from '../../../app';
 
-import { Details, TypeArrayOfLayerData } from './details';
+import { Details, TypeArrayOfLayerData, DetailsStyleProps } from './details';
 
 export interface TypeLayerDetailsProps {
   layerPath: string;
@@ -38,11 +38,12 @@ export class DetailsAPI {
    * @return {ReactElement} the details react element
    *
    */
-  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData): ReactElement => {
+  createDetails = (mapId: string, detailsElements: TypeArrayOfLayerData, detailsStyle: DetailsStyleProps): ReactElement => {
     return createElement('div', {}, [
       createElement(Details, {
         key: `${mapId}-details-sets`,
         arrayOfLayerData: detailsElements,
+        detailsStyle,
       }),
     ]);
   };
