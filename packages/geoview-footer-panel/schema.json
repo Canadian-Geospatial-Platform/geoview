@@ -4,7 +4,7 @@
   "type": "object",
   "version": 1.0,
   "comments": "Configuration for GeoView footer package.",
-  "additionalProperties": false,
+  "additionalProperties": true,
 
   "properties": {
     "tabs": {
@@ -61,5 +61,5 @@
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
     }
   },
-  "required": ["suportedLanguages"]
+  "required": ["suportedLanguages", "tabs"]
 }
