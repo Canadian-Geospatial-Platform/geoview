@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
-import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeStyleConfigKey } from '../../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeStyleGeometry } from '../../map/map-schema-types';
 import { TypeArrayOfFeatureInfoEntries, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
 import { TypeJsonObject } from '../../../core/types/global-types';
 export type TypeLegend = {
@@ -44,12 +44,12 @@ export type TypeStyleRepresentation = {
     /** The arrayOfCanvas property is used by unique value and class break styles. */
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyle = Partial<Record<TypeStyleConfigKey, TypeStyleRepresentation>>;
-type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
+export type TypeLayerStyle = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
+type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
  */
-export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
+export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | 'geoCore' | 'GeoPackage' | 'xyzTiles' | 'ogcFeature' | 'ogcWfs' | 'ogcWms';
 /**
  * Definition of the GeoView layer constants
  */
@@ -191,7 +191,7 @@ export declare abstract class AbstractGeoViewLayer {
      */
     protected abstract processOneLayerEntry(layerEntryConfig: TypeBaseLayerEntryConfig): Promise<BaseLayer | null>;
     /** ***************************************************************************************************************************
-     * Return feature information for the layer specified. If layerId is undefined, this.activeLayer is used.
+     * Return feature information for the layer specified. If layerPathOrConfig is undefined, this.activeLayer is used.
      *
      * @param {Pixel | Coordinate | Coordinate[]} location A pixel, a coordinate or a polygon that will be used by the query.
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.

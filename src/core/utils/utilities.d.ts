@@ -64,3 +64,8 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
  * @returns {string} sanitze HTLM or empty string if all dirty
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
+/**
+ * Export the map as a PNG
+ * @param {string} mapId Id of map to export
+ */
+export declare function exportPNG(mapId: string): void;
