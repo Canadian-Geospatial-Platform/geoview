@@ -45,14 +45,12 @@
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          { "layerId": "8" }
-        ]
+        "listOfLayerEntryConfig": [{ "layerId": "8" }]
       }
     ]
   },
   "theme": "dark",
-  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map"],
+  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
   "corePackages": [],
   "externalPackages": [],
   "suportedLanguages": ["en"]

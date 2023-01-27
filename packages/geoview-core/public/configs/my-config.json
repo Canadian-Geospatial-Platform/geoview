@@ -49,7 +49,7 @@
           "fr": "./geojson/"
         },
         "geoviewLayerType": "GeoJSON",
-        "listOfLayerEntryConfig": [ { "layerId": "points.json" }, { "layerId": "lines.json" }, { "layerId": "polygons.json" }]
+        "listOfLayerEntryConfig": [{ "layerId": "points.json" }, { "layerId": "lines.json" }, { "layerId": "polygons.json" }]
       },
       {
         "geoviewLayerId": "wmsLYR7",
@@ -67,7 +67,7 @@
     ]
   },
   "theme": "dark",
-  "components": [],
+  "components": ["footer-bar"],
   "corePackages": [],
   "suportedLanguages": ["en"]
 }

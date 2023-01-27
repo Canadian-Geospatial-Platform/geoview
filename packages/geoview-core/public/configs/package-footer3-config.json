@@ -31,7 +31,7 @@
     ]
   },
   "theme": "light",
-  "components": ["nav-bar", "north-arrow", "overview-map"],
+  "components": ["nav-bar", "north-arrow", "overview-map", "footer-bar"],
   "corePackages": ["footer-panel"],
   "suportedLanguages": ["en"]
 }

@@ -19,14 +19,12 @@
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          { "layerId": "8" }
-        ]
+        "listOfLayerEntryConfig": [{ "layerId": "8" }]
       }
     ]
   },
   "theme": "light",
-  "components": [],
+  "components": ["footer-bar"],
   "corePackages": ["footer-panel"],
   "externalPackages": [],
   "suportedLanguages": ["en"]
