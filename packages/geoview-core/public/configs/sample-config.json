@@ -71,7 +71,7 @@
             "layerId": "5"
           }
         ]
-       },
+      },
       {
         "geoviewLayerId": "esriFeatureLYR5",
         "metadataAccessPath": {
@@ -116,7 +116,7 @@
     ]
   },
   "theme": "dark",
-  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map"],
+  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
   "corePackages": ["basemap-panel"],
   "externalPackages": [],
   "serviceUrls": {
