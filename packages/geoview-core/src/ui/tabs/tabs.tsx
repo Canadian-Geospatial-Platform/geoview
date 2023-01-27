@@ -7,13 +7,13 @@ import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import MaterialTabs from '@mui/material/Tabs';
 import MaterialTab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
+import { styled } from '@mui/system';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
 import { TabPanel } from './tab-panel';
 
 type TypeChildren = React.ReactNode;
-
 /**
  * Type used for properties of each tab
  */
@@ -34,6 +34,19 @@ export interface TypeTabsProps {
   tabProps?: TabProps;
   rightButtons?: unknown;
 }
+
+const StyledMaterialTab = styled(MaterialTab)(({ theme }) => ({
+  'text-transform': 'capitalize',
+  '&.Mui-selected': {
+    color: theme.palette.secondary.main,
+  },
+}));
+
+const StyledMaterialTabs = styled(MaterialTabs)(({ theme }) => ({
+  '>div:last-child>span': {
+    'background-color': theme.palette.secondary.main,
+  },
+}));
 
 /**
  * Create a tabs ui
@@ -64,12 +77,20 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   return (
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
       <Grid item xs={7} sm={10}>
-        <MaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs">
+        <StyledMaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs">
           {tabs.map((tab, index) => {
             // eslint-disable-next-line prettier/prettier
-            return <MaterialTab label={tab.label} key={index} {...props.tabProps} id={`tab-${index}`} sx={{ fontSize: 'min(3vw, 24px)', minWidth: 'min(4vw, 24px)', padding: '12px 2%' }} />;
+            return (
+              <StyledMaterialTab
+                label={tab.label}
+                key={index}
+                {...props.tabProps}
+                id={`tab-${index}`}
+                sx={{ fontSize: '1rem', minWidth: 'min(4vw, 24px)', padding: '16px 2%' }}
+              />
+            );
           })}
-        </MaterialTabs>
+        </StyledMaterialTabs>
       </Grid>
       <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
         {rightButtons}
@@ -79,7 +100,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           const TabContent = tab.content as React.ElementType;
 
           return (
-            <TabPanel key={index} value={value} index={index} >
+            <TabPanel key={index} value={value} index={index}>
               {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
             </TabPanel>
           );
