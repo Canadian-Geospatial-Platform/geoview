@@ -125,7 +125,7 @@
     ]
   },
   "theme": "light",
-  "components": ["nav-bar", "north-arrow", "overview-map"],
+  "components": ["nav-bar", "north-arrow", "overview-map", "footer-bar"],
   "corePackages": ["swiper"],
   "externalPackages": [],
   "suportedLanguages": ["en"]
