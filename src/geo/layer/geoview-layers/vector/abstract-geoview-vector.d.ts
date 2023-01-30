@@ -147,4 +147,14 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns {Extent} The layer bounding box.
      */
     calculateBounds(layerPathOrConfig?: string | TypeLayerEntryConfig | TypeListOfLayerEntryConfig | null, projectionCode?: string | number | undefined): Extent | undefined;
+    /** ***************************************************************************************************************************
+     * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the feature
+     * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
+     * (feature filters) and (styleFilter). Feature filters are derived from the uniqueValue or classBreaks style of the layer.
+     * When the layer config is invalid, nothing is done.
+     *
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string} filter An aptional filter to be used in place of the getViewFilter value.
+     */
+    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
 }

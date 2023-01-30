@@ -1,7 +1,12 @@
 /// <reference types="react" />
 import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
+export interface DetailsStyleProps {
+    backgroundStyle?: string;
+    singleColumn?: boolean;
+}
 export interface TypeDetailsProps {
     arrayOfLayerData: TypeArrayOfLayerData;
+    detailsStyle: DetailsStyleProps;
 }
 export interface TypeLayerData {
     layerPath: string;

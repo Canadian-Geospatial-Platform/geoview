@@ -94,9 +94,9 @@ export declare class GeoviewRenderer {
      * created.
      * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
      */
-    private getStyleSubRoutine;
+    private getPointStyleSubRoutine;
     /** ***************************************************************************************************************************
-     * This method gets the style of the layer as specified by the style configuration.
+     * This method gets the point style of the layer as specified by the style configuration.
      *
      * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
      *
@@ -408,7 +408,7 @@ export declare class GeoviewRenderer {
      * Search the class breakentry using the field value stored in the feature.
      *
      * @param {string[]} field The field involved in the class break definition.
-     * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfos The class break configuration.
+     * @param {TypeClassBreakStyleInfo[]} classBreakStyleInfo The class break configuration.
      * @param {FeatureLike} feature The feature used to test the class break conditions.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
@@ -444,7 +444,7 @@ export declare class GeoviewRenderer {
     /** ***************************************************************************************************************************
      * Create a default style to use with a vector feature that has no style configuration.
      *
-     * @param {TypeStyleConfigKey} geometryType The type of geometry (Point, LineString, Polygon).
+     * @param {TypeStyleGeometry} geometryType The type of geometry (Point, LineString, Polygon).
      * @param {TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig the layer entry config to configure.
      *
      * @returns {TypeStyleConfig | undefined} The Style configurationcreated. Undefined if unable to create it.

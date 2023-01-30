@@ -25,5 +25,5 @@ export declare class DataGridAPI {
      * @return {ReactElement} the data grid react element
      *
      */
-    createDataGrid: (props: TypeLayerDataGridProps) => ReactElement;
+    createDataGrid: (layerDataGridProps: TypeLayerDataGridProps) => ReactElement;
 }

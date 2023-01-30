@@ -2,19 +2,20 @@ import { MouseEventHandler } from 'react';
 /**
  * Interface used for home button properties
  */
-interface ExportProps {
+interface ExportModalProps {
     className?: string | undefined;
-    openModal: MouseEventHandler<HTMLButtonElement>;
+    isShown: boolean;
+    closeModal: MouseEventHandler<HTMLElement>;
 }
 /**
  * Export PNG Button component
  *
  * @returns {JSX.Element} the export button
  */
-declare function Export(props: ExportProps): JSX.Element;
-declare namespace Export {
+declare function ExportModal(props: ExportModalProps): JSX.Element;
+declare namespace ExportModal {
     var defaultProps: {
         className: string;
     };
 }
-export default Export;
+export default ExportModal;

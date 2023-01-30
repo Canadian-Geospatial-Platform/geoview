@@ -44,7 +44,7 @@ export declare class API {
         WM: string;
         LATLNG: string;
     };
-    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "GEOJSON" | "GEOCORE" | "XYZ_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("../geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
+    layerTypes: Record<"ESRI_DYNAMIC" | "ESRI_FEATURE" | "GEOJSON" | "GEOCORE" | "GEOPACKAGE" | "XYZ_TILES" | "OGC_FEATURE" | "WFS" | "WMS", import("../geo/layer/geoview-layers/abstract-geoview-layers").TypeGeoviewLayerType>;
     maps: Record<string, MapViewer>;
     isReady: number;
     readyCallback?: (mapId?: string) => void;

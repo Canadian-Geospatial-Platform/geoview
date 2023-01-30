@@ -172,4 +172,41 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @returns {Promise<TypeArrayOfFeatureInfoEntries>} The feature info table.
      */
     protected getFeatureInfoUsingPolygon(location: Coordinate[], layerConfig: TypeEsriDynamicLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
+    /** ***************************************************************************************************************************
+     * Get the layer view filter. The filter is derived fron the uniqueValue or the classBreak visibility flags and an layerFilter
+     * associated to the layer.
+     *
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     *
+     * @returns {string} the filter associated to the layerPath
+     */
+    getViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string;
+    /** ***************************************************************************************************************************
+     * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the legend
+     * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
+     * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
+     * When the layer config is invalid, nothing is done.
+     *
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     * @param {string} filter An optional filter to be used in place of the getViewFilter value.
+     */
+    applyViewFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null, filter?: string): void;
+    /** ***************************************************************************************************************************
+     * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
+     * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
+     * done.
+     *
+     * @param {string} filterValue The filter to associate to the layer.
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     */
+    setLayerFilter(filterValue: string, layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
+    /** ***************************************************************************************************************************
+     * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
+     * If layerPathOrConfig is undefined, this.activeLayer is used.
+     *
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+     *
+     * @returns {string | undefined} The filter associated to the layer or undefined.
+     */
+    getLayerFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string | undefined;
 }
