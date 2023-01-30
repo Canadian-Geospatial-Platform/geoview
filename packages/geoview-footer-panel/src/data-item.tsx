@@ -1,5 +1,4 @@
 /* eslint-disable react/require-default-props */
-// import { DetailedReactHTMLElement, JSXElementConstructor, ReactElement } from 'react';
 import { TypeWindow, getLocalizedValue, TypeTabs } from 'geoview-core';
 
 interface Props {
