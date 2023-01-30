@@ -77,7 +77,7 @@ class FooterPanelPlugin extends AbstractPlugin {
     // access the cgpv object from the window object
     const { cgpv } = w;
 
-    // if (cgpv) {
+    if (cgpv) {
     // access the api calls
     const { api } = cgpv;
     const { displayLanguage, footerTabs, map } = api.map(mapId);
@@ -153,7 +153,7 @@ class FooterPanelPlugin extends AbstractPlugin {
       });
       tabsCounter++;
     }
-    // }
+    }
   };
 
   /**
