@@ -27,6 +27,7 @@ import {
 import { api } from '../../../../app';
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { NodeType } from '../../../renderer/geoview-renderer-types';
 
 /* *******************************************************************************************************************************
  * AbstractGeoViewVector types
@@ -201,8 +202,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       },
     };
 
-    // eslint-disable-next-line no-param-reassign
     layerEntryConfig.gvLayer = new VectorLayer(layerOptions);
+    layerEntryConfig.gvLayer?.set('layerFilter', layerEntryConfig.layerFilter);
+    this.applyViewFilter(layerEntryConfig);
+
     return layerEntryConfig.gvLayer as VectorLayer<VectorSource>;
   }
 
@@ -416,18 +419,71 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Apply a view filter to the layer. When the filter parameter is not empty (''), the view filter does not use the feature
-   * filter. Otherwise, the getViewFilter method is used to define the view filter and the resulting filter is
-   * (feature filters) and (styleFilter). Feature filters are derived from the uniqueValue or classBreaks style of the layer.
+   * Apply a view filter to the layer. When the optional filter parameter is not empty (''), it is used alone to display the
+   * features. Otherwise, the legend filter and the layerFilter are used to define the view filter and the resulting filter is
+   * (legend filters) and (layerFilter). The legend filters are derived from the uniqueValue or classBreaks style of the layer.
    * When the layer config is invalid, nothing is done.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
-   * @param {string} filter An aptional filter to be used in place of the getViewFilter value.
+   * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    */
-  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
-    const layerEntryConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+  applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeVectorLayerEntryConfig;
     if (layerEntryConfig) {
+      try {
+        const layerFilter = this.getLayerFilter(layerEntryConfig);
+        const nodeValue = filter || layerFilter || '';
+        const { geoviewRenderer } = api.map(this.mapId);
+        const filterEquation = geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue }]);
+        layerEntryConfig.gvLayer!.set('filterEquation', filterEquation);
+      } catch (error) {
+        throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${filter}`);
+      }
+      layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
       layerEntryConfig.gvLayer?.changed();
     }
+  }
+
+  /** ***************************************************************************************************************************
+   * Set the layerFilter that will be applied with the legend filters derived from the uniqueValue or classBreabs style of
+   * the layer. The resulting filter will be (legend filters) and (layerFilter). When the layer config is invalid, nothing is
+   * done.
+   *
+   * @param {string} filterValue The filter to associate to the layer.
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   */
+  setLayerFilter(filterValue: string, layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeVectorLayerEntryConfig;
+    if (layerEntryConfig) {
+      try {
+        const filterEquation = api
+          .map(this.mapId)
+          .geoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValue }]);
+        layerEntryConfig.gvLayer?.set('filterEquation', filterEquation);
+      } catch (error) {
+        throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).\nfilter = ${filterValue}`);
+      }
+      layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Get the layerFilter that is associated to the layer. Returns undefined when the layer config is invalid.
+   * If layerPathOrConfig is undefined, this.activeLayer is used.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
+   *
+   * @returns {string | undefined} The filter associated to the layer or undefined.
+   */
+  getLayerFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): string | undefined {
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeVectorLayerEntryConfig;
+    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
+    return undefined;
   }
 }

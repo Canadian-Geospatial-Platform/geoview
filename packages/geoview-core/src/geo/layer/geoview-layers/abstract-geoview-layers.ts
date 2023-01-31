@@ -847,7 +847,7 @@ export abstract class AbstractGeoViewLayer {
       if (!layerConfig?.style) resolve(null);
       else {
         const { geoviewRenderer } = api.map(this.mapId);
-        geoviewRenderer.getStyle(layerConfig.style as TypeStyleConfig).then((legendStyle) => {
+        geoviewRenderer.getLegendStyles(layerConfig.style as TypeStyleConfig).then((legendStyle) => {
           const legend: TypeLegend = {
             type: layerConfig.geoviewRootLayer!.geoviewLayerType,
             layerPath: Layer.getLayerPath(layerConfig),

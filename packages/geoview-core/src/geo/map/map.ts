@@ -433,7 +433,15 @@ export class MapViewer {
    */
   loadMapConfig = (mapConfig: string) => {
     // parse the config
-    const parsedMapConfig = JSON.parse(mapConfig.replace(/(\r\n|\n|\r)/gm, '').replace(/'/gm, '"'));
+    const parsedMapConfig = JSON.parse(
+      mapConfig
+        // remove CR and LF from the map config
+        .replace(/(\r\n|\n|\r)/gm, '')
+        // replace apostrophes not preceded by a backslash with quotes
+        .replace(/(?<!\\)'/gm, '"')
+        // replace apostrophes preceded by a backslash with a single appostrope
+        .replace(/\\'/gm, "'")
+    );
 
     // create a new config for this map element
     const config = new Config(this.map.getTargetElement());

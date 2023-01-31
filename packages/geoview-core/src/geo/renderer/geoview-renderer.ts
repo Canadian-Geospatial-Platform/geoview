@@ -45,12 +45,27 @@ import {
   TypeClassBreakStyleConfig,
   TypeBaseSourceVectorInitialConfig,
 } from '../map/map-schema-types';
-import { defaultColor } from './geoview-renderer-types';
+import {
+  binaryKeywors,
+  defaultColor,
+  FillPaternLine,
+  FillPaternSettings,
+  FilterNodeArrayType,
+  FilterNodeType,
+  groupKeywords,
+  NodeType,
+  operatorPriority,
+  unaryKeywords,
+} from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
 import { TypeLayerStyle, TypeStyleRepresentation } from '../layer/geoview-layers/abstract-geoview-layers';
 
-type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
-type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
+type TypeStyleProcessor = (
+  styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+  feature?: FeatureLike,
+  filterEquation?: FilterNodeArrayType,
+  legendFilterIsOff?: boolean
+) => Style | undefined;
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -84,10 +99,7 @@ export class GeoviewRenderer {
   };
 
   /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
-  private processStyle: Record<
-    TypeBaseStyleType,
-    Record<TypeStyleGeometry, (styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike) => Style | undefined>
-  > = {
+  private processStyle: Record<TypeBaseStyleType, Record<TypeStyleGeometry, TypeStyleProcessor>> = {
     simple: {
       Point: this.processSimplePoint,
       LineString: this.processSimpleLineString,
@@ -346,7 +358,7 @@ export class GeoviewRenderer {
   }
 
   /** ***************************************************************************************************************************
-   * This method is a private sub routine used by the getStyle method to gets the style of the layer as specified by the style
+   * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the style
    * configuration.
    *
    * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
@@ -388,13 +400,13 @@ export class GeoviewRenderer {
   }
 
   /** ***************************************************************************************************************************
-   * This method gets the point style of the layer as specified by the style configuration.
+   * This method gets the legend styles used by the the layer as specified by the style configuration.
    *
    * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
    *
    * @returns {Promise<TypeLayerStyle>} A promise that the layer style is processed.
    */
-  getStyle(styleConfig: TypeStyleConfig): Promise<TypeLayerStyle> {
+  getLegendStyles(styleConfig: TypeStyleConfig): Promise<TypeLayerStyle> {
     const promisedLayerStyle = new Promise<TypeLayerStyle>((resolve) => {
       const layerStyle: TypeLayerStyle = {};
 
@@ -504,7 +516,13 @@ export class GeoviewRenderer {
     if (style![geometryType] !== undefined) {
       const styleSettings = style![geometryType]!;
       const { styleType } = styleSettings;
-      return this.processStyle[styleType][geometryType].call(this, styleSettings, feature);
+      return this.processStyle[styleType][geometryType].call(
+        this,
+        styleSettings,
+        feature,
+        layerEntryConfig.gvLayer!.get('filterEquation'),
+        layerEntryConfig.gvLayer!.get('legendFilterIsOff')
+      );
     }
     return undefined;
   }
@@ -912,10 +930,18 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
    * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processSimplePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
+  private processSimplePoint(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
     if (isSimpleSymbolVectorConfig(settings)) {
       const { symbol } = settings;
@@ -930,10 +956,18 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
    * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processSimpleLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
+  private processSimpleLineString(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
     let geometry;
     if (feature) {
@@ -1096,13 +1130,20 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * Process a simple polygon using the settings.
    *
-   * @param {TypePolTypeStyleSettings | TypeKindOfVectorSettingsygonVectorConfig} styleSettings The settings to use for the
-   * Style creation.
+   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the Style creation.
    * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processSimplePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature?: FeatureLike): Style | undefined {
+  private processSimplePolygon(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeKindOfVectorSettings;
     let geometry;
     if (feature) {
@@ -1151,15 +1192,27 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
    * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processUniqueValuePoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+  private processUniqueValuePoint(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
-      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined && uniqueValueStyleInfo[i].visible) return this.processSimplePoint(uniqueValueStyleInfo[i].settings);
-      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined) return this.processSimplePoint(defaultSettings);
+      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
+      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible))
+        return this.processSimplePoint(uniqueValueStyleInfo[i].settings);
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible))
+        return this.processSimplePoint(defaultSettings);
     }
     return undefined;
   }
@@ -1169,16 +1222,26 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
    * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processUniqueLineString(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+  private processUniqueLineString(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
-      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined && uniqueValueStyleInfo[i].visible)
+      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
+      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible))
         return this.processSimpleLineString(uniqueValueStyleInfo[i].settings, feature);
-      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible))
         return this.processSimpleLineString(defaultSettings, feature);
     }
     return undefined;
@@ -1189,17 +1252,26 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
    * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processUniquePolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+  private processUniquePolygon(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     if (isUniqueValueStyleConfig(styleSettings)) {
       const { defaultSettings, fields, uniqueValueStyleInfo } = styleSettings;
-      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature);
-      if (i !== undefined && uniqueValueStyleInfo[i].visible) {
+      const i = this.searchUniqueValueEntry(fields, uniqueValueStyleInfo, feature!);
+      if (i !== undefined && (legendFilterIsOff || uniqueValueStyleInfo[i].visible))
         return this.processSimplePolygon(uniqueValueStyleInfo[i].settings, feature);
-      }
-      if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
+      if (i === undefined && defaultSettings !== undefined && (legendFilterIsOff || styleSettings.defaultVisible))
         return this.processSimplePolygon(defaultSettings, feature);
     }
     return undefined;
@@ -1237,13 +1309,23 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
    * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processClassBreaksPoint(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+  private processClassBreaksPoint(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
-      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature!);
       if (i !== undefined && classBreakStyleInfo[i].visible) return this.processSimplePoint(classBreakStyleInfo[i].settings);
       if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined) return this.processSimplePoint(defaultSettings);
     }
@@ -1255,16 +1337,23 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
    * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   private processClassBreaksLineString(
     styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature: FeatureLike
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
   ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
-      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature!);
       if (i !== undefined && classBreakStyleInfo[i].visible) return this.processSimpleLineString(classBreakStyleInfo[i].settings, feature);
       if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
         return this.processSimpleLineString(defaultSettings, feature);
@@ -1277,13 +1366,23 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The style settings to use.
    * @param {FeatureLike} feature the feature used to test the unique value conditions.
+   * @param {FilterNodeArrayType} filterEquation The filter equation associated to the layer.
+   * @param {boolean} legendFilterIsOff when true, do not apply legend filter.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processClassBreaksPolygon(styleSettings: TypeStyleSettings | TypeKindOfVectorSettings, feature: FeatureLike): Style | undefined {
+  private processClassBreaksPolygon(
+    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
+    feature?: FeatureLike,
+    filterEquation?: FilterNodeArrayType,
+    legendFilterIsOff?: boolean
+  ): Style | undefined {
+    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
+      if (this.featureIsNotVisible(feature, filterEquation!)) return undefined;
+
     if (isClassBreakStyleConfig(styleSettings)) {
       const { defaultSettings, field, classBreakStyleInfo } = styleSettings;
-      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature);
+      const i = this.searchClassBreakEntry(field, classBreakStyleInfo, feature!);
       if (i !== undefined && classBreakStyleInfo[i].visible) return this.processSimplePolygon(classBreakStyleInfo[i].settings, feature);
       if (defaultSettings !== undefined && styleSettings.defaultVisible && i === undefined)
         return this.processSimplePolygon(defaultSettings, feature);
@@ -1348,5 +1447,379 @@ export class GeoviewRenderer {
     // eslint-disable-next-line no-console
     console.log(`Geometry type ${geometryType} is not supported by the GeoView viewer.`);
     return undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Use the filter equation and the feature fields to determine if the feature is visible.
+   *
+   * @param {FeatureLike} feature the feature used to find the visibility value to return.
+   * @param {FilterNodeArrayType} filterEquation the filter used to find the visibility value to return.
+   *
+   * @returns {boolean | undefined} The visibility flag for the feature specified.
+   */
+  private featureIsNotVisible(feature: FeatureLike, filterEquation: FilterNodeArrayType): boolean | undefined {
+    const operatorStack: FilterNodeArrayType = [];
+    const dataStack: FilterNodeArrayType = [];
+
+    const operatorAt = (index: number, stack: FilterNodeArrayType): FilterNodeType | undefined => {
+      if (index < 0 && stack.length + index >= 0) return stack[stack.length + index];
+      if (index > 0 && index < stack.length) return stack[index];
+      return undefined;
+    };
+
+    const findPriority = (target: FilterNodeType): number => {
+      const i = operatorPriority.findIndex((element) => element.key === target.nodeValue);
+      if (i === -1) return -1;
+      return operatorPriority[i].priority;
+    };
+
+    try {
+      for (let i = 0; i < filterEquation.length; i++) {
+        if (filterEquation[i].nodeType === NodeType.variable)
+          dataStack.push({ nodeType: NodeType.variable, nodeValue: feature.get(filterEquation[i].nodeValue as string) });
+        else if ([NodeType.string, NodeType.number].includes(filterEquation[i].nodeType)) dataStack.push(filterEquation[i]);
+        else if (filterEquation[i].nodeType === NodeType.group)
+          if (filterEquation[i].nodeValue === '(') {
+            operatorStack.push(filterEquation[i]);
+            dataStack.push(filterEquation[i]);
+          } else {
+            let operatorOnTop1 = operatorAt(-1, operatorStack);
+            for (; operatorOnTop1 && operatorOnTop1.nodeValue !== '('; this.executeOperator(operatorStack.pop()!, dataStack))
+              operatorOnTop1 = operatorAt(-2, operatorStack);
+            operatorStack.pop();
+            if (operatorOnTop1 && operatorOnTop1.nodeValue === '(') {
+              const dataOnTop = dataStack.pop();
+              dataStack.pop();
+              dataStack.push(dataOnTop!);
+            }
+          }
+        else {
+          for (
+            let operatorOnTop2 = operatorAt(-1, operatorStack);
+            operatorOnTop2 && operatorOnTop2.nodeValue !== '(' && findPriority(operatorOnTop2) > findPriority(filterEquation[i]);
+            this.executeOperator(operatorStack.pop()!, dataStack)
+          )
+            operatorOnTop2 = operatorAt(-2, operatorStack);
+          operatorStack.push(filterEquation[i]);
+        }
+      }
+      for (
+        let operatorOnTop3 = operatorAt(-1, operatorStack);
+        operatorOnTop3 && operatorOnTop3.nodeValue !== '(';
+        this.executeOperator(operatorStack.pop()!, dataStack)
+      )
+        operatorOnTop3 = operatorAt(-2, operatorStack);
+      operatorStack.pop();
+    } catch (error) {
+      throw new Error(`Invalid vector layer filter (${(error as { message: string }).message}).`);
+    }
+    if (dataStack.length !== 1 || dataStack[0].nodeType !== NodeType.variable)
+      throw new Error(`Invalid vector layer filter (invalid structure).`);
+    const dataStackTop = dataStack.pop();
+    return dataStackTop ? !(dataStackTop.nodeValue as boolean) : undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * Execute an operator using the nodes on the data stack. The filter equation is evaluated using a postfix notation. The result
+   * is pushed back on the data stack. If a problem is detected, an error object is thrown with an explanatory message.
+   *
+   * @param {FilterNodeType} operator the operator to execute.
+   * @param {FilterNodeArrayType} dataStack The data stack to use for the operator execution.
+   */
+  private executeOperator(operator: FilterNodeType, dataStack: FilterNodeArrayType) {
+    if (operator.nodeType === NodeType.binary) {
+      if (dataStack.length < 2 || dataStack[dataStack.length - 2].nodeValue === '(')
+        throw new Error(`binary operator error - operator = '${operator.nodeValue}'`);
+      else {
+        const operande2 = dataStack.pop()!;
+        const operande1 = dataStack.pop()!;
+        let valueToPush;
+        switch (operator.nodeValue) {
+          case '=':
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === operande2.nodeValue });
+            break;
+          case '<':
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue < operande2.nodeValue });
+            break;
+          case '>':
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue > operande2.nodeValue });
+            break;
+          case '<=':
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue <= operande2.nodeValue });
+            break;
+          case '>=':
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue >= operande2.nodeValue });
+            break;
+          case '!=':
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue !== operande2.nodeValue });
+            break;
+          case 'and':
+            if (typeof operande1.nodeValue !== 'boolean' || typeof operande2.nodeValue !== 'boolean') throw new Error(`and operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue && operande2.nodeValue });
+            break;
+          case 'or':
+            if (typeof operande1.nodeValue !== 'boolean' || typeof operande2.nodeValue !== 'boolean') throw new Error(`or operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue || operande2.nodeValue });
+            break;
+          case '+':
+            if (typeof operande1.nodeValue !== 'number' || typeof operande2.nodeValue !== 'number') throw new Error(`+ operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue + operande2.nodeValue });
+            break;
+          case '-':
+            if (typeof operande1.nodeValue !== 'number' || typeof operande2.nodeValue !== 'number') throw new Error(`- operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue - operande2.nodeValue });
+            break;
+          case '*':
+            if (typeof operande1.nodeValue !== 'number' || typeof operande2.nodeValue !== 'number') throw new Error(`* operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue * operande2.nodeValue });
+            break;
+          case '/':
+            if (typeof operande1.nodeValue !== 'number' || typeof operande2.nodeValue !== 'number') throw new Error(`/ operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue / operande2.nodeValue });
+            break;
+          case '||':
+            if (typeof operande1.nodeValue !== 'string' || typeof operande2.nodeValue !== 'string') throw new Error(`|| operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: `${operande1.nodeValue}${operande2.nodeValue}` });
+            break;
+          case 'like':
+            if (typeof operande1.nodeValue !== 'string' || typeof operande2.nodeValue !== 'string') throw new Error(`like operator error`);
+            else {
+              const regularExpression = new RegExp(
+                operande2.nodeValue.replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
+                ''
+              );
+              const match = operande1.nodeValue.match(regularExpression);
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operande1.nodeValue });
+            }
+            break;
+          case ',':
+            valueToPush = {
+              nodeType: NodeType.variable,
+              nodeValue: Array.isArray(operande2.nodeValue)
+                ? ([operande1.nodeValue].concat(operande2.nodeValue) as string[] | number[])
+                : ([operande1.nodeValue, operande2.nodeValue] as string[] | number[]),
+            };
+            if (typeof (valueToPush.nodeValue as string[] | number[])[0] !== typeof (valueToPush.nodeValue as string[] | number[])[1])
+              throw new Error(`IN clause can't mix types`);
+            dataStack.push(valueToPush);
+            break;
+          case 'in':
+            if (Array.isArray(operande2.nodeValue))
+              dataStack.push({
+                nodeType: NodeType.variable,
+                nodeValue: (operande2.nodeValue as unknown[]).includes(operande1.nodeValue as string),
+              });
+            else
+              dataStack.push({
+                nodeType: NodeType.variable,
+                nodeValue: operande1.nodeValue === operande2.nodeValue,
+              });
+            break;
+          default:
+            throw new Error(`unknown operator error`);
+            break;
+        }
+      }
+      return;
+    }
+
+    if (operator.nodeType === NodeType.unary) {
+      if (dataStack.length < 1 || dataStack[dataStack.length - 1].nodeValue === '(') throw new Error(`unary operator error`);
+      else {
+        const operande = dataStack.pop()!;
+        switch (operator.nodeValue) {
+          case 'not':
+            if (typeof operande.nodeValue !== 'boolean') throw new Error(`not operator error`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: !operande.nodeValue });
+            break;
+          case 'u+':
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande.nodeValue });
+            break;
+          case 'u-':
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: -operande.nodeValue });
+            break;
+          default:
+            throw new Error(`unknoown operator error`);
+            break;
+        }
+      }
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
+   * explanatory message.
+   *
+   * @param {FilterNodeArrayType} filterNodeArrayType the node array to analyse.
+   *
+   * @returns {FilterNodeArrayType} The new node array with all nodes classified.
+   */
+  analyzeLayerFilter(filterNodeArrayType: FilterNodeArrayType): FilterNodeArrayType {
+    let resultingKeywordArray = filterNodeArrayType;
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, "'");
+    resultingKeywordArray = this.extractStrings(resultingKeywordArray);
+
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '(');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, ')');
+    if (
+      resultingKeywordArray.reduce((result, node) => {
+        return node.nodeType === NodeType.group ? result + 1 : result;
+      }, 0) % 2
+    )
+      throw new Error(`unbalanced parentheses`);
+
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'in', /^in\b| in\b| in$|^in$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, ',');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'not', /^not\b| not\b| not$|^not$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'and', /^and\b| and\b| and$|^and$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'or', /^or\b| or\b| or$|^or$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'like', /^like\b| like\b| like$|^like$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '!=');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '<');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '>');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '<=');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '>=');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '+');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '-');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '*');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '/');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '||');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '=');
+    resultingKeywordArray = this.classifyUnprocessedNodes(resultingKeywordArray);
+
+    return resultingKeywordArray;
+  }
+
+  /** ***************************************************************************************************************************
+   * Extract the specified keyword and associate a node type their nodes. In some cases, the extraction uses an optionally
+   * regular expression.
+   *
+   * @param {FilterNodeArrayType} FilterNodeArrayType the array of keywords to process.
+   * @param {string} keyword the keyword to extract.
+   * @param {RegExp} regExp an optional regular expression to use for the extraction.
+   *
+   * @returns {FilterNodeArrayType} The new keywords array.
+   */
+  private extractKeyword(filterNodeArray: FilterNodeArrayType, keyword: string, regExp?: RegExp): FilterNodeArrayType {
+    // eslint-disable-next-line no-nested-ternary
+    const getNodeType = (keywordValue: string): NodeType => {
+      if (['+', '-'].includes(keywordValue)) return NodeType.unprocessedNode;
+      if (binaryKeywors.includes(keywordValue)) return NodeType.binary;
+      if (unaryKeywords.includes(keywordValue)) return NodeType.unary;
+      if (groupKeywords.includes(keywordValue)) return NodeType.group;
+      return NodeType.keyword;
+    };
+
+    return filterNodeArray.reduce((newKeywordArray, node) => {
+      if (node.nodeType !== NodeType.unprocessedNode) newKeywordArray.push(node);
+      else {
+        newKeywordArray = newKeywordArray.concat(
+          (node.nodeValue as string)
+            .trim()
+            .split(regExp === undefined ? keyword : regExp)
+            .reduce((nodeArray, splitNode) => {
+              if (splitNode === '') {
+                nodeArray.push({ nodeType: getNodeType(keyword), nodeValue: keyword });
+                return nodeArray;
+              }
+              nodeArray.push({ nodeType: NodeType.unprocessedNode, nodeValue: splitNode.trim() });
+              nodeArray.push({ nodeType: getNodeType(keyword), nodeValue: keyword });
+              return nodeArray;
+            }, [] as FilterNodeArrayType)
+            .slice(0, -1)
+        );
+      }
+      return newKeywordArray;
+    }, [] as FilterNodeArrayType);
+  }
+
+  /** ***************************************************************************************************************************
+   * Extract the string nodes from the keyword array. This operation is done at the beginning of the classification. This allows
+   * to considere Keywords in a string as a normal word. If a problem is detected, an error object is thrown with an explanatory
+   * message.
+   *
+   * @param {FilterNodeArrayType} keywordArray the array of keywords to process.
+   *
+   * @returns {FilterNodeArrayType} The new keywords array with all string nodes classified.
+   */
+  private extractStrings(keywordArray: FilterNodeArrayType): FilterNodeArrayType {
+    let stringNeeded = false;
+    let stringHasBegun = false;
+    let contiguousApostrophes = 0;
+    let stringValue = '';
+    const keywordArrayToReturn = keywordArray.reduce((newKeywordArray, node) => {
+      if (stringHasBegun) {
+        if (node.nodeType === NodeType.unprocessedNode) {
+          if (stringNeeded) {
+            stringValue = `${stringValue}${node.nodeValue}`;
+            stringNeeded = false;
+          } else {
+            newKeywordArray.push({ nodeType: NodeType.string, nodeValue: stringValue });
+            newKeywordArray.push(node);
+            stringValue = '';
+            stringHasBegun = false;
+            stringNeeded = false;
+            contiguousApostrophes = 0;
+          }
+        } else {
+          contiguousApostrophes += 1;
+          if (contiguousApostrophes === 2) {
+            stringValue = `${stringValue}'`;
+            stringNeeded = true;
+            contiguousApostrophes = 0;
+          }
+        }
+        return newKeywordArray;
+      }
+      if (node.nodeType === NodeType.keyword) {
+        stringHasBegun = true;
+        stringNeeded = true;
+      } else newKeywordArray.push(node);
+      return newKeywordArray;
+    }, [] as FilterNodeArrayType);
+    if (stringHasBegun)
+      if (!stringNeeded && contiguousApostrophes === 1) keywordArrayToReturn.push({ nodeType: NodeType.string, nodeValue: stringValue });
+      else throw new Error(`string not closed`);
+    return keywordArrayToReturn;
+  }
+
+  /** ***************************************************************************************************************************
+   * Classify the remaining nodes to complete the classification. The plus and minus can be a unary or a binary operator. It is
+   * only at the end that we can determine there node type. Nodes that start with a number are numbers, otherwise they are
+   * variables. If a problem is detected, an error object is thrown with an explanatory message.
+   *
+   * @param {FilterNodeArrayType} keywordArray the array of keywords to process.
+   *
+   * @returns {FilterNodeArrayType} The new keywords array with all nodes classified.
+   */
+  private classifyUnprocessedNodes(keywordArray: FilterNodeArrayType): FilterNodeArrayType {
+    return keywordArray.map((node, i) => {
+      if (node.nodeType === NodeType.unprocessedNode) {
+        if (Number.isNaN(Number((node.nodeValue as string).slice(0, 1)))) {
+          if (['+', '-'].includes(node.nodeValue as string))
+            if (i !== 0 && [NodeType.number, NodeType.string, NodeType.variable].includes(keywordArray[i - 1].nodeType))
+              node.nodeType = NodeType.binary;
+            else {
+              node.nodeType = NodeType.unary;
+              node.nodeValue = `u${node.nodeValue}`;
+            }
+          else {
+            node.nodeType = NodeType.variable;
+          }
+          return node;
+        }
+        node.nodeType = NodeType.number;
+        node.nodeValue = Number(node.nodeValue);
+        if (Number.isNaN(node.nodeValue)) throw new Error(`${node.nodeValue} is an invalid number`);
+        return node;
+      }
+      return node;
+    });
   }
 }
