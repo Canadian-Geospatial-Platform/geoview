@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
-import Grid from '@mui/material/Grid';
 import {
   Collapse,
   List,
@@ -64,11 +63,9 @@ const sxClasses = {
 
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
-  key: number;
   feature: TypeFeatureInfoEntry;
   startOpen?: boolean;
   backgroundStyle?: string;
-  singleColumn?: boolean;
 }
 
 /**
@@ -77,7 +74,7 @@ export interface TypeFeatureProps {
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
-  const { feature, startOpen, backgroundStyle, singleColumn } = props;
+  const { feature, startOpen, backgroundStyle } = props;
   const featureId = `Feature Info ${feature.featureKey}`;
   const [isOpen, setOpen] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
@@ -94,7 +91,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   }, []);
 
   return (
-    <Grid item sm={12} md={singleColumn ? 12 : 6} lg={singleColumn ? 12 : 4}>
+    <>
       <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
@@ -115,7 +112,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
               featureInfoList.map((featureInfoItem, index) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <ListItem sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
+                  <ListItem key={index} sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
                     <Box sx={sxClasses.featureInfoItemKey}>{featureInfoItem.key}</Box>
                     <Box sx={sxClasses.featureInfoItemValue}>{featureInfoItem.value}</Box>
                   </ListItem>
@@ -125,6 +122,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           </List>
         </Box>
       </Collapse>
-    </Grid>
+    </>
   );
 }

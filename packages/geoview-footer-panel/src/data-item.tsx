@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { DetailedReactHTMLElement, JSXElementConstructor, ReactElement } from 'react';
-import { TypeWindow, payloadIsALayerConfig, payloadIsRemoveGeoViewLayer, getLocalizedValue } from 'geoview-core';
+import { TypeWindow, getLocalizedValue, TypeTabs } from 'geoview-core';
 
 interface Props {
   mapId: string;
@@ -32,14 +31,14 @@ export function DataItem({ mapId }: Props): JSX.Element {
       tabsProps={{
         variant: 'scrollable',
       }}
-      tabs={dataLayers.map((layerId, index): any => {
+      tabs={dataLayers.map((layerId, index): TypeTabs => {
         const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
-
+        const labelValue = getLocalizedValue(geoviewLayerInstance.geoviewLayerName, mapId);
         return {
           value: index,
-          label: getLocalizedValue(geoviewLayerInstance.geoviewLayerName, mapId),
+          label: labelValue !== undefined ? labelValue : `data-${index}`,
           content: () => api.map(mapId).dataGrid.createDataGrid({ layerId }),
-        }
+        };
       })}
     />
   );

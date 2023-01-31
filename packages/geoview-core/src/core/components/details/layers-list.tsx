@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
@@ -66,8 +67,10 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
             <Collapse in={layerSetOpen === layerData.layerPath} timeout="auto" unmountOnExit>
               <Grid container spacing={2} sx={sxClasses.expandableIconContainer}>
                 {layerData.features.map((feature, index: number) => (
-                  // eslint-disable-next-line react/no-array-index-key, prettier/prettier
-                  <FeatureInfo key={index} feature={feature} startOpen={layerData.features.length === 1} backgroundStyle={detailsStyle.backgroundStyle} singleColumn={detailsStyle.singleColumn} />
+                  // eslint-disable-next-line react/no-array-index-key
+                  <Grid key={index} item sm={12} md={detailsStyle.singleColumn ? 12 : 6} lg={detailsStyle.singleColumn ? 12 : 4}>
+                    <FeatureInfo feature={feature} startOpen={layerData.features.length === 1} backgroundStyle={detailsStyle.backgroundStyle} />
+                  </Grid>
                 ))}
               </Grid>
             </Collapse>

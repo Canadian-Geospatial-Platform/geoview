@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     right: theme.spacing(5),
     bottom: 32,
     height: '600px',
+    maxHeight: 'calc( 100% - 200px)',
     display: 'flex',
     flexDirection: 'row',
     marginRight: 0,
