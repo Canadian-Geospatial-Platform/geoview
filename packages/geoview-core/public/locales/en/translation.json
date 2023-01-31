@@ -9,7 +9,9 @@
     "home": "Reset to initial view",
     "export": "Export map as PNG",
     "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out"
+    "zoomOut": "Zoom out",
+    "cordinates": "Cordinates",
+    "scale": "Scale"
   },
   "mapctrl": {
     "rotation": {

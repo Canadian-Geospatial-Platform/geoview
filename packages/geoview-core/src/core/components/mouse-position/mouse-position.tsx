@@ -15,7 +15,7 @@ import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
-import { CheckIcon } from '../../../ui';
+import { CheckIcon, Tooltip } from '../../../ui';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -37,8 +37,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    maxHeight: '15px',
-    height: '15px',
   },
   mousePositionCheckmark: {
     paddingRight: 5,
@@ -46,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.primary.light,
   },
   mousePositionText: {
-    fontSize: theme.typography.subtitle2.fontSize,
+    fontSize: theme.typography.fontSize,
     color: theme.palette.primary.light,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -227,22 +225,24 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   }, []);
 
   return (
-    <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
-      <div className={classes.mousePositionTextContainer}>
-        {expanded ? (
-          positions.map((position, index) => {
-            return (
-              // eslint-disable-next-line react/no-array-index-key
-              <div className={classes.mousePositionTextCheckmarkContainer} key={index}>
-                {index === positionMode && <CheckIcon className={classes.mousePositionCheckmark} />}
-                <span className={classes.mousePositionText}>{position}</span>
-              </div>
-            );
-          })
-        ) : (
-          <span className={classes.mousePositionText}>{positions[positionMode]}</span>
-        )}
-      </div>
-    </button>
+    <Tooltip title={t('mapnav.cordinates')}>
+      <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
+        <div className={classes.mousePositionTextContainer}>
+          {expanded ? (
+            positions.map((position, index) => {
+              return (
+                // eslint-disable-next-line react/no-array-index-key
+                <div className={classes.mousePositionTextCheckmarkContainer} key={index}>
+                  {index === positionMode && <CheckIcon className={classes.mousePositionCheckmark} />}
+                  <span className={classes.mousePositionText}>{position}</span>
+                </div>
+              );
+            })
+          ) : (
+            <span className={classes.mousePositionText}>{positions[positionMode]}</span>
+          )}
+        </div>
+      </button>
+    </Tooltip>
   );
 }

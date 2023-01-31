@@ -9,7 +9,9 @@
     "fullscreen": "Plein Écran",
     "home": "Retour à la vue initiale",
     "zoomIn": "Zoom avant",
-    "zoomOut": "Zoom arrière"
+    "zoomOut": "Zoom arrière",
+    "cordinates": "Coordonnés",
+    "scale": "Échelle"
   },
   "mapctrl": {
     "rotation": {
