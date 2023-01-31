@@ -78,81 +78,81 @@ class FooterPanelPlugin extends AbstractPlugin {
     const { cgpv } = w;
 
     if (cgpv) {
-    // access the api calls
-    const { api } = cgpv;
-    const { displayLanguage, footerTabs, map } = api.map(mapId);
+      // access the api calls
+      const { api } = cgpv;
+      const { displayLanguage, footerTabs, map } = api.map(mapId);
 
-    const mapContainer = map.getTargetElement().parentElement;
-    if (mapContainer) {
-      mapContainer.style.height = 'calc( 100% - 300px )';
-    }
+      const mapContainer = map.getTargetElement().parentElement;
+      if (mapContainer) {
+        mapContainer.style.height = 'calc( 100% - 300px )';
+      }
 
-    const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
-    let tabsCounter = 0;
+      const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;
+      let tabsCounter = 0;
 
-    if (defaultTabs.includes('legend')) {
-      // create new tab and add the LegendComponent to the footer tab
-      footerTabs.createFooterTab({
-        value: tabsCounter,
-        label: this.translations[displayLanguage].legend as string,
-        content: () => <LegendItem mapId={mapId} />,
-      });
-      tabsCounter++;
-    }
+      if (defaultTabs.includes('legend')) {
+        // create new tab and add the LegendComponent to the footer tab
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].legend as string,
+          content: () => <LegendItem mapId={mapId} />,
+        });
+        tabsCounter++;
+      }
 
-    // create the listener to return the details
-    if (defaultTabs.includes('details')) {
-      // create new tab and add the DetailComponent to the footer tab
-      const detailsTabValue = tabsCounter;
-      footerTabs.createFooterTab({
-        value: detailsTabValue,
-        label: this.translations[displayLanguage].details as string,
-        content: () => <DetailsItem mapId={mapId} />,
-      });
-      tabsCounter++;
-      // select the details tab when map click queries are done
-      api.event.on(
-        api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          if (payloadIsAllQueriesDone(payload)) {
-            const { resultSets } = payload;
-            let features: TypeArrayOfFeatureInfoEntries = [];
-            Object.keys(resultSets).forEach((layerPath) => {
-              features = features.concat(resultSets[layerPath]!);
-            });
-            if (features.length > 0) {
-              footerTabs.selectFooterTab(detailsTabValue);
+      // create the listener to return the details
+      if (defaultTabs.includes('details')) {
+        // create new tab and add the DetailComponent to the footer tab
+        const detailsTabValue = tabsCounter;
+        footerTabs.createFooterTab({
+          value: detailsTabValue,
+          label: this.translations[displayLanguage].details as string,
+          content: () => <DetailsItem mapId={mapId} />,
+        });
+        tabsCounter++;
+        // select the details tab when map click queries are done
+        api.event.on(
+          api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+          (payload) => {
+            if (payloadIsAllQueriesDone(payload)) {
+              const { resultSets } = payload;
+              let features: TypeArrayOfFeatureInfoEntries = [];
+              Object.keys(resultSets).forEach((layerPath) => {
+                features = features.concat(resultSets[layerPath]!);
+              });
+              if (features.length > 0) {
+                footerTabs.selectFooterTab(detailsTabValue);
+              }
             }
-          }
-        },
-        mapId,
-        `${mapId}-DetailsAPI`
-      );
-    }
+          },
+          mapId,
+          `${mapId}-DetailsAPI`
+        );
+      }
 
-    if (defaultTabs.includes('data-grid')) {
-      /// create new tab and add the DataGridComponent to the footer tab
-      footerTabs.createFooterTab({
-        value: tabsCounter,
-        label: this.translations[displayLanguage].dataGrid as string,
-        content: () => <DataItem mapId={mapId} />,
-      });
-      tabsCounter++;
-    }
+      if (defaultTabs.includes('data-grid')) {
+        /// create new tab and add the DataGridComponent to the footer tab
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: this.translations[displayLanguage].dataGrid as string,
+          content: () => <DataItem mapId={mapId} />,
+        });
+        tabsCounter++;
+      }
 
-    // TODO add custom detail reusable component when done
+      // TODO add custom detail reusable component when done
 
-    const customTabs = configObj?.tabs.customTabs as Array<string>;
-    for (let i = 0; i < customTabs.length; i++) {
-      const tab = customTabs[i] as unknown as CustomTabs;
+      const customTabs = configObj?.tabs.customTabs as Array<string>;
+      for (let i = 0; i < customTabs.length; i++) {
+        const tab = customTabs[i] as unknown as CustomTabs;
 
-      footerTabs.createFooterTab({
-        value: tabsCounter,
-        label: tab.title,
-        content: tab.contentHTML,
-      });
-      tabsCounter++;
-    }
+        footerTabs.createFooterTab({
+          value: tabsCounter,
+          label: tab.title,
+          content: tab.contentHTML,
+        });
+        tabsCounter++;
+      }
     }
   };
 
