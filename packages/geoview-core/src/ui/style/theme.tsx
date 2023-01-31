@@ -27,9 +27,9 @@ const lightPalette = {
     contrastText: '#666666',
   },
   secondary: {
-    light: '#ff7961',
-    main: '#f44336',
-    dark: '#ba000d',
+    light: '#42a5f5',
+    main: '#1976d2',
+    dark: '#1565c0',
     contrastText: '#000',
   },
   backdrop: '#3F3F3F50',

@@ -13,7 +13,6 @@ import { HtmlToReact } from '../../core/containers/html-to-react';
 import { TabPanel } from './tab-panel';
 
 type TypeChildren = React.ReactNode;
-
 /**
  * Type used for properties of each tab
  */
@@ -64,10 +63,36 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   return (
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
       <Grid item xs={7} sm={10}>
-        <MaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs">
+        <MaterialTabs
+          {...props.tabsProps}
+          value={value}
+          onChange={handleChange}
+          aria-label="basic tabs"
+          sx={{
+            '& .MuiTabs-indicator': {
+              'background-color': (theme) => theme.palette.secondary.main,
+            },
+          }}
+        >
           {tabs.map((tab, index) => {
             // eslint-disable-next-line prettier/prettier
-            return <MaterialTab label={tab.label} key={index} {...props.tabProps} id={`tab-${index}`} sx={{ fontSize: 'min(3vw, 24px)', minWidth: 'min(4vw, 24px)', padding: '12px 2%' }} />;
+            return (
+              <MaterialTab
+                label={tab.label}
+                key={index}
+                {...props.tabProps}
+                id={`tab-${index}`}
+                sx={{
+                  fontSize: 16,
+                  minWidth: 'min(4vw, 24px)',
+                  padding: '16px 2%',
+                  'text-transform': 'capitalize',
+                  '&.Mui-selected': {
+                    color: 'secondary.main',
+                  },
+                }}
+              />
+            );
           })}
         </MaterialTabs>
       </Grid>
@@ -79,7 +104,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           const TabContent = tab.content as React.ElementType;
 
           return (
-            <TabPanel key={index} value={value} index={index} >
+            <TabPanel key={index} value={value} index={index}>
               {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
             </TabPanel>
           );
