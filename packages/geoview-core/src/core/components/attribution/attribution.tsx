@@ -50,7 +50,6 @@ const useStyles = makeStyles((theme) => ({
         fontSize: 'initial',
         '& li': {
           display: 'block',
-          fontSize: theme.typography.subtitle2.fontSize,
           color: theme.palette.primary.light,
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
