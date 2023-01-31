@@ -40,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
   },
   mousePositionCheckmark: {
     paddingRight: 5,
-    fontSize: `20px !important`,
     color: theme.palette.primary.light,
   },
   mousePositionText: {
@@ -225,7 +224,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapnav.cordinates')}>
+    <Tooltip title={t('mapnav.coordinates')}>
       <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
         <div className={classes.mousePositionTextContainer}>
           {expanded ? (
@@ -233,7 +232,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
               return (
                 // eslint-disable-next-line react/no-array-index-key
                 <div className={classes.mousePositionTextCheckmarkContainer} key={index}>
-                  {index === positionMode && <CheckIcon className={classes.mousePositionCheckmark} />}
+                  {index === positionMode && <CheckIcon sx={{ fontSize: 25 }} className={classes.mousePositionCheckmark} />}
                   <span className={classes.mousePositionText}>{position}</span>
                 </div>
               );

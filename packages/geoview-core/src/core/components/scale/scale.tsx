@@ -50,7 +50,6 @@ const useStyles = makeStyles((theme) => ({
   },
   scaleCheckmark: {
     paddingRight: 5,
-    fontSize: `20px !important`,
     color: theme.palette.primary.light,
   },
 }));
@@ -162,7 +161,7 @@ export function Scale(): JSX.Element {
               {scaleValues.map((value, index) => {
                 return (
                   <div className={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
-                    {scaleMode === index && <CheckIcon className={classes.scaleCheckmark} />}
+                    {scaleMode === index && <CheckIcon sx={{ fontSize: 25 }} className={classes.scaleCheckmark} />}
                     <span
                       className={classes.scaleText}
                       style={{

@@ -19,6 +19,8 @@ const sxClasses = {
   },
   rotationIcon: {
     fontSize: 'fontSize',
+    width: '1.5em',
+    height: '1.5em',
     color: 'primary.light',
   },
 };

@@ -15,6 +15,7 @@ const sxClasses = {
     color: 'primary.light',
     height: '30px',
     width: '30px',
+    marginLeft: '5px',
   },
 };
 

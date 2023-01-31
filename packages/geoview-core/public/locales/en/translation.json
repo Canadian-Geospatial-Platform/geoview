@@ -10,8 +10,8 @@
     "export": "Export map as PNG",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
-    "cordinates": "Cordinates",
-    "scale": "Scale"
+    "coordinates": "Toggle Coordinates",
+    "scale": "Toggle between scale and resolution"
   },
   "mapctrl": {
     "rotation": {

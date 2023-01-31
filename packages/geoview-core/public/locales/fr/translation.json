@@ -10,8 +10,8 @@
     "home": "Retour à la vue initiale",
     "zoomIn": "Zoom avant",
     "zoomOut": "Zoom arrière",
-    "cordinates": "Coordonnés",
-    "scale": "Échelle"
+    "coordinates": "Basculer le format des coordonnées",
+    "scale": "Basculer entre l'échelle et la résolution"
   },
   "mapctrl": {
     "rotation": {
