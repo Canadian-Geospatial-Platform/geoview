@@ -21,8 +21,8 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    maxHeight: '30px',
-    minHeight: '30px',
+    maxHeight: '34px',
+    minHeight: '34px',
     backdropFilter: 'blur(5px)',
     backgroundColor: '#000000aa',
     pointerEvents: 'all',
@@ -34,7 +34,7 @@ const useStyles = makeStyles(() => ({
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',
-    padding: '5px',
+    gap: 20,
     '& button': {
       cursor: 'pointer',
       margin: 'auto',
@@ -43,6 +43,7 @@ const useStyles = makeStyles(() => ({
   rotationControlsContainer: {
     display: 'flex',
     flexDirection: 'column',
+    marginLeft: 20,
   },
 }));
 
