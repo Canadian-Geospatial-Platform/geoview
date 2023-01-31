@@ -13,17 +13,15 @@ import {
   Tooltip,
   IconButton,
 } from '../../../ui';
-import { TypeArrayOfLayerData, DetailsStyleProps } from './details';
+import { TypeArrayOfLayerData, DetailsProps } from './details';
 import { FeatureInfo } from './feature-info';
 
 const sxClasses = {
-  expandableIconContainer: {
-    paddingLeft: 10,
-  },
+  expandableIconContainer: {},
 };
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
-  detailsStyle: DetailsStyleProps;
+  detailsSettings: DetailsProps;
 }
 
 /**
@@ -32,10 +30,10 @@ interface TypeLayersListProps {
  * @returns {JSX.Element} the layers list
  */
 export function LayersList(props: TypeLayersListProps): JSX.Element {
-  const { arrayOfLayerData, detailsStyle } = props;
+  const { arrayOfLayerData, detailsSettings } = props;
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
 
-  const fontColor = detailsStyle.backgroundStyle === 'dark' ? { color: '#fff' } : {};
+  const fontColor = detailsSettings.backgroundStyle === 'dark' ? { color: '#fff' } : {};
 
   useEffect(() => {
     // if there is only one layer in the list, open it
@@ -51,7 +49,10 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
       {arrayOfLayerData.map((layerData) => {
         return (
           <div key={layerData.layerPath}>
-            <ListItem onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')} sx={fontColor}>
+            <ListItem
+              onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}
+              sx={{ padding: '8px 0', ...fontColor }}
+            >
               <ListItemButton>
                 <ListItemIcon>
                   <IconButton color="primary" sx={fontColor}>
@@ -67,7 +68,7 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
               <Grid container spacing={2} sx={sxClasses.expandableIconContainer}>
                 {layerData.features.map((feature, index: number) => (
                   // eslint-disable-next-line react/no-array-index-key, prettier/prettier
-                  <FeatureInfo key={index} feature={feature} startOpen={layerData.features.length === 1} backgroundStyle={detailsStyle.backgroundStyle} singleColumn={detailsStyle.singleColumn} />
+                  <FeatureInfo key={index} feature={feature} startOpen={layerData.features.length === 1} detailsSettings={detailsSettings} />
                 ))}
               </Grid>
             </Collapse>
