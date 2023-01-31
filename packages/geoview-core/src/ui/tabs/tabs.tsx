@@ -7,7 +7,6 @@ import { TabsProps, TabProps, BoxProps } from '@mui/material';
 import MaterialTabs from '@mui/material/Tabs';
 import MaterialTab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/system';
 
 import { HtmlToReact } from '../../core/containers/html-to-react';
 
@@ -34,19 +33,6 @@ export interface TypeTabsProps {
   tabProps?: TabProps;
   rightButtons?: unknown;
 }
-
-const StyledMaterialTab = styled(MaterialTab)(({ theme }) => ({
-  'text-transform': 'capitalize',
-  '&.Mui-selected': {
-    color: theme.palette.secondary.main,
-  },
-}));
-
-const StyledMaterialTabs = styled(MaterialTabs)(({ theme }) => ({
-  '>div:last-child>span': {
-    'background-color': theme.palette.secondary.main,
-  },
-}));
 
 /**
  * Create a tabs ui
@@ -77,20 +63,38 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
   return (
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
       <Grid item xs={7} sm={10}>
-        <StyledMaterialTabs {...props.tabsProps} value={value} onChange={handleChange} aria-label="basic tabs">
+        <MaterialTabs
+          {...props.tabsProps}
+          value={value}
+          onChange={handleChange}
+          aria-label="basic tabs"
+          sx={{
+            '& .MuiTabs-indicator': {
+              'background-color': (theme) => theme.palette.secondary.main,
+            },
+          }}
+        >
           {tabs.map((tab, index) => {
             // eslint-disable-next-line prettier/prettier
             return (
-              <StyledMaterialTab
+              <MaterialTab
                 label={tab.label}
                 key={index}
                 {...props.tabProps}
                 id={`tab-${index}`}
-                sx={{ fontSize: '1rem', minWidth: 'min(4vw, 24px)', padding: '16px 2%' }}
+                sx={{
+                  fontSize: 1,
+                  minWidth: 'min(4vw, 24px)',
+                  padding: '16px 2%',
+                  'text-transform': 'capitalize',
+                  '&.Mui-selected': {
+                    color: 'secondary.main',
+                  },
+                }}
               />
             );
           })}
-        </StyledMaterialTabs>
+        </MaterialTabs>
       </Grid>
       <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
         {rightButtons}
