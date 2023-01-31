@@ -19,11 +19,11 @@
       "style": {
         "Polygon": {
           "styleId": "uniqueValueId",
-          "defaultLabel": "One",
+          "defaultLabel": "Other provinces",
           "styleType": "uniqueValue",
           "defaultSettings": {
             "type": "filledPolygon",
-            "color": "rgba(0,0,255,0.25)",
+            "color": "rgba(0,0,255,0.5)",
             "paternSize": 10,
             "paternWidth": 2,
             "fillStyle": "diagonalCross",
@@ -32,14 +32,14 @@
               "lineStyle": "dot"
             }
           },
-          "defaultVisible": false,
-          "fields": ["number"],
+          "defaultVisible": true,
+          "fields": ["Province"],
           "uniqueValueStyleInfo": [
             {
-              "label": "Two",
+              "label": "Quebec",
               "settings": {
                 "type": "filledPolygon",
-                "color": "rgba(0,255,255,0.25)",
+                "color": "rgba(0,128,128,0.5)",
                 "paternSize": 10,
                 "paternWidth": 2,
                 "fillStyle": "diagonalCross",
@@ -48,14 +48,14 @@
                   "lineStyle": "dot"
                 }
               },
-              "values": ["Two"],
-              "visible": false
+              "values": ["Quebec"],
+              "visible": true
             },
             {
-              "label": "Three",
+              "label": "Alberta",
               "settings": {
                 "type": "filledPolygon",
-                "color": "rgba(255,0,255,0.25)",
+                "color": "rgba(255,0,255,0.5)",
                 "paternSize": 10,
                 "paternWidth": 2,
                 "fillStyle": "diagonalCross",
@@ -64,8 +64,8 @@
                   "lineStyle": "dot"
                 }
               },
-              "values": ["Three"],
-              "visible": false
+              "values": ["Alberta"],
+              "visible": true
             }
           ]
         }
@@ -122,7 +122,7 @@
             "type": "iconSymbol",
             "mimeType": "image/png",
             "src": "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=",
-            "opacity": 0.25
+            "opacity": 0.5
           }
         }
       }

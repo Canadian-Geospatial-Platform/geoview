@@ -3,48 +3,48 @@
   "features": [
     {
       "type": "Feature",
-      "properties": { "number": "One" },
+      "properties": { "Province": "Ontario" },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [-104.05, 48.99],
-            [-97.22, 48.98],
-            [-96.58, 45.94],
-            [-104.03, 45.94],
-            [-104.05, 48.99]
+            [-90, 52],
+            [-84, 53],
+            [-84, 50],
+            [-90, 50],
+            [-90, 52]
           ]
         ]
       }
     },
     {
       "type": "Feature",
-      "properties": { "number": "Two" },
+      "properties": { "Province": "Quebec" },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [-109.05, 41.0],
-            [-102.06, 40.99],
-            [-102.03, 36.99],
-            [-109.04, 36.99],
-            [-109.05, 41.0]
+            [-73, 50],
+            [-73, 45.5],
+            [-74.25, 45.5],
+            [-74.25, 50],
+            [-73, 50]
           ]
         ]
       }
     },
     {
       "type": "Feature",
-      "properties": { "number": "Three" },
+      "properties": { "Province": "Alberta" },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
-            [-107.05, 45.99],
-            [-99.22, 45.98],
-            [-99.58, 40.94],
-            [-104.03, 40.94],
-            [-107.05, 45.99]
+            [-115, 55],
+            [-110.25, 55],
+            [-111, 49.5],
+            [-114, 49.6],
+            [-115, 55]
           ]
         ]
       }
