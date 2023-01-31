@@ -83,7 +83,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 {...props.tabProps}
                 id={`tab-${index}`}
                 sx={{
-                  fontSize: 1,
+                  fontSize: 16,
                   minWidth: 'min(4vw, 24px)',
                   padding: '16px 2%',
                   'text-transform': 'capitalize',
