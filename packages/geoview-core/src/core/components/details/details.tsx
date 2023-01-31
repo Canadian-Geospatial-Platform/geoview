@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Coordinate } from 'ol/coordinate';
 import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
 import { LayersList } from './layers-list';
 
 export interface DetailsProps {
   mapId: string;
-  location: Coordinate;
+  location: unknown;
   backgroundStyle?: string;
   singleColumn?: boolean;
-  handlerName: string | null;
 }
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -30,12 +28,11 @@ export type TypeArrayOfLayerData = TypeLayerData[];
 export function Details(props: TypeDetailsProps): JSX.Element | null {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { arrayOfLayerData, detailsSettings } = props;
-  const { location, handlerName } = detailsSettings;
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
 
   useEffect(() => {
     setDetails(arrayOfLayerData);
-  }, [arrayOfLayerData, location, handlerName]);
+  }, [arrayOfLayerData]);
 
   return <LayersList arrayOfLayerData={details} detailsSettings={detailsSettings} />;
 }
