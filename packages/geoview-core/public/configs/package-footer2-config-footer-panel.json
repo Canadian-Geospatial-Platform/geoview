@@ -1,10 +1,13 @@
 {
   "tabs": {
     "defaultTabs": [],
-    "customTabs": [{
-      "title": "What is this Map?",
-      "contentHTML": "<div>This is a custom tab define as HTML content in configuration! By the way, this is a static map.</div>"
-    }]
+    "customTabs": [
+      {
+        "title": "What is this Map?",
+        "contentHTML": "<div>This is a custom tab define as HTML content in configuration! By the way, this is a static map.</div>"
+      }
+    ]
   },
-  "suportedLanguages": ["en", "fr"]
+  "suportedLanguages": ["en", "fr"],
+  "collapsed": false
 }

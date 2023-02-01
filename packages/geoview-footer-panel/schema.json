@@ -59,6 +59,11 @@
       "type": "string",
       "enum": ["1.0"],
       "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer."
+    },
+    "collapsed": {
+      "type": "boolean",
+      "default": true,
+      "description": "State of footer panel when map is loaded"
     }
   },
   "required": ["suportedLanguages", "tabs"]
