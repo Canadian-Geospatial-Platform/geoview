@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import OLAttribution, { Options } from 'ol/control/Attribution';
 
@@ -7,7 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
-import { Tooltip } from '../../../ui';
+import { Tooltip, Box } from '../../../ui';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
@@ -20,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: 'ellipsis',
     alignItems: 'center',
     width: '100%',
+    transition: 'opacity 1ms ease-in 300ms',
     '& .ol-attribution': {
       display: 'flex !important',
       flexDirection: 'row',
@@ -40,7 +41,6 @@ const useStyles = makeStyles((theme) => ({
       },
       '& ul': {
         display: 'block',
-        width: 0,
         maxWidth: '500px',
         overflow: 'hidden',
         margin: 'initial',
@@ -50,7 +50,6 @@ const useStyles = makeStyles((theme) => ({
         fontSize: 'initial',
         '& li': {
           display: 'block',
-          fontSize: theme.typography.subtitle2.fontSize,
           color: theme.palette.primary.light,
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -144,7 +143,8 @@ export function Attribution(): JSX.Element {
   const classes = useStyles();
 
   const mapConfig = useContext(MapContext);
-  const [attributionText, setAttributionText] = useState('');
+  const attributionTextRef = useRef<Array<string>>([]);
+  const [attribtuionTextOpacity, setAttribtuionTextOpacity] = useState<boolean>(false);
 
   const { mapId } = mapConfig;
 
@@ -173,13 +173,17 @@ export function Attribution(): JSX.Element {
             if (liElements && liElements.length > 0) {
               for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
                 const liElement = liElements[liElementIndex] as HTMLElement;
-                setAttributionText(liElement.innerText);
+                attributionTextRef.current.push(liElement.innerText);
               }
             }
           }
           if (payload.handlerName!.includes(mapId) && payload.status) {
             attributionControl.formatAttribution();
           }
+          if (!payload.status) {
+            attributionTextRef.current.length = 0;
+          }
+          setAttribtuionTextOpacity(payload.status);
         }
       },
       mapId
@@ -189,8 +193,8 @@ export function Attribution(): JSX.Element {
   }, [mapId]);
 
   return (
-    <Tooltip title={attributionText}>
-      <div id={`${mapId}-attribution-text`} className={classes.attributionContainer} />
+    <Tooltip title={!attributionTextRef.current?.length ? '' : attributionTextRef.current.join('\n')}>
+      <Box id={`${mapId}-attribution-text`} className={classes.attributionContainer} sx={{ opacity: attribtuionTextOpacity ? 1 : 0 }} />
     </Tooltip>
   );
 }

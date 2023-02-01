@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 
-import { ExpandMoreIcon, ExpandLessIcon, IconButton } from '../../../ui';
+import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '../../../ui';
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
 
@@ -13,8 +13,9 @@ const sxClasses = {
     alignItems: 'center',
     justifyContent: 'center',
     color: 'primary.light',
-    height: '25px',
-    width: '25px',
+    height: '30px',
+    width: '30px',
+    marginLeft: '5px',
   },
 };
 
@@ -35,9 +36,9 @@ export function FooterbarExpandButton(): JSX.Element {
   const expandFooterbar = () => {
     const footerBar = document.getElementById(`${mapId}-footerBar`);
     if (footerBar) {
-      footerBar.style.transition = 'max-height 300ms ease-in';
-      footerBar.style.maxHeight = '55px';
-      footerBar.style.height = '55px';
+      footerBar.style.transition = 'max-height 300ms ease-in 0s';
+      footerBar.style.maxHeight = '80px';
+      footerBar.style.height = '80px';
 
       const ulElement = footerBar.querySelector('.ol-attribution ul') as HTMLElement;
 
@@ -74,8 +75,10 @@ export function FooterbarExpandButton(): JSX.Element {
   };
 
   return (
-    <IconButton sx={sxClasses.expandbuttonContainer} onClick={() => (status ? collapseFooterbar() : expandFooterbar())}>
-      {status ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-    </IconButton>
+    <Box>
+      <IconButton sx={sxClasses.expandbuttonContainer} onClick={() => (status ? collapseFooterbar() : expandFooterbar())}>
+        {status ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+      </IconButton>
+    </Box>
   );
 }
