@@ -232,7 +232,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
               return (
                 // eslint-disable-next-line react/no-array-index-key
                 <div className={classes.mousePositionTextCheckmarkContainer} key={index}>
-                  {index === positionMode && <CheckIcon sx={{ fontSize: 25 }} className={classes.mousePositionCheckmark} />}
+                  <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0 }} className={classes.mousePositionCheckmark} />
                   <span className={classes.mousePositionText}>{position}</span>
                 </div>
               );

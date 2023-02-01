@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   navBarRef: {
     position: 'absolute',
     right: theme.spacing(5),
-    bottom: 32,
+    bottom: 80,
     height: '600px',
     display: 'flex',
     flexDirection: 'row',

@@ -36,7 +36,7 @@ export function FooterbarExpandButton(): JSX.Element {
   const expandFooterbar = () => {
     const footerBar = document.getElementById(`${mapId}-footerBar`);
     if (footerBar) {
-      footerBar.style.transition = 'max-height 300ms ease-in';
+      footerBar.style.transition = 'max-height 300ms ease-in 0s';
       footerBar.style.maxHeight = '80px';
       footerBar.style.height = '80px';
 
