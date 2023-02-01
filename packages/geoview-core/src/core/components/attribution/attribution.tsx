@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 
 import OLAttribution, { Options } from 'ol/control/Attribution';
 
@@ -144,7 +144,7 @@ export function Attribution(): JSX.Element {
   const classes = useStyles();
 
   const mapConfig = useContext(MapContext);
-  const [attributionText, setAttributionText] = useState('');
+  const attributionTextRef = useRef<Array<string>>([]);
   const [attribtuionTextOpacity, setAttribtuionTextOpacity] = useState<boolean>(false);
   const { mapId } = mapConfig;
 
@@ -173,12 +173,15 @@ export function Attribution(): JSX.Element {
             if (liElements && liElements.length > 0) {
               for (let liElementIndex = 0; liElementIndex < liElements.length; liElementIndex++) {
                 const liElement = liElements[liElementIndex] as HTMLElement;
-                setAttributionText(liElement.innerText);
+                attributionTextRef.current.push(liElement.innerText);
               }
             }
           }
           if (payload.handlerName!.includes(mapId) && payload.status) {
             attributionControl.formatAttribution();
+          }
+          if (!payload.status) {
+            attributionTextRef.current.length = 0;
           }
           setAttribtuionTextOpacity(payload.status);
         }
@@ -189,7 +192,7 @@ export function Attribution(): JSX.Element {
     map.addControl(attributionControl);
   }, [mapId]);
   return (
-    <Tooltip title={attributionText}>
+    <Tooltip title={!attributionTextRef.current?.length ? '' : attributionTextRef.current.join('\n')}>
       <Box id={`${mapId}-attribution-text`} className={classes.attributionContainer} sx={{ opacity: attribtuionTextOpacity ? 1 : 0 }} />
     </Tooltip>
   );
