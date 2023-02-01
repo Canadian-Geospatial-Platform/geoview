@@ -123,7 +123,7 @@
                 }
               ]
             },
-            'components': ['overview-map', 'nav-bar', 'footer-bar'],
+            'components': ['overview-map', 'nav-bar'],
             'corePackages': [],
             'theme': 'dark',
             'suportedLanguages': ['en']
@@ -182,7 +182,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -601,7 +601,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar', 'north-arrow'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -657,7 +657,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar', 'north-arrow'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -734,7 +734,7 @@
         }
       ]
     },
-    'components': ['overview-map', 'nav-bar', 'footer-bar'],
+    'components': ['overview-map', 'nav-bar'],
     'corePackages': [],
     'theme': 'dark',
     'suportedLanguages': ['en']
@@ -746,9 +746,12 @@
     <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
     <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll;"  id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
-    <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking the buttons</p>
+    <p>
+      This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
+      the buttons
+    </p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR5CS" class="panel"></pre>
     <hr />
@@ -795,7 +798,7 @@
             }
           ]
         },
-        'components': ['overview-map', 'nav-bar', 'footer-bar'],
+        'components': ['overview-map', 'nav-bar'],
         'corePackages': [],
         'theme': 'dark',
         'suportedLanguages': ['en']
@@ -853,7 +856,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -912,7 +915,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -973,7 +976,7 @@
         }
       ]
     },
-    'components': ['overview-map', 'nav-bar', 'footer-bar'],
+    'components': ['overview-map', 'nav-bar'],
     'corePackages': [],
     'theme': 'dark',
     'suportedLanguages': ['en']
@@ -1014,39 +1017,43 @@
           table.appendChild(layerButtons);
         }
 
-          const geoviewLayers = cgpv.api.maps[mapId].layer.geoviewLayers;
-          Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-            const geoviewLayer = geoviewLayers[geoviewLayerId];
+        const geoviewLayers = cgpv.api.maps[mapId].layer.geoviewLayers;
+        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
+          const geoviewLayer = geoviewLayers[geoviewLayerId];
+          if (mapId === 'LYR5') {
+            const geoviewLayerText = document.createElement("h1");
+            geoviewLayerText.innerText = geoviewLayer.geoviewLayerName.en;
+            layerButtons.appendChild(geoviewLayerText);
+          }
+          const registeredLayers = cgpv.api.maps[mapId].layer.registeredLayers;
+          Object.keys(registeredLayers).forEach((layerPath) => {
             if (mapId === 'LYR5') {
-              const geoviewLayerText = document.createElement('h1');
-              geoviewLayerText.innerText = geoviewLayer.geoviewLayerName.en;
-              layerButtons.appendChild(geoviewLayerText);
+              layerButtons = document.createElement("td");
+              layerButtons.style.width = '16.66%';
+              layerButtons.style.padding = '15px';
+              layerButtons.border = '1px solid black';
+              table.appendChild(layerButtons);
             }
-            const registeredLayers = cgpv.api.maps[mapId].layer.registeredLayers;
-            Object.keys(registeredLayers).forEach((layerPath) => {
-              if (mapId === 'LYR5') {
-                layerButtons = document.createElement('td');
-                layerButtons.style.width = '16.66%';
-                layerButtons.style.padding = '15px';
-                layerButtons.border = '1px solid black';
-                table.appendChild(layerButtons);
-              }
-              if (layerPath.startsWith(geoviewLayerId)) {
-                const layerConfig = registeredLayers[layerPath];
-                const layerConfigH2 = document.createElement('h2');
-                layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
-                layerButtons.appendChild(layerConfigH2);
-                const toggleLayerVisibility = document.createElement('button');
-                const visibilityFlag = geoviewLayer.getVisible(layerConfig);
-                if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
-                else toggleLayerVisibility.innerText = 'Show';
-                toggleLayerVisibility.addEventListener('click', function (e) {
-                  const visibilityFlag = !geoviewLayer.getVisible(layerConfig);
-                  if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
-                  else toggleLayerVisibility.innerText = 'Show';
-                  geoviewLayer.setVisible(visibilityFlag, layerConfig);
-                });
-                layerConfigH2.appendChild(toggleLayerVisibility);
+            if (layerPath.startsWith(geoviewLayerId)) {
+              const layerConfig = registeredLayers[layerPath];
+              const layerConfigH2 = document.createElement("h2");
+              layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
+              layerButtons.appendChild(layerConfigH2);
+              const toggleLayerVisibility = document.createElement("button");
+              const visibilityFlag = geoviewLayer.getVisible(layerConfig);
+              if (visibilityFlag)
+                toggleLayerVisibility.innerText = 'Hide';
+              else
+                toggleLayerVisibility.innerText = 'Show';
+              toggleLayerVisibility.addEventListener('click', function (e) {
+                const visibilityFlag = !geoviewLayer.getVisible(layerConfig);
+                if (visibilityFlag)
+                  toggleLayerVisibility.innerText = 'Hide';
+                else
+                  toggleLayerVisibility.innerText = 'Show';
+                geoviewLayer.setVisible(visibilityFlag, layerConfig);
+              });
+              layerConfigH2.appendChild(toggleLayerVisibility);
 
               if (layerConfig.style) {
                 Object.keys(layerConfig.style).forEach((geometry) => {

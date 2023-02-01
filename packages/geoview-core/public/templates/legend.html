@@ -1,56 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="shortcut icon" href="./favicon.ico" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="msapplication-config" content="./img/browserconfig.xml" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
 
-  <body>
-    <div class="header-table">
-      <table>
-        <tbody>
-          <tr>
-            <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
-            <td class="header-title">
-              <h1><strong>Legend</strong></h1>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td><a href="./index.html">Main</a><br /></td>
-          </tr>
-        </tbody>
-      </table>
-      <table>
-        <tbody>
-          <tr>
-            <td>This page demonstrates the legend component</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="map-title-holder">
-      <h4 id="HUC1">1. Legend Core Component</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div
-      id="UC1"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <link rel="shortcut icon" href="./favicon.ico" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="msapplication-config" content="./img/browserconfig.xml" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"
+    type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="header-table">
+    <table>
+      <tbody>
+        <tr>
+          <td><img class="header-logo" alt="logo" src="./img/Logo.png" /></td>
+          <td class="header-title">
+            <h1><strong>Legend</strong></h1>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            <a href="./index.html">Main</a><br />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+            This page demonstrates the legend component
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="map-title-holder">
+    <h4 id="HUC1">1. Legend Core Component</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC1" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -144,24 +147,18 @@
             ]
           },
           'theme': 'light',
-          'components': ['footer-bar'],
+          'components': [],
           'corePackages': [],
           'suportedLanguages': ['en']
-        }"
-    ></div>
-    <p>Add a legend component.</p>
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="UC1CS" class="panel"></pre>
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC1CS" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HUC2">2. Class Break Style Legend</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div
-      id="UC2"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
+  <div class="map-title-holder">
+    <h4 id="HUC2">2. Class Break Style Legend</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC2" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -193,24 +190,18 @@
             ]
           },
           'theme': 'dark',
-          'components': ['footer-bar'],
+          'components': [],
           'corePackages': [],
           'suportedLanguages': ['en']
-        }"
-    ></div>
-    <p>Add a legend component.</p>
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="UC2CS" class="panel"></pre>
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC2CS" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HUC3">3. Group Layer</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div
-      id="UC3"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
+  <div class="map-title-holder">
+    <h4 id="HUC3">3. Group Layer</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC3" class="llwp-map" data-lang="en" data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -241,25 +232,19 @@
               }
             ]
           },
-          'components': ['nav-bar', 'footer-bar'],
+          'components': ['nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
-        }"
-    ></div>
-    <p>Add a legend component.</p>
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="UC3CS" class="panel"></pre>
+        }"></div>
+  <p>Add a legend component.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC3CS" class="panel"></pre>
 
-    <div class="map-title-holder">
-      <h4 id="HUC4">4. WMS Group</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-    <div
-      id="UC4"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
+  <div class="map-title-holder">
+    <h4 id="HUC4">4. WMS Group</h4><a class="ref-link" href="#top">Top</a>
+  </div>
+  <div id="UC4" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
@@ -325,104 +310,103 @@
       },
       'components': [
         'app-bar',
-        'nav-bar',
-        'footer-bar'
+        'nav-bar'
       ],
       'corePackages': [],
       'theme': 'dark',
       'suportedLanguages': [
         'en'
       ]
-  }"
-    ></div>
-    <p>Add a legend component in Panel.</p>
-    <div id="legend-item-example"></div>
-    <p>Add a single legend item component in div.</p>
-    <button type="button" class="collapsible">Configuration Snippet</button>
-    <pre id="UC4CS" class="panel"></pre>
+  }"></div>
+  <p>Add a legend component in Panel.</p>
+  <div id="legend-item-example"></div>
+  <p>Add a single legend item component in div.</p>
+  <button type="button" class="collapsible">Configuration Snippet</button>
+  <pre id="UC4CS" class="panel"></pre>
 
-    <script src="codedoc.js"></script>
-    <script>
-      // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
-      cgpv.init(function () {
-        console.log('api is ready');
+  <script src="codedoc.js"></script>
+  <script>
+    // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
 
-        //create snippets
-        createCodeSnippet();
-        createConfigSnippet();
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
 
-        // import react and api from the core
-        const { react, reactDOM, api, ui } = cgpv;
+      // import react and api from the core
+      const { react, reactDOM, api, ui } = cgpv;
 
-        // define the map id
-        const mapIdOne = 'UC1';
+      // define the map id
+      const mapIdOne = 'UC1';
 
-        // import footerTabs from the core for the current map
-        const { footerTabs: ft1 } = api.map(mapIdOne);
+      // import footerTabs from the core for the current map
+      const { footerTabs: ft1 } = api.map(mapIdOne);
 
-        const legendOne = api
-          .map(mapIdOne)
-          .legend.createLegend({ layerIds: ['UC1-Layer1', 'UC1-Layer2', 'UC1-Layer3', 'UC1-Layer4', 'UC1-Layer5'] });
+      const legendOne = api.map(mapIdOne).legend.createLegend({layerIds: ['UC1-Layer1', 'UC1-Layer2', 'UC1-Layer3', 'UC1-Layer4', 'UC1-Layer5']});
 
-        // create new tab and add the LegendComponent to the footer tab
-        ft1.createFooterTab({
-          value: 0,
-          label: 'Legend',
-          content: () => legendOne,
-        });
-
-        const mapIdTwo = 'UC2';
-
-        // import footerTabs from the core for the current map
-        const { footerTabs: ft2 } = api.map(mapIdTwo);
-
-        const legendTwo = api.map(mapIdTwo).legend.createLegend({ layerIds: ['UC2-Layer1'] });
-
-        // create new tab and add the LegendComponent to the footer tab
-        ft2.createFooterTab({
-          value: 0,
-          label: 'Legend',
-          content: () => legendTwo,
-        });
-
-        const mapIdThree = 'UC3';
-
-        // import footerTabs from the core for the current map
-        const { footerTabs: ft3 } = api.map(mapIdThree);
-
-        const legendThree = api.map(mapIdThree).legend.createLegend({ layerIds: ['UC3-Layer1'] });
-
-        // create new tab and add the LegendComponent to the footer tab
-        ft3.createFooterTab({
-          value: 0,
-          label: 'Legend',
-          content: () => legendThree,
-        });
-
-        // Legend in a panel
-        const mapIdFour = 'UC4';
-        const legendFour = api.map(mapIdFour).legend.createLegend({ layerIds: ['UC4Layer1-Root', 'UC4Layer2-msi'] });
-        const button = {
-          id: 'AppbarPanelButtonId',
-          tooltip: 'Legend',
-          tooltipPlacement: 'right',
-          children: react.createElement(ui.elements.LayersIcon),
-        };
-
-        const panel = {
-          panelId: 'AppbarPanelId',
-          title: 'Legend',
-          content: legendFour,
-          width: 200,
-        };
-
-        // call an api function to add a panel with a button in the default group
-        api.map(mapIdFour).appBarButtons.createAppbarPanel(button, panel, null);
-
-        const legendDiv = document.getElementById('legend-item-example');
-        const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({ layerId: 'UC4Layer2-msi' });
-        reactDOM.render(legendItemOutside, legendDiv);
+      // create new tab and add the LegendComponent to the footer tab
+      ft1.createFooterTab({
+        value: 0,
+        label: 'Legend',
+        content: () => legendOne
       });
-    </script>
-  </body>
+
+      const mapIdTwo = 'UC2';
+
+      // import footerTabs from the core for the current map
+      const { footerTabs: ft2 } = api.map(mapIdTwo);
+
+      const legendTwo = api.map(mapIdTwo).legend.createLegend({layerIds: ['UC2-Layer1']});
+
+      // create new tab and add the LegendComponent to the footer tab
+      ft2.createFooterTab({
+        value: 0,
+        label: 'Legend',
+        content: () => legendTwo
+      });
+
+
+      const mapIdThree = 'UC3';
+
+      // import footerTabs from the core for the current map
+      const { footerTabs: ft3 } = api.map(mapIdThree);
+
+      const legendThree = api.map(mapIdThree).legend.createLegend({layerIds: ['UC3-Layer1']});
+
+      // create new tab and add the LegendComponent to the footer tab
+      ft3.createFooterTab({
+        value: 0,
+        label: 'Legend',
+        content: () => legendThree
+      });
+
+      // Legend in a panel
+      const mapIdFour = 'UC4';
+      const legendFour = api.map(mapIdFour).legend.createLegend({layerIds: ['UC4Layer1-Root', 'UC4Layer2-msi']});
+      const button = {
+        id: 'AppbarPanelButtonId',
+        tooltip: 'Legend',
+        tooltipPlacement: 'right',
+        children: react.createElement(ui.elements.LayersIcon),
+      };
+
+      const panel = {
+        panelId: 'AppbarPanelId',
+        title: 'Legend',
+        content: legendFour,
+        width: 200,
+      };
+
+      // call an api function to add a panel with a button in the default group
+      api.map(mapIdFour).appBarButtons.createAppbarPanel(button, panel, null);
+
+      const legendDiv = document.getElementById('legend-item-example');
+      const legendItemOutside = api.map(mapIdFour).legend.createLegendItem({layerId: 'UC4Layer2-msi'})
+      reactDOM.render(legendItemOutside, legendDiv);
+
+    });
+  </script>
+</body>
+
 </html>

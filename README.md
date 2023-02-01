@@ -203,7 +203,7 @@ Below is an example of a simple map, with an id **mapOne**. This map will be usi
         ]
       },
       'theme': 'dark',
-      'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map', 'footer-bar'],
+      'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
       'corePackages': [],
       'suportedLanguages': ['en']
     }"

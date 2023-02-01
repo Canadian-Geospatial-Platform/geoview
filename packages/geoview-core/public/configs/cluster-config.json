@@ -50,7 +50,7 @@
     ]
   },
   "theme": "dark",
-  "components": ["footer-bar"],
+  "components": [],
   "corePackages": [],
   "suportedLanguages": ["en"]
 }
