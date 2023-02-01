@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     pointerEvents: 'all',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    transition: 'bottom 1s ease-in-out 300ms',
+    transition: 'bottom 1ms ease-in-out 300ms',
   },
   navBtnGroupContainer: {
     display: 'flex',
