@@ -7,7 +7,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import { MapContext } from '../../app-start';
 import { api } from '../../../app';
-import { Tooltip } from '../../../ui';
+import { Tooltip, Box } from '../../../ui';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
@@ -20,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: 'ellipsis',
     alignItems: 'center',
     width: '100%',
+    transition: 'opacity 1ms ease-in 300ms',
     '& .ol-attribution': {
       display: 'flex !important',
       flexDirection: 'row',
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
       },
       '& ul': {
         display: 'block',
-        width: 0,
+        // width: 0,
         maxWidth: '500px',
         overflow: 'hidden',
         margin: 'initial',
@@ -144,7 +145,7 @@ export function Attribution(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const [attributionText, setAttributionText] = useState('');
-
+  const [attribtuionTextOpacity, setAttribtuionTextOpacity] = useState<boolean>(false);
   const { mapId } = mapConfig;
 
   useEffect(() => {
@@ -179,6 +180,7 @@ export function Attribution(): JSX.Element {
           if (payload.handlerName!.includes(mapId) && payload.status) {
             attributionControl.formatAttribution();
           }
+          setAttribtuionTextOpacity(payload.status);
         }
       },
       mapId
@@ -186,10 +188,9 @@ export function Attribution(): JSX.Element {
 
     map.addControl(attributionControl);
   }, [mapId]);
-
   return (
     <Tooltip title={attributionText}>
-      <div id={`${mapId}-attribution-text`} className={classes.attributionContainer} />
+      <Box id={`${mapId}-attribution-text`} className={classes.attributionContainer} sx={{ opacity: attribtuionTextOpacity ? 1 : 0 }} />
     </Tooltip>
   );
 }

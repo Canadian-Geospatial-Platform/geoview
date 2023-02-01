@@ -44,6 +44,7 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
     marginLeft: 20,
+    alignItems: 'flex-end',
   },
 }));
 

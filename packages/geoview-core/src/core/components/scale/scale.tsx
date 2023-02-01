@@ -161,7 +161,7 @@ export function Scale(): JSX.Element {
               {scaleValues.map((value, index) => {
                 return (
                   <div className={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
-                    {scaleMode === index && <CheckIcon sx={{ fontSize: 25 }} className={classes.scaleCheckmark} />}
+                    <CheckIcon sx={{ fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} className={classes.scaleCheckmark} />
                     <span
                       className={classes.scaleText}
                       style={{
