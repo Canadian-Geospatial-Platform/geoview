@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
       background: theme.palette.primary.light,
     },
     '& .MuiFormControlLabel-label': {
-      fontSize: theme.typography.subtitle2.fontSize,
+      fontSize: theme.typography.fontSize,
       color: theme.palette.primary.light,
       whiteSpace: 'nowrap',
     },

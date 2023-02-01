@@ -12,8 +12,8 @@ import Export from './buttons/export';
 
 import ExportModal from './export-modal';
 
-import { api } from '../../../app';
-import { Panel, ButtonGroup, IconButton } from '../../../ui';
+import { api, payloadIsABoolean } from '../../../app';
+import { Panel, ButtonGroup, IconButton, Box } from '../../../ui';
 
 import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -27,7 +27,6 @@ const useStyles = makeStyles((theme) => ({
   navBarRef: {
     position: 'absolute',
     right: theme.spacing(5),
-    bottom: 80,
     height: '600px',
     maxHeight: 'calc( 100% - 200px)',
     display: 'flex',
@@ -37,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
     pointerEvents: 'all',
     justifyContent: 'center',
     backgroundColor: 'transparent',
+    transition: 'bottom 1s ease-in-out 300ms',
   },
   navBtnGroupContainer: {
     display: 'flex',
@@ -96,6 +96,7 @@ const useStyles = makeStyles((theme) => ({
 export function Navbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
+  const [footerBarExpanded, setFooterBarExpanded] = useState<boolean>(false);
 
   const classes = useStyles();
 
@@ -170,15 +171,26 @@ export function Navbar(): JSX.Element {
       mapId
     );
 
+    api.event.on(
+      EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
+      (payload) => {
+        if (payloadIsABoolean(payload)) {
+          setFooterBarExpanded(payload.status);
+        }
+      },
+      mapId
+    );
+
     return () => {
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
     };
   }, [addButtonPanel, mapId, removeButtonPanel]);
 
   return (
     /** TODO - KenChase Need to add styling for scenario when more buttons that can fit vertically occurs (or limit number of buttons that can be added) */
-    <div ref={navBarRef} className={`${classes.navBarRef}`}>
+    <Box ref={navBarRef} className={`${classes.navBarRef}`} sx={{ bottom: footerBarExpanded ? 80 : 40 }}>
       {Object.keys(buttonPanelGroups).map((groupName) => {
         const buttonPanelGroup = buttonPanelGroups[groupName];
 
@@ -259,6 +271,6 @@ export function Navbar(): JSX.Element {
         </ButtonGroup>
         <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
       </div>
-    </div>
+    </Box>
   );
 }
