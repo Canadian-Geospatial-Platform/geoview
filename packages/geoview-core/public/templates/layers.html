@@ -224,7 +224,7 @@
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': '1',
-                    'layerFilter': 'E_Province = `Alberta` or E_Province = `Manitoba`',
+                    'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\'',
                     'initialSettings': { 'visible': true },
                     'style': {
                       'Point': {
@@ -625,6 +625,7 @@
     <div
       id="LYR4"
       class="llwp-map"
+      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
           'map': {
@@ -648,7 +649,10 @@
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
-                  { 'layerId': '4' }
+                  {
+                    'layerId': '4',
+                    'layerFilter': 'province_territoire like \'British%bi_\' OR province_territoire = \'Ontario\' OR province_territoire = \'Nunavut\''
+                  }
                 ]
               }
             ]
@@ -659,6 +663,7 @@
           'suportedLanguages': ['en']
         }"
     ></div>
+    <div class="layer4-buttons-div"></div>
     <button class="Get-esri-feature-Legend">Get Legend</button>
     <div id="esriFeatureLegendsId-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
@@ -690,7 +695,7 @@
         'projection': 3978
       },
       'basemapOptions': {
-        'basemapId': 'nogeom',
+        'basemapId': 'transport',
         'shaded': true,
         'labeled': false
       },
@@ -703,7 +708,8 @@
           'listOfLayerEntryConfig': [
             {
               'layerId': 'polygons.json',
-              'layerName': { 'en': 'Polygons' }
+              'layerName': { 'en': 'Polygons' },
+              'layerFilter': '1=1'
             },
             {
               'layerId': 'lines.json',
@@ -754,6 +760,7 @@
     <div
       id="LYR6"
       class="llwp-map"
+      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
         'map': {
@@ -780,7 +787,9 @@
               'geoviewLayerType': 'ogcWfs',
               'listOfLayerEntryConfig': [
                 {
-                  'layerId': 'GISDATA.AIRPORTS_PT'
+                  'layerId': 'GISDATA.AIRPORTS_PT',
+                  'layerName': { 'en': 'Airport' },
+                  'layerFilter': 'id in (\'MVY\',\'MA6\',\'MA02\',\'7B2\',\'CEF\')'
                 }
               ]
             }
@@ -792,6 +801,7 @@
         'suportedLanguages': ['en']
       }"
     ></div>
+    <div class="layer6-buttons-div"></div>
     <button class="Get-wfs-Legend">Get Legend</button>
     <div id="wfsLegendsId-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
@@ -809,6 +819,7 @@
     <div
       id="LYR7"
       class="llwp-map"
+      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
           'map': {
@@ -835,7 +846,8 @@
                 'geoviewLayerType': 'ogcFeature',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': 'lakes'
+                    'layerId': 'lakes',
+                    'layerFilter': 'name in (\'Lake Victoria\', \'Lake Superior\', \'L. Erie\', \'L. Ontario\')'
                   }
                 ]
               }
@@ -847,6 +859,7 @@
           'suportedLanguages': ['en']
         }"
     ></div>
+    <div class="layer7-buttons-div"></div>
     <button class="Get-ogcApi-Legend">Get Legend</button>
     <div id="ogcApiLegendsId-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
@@ -923,6 +936,7 @@
     <div
       id="LYR9"
       class="llwp-map"
+      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
     'map': {
@@ -947,6 +961,7 @@
           'listOfLayerEntryConfig': [
             {
               'layerId': 'rivers.gpkg',
+              'layerName': { 'en': 'Rivers' },
               'source': {
                 'dataAccessPath': {
                   'en': './geojson',
@@ -964,6 +979,7 @@
     'suportedLanguages': ['en']
   }"
     ></div>
+    <div class="layer9-buttons-div"></div>
     <button class="Get-Geopackage-Legend">Get Legend</button>
     <div id="geopackageLegendsId-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
@@ -983,20 +999,20 @@
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-        if (mapId === 'LYR3' || mapId === 'LYR5') {
-          var layerButtons = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
-          if (mapId === 'LYR3') layerButtons.appendChild(document.createElement('hr'));
-          else {
-            var table = document.createElement('table');
-            table.style.width = '100%';
-            table.border = '1px solid black';
-            layerButtons.appendChild(table);
-            layerButtons = document.createElement('td');
-            layerButtons.style.width = '16.66%';
-            layerButtons.style.padding = '15px';
-            layerButtons.border = '1px solid black';
-            table.appendChild(layerButtons);
-          }
+      if (['LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR9'].includes(mapId)) {
+        var layerButtons = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
+        if (mapId !== 'LYR5') layerButtons.appendChild(document.createElement("hr"));
+        else {
+          var table = document.createElement("table");
+          table.style.width = '100%';
+          table.border = '1px solid black';
+          layerButtons.appendChild(table);
+          layerButtons = document.createElement("td");
+          layerButtons.style.width = '16.66%';
+          layerButtons.style.padding = '15px';
+          layerButtons.border = '1px solid black';
+          table.appendChild(layerButtons);
+        }
 
           const geoviewLayers = cgpv.api.maps[mapId].layer.geoviewLayers;
           Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
@@ -1032,89 +1048,139 @@
                 });
                 layerConfigH2.appendChild(toggleLayerVisibility);
 
-                if (layerConfig.style) {
-                  Object.keys(layerConfig.style).forEach((geometry) => {
-                    const geometryText = document.createElement('p');
-                    geometryText.innerText = `Geometry = ${geometry}`;
-                    layerButtons.appendChild(geometryText);
-                    if (layerConfig.style[geometry].styleType === 'uniqueValue') {
-                      const toggleUniqueValueDefault = document.createElement('button');
-                      if (layerConfig.style[geometry].defaultVisible) toggleUniqueValueDefault.innerText = 'Hide default';
-                      else toggleUniqueValueDefault.innerText = 'Show default';
-                      toggleUniqueValueDefault.addEventListener('click', function (e) {
-                        layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
-                        if (layerConfig.style[geometry].defaultVisible) toggleUniqueValueDefault.innerText = 'Hide default';
-                        else toggleUniqueValueDefault.innerText = 'Show default';
-                        geoviewLayer.applyViewFilter(layerConfig);
-                      });
-                      layerButtons.appendChild(toggleUniqueValueDefault);
-                      if (mapId === 'LYR5') layerButtons.appendChild(document.createElement('p'));
+              if (layerConfig.style) {
+                Object.keys(layerConfig.style).forEach((geometry) => {
+                  const geometryText = document.createElement("p");
+                  geometryText.innerText = `Geometry = ${geometry}`;
+                  layerButtons.appendChild(geometryText);
+                  if (layerConfig.style[geometry].styleType === 'uniqueValue') {
+                    const toggleUniqueValueDefault = document.createElement("button");
+                    if (layerConfig.style[geometry].defaultVisible)
+                      toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                    else
+                      toggleUniqueValueDefault.innerText =  `Show ${layerConfig.style[geometry].defaultLabel}`;
+                    toggleUniqueValueDefault.addEventListener('click', function (e) {
+                      layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
+                      if (layerConfig.style[geometry].defaultVisible)
+                        toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                      else
+                        toggleUniqueValueDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                      const checkbox = document.getElementById(`checkbox-${mapId}`);
+                      const filterInput = document.getElementById(`filter-input-${mapId}`);
+                      const filter = checkbox.value === 'true' ? filterInput.value : '';
+                      geoviewLayer.applyViewFilter(layerConfig, filter);
+                    });
+                    layerButtons.appendChild(toggleUniqueValueDefault);
+                    if (mapId === 'LYR5') layerButtons.appendChild(document.createElement("p"));
 
-                      for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
-                        const toggleUniqueValueFeature = document.createElement('button');
-                        if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible)
-                          toggleUniqueValueFeature.innerText = `Hide Feature ${i + 1}`;
-                        else toggleUniqueValueFeature.innerText = `Show Feature ${i + 1}`;
-                        toggleUniqueValueFeature.addEventListener('click', function (e) {
-                          const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
-                          uniqueValueStyleInfoEntry.visible = !uniqueValueStyleInfoEntry.visible;
-                          if (uniqueValueStyleInfoEntry.visible) toggleUniqueValueFeature.innerText = `Hide Feature ${i + 1}`;
-                          else toggleUniqueValueFeature.innerText = `Show Feature ${i + 1}`;
-                          geoviewLayer.applyViewFilter(layerConfig);
-                        });
-                        layerButtons.appendChild(toggleUniqueValueFeature);
-                        if (mapId === 'LYR5') layerButtons.appendChild(document.createElement('p'));
-                      }
-                    }
-                    if (layerConfig.style[geometry].styleType === 'classBreaks') {
-                      const toggleClassBreakDefault = document.createElement('button');
-                      if (layerConfig.style[geometry].defaultVisible) toggleClassBreakDefault.innerText = 'Hide default';
-                      else toggleClassBreakDefault.innerText = 'Show default';
-                      toggleClassBreakDefault.addEventListener('click', function (e) {
-                        layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
-                        if (layerConfig.style[geometry].defaultVisible) toggleClassBreakDefault.innerText = 'Hide default';
-                        else toggleClassBreakDefault.innerText = 'Show default';
-                        geoviewLayer.applyViewFilter(layerConfig);
+                    for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
+                      const toggleUniqueValueFeature = document.createElement("button");
+                      if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible)
+                        toggleUniqueValueFeature.innerText = `Hide ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
+                      else
+                        toggleUniqueValueFeature.innerText = `Show ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
+                      toggleUniqueValueFeature.addEventListener('click', function (e) {
+                        const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
+                        uniqueValueStyleInfoEntry.visible = !uniqueValueStyleInfoEntry.visible;
+                        if (uniqueValueStyleInfoEntry.visible)
+                          toggleUniqueValueFeature.innerText = `Hide ${uniqueValueStyleInfoEntry.label}`;
+                        else
+                          toggleUniqueValueFeature.innerText = `Show ${uniqueValueStyleInfoEntry.label}`;
+                        const checkbox = document.getElementById(`checkbox-${mapId}`);
+                        const filterInput = document.getElementById(`filter-input-${mapId}`);
+                        const filter = checkbox.value === 'true' ? filterInput.value : '';
+                        geoviewLayer.applyViewFilter(layerConfig, filter);
                       });
-                      layerButtons.appendChild(toggleClassBreakDefault);
-
-                      for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
-                        const toggleClassBreakFeature = document.createElement('button');
-                        if (layerConfig.style[geometry].classBreakStyleInfo[i].visible)
-                          toggleClassBreakFeature.innerText = `Hide Feature ${i + 1}`;
-                        else toggleClassBreakFeature.innerText = `Show Feature ${i + 1}`;
-                        toggleClassBreakFeature.addEventListener('click', function (e) {
-                          const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
-                          classBreakStyleInfoEntry.visible = !classBreakStyleInfoEntry.visible;
-                          if (classBreakStyleInfoEntry.visible) toggleClassBreakFeature.innerText = `Hide Feature ${i + 1}`;
-                          else toggleClassBreakFeature.innerText = `Show Feature ${i + 1}`;
-                          geoviewLayer.applyViewFilter(layerConfig);
-                        });
-                        layerButtons.appendChild(toggleClassBreakFeature);
-                      }
+                      layerButtons.appendChild(toggleUniqueValueFeature);
+                      if (mapId === 'LYR5') layerButtons.appendChild(document.createElement("p"));
                     }
-                    if (geoviewLayer.getLayerFilter) {
-                      const layerFilterText = document.createElement('p');
-                      layerFilterText.innerText = `Extra filter: `;
-                      layerButtons.appendChild(layerFilterText);
-                      const layerFilterInput = document.createElement('input');
-                      layerFilterText.appendChild(layerFilterInput);
-                      layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
-                      const layerFilterButton = document.createElement('button');
-                      layerFilterButton.addEventListener('click', function (e) {
+                  } if (layerConfig.style[geometry].styleType === 'classBreaks') {
+                    const toggleClassBreakDefault = document.createElement("button");
+                    if (layerConfig.style[geometry].defaultVisible)
+                      toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                    else
+                      toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                    toggleClassBreakDefault.addEventListener('click', function (e) {
+                      layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
+                      if (layerConfig.style[geometry].defaultVisible)
+                        toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                      else
+                        toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                      const checkbox = document.getElementById(`checkbox-${mapId}`);
+                      const filterInput = document.getElementById(`filter-input-${mapId}`);
+                      const filter = checkbox.value === 'true' ? filterInput.value : '';
+                      geoviewLayer.applyViewFilter(layerConfig, filter);
+                    });
+                    layerButtons.appendChild(toggleClassBreakDefault);
+
+                    for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
+                      const toggleClassBreakFeature = document.createElement("button");
+                      if (layerConfig.style[geometry].classBreakStyleInfo[i].visible)
+                        toggleClassBreakFeature.innerText = `Hide ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
+                      else
+                        toggleClassBreakFeature.innerText = `Show ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
+                      toggleClassBreakFeature.addEventListener('click', function (e) {
+                        const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
+                        classBreakStyleInfoEntry.visible = !classBreakStyleInfoEntry.visible;
+                        if (classBreakStyleInfoEntry.visible)
+                          toggleClassBreakFeature.innerText = `Hide ${classBreakStyleInfoEntry.label}`;
+                        else
+                          toggleClassBreakFeature.innerText = `Show ${classBreakStyleInfoEntry.label}`;
+                        const checkbox = document.getElementById(`checkbox-${mapId}`);
+                        const filterInput = document.getElementById(`filter-input-${mapId}`);
+                        const filter = checkbox.value === 'true' ? filterInput.value : '';
+                        geoviewLayer.applyViewFilter(layerConfig, filter);
+                      });
+                      layerButtons.appendChild(toggleClassBreakFeature);
+                    }
+                  }
+                  if (geoviewLayer.getLayerFilter) {
+                    const layerFilterText = document.createElement("p");
+                    layerFilterText.innerText = `Extra filter: `;
+                    layerButtons.appendChild(layerFilterText);
+                    const layerFilterInput = document.createElement("input");
+                    layerFilterInput.id = `filter-input-${mapId}`;
+                    layerFilterInput.style.width = '50%';
+                    layerFilterText.appendChild(layerFilterInput);
+                    layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
+                    const layerFilterButton = document.createElement("button");
+                    layerFilterButton.addEventListener('click', function (e) {
+                      const checkbox = document.getElementById(`checkbox-${mapId}`);
+                      if (checkbox.value === 'true')
+                        geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                      else {
                         geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
                         geoviewLayer.applyViewFilter(layerConfig);
-                      });
-                      layerFilterButton.innerText = 'Apply';
-                      layerFilterText.appendChild(layerFilterButton);
-                    }
-                    if (mapId === 'LYR3') layerButtons.appendChild(document.createElement('hr'));
-                  });
-                }
+                      }
+                    });
+                    layerFilterButton.innerText = 'Apply';
+                    layerFilterText.appendChild(layerFilterButton);
+
+                    const checkboxInput = document.createElement("input");
+                    checkboxInput.type='checkbox';
+                    checkboxInput.value = 'false';
+                    checkboxInput.id = `checkbox-${mapId}`;
+                    checkboxInput.addEventListener('click', function (e) {
+                      checkboxInput.value =checkboxInput.value === 'true' ? 'false' : 'true';
+                      if (checkboxInput.value === 'true')
+                        geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                      else {
+                        geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
+                        geoviewLayer.applyViewFilter(layerConfig);
+                      }
+                    });
+                    layerButtons.appendChild(checkboxInput);
+                    const checkboxText = document.createElement("label");
+                    checkboxText.innerText = `apply only the extra filter`;
+                    layerButtons.appendChild(checkboxText);
+                  }
+                  if (mapId !== 'LYR5') layerButtons.appendChild(document.createElement("hr"));
+                });
               }
-            });
+            }
           });
-        }
+        });
+      }
 
         if (mapId === 'allMaps') {
           //create snippets

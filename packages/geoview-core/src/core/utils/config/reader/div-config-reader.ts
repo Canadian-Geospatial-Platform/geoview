@@ -33,7 +33,9 @@ export class InlineDivConfigReader {
 
     if (configObjStr && configObjStr !== '') {
       // If you want to use quotes in your JSON string, write \&quot;
-      configObjStr = configObjStr.replace(/'/g, '"');
+      // First, replace apostrophes not preceded by a backslash with quotes
+      // Then, replace apostrophes preceded by a backslash with a single apostrophe
+      configObjStr = configObjStr.replace(/(?<!\\)'/gm, '"').replace(/\\'/gm, "'");
 
       if (!isJsonString(configObjStr)) {
         console.log(`- Map: ${mapId} - Invalid JSON configuration object, using default -`);

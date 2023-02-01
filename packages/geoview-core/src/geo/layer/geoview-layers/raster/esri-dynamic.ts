@@ -434,6 +434,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       );
 
       layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
+      layerEntryConfig.gvLayer?.set('layerFilter', layerEntryConfig.layerFilter);
       this.applyViewFilter(layerEntryConfig);
 
       resolve(layerEntryConfig.gvLayer);
@@ -608,7 +609,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    const layerPath = typeof layerPathOrConfig === 'string' ? layerPathOrConfig : Layer.getLayerPath(layerEntryConfig);
+    const layerFilter = layerEntryConfig.gvLayer?.get('layerFilter');
 
     if (layerEntryConfig.style) {
       const setAllUndefinedVisibilityFlagsToTrue = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
@@ -629,12 +630,12 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const styleSettings = layerEntryConfig.style[Object.keys(layerEntryConfig.style)[0] as TypeStyleGeometry]!;
 
       if (isSimpleStyleConfig(styleSettings)) {
-        return layerEntryConfig.layerFilter || '(1=1)';
+        return layerFilter || '(1=1)';
       }
       if (isUniqueValueStyleConfig(styleSettings)) {
         setAllUndefinedVisibilityFlagsToTrue(styleSettings);
         if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: boolean }[]))
-          return `(1=1)${layerEntryConfig.layerFilter ? ` and (${layerEntryConfig.layerFilter})` : ''}`;
+          return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const fieldNames = styleSettings.fields
           .reduce((fieldConcatenation, fieldName) => {
@@ -659,13 +660,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         const selectionOperator = styleSettings.defaultVisible ? 'not in' : 'in';
         const filterValue = `(${fieldNames} ${selectionOperator} (${fieldValues || "''"}))`;
 
-        return `${filterValue}${layerEntryConfig.layerFilter ? ` and (${layerEntryConfig.layerFilter})` : ''}`;
+        return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
 
       if (isClassBreakStyleConfig(styleSettings)) {
         setAllUndefinedVisibilityFlagsToTrue(styleSettings);
         if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: boolean }[]))
-          return `(1=1)${layerEntryConfig.layerFilter ? ` and (${layerEntryConfig.layerFilter})` : ''}`;
+          return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const filterArray = [];
         let visibleWhenGreatherThisIndex = -1;
@@ -708,7 +709,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;
             return `${previousFilterValue}(${filterNode}`;
           }, '')}${filterArray.slice(-1)[0]})`;
-          return `${filterValue}${layerEntryConfig.layerFilter ? ` and (${layerEntryConfig.layerFilter})` : ''}`;
+          return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
         }
 
         const filterValue = filterArray.length
@@ -717,9 +718,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
               if (i % 2 === 0) return `${previousFilterValue} or (${filterNode} and `;
               return `${previousFilterValue}${filterNode})`;
             }, '')})`
-          : '(1=0)';
-        // We use '(1=0)' as false to select nothing
-        return `${filterValue}${layerEntryConfig.layerFilter ? ` and (${layerEntryConfig.layerFilter})` : ''}`;
+          : // We use '(1=0)' as false to select nothing
+            '(1=0)';
+        return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
     }
     return '(1=1)';
@@ -735,10 +736,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} filter An optional filter to be used in place of the getViewFilter value.
    */
   applyViewFilter(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer, filter = '') {
-    const layerEntryConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+    const layerEntryConfig = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeEsriDynamicLayerEntryConfig;
     if (layerEntryConfig) {
       const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
       source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filter || this.getViewFilter(layerEntryConfig)}"}` });
+      layerEntryConfig.gvLayer!.changed();
     }
   }
 
@@ -754,7 +758,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    if (layerEntryConfig) layerEntryConfig.layerFilter = filterValue;
+    if (layerEntryConfig) layerEntryConfig.gvLayer?.set('layerFilter', filterValue);
   }
 
   /** ***************************************************************************************************************************
@@ -769,7 +773,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    if (layerEntryConfig) return layerEntryConfig.layerFilter;
+    if (layerEntryConfig) return layerEntryConfig.gvLayer?.get('layerFilter');
     return undefined;
   }
 }

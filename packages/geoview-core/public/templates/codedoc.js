@@ -26,7 +26,19 @@ function createConfigSnippet() {
     // check if JSON can be parsed, if not do nothing
     try {
       if (configSnippet !== undefined && el !== null) {
-        el.textContent = JSON.stringify(JSON.parse(configSnippet.value.replace(/(\r\n|\n|\r)/gm, '').replace(/'/gm, '"')), undefined, 2);
+        el.textContent = JSON.stringify(
+          JSON.parse(
+            configSnippet.value
+              // remove CR and LF from the map config
+              .replace(/(\r\n|\n|\r)/gm, '')
+              // replace apostrophes not preceded by a backslash with quotes
+              .replace(/(?<!\\)'/gm, '"')
+              // replace apostrophes preceded by a backslash with a single apostrophe
+              .replace(/\\'/gm, "'")
+          ),
+          undefined,
+          2
+        );
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -44,7 +56,7 @@ function createCollapsible() {
 
   for (i = 0; i < coll.length; i++) {
     // eslint-disable-next-line func-names
-    coll[i].addEventListener('click', function() {
+    coll[i].addEventListener('click', function () {
       this.classList.toggle('active');
       const content = this.nextElementSibling;
       if (content.style.display === 'block') {

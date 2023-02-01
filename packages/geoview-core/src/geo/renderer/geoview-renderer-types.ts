@@ -1,3 +1,5 @@
+import { TypeFillStyle } from '../map/map-schema-types';
+
 export const defaultColor = [
   '#800000',
   '#008000',
@@ -63,4 +65,46 @@ export const defaultColor = [
   '#9370db',
   '#3cb371',
   '#ffdead',
+];
+
+export type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
+
+export type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
+
+export enum NodeType {
+  unprocessedNode,
+  keyword,
+  variable,
+  string,
+  number,
+  unary,
+  binary,
+  group,
+}
+export type FilterNodeType = { nodeType: NodeType; nodeValue: string | number | boolean | string[] | number[] };
+export type FilterNodeArrayType = FilterNodeType[];
+export const binaryKeywors = ['in', 'like', 'and', 'or', '<', '<=', '=', '!=', '>', '>=', '||', '/', '*', ','];
+export const unaryKeywords = ['not'];
+export const groupKeywords = ['(', ')'];
+export const operatorPriority = [
+  { key: 'u+', priority: 15 },
+  { key: 'u-', priority: 15 },
+  { key: '*', priority: 14 },
+  { key: '/', priority: 14 },
+  { key: '+', priority: 13 },
+  { key: '-', priority: 13 },
+  { key: '||', priority: 13 },
+  { key: ',', priority: 12 },
+  { key: '=', priority: 11 },
+  { key: '<', priority: 10 },
+  { key: '>', priority: 9 },
+  { key: '<=', priority: 8 },
+  { key: '>=', priority: 7 },
+  { key: '!=', priority: 6 },
+  { key: 'is null', priority: 5 },
+  { key: 'like', priority: 4 },
+  { key: 'in', priority: 3 },
+  { key: 'not', priority: 2 },
+  { key: 'and', priority: 1 },
+  { key: 'or', priority: 0 },
 ];
