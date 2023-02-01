@@ -83,8 +83,13 @@ class FooterPanelPlugin extends AbstractPlugin {
       const { displayLanguage, footerTabs, map } = api.map(mapId);
 
       const mapContainer = map.getTargetElement().parentElement;
+      // Set size of map container based on whether footer-panel is collapsed or not
       if (mapContainer) {
-        mapContainer.style.height = 'calc( 100% - 300px )';
+        if (configObj?.collapsed === false) {
+          mapContainer.style.height = 'calc( 100% - 300px )';
+        } else {
+          mapContainer.style.height = 'calc( 100% - 55px )';
+        }
       }
 
       const defaultTabs = configObj?.tabs.defaultTabs as Array<string>;

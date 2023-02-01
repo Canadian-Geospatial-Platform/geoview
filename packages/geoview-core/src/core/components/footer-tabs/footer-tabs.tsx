@@ -14,7 +14,6 @@ export const useStyles = makeStyles((theme) => ({
     position: 'relative',
     backgroundColor: theme.palette.background.default,
     width: '100%',
-    height: '300px',
     transition: 'height 0.2s ease-out',
   },
 }));
@@ -72,16 +71,16 @@ export function FooterTabs(): JSX.Element | null {
   const handleCollapse = () => {
     // check if tabs component is created
     if (tabsContainerRef && tabsContainerRef.current) {
-      const tabsContaine = tabsContainerRef.current as HTMLDivElement;
-      const mapContaine = tabsContaine.previousElementSibling as HTMLDivElement;
-      mapContaine.style.transition = 'height 0.2s ease-out';
+      const tabsContainer = tabsContainerRef.current as HTMLDivElement;
+      const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
+      mapContainer.style.transition = 'height 0.2s ease-out';
       // check if the tabs container is collapsed
-      if (isCollapsed) {
-        tabsContaine.style.height = '55px';
-        mapContaine.style.height = 'calc( 100% - 55px)';
+      if (!isCollapsed) {
+        tabsContainer.style.height = '55px';
+        mapContainer.style.height = 'calc( 100% - 55px)';
       } else {
-        tabsContaine.style.height = '300px';
-        mapContaine.style.height = 'calc( 100% - 300px)';
+        tabsContainer.style.height = '300px';
+        mapContainer.style.height = 'calc( 100% - 300px)';
       }
     }
     setIsFullscreen(false);
@@ -104,7 +103,7 @@ export function FooterTabs(): JSX.Element | null {
         // eslint-disable-next-line no-lonely-if
         tabsContaine.style.height = '300px';
         mapContaine.style.height = 'calc( 100% - 300px)';
-        setIsCollapsed(true);
+        setIsCollapsed(false);
       } else {
         tabsContaine.style.height = '100%';
         mapContaine.style.height = '0';
@@ -127,6 +126,17 @@ export function FooterTabs(): JSX.Element | null {
         if (payloadIsAFooterTab(payload)) {
           if (payload.handlerName && payload.handlerName === mapId) {
             addTab(payload);
+            // Check if footer-panel is collapsed or not, and size accordingly
+            if (tabsContainerRef && tabsContainerRef.current) {
+              const tabsContainer = tabsContainerRef.current as HTMLDivElement;
+              const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
+              if (mapContainer.style.height === 'calc(100% - 300px)') {
+                setIsCollapsed(false);
+                tabsContainer.style.height = '300px';
+              } else {
+                tabsContainer.style.height = '55px';
+              }
+            }
           }
         }
       },
@@ -169,6 +179,8 @@ export function FooterTabs(): JSX.Element | null {
   return api.map(mapId).footerTabs.tabs.length > 0 ? (
     <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
       <Tabs
+        isCollapsed={isCollapsed}
+        handleCollapse={handleCollapse}
         selectedTab={selectedTab}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerTabs.map((tab) => {
@@ -178,11 +190,14 @@ export function FooterTabs(): JSX.Element | null {
         })}
         rightButtons={
           <>
-            {!isFullscreen && <IconButton onClick={handleCollapse}>{isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
+            {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
             <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
           </>
         }
       />
     </div>
   ) : null;
+}
+function componentDidMount() {
+  throw new Error('Function not implemented.');
 }

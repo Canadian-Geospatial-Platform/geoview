@@ -32,6 +32,9 @@ export interface TypeTabsProps {
   tabsProps?: TabsProps;
   tabProps?: TabProps;
   rightButtons?: unknown;
+  isCollapsed?: boolean;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  handleCollapse?: Function | undefined;
 }
 
 /**
@@ -41,7 +44,7 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, rightButtons, selectedTab } = props;
+  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse } = props;
 
   const [value, setValue] = useState(0);
 
@@ -53,6 +56,14 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = (event: SyntheticEvent<Element, Event>, newValue: number) => {
     setValue(newValue);
+  };
+
+  /**
+   * Handle a tab click
+   * If the panel is collapsed when tab is clicked, expand the panel
+   */
+  const handleClick = () => {
+    if (isCollapsed && handleCollapse !== undefined) handleCollapse();
   };
 
   useEffect(() => {
@@ -82,6 +93,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 key={index}
                 {...props.tabProps}
                 id={`tab-${index}`}
+                onClick={handleClick}
                 sx={{
                   fontSize: 16,
                   minWidth: 'min(4vw, 24px)',
