@@ -11,7 +11,7 @@ import { api } from '../../../app';
 import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 
-import { CheckIcon, Tooltip } from '../../../ui';
+import { CheckIcon, Tooltip, Box } from '../../../ui';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
@@ -152,7 +152,7 @@ export function Scale(): JSX.Element {
 
   return (
     <Tooltip title={t('mapnav.scale')}>
-      <div>
+      <Box sx={{ minWidth: 120 }}>
         <div id={`${mapId}-scaleControlBar`} className={classes.scaleControl} />
         <div id={`${mapId}-scaleControlLine`} className={classes.scaleControl} />
         <button type="button" onClick={() => switchScale()} className={classes.scaleContainer}>
@@ -185,7 +185,7 @@ export function Scale(): JSX.Element {
             </span>
           )}
         </button>
-      </div>
+      </Box>
     </Tooltip>
   );
 }
