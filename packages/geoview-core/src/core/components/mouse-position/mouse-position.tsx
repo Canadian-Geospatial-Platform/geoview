@@ -15,7 +15,7 @@ import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
-import { Box, CheckIcon, Tooltip, Fade } from '../../../ui';
+import { Box, CheckIcon, Tooltip } from '../../../ui';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
