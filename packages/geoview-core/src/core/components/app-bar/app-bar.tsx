@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBarButton: {
     backgroundColor: theme.appBar.btnDefaultBg,
-    color: theme.palette.background.paper,
+    color: theme.palette.primary.light,
     height: 44,
     width: 44,
     transition: 'background-color 0.3s ease-in-out',
