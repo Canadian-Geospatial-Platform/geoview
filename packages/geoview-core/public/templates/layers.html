@@ -123,7 +123,7 @@
                 }
               ]
             },
-            'components': ['overview-map', 'nav-bar', 'footer-bar'],
+            'components': ['overview-map', 'nav-bar'],
             'corePackages': [],
             'theme': 'dark',
             'suportedLanguages': ['en']
@@ -182,7 +182,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -601,7 +601,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar', 'north-arrow'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -653,7 +653,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar', 'north-arrow'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -728,7 +728,7 @@
         }
       ]
     },
-    'components': ['overview-map', 'nav-bar', 'footer-bar'],
+    'components': ['overview-map', 'nav-bar'],
     'corePackages': [],
     'theme': 'dark',
     'suportedLanguages': ['en']
@@ -740,9 +740,12 @@
     <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
     <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll;"  id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
-    <p>This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking the buttons</p>
+    <p>
+      This map has one GeoJSON layer added from configuration. and another geoJSON layer can be added/removed by clicking
+      the buttons
+    </p>
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR5CS" class="panel"></pre>
     <hr />
@@ -786,7 +789,7 @@
             }
           ]
         },
-        'components': ['overview-map', 'nav-bar', 'footer-bar'],
+        'components': ['overview-map', 'nav-bar'],
         'corePackages': [],
         'theme': 'dark',
         'suportedLanguages': ['en']
@@ -841,7 +844,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -899,7 +902,7 @@
               }
             ]
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['overview-map', 'nav-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']
@@ -958,7 +961,7 @@
         }
       ]
     },
-    'components': ['overview-map', 'nav-bar', 'footer-bar'],
+    'components': ['overview-map', 'nav-bar'],
     'corePackages': [],
     'theme': 'dark',
     'suportedLanguages': ['en']
@@ -983,138 +986,155 @@
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-        if (mapId === 'LYR3' || mapId === 'LYR5') {
-          var layerButtons = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
-          if (mapId === 'LYR3') layerButtons.appendChild(document.createElement('hr'));
-          else {
-            var table = document.createElement('table');
-            table.style.width = '100%';
-            table.border = '1px solid black';
-            layerButtons.appendChild(table);
-            layerButtons = document.createElement('td');
-            layerButtons.style.width = '16.66%';
-            layerButtons.style.padding = '15px';
-            layerButtons.border = '1px solid black';
-            table.appendChild(layerButtons);
-          }
-
-          const geoviewLayers = cgpv.api.maps[mapId].layer.geoviewLayers;
-          Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-            const geoviewLayer = geoviewLayers[geoviewLayerId];
-            if (mapId === 'LYR5') {
-              const geoviewLayerText = document.createElement('h1');
-              geoviewLayerText.innerText = geoviewLayer.geoviewLayerName.en;
-              layerButtons.appendChild(geoviewLayerText);
-            }
-            const registeredLayers = cgpv.api.maps[mapId].layer.registeredLayers;
-            Object.keys(registeredLayers).forEach((layerPath) => {
-              if (mapId === 'LYR5') {
-                layerButtons = document.createElement('td');
-                layerButtons.style.width = '16.66%';
-                layerButtons.style.padding = '15px';
-                layerButtons.border = '1px solid black';
-                table.appendChild(layerButtons);
-              }
-              if (layerPath.startsWith(geoviewLayerId)) {
-                const layerConfig = registeredLayers[layerPath];
-                const layerConfigH2 = document.createElement('h2');
-                layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
-                layerButtons.appendChild(layerConfigH2);
-                const toggleLayerVisibility = document.createElement('button');
-                const visibilityFlag = geoviewLayer.getVisible(layerConfig);
-                if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
-                else toggleLayerVisibility.innerText = 'Show';
-                toggleLayerVisibility.addEventListener('click', function (e) {
-                  const visibilityFlag = !geoviewLayer.getVisible(layerConfig);
-                  if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
-                  else toggleLayerVisibility.innerText = 'Show';
-                  geoviewLayer.setVisible(visibilityFlag, layerConfig);
-                });
-                layerConfigH2.appendChild(toggleLayerVisibility);
-
-                if (layerConfig.style) {
-                  Object.keys(layerConfig.style).forEach((geometry) => {
-                    const geometryText = document.createElement('p');
-                    geometryText.innerText = `Geometry = ${geometry}`;
-                    layerButtons.appendChild(geometryText);
-                    if (layerConfig.style[geometry].styleType === 'uniqueValue') {
-                      const toggleUniqueValueDefault = document.createElement('button');
-                      if (layerConfig.style[geometry].defaultVisible) toggleUniqueValueDefault.innerText = 'Hide default';
-                      else toggleUniqueValueDefault.innerText = 'Show default';
-                      toggleUniqueValueDefault.addEventListener('click', function (e) {
-                        layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
-                        if (layerConfig.style[geometry].defaultVisible) toggleUniqueValueDefault.innerText = 'Hide default';
-                        else toggleUniqueValueDefault.innerText = 'Show default';
-                        geoviewLayer.applyViewFilter(layerConfig);
-                      });
-                      layerButtons.appendChild(toggleUniqueValueDefault);
-                      if (mapId === 'LYR5') layerButtons.appendChild(document.createElement('p'));
-
-                      for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
-                        const toggleUniqueValueFeature = document.createElement('button');
-                        if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible)
-                          toggleUniqueValueFeature.innerText = `Hide Feature ${i + 1}`;
-                        else toggleUniqueValueFeature.innerText = `Show Feature ${i + 1}`;
-                        toggleUniqueValueFeature.addEventListener('click', function (e) {
-                          const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
-                          uniqueValueStyleInfoEntry.visible = !uniqueValueStyleInfoEntry.visible;
-                          if (uniqueValueStyleInfoEntry.visible) toggleUniqueValueFeature.innerText = `Hide Feature ${i + 1}`;
-                          else toggleUniqueValueFeature.innerText = `Show Feature ${i + 1}`;
-                          geoviewLayer.applyViewFilter(layerConfig);
-                        });
-                        layerButtons.appendChild(toggleUniqueValueFeature);
-                        if (mapId === 'LYR5') layerButtons.appendChild(document.createElement('p'));
-                      }
-                    }
-                    if (layerConfig.style[geometry].styleType === 'classBreaks') {
-                      const toggleClassBreakDefault = document.createElement('button');
-                      if (layerConfig.style[geometry].defaultVisible) toggleClassBreakDefault.innerText = 'Hide default';
-                      else toggleClassBreakDefault.innerText = 'Show default';
-                      toggleClassBreakDefault.addEventListener('click', function (e) {
-                        layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
-                        if (layerConfig.style[geometry].defaultVisible) toggleClassBreakDefault.innerText = 'Hide default';
-                        else toggleClassBreakDefault.innerText = 'Show default';
-                        geoviewLayer.applyViewFilter(layerConfig);
-                      });
-                      layerButtons.appendChild(toggleClassBreakDefault);
-
-                      for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
-                        const toggleClassBreakFeature = document.createElement('button');
-                        if (layerConfig.style[geometry].classBreakStyleInfo[i].visible)
-                          toggleClassBreakFeature.innerText = `Hide Feature ${i + 1}`;
-                        else toggleClassBreakFeature.innerText = `Show Feature ${i + 1}`;
-                        toggleClassBreakFeature.addEventListener('click', function (e) {
-                          const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
-                          classBreakStyleInfoEntry.visible = !classBreakStyleInfoEntry.visible;
-                          if (classBreakStyleInfoEntry.visible) toggleClassBreakFeature.innerText = `Hide Feature ${i + 1}`;
-                          else toggleClassBreakFeature.innerText = `Show Feature ${i + 1}`;
-                          geoviewLayer.applyViewFilter(layerConfig);
-                        });
-                        layerButtons.appendChild(toggleClassBreakFeature);
-                      }
-                    }
-                    if (geoviewLayer.getLayerFilter) {
-                      const layerFilterText = document.createElement('p');
-                      layerFilterText.innerText = `Extra filter: `;
-                      layerButtons.appendChild(layerFilterText);
-                      const layerFilterInput = document.createElement('input');
-                      layerFilterText.appendChild(layerFilterInput);
-                      layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
-                      const layerFilterButton = document.createElement('button');
-                      layerFilterButton.addEventListener('click', function (e) {
-                        geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
-                        geoviewLayer.applyViewFilter(layerConfig);
-                      });
-                      layerFilterButton.innerText = 'Apply';
-                      layerFilterText.appendChild(layerFilterButton);
-                    }
-                    if (mapId === 'LYR3') layerButtons.appendChild(document.createElement('hr'));
-                  });
-                }
-              }
-            });
-          });
+      if (mapId === 'LYR3' || mapId === 'LYR5') {
+        var layerButtons = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
+        if (mapId === 'LYR3') layerButtons.appendChild(document.createElement("hr"));
+        else {
+          var table = document.createElement("table");
+          table.style.width = '100%';
+          table.border = '1px solid black';
+          layerButtons.appendChild(table);
+          layerButtons = document.createElement("td");
+          layerButtons.style.width = '16.66%';
+          layerButtons.style.padding = '15px';
+          layerButtons.border = '1px solid black';
+          table.appendChild(layerButtons);
         }
+
+        const geoviewLayers = cgpv.api.maps[mapId].layer.geoviewLayers;
+        Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
+          const geoviewLayer = geoviewLayers[geoviewLayerId];
+          if (mapId === 'LYR5') {
+            const geoviewLayerText = document.createElement("h1");
+            geoviewLayerText.innerText = geoviewLayer.geoviewLayerName.en;
+            layerButtons.appendChild(geoviewLayerText);
+          }
+          const registeredLayers = cgpv.api.maps[mapId].layer.registeredLayers;
+          Object.keys(registeredLayers).forEach((layerPath) => {
+            if (mapId === 'LYR5') {
+              layerButtons = document.createElement("td");
+              layerButtons.style.width = '16.66%';
+              layerButtons.style.padding = '15px';
+              layerButtons.border = '1px solid black';
+              table.appendChild(layerButtons);
+            }
+            if (layerPath.startsWith(geoviewLayerId)) {
+              const layerConfig = registeredLayers[layerPath];
+              const layerConfigH2 = document.createElement("h2");
+              layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
+              layerButtons.appendChild(layerConfigH2);
+              const toggleLayerVisibility = document.createElement("button");
+              const visibilityFlag = geoviewLayer.getVisible(layerConfig);
+              if (visibilityFlag)
+                toggleLayerVisibility.innerText = 'Hide';
+              else
+                toggleLayerVisibility.innerText = 'Show';
+              toggleLayerVisibility.addEventListener('click', function (e) {
+                const visibilityFlag = !geoviewLayer.getVisible(layerConfig);
+                if (visibilityFlag)
+                  toggleLayerVisibility.innerText = 'Hide';
+                else
+                  toggleLayerVisibility.innerText = 'Show';
+                geoviewLayer.setVisible(visibilityFlag, layerConfig);
+              });
+              layerConfigH2.appendChild(toggleLayerVisibility);
+
+              if (layerConfig.style) {
+                Object.keys(layerConfig.style).forEach((geometry) => {
+                  const geometryText = document.createElement("p");
+                  geometryText.innerText = `Geometry = ${geometry}`;
+                  layerButtons.appendChild(geometryText);
+                  if (layerConfig.style[geometry].styleType === 'uniqueValue') {
+                    const toggleUniqueValueDefault = document.createElement("button");
+                    if (layerConfig.style[geometry].defaultVisible)
+                      toggleUniqueValueDefault.innerText = 'Hide default';
+                    else
+                      toggleUniqueValueDefault.innerText = 'Show default';
+                    toggleUniqueValueDefault.addEventListener('click', function (e) {
+                      layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
+                      if (layerConfig.style[geometry].defaultVisible)
+                        toggleUniqueValueDefault.innerText = 'Hide default';
+                      else
+                        toggleUniqueValueDefault.innerText = 'Show default';
+                      geoviewLayer.applyViewFilter(layerConfig);
+                    });
+                    layerButtons.appendChild(toggleUniqueValueDefault);
+                    if (mapId === 'LYR5') layerButtons.appendChild(document.createElement("p"));
+
+                    for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
+                      const toggleUniqueValueFeature = document.createElement("button");
+                      if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible)
+                        toggleUniqueValueFeature.innerText = `Hide Feature ${i+1}`;
+                      else
+                        toggleUniqueValueFeature.innerText = `Show Feature ${i+1}`;
+                      toggleUniqueValueFeature.addEventListener('click', function (e) {
+                        const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
+                        uniqueValueStyleInfoEntry.visible = !uniqueValueStyleInfoEntry.visible;
+                        if (uniqueValueStyleInfoEntry.visible)
+                          toggleUniqueValueFeature.innerText = `Hide Feature ${i+1}`;
+                        else
+                          toggleUniqueValueFeature.innerText = `Show Feature ${i+1}`;
+                        geoviewLayer.applyViewFilter(layerConfig);
+                      });
+                      layerButtons.appendChild(toggleUniqueValueFeature);
+                      if (mapId === 'LYR5') layerButtons.appendChild(document.createElement("p"));
+                    }
+                  } if (layerConfig.style[geometry].styleType === 'classBreaks') {
+                    const toggleClassBreakDefault = document.createElement("button");
+                    if (layerConfig.style[geometry].defaultVisible)
+                      toggleClassBreakDefault.innerText = 'Hide default';
+                    else
+                      toggleClassBreakDefault.innerText = 'Show default';
+                    toggleClassBreakDefault.addEventListener('click', function (e) {
+                      layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
+                      if (layerConfig.style[geometry].defaultVisible)
+                        toggleClassBreakDefault.innerText = 'Hide default';
+                      else
+                        toggleClassBreakDefault.innerText = 'Show default';
+                      geoviewLayer.applyViewFilter(layerConfig);
+                    });
+                    layerButtons.appendChild(toggleClassBreakDefault);
+
+                    for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
+                      const toggleClassBreakFeature = document.createElement("button");
+                      if (layerConfig.style[geometry].classBreakStyleInfo[i].visible)
+                        toggleClassBreakFeature.innerText = `Hide Feature ${i+1}`;
+                      else
+                        toggleClassBreakFeature.innerText = `Show Feature ${i+1}`;
+                      toggleClassBreakFeature.addEventListener('click', function (e) {
+                        const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
+                        classBreakStyleInfoEntry.visible = !classBreakStyleInfoEntry.visible;
+                        if (classBreakStyleInfoEntry.visible)
+                          toggleClassBreakFeature.innerText = `Hide Feature ${i+1}`;
+                        else
+                          toggleClassBreakFeature.innerText = `Show Feature ${i+1}`;
+                        geoviewLayer.applyViewFilter(layerConfig);
+                      });
+                      layerButtons.appendChild(toggleClassBreakFeature);
+                    }
+                  }
+                  if (geoviewLayer.getLayerFilter) {
+                    const layerFilterText = document.createElement("p");
+                    layerFilterText.innerText = `Extra filter: `;
+                    layerButtons.appendChild(layerFilterText);
+                    const layerFilterInput = document.createElement("input");
+                    layerFilterText.appendChild(layerFilterInput);
+                    layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
+                    const layerFilterButton = document.createElement("button");
+                    layerFilterButton.addEventListener('click', function (e) {
+                      geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
+                      geoviewLayer.applyViewFilter(layerConfig);
+                    });
+                    layerFilterButton.innerText = 'Apply';
+                    layerFilterText.appendChild(layerFilterButton);
+                  }
+                  if (mapId === 'LYR3') layerButtons.appendChild(document.createElement("hr"));
+                });
+              }
+            }
+          });
+        });
+      }
 
         if (mapId === 'allMaps') {
           //create snippets

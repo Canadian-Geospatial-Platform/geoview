@@ -15,11 +15,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div
-      id="LYR1"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
+    <div id="LYR1" class="llwp-map" data-lang="en" data-config="{
       'map': {
         'interaction': 'dynamic',
         'viewSettings': {
@@ -57,19 +53,19 @@
           }
         ]
       },
-      'components': ['overview-map', 'nav-bar', 'footer-bar'],
+      'components': ['overview-map', 'nav-bar'],
       'corePackages': [],
       'theme': 'dark',
       'suportedLanguages': ['en']
-    }"
-    ></div>
+    }">
+    </div>
     <button class="Get-Legend">Get Legend</button>
     <button class="Show-Bounds-wms">Show Bounds</button>
     <button class="Show-MultiPolygons">Find multi-polygons</button>
     <button class="Show-MultiPoints">Find multi-points</button>
     <div id="legend-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="wmsResultSetId" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll;"  id="wmsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
@@ -85,18 +81,17 @@
               const bbox = cgpv.api.map('LYR1').layer.geoviewLayers[geoviewLayerId].calculateBounds(layerPath, 4326);
               addBoundsPolygon(bbox, 4326, 4326);
               if (!allBounds) allBounds = bbox;
-              else
-                allBounds = [
-                  Math.min(allBounds[0], bbox[0]),
-                  Math.min(allBounds[1], bbox[1]),
-                  Math.max(allBounds[2], bbox[2]),
-                  Math.max(allBounds[3], bbox[3]),
-                ];
+              else allBounds = [
+                Math.min(allBounds[0], bbox[0]),
+                Math.min(allBounds[1], bbox[1]),
+                Math.max(allBounds[2], bbox[2]),
+                Math.max(allBounds[3], bbox[3]),
+              ];
             }
           });
         });
         cgpv.api.map('LYR1').fitBounds(allBounds, 4326);
-      };
+      }
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
@@ -107,26 +102,16 @@
       });
       // WMS ======================================================================================================================
       const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-        },
-        'LYR1',
-        'wmsResultSetId'
-      );
+      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+        const {  layerSetId, resultSets } = payload;
+        document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+      }, 'LYR1', 'wmsResultSetId');
 
       const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
-        (payload) => {
-          const { resultSets } = payload;
-          displayLegend('wmsLegendsId', resultSets);
-        },
-        'LYR1',
-        'wmsLegendsId'
-      );
+      cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
+        const {  resultSets } = payload;
+        displayLegend('wmsLegendsId', resultSets);
+      }, 'LYR1', 'wmsLegendsId');
 
       var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
       addGeoJsonLegendButton.addEventListener('click', function (e) {
@@ -140,26 +125,16 @@
 
       // WFS ======================================================================================================================
       const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-        },
-        'LYR6',
-        'wfsResultSetId'
-      );
+      cgpv.api.event.on(cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, (payload) => {
+        const {  layerSetId, resultSets } = payload;
+        document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+      }, 'LYR6', 'wfsResultSetId');
 
       const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
-        (payload) => {
-          const { resultSets } = payload;
-          displayLegend('wfsLegendsId', resultSets);
-        },
-        'LYR6',
-        'wfsLegendsId'
-      );
+      cgpv.api.event.on(cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE, (payload) => {
+        const {  resultSets } = payload;
+        displayLegend('wfsLegendsId', resultSets);
+      }, 'LYR6', 'wfsLegendsId');
 
       var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
       addGeoJsonLegendButton.addEventListener('click', function (e) {
@@ -178,13 +153,16 @@
 
         cgpv.api.map('LYR1').layer.vector.setActiveGeometryGroup();
 
-        const polygon = cgpv.api.map('LYR1').layer.vector.addPolygon([newBbox], {
-          style: {
-            strokeColor: '#000',
-            strokeWidth: 5,
-            strokeOpacity: 0.8,
-          },
-        });
+        const polygon = cgpv.api.map('LYR1').layer.vector.addPolygon(
+          [ newBbox ],
+          {
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 5,
+              strokeOpacity: 0.8,
+            },
+          }
+        );
       }
 
       // ==========================================================================================================================
@@ -192,12 +170,9 @@
       let polygons = [];
       function cycleThroughAllMultiPolygons(map) {
         if (polygons.length === 0) {
-          cgpv.api
-            .map(map)
-            .layer.registeredLayers['LYR1-MultiPolygon/9'].gvLayer.getSource()
-            .forEachFeature((feature) => {
-              if (feature.getGeometry()?.getType() === 'MultiPolygon') polygons.push(feature);
-            });
+          cgpv.api.map(map).layer.registeredLayers['LYR1-MultiPolygon/9'].gvLayer.getSource().forEachFeature((feature) => {
+            if (feature.getGeometry()?.getType() === 'MultiPolygon') polygons.push(feature);
+          });
         }
         if (i === polygons.length) i = 0;
         if (polygons.length) {
@@ -212,13 +187,9 @@
       let points = [];
       function cycleThroughAllMultiPoints(map) {
         if (points.length === 0) {
-          cgpv.api
-            .map(map)
-            .layer.registeredLayers['LYR1-MultiPoint/0'].gvLayer.getSource()
-            .forEachFeature((feature) => {
-              if (feature.getGeometry()?.getType() === 'MultiPoint' && feature.getGeometry()?.flatCoordinates.length !== 2)
-                points.push(feature);
-            });
+          cgpv.api.map(map).layer.registeredLayers['LYR1-MultiPoint/0'].gvLayer.getSource().forEachFeature((feature) => {
+            if (feature.getGeometry()?.getType() === 'MultiPoint' && feature.getGeometry()?.flatCoordinates.length !== 2) points.push(feature);
+          });
         }
         if (j === points.length) j = 0;
         if (points.length) {
@@ -232,25 +203,25 @@
       function displayLegend(layerSetId, resultSets) {
         const addHeader = (title, container) => {
           const tableHeader = document.createElement('th');
-          tableHeader.style = 'text-align: center; vertical-align: middle;';
-          tableHeader.innerHTML = title;
+          tableHeader.style = "text-align: center; vertical-align: middle;"
+          tableHeader.innerHTML =  title;
           container.appendChild(tableHeader);
-        };
+        }
         const addData = (data, container) => {
           const tableData = document.createElement('td');
           tableData.style.verticalAlign = 'middle';
           tableData.style.textAlign = 'center';
-          if (typeof data === 'string') tableData.innerHTML = data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+          if (typeof data === 'string') tableData.innerHTML =  data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
           else tableData.appendChild(data);
           container.appendChild(tableData);
-        };
+        }
         var oldTable = document.getElementById(`${layerSetId}-table`);
-        if (oldTable) oldTable.parentNode.removeChild(oldTable);
+        if (oldTable) oldTable.parentNode.removeChild(oldTable)
         var legendTable = document.getElementById('legend-table-div');
         const table = document.createElement('table');
         table.id = `${layerSetId}-table`;
-        table.border = '1';
-        table.style = 'width:50%';
+        table.border="1";
+        table.style="width:50%";
         legendTable.appendChild(table);
         var createHeader = true;
         Object.keys(resultSets).forEach((layerPath) => {
@@ -259,8 +230,8 @@
               createHeader = false;
               const tableRow1 = document.createElement('tr');
               table.appendChild(tableRow1);
-              addHeader('Layer Path', tableRow1);
-              addHeader('Symbology', tableRow1);
+              addHeader("Layer Path", tableRow1);
+              addHeader("Symbology", tableRow1);
             }
             const tableRow = document.createElement('tr');
             addData(resultSets[layerPath].layerPath, tableRow);
@@ -273,52 +244,42 @@
               addData(label, tableRow); // canvas.style = "border: 1px solid black;"
               addData(canvas, tableRow);
               table.appendChild(tableRow);
-            };
+            }
             if (createHeader) {
               createHeader = false;
               const tableRow1 = document.createElement('tr');
               table.appendChild(tableRow1);
-              addHeader('Layer Path', tableRow1);
-              addHeader('Label', tableRow1);
-              addHeader('Symbology', tableRow1);
+              addHeader("Layer Path", tableRow1);
+              addHeader("Label", tableRow1);
+              addHeader("Symbology", tableRow1);
             }
             if (resultSets[layerPath]?.legend) {
               Object.keys(resultSets[layerPath].legend).forEach((geometryKey) => {
                 if (geometryKey) {
-                  if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'uniqueValue') {
+                  if (resultSets[layerPath].styleConfig[geometryKey].styleType === "uniqueValue") {
                     if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                      addRow(
-                        layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                        resultSets[layerPath].legend[geometryKey].defaultCanvas
-                      );
+                      addRow(layerPath,
+                              resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                              resultSets[layerPath].legend[geometryKey].defaultCanvas);
                     for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                      addRow(
-                        layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
-                        resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
-                      );
+                      addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].uniqueValueStyleInfo[i].label,
+                            resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
                     }
-                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'classBreaks') {
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "classBreaks") {
                     if (resultSets[layerPath].legend[geometryKey].defaultCanvas)
-                      addRow(
-                        layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
-                        resultSets[layerPath].legend[geometryKey].defaultCanvas
-                      );
+                      addRow(layerPath,
+                              resultSets[layerPath].styleConfig[geometryKey].defaultLabel,
+                              resultSets[layerPath].legend[geometryKey].defaultCanvas);
                     for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
-                      addRow(
-                        layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
-                        resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
-                      );
+                      addRow(layerPath,
+                            resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                            resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]);
                     }
-                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === 'simple') {
-                    addRow(
-                      layerPath,
-                      resultSets[layerPath].styleConfig[geometryKey].label,
-                      resultSets[layerPath].legend[geometryKey].defaultCanvas
-                    );
+                  } else if (resultSets[layerPath].styleConfig[geometryKey].styleType === "simple") {
+                    addRow(layerPath,
+                          resultSets[layerPath].styleConfig[geometryKey].label,
+                          resultSets[layerPath].legend[geometryKey].defaultCanvas);
                   }
                 }
               });

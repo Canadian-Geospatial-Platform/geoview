@@ -95,7 +95,7 @@
     </div>
     <br />
     <!--  TODO: repair when layer populate automatically child element -->
-    <div style="display: none">
+    <div style="display:none;">
       <span>Add Layers</span><br />
       <div id="sourcedLayers" class="load-test-params">
         <label>Layer Type</label>
@@ -149,7 +149,7 @@
             'labeled': true
           }
         },
-        'components': ['nav-bar', 'footer-bar'],
+        'components': ['nav-bar'],
         'corePackages': [],
         'theme': 'dark',
         'suportedLanguages': ['en']
@@ -170,15 +170,11 @@
       cgpv.init(function () {
         console.log('api is ready');
 
-        setTimeout(() => cgpv.api.maps.mapWM.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
-        setTimeout(
-          () =>
-            cgpv.api.maps.mapWM.map.on('moveend', () => {
-              var tzoom1 = performance.now();
-              document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
-            }),
-          1000
-        );
+        setTimeout(() => cgpv.api.maps.mapWM.map.on('movestart', () =>  tzoom0 = performance.now()), 1000);
+        setTimeout(() => cgpv.api.maps.mapWM.map.on('moveend', () => {
+          var tzoom1 = performance.now();
+          document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
+        }), 1000)
 
         //create snippets
         createCodeSnippet();

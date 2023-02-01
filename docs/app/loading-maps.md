@@ -58,13 +58,8 @@ The content of the config must match the schema, an example of the object in the
     "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
-  "components": ["app-bar", "nav-bar", "north-arrow", "footer-bar"],
-  "corePackages": [
-    "basemap-panel",
-    "layers-panel",
-    "details-panel",
-    "geolocator"
-  ],
+  "components": ["app-bar", "nav-bar", "north-arrow"],
+  "corePackages": ["basemap-panel", "layers-panel", "details-panel", "geolocator"],
   "externalPackages": [],
   "suportedLanguages": ["en", "fr"]
 }
@@ -111,7 +106,7 @@ An example of this:
                       ],
                     },
                     'theme': 'dark',
-                    'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map', 'footer-bar'],
+                    'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
                     'corePackages': ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
                     'externalPackages': [],
                     'suportedLanguages': ['en', 'fr']
@@ -153,7 +148,7 @@ cgpv.init(function() {
             listOfGeoviewLayerConfig: [],
         },
         theme: 'dark',
-        components: ['app-bar', 'nav-bar', 'north-arrow', 'overview-map', 'footer-bar'],
+        components: ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
         corePackages: ['basemap-panel', 'layers-panel', 'details-panel', 'geolocator'],
         externalPackages: [],
         suportedLanguages: ['en', 'fr'],
