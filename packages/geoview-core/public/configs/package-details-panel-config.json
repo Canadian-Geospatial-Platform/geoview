@@ -19,9 +19,7 @@
           "en": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer"
         },
         "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          { "layerId": "8" }
-        ]
+        "listOfLayerEntryConfig": [{ "layerId": "8" }]
       },
       {
         "geoviewLayerId": "geojsonLYR5",
@@ -42,12 +40,8 @@
             "layerId": "point-feature-group",
             "layerName": { "en": "point-feature-group" },
             "listOfLayerEntryConfig": [
-              { "layerId": "icon_points.json",
-              "layerName": { "en": "Icons" }
-            },
-              { "layerId": "points.json",
-              "layerName": { "en": "Points" }
-            }
+              { "layerId": "icon_points.json", "layerName": { "en": "Icons" } },
+              { "layerId": "points.json", "layerName": { "en": "Points" } }
             ]
           }
         ]
@@ -55,7 +49,7 @@
     ]
   },
   "theme": "light",
-  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map"],
+  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
   "corePackages": ["details-panel"],
   "externalPackages": [],
   "suportedLanguages": ["en"]

@@ -77,7 +77,7 @@ export class ConfigValidation {
       extraOptions: {},
     },
     theme: 'dark',
-    components: ['app-bar', 'nav-bar', 'north-arrow', 'overview-map'],
+    components: ['app-bar', 'footer-bar', 'nav-bar', 'north-arrow', 'overview-map'],
     corePackages: [],
     displayLanguage: 'en',
     triggerReadyCallback: false,

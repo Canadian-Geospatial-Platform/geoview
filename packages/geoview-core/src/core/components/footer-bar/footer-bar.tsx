@@ -58,7 +58,7 @@ export function Footerbar(): JSX.Element {
 
   const mapConfig = useContext(MapContext);
 
-  const { mapId } = mapConfig;
+  const { mapId, interaction } = mapConfig;
 
   const footerBarRef = useRef<HTMLDivElement>();
 
@@ -66,19 +66,23 @@ export function Footerbar(): JSX.Element {
 
   // if screen size is medium and up
   const deviceSizeMedUp = useMediaQuery(defaultTheme.breakpoints.up('sm'));
+  // If map is static do not display mouse position or rotation controls
+  const mapIsDynamic = interaction === 'dynamic';
 
   return (
     <div id={`${mapId}-footerBar`} className={`${classes.footerBarContainer}`} ref={footerBarRef as MutableRefObject<HTMLDivElement>}>
       <FooterbarExpandButton />
       {deviceSizeMedUp && <Attribution />}
       <div id="mouseAndScaleControls" className={classes.mouseScaleControlsContainer}>
-        {deviceSizeMedUp && <MousePosition mousePositionMapId={mapId} />}
+        {deviceSizeMedUp && mapIsDynamic && <MousePosition mousePositionMapId={mapId} />}
         <Scale />
       </div>
-      <div className={classes.rotationControlsContainer}>
-        <FooterbarRotationButton />
-        <FooterbarFixNorthSwitch />
-      </div>
+      {mapIsDynamic && (
+        <div className={classes.rotationControlsContainer}>
+          <FooterbarRotationButton />
+          <FooterbarFixNorthSwitch />
+        </div>
+      )}
     </div>
   );
 }
