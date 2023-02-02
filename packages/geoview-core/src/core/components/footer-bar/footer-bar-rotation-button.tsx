@@ -14,11 +14,14 @@ import { payloadIsAMapViewProjection } from '../../../api/events/payloads/map-vi
 
 const sxClasses = {
   rotationButton: {
-    height: '25px',
-    width: '25px',
+    height: 25,
+    width: 25,
+    marginRight: 5,
   },
   rotationIcon: {
     fontSize: 'fontSize',
+    width: '1.5em',
+    height: '1.5em',
     color: 'primary.light',
   },
 };

@@ -15,7 +15,7 @@ import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
-import { CheckIcon } from '../../../ui';
+import { Box, CheckIcon, Tooltip } from '../../../ui';
 
 const useStyles = makeStyles((theme) => ({
   mousePositionContainer: {
@@ -37,16 +37,13 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    maxHeight: '15px',
-    height: '15px',
   },
   mousePositionCheckmark: {
     paddingRight: 5,
-    fontSize: `20px !important`,
     color: theme.palette.primary.light,
   },
   mousePositionText: {
-    fontSize: theme.typography.subtitle2.fontSize,
+    fontSize: theme.typography.fontSize,
     color: theme.palette.primary.light,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -85,6 +82,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   const { mousePositionMapId } = props;
 
   const [expanded, setExpanded] = useState(false);
+  const [mousePositionText, setMousePositionText] = useState<boolean>(false);
 
   const { t } = useTranslation<string>();
 
@@ -193,6 +191,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   }, [mapId, onMouseMove, onMoveEnd, positionMode]);
 
   useEffect(() => {
+    let opacityTimeout: string | number | NodeJS.Timeout | undefined;
     // on map crosshair enable\disable, set variable for WCAG mouse position
     // TODO: On crosshaih, add crosshair center information to screen reader / mouse position component
     api.event.on(
@@ -212,7 +211,12 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
       (payload) => {
         if (payloadIsABoolean(payload)) {
           if (payload.handlerName!.includes(mousePositionMapId)) {
-            setExpanded(payload.status);
+            if (payload.status) {
+              opacityTimeout = setTimeout(() => setExpanded(payload.status), 300);
+            } else {
+              setExpanded(payload.status);
+            }
+            setMousePositionText(payload.status);
           }
         }
       },
@@ -222,27 +226,31 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
     return () => {
       api.event.off(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId);
       api.event.off(EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE, mapId);
+      clearTimeout(opacityTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
-      <div className={classes.mousePositionTextContainer}>
-        {expanded ? (
-          positions.map((position, index) => {
-            return (
-              // eslint-disable-next-line react/no-array-index-key
-              <div className={classes.mousePositionTextCheckmarkContainer} key={index}>
-                {index === positionMode && <CheckIcon className={classes.mousePositionCheckmark} />}
-                <span className={classes.mousePositionText}>{position}</span>
-              </div>
-            );
-          })
-        ) : (
-          <span className={classes.mousePositionText}>{positions[positionMode]}</span>
-        )}
-      </div>
-    </button>
+    <Tooltip title={t('mapnav.coordinates')}>
+      <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
+        <Box className={classes.mousePositionTextContainer}>
+          <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
+            {positions.map((position, index) => {
+              return (
+                // eslint-disable-next-line react/no-array-index-key
+                <Box className={classes.mousePositionTextCheckmarkContainer} key={index}>
+                  <CheckIcon sx={{ fontSize: 25, opacity: index === positionMode ? 1 : 0 }} className={classes.mousePositionCheckmark} />
+                  <span className={classes.mousePositionText}>{position}</span>
+                </Box>
+              );
+            })}
+          </Box>
+          <Box component="span" className={classes.mousePositionText} sx={{ display: mousePositionText ? 'none' : 'block' }}>
+            {positions[positionMode]}
+          </Box>
+        </Box>
+      </button>
+    </Tooltip>
   );
 }

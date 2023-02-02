@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import { ScaleLine } from 'ol/control';
 import { MapEvent } from 'ol';
+import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -10,7 +11,7 @@ import { api } from '../../../app';
 import { MapContext } from '../../app-start';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 
-import { CheckIcon } from '../../../ui';
+import { CheckIcon, Tooltip, Box } from '../../../ui';
 import { payloadIsABoolean } from '../../../api/events/payloads/boolean-payload';
 
 const useStyles = makeStyles((theme) => ({
@@ -28,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     height: '100%',
+    gap: theme.spacing(5),
   },
   scaleExpandedCheckmarkText: {
     display: 'flex',
@@ -38,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '18px',
   },
   scaleText: {
-    fontSize: theme.typography.subtitle2.fontSize,
+    fontSize: theme.typography.fontSize,
     color: theme.palette.primary.light,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -51,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
   },
   scaleCheckmark: {
     paddingRight: 5,
-    fontSize: `20px !important`,
     color: theme.palette.primary.light,
   },
 }));
@@ -68,6 +69,7 @@ interface TypeScale {
  * @returns {JSX.Element} created scale element
  */
 export function Scale(): JSX.Element {
+  const { t } = useTranslation<string>();
   const [scaleMode, setScaleMode] = useState<number>(0);
   const [scaleValues, setScaleValues] = useState<TypeScale[]>([
     {
@@ -152,39 +154,41 @@ export function Scale(): JSX.Element {
   }, [mapId]);
 
   return (
-    <div>
-      <div id={`${mapId}-scaleControlBar`} className={classes.scaleControl} />
-      <div id={`${mapId}-scaleControlLine`} className={classes.scaleControl} />
-      <button type="button" onClick={() => switchScale()} className={classes.scaleContainer}>
-        {expanded ? (
-          <div className={classes.scaleExpandedContainer}>
-            {scaleValues.map((value, index) => {
-              return (
-                <div className={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
-                  {scaleMode === index && <CheckIcon className={classes.scaleCheckmark} />}
-                  <span
-                    className={classes.scaleText}
-                    style={{
-                      borderBottom: !value.borderBottom ? 'none' : '1px solid',
-                    }}
-                  >
-                    {value.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <span
-            className={classes.scaleText}
-            style={{
-              borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
-            }}
-          >
-            {scaleValues[scaleMode].label}
-          </span>
-        )}
-      </button>
-    </div>
+    <Tooltip title={t('mapnav.scale')}>
+      <Box sx={{ minWidth: 120 }}>
+        <div id={`${mapId}-scaleControlBar`} className={classes.scaleControl} />
+        <div id={`${mapId}-scaleControlLine`} className={classes.scaleControl} />
+        <button type="button" onClick={() => switchScale()} className={classes.scaleContainer}>
+          {expanded ? (
+            <div className={classes.scaleExpandedContainer}>
+              {scaleValues.map((value, index) => {
+                return (
+                  <div className={classes.scaleExpandedCheckmarkText} key={value.scaleId}>
+                    <CheckIcon sx={{ fontSize: 25, opacity: scaleMode === index ? 1 : 0 }} className={classes.scaleCheckmark} />
+                    <span
+                      className={classes.scaleText}
+                      style={{
+                        borderBottom: !value.borderBottom ? 'none' : '1px solid',
+                      }}
+                    >
+                      {value.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <span
+              className={classes.scaleText}
+              style={{
+                borderBottom: !scaleValues[scaleMode].borderBottom ? 'none' : '1px solid',
+              }}
+            >
+              {scaleValues[scaleMode].label}
+            </span>
+          )}
+        </button>
+      </Box>
+    </Tooltip>
   );
 }

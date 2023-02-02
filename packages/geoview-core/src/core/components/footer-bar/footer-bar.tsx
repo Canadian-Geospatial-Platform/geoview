@@ -14,26 +14,27 @@ import { FooterbarExpandButton } from './footer-bar-expand-button';
 import { FooterbarRotationButton } from './footer-bar-rotation-button';
 import { FooterbarFixNorthSwitch } from './footer-bar-fixnorth-switch';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   footerBarContainer: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    maxHeight: '25px',
-    minHeight: '25px',
+    maxHeight: '34px',
+    minHeight: '34px',
     backdropFilter: 'blur(5px)',
     backgroundColor: '#000000aa',
     pointerEvents: 'all',
     position: 'absolute',
     left: 0,
     bottom: 0,
+    gap: 0.5,
   },
   mouseScaleControlsContainer: {
     display: 'flex',
     flexDirection: 'row',
-    padding: '5px',
+    gap: 20,
     '& button': {
       cursor: 'pointer',
       margin: 'auto',
@@ -42,6 +43,8 @@ const useStyles = makeStyles((theme) => ({
   rotationControlsContainer: {
     display: 'flex',
     flexDirection: 'column',
+    marginLeft: 20,
+    alignItems: 'flex-end',
   },
 }));
 
