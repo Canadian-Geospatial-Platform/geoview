@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'center',
     height: '100%',
+    gap: theme.spacing(5),
   },
   scaleExpandedCheckmarkText: {
     display: 'flex',
