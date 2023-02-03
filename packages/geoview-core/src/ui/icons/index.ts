@@ -33,6 +33,8 @@ import Opacity from '@mui/icons-material/Opacity';
 import Menu from '@mui/icons-material/Menu';
 import ImportExport from '@mui/icons-material/ImportExport';
 import DownloadIcon from '@mui/icons-material/Download';
+import ZoomInSearchIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutSearchIcon from '@mui/icons-material/ZoomOut';
 
 export {
   Layers as LayersIcon,
@@ -72,4 +74,6 @@ export {
   Menu as MenuIcon,
   ImportExport as ReorderIcon,
   DownloadIcon,
+  ZoomInSearchIcon,
+  ZoomOutSearchIcon,
 };
