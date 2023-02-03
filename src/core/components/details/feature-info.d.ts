@@ -1,11 +1,9 @@
 /// <reference types="react" />
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
 export interface TypeFeatureProps {
-    key: number;
     feature: TypeFeatureInfoEntry;
     startOpen?: boolean;
     backgroundStyle?: string;
-    singleColumn?: boolean;
 }
 /**
  * feature info for a layer list
