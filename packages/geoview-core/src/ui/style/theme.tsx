@@ -196,6 +196,15 @@ const darkPalette = {
   },
 };
 
+const darkAppBar = {
+  background: '#1E1E1E',
+  border: '#444444',
+  btnActiveBg: '#ffffffe6',
+  btnDefaultBg: '#222222',
+  btnFocusBg: '#333333',
+  btnHoverBg: '#666666',
+};
+
 const themeOptions: ThemeOptions = {
   palette: lightPalette,
   typography: {
@@ -324,14 +333,13 @@ const themeOptions: ThemeOptions = {
       size: { width: 275, height: 275 },
     },
   },
-  // TODO colors below should move within light/dark palettes so theme can be used
   appBar: {
     background: '#1E1E1E',
     border: '#444444',
-    btnActiveBg: '#4B4B4B',
+    btnActiveBg: '#000000e6',
     btnDefaultBg: '#222222',
     btnFocusBg: '#333333',
-    btnHoverBg: '#333333',
+    btnHoverBg: '#666666',
   },
   navBar: {
     borderColor: '#bdbbdb',
@@ -367,6 +375,7 @@ export const getTheme = (mode: 'light' | 'dark' | undefined) => {
   const optionClone = { ...themeOptions };
   if (mode === 'dark') {
     optionClone.palette = darkPalette;
+    optionClone.appBar = darkAppBar;
   }
   return createTheme(optionClone);
 };

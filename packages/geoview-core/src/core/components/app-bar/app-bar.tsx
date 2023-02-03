@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '&.active': {
       backgroundColor: theme.appBar.btnActiveBg,
-      color: theme.palette.primary.light,
+      color: theme.palette.background.paper,
     },
     '& .MuiSvgIcon-root': {
       height: 20,
@@ -91,6 +91,7 @@ const useStyles = makeStyles((theme) => ({
 export function Appbar(): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
+  const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
 
   const classes = useStyles();
 
@@ -163,11 +164,21 @@ export function Appbar(): JSX.Element {
       mapId
     );
 
+    api.event.on(
+      EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
+      () => {
+        setSelectedAppbarButtonId('');
+      },
+      mapId,
+      selectedAppBarButtonId
+    );
+
     return () => {
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE, mapId);
       api.event.off(EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE, mapId);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId);
     };
-  }, [addButtonPanel, mapId, removeButtonPanel]);
+  }, [addButtonPanel, mapId, removeButtonPanel, selectedAppBarButtonId]);
 
   return (
     <div className={classes.appBar} ref={appBar}>
@@ -192,14 +203,15 @@ export function Appbar(): JSX.Element {
                           aria-label={buttonPanel.button.tooltip}
                           tooltip={buttonPanel.button.tooltip}
                           tooltipPlacement="right"
-                          className={classes.appBarButton}
+                          className={`${classes.appBarButton} ${selectedAppBarButtonId === buttonPanel.button.id ? 'active' : ''}`}
                           size="small"
-                          // TODO -  KenChase - need to add active css class to IconButton who's panel is open
                           onClick={() => {
                             if (!buttonPanel.panel?.status) {
                               buttonPanel.panel?.open();
+                              setSelectedAppbarButtonId(buttonPanel?.button?.id ?? '');
                             } else {
                               buttonPanel.panel?.close();
+                              setSelectedAppbarButtonId('');
                             }
                           }}
                         >
@@ -215,7 +227,7 @@ export function Appbar(): JSX.Element {
           <div className={classes.exportButtonDiv}>
             <List className={classes.appBarList}>
               <ListItem>
-                <Export className={classes.appBarButton} openModal={openModal} />
+                <Export className={`${classes.appBarButton} ${ModalIsShown ? 'active' : ''}`} openModal={openModal} />
               </ListItem>
             </List>
           </div>
