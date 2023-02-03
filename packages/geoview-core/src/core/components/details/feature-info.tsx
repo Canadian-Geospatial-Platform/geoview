@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { fromLonLat } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
+import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
+import { getCenter, Extent } from 'ol/extent';
 import {
   Collapse,
   List,
@@ -11,7 +13,8 @@ import {
   ListItemText,
   ExpandMoreIcon,
   ExpandLessIcon,
-  ZoomInIcon,
+  ZoomInSearchIcon,
+  ZoomOutSearchIcon,
   Tooltip,
   IconButton,
   Box,
@@ -82,29 +85,70 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { mapId, location, backgroundStyle } = detailsSettings;
 
   const featureId = `Feature Info ${feature.featureKey}`;
+  const featureGeoMetry = feature.geometry;
   const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
     return { key: featureKey, value: feature.featureInfo[featureKey] };
   });
   const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
 
   const { currentProjection } = api.map(mapId);
-  const { zoom } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
+  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
-
+  // console.log(api.map(mapId).mapFeaturesConfig.map.viewSettings);
   const [isOpen, setOpen] = useState<boolean>(false);
-  const [currentZoom, setZoom] = useState<number>(zoom);
+  const [currentZoom, setCurrentZoom] = useState<boolean>(false);
+
+  const getFeatureZoomCenter = (geometry: Geometry) => {
+    let featurePoint = null;
+    let zoomCenter = null;
+    if (geometry instanceof Polygon) {
+      featurePoint = geometry.getInteriorPoint() !== undefined ? geometry.getInteriorPoint() : null;
+    }
+
+    if (geometry instanceof LineString) {
+      featurePoint = geometry.getCoordinateAt(0.5) !== undefined ? new Point(geometry.getCoordinateAt(0.5)) : null;
+    }
+
+    if (geometry instanceof Point) {
+      featurePoint = geometry !== undefined ? (geometry as Point) : null;
+    }
+
+    if (geometry instanceof MultiPoint) {
+      const mcenter = getCenter(geometry.getExtent() as Extent) as Coordinate;
+      featurePoint = mcenter !== undefined ? new Point(center) : null;
+    }
+    if (featurePoint !== null) {
+      zoomCenter = getCenter(featurePoint.getExtent() as Extent) as Coordinate;
+    }
+    return zoomCenter !== undefined ? zoomCenter : null;
+  };
 
   function handleZoomIn() {
     // get map and set initial bounds to use in zoom home
+    let zoomCenter = null;
+    if (featureGeoMetry !== undefined) {
+      // const geoviewLayers = api.map(mapId).layer.vector;
+      // console.log(geoviewLayers, featureGeoMetry);
+      zoomCenter = getFeatureZoomCenter(featureGeoMetry);
+      // console.log(location, featureGeoMetry, zoomCenter);
+    }
+
+    if (zoomCenter === null || currentZoom) {
+      zoomCenter = location as Coordinate;
+    }
+
     api
       .map(mapId)
       .map.getView()
       .animate({
-        center: fromLonLat(location as Coordinate, projectionConfig),
+        center: fromLonLat(zoomCenter, projectionConfig),
         duration: 500,
-        zoom: currentZoom + 1,
+        zoom: currentZoom ? zoom : zoom + 2,
       });
-    setZoom(currentZoom + 1);
+
+    // console.log(featureGeoMetry);
+    setCurrentZoom(!currentZoom);
+    setOpen(true);
   }
 
   useEffect(() => {
@@ -129,7 +173,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           </Tooltip>
           <ListItemIcon>
             <IconButton color="primary" sx={fontColor} onClick={() => handleZoomIn()}>
-              <ZoomInIcon />
+              {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
             </IconButton>
           </ListItemIcon>
         </ListItemButton>

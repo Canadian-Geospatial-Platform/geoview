@@ -1,5 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import { Geometry } from 'ol/geom';
 
 import { PayloadBaseClass } from './payload-base-class';
 
@@ -17,6 +18,7 @@ export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'usin
 export type TypeFeatureInfoEntry = {
   featureKey: number;
   featureInfo: Record<string, string | number | null>;
+  geometry?: Geometry;
 };
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined };

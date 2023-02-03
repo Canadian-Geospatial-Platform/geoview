@@ -35,6 +35,8 @@ import ImportExport from '@mui/icons-material/ImportExport';
 import DownloadIcon from '@mui/icons-material/Download';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import ZoomInSearchIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutSearchIcon from '@mui/icons-material/ZoomOut';
 
 export {
   Layers as LayersIcon,
@@ -76,4 +78,6 @@ export {
   DownloadIcon,
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon as CheckBoxOutIcon,
+  ZoomInSearchIcon,
+  ZoomOutSearchIcon,
 };

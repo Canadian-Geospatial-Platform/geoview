@@ -233,6 +233,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           // feature key for building the data-grid
           featureKey: keyCounter++,
           featureInfo: {},
+          geometry: feature.getGeometry(),
         };
 
         // query feature info
