@@ -446,7 +446,7 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
   const style: TypeStyleConfig = {};
   const styleType = 'uniqueValue';
   const defaultLabel = renderer.defaultLabel === null ? undefined : renderer.defaultLabel;
-  const defaultVisible = true;
+  const defaultVisible = 'yes';
   const defaultSettings = convertSymbol(renderer.defaultSymbol);
   const fields = [renderer.field1];
   if (renderer.field2) fields.push(renderer.field2);
@@ -459,7 +459,7 @@ function processUniqueValueRenderer(styleId: string, renderer: EsriUniqueValueRe
         settings.rotation = Math.PI / 2 - settings.rotation!;
       uniqueValueStyleInfo.push({
         label: symbolInfo.label,
-        visible: true,
+        visible: 'yes',
         values: symbolInfo.value.split(renderer.fieldDelimiter),
         settings,
       });
@@ -520,7 +520,7 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
   const styleType = 'classBreaks';
   const defaultLabel = EsriRenderer.defaultLabel === null ? undefined : EsriRenderer.defaultLabel;
   const defaultSettings = convertSymbol(EsriRenderer.defaultSymbol);
-  const defaultVisible = true;
+  const defaultVisible = 'yes';
   const { field } = EsriRenderer;
   const classBreakStyleInfo: TypeClassBreakStyleInfo[] = [];
   for (let i = 0; i < EsriRenderer.classBreakInfos.length; i++) {
@@ -530,7 +530,7 @@ function processClassBreakRenderer(styleId: string, EsriRenderer: EsriClassBreak
         settings.rotation = Math.PI / 2 - settings.rotation!;
       const geoviewClassBreakInfo: TypeClassBreakStyleInfo = {
         label: EsriRenderer.classBreakInfos[i].label,
-        visible: true,
+        visible: 'yes',
         minValue: EsriRenderer.classBreakInfos[i].classMinValue,
         maxValue: EsriRenderer.classBreakInfos[i].classMaxValue,
         settings,

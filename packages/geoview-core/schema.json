@@ -234,8 +234,8 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultVisible": {
-          "type": "boolean",
-          "description": "Flag used to show/hide features associated to the default label (default true)."
+          "enum": ["yes", "no", "always"],
+          "description": "Flag used to show/hide features associated to the default label (default: yes)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -263,8 +263,8 @@
             "type": "string"
           },
           "visible": {
-            "type": "boolean",
-            "description": "Flag used to show/hide features associated to the label (default true)."
+            "enum": ["yes", "no", "always"],
+            "description": "Flag used to show/hide features associated to the label (default: yes)."
           },
           "values": {
             "type": "array",
@@ -295,8 +295,8 @@
           "description": "Label used if field/value association is not found."
         },
         "defaultVisible": {
-          "type": "boolean",
-          "description": "Flag used to show/hide features associated to the default label (default true)."
+          "enum": ["yes", "no", "always"],
+          "description": "Flag used to show/hide features associated to the default label (default: yes)."
         },
         "defaultSettings": {
           "$ref": "#/definitions/TypeKindOfVectorSettings",
@@ -321,8 +321,8 @@
             "type": "string"
           },
           "visible": {
-            "type": "boolean",
-            "description": "Flag used to show/hide features associated to the label (default true)."
+            "enum": ["yes", "no", "always"],
+            "description": "Flag used to show/hide features associated to the label (default: yes)."
           },
           "minValue": {
             "type": "number"
@@ -793,11 +793,19 @@
           "type": "string",
           "description": "The id of the layer to display on the map."
         },
-        "layerName": {
+        "geocoreLayerName": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "The display name of the layer (English/French). If it is not present the viewer will make an attempt to scrape this information."
         },
-        "source": { "$ref": "#/definitions/TypeSourceGeocoreConfig" }
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "source": { "$ref": "#/definitions/TypeSourceGeocoreConfig" },
+        "listOfLayerEntryConfig": {
+          "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+          "description": "The list of layer entry configurations to use from the GeoView layer group."
+        }
       },
       "required": ["layerId"]
     },
@@ -951,7 +959,7 @@
           "description": "The layer entries to use from the GeoView layer."
         }
       },
-      "required": ["geoviewLayerId", "geoviewLayerType", "listOfLayerEntryConfig"]
+      "required": ["geoviewLayerType", "listOfLayerEntryConfig"]
     },
 
     "TypeGeoviewLayerType": {

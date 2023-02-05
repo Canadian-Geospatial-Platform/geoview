@@ -239,7 +239,7 @@
                           'src': 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAUhJREFUOI2d0z1Lw1AUBuD3hppCLSo4iLg6dFZBEYtZQgeFgB+jrSIEQXSxFUIFg1jTYhBHyWITEVwDOhXUSVz8Bf4DcahgBxtvrkNrIbamSd/tXM557llOBAGiGQtxRb779OuJdEOUm9UY+6o+6KYkZDN2rWdooF7dZ6BTdXzsATjqCSpaqTGXOblGxeVUc/JCzby8hYZc5pwAiDXLOM8GDwFsh4KOy8kJAGueRwK5cDl7nt94eg0MEdJ3BoC09XO8BmAlEFQwhSUCzHf8ANyyVhZnlPXKsy+0a4An4Er/bQoAjNBTAElfaCQq7gB03A8CMKdZgqSkH+2OUMmaHqaMHnRBGlsxrmgYuJVl0DboG/0qAYaCQAAS71FxE6gYHki7SiWY62wFRJqhqm5K19mMXWtBLnN0EuBk/mT093Rag/n0/WJIxJMfY79g/IvbH/IAAAAASUVORK5CYII=',
                           'type': 'iconSymbol'
                         },
-                        'defaultVisible': true,
+                        'defaultVisible': 'always',
                         'fields': ['E_Regulated', 'E_SampleType', 'E_Overall_Condition'],
                         'uniqueValueStyleInfo': [
                           {
@@ -253,7 +253,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Natural', 'Seasonal', 'High'],
-                            'visible': true
+                            'visible': 'yes'
                           },
                           {
                             'label': 'Natural, Seasonal, Low',
@@ -266,7 +266,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Natural', 'Seasonal', 'Low'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Natural, Seasonal, Normal',
@@ -279,7 +279,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Natural', 'Seasonal', 'Normal'],
-                            'visible': false
+                            'visible': 'always'
                           },
                           {
                             'label': 'Natural, Yearly, High',
@@ -292,7 +292,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Natural', 'Yearly', 'High'],
-                            'visible': true
+                            'visible': 'yes'
                           },
                           {
                             'label': 'Natural, Yearly, Low',
@@ -305,7 +305,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Natural', 'Yearly', 'Low'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Natural, Yearly, Normal',
@@ -318,7 +318,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Natural', 'Yearly', 'Normal'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Regulated, Seasonal, High',
@@ -331,7 +331,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Regulated', 'Seasonal', 'High'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Regulated, Seasonal, Low',
@@ -344,7 +344,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Regulated', 'Seasonal', 'Low'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Regulated, Seasonal, Normal',
@@ -357,7 +357,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Regulated', 'Seasonal', 'Normal'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Regulated, Yearly, High',
@@ -370,7 +370,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Regulated', 'Yearly', 'High'],
-                            'visible': false
+                            'visible': 'no'
                           },
                           {
                             'label': 'Regulated, Yearly, Low',
@@ -383,7 +383,7 @@
                               'type': 'iconSymbol'
                             },
                             'values': ['Regulated', 'Yearly', 'Low'],
-                            'visible': false
+                            'visible': 'no'
                           }
                         ]
                       }
@@ -419,14 +419,14 @@
                             'width': 0.5
                           }
                         },
-                        'defaultVisible': true,
+                        'defaultVisible': 'always',
                         'field': 'Total_CSO_Volume',
                         'classBreakStyleInfo': [
                           {
                             'label': '0 m3',
                             'minValue': 0,
                             'maxValue': 0,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -445,7 +445,7 @@
                             'label': '0.0001 - ≤ 5,000,000 m3',
                             'minValue': 0,
                             'maxValue': 5000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -464,7 +464,7 @@
                             'label': '> 5,000,000 - ≤ 10,000,000 m3',
                             'minValue': 5000000,
                             'maxValue': 10000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -483,7 +483,7 @@
                             'label': '> 10,000,000 - ≤ 15,000,000 m3',
                             'minValue': 10000000,
                             'maxValue': 15000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -502,7 +502,7 @@
                             'label': '> 15,000,000 - ≤ 20,000,000 m3',
                             'minValue': 15000000,
                             'maxValue': 20000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -521,7 +521,7 @@
                             'label': '> 20,000,000 - ≤ 25,000,000 m3',
                             'minValue': 20000000,
                             'maxValue': 25000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -540,7 +540,7 @@
                             'label': '> 25,000,000 - ≤ 30,000,000 m3',
                             'minValue': 25000000,
                             'maxValue': 30000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -559,7 +559,7 @@
                             'label': '> 30,000,000 - ≤ 35,000,000 m3',
                             'minValue': 30000000,
                             'maxValue': 35000000,
-                            'visible': true,
+                            'visible': 'yes',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -578,7 +578,7 @@
                             'label': '> 35,000,000 m3',
                             'minValue': 35000000,
                             'maxValue': 999000000,
-                            'visible': true,
+                            'visible': 'always',
                             'settings': {
                               'symbol': 'circle',
                               'type': 'simpleSymbol',
@@ -877,6 +877,7 @@
     <div
       id="LYR8"
       class="llwp-map"
+      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
           'map': {
@@ -893,20 +894,135 @@
             },
             'listOfGeoviewLayerConfig': [
               {
-                'geoviewLayerId': 'LYR8',
                 'geoviewLayerType': 'geoCore',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': '0fe65119-e96e-4a57-8bfe-9d9245fba06b'
+                    'layerId': '0fe65119-e96e-4a57-8bfe-9d9245fba06b',
+                    'geocoreLayerName': { 'en': 'HRDEM Mosaic Hillshade' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'dsm-hillshade',
+                        'layerName': { 'en': 'Map' }
+                      }
+                    ]
                   },
                   {
-                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9'
+                    'layerId': 'ccc75c12-5acc-4a6a-959f-ef6f621147b9',
+                    'geocoreLayerName': { 'en': 'Commemorative Map' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': '0',
+                        'layerName': { 'en': 'Map' },
+                        'style': {
+                          'Point': {
+                            'styleId': 'uniqueValueId',
+                            'styleType': 'uniqueValue',
+                           'fields': ['SYMBOL_EN'],
+                            'uniqueValueStyleInfo': [
+                              {
+                                'label': 'Confederation to 1914',
+                                'settings': {
+                                  'mimeType': 'image/png',
+                                  'offset': [0, 0],
+                                  'opacity': 1,
+                                  'rotation': 0,
+                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAahJREFUKJGd0ksoRFEcBvDvjMvci3E9GkxMxttYIIQo8igWHkmsRikLoSxlbSVZjKasyIIFmhQa5JmFZOGxMHYjeSQLxsw05ozhHgtcMWYWvjqbU7/zP9/pcPhnuN8blDqiGSONBCQHYG8gOPV62ZooijQgpB5XtySxsZvLu+j72weEcApoUzVQJ8TeejyuHkFQWfwgpc6BpwfH+PToCs4Xrn/com6oIKm1q26ZUmc7z0ctypBSZ7qX+sZMg3O42nn067M1cgoffVUYBpomKXXs8rxo5wCAMfQc7VtD/0Jf2TOeoaq5OEabmmgAYOIAgABlZ4e2wE/4GZv1ClqdpkyGAAl/dtGg6KPSCwAWLndkgE2bpS6y4joojE+KAwi5kCEBzKXVeR3rw8cBkSqbhz4/DYzBLEMlH2lOTtHsd07UVsz0bfuhsIQQ9BvbwAv8vCCoDr4nEsJe3O62yoaSVY0lvnB36QjWzUsoxVAU1megpqUU6sTYDUlSdH8dJn+AsIiIe8bs5Zm5ut5Mvc6AIegBvAE4AcGUUhk5SwiR/ODH5BgvAOPnCpp3ofqRTtNnzMYAAAAASUVORK5CYII=',
+                                  'type': 'iconSymbol'
+                                },
+                                'values': ['Confederation to 1914'],
+                                'visible': 'no'
+                              },
+                              {
+                                'label': 'First World War',
+                                'settings': {
+                                  'mimeType': 'image/png',
+                                  'offset': [0, 0],
+                                  'opacity': 1,
+                                  'rotation': 0,
+                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZ5JREFUKJGd0ssvA1EUBvDvjqmZelUH7UwkbZQFQSKqImw8dtLEomFlZ9HY+EssiC07G1IWBInEYyMWgiZeG7owI6lE23REemdavRZqhCqJLzmbm/zuOefm8vhn+O8HlKZrGSNBAtIKsFcQRA2D7TgcDloS0szzFMuz2Xg8XvuUSILjOCiyDElyPmQyz2G7vXqrCFKqz+hpfX5jcweapn2Zoqurs3FkeGiDUn1cFGvWLUip3mwY2dmV1TUkEsmifaLRC+SyOS4YHF2kNH0gio4UDwCMIXx9fWP7CX3k8uoG/p5up6K4JwEs8ABAgL6721jpJyzk/l6FIst9FgRIhWGaf0LTNAGwCmtHBty5XPV+VdV+hXV1EkBIzIIEiHR0tE+cnkZLIkEQ4PM1gTFELCiIVRFFlo9GhgcH9vYPi5DNxiMUGoMgiCt2e/XxZ0dCmPnyEgoE/Nsud0P3yckZVFUDz5ehpcWH3t4AJMm5m89zUx+XWR+gvLLykbFUv9frmfZ6PJMA2gC8AjgHwZIgVC0TQvJF8L2z0wAwV6hf8waIeZGd6U5WcwAAAABJRU5ErkJggg==',
+                                  'type': 'iconSymbol'
+                                },
+                                'values': ['First World War'],
+                                'visible': 'no'
+                              },
+                              {
+                                'label': 'Second World War',
+                                'settings': {
+                                  'mimeType': 'image/png',
+                                  'offset': [0, 0],
+                                  'opacity': 1,
+                                  'rotation': 0,
+                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZ5JREFUKJGd0EsoRFEYB/D/GZe511zzyhhiMTMiQxI2YsPKMylRSkqKlFhpSspGSRSSjcdOpAalPGJhpUkWrFiI2RiSzDTX454rc48FrhiP8q9TX6d+fQ8O/wz39YPSsJkxUkNAsgAWAcGRorBNk8lEf4RUvmtjqjoa8vvN94FL6LgYmF0uiHZ7QJbvOgQhYT0KUip1y7fBicOhEUgzC5+mSBnuT81pbVmjVGrgeeOKBimV0p+pMnrQ68Hj8nbUPleeQahU0eX3dM1SGt7leVOIAwDG0HGx54v9Dr3nemAEwdpqi9XlaAYwyQEAAYpufPs/n/AtweMTWJ3OIg0CJP5ZCv8JI7IMgMVrOzLgTMzKLPyLGtJSAULONUgAb1pZaWPgF8QV5iApLxeMwatBPS96LQ7nXsbidMlpU3sUinHYkDc1hljBsCQICb6PjoSwp4eH+vTK8g2jb6vAv7oGaWMHxGpEYlUFXHW1EJPt26qqa9MmeC/iDIZrxkLFtmx3p83tbkafxw0gAuAQBHN6vThPCFGj4GtniwJg/O39mhf/K5CfkLtGyAAAAABJRU5ErkJggg==',
+                                  'type': 'iconSymbol'
+                                },
+                                'values': ['Second World War'],
+                                'visible': 'always'
+                              },
+                              {
+                                'label': 'Korean War',
+                                'settings': {
+                                  'mimeType': 'image/png',
+                                  'offset': [0, 0],
+                                  'opacity': 1,
+                                  'rotation': 0,
+                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAYtJREFUKJGdz79rU2EUxvHvSa+5N2libixtwEpTEYkZjKBLsItQapfiInYKXTIEQd0U/AdcTKG2a91cxCCoVEEonSTiYkEIVKiIYCQdDEkoeW+09zioVzTGgg+8cHjhc35Y/GesPz+MabmqMifICdA9hE3P02eJRMIMhKbbKeL7Zdl572qzDkNDMHoU20197HY7pUgkvtYHjWlfo/P5jr++CI0Hv6+RuT4uUwuPjWlfcpyDDwNoTPsYPa/sr92E1kbfPbp1G756IZm+smpMa8NxEk0LQJUSb6sH/oYCvL0MJ+eSkkoXgBULQCCvH14NREHqNRibzAcQJKq99v7wiwE0GtyosC0jx89oYx/oHgaRdwEUqGjm3Dy1W4ORnYF0DlUqAbSdWMUbnXxBfmVKX17tR9YhZKYM4ej9SCRe/TVRRHu7uxf93OxTRh6d1jdP4NM6WHFk4jycugBu6rnvh4pBr59FeHi4odo86x3JXpbxbAFuZIE94DXCXduO3RMRvw9+n5z0gKUf75/5BuXZh6Fohy1dAAAAAElFTkSuQmCC',
+                                  'type': 'iconSymbol'
+                                },
+                                'values': ['Korean War'],
+                                'visible': 'yes'
+                              },
+                              {
+                                'label': 'Peacekeeping',
+                                'settings': {
+                                  'mimeType': 'image/png',
+                                  'offset': [0, 0],
+                                  'opacity': 1,
+                                  'rotation': 0,
+                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAatJREFUKJGd0jFoE1Ecx/HvP7kmd03iJSElwaLYq4OpRSQKFgUFt0IpFNGpkx2Ki1hcHNxdCio6OOjmoBAiiFZwEYTSrRYpioNBtLYErUlzxHuJ5p6D7YnGVPAH/+XB5/3//8cz+M8Yfx4otZHUWsYE2Qe6jbDUbOontm2rrlB57pTv69l3lVpyZb1BOCwMZm1yqfhHz3OnLSvxuAMqVT+/Xv96/crcMjfX3N+muDqc7T97Iv9Qqfpp09xRCqBS9UHVas9eLC1xr+p17DOzXKH5zQ9dGD1wW6mNZ6ZpVw0ArZmef73a8ze0lUtvPjFeqKWcnD0J3DAABEYWyp+7P+FmXn34gpNNjgQQpLfW+v5P6LXagO4NdtTwNp+JH2LV3Rb2p2MgUg6gQPHk/p1neLnWFR2JGBx0+tCaYgCjZrw4kGX+wXHn2MTzcgfaGw5xa3wYK9Jz37ISC786iuhWo3FqtDAwt9iXKJQW3/NoxSVtCGNOmonDe8ilYk99PzS1dVnwASKxWEXr6tGh3ZlzQ7syk5chD7SBFwh3otH4XRHxO+DPzqkmcG2zts0PBFWRZ33W55YAAAAASUVORK5CYII=',
+                                  'type': 'iconSymbol'
+                                },
+                                'values': ['Peacekeeping'],
+                                'visible': 'no'
+                              },
+                              {
+                                'label': 'Afghanistan',
+                                'settings': {
+                                  'mimeType': 'image/png',
+                                  'offset': [0, 0],
+                                  'opacity': 1,
+                                  'rotation': 0,
+                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAadJREFUKJGd0ksoRFEYB/D/MZe5dzzGlccUxjOZsRksyLBRkkghVlZmISWRzSzsWShkFhQ7CzKNyCsbG1KTmBSJvMpzYYaZpjl35B4L44oxlH99m1O/833f6XD4Z7jvB5Q+JzJGGghIIcBeQeCSJLam1WppREgDPossy8OXD1eJ1+57qFQq5KVmQyem3AQCvk5BiF8Jg5R6ex59nrHB9UnY7pxfphgpak7vqGpbotTbyvMJDgVS6s2jweBw/+IQZt2nYfv0HTogvUhRvbWWKUqfN3le6+EAgDF0bh87o39CH7GerKDRVCPm6jLbAYxzAECA8p0LV+QnDOXo5gS5afpyBQJE8/Ti/xMGghQA0yg7MuDMkJxVilvnrzBd1AGEnCuQAPZqg7kNB/MRUZlahCnHCMZgV6Caj7PnpOq3Fyq7zU1btjCUz/GYqLdCiNHMCUL8zmdHQljQ72+pK65e3UvOKHG4NrB8u4skjkdDthlNJbXQiSkbshxl+bhM+QAxsbEPjHkqjPqCLmNmQfsAYADwCmAfBNNqddwMIUQOg++dRQnAaKh+zRtAE5CN4Z5HEQAAAABJRU5ErkJggg==',
+                                  'type': 'iconSymbol'
+                                },
+                                'values': ['Afghanistan'],
+                                'visible': 'no'
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
                   },
                   {
-                    'layerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326'
+                    'layerId': '0fca08b5-e9d0-414b-a3c4-092ff9c5e326',
+                    'geocoreLayerName': { 'en': 'Marine Water Quality' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': '6',
+                        'layerName': { 'en': 'Map' }
+                      }
+                    ]
+
                   },
                   {
-                    'layerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703'
+                    'layerId': '03ccfb5c-a06e-43e3-80fd-09d4f8f69703',
+                    'geocoreLayerName': { 'en': 'NAPL Temporal Series' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'regina',
+                        'layerName': { 'en': 'Map of Regina' }
+                      }
+                    ]
                   }
                 ]
               }
@@ -918,6 +1034,7 @@
           'suportedLanguages': ['en']
         }"
     ></div>
+    <div class="layer8-buttons-div"></div>
     <button class="Get-geocore-Legend">Get Legend</button>
     <div id="geocoreLegendsId-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
@@ -999,43 +1116,34 @@
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-      if (['LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR9'].includes(mapId)) {
-        var layerButtons = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
-        if (mapId !== 'LYR5') layerButtons.appendChild(document.createElement("hr"));
-        else {
-          var table = document.createElement("table");
-          table.style.width = '100%';
-          table.border = '1px solid black';
-          layerButtons.appendChild(table);
-          layerButtons = document.createElement("td");
-          layerButtons.style.width = '16.66%';
-          layerButtons.style.padding = '15px';
-          layerButtons.border = '1px solid black';
-          table.appendChild(layerButtons);
-        }
+      if (['LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR8', 'LYR9'].includes(mapId)) {
+        var mapButtonsDiv = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
+        var tableElement = document.createElement("table");
+        tableElement.style.width = '100%';
+        tableElement.border = '1px solid black';
+        mapButtonsDiv.appendChild(tableElement);
+        Object.keys(cgpv.api.maps[mapId].layer.geoviewLayers).forEach((geoviewLayerId) => {
+          const geoviewLayer = cgpv.api.maps[mapId].layer.geoviewLayers[geoviewLayerId];
+          Object.keys(cgpv.api.maps[mapId].layer.registeredLayers).forEach((layerPath) => {
+            if (layerPath.startsWith(geoviewLayerId)) {
+              const layerConfig = cgpv.api.maps[mapId].layer.registeredLayers[layerPath];
+              const { geoviewRenderer } = cgpv.api.maps[mapId];
+              geoviewRenderer.getLegendStyles(layerConfig.style).then((legendStyle) => {
 
-          const geoviewLayers = cgpv.api.maps[mapId].layer.geoviewLayers;
-          Object.keys(geoviewLayers).forEach((geoviewLayerId) => {
-            const geoviewLayer = geoviewLayers[geoviewLayerId];
-            if (mapId === 'LYR5') {
-              const geoviewLayerText = document.createElement('h1');
-              geoviewLayerText.innerText = geoviewLayer.geoviewLayerName.en;
-              layerButtons.appendChild(geoviewLayerText);
-            }
-            const registeredLayers = cgpv.api.maps[mapId].layer.registeredLayers;
-            Object.keys(registeredLayers).forEach((layerPath) => {
-              if (mapId === 'LYR5') {
-                layerButtons = document.createElement('td');
-                layerButtons.style.width = '16.66%';
-                layerButtons.style.padding = '15px';
-                layerButtons.border = '1px solid black';
-                table.appendChild(layerButtons);
-              }
-              if (layerPath.startsWith(geoviewLayerId)) {
-                const layerConfig = registeredLayers[layerPath];
-                const layerConfigH2 = document.createElement('h2');
+                mapButtonsDiv = document.createElement('td');
+                mapButtonsDiv.style.width = '16.66%';
+                mapButtonsDiv.border = '1px solid black';
+                tableElement.appendChild(mapButtonsDiv);
+
+                const geoviewLayerH1 = document.createElement('h1');
+                geoviewLayerH1.innerText = geoviewLayer.geoviewLayerName.en;
+                mapButtonsDiv.appendChild(geoviewLayerH1);
+
+                  const layerConfigH2 = document.createElement('h2');
                 layerConfigH2.innerText = `${layerConfig.layerName.en}  `;
-                layerButtons.appendChild(layerConfigH2);
+                layerConfigH2.style.height = '15px';
+                mapButtonsDiv.appendChild(layerConfigH2);
+
                 const toggleLayerVisibility = document.createElement('button');
                 const visibilityFlag = geoviewLayer.getVisible(layerConfig);
                 if (visibilityFlag) toggleLayerVisibility.innerText = 'Hide';
@@ -1048,135 +1156,207 @@
                 });
                 layerConfigH2.appendChild(toggleLayerVisibility);
 
-              if (layerConfig.style) {
-                Object.keys(layerConfig.style).forEach((geometry) => {
-                  const geometryText = document.createElement("p");
-                  geometryText.innerText = `Geometry = ${geometry}`;
-                  layerButtons.appendChild(geometryText);
-                  if (layerConfig.style[geometry].styleType === 'uniqueValue') {
-                    const toggleUniqueValueDefault = document.createElement("button");
-                    if (layerConfig.style[geometry].defaultVisible)
-                      toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
-                    else
-                      toggleUniqueValueDefault.innerText =  `Show ${layerConfig.style[geometry].defaultLabel}`;
-                    toggleUniqueValueDefault.addEventListener('click', function (e) {
-                      layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
-                      if (layerConfig.style[geometry].defaultVisible)
-                        toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
-                      else
-                        toggleUniqueValueDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
-                      const checkbox = document.getElementById(`checkbox-${mapId}`);
-                      const filterInput = document.getElementById(`filter-input-${mapId}`);
-                      const filter = checkbox.value === 'true' ? filterInput.value : '';
-                      geoviewLayer.applyViewFilter(layerConfig, filter);
-                    });
-                    layerButtons.appendChild(toggleUniqueValueDefault);
-                    if (mapId === 'LYR5') layerButtons.appendChild(document.createElement("p"));
-
-                    for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
-                      const toggleUniqueValueFeature = document.createElement("button");
-                      if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible)
-                        toggleUniqueValueFeature.innerText = `Hide ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
-                      else
-                        toggleUniqueValueFeature.innerText = `Show ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
-                      toggleUniqueValueFeature.addEventListener('click', function (e) {
-                        const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
-                        uniqueValueStyleInfoEntry.visible = !uniqueValueStyleInfoEntry.visible;
-                        if (uniqueValueStyleInfoEntry.visible)
-                          toggleUniqueValueFeature.innerText = `Hide ${uniqueValueStyleInfoEntry.label}`;
-                        else
-                          toggleUniqueValueFeature.innerText = `Show ${uniqueValueStyleInfoEntry.label}`;
-                        const checkbox = document.getElementById(`checkbox-${mapId}`);
-                        const filterInput = document.getElementById(`filter-input-${mapId}`);
-                        const filter = checkbox.value === 'true' ? filterInput.value : '';
-                        geoviewLayer.applyViewFilter(layerConfig, filter);
-                      });
-                      layerButtons.appendChild(toggleUniqueValueFeature);
-                      if (mapId === 'LYR5') layerButtons.appendChild(document.createElement("p"));
-                    }
-                  } if (layerConfig.style[geometry].styleType === 'classBreaks') {
-                    const toggleClassBreakDefault = document.createElement("button");
-                    if (layerConfig.style[geometry].defaultVisible)
-                      toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
-                    else
-                      toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
-                    toggleClassBreakDefault.addEventListener('click', function (e) {
-                      layerConfig.style[geometry].defaultVisible = !layerConfig.style[geometry].defaultVisible;
-                      if (layerConfig.style[geometry].defaultVisible)
-                        toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
-                      else
-                        toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
-                      const checkbox = document.getElementById(`checkbox-${mapId}`);
-                      const filterInput = document.getElementById(`filter-input-${mapId}`);
-                      const filter = checkbox.value === 'true' ? filterInput.value : '';
-                      geoviewLayer.applyViewFilter(layerConfig, filter);
-                    });
-                    layerButtons.appendChild(toggleClassBreakDefault);
-
-                    for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
-                      const toggleClassBreakFeature = document.createElement("button");
-                      if (layerConfig.style[geometry].classBreakStyleInfo[i].visible)
-                        toggleClassBreakFeature.innerText = `Hide ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
-                      else
-                        toggleClassBreakFeature.innerText = `Show ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
-                      toggleClassBreakFeature.addEventListener('click', function (e) {
-                        const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
-                        classBreakStyleInfoEntry.visible = !classBreakStyleInfoEntry.visible;
-                        if (classBreakStyleInfoEntry.visible)
-                          toggleClassBreakFeature.innerText = `Hide ${classBreakStyleInfoEntry.label}`;
-                        else
-                          toggleClassBreakFeature.innerText = `Show ${classBreakStyleInfoEntry.label}`;
-                        const checkbox = document.getElementById(`checkbox-${mapId}`);
-                        const filterInput = document.getElementById(`filter-input-${mapId}`);
-                        const filter = checkbox.value === 'true' ? filterInput.value : '';
-                        geoviewLayer.applyViewFilter(layerConfig, filter);
-                      });
-                      layerButtons.appendChild(toggleClassBreakFeature);
-                    }
-                  }
-                  if (geoviewLayer.getLayerFilter) {
-                    const layerFilterText = document.createElement("p");
-                    layerFilterText.innerText = `Extra filter: `;
-                    layerButtons.appendChild(layerFilterText);
-                    const layerFilterInput = document.createElement("input");
-                    layerFilterInput.id = `filter-input-${mapId}`;
-                    layerFilterInput.style.width = '50%';
-                    layerFilterText.appendChild(layerFilterInput);
-                    layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
-                    const layerFilterButton = document.createElement("button");
-                    layerFilterButton.addEventListener('click', function (e) {
-                      const checkbox = document.getElementById(`checkbox-${mapId}`);
-                      if (checkbox.value === 'true')
-                        geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
-                      else {
-                        geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
-                        geoviewLayer.applyViewFilter(layerConfig);
+                if (layerConfig.style) {
+                  Object.keys(layerConfig.style).forEach((geometry) => {
+                    const geometryText = document.createElement("p");
+                    geometryText.innerText = `Geometry = ${geometry}`;
+                    geometryText.style.height = '15px';
+                    mapButtonsDiv.appendChild(geometryText);
+                    if (layerConfig.style[geometry].styleType === 'uniqueValue') {
+                      if (layerConfig.style[geometry].defaultSettings) {
+                        if (layerConfig.style[geometry].defaultVisible === 'always') {
+                          const alwaysDefaultLabel = document.createElement("label");
+                          alwaysDefaultLabel.innerText =  `Always show `;
+                          alwaysDefaultLabel.style.fontSize = '15px';
+                          alwaysDefaultLabel.style.height = '15px';
+                          mapButtonsDiv.appendChild(alwaysDefaultLabel);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleUniqueValueDefault = document.createElement("button");
+                          if (layerConfig.style[geometry].defaultVisible === 'yes')
+                            toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                          else if (layerConfig.style[geometry].defaultVisible === 'no')
+                            toggleUniqueValueDefault.innerText =  `Show ${layerConfig.style[geometry].defaultLabel}`;
+                          toggleUniqueValueDefault.addEventListener('click', function (e) {
+                            if (layerConfig.style[geometry].defaultVisible === 'yes') {
+                              layerConfig.style[geometry].defaultVisible = 'no';
+                              toggleUniqueValueDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                            } else if (layerConfig.style[geometry].defaultVisible === 'no') {
+                              layerConfig.style[geometry].defaultVisible = 'yes';
+                              toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                            }
+                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleUniqueValueDefault);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
                       }
-                    });
-                    layerFilterButton.innerText = 'Apply';
-                    layerFilterText.appendChild(layerFilterButton);
+                      for (let i = 0; i < layerConfig.style[geometry].uniqueValueStyleInfo.length; i++) {
+                        if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'always') {
+                          const alwaysEntry = document.createElement("label");
+                          alwaysEntry.innerText =  `Always show `;
+                          alwaysEntry.style.fontSize = '15px';
+                          mapButtonsDiv.appendChild(alwaysEntry);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
 
-                    const checkboxInput = document.createElement("input");
-                    checkboxInput.type='checkbox';
-                    checkboxInput.value = 'false';
-                    checkboxInput.id = `checkbox-${mapId}`;
-                    checkboxInput.addEventListener('click', function (e) {
-                      checkboxInput.value =checkboxInput.value === 'true' ? 'false' : 'true';
-                      if (checkboxInput.value === 'true')
-                        geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
-                      else {
-                        geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
-                        geoviewLayer.applyViewFilter(layerConfig);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleUniqueValueFeature = document.createElement("button");
+                          if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'yes')
+                            toggleUniqueValueFeature.innerText = `Hide ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
+                          else if (layerConfig.style[geometry].uniqueValueStyleInfo[i].visible === 'no')
+                            toggleUniqueValueFeature.innerText = `Show ${layerConfig.style[geometry].uniqueValueStyleInfo[i].label}`;
+                          toggleUniqueValueFeature.addEventListener('click', function (e) {
+                            const uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i];
+                            if (uniqueValueStyleInfoEntry.visible === 'yes') {
+                              uniqueValueStyleInfoEntry.visible = 'no';
+                              toggleUniqueValueFeature.innerText = `Show ${uniqueValueStyleInfoEntry.label}`;
+                            } else if (uniqueValueStyleInfoEntry.visible === 'no') {
+                              uniqueValueStyleInfoEntry.visible = 'yes';
+                              toggleUniqueValueFeature.innerText = `Hide ${uniqueValueStyleInfoEntry.label}`;
+                            }
+                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleUniqueValueFeature);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
                       }
-                    });
-                    layerButtons.appendChild(checkboxInput);
-                    const checkboxText = document.createElement("label");
-                    checkboxText.innerText = `apply only the extra filter`;
-                    layerButtons.appendChild(checkboxText);
-                  }
-                  if (mapId !== 'LYR5') layerButtons.appendChild(document.createElement("hr"));
-                });
-              }
+                    } else if (layerConfig.style[geometry].styleType === 'classBreaks') {
+                      if (layerConfig.style[geometry].defaultSettings) {
+                        if (layerConfig.style[geometry].defaultVisible === 'always') {
+                          const alwaysDefaultLabel = document.createElement("label");
+                          alwaysDefaultLabel.innerText =  `Always show `;
+                          alwaysDefaultLabel.style.fontSize = '15px';
+                          mapButtonsDiv.appendChild(alwaysDefaultLabel);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].defaultCanvas);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleClassBreakDefault = document.createElement("button");
+                          if (layerConfig.style[geometry].defaultVisible === 'yes')
+                            toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                          else if (layerConfig.style[geometry].defaultVisible === 'no')
+                            toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                          toggleClassBreakDefault.addEventListener('click', function (e) {
+                          if (layerConfig.style[geometry].defaultVisible === 'yes') {
+                            layerConfig.style[geometry].defaultVisible = 'no';
+                            toggleClassBreakDefault.innerText = `Show ${layerConfig.style[geometry].defaultLabel}`;
+                          } else if (layerConfig.style[geometry].defaultVisible === 'no') {
+                            layerConfig.style[geometry].defaultVisible = 'yes';
+                            toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
+                          }
+                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleClassBreakDefault);
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
+                      }
+                      for (let i = 0; i < layerConfig.style[geometry].classBreakStyleInfo.length; i++) {
+                        if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'always') {
+                          const alwaysEntry = document.createElement("label");
+                          alwaysEntry.innerText =  `Always show `;
+                          alwaysEntry.style.fontSize = '15px';
+                          mapButtonsDiv.appendChild(alwaysEntry);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        } else {
+                          const toggleClassBreakFeature = document.createElement("button");
+                          if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'yes')
+                            toggleClassBreakFeature.innerText = `Hide ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
+                          else if (layerConfig.style[geometry].classBreakStyleInfo[i].visible === 'no')
+                            toggleClassBreakFeature.innerText = `Show ${layerConfig.style[geometry].classBreakStyleInfo[i].label}`;
+                          toggleClassBreakFeature.addEventListener('click', function (e) {
+                            const classBreakStyleInfoEntry = layerConfig.style[geometry].classBreakStyleInfo[i];
+                            if (classBreakStyleInfoEntry.visible === 'yes') {
+                              classBreakStyleInfoEntry.visible = 'no';
+                              toggleClassBreakFeature.innerText = `Show ${classBreakStyleInfoEntry.label}`;
+                            } else if (classBreakStyleInfoEntry.visible === 'no') {
+                              classBreakStyleInfoEntry.visible = 'yes';
+                              toggleClassBreakFeature.innerText = `Hide ${classBreakStyleInfoEntry.label}`;
+                            }
+                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const filterInput = document.getElementById(`filter-input-${mapId}`);
+                            const filter = checkbox.value === 'true' ? filterInput.value : '';
+                            geoviewLayer.applyViewFilter(layerConfig, filter);
+                          });
+                          mapButtonsDiv.appendChild(toggleClassBreakFeature);
+                          mapButtonsDiv.appendChild(legendStyle[geometry].arrayOfCanvas[i]);
+
+                          const br = document.createElement("br");
+                          br.style.height = '1px';
+                          mapButtonsDiv.appendChild(br);
+                        }
+                      }
+                    }
+                    if (geoviewLayer.getLayerFilter) {
+                      const layerFilterText = document.createElement("p");
+                      layerFilterText.innerText = `Extra filter: `;
+                      mapButtonsDiv.appendChild(layerFilterText);
+                      const layerFilterInput = document.createElement("input");
+                      layerFilterInput.id = `filter-input-${mapId}`;
+                      layerFilterInput.style.width = '50%';
+                      layerFilterText.appendChild(layerFilterInput);
+                      layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
+                      const layerFilterButton = document.createElement("button");
+                      layerFilterButton.addEventListener('click', function (e) {
+                        const checkbox = document.getElementById(`checkbox-${mapId}`);
+                        if (checkbox.value === 'true')
+                          geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                        else {
+                          geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
+                          geoviewLayer.applyViewFilter(layerConfig);
+                        }
+                      });
+                      layerFilterButton.innerText = 'Apply';
+                      layerFilterText.appendChild(layerFilterButton);
+
+                      const checkboxInput = document.createElement("input");
+                      checkboxInput.type='checkbox';
+                      checkboxInput.value = 'false';
+                      checkboxInput.id = `checkbox-${mapId}`;
+                      checkboxInput.addEventListener('click', function (e) {
+                        checkboxInput.value =checkboxInput.value === 'true' ? 'false' : 'true';
+                        if (checkboxInput.value === 'true')
+                          geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
+                        else {
+                          geoviewLayer.setLayerFilter(layerFilterInput.value, layerConfig);
+                          geoviewLayer.applyViewFilter(layerConfig);
+                        }
+                      });
+                      mapButtonsDiv.appendChild(checkboxInput);
+                      const checkboxText = document.createElement("label");
+                      checkboxText.innerText = `apply only the extra filter`;
+                      mapButtonsDiv.appendChild(checkboxText);
+                    }
+                  });
+                }
+              });
             }
           });
         });
