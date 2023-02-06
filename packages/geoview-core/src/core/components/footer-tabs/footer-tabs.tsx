@@ -25,8 +25,7 @@ export const useStyles = makeStyles((theme) => ({
 export function FooterTabs(): JSX.Element | null {
   const [selectedTab, setSelectedTab] = useState<number | undefined>();
   const [footerTabs, setFooterTabs] = useState<TypeTabs[]>([]);
-
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -68,14 +67,15 @@ export function FooterTabs(): JSX.Element | null {
   /**
    * Handle a collapse, expand event for the tabs component
    */
-  const handleCollapse = () => {
+  const handleCollapse = (open?: boolean) => {
     // check if tabs component is created
+    const collapseStatus = open !== undefined ? open : isCollapsed;
     if (tabsContainerRef && tabsContainerRef.current) {
       const tabsContainer = tabsContainerRef.current as HTMLDivElement;
       const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
       mapContainer.style.transition = 'height 0.2s ease-out';
       // check if the tabs container is collapsed
-      if (!isCollapsed) {
+      if (!collapseStatus) {
         tabsContainer.style.height = '55px';
         mapContainer.style.height = 'calc( 100% - 55px)';
       } else {
@@ -84,7 +84,7 @@ export function FooterTabs(): JSX.Element | null {
       }
     }
     setIsFullscreen(false);
-    setIsCollapsed(!isCollapsed);
+    setIsCollapsed(!collapseStatus);
 
     // update map container size
     setTimeout(() => {
@@ -162,6 +162,10 @@ export function FooterTabs(): JSX.Element | null {
       (payload) => {
         if (payloadIsAFooterTab(payload)) {
           if (payload.handlerName && payload.handlerName === mapId) {
+            // for details tab, extand the tab
+            if (payload.tab.value === 1) {
+              handleCollapse(true);
+            }
             setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
             setSelectedTab(payload.tab.value);
           }
@@ -180,7 +184,6 @@ export function FooterTabs(): JSX.Element | null {
     <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
       <Tabs
         isCollapsed={isCollapsed}
-        handleCollapse={handleCollapse}
         selectedTab={selectedTab}
         tabsProps={{ variant: 'scrollable' }}
         tabs={footerTabs.map((tab) => {
@@ -190,7 +193,9 @@ export function FooterTabs(): JSX.Element | null {
         })}
         rightButtons={
           <>
-            {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
+            {!isFullscreen && (
+              <IconButton onClick={() => handleCollapse()}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+            )}
             <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
           </>
         }
