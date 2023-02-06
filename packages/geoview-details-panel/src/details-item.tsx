@@ -5,6 +5,7 @@ import { TypeWindow, payloadIsAllQueriesDone, TypeArrayOfLayerData, getLocalized
 
 interface Props {
   mapId: string;
+  buttonId?: string;
 }
 const w = window as TypeWindow;
 
@@ -13,7 +14,7 @@ const w = window as TypeWindow;
  *
  * @returns {JSX.Element} created details component
  */
-export function DetailsItem({ mapId }: Props): JSX.Element {
+export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, react } = cgpv;
 
@@ -40,6 +41,10 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
           });
           if (newDetails.length > 0) {
             setDetails(newDetails);
+            api
+              .map(mapId)
+              .appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)
+              ?.panel?.open();
           } else {
             setDetails([]);
           }

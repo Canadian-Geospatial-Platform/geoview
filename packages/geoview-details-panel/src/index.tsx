@@ -96,7 +96,7 @@ class DetailsPlugin extends AbstractPlugin {
     this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
 
     // set panel content
-    this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} />);
+    this.buttonPanel?.panel?.changeContent(<DetailsItem mapId={mapId} buttonId={button.id} />);
   };
 
   /**
