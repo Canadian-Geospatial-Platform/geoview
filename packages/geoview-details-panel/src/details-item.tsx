@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { ReactElement } from 'react';
 
-import { TypeWindow, payloadIsAllQueriesDone, TypeArrayOfLayerData, getLocalizedValue } from 'geoview-core';
+import { TypeWindow, payloadIsAllQueriesDone, payloadIsQueryLayer, TypeArrayOfLayerData, getLocalizedValue } from 'geoview-core';
 
 interface Props {
   mapId: string;
@@ -23,6 +23,7 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<ReactElement>();
+  const [latLng, setLatLng] = useState<unknown>([]);
 
   useEffect(() => {
     // create the listener to return the details
@@ -55,8 +56,21 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
       mapId,
       `${mapId}-DetailsAPI`
     );
+    api.event.on(
+      api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
+      (payload) => {
+        if (payloadIsQueryLayer(payload)) {
+          const { location } = payload;
+          setLatLng(location);
+        } else {
+          setLatLng([]);
+        }
+      },
+      mapId
+    );
     return () => {
       api.event.off(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId);
+      api.event.off(api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
