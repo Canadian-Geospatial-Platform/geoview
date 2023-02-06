@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { OverviewMap as OLOverviewMap } from 'ol/control';
+import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import { ChevronLeftIcon } from '../../../ui';
+import { ChevronLeftIcon, Tooltip } from '../../../ui';
 
 const useStyles = makeStyles((theme) => ({
   toggleBtn: {
@@ -48,6 +49,8 @@ interface OverviewMapToggleProps {
 export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   const { overviewMap } = props;
 
+  const { t } = useTranslation<string>();
+
   const [status, setStatus] = useState(true);
 
   const divRef = useRef<HTMLDivElement>(null);
@@ -86,18 +89,20 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element {
   }, []);
 
   return (
-    <div ref={divRef} className={`${classes.toggleBtnContainer}`}>
-      <div
-        className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
-        style={{
-          margin: 0,
-          padding: 0,
-          height: 'initial',
-          minWidth: 'initial',
-        }}
-      >
-        <ChevronLeftIcon />
+    <Tooltip title={t('mapctrl.overviewmap.toggle')}>
+      <div ref={divRef} className={`${classes.toggleBtnContainer}`}>
+        <div
+          className={`${classes.toggleBtn} ${!status ? classes.minimapOpen : classes.minimapClosed}`}
+          style={{
+            margin: 0,
+            padding: 0,
+            height: 'initial',
+            minWidth: 'initial',
+          }}
+        >
+          <ChevronLeftIcon />
+        </div>
       </div>
-    </div>
+    </Tooltip>
   );
 }
