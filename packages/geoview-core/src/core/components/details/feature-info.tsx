@@ -13,7 +13,6 @@ import {
   IconButton,
   Box,
 } from '../../../ui';
-
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
 
 const sxClasses = {
