@@ -44,7 +44,7 @@ export function Details(props: TypeDetailsProps): JSX.Element | null {
         api.event.emit(
           markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, location, {} as TypeJsonObject)
         );
-      }, 1000);
+      }, 1800);
     }
   }, [arrayOfLayerData, location, handlerName]);
 
