@@ -19,7 +19,7 @@ import { MapContext } from '../../core/app-start';
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
-import { IconButton, CloseIcon, PanelApi } from '..';
+import { IconButton, CloseIcon, PanelApi, Box } from '..';
 import { payloadBaseClass } from '../../api/events/payloads/payload-base-class';
 import { payloadIsAPanelAction, payloadIsAPanelContent, payloadHasAButtonIdAndType } from '../../api/events/payloads/panel-payload';
 import { inKeyfocusPayload } from '../../api/events/payloads/in-keyfocus-payload';
@@ -38,8 +38,6 @@ const useStyles = makeStyles((theme) => ({
   panelContainer: {
     backgroundColor: theme.panel.background,
     color: theme.palette.primary.light,
-    minWidth: 300,
-    width: 350,
     height: '100%',
     borderRadius: 0,
     flexDirection: 'column',
@@ -296,63 +294,62 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   }, [button, closeBtnRef]);
 
   return (
-    <FocusTrap
-      active={panelStatus}
-      focusTrapOptions={{
-        escapeDeactivates: false,
-        clickOutsideDeactivates: true,
-      }}
-    >
-      <Card
-        ref={panelRef as React.MutableRefObject<null>}
-        className={classes.panelContainer}
-        style={{
-          display: panelStatus ? 'flex' : 'none',
+    <Box sx={{ width: panelStatus ? 350 : 0, transition: 'width 300ms ease' }}>
+      <FocusTrap
+        active={panelStatus}
+        focusTrapOptions={{
+          escapeDeactivates: false,
+          clickOutsideDeactivates: true,
         }}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            closePanel();
-          }
-        }}
-        {...{ 'data-id': button.id }}
       >
-        <CardHeader
-          classes={{
-            root: classes.panelHeader,
-            title: classes.panelHeaderTitle,
-            action: classes.panelHeaderAction,
+        <Card
+          ref={panelRef as React.MutableRefObject<null>}
+          className={classes.panelContainer}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              closePanel();
+            }
           }}
-          ref={panelHeader}
-          title={t(panel.title)}
-          titleTypographyProps={{
-            component: 'h2',
-          }}
-          action={
-            panelStatus ? (
-              <>
-                {actionButtons}
-                <IconButton
-                  tooltip={t('general.close')}
-                  tooltipPlacement="right"
-                  aria-label={t('general.close')}
-                  size="small"
-                  onClick={panel.close}
-                  iconRef={closeBtnRef}
-                  className="cgpv-panel-close"
-                >
-                  <CloseIcon />
-                </IconButton>
-              </>
-            ) : (
-              <></>
-            )
-          }
-        />
+          {...{ 'data-id': button.id }}
+        >
+          <CardHeader
+            classes={{
+              root: classes.panelHeader,
+              title: classes.panelHeaderTitle,
+              action: classes.panelHeaderAction,
+            }}
+            ref={panelHeader}
+            title={t(panel.title)}
+            titleTypographyProps={{
+              component: 'h2',
+            }}
+            action={
+              panelStatus ? (
+                <>
+                  {actionButtons}
+                  <IconButton
+                    tooltip={t('general.close')}
+                    tooltipPlacement="right"
+                    aria-label={t('general.close')}
+                    size="small"
+                    onClick={panel.close}
+                    iconRef={closeBtnRef}
+                    className="cgpv-panel-close"
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </>
+              ) : (
+                <></>
+              )
+            }
+          />
 
-        <CardContent className={classes.panelContentContainer}>
-          {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
-        </CardContent>
-      </Card>
-    </FocusTrap>
+          <CardContent className={classes.panelContentContainer}>
+            {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
+          </CardContent>
+        </Card>
+      </FocusTrap>
+    </Box>
   );
 }

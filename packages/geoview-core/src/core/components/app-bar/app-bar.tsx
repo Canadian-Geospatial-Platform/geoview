@@ -239,14 +239,14 @@ export function Appbar(): JSX.Element {
 
         // display the panels in the list
         return (
-          <div key={groupName}>
+          <Fragment key={groupName}>
             {Object.keys(buttonPanels).map((buttonPanelsKey) => {
               const buttonPanel = buttonPanels[buttonPanelsKey];
               return buttonPanel?.panel ? (
                 <Panel key={buttonPanel.panel.panelId} panel={buttonPanel.panel} button={buttonPanel.button} />
               ) : null;
             })}
-          </div>
+          </Fragment>
         );
       })}
       <ExportModal isShown={ModalIsShown} closeModal={closeModal} />
