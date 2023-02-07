@@ -67,12 +67,9 @@ const useStyles = makeStyles((theme) => ({
       right: 0,
       left: 'auto !important',
       bottom: 'auto !important',
-      backgroundColor: 'transparent',
-      '&:hover': {
-        backgroundColor: 'transparent',
-      },
+      backgroundColor: '#cccccc',
       '&:focus': {
-        backgroundColor: 'transparent',
+        outline: 'none',
       },
     },
     '&::before': {
@@ -81,15 +78,12 @@ const useStyles = makeStyles((theme) => ({
       position: 'absolute',
       width: 0,
       height: 0,
-      borderTop: '28px solid rgba(0, 0, 0, 0.2)',
-      borderLeft: '28px solid rgba(0, 0, 0, 0.2)',
       borderRadius: 2,
       zIndex: theme.zIndex.appBar,
       right: 0,
       top: 0,
     },
     '& .ol-overviewmap-box': {
-      border: '1px solid black',
       backgroundColor: 'rgba(0, 0, 0, 0.2)',
     },
     '& .ol-viewport': {
@@ -229,6 +223,7 @@ export function OverviewMap(): JSX.Element {
       label: toggleButton,
       collapsed: false,
       rotateWithView: true,
+      tipLabel: '',
     });
 
     map.addControl(overviewMapControl);
