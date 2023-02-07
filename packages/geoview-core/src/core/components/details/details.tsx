@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Coordinate } from 'ol/coordinate';
 import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
-import { mapSingleClickPayload, TypeMapSingleClick } from '../../../api/events/payloads/map-slingle-click-payload';
+import { markerDefinitionPayload } from '../../../api/events/payloads/marker-definition-payload';
 import { LayersList } from './layers-list';
-import { api } from '../../../app';
-
-export interface TypeofClickPayload {
-  handlerName: string | null;
-  coordinates: TypeMapSingleClick;
-}
+import { api, TypeJsonObject } from '../../../app';
 
 export interface DetailsProps {
   mapId: string;
-  location: unknown;
+  location: Coordinate;
   backgroundStyle?: string;
   singleColumn?: boolean;
-  clickPayload?: TypeofClickPayload;
+  handlerName: string | null;
 }
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -36,23 +32,21 @@ export type TypeArrayOfLayerData = TypeLayerData[];
 export function Details(props: TypeDetailsProps): JSX.Element | null {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { arrayOfLayerData, detailsSettings } = props;
-  const { clickPayload } = detailsSettings;
-  const [clicked, setClicked] = useState<boolean>(true);
+  const { location, handlerName } = detailsSettings;
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
 
   useEffect(() => {
     setDetails(arrayOfLayerData);
     // show marker
 
-    console.log(clickPayload, clicked);
-    if (clickPayload !== undefined) {
+    if (handlerName !== undefined) {
       setTimeout(() => {
-        const { handlerName, coordinates } = clickPayload;
-        api.event.emit(mapSingleClickPayload(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, handlerName, coordinates));
-        // setClicked(false);
-      }, 2000);
+        api.event.emit(
+          markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, location, {} as TypeJsonObject)
+        );
+      }, 1000);
     }
-  }, [arrayOfLayerData, clickPayload, clicked]);
+  }, [arrayOfLayerData, location, handlerName]);
 
   return <LayersList arrayOfLayerData={details} detailsSettings={detailsSettings} />;
 }

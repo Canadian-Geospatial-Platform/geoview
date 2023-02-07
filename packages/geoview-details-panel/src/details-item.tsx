@@ -4,21 +4,15 @@ import { ReactElement } from 'react';
 import {
   TypeWindow,
   payloadIsAMapSingleClick,
-  mapSingleClickPayload,
-  TypeMapSingleClick,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
   getLocalizedValue,
+  Coordinate,
 } from 'geoview-core';
 
 interface Props {
   mapId: string;
   buttonId?: string;
-}
-
-interface TypeofClickPayload {
-  handlerName: string | null;
-  coordinates: TypeMapSingleClick;
 }
 
 const w = window as TypeWindow;
@@ -37,9 +31,8 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<ReactElement>();
-  const [latLng, setLatLng] = useState<unknown>([]);
-  const [clicked, setClicked] = useState<boolean>(false);
-  const [clickPayload, setClickPayload] = useState<TypeofClickPayload>({ handlerName: '', coordinates: {} as TypeMapSingleClick });
+  const [latLng, setLatLng] = useState<Coordinate>([]);
+  const [handlerName, setHandlerName] = useState<string | null>(null);
 
   const panel = api.map(mapId).appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)?.panel;
 
@@ -72,14 +65,14 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
       mapId,
       `${mapId}-DetailsAPI`
     );
+    // get click info.
     api.event.on(
       api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
         if (payloadIsAMapSingleClick(payload)) {
-          const { handlerName, coordinates } = payload;
-          setClickPayload({ handlerName, coordinates });
+          const { coordinates } = payload;
+          setHandlerName(payload.handlerName);
           setLatLng(coordinates.lnglat);
-          setClicked(true);
         } else {
           setLatLng([]);
         }
@@ -95,17 +88,11 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latLng, backgroundStyle: 'dark', singleColumn: true }));
-
-    // show marker
-    setTimeout(() => {
-      if (clicked && Array.isArray(details) && details.length > 0) {
-        const { handlerName, coordinates } = clickPayload;
-        api.event.emit(mapSingleClickPayload(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, handlerName, coordinates));
-        setClicked(false);
-      }
-    }, 1000);
-
+    setList(
+      api
+        .map(mapId)
+        .details.createDetails(mapId, details, { mapId, location: latLng, backgroundStyle: 'dark', singleColumn: true, handlerName })
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, latLng]);
 

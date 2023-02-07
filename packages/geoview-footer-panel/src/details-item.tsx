@@ -4,19 +4,14 @@ import { ReactElement } from 'react';
 import {
   TypeWindow,
   payloadIsAMapSingleClick,
-  TypeMapSingleClick,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
   getLocalizedValue,
+  Coordinate,
 } from 'geoview-core';
 
 interface Props {
   mapId: string;
-}
-
-interface TypeofClickPayload {
-  handlerName: string | null;
-  coordinates: TypeMapSingleClick;
 }
 
 const w = window as TypeWindow;
@@ -35,8 +30,8 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<ReactElement>();
-  const [latLng, setLatLng] = useState<unknown>([]);
-  const [clickPayload, setClickPayload] = useState<TypeofClickPayload>({ handlerName: '', coordinates: {} as TypeMapSingleClick });
+  const [latLng, setLatLng] = useState<Coordinate>([]);
+  const [handlerName, setHandlerName] = useState<string | null>(null);
 
   useEffect(() => {
     // create the listener to return the details
@@ -69,8 +64,8 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
       api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
         if (payloadIsAMapSingleClick(payload)) {
-          const { handlerName, coordinates } = payload;
-          setClickPayload({ handlerName, coordinates });
+          const { coordinates } = payload;
+          setHandlerName(payload.handlerName);
           setLatLng(coordinates.lnglat);
         } else {
           setLatLng([]);
@@ -86,7 +81,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latLng, clickPayload }));
+    setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latLng, handlerName }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, latLng]);
 
