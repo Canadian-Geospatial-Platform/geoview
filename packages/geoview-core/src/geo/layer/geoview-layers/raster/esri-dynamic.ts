@@ -104,6 +104,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /** Service metadata */
   metadata: TypeJsonObject = {};
 
+  /** Layer metadata */
+  layerMetadata: Record<string, TypeJsonObject> = {};
+
   /** ****************************************************************************************************************************
    * Initialize layer.
    * @param {string} mapId The id of the map.
@@ -222,10 +225,11 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return true;
       }
 
-      layerEntryConfig.layerName = {
-        en: this.metadata!.layers[esriIndex].name as string,
-        fr: this.metadata!.layers[esriIndex].name as string,
-      };
+      if (!layerEntryConfig.layerName)
+        layerEntryConfig.layerName = {
+          en: this.metadata!.layers[esriIndex].name as string,
+          fr: this.metadata!.layers[esriIndex].name as string,
+        };
 
       api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       return true;
@@ -253,6 +257,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
             // layers must have a fields attribute except if it is an metadata layer group.
             if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
+            this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = response.data;
             if (geoviewEntryIsEsriDynamic(layerEntryConfig)) {
               if (!(layerEntryConfig as TypeImageLayerEntryConfig).style) {
                 const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);
@@ -612,17 +617,20 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerFilter = layerEntryConfig.gvLayer?.get('layerFilter');
 
     if (layerEntryConfig.style) {
-      const setAllUndefinedVisibilityFlagsToTrue = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
+      const setAllUndefinedVisibilityFlagsToYes = (styleConfig: TypeUniqueValueStyleConfig | TypeClassBreakStyleConfig) => {
         // default value is true for all undefined visibility flags
-        if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = true;
+        if (styleConfig.defaultVisible === undefined) styleConfig.defaultVisible = 'yes';
         const settings = isUniqueValueStyleConfig(styleConfig) ? styleConfig.uniqueValueStyleInfo : styleConfig.classBreakStyleInfo;
-        for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = true;
+        for (let i = 0; i < settings.length; i++) if (settings[i].visible === undefined) settings[i].visible = 'yes';
       };
 
-      const featuresAreAllVisible = (defaultVisibility: boolean, settings: { visible: boolean }[]): boolean => {
-        let allVisible = defaultVisibility;
+      const featuresAreAllVisible = (
+        defaultVisibility: 'yes' | 'no' | 'always',
+        settings: { visible: 'yes' | 'no' | 'always' }[]
+      ): boolean => {
+        let allVisible = defaultVisibility !== 'no';
         for (let i = 0; i < settings.length; i++) {
-          allVisible &&= settings[i].visible;
+          allVisible &&= settings[i].visible !== 'no';
         }
         return allVisible;
       };
@@ -633,19 +641,28 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         return layerFilter || '(1=1)';
       }
       if (isUniqueValueStyleConfig(styleSettings)) {
-        setAllUndefinedVisibilityFlagsToTrue(styleSettings);
-        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: boolean }[]))
+        setAllUndefinedVisibilityFlagsToYes(styleSettings);
+        if (
+          featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.uniqueValueStyleInfo as { visible: 'yes' | 'no' | 'always' }[])
+        )
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const fieldNames = styleSettings.fields
           .reduce((fieldConcatenation, fieldName) => {
-            return `${fieldConcatenation}||'~+~'||${fieldName}`;
+            const fieldFound = (this.layerMetadata[Layer.getLayerPath(layerEntryConfig)].fields as TypeJsonArray).find(
+              (metadataFieldEntry) => metadataFieldEntry.name === fieldName
+            );
+            if (fieldFound!.type === 'esriFieldTypeString') return `${fieldConcatenation}||'~+~'||${fieldName}`;
+            return `${fieldConcatenation}||'~+~'||cast(${fieldName} as char(25))`;
           }, '')
           .slice(9);
 
         const fieldValues = styleSettings.uniqueValueStyleInfo
           .reduce((valueConcatenation, fieldEntry) => {
-            if ((!fieldEntry.visible && styleSettings.defaultVisible) || (fieldEntry.visible && !styleSettings.defaultVisible)) {
+            if (
+              (fieldEntry.visible === 'no' && styleSettings.defaultVisible !== 'no') ||
+              (fieldEntry.visible !== 'no' && styleSettings.defaultVisible === 'no')
+            ) {
               const fieldEntryValues: string = fieldEntry.values
                 .reduce((fieldValuesConcatenation, nextFieldValue) => {
                   return `${fieldValuesConcatenation}~+~${nextFieldValue}`;
@@ -657,15 +674,17 @@ export class EsriDynamic extends AbstractGeoViewRaster {
           }, '')
           .slice(1);
 
-        const selectionOperator = styleSettings.defaultVisible ? 'not in' : 'in';
+        const selectionOperator = styleSettings.defaultVisible !== 'no' ? 'not in' : 'in';
         const filterValue = `(${fieldNames} ${selectionOperator} (${fieldValues || "''"}))`;
 
         return `${filterValue}${layerFilter ? ` and (${layerFilter})` : ''}`;
       }
 
       if (isClassBreakStyleConfig(styleSettings)) {
-        setAllUndefinedVisibilityFlagsToTrue(styleSettings);
-        if (featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: boolean }[]))
+        setAllUndefinedVisibilityFlagsToYes(styleSettings);
+        if (
+          featuresAreAllVisible(styleSettings.defaultVisible!, styleSettings.classBreakStyleInfo as { visible: 'yes' | 'no' | 'always' }[])
+        )
           return `(1=1)${layerFilter ? ` and (${layerFilter})` : ''}`;
 
         const filterArray = [];
@@ -673,27 +692,27 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         for (let i = 0; i < styleSettings.classBreakStyleInfo.length; i++) {
           if (filterArray.length % 2 === 0) {
             if (i === 0) {
-              if (styleSettings.classBreakStyleInfo[0].visible && !styleSettings.defaultVisible)
+              if (styleSettings.classBreakStyleInfo[0].visible !== 'no' && styleSettings.defaultVisible === 'no')
                 filterArray.push(`${styleSettings.field} >= ${styleSettings.classBreakStyleInfo[0].minValue}`);
-              else if (!styleSettings.classBreakStyleInfo[0].visible && styleSettings.defaultVisible) {
+              else if (styleSettings.classBreakStyleInfo[0].visible === 'no' && styleSettings.defaultVisible !== 'no') {
                 filterArray.push(`${styleSettings.field} < ${styleSettings.classBreakStyleInfo[0].minValue}`);
                 visibleWhenGreatherThisIndex = i;
               }
-            } else if (styleSettings.classBreakStyleInfo[i].visible && !styleSettings.defaultVisible) {
+            } else if (styleSettings.classBreakStyleInfo[i].visible !== 'no' && styleSettings.defaultVisible === 'no') {
               filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[i].minValue}`);
               if (i + 1 === styleSettings.classBreakStyleInfo.length)
                 filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].maxValue}`);
-            } else if (!styleSettings.classBreakStyleInfo[i].visible && styleSettings.defaultVisible) {
+            } else if (styleSettings.classBreakStyleInfo[i].visible === 'no' && styleSettings.defaultVisible !== 'no') {
               filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].minValue}`);
               visibleWhenGreatherThisIndex = i;
             }
-          } else if (!styleSettings.defaultVisible) {
-            if (!styleSettings.classBreakStyleInfo[i].visible) {
+          } else if (styleSettings.defaultVisible === 'no') {
+            if (styleSettings.classBreakStyleInfo[i].visible === 'no') {
               filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i - 1].maxValue}`);
             } else if (i + 1 === styleSettings.classBreakStyleInfo.length) {
               filterArray.push(`${styleSettings.field} <= ${styleSettings.classBreakStyleInfo[i].maxValue}`);
             }
-          } else if (styleSettings.classBreakStyleInfo[i].visible) {
+          } else if (styleSettings.classBreakStyleInfo[i].visible !== 'no') {
             filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[i - 1].maxValue}`);
             visibleWhenGreatherThisIndex = -1;
           } else {
@@ -703,7 +722,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         if (visibleWhenGreatherThisIndex !== -1)
           filterArray.push(`${styleSettings.field} > ${styleSettings.classBreakStyleInfo[visibleWhenGreatherThisIndex].maxValue}`);
 
-        if (styleSettings.defaultVisible) {
+        if (styleSettings.defaultVisible !== 'no') {
           const filterValue = `${filterArray.slice(0, -1).reduce((previousFilterValue, filterNode, i) => {
             if (i === 0) return `(${filterNode} or `;
             if (i % 2 === 0) return `${previousFilterValue} and ${filterNode}) or `;

@@ -95,6 +95,9 @@ export const geoviewEntryIsEsriFeature = (
  */
 // ******************************************************************************************************************************
 export class EsriFeature extends AbstractGeoViewVector {
+  /** Layer metadata */
+  layerMetadata: Record<string, TypeJsonObject> = {};
+
   /** ***************************************************************************************************************************
    * Initialize layer.
    *
@@ -245,6 +248,7 @@ export class EsriFeature extends AbstractGeoViewVector {
             // layers must have a fields attribute except if it is an metadata layer group.
             if (!response.data.fields && !(layerEntryConfig as TypeLayerGroupEntryConfig).isMetadataLayerGroup)
               throw new Error(`Despite a return code of 200, an error was detected with this query (${queryUrl}?f=pjson)`);
+            this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = response.data;
             if (geoviewEntryIsEsriFeature(layerEntryConfig)) {
               if (!layerEntryConfig.style) {
                 const renderer = Cast<EsriBaseRenderer>(response.data.drawingInfo?.renderer);

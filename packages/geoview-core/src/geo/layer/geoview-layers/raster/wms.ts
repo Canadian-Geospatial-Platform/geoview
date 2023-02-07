@@ -391,10 +391,11 @@ export class WMS extends AbstractGeoViewRaster {
         return true;
       }
 
-      layerEntryConfig.layerName = {
-        en: layerFound.Title as string,
-        fr: layerFound.Title as string,
-      };
+      if (!layerEntryConfig.layerName)
+        layerEntryConfig.layerName = {
+          en: layerFound.Title as string,
+          fr: layerFound.Title as string,
+        };
 
       api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);
       return true;

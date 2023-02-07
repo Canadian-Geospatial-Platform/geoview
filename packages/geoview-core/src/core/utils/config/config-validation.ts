@@ -30,10 +30,8 @@ import {
   VALID_VERSIONS,
   TypeListOfGeoviewLayerConfig,
   TypeListOfLocalizedLanguages,
-  TypeVectorLayerEntryConfig,
-  TypeImageLayerEntryConfig,
 } from '../../../geo/map/map-schema-types';
-import { TypeMapFeaturesConfig } from '../../types/global-types';
+import { Cast, toJsonObject, TypeJsonObject, TypeMapFeaturesConfig } from '../../types/global-types';
 import { api } from '../../../app';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -398,13 +396,16 @@ export class ConfigValidation {
       listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
         switch (geoviewLayerConfig.geoviewLayerType) {
           case 'GeoJSON':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'esriDynamic':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'esriFeature':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
@@ -412,20 +413,25 @@ export class ConfigValidation {
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'GeoPackage':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'xyzTiles':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'ogcFeature':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'ogcWfs':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
           case 'ogcWms':
+            this.geoviewLayerIdIsMandatory(geoviewLayerConfig);
             this.metadataAccessPathIsMandatory(geoviewLayerConfig);
             this.processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
             break;
@@ -446,6 +452,16 @@ export class ConfigValidation {
       throw new Error(
         `metadataAccessPath is mandatory for GeoView layer ${geoviewLayerConfig.geoviewLayerId} of type ${geoviewLayerConfig.geoviewLayerType}.`
       );
+    }
+  }
+
+  /** ***************************************************************************************************************************
+   * Verify that the geoviewLayerId has a value.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
+   */
+  private geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig) {
+    if (!geoviewLayerConfig.geoviewLayerId) {
+      throw new Error(`geoviewLayerId is mandatory for GeoView layer of type ${geoviewLayerConfig.geoviewLayerType}.`);
     }
   }
 
@@ -636,24 +652,18 @@ export class ConfigValidation {
     }
 
     if (listOfGeoviewLayerConfig) {
-      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig: TypeGeoviewLayerConfig) => {
-        if (geoviewLayerConfig?.geoviewLayerName)
-          this.SynchronizeLocalizedString(geoviewLayerConfig.geoviewLayerName, sourceKey, destinationKey);
-        if (geoviewLayerConfig?.metadataAccessPath)
-          this.SynchronizeLocalizedString(geoviewLayerConfig.metadataAccessPath, sourceKey, destinationKey);
-
-        geoviewLayerConfig.listOfLayerEntryConfig.forEach((layerEntryConfig: TypeLayerEntryConfig) => {
-          if (layerEntryConfig?.layerName) this.SynchronizeLocalizedString(layerEntryConfig.layerName!, sourceKey, destinationKey);
-          if (layerEntryConfig?.source?.dataAccessPath)
-            this.SynchronizeLocalizedString(layerEntryConfig.source.dataAccessPath, sourceKey, destinationKey);
-          const baseVectorLayerEntryConfig = layerEntryConfig as TypeVectorLayerEntryConfig | TypeImageLayerEntryConfig;
-          if (baseVectorLayerEntryConfig?.source?.featureInfo) {
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.aliasFields!, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.nameField!, sourceKey, destinationKey);
-            this.SynchronizeLocalizedString(baseVectorLayerEntryConfig.source.featureInfo.outfields!, sourceKey, destinationKey);
-          }
-        });
-      });
+      const propagateLocalizedString = (config: TypeJsonObject) => {
+        if (typeof config === 'object') {
+          Object.keys(config).forEach((key) => {
+            if (typeof config[key] === 'object') {
+              if ('en' in config[key] || 'fr' in config[key])
+                this.SynchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
+              else propagateLocalizedString(config[key]);
+            }
+          });
+        }
+      };
+      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => propagateLocalizedString(toJsonObject(geoviewLayerConfig)));
     }
   }
 
