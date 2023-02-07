@@ -1,11 +1,24 @@
 /* eslint-disable react/require-default-props */
 import { ReactElement } from 'react';
 
-import { TypeWindow, payloadIsAllQueriesDone, payloadIsQueryLayer, TypeArrayOfLayerData, getLocalizedValue } from 'geoview-core';
+import {
+  TypeWindow,
+  payloadIsAMapSingleClick,
+  TypeMapSingleClick,
+  payloadIsAllQueriesDone,
+  TypeArrayOfLayerData,
+  getLocalizedValue,
+} from 'geoview-core';
 
 interface Props {
   mapId: string;
 }
+
+interface TypeofClickPayload {
+  handlerName: string | null;
+  coordinates: TypeMapSingleClick;
+}
+
 const w = window as TypeWindow;
 
 /**
@@ -23,6 +36,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<ReactElement>();
   const [latLng, setLatLng] = useState<unknown>([]);
+  const [clickPayload, setClickPayload] = useState<TypeofClickPayload>({ handlerName: '', coordinates: {} as TypeMapSingleClick });
 
   useEffect(() => {
     // create the listener to return the details
@@ -52,11 +66,12 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
       `${mapId}-DetailsAPI`
     );
     api.event.on(
-      api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
+      api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsQueryLayer(payload)) {
-          const { location } = payload;
-          setLatLng(location);
+        if (payloadIsAMapSingleClick(payload)) {
+          const { handlerName, coordinates } = payload;
+          setClickPayload({ handlerName, coordinates });
+          setLatLng(coordinates.lnglat);
         } else {
           setLatLng([]);
         }
@@ -65,15 +80,15 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
     );
     return () => {
       api.event.off(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId);
-      api.event.off(api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, mapId);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    setList(api.map(mapId).details.createDetails(mapId, details, {mapId, location: latlng}));
+    setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latLng, clickPayload }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [details]);
+  }, [details, latLng]);
 
   return <div>{list}</div>;
 }

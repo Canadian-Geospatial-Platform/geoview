@@ -1,14 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { TypeArrayOfFeatureInfoEntries } from '../../../api/events/payloads/get-feature-info-payload';
+import { mapSingleClickPayload, TypeMapSingleClick } from '../../../api/events/payloads/map-slingle-click-payload';
 import { LayersList } from './layers-list';
+import { api } from '../../../app';
 
-export interface DetailsStyleProps {
+export interface TypeofClickPayload {
+  handlerName: string | null;
+  coordinates: TypeMapSingleClick;
+}
+
+export interface DetailsProps {
+  mapId: string;
+  location: unknown;
   backgroundStyle?: string;
   singleColumn?: boolean;
+  clickPayload?: TypeofClickPayload;
 }
 export interface TypeDetailsProps {
   arrayOfLayerData: TypeArrayOfLayerData;
-  detailsStyle: DetailsStyleProps;
+  detailsSettings: DetailsProps;
 }
 
 export interface TypeLayerData {
@@ -25,12 +35,24 @@ export type TypeArrayOfLayerData = TypeLayerData[];
  */
 export function Details(props: TypeDetailsProps): JSX.Element | null {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { arrayOfLayerData, detailsStyle } = props;
+  const { arrayOfLayerData, detailsSettings } = props;
+  const { clickPayload } = detailsSettings;
+  const [clicked, setClicked] = useState<boolean>(true);
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
 
   useEffect(() => {
     setDetails(arrayOfLayerData);
-  }, [arrayOfLayerData]);
+    // show marker
 
-  return <LayersList arrayOfLayerData={details} detailsStyle={detailsStyle} />;
+    console.log(clickPayload, clicked);
+    if (clickPayload !== undefined) {
+      setTimeout(() => {
+        const { handlerName, coordinates } = clickPayload;
+        api.event.emit(mapSingleClickPayload(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, handlerName, coordinates));
+        // setClicked(false);
+      }, 2000);
+    }
+  }, [arrayOfLayerData, clickPayload, clicked]);
+
+  return <LayersList arrayOfLayerData={details} detailsSettings={detailsSettings} />;
 }
