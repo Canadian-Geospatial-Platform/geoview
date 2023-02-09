@@ -432,9 +432,21 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
+    // Erase comments in the config file.
+    const configObjStr = mapConfig
+      .split(/(?<!\\)'/gm)
+      .map((fragment, index) => {
+        if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
+        return fragment; // .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '');
+      })
+      .join("'")
+      .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
+      .replaceAll(String.fromCharCode(1), '/*')
+      .replaceAll(String.fromCharCode(2), '*/');
+
     // parse the config
     const parsedMapConfig = JSON.parse(
-      mapConfig
+      configObjStr
         // remove CR and LF from the map config
         .replace(/(\r\n|\n|\r)/gm, '')
         // replace apostrophes not preceded by a backslash with quotes

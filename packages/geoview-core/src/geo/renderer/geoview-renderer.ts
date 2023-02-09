@@ -1545,23 +1545,23 @@ export class GeoviewRenderer {
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === operande2.nodeValue });
             break;
           case '<':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`< operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue < operande2.nodeValue });
             break;
           case '>':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`> operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue > operande2.nodeValue });
             break;
           case '<=':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`<= operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue <= operande2.nodeValue });
             break;
           case '>=':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`>= operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue >= operande2.nodeValue });
             break;
           case '!=':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
+            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`!= operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue !== operande2.nodeValue });
             break;
           case 'and':
