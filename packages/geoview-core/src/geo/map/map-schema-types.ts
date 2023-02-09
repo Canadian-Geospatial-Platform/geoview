@@ -575,6 +575,8 @@ export type TypeBaseLayerEntryConfig = {
   isMetadataLayerGroup?: boolean;
   /** Layer entry data type. */
   entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
+  /** The ending element of the layer configuration path (default: the layerId value. */
+  layerPathEnding?: string;
   /** The id of the layer to display on the map. */
   layerId: string;
   /** The display name of the layer (English/French). */
@@ -689,13 +691,13 @@ export type TypeTileGrid = {
  * Initial settings for tile image sources.
  */
 export type TypeSourceTileInitialConfig = {
-  /** The service endpoint of the layer (English/French). */
+  /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it. */
   dataAccessPath: TypeLocalizedString;
   /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
    */
   crossOrigin?: string;
-  /** The source type for the tile layer. Default = XYZ. */
+  /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
   projection?: TypeValidMapProjectionCodes;
   /** Tile grid parameters to use. */
   tileGrid?: TypeTileGrid;
@@ -783,6 +785,8 @@ export type TypeGeocoreLayerEntryConfig = {
   entryType?: 'geocore';
   /** The layerId is not used by geocore layers. */
   layerId: never;
+  /** The layerPathEnding is not used by geocore layers. */
+  layerPathEnding: never;
   /** The display name of a geocore layer is in geocoreLayerName. */
   layerName?: never;
   /** The display name of the layer (English/French). */

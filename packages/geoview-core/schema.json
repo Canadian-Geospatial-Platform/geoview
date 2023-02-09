@@ -615,6 +615,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["vectorHeatmap"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path (default: the layerId value."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -659,6 +663,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["vector"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path (default: the layerId value."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -687,6 +695,10 @@
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "entryType": { "enum": ["vectorTile"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path (default: the layerId value."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -739,6 +751,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["raster"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path (default: the layerId value."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -766,6 +782,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["raster"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path (default: the layerId value."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."

@@ -42,7 +42,7 @@ function createConfigSnippet() {
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log('Error trapped');
+      console.log('Error trapped in createConfigSnippet');
     }
   }
 

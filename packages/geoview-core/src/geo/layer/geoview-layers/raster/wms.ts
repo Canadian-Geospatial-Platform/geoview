@@ -27,6 +27,7 @@ import {
   layerEntryIsGroupLayer,
   TypeLayerGroupEntryConfig,
   TypeFeatureInfoLayerConfig,
+  TypeSourceImageInitialConfig,
 } from '../../../map/map-schema-types';
 import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { getLocalizedValue, xmlToJson } from '../../../../core/utils/utilities';
@@ -202,6 +203,9 @@ export class WMS extends AbstractGeoViewRaster {
           this.metadata = parser.read(capabilitiesString);
           if (this.metadata) {
             this.processMetadataInheritance();
+            const metadataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
+            this.metadataAccessPath.en = metadataAccessPath;
+            this.metadataAccessPath.fr = metadataAccessPath;
             const dataAccessPath = this.metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource as string;
             const setDataAccessPath = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig) => {
               listOfLayerEntryConfig.forEach((layerEntryConfig) => {
@@ -473,7 +477,7 @@ export class WMS extends AbstractGeoViewRaster {
         const dataAccessPath = getLocalizedValue(layerEntryConfig.source.dataAccessPath!, this.mapId)!;
         const sourceOptions: SourceOptions = {
           url: dataAccessPath.endsWith('?') ? dataAccessPath : `${dataAccessPath}?`,
-          params: { LAYERS: layerEntryConfig.layerId },
+          params: { LAYERS: layerEntryConfig.layerId, STYLES: layerEntryConfig.source?.style ? layerEntryConfig.source.style : '' },
         };
         sourceOptions.attributions = this.attributions;
         sourceOptions.serverType = layerEntryConfig.source.serverType;
@@ -697,19 +701,24 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
    *
-   * @param {string} layerId The layer identifier for which we are looking for the legend URL.
+   * @param {TypeWmsLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
    */
-  private getLegendUrlFromCapabilities(layerId: string): TypeJsonObject | null {
-    const layerCapabilities = this.getLayerMetadataEntry(layerId);
-    if (layerCapabilities?.Style) {
-      for (let i = 0; i < layerCapabilities.Style.length; i++) {
-        if (layerCapabilities.Style[i].LegendURL) {
-          for (let j = 0; j < layerCapabilities.Style[i].LegendURL.length; j++) {
-            if (layerCapabilities.Style[i].LegendURL[j].Format === 'image/png') return layerCapabilities.Style[i].LegendURL[j];
-          }
-        }
+  private getLegendUrlFromCapabilities(layerConfig: TypeWmsLayerEntryConfig): TypeJsonObject | null {
+    const layerCapabilities = this.getLayerMetadataEntry(layerConfig.layerId);
+    if (Array.isArray(layerCapabilities?.Style)) {
+      const legendStyle = layerCapabilities?.Style.find((style) => {
+        if (layerConfig?.source?.style === style.Name) return true;
+        if (style.Name === 'default') return true;
+        return false;
+      });
+      if (Array.isArray(legendStyle?.LegendURL)) {
+        const legendUrl = legendStyle!.LegendURL.find((urlEntry) => {
+          if (urlEntry.Format === 'image/png') return true;
+          return false;
+        });
+        if (legendUrl) return legendUrl;
       }
     }
     return null;
@@ -718,11 +727,11 @@ export class WMS extends AbstractGeoViewRaster {
   /** ***************************************************************************************************************************
    * Get the legend image of a layer.
    *
-   * @param {string} layerId The layer identifier for which we are looking for the legend.
+   * @param {TypeWmsLayerEntryConfig} layerConfig layer configuration.
    *
    * @returns {blob} image blob
    */
-  private getLegendImage(layerId: string): Promise<string | ArrayBuffer | null> {
+  private getLegendImage(layerConfig: TypeWmsLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
       const readImage = (blob: Blob): Promise<string | ArrayBuffer | null> =>
         // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -733,10 +742,14 @@ export class WMS extends AbstractGeoViewRaster {
           reader.readAsDataURL(blob);
         });
 
-      const legendUrlFromCapabilities = this.getLegendUrlFromCapabilities(layerId);
+      const legendUrlFromCapabilities = this.getLegendUrlFromCapabilities(layerConfig);
       let queryUrl: string;
       if (legendUrlFromCapabilities) queryUrl = legendUrlFromCapabilities.OnlineResource as string;
-      else queryUrl = `${this.metadataAccessPath}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerId}`;
+      else
+        queryUrl = `${getLocalizedValue(
+          this.metadataAccessPath,
+          this.mapId
+        )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
       axios.get<TypeJsonObject>(queryUrl, { responseType: 'blob' }).then((response) => {
         resolve(readImage(Cast<Blob>(response.data)));
@@ -756,10 +769,12 @@ export class WMS extends AbstractGeoViewRaster {
    */
   getLegend(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer): Promise<TypeLegend | null> {
     const promisedLegend = new Promise<TypeLegend | null>((resolve) => {
-      const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+      const layerConfig = Cast<TypeWmsLayerEntryConfig | undefined | null>(
+        typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+      );
       if (!layerConfig) resolve(null);
 
-      this.getLegendImage(layerConfig!.layerId).then((legendImage) => {
+      this.getLegendImage(layerConfig!).then((legendImage) => {
         if (!legendImage) resolve(null);
         else {
           api
