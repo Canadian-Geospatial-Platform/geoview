@@ -602,12 +602,14 @@ export class ConfigValidation {
           fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
           layerEntryConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
         }
-        layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
-          ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
-          : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
-        layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
-          ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
-          : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+        if (!layerEntryConfig.source.dataAccessPath!.en?.endsWith('.json' || '.geojson' || '.JSON' || '.geoJSON' || '.GEOJSON')) {
+          layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
+            ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
+            : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
+          layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
+            ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
+            : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+        }
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       }
     });
