@@ -100,6 +100,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
     if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(addGeoviewLayerId)) {
       setMapLayers((orderedLayers) => [addGeoviewLayerId, ...orderedLayers]);
     } else {
+      // eslint-disable-next-line no-console
       console.error('geoviewLayerId is not in the layers list');
     }
   };
@@ -109,7 +110,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   };
 
   useEffect(() => {
-    setMapLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
+    if (api.map(mapId!).layer !== undefined) setMapLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
     api.event.on(
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {
