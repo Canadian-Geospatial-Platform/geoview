@@ -36,7 +36,10 @@ export class FeatureInfoLayerSet {
   constructor(mapId: string, layerSetId: string) {
     const registrationConditionFunction = (layerPath: string): boolean => {
       const layerEntryConfig = api.map(this.mapId).layer.registeredLayers[layerPath];
-      return 'featureInfo' in layerEntryConfig.source! && !!layerEntryConfig.source.featureInfo?.queryable;
+      if (layerEntryConfig.source) {
+        return 'featureInfo' in layerEntryConfig.source! && !!layerEntryConfig.source.featureInfo?.queryable;
+      }
+      return false;
     };
     this.mapId = mapId;
     this.layerSetId = layerSetId;
