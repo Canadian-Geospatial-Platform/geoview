@@ -13,6 +13,23 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
+
+    <script>
+      // add url params
+      if (document.location.search.length === 0)
+        // reload page with new params
+        document.location.search =
+          '?' +
+          'p=3857&' +
+          'z=4&' +
+          'c=-100,40&' +
+          'l=en&' +
+          't=dark&' +
+          'b={basemapId:transport,shaded:false,labeled:true}&' +
+          'i=dynamic&' +
+          'cc=overview-map&' +
+          'keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9';
+    </script>
   </head>
 
   <body>
@@ -207,7 +224,7 @@
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
-              'zoom': 4,
+              'zoom': 10,
               'center': [-100, 60],
               'projection': 3978
             },
@@ -218,7 +235,7 @@
             },
             'listOfGeoviewLayerConfig': []
           },
-          'components': ['overview-map', 'nav-bar', 'footer-bar'],
+          'components': ['app-bar', 'overview-map', 'nav-bar', 'footer-bar'],
           'corePackages': [],
           'theme': 'dark',
           'suportedLanguages': ['en']

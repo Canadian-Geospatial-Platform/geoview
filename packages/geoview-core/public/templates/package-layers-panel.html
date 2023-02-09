@@ -45,32 +45,14 @@
       <h4 id="HUC1">1. Default Configuration</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div
-      id="mapWM"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'zoom': 4,
-              'center': [-100, 60],
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': [
-            ]
-          },
-          'theme': 'dark',
-          'components': ['app-bar', 'footer-bar'],
-          'corePackages': ['layers-panel'],
-          'suportedLanguages': ['en']
-        }"
-    ></div>
+
+    <select name="projections" id="projections">
+      <option value="3857">Web Mercator (3857)</option>
+      <option value="3978">LCC (3978)</option>
+    </select>
+    <button type="button" onclick="reloadMap()">Set Projection</button>
+
+    <div id="mapWM" class="llwp-map" data-lang="en"></div>
     <h4>Add Layer Examples</h4>
     <div style="font-size: smaller">
       <div>
@@ -132,13 +114,58 @@
     <pre id="mapWMCS" class="panel"></pre>
     <script src="codedoc.js"></script>
     <script>
+      function reloadMap() {
+        cgpv.api.map('mapWM').loadMapConfig(`{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': ${Number(document.getElementById('projections').value)}
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+            ]
+          },
+          'theme': 'dark',
+          'components': ['app-bar', 'footer-bar'],
+          'corePackages': ['layers-panel', 'details-panel'],
+          'suportedLanguages': ['en']
+        }`);
+      }
       // initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
       cgpv.init(function () {
         console.log('api is ready');
 
+        cgpv.api.map('mapWM').loadMapConfig(`{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+            ]
+          },
+          'theme': 'dark',
+          'components': ['app-bar', 'footer-bar'],
+          'corePackages': ['layers-panel', 'details-panel'],
+          'suportedLanguages': ['en']
+        }`);
+
         //create snippets
         createConfigSnippet();
-        // createCodeSnippet();
+        createCodeSnippet();
       });
     </script>
   </body>

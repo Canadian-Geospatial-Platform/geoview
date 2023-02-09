@@ -29,39 +29,41 @@ export const api = new API();
 // TODO look for a better place to put this when working on issue #8
 
 // listen to map reload event
-// TODO: Fix: because handler name is not know at registration, never trigger. Plus if we put default name, it triggers all the time.
-// break map 7 load default config
-api.event.on(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, (payload) => {
-  if (payloadIsAmapFeaturesConfig(payload)) {
-    if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
-      // unsubscribe from all events registered on this map
-      api.event.offAll(payload.mapFeaturesConfig.mapId);
+api.event.on(
+  EVENT_NAMES.MAP.EVENT_MAP_RELOAD,
+  (payload) => {
+    if (payloadIsAmapFeaturesConfig(payload)) {
+      if (payload.mapFeaturesConfig && payload.mapFeaturesConfig.mapId) {
+        // unsubscribe from all events registered on this map
+        api.event.offAll(payload.mapFeaturesConfig.mapId);
 
-      // unload all loaded plugins on the map
-      api.plugin.removePlugins(payload.mapFeaturesConfig.mapId);
+        // unload all loaded plugins on the map
+        api.plugin.removePlugins(payload.mapFeaturesConfig.mapId);
 
-      // get the map container
-      const map = document.getElementById(payload.mapFeaturesConfig.mapId);
+        // get the map container
+        const map = document.getElementById(payload.mapFeaturesConfig.mapId);
 
-      if (map) {
-        // remove the dom element (remove rendered map)
-        ReactDOM.unmountComponentAtNode(map);
+        if (map) {
+          // remove the dom element (remove rendered map)
+          ReactDOM.unmountComponentAtNode(map);
 
-        // delete the map instance from the maps array
-        delete api.maps[payload.mapFeaturesConfig.mapId];
+          // delete the map instance from the maps array
+          delete api.maps[payload.mapFeaturesConfig.mapId];
 
-        // delete plugins that were loaded on the map
-        delete api.plugin.plugins[payload.mapFeaturesConfig.mapId];
+          // delete plugins that were loaded on the map
+          delete api.plugin.plugins[payload.mapFeaturesConfig.mapId];
 
-        // set plugin's loaded to false
-        api.plugin.pluginsLoaded = false;
+          // set plugin's loaded to false
+          api.plugin.pluginsLoaded = false;
 
-        // re-render map with updated config keeping previous values if unchanged
-        ReactDOM.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />, map);
+          // re-render map with updated config keeping previous values if unchanged
+          ReactDOM.render(<AppStart mapFeaturesConfig={payload.mapFeaturesConfig} />, map);
+        }
       }
     }
-  }
-});
+  },
+  'all'
+);
 
 /**
  * Initialize the cgpv and render it to root element
