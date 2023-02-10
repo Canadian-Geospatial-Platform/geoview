@@ -1049,11 +1049,11 @@
           "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
         },
         "zoom": {
-          "type": "integer",
+          "type": "number",
           "minimum": 0,
           "maximum": 28,
           "default": 12,
-          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
+          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels. Levels between whole numbers are supported to fine tune initial view."
         }
       },
       "required": ["zoom", "center"]
