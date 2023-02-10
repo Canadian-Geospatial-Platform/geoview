@@ -70,7 +70,7 @@ export function LegendItem({ mapId }: Props): JSX.Element {
   }, []);
 
   useEffect(() => {
-    setLegend(api.map(mapId).legend.createLegend({ layerIds: mapLayers }));
+    setLegend(api.map(mapId).legend.createLegend({ layerIds: mapLayers, isRemoveable: false, canSetOpacity: true }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLayers]);
 

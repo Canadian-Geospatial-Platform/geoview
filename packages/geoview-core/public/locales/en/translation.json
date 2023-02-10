@@ -44,7 +44,8 @@
     "unknown": "Unknown Layer Title",
     "remove_layer": "Remove Layer",
     "opacity": "Opacity",
-    "expand_legend": "Expand Legend"
+    "expand_legend": "Expand Legend",
+    "toggle_cluster": "Toggle Clustering"
   },
   "keyboardnav": {
     "start": "Skip after map element",
