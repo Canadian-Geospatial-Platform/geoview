@@ -11,8 +11,8 @@ import { isJsonString } from '../../utilities';
  *
  * The configuration must respect the JSON format. However, for readability reasons, the quotes (") are replaced by
  * apostrophe ('). The reader will take care of converting the apostrophes into quotes when reading. If you want to insert a
- * quote in the configuration, use the HTML syntax '&quot;', but remember that it must be preceded by a backslash depending on
- * where it is located in the JSON code.
+ * quote in the configuration, use the HTML syntax '&quot;' or escape it using a backslash, but remember that it must be preceded
+ * by a backslash depending on where it is located in the JSON code.
  * @exports
  * @class URLmapConfigReader
  */
@@ -32,10 +32,23 @@ export class InlineDivConfigReader {
     let configObjStr = mapElement.getAttribute('data-config');
 
     if (configObjStr && configObjStr !== '') {
-      // If you want to use quotes in your JSON string, write \&quot;
+      // Erase comments in the config file.
+      configObjStr = configObjStr
+        .split(/(?<!\\)'/gm)
+        .map((fragment, index) => {
+          if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
+          return fragment; // .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '');
+        })
+        .join("'")
+        .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
+        .replaceAll(String.fromCharCode(1), '/*')
+        .replaceAll(String.fromCharCode(2), '*/');
+
+      // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
       // First, replace apostrophes not preceded by a backslash with quotes
+      configObjStr = configObjStr.replace(/(?<!\\)'/gm, '"');
       // Then, replace apostrophes preceded by a backslash with a single apostrophe
-      configObjStr = configObjStr.replace(/(?<!\\)'/gm, '"').replace(/\\'/gm, "'");
+      configObjStr = configObjStr.replace(/\\'/gm, "'");
 
       if (!isJsonString(configObjStr)) {
         console.log(`- Map: ${mapId} - Invalid JSON configuration object, using default -`);
