@@ -46,4 +46,11 @@ export declare class GeoCore {
      * @returns {Promise<TypeListOfGeoviewLayerConfig>} list of layer configurations to add to the map
      */
     createLayers(geocoreLayerConfig: TypeGeoCoreLayerConfig): Promise<TypeListOfGeoviewLayerConfig[]>;
+    /**
+     * Copy the config settings over the geocore values (config values have priority).
+     *
+     * @param {TypeGeocoreLayerEntryConfig} geocoreLayerEntryConfig The config file settings
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The settings returned by the geocore service
+     */
+    private copyConfigSettingsOverGeocoreSettings;
 }

@@ -148,6 +148,11 @@ export declare class ConfigValidation {
      */
     private metadataAccessPathIsMandatory;
     /** ***************************************************************************************************************************
+     * Verify that the geoviewLayerId has a value.
+     * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration to validate.
+     */
+    private geoviewLayerIdIsMandatory;
+    /** ***************************************************************************************************************************
      * Process recursively the layer entries to create layers and layer groups.
      * @param {TypeGeoviewLayerConfig} rootLayerConfig The GeoView layer configuration to adjust and validate.
      * @param {TypeGeoviewLayerConfig | TypeLayerGroupEntryConfig} parentLayerConfig The parent layer configuration of all the

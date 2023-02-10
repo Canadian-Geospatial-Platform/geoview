@@ -1,8 +1,8 @@
 /// <reference types="react" />
-import { TypeArrayOfLayerData, DetailsStyleProps } from './details';
+import { TypeArrayOfLayerData, DetailsProps } from './details';
 interface TypeLayersListProps {
     arrayOfLayerData: TypeArrayOfLayerData;
-    detailsStyle: DetailsStyleProps;
+    detailsSettings: DetailsProps;
 }
 /**
  * layers list

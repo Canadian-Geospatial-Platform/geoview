@@ -175,4 +175,8 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * @returns {string | undefined} The filter associated to the layer or undefined.
      */
     getLayerFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string | undefined;
+    /** ***************************************************************************************************************************
+     * Toggle cluster status.
+     */
+    toggleCluster(): void;
 }

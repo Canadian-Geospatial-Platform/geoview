@@ -6,8 +6,8 @@ import { TypeMapFeaturesConfig } from '../../../types/global-types';
  *
  * The configuration must respect the JSON format. However, for readability reasons, the quotes (") are replaced by
  * apostrophe ('). The reader will take care of converting the apostrophes into quotes when reading. If you want to insert a
- * quote in the configuration, use the HTML syntax '&quot;', but remember that it must be preceded by a backslash depending on
- * where it is located in the JSON code.
+ * quote in the configuration, use the HTML syntax '&quot;' or escape it using a backslash, but remember that it must be preceded
+ * by a backslash depending on where it is located in the JSON code.
  * @exports
  * @class URLmapConfigReader
  */
