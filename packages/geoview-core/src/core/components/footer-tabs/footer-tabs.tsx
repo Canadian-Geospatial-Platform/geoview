@@ -130,9 +130,9 @@ export function FooterTabs(): JSX.Element | null {
               const tabsContainer = tabsContainerRef.current as HTMLDivElement;
               const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
               if (mapContainer.style.height === 'calc(100% - 300px)') {
-                setIsCollapsed(false);
                 tabsContainer.style.height = '300px';
               } else {
+                setIsCollapsed(true);
                 tabsContainer.style.height = '55px';
               }
             }

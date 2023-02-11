@@ -21,6 +21,15 @@ export function DataItem({ mapId }: Props): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
+  const onChangeLayer = (selectedIndex: number) => {
+    const datagridTables = document.getElementsByClassName('layer-datagrid-table');
+    if (datagridTables.length > 0) {
+      for (let i = 0; i < datagridTables.length; i++) {
+        (datagridTables[i] as HTMLDivElement).setAttribute('style', `display:${i !== selectedIndex ? 'none' : 'block'}`);
+      }
+    }
+  };
+
   useEffect(() => {
     setDataLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,7 +46,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
         return {
           value: index,
           label: labelValue !== undefined ? labelValue : `data-${index}`,
-          content: () => api.map(mapId).dataGrid.createDataGrid({ layerId }),
+          content: () => api.map(mapId).dataGrid.createDataGrid({ layerId, onChangeLayer }),
         };
       })}
     />
