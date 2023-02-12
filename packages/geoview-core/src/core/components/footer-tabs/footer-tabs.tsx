@@ -67,31 +67,36 @@ export function FooterTabs(): JSX.Element | null {
   /**
    * Handle a collapse, expand event for the tabs component
    */
-  const handleCollapse = (open?: boolean) => {
-    // check if tabs component is created
-    const collapseStatus = open !== undefined ? open : isCollapsed;
-    if (tabsContainerRef && tabsContainerRef.current) {
-      const tabsContainer = tabsContainerRef.current as HTMLDivElement;
-      const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
-      mapContainer.style.transition = 'height 0.2s ease-out';
-      // check if the tabs container is collapsed
-      if (!collapseStatus) {
-        tabsContainer.style.height = '55px';
-        mapContainer.style.height = 'calc( 100% - 55px)';
-      } else {
-        tabsContainer.style.height = '300px';
-        mapContainer.style.height = 'calc( 100% - 300px)';
+  const handleCollapse = useCallback(
+    (open?: boolean) => {
+      // check if tabs component is created
+      const collapseStatus = open !== undefined ? open : isCollapsed;
+      if (tabsContainerRef && tabsContainerRef.current) {
+        const tabsContainer = tabsContainerRef.current as HTMLDivElement;
+        const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
+        mapContainer.style.transition = 'height 0.2s ease-out';
+        // check if the tabs container is collapsed
+        if (!collapseStatus) {
+          tabsContainer.style.height = '55px';
+          mapContainer.style.height = 'calc( 100% - 55px)';
+        } else {
+          tabsContainer.style.height = '300px';
+          mapContainer.style.height = 'calc( 100% - 300px)';
+        }
       }
-    }
-    setIsFullscreen(false);
-    setIsCollapsed(!collapseStatus);
+      setIsFullscreen(false);
+      setIsCollapsed(!collapseStatus);
 
-    // update map container size
-    setTimeout(() => {
-      api.map(mapId).map.updateSize();
-    }, 1000);
-  };
+      // update map container size
+      setTimeout(() => {
+        api.map(mapId).map.updateSize();
+      }, 1000);
+    },
+    [isCollapsed, mapId]
+  );
 
+  console.log('collapseStatuscollapseStatus', isCollapsed);
+  console.log('footerTabsfooterTabs', footerTabs);
   const handleFullscreen = () => {
     // check if tabs component is created
     if (tabsContainerRef && tabsContainerRef.current) {
@@ -100,7 +105,6 @@ export function FooterTabs(): JSX.Element | null {
       mapContaine.style.transition = 'height 0.2s ease-out';
       // check if the tabs container is collapsed
       if (isFullscreen) {
-        // eslint-disable-next-line no-lonely-if
         tabsContaine.style.height = '300px';
         mapContaine.style.height = 'calc( 100% - 300px)';
         setIsCollapsed(false);
@@ -123,6 +127,7 @@ export function FooterTabs(): JSX.Element | null {
     api.event.on(
       EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE,
       (payload) => {
+        console.log('tab created', payload);
         if (payloadIsAFooterTab(payload)) {
           if (payload.handlerName && payload.handlerName === mapId) {
             addTab(payload);
@@ -131,7 +136,7 @@ export function FooterTabs(): JSX.Element | null {
               const tabsContainer = tabsContainerRef.current as HTMLDivElement;
               const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
               if (mapContainer.style.height === 'calc(100% - 300px)') {
-                setIsCollapsed(false);
+                setIsCollapsed(true);
                 tabsContainer.style.height = '300px';
               } else {
                 tabsContainer.style.height = '55px';
@@ -178,7 +183,7 @@ export function FooterTabs(): JSX.Element | null {
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId);
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, mapId);
     };
-  }, [addTab, mapId, removeTab]);
+  }, [addTab, mapId, removeTab, handleCollapse]);
 
   return api.map(mapId).footerTabs.tabs.length > 0 ? (
     <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
@@ -202,7 +207,4 @@ export function FooterTabs(): JSX.Element | null {
       />
     </div>
   ) : null;
-}
-function componentDidMount() {
-  throw new Error('Function not implemented.');
 }

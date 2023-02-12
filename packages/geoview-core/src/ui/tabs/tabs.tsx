@@ -45,7 +45,7 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse } = props;
-
+  console.log('props', props);
   const [value, setValue] = useState(0);
 
   /**
@@ -114,7 +114,6 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider' }}>
         {tabs.map((tab, index) => {
           const TabContent = tab.content as React.ElementType;
-
           return (
             <TabPanel key={index} value={value} index={index}>
               {typeof tab.content === 'string' ? <HtmlToReact htmlContent={tab.content} /> : <TabContent />}
