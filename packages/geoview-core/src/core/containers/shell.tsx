@@ -183,16 +183,6 @@ export function Shell(props: ShellProps): JSX.Element {
     };
   }, [components, shellId, updateShell]);
 
-  // useEffect(() => {
-  //   document.addEventListener(
-  //     'focusin',
-  //     () => {
-  //       console.log(document.activeElement);
-  //     },
-  //     true
-  //   );
-  // }, []);
-
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div id={`shell-${shellId}`} className={classes.shell}>
