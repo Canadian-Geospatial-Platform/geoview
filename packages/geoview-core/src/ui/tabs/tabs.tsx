@@ -45,7 +45,6 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse } = props;
-
   const [value, setValue] = useState(0);
 
   /**
