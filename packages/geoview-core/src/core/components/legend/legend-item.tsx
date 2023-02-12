@@ -66,6 +66,7 @@ const sxClasses = {
     maxHeight: 24,
   },
   iconPreview: {
+    marginLeft: 8,
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
@@ -80,8 +81,16 @@ const sxClasses = {
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
   },
+  stackIconsBox: {
+    position: 'relative',
+    marginLeft: 8,
+    '&:focus': {
+      outlineColor: 'grey',
+    },
+  },
   iconPreviewHoverable: {
-    left: -30,
+    position: 'absolute',
+    left: -3,
     top: -2,
     padding: 0,
     borderRadius: 0,
@@ -94,6 +103,7 @@ const sxClasses = {
     },
   },
   iconPreviewStacked: {
+    // marginLeft: 8,
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
@@ -346,7 +356,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+              <IconButton
+                sx={sxClasses.iconPreview}
+                color="primary"
+                size="small"
+                onClick={handleLegendClick}
+                tabIndex={isLegendOpen ? 1 : -1}
+              >
                 <CloseIcon />
               </IconButton>
             )}
@@ -359,13 +375,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
             {iconType === 'list' && !isLegendOpen && (
               <Tooltip title={t('legend.expand_legend')} placement="top" enterDelay={1000}>
-                <Box>
-                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small">
+                <Box tabIndex={0} onClick={handleLegendClick} sx={sxClasses.stackIconsBox}>
+                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
                     <Box sx={sxClasses.legendIconTransparent}>
                       {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
                     </Box>
                   </IconButton>
-                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" onClick={handleLegendClick}>
+                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
                     <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
                   </IconButton>
                 </Box>

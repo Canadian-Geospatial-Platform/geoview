@@ -265,6 +265,27 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Disable scrolling, so that screen doesnt scroll down.
+   *  when focus is set to map and
+   * arrows and enter keys are used to navigate the map
+   * @param e
+   */
+  const stopScrollingWhenFocusedMap = (e: KeyboardEvent): void => {
+    if (mapElement.current === document.activeElement) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', stopScrollingWhenFocusedMap);
+    return () => {
+      document.removeEventListener('keydown', stopScrollingWhenFocusedMap);
+    };
+  }, []);
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
     <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} tabIndex={0}>
