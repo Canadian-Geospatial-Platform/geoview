@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, MutableRefObject } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -54,7 +54,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const fullScreen = useMediaQuery(defaultTheme.breakpoints.down('md'));
 
   const [open, setOpen] = useState(false);
-
+  const navigationLinkRef = useRef() as MutableRefObject<string | undefined>;
   /**
    * Exit the focus trap
    */
@@ -97,9 +97,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     setFocusTrap();
   };
   const handleSkip = () => {
-    // because the process is about to focus the map, apply a timeout before shifting focus on bottom link
+    // because the process is about to focus the map, apply a timeout before shifting focus on bottom or top link
     setOpen(false);
-    setTimeout(() => document.getElementById(`bottomlink-${focusTrapId}`)?.focus(), 0);
+    setTimeout(() => document.getElementById(navigationLinkRef.current!)?.focus(), 0);
   };
 
   /**
@@ -110,11 +110,11 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // if Enter, skip to the right link (handle the ref of the link)
     // if Tab from topLink or shift+Tab from bottomLink, focus the map element
     const linkId = (evt.target as HTMLElement).id.split('-')[0];
-
-    if ((evt.code === 'Tab' && linkId === 'toplink') || (evt.code === 'Tab' && evt.shiftKey && linkId === 'bottomlink')) {
+    if ((evt.code === 'Tab' && !evt.shiftKey && linkId === 'toplink') || (evt.code === 'Tab' && evt.shiftKey && linkId === 'bottomlink')) {
       // prevent the event to tab to inner map
       evt.preventDefault();
       evt.stopPropagation();
+      navigationLinkRef.current = linkId === 'toplink' ? `bottomlink-${focusTrapId}` : `toplink-${focusTrapId}`;
 
       // focus the map element and emit the map keyboard focus event
       (document.getElementById(`map-${focusTrapId}`) as HTMLElement).focus();

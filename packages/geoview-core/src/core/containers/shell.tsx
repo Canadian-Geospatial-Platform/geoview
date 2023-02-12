@@ -183,6 +183,16 @@ export function Shell(props: ShellProps): JSX.Element {
     };
   }, [components, shellId, updateShell]);
 
+  // useEffect(() => {
+  //   document.addEventListener(
+  //     'focusin',
+  //     () => {
+  //       console.log(document.activeElement);
+  //     },
+  //     true
+  //   );
+  // }, []);
+
   return (
     <FocusTrap active={activeTrap} focusTrapOptions={{ escapeDeactivates: false }}>
       <div id={`shell-${shellId}`} className={classes.shell}>
@@ -191,7 +201,9 @@ export function Shell(props: ShellProps): JSX.Element {
           {t('keyboardnav.start')}
         </a>
         <div className={classes.mapContainer}>
-          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && <Appbar />}
+          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
+            <Appbar setActivetrap={setActivetrap} />
+          )}
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('nav-bar') > -1 && <Navbar />}
         </div>

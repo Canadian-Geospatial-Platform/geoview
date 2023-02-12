@@ -68,9 +68,6 @@ const useStyles = makeStyles((theme) => ({
       left: 'auto !important',
       bottom: 'auto !important',
       backgroundColor: '#cccccc',
-      '&:focus': {
-        outline: 'none',
-      },
     },
     '&::before': {
       content: '""',

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, Fragment, useContext } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment, useContext, SetStateAction, Dispatch } from 'react';
 
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -85,10 +85,13 @@ const useStyles = makeStyles((theme) => ({
   appBarPanels: {},
 }));
 
+type AppbarProps = {
+  setActivetrap: Dispatch<SetStateAction<boolean>>;
+};
 /**
  * Create an app-bar with buttons that can open a panel
  */
-export function Appbar(): JSX.Element {
+export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [selectedAppBarButtonId, setSelectedAppbarButtonId] = useState<string>('');
@@ -103,10 +106,14 @@ export function Appbar(): JSX.Element {
 
   const openModal = () => {
     setModalIsShown(true);
+    // this will remove the focus active trap from map and focus will be on export modal
+    setActivetrap(false);
   };
 
   const closeModal = () => {
     setModalIsShown(false);
+    // this will add back focus active trap from map and focus will be on export modal
+    setActivetrap(true);
   };
 
   const addButtonPanel = useCallback(
