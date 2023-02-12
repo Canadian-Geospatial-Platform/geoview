@@ -61,8 +61,8 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
    * Handle a tab click
    * If the panel is collapsed when tab is clicked, expand the panel
    */
-  const handleClick = () => {
-    if (isCollapsed && handleCollapse !== undefined) handleCollapse();
+  const handleClick = (index: number) => {
+    if (handleCollapse !== undefined && (isCollapsed || value === index)) handleCollapse();
   };
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                 key={index}
                 {...props.tabProps}
                 id={`tab-${index}`}
-                onClick={handleClick}
+                onClick={() => handleClick(index)}
                 sx={{
                   fontSize: 16,
                   minWidth: 'min(4vw, 24px)',

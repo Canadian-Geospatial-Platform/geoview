@@ -44,7 +44,8 @@
     "unknown": "Titre de légende inconnu",
     "remove_layer": "Supprimer le calque",
     "opacity": "Opacité",
-    "expand_legend": "Développer la légende"
+    "expand_legend": "Développer la légende",
+    "toggle_cluster": "Basculer le groupement"
   },
   "keyboardnav": {
     "start": "Aller après l'élément carte",

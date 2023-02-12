@@ -193,11 +193,17 @@ export class Layer {
   /**
    * Get the layer Path of the layer configuration parameter.
    * @param {TypeLayerEntryConfig} layerEntryConfig The layer configuration for wich we want to get the layer path.
+   * @param {string} layerPath Internal parameter used to build the layer path (should not be used by the user).
    *
    * @returns {string} Returns the layer path.
    */
   static getLayerPath(layerEntryConfig: TypeLayerEntryConfig, layerPath?: string): string {
-    const pathEnding = typeof layerPath === 'undefined' ? layerEntryConfig.layerId : layerPath;
+    let pathEnding = layerPath;
+    if (pathEnding === undefined)
+      pathEnding =
+        layerEntryConfig.layerPathEnding === undefined
+          ? layerEntryConfig.layerId
+          : `${layerEntryConfig.layerId}/${layerEntryConfig.layerPathEnding}`;
     if (layerEntryConfig.geoviewRootLayer === layerEntryConfig.parentLayerConfig)
       return `${layerEntryConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
     return this.getLayerPath(

@@ -32,6 +32,7 @@ import {
   TypeLayerEntryConfig,
   TypeDisplayLanguage,
   MapContext,
+  AbstractGeoViewVector,
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
@@ -156,11 +157,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
+  // check if layer is a vectorlayer, so that clustering can be toggled
+  const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
+  const canCluster = geoviewLayerInstance.type in vectorLayers;
 
   const [isChecked, setChecked] = useState(true);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
-  const [isGroupOpen, setGroupOpen] = useState(false);
-  const [isLegendOpen, setLegendOpen] = useState(false);
+  const [isGroupOpen, setGroupOpen] = useState(true);
+  const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
@@ -334,6 +338,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
     else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
   };
+  const handleClusterToggle = () => {
+    (geoviewLayerInstance as AbstractGeoViewVector).toggleCluster();
+    const layerConfig = api.map(mapId).layer.getGeoviewLayerById(layerId)?.activeLayer?.geoviewRootLayer;
+    api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
+    api.map(mapId).layer.addGeoviewLayer(layerConfig!);
+  };
 
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
@@ -345,7 +355,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
-            {isLegendOpen && (
+            {groupItems.length === 0 && isLegendOpen && (
               <IconButton
                 sx={sxClasses.iconPreview}
                 color="primary"
@@ -406,6 +416,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
         {canSetOpacity && groupItems.length === 0 && <MenuItem onClick={handleOpacityOpen}>{t('legend.opacity')}</MenuItem>}
+        {canCluster && groupItems.length === 0 && <MenuItem onClick={handleClusterToggle}>{t('legend.toggle_cluster')}</MenuItem>}
       </Menu>
       <Collapse in={isOpacityOpen} timeout="auto">
         <Box sx={sxClasses.opacityMenu}>

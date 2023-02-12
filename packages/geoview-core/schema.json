@@ -615,6 +615,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["vectorHeatmap"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -659,6 +663,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["vector"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -687,6 +695,10 @@
       "description": "Layer sources providing vector data divided into a tile grid.",
       "properties": {
         "entryType": { "enum": ["vectorTile"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -739,6 +751,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["raster"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -766,6 +782,10 @@
       "type": "object",
       "properties": {
         "entryType": { "enum": ["raster"] },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
         "layerId": {
           "type": "string",
           "description": "The id of the layer to display on the map."
@@ -1029,11 +1049,11 @@
           "description": "The initial rotation for the view in degree (positive rotation clockwise, 0 means North). Will be converted to radiant by the viewer."
         },
         "zoom": {
-          "type": "integer",
+          "type": "number",
           "minimum": 0,
           "maximum": 28,
           "default": 12,
-          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels."
+          "description": "Initial map zoom level. Zoom level are define by the basemap zoom levels. Levels between whole numbers are supported to fine tune initial view."
         }
       },
       "required": ["zoom", "center"]
