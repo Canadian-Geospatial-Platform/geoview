@@ -45,7 +45,7 @@ export interface TypeTabsProps {
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
   const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse } = props;
-  console.log('props', props);
+
   const [value, setValue] = useState(0);
 
   /**
@@ -81,7 +81,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
           aria-label="basic tabs"
           sx={{
             '& .MuiTabs-indicator': {
-              'background-color': (theme) => theme.palette.secondary.main,
+              backgroundColor: (theme) => theme.palette.secondary.main,
             },
           }}
         >
@@ -98,7 +98,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
                   fontSize: 16,
                   minWidth: 'min(4vw, 24px)',
                   padding: '16px 2%',
-                  'text-transform': 'capitalize',
+                  textTransform: 'capitalize',
                   '&.Mui-selected': {
                     color: 'secondary.main',
                   },
