@@ -197,7 +197,7 @@ export function FooterTabs(): JSX.Element | null {
         rightButtons={
           <>
             {!isFullscreen && (
-              <IconButton onClick={() => handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
+              <IconButton onClick={() => handleCollapse()}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
             )}
             <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
           </>

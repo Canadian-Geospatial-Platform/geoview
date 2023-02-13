@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import Grid from '@mui/material/Grid';
 import {
@@ -161,10 +161,10 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
   const canCluster = geoviewLayerInstance.type in vectorLayers;
 
-  const [isChecked, setChecked] = useState(true);
+  const [isChecked, setChecked] = useState(false);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
-  const [isGroupOpen, setGroupOpen] = useState(true);
-  const [isLegendOpen, setLegendOpen] = useState(true);
+  const [isGroupOpen, setGroupOpen] = useState(false);
+  const [isLegendOpen, setLegendOpen] = useState(false);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
@@ -174,6 +174,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
+  const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
+  const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
 
   const menuOpen = Boolean(menuAnchorElement);
 
@@ -344,6 +346,32 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
     api.map(mapId).layer.addGeoviewLayer(layerConfig!);
   };
+  const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Space' || e.key === 'Enter') {
+      handleLegendClick();
+    }
+  };
+
+  /**
+   * Disable scrolling, so that screen doesnt scroll down.
+   *  when focus is set to map and
+   * arrows and enter keys are used to navigate the map
+   * @param e
+   */
+  const stopScrollingWhenFocusedLegends = (e: KeyboardEvent): void => {
+    if (stackIconRef.current === document.activeElement || closeIconRef.current === document.activeElement) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', stopScrollingWhenFocusedLegends);
+    return () => {
+      document.removeEventListener('keydown', stopScrollingWhenFocusedLegends);
+    };
+  }, []);
 
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
@@ -360,8 +388,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 sx={sxClasses.iconPreview}
                 color="primary"
                 size="small"
-                onClick={handleLegendClick}
-                tabIndex={isLegendOpen ? 1 : -1}
+                onClick={() => handleLegendClick()}
+                iconRef={closeIconRef}
+                className="keyboard-focused"
               >
                 <CloseIcon />
               </IconButton>
@@ -375,7 +404,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
             {iconType === 'list' && !isLegendOpen && (
               <Tooltip title={t('legend.expand_legend')} placement="top" enterDelay={1000}>
-                <Box tabIndex={0} onClick={handleLegendClick} sx={sxClasses.stackIconsBox}>
+                <Box
+                  tabIndex={0}
+                  onClick={handleLegendClick}
+                  sx={sxClasses.stackIconsBox}
+                  ref={stackIconRef}
+                  onKeyDown={(e) => handleStackIcon(e)}
+                >
                   <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
                     <Box sx={sxClasses.legendIconTransparent}>
                       {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
