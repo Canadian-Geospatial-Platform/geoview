@@ -2,6 +2,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
@@ -55,6 +56,8 @@ export declare const geoviewEntryIsEsriFeature: (verifyIfGeoViewEntry: TypeLayer
  * @class EsriFeature
  */
 export declare class EsriFeature extends AbstractGeoViewVector {
+    /** Layer metadata */
+    layerMetadata: Record<string, TypeJsonObject>;
     /** ***************************************************************************************************************************
      * Initialize layer.
      *

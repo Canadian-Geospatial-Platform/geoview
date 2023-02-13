@@ -300,8 +300,8 @@ export type TypeUniqueValueStyleInfo = {
     /** Label used by the style. */
     label: string;
     /** Values associated to the style. */
-    visible?: boolean;
-    /** Flag used to show/hide features associated to the label (default true). */
+    visible?: 'yes' | 'no' | 'always';
+    /** Flag used to show/hide features associated to the label (default: yes). */
     values: string[];
     /** options associated to the style. */
     settings: TypeKindOfVectorSettings;
@@ -328,8 +328,8 @@ export interface TypeUniqueValueStyleConfig extends TypeBaseStyleConfig {
     /** Label used if field/value association is not found. */
     defaultLabel?: string;
     /** Options used if field/value association is not found. */
-    defaultVisible?: boolean;
-    /** Flag used to show/hide features associated to the default label (default true). */
+    defaultVisible?: 'yes' | 'no' | 'always';
+    /** Flag used to show/hide features associated to the default label (default: yes). */
     defaultSettings?: TypeKindOfVectorSettings;
     /** Fields used by the style. */
     fields: string[];
@@ -343,8 +343,8 @@ export type TypeClassBreakStyleInfo = {
     /** Label used by the style. */
     label: string;
     /** Minimum values associated to the style. */
-    visible?: boolean;
-    /** Flag used to show/hide features associated to the label (default true). */
+    visible?: 'yes' | 'no' | 'always';
+    /** Flag used to show/hide features associated to the label (default: yes). */
     minValue: number | undefined | null;
     /** Maximum values associated to the style. */
     maxValue: number;
@@ -373,8 +373,8 @@ export interface TypeClassBreakStyleConfig extends TypeBaseStyleConfig {
     /** Label used if field/value association is not found. */
     defaultLabel?: string;
     /** Options used if field/value association is not found. */
-    defaultVisible?: boolean;
-    /** Flag used to show/hide features associated to the default label (default true). */
+    defaultVisible?: 'yes' | 'no' | 'always';
+    /** Flag used to show/hide features associated to the default label (default: yes). */
     defaultSettings?: TypeKindOfVectorSettings;
     /** Field used by the style. */
     field: string;
@@ -471,6 +471,8 @@ export type TypeBaseLayerEntryConfig = {
     isMetadataLayerGroup?: boolean;
     /** Layer entry data type. */
     entryType?: 'vector' | 'vectorTile' | 'vectorHeatmap' | 'raster' | 'group';
+    /** The ending element of the layer configuration path. */
+    layerPathEnding?: string;
     /** The id of the layer to display on the map. */
     layerId: string;
     /** The display name of the layer (English/French). */
@@ -482,7 +484,7 @@ export type TypeBaseLayerEntryConfig = {
     initialSettings?: TypeLayerInitialSettings;
     /** Source settings to apply to the GeoView vector layer source at creation time. */
     source?: TypeBaseSourceVectorInitialConfig | TypeSourceImageInitialConfig | TypeSourceTileInitialConfig;
-    /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
+    /** The listOfLayerEntryConfig attribute is not used by child of TypeBaseLayerEntryConfig. */
     listOfLayerEntryConfig?: never;
 };
 /** ******************************************************************************************************************************
@@ -576,13 +578,13 @@ export type TypeTileGrid = {
  * Initial settings for tile image sources.
  */
 export type TypeSourceTileInitialConfig = {
-    /** The service endpoint of the layer (English/French). */
+    /** The path (English/French) to reach the data to display. If not specified, metadatAccessPath will be assigne dto it. */
     dataAccessPath: TypeLocalizedString;
     /** The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
      * with the Canvas renderer.
      */
     crossOrigin?: string;
-    /** The source type for the tile layer. Default = XYZ. */
+    /** Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada. */
     projection?: TypeValidMapProjectionCodes;
     /** Tile grid parameters to use. */
     tileGrid?: TypeTileGrid;
@@ -662,18 +664,23 @@ export type TypeGeocoreLayerEntryConfig = {
     gvLayer?: BaseLayer;
     /** Layer entry data type. */
     entryType?: 'geocore';
-    /** Basic information used to identify the GeoView layer. The GeoCore catalog uuid of the layer is stored in the layerId
-     * attribute. The id will have the language extension (id-'lang').
-     */
-    layerId: string;
+    /** The layerId is not used by geocore layers. */
+    layerId: never;
+    /** The layerPathEnding is not used by geocore layers. */
+    layerPathEnding: never;
+    /** The display name of a geocore layer is in geocoreLayerName. */
+    layerName?: never;
     /** The display name of the layer (English/French). */
-    layerName?: TypeLocalizedString;
+    geocoreLayerName?: TypeLocalizedString;
     /** The access path to the geoCore endpoint (optional, this value should be embeded in the GeoView API). */
     source?: TypeSourceGeocoreConfig;
-    /** Attribute initialSettings is never used by GeoCore layer entry. */
-    initialSettings?: never;
-    /** The listOfLayerEntryConfig attribute is used only on group entry and on GeoView layer configurations. */
-    listOfLayerEntryConfig?: never;
+    /**
+     * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+     * configuration tree.
+     */
+    initialSettings?: TypeLayerInitialSettings;
+    /** The list of layer entry configurations to use from the Geocore layer. */
+    listOfLayerEntryConfig?: TypeListOfLayerEntryConfig;
 };
 /** ******************************************************************************************************************************
  * Initial settings to apply to the GeoView vector layer source at creation time.

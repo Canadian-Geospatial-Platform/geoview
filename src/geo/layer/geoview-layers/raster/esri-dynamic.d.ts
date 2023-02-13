@@ -54,6 +54,8 @@ export declare const geoviewEntryIsEsriDynamic: (verifyIfGeoViewEntry: TypeLayer
 export declare class EsriDynamic extends AbstractGeoViewRaster {
     /** Service metadata */
     metadata: TypeJsonObject;
+    /** Layer metadata */
+    layerMetadata: Record<string, TypeJsonObject>;
     /** ****************************************************************************************************************************
      * Initialize layer.
      * @param {string} mapId The id of the map.

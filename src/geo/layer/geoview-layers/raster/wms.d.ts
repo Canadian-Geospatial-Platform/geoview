@@ -211,7 +211,7 @@ export declare class WMS extends AbstractGeoViewRaster {
     /** ***************************************************************************************************************************
      * Get the legend image URL of a layer from the capabilities. Return null if it does not exist.
      *
-     * @param {string} layerId The layer identifier for which we are looking for the legend URL.
+     * @param {TypeWmsLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {TypeJsonObject | null} URL of a Legend image in png format or null
      */
@@ -219,7 +219,7 @@ export declare class WMS extends AbstractGeoViewRaster {
     /** ***************************************************************************************************************************
      * Get the legend image of a layer.
      *
-     * @param {string} layerId The layer identifier for which we are looking for the legend.
+     * @param {TypeWmsLayerEntryConfig} layerConfig layer configuration.
      *
      * @returns {blob} image blob
      */
