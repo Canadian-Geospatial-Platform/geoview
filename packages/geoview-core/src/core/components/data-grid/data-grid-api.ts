@@ -8,7 +8,6 @@ import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../geo/ma
 
 export interface TypeLayerDataGridProps {
   layerId: string;
-  onChangeLayer?: (selectedIndex: number) => void;
 }
 
 /**
@@ -40,7 +39,7 @@ export class DataGridAPI {
    *
    */
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
-    const { layerId, onChangeLayer } = layerDataGridProps;
+    const { layerId } = layerDataGridProps;
     // eslint-disable-next-line @typescript-eslint/ban-types
     let values: {}[] = [];
     const groupKeys: string[] = [];
@@ -111,16 +110,11 @@ export class DataGridAPI {
       };
     };
 
-    const changeLayer = () => {
-      const selectedIndex = (document.getElementById('groupLayerSelection') as HTMLSelectElement)?.selectedIndex;
-      if (onChangeLayer) onChangeLayer(selectedIndex);
-    };
-
     return createElement('div', {}, [
       groupKeys.length > 0 && [
         createElement(
           'select',
-          { id: 'groupLayerSelection', style: { fontSize: '1em', margin: '1em', padding: '0.3em' }, onChange: () => changeLayer() },
+          { id: 'groupLayerSelection', style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
           groupKeys.map((layerkey) => {
             return createElement('option', {}, [layerkey]);
           })
@@ -128,7 +122,7 @@ export class DataGridAPI {
         groupValues.map((groupValue, index) => {
           return createElement(
             'div',
-            { className: `layer-datagrid-table`, style: { display: index === 0 ? 'block' : 'none' } },
+            { class: `layer-datagrid-table`, style: { display: index === 0 ? 'block' : 'none' } },
             createElement(LayerDataGrid, setLayerDataGridProps(groupValue.layerValues))
           );
         }),
