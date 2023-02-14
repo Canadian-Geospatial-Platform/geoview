@@ -21,24 +21,25 @@ export function DataItem({ mapId }: Props): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [dataLayers, setDataLayers] = useState<string[]>([]);
 
-  const layerSelection = document.getElementById('groupLayerSelection');
-  if (layerSelection) {
-    layerSelection.addEventListener('change', function (e) {
-      const selectedIndex = (document.getElementById('groupLayerSelection') as HTMLSelectElement)?.selectedIndex;
-      const datagridTables = document.getElementsByClassName('layer-datagrid-table');
-      if (datagridTables.length > 0) {
-        for (let i = 0; i < datagridTables.length; i++) {
-          (datagridTables[i] as HTMLDivElement).setAttribute('style', `display:${i !== selectedIndex ? 'none' : 'block'}`);
-        }
-      }
-    });
-  }
-
   useEffect(() => {
     setDataLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [api, mapId]);
 
+  setTimeout(() => {
+    const layerSelection = document.getElementById('groupLayerSelection');
+    if (layerSelection) {
+      (layerSelection as HTMLSelectElement).addEventListener('change', function onChange(this, e) {
+        const { selectedIndex } = this;
+        const datagridTables = document.getElementsByClassName('layer-datagrid-table');
+        if (datagridTables.length > 0) {
+          for (let i = 0; i < datagridTables.length; i++) {
+            (datagridTables[i] as HTMLDivElement).setAttribute('style', `display:${i !== selectedIndex ? 'none' : 'block'}`);
+          }
+        }
+      });
+    }
+  }, 100);
   return (
     <Tabs
       tabsProps={{
