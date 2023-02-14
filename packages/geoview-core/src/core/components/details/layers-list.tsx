@@ -56,7 +56,7 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
               <ListItemButton>
                 <ListItemIcon>
                   <IconButton color="primary" sx={fontColor}>
-                    {layerSetOpen !== layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    {layerSetOpen === layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                   </IconButton>
                 </ListItemIcon>
                 <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>

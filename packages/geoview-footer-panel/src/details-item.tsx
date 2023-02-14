@@ -4,8 +4,10 @@ import { ReactElement } from 'react';
 import {
   TypeWindow,
   payloadIsAMapSingleClick,
+  markerDefinitionPayload,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
+  TypeJsonObject,
   getLocalizedValue,
   Coordinate,
 } from 'geoview-core';
@@ -67,6 +69,14 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
           const { coordinates } = payload;
           setHandlerName(payload.handlerName);
           setLatLng(coordinates.lnglat);
+          api.event.emit(
+            markerDefinitionPayload(
+              api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW,
+              payload.handlerName,
+              coordinates.lnglat,
+              {} as TypeJsonObject
+            )
+          );
         } else {
           setLatLng([]);
         }
@@ -82,6 +92,9 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
 
   useEffect(() => {
     setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latLng, handlerName }));
+    setTimeout(() => {
+      api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, latLng, {} as TypeJsonObject));
+    }, 8000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, latLng]);
 
