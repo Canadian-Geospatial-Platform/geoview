@@ -21,7 +21,7 @@ import { Footerbar } from '../footer-bar/footer-bar';
 import { OverviewMap } from '../overview-map/overview-map';
 import { ClickMarker } from '../click-marker/click-marker';
 
-import { generateId } from '../../utils/utilities';
+import { disableScrolling, generateId } from '../../utils/utilities';
 
 import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
@@ -56,7 +56,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const classes = useStyles();
 
   // get ref to div element
-  const mapElement = useRef<HTMLDivElement | null>();
+  const mapElement = useRef<HTMLDivElement>();
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(mapId);
@@ -265,30 +265,16 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /**
-   * Disable scrolling, so that screen doesnt scroll down.
-   *  when focus is set to map and
-   * arrows and enter keys are used to navigate the map
-   * @param e
-   */
-  const stopScrollingWhenFocusedMap = (e: KeyboardEvent): void => {
-    if (mapElement.current === document.activeElement) {
-      if (e.code === 'Space') {
-        e.preventDefault();
-      }
-    }
-  };
-
   useEffect(() => {
-    document.addEventListener('keydown', stopScrollingWhenFocusedMap);
+    document.addEventListener('keydown', (e) => disableScrolling(e, mapElement));
     return () => {
-      document.removeEventListener('keydown', stopScrollingWhenFocusedMap);
+      document.removeEventListener('keydown', (e) => disableScrolling(e, mapElement));
     };
   }, []);
 
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-    <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement | null>} className={classes.mapContainer} tabIndex={0}>
+    <div id={`map-${mapId}`} ref={mapElement as MutableRefObject<HTMLDivElement>} className={classes.mapContainer} tabIndex={0}>
       {isLoaded && (
         <>
           {components !== undefined && components.indexOf('north-arrow') > -1 && (
