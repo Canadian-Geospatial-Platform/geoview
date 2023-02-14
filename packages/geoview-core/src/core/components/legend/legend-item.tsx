@@ -33,6 +33,7 @@ import {
   TypeDisplayLanguage,
   MapContext,
   AbstractGeoViewVector,
+  disableScrolling,
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
@@ -161,10 +162,10 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
   const canCluster = geoviewLayerInstance.type in vectorLayers;
 
-  const [isChecked, setChecked] = useState(false);
-  const [isOpacityOpen, setOpacityOpen] = useState(false);
-  const [isGroupOpen, setGroupOpen] = useState(false);
-  const [isLegendOpen, setLegendOpen] = useState(false);
+  const [isChecked, setChecked] = useState(true);
+  const [isOpacityOpen, setOpacityOpen] = useState(true);
+  const [isGroupOpen, setGroupOpen] = useState(true);
+  const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
   const [iconType, setIconType] = useState<string | null>(null);
   const [iconImg, setIconImg] = useState<string | null>(null);
@@ -352,24 +353,10 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   };
 
-  /**
-   * Disable scrolling, so that screen doesnt scroll down.
-   *  when focus is set to map and
-   * arrows and enter keys are used to navigate the map
-   * @param e
-   */
-  const stopScrollingWhenFocusedLegends = (e: KeyboardEvent): void => {
-    if (stackIconRef.current === document.activeElement || closeIconRef.current === document.activeElement) {
-      if (e.code === 'Space') {
-        e.preventDefault();
-      }
-    }
-  };
-
   useEffect(() => {
-    document.addEventListener('keydown', stopScrollingWhenFocusedLegends);
+    document.addEventListener('keydown', (e) => disableScrolling(e, stackIconRef));
     return () => {
-      document.removeEventListener('keydown', stopScrollingWhenFocusedLegends);
+      document.removeEventListener('keydown', (e) => disableScrolling(e, stackIconRef));
     };
   }, []);
 
@@ -388,7 +375,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 sx={sxClasses.iconPreview}
                 color="primary"
                 size="small"
-                onClick={() => handleLegendClick()}
+                onClick={handleLegendClick}
                 iconRef={closeIconRef}
                 className="keyboard-focused"
               >
