@@ -114,7 +114,7 @@ export class DataGridAPI {
       groupKeys.length > 0 && [
         createElement(
           'select',
-          { id: 'groupLayerSelection', style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
+          { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
           groupKeys.map((layerkey) => {
             return createElement('option', {}, [layerkey]);
           })
@@ -122,13 +122,13 @@ export class DataGridAPI {
         groupValues.map((groupValue, index) => {
           return createElement(
             'div',
-            { class: `layer-datagrid-table`, style: { display: index === 0 ? 'block' : 'none' } },
+            { class: `${layerId}-layer-datagrid-table`, style: { display: index === 0 ? 'block' : 'none' } },
             createElement(LayerDataGrid, setLayerDataGridProps(groupValue.layerValues))
           );
         }),
       ],
       values.length > 0 &&
-        createElement('div', { id: 'layer-datagrid-table' }, [createElement(LayerDataGrid, setLayerDataGridProps(values))]),
+        createElement('div', { id: `${layerId}-layer-datagrid-table` }, [createElement(LayerDataGrid, setLayerDataGridProps(values))]),
     ]);
   };
 }

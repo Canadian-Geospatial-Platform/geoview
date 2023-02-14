@@ -27,18 +27,20 @@ export function DataItem({ mapId }: Props): JSX.Element {
   }, [api, mapId]);
 
   setTimeout(() => {
-    const layerSelection = document.getElementById('groupLayerSelection');
-    if (layerSelection) {
-      (layerSelection as HTMLSelectElement).addEventListener('change', function onChange(this, e) {
-        const { selectedIndex } = this;
-        const datagridTables = document.getElementsByClassName('layer-datagrid-table');
-        if (datagridTables.length > 0) {
-          for (let i = 0; i < datagridTables.length; i++) {
-            (datagridTables[i] as HTMLDivElement).setAttribute('style', `display:${i !== selectedIndex ? 'none' : 'block'}`);
+    dataLayers.forEach((layerId) => {
+      const layerSelection = document.getElementById(`${layerId}-groupLayerSelection`);
+      if (layerSelection) {
+        (layerSelection as HTMLSelectElement).addEventListener('change', function onChange(this, e) {
+          const { selectedIndex } = this;
+          const datagridTables = document.getElementsByClassName(`${layerId}-layer-datagrid-table`);
+          if (datagridTables.length > 0) {
+            for (let i = 0; i < datagridTables.length; i++) {
+              (datagridTables[i] as HTMLDivElement).setAttribute('style', `display:${i !== selectedIndex ? 'none' : 'block'}`);
+            }
           }
-        }
-      });
-    }
+        });
+      }
+    });
   }, 100);
   return (
     <Tabs
