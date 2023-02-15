@@ -95,7 +95,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
         <ListItemButton>
           <ListItemIcon>
             <IconButton color="primary" sx={fontColor}>
-              {!isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>

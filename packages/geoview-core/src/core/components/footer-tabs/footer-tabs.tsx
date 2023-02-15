@@ -136,6 +136,7 @@ export function FooterTabs(): JSX.Element | null {
                 setIsCollapsed(false);
                 tabsContainer.style.height = '300px';
               } else {
+                setIsCollapsed(true);
                 tabsContainer.style.height = '55px';
               }
             }
