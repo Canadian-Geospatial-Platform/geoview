@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText, Tooltip } from '../../../ui';
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
+  IconButton,
+  VisibilityOffIcon,
+  VisibilityIcon,
+} from '../../../ui';
 
 const sxClasses = {
   listIconLabel: {
@@ -27,6 +37,10 @@ const sxClasses = {
 export interface TypeLegendIconListProps {
   iconImages: string[];
   iconLabels: string[];
+  // eslint-disable-next-line react/require-default-props
+  isParentVisible?: boolean;
+  // eslint-disable-next-line react/require-default-props
+  toggleParentVisible?: () => void;
 }
 /**
  * List of Icons to show in expanded Legend Item
@@ -34,7 +48,37 @@ export interface TypeLegendIconListProps {
  * @returns {JSX.Element} the list of icons
  */
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels } = props;
+  const { iconImages, iconLabels, isParentVisible, toggleParentVisible } = props;
+  const allChecked = iconImages.map(() => true);
+  const allUnChecked = iconImages.map(() => false);
+  const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
+  const [checkedCount, setCheckCount] = useState<number>(isParentVisible === true ? iconImages.length : 0);
+  const [initPV, setInitPV] = useState(isParentVisible);
+  /**
+   * Handle view/hide layers.
+   */
+  const handleToggleLayer = (index: number) => {
+    const checklist = isChecked.map((checked, i) => (i === index ? !checked : checked));
+    const count = checklist.filter((f) => f === true).length;
+    setChecked(checklist);
+    setCheckCount(count);
+    if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
+      if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
+        if (isParentVisible === false) {
+          setInitPV(true);
+        }
+        toggleParentVisible();
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isParentVisible !== initPV) {
+      setChecked(isParentVisible === true ? allChecked : allUnChecked);
+      setCheckCount(isParentVisible === true ? allChecked.length : 0);
+      setInitPV(isParentVisible);
+    }
+  }, [isParentVisible, allChecked, allUnChecked, checkedCount, initPV]);
 
   return (
     <List>
@@ -53,6 +97,11 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                     primary={iconLabels[index]}
                   />
                 </Tooltip>
+                <ListItemIcon>
+                  <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
+                    {isChecked[index] === true ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  </IconButton>
+                </ListItemIcon>
               </ListItemButton>
             </ListItem>
           </Box>
