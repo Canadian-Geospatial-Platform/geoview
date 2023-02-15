@@ -35,6 +35,7 @@ export interface TypeTabsProps {
   isCollapsed?: boolean;
   // eslint-disable-next-line @typescript-eslint/ban-types
   handleCollapse?: Function | undefined;
+  TabContentVisibilty?: string | undefined;
 }
 
 /**
@@ -44,7 +45,7 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse } = props;
+  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'hidden' } = props;
   const [value, setValue] = useState(0);
 
   /**
@@ -110,7 +111,7 @@ export function Tabs(props: TypeTabsProps): JSX.Element {
       <Grid item xs={5} sm={2} sx={{ textAlign: 'right' }}>
         {rightButtons}
       </Grid>
-      <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider' }}>
+      <Grid item xs={12} sx={{ height: 'calc( 100% - 55px )', borderTop: 1, borderColor: 'divider', visibility: TabContentVisibilty }}>
         {tabs.map((tab, index) => {
           const TabContent = tab.content as React.ElementType;
           return (

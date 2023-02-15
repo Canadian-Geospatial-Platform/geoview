@@ -74,7 +74,7 @@ export function FooterTabs(): JSX.Element | null {
       if (tabsContainerRef && tabsContainerRef.current) {
         const tabsContainer = tabsContainerRef.current as HTMLDivElement;
         const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
-        mapContainer.style.transition = 'height 0.2s ease-out';
+        mapContainer.style.transition = 'height 0.2s ease-in-out';
         // check if the tabs container is collapsed
         if (!collapseStatus) {
           tabsContainer.style.height = '55px';
@@ -100,7 +100,7 @@ export function FooterTabs(): JSX.Element | null {
     if (tabsContainerRef && tabsContainerRef.current) {
       const tabsContaine = tabsContainerRef.current as HTMLDivElement;
       const mapContaine = tabsContaine.previousElementSibling as HTMLDivElement;
-      mapContaine.style.transition = 'height 0.2s ease-out';
+      mapContaine.style.transition = 'height 0.2s ease-in-out';
       // check if the tabs container is collapsed
       if (isFullscreen) {
         tabsContaine.style.height = '300px';
@@ -194,6 +194,7 @@ export function FooterTabs(): JSX.Element | null {
             ...tab,
           };
         })}
+        TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
             {!isFullscreen && (
