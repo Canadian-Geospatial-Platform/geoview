@@ -220,6 +220,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
+                // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
                 Object.entries(layerLegend.styleConfig).forEach(([, styleSettings]) => {
                   if (isClassBreakStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo.map((styleInfo) => {
@@ -472,7 +473,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               <img alt="" style={{ ...sxClasses.solidBackground, ...sxClasses.iconImg }} src={iconImg} />
             )}
             {iconType === 'list' && iconList !== null && labelList !== null && (
-              <LegendIconList iconImages={iconList} iconLabels={labelList} />
+              <LegendIconList
+                iconImages={iconList}
+                iconLabels={labelList}
+                isParentVisible={isChecked}
+                toggleParentVisible={() => setChecked(!isChecked)}
+              />
             )}
           </Box>
         </Box>
