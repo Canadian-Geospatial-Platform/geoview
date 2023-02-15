@@ -30,7 +30,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
     dataLayers.forEach((layerId) => {
       const layerSelection = document.getElementById(`${layerId}-groupLayerSelection`);
       if (layerSelection) {
-        (layerSelection as HTMLSelectElement).addEventListener('change', function onChange(this, e) {
+        (layerSelection as HTMLSelectElement).addEventListener('change', function onChange(this) {
           const { selectedIndex } = this;
           const datagridTables = document.getElementsByClassName(`${layerId}-layer-datagrid-table`);
           if (datagridTables.length > 0) {

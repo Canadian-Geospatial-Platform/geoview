@@ -33,6 +33,8 @@ import {
   TypeDisplayLanguage,
   MapContext,
   AbstractGeoViewVector,
+  TypeVectorLayerEntryConfig,
+  TypeStyleGeometry,
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
@@ -161,6 +163,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [iconImgStacked, setIconImgStacked] = useState<string | null>(null);
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
+  const [geometryLayerConfig, setLayerConfig] = useState<TypeLayerEntryConfig | null>(null);
+  const [layerGeometryKey, setGeometryKey] = useState<string | undefined>(undefined);
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
@@ -186,6 +190,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
 
   const getLegendDetails = () => {
     geoviewLayerInstance?.getLegend(subLayerId).then((layerLegend) => {
+      const { geoviewLayerId } = geoviewLayerInstance;
+      // console.log(layerLegend, geoviewLayerInstance);
       if (layerLegend) {
         // WMS layers just return a string
         if (isWmsLegend(layerLegend)) {
@@ -204,13 +210,15 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
                 // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
-                Object.entries(layerLegend.styleConfig).forEach(([, styleSettings]) => {
+                let geometryKey: string | null = null;
+                Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
                   if (isClassBreakStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo.map((styleInfo) => {
                       return styleInfo.label;
                     });
                     if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
                     setLabelList(iconLabelList);
+                    geometryKey = key;
                   }
                   if (isUniqueValueStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.map((styleInfo) => {
@@ -218,6 +226,23 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                     });
                     if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
                     setLabelList(iconLabelList);
+                    geometryKey = key;
+                  }
+                });
+
+                Object.keys(api.map(mapId).layer.registeredLayers).forEach((layerPath) => {
+                  if (layerPath.startsWith(geoviewLayerId)) {
+                    const layerConfig = api.map(mapId).layer.registeredLayers[layerPath] as TypeVectorLayerEntryConfig;
+                    if (layerConfig && layerConfig.style && geometryKey) {
+                      const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
+                      if (
+                        geometryStyle !== undefined &&
+                        (geometryStyle.styleType === 'uniqueValue' || geometryStyle.styleType === 'classBreaks')
+                      ) {
+                        setGeometryKey(geometryKey);
+                        setLayerConfig(layerConfig);
+                      }
+                    }
                   }
                 });
               }
@@ -426,6 +451,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 iconLabels={labelList}
                 isParentVisible={isChecked}
                 toggleParentVisible={() => setChecked(!isChecked)}
+                geoviewLayerInstance={geoviewLayerInstance as AbstractGeoViewVector}
+                layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
+                geometryKey={layerGeometryKey}
               />
             )}
           </Box>
