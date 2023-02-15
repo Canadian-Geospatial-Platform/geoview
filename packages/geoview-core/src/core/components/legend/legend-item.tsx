@@ -427,7 +427,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </Tooltip>
           <ListItemIcon>
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
-              <IconButton onClick={handleMoreClick}>
+              <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
               </IconButton>
             )}
@@ -441,7 +441,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </ListItemIcon>
         </ListItemButton>
       </ListItem>
-      <Menu anchorEl={menuAnchorElement} open={menuOpen} onClose={handleCloseMenu}>
+      <Menu
+        anchorEl={menuAnchorElement}
+        open={menuOpen}
+        onClose={handleCloseMenu}
+        MenuListProps={{
+          'aria-labelledby': 'setOpacityBtn',
+        }}
+      >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
         {canSetOpacity && groupItems.length === 0 && <MenuItem onClick={handleOpacityOpen}>{t('legend.opacity')}</MenuItem>}
