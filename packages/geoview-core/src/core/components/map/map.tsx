@@ -274,7 +274,8 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
 
   useEffect(() => {
     document.addEventListener('focusin', () => {
-      if (mapElement.current === document.activeElement) {
+      const mapContainer = document.getElementById(mapId);
+      if (mapElement.current === document.activeElement && mapContainer?.classList.contains('map-focus-trap')) {
         (document.getElementById(`map-${mapId}`) as HTMLElement).focus();
         api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId));
       }
