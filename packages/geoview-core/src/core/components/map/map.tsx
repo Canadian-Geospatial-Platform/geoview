@@ -23,7 +23,7 @@ import { ClickMarker } from '../click-marker/click-marker';
 
 import { disableScrolling, generateId } from '../../utils/utilities';
 
-import { api } from '../../../app';
+import { api, inKeyfocusPayload } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 
 import { MapViewer } from '../../../geo/map/map';
@@ -271,6 +271,16 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
       document.removeEventListener('keydown', (e) => disableScrolling(e, mapElement));
     };
   }, []);
+
+  useEffect(() => {
+    document.addEventListener('focusin', () => {
+      if (mapElement.current === document.activeElement) {
+        (document.getElementById(`map-${mapId}`) as HTMLElement).focus();
+        api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, mapId));
+      }
+    });
+    return () => document.removeEventListener('focusin', () => []);
+  }, [mapId]);
 
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
