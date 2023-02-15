@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import React, { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
@@ -12,6 +13,13 @@ import {
   VisibilityOffIcon,
   VisibilityIcon,
 } from '../../../ui';
+import {
+  AbstractGeoViewVector,
+  TypeVectorLayerEntryConfig,
+  TypeStyleGeometry,
+  TypeClassBreakStyleConfig,
+  TypeUniqueValueStyleConfig,
+} from '../../../app';
 
 const sxClasses = {
   listIconLabel: {
@@ -37,9 +45,10 @@ const sxClasses = {
 export interface TypeLegendIconListProps {
   iconImages: string[];
   iconLabels: string[];
-  // eslint-disable-next-line react/require-default-props
+  geoviewLayerInstance: AbstractGeoViewVector;
+  layerConfig?: TypeVectorLayerEntryConfig;
+  geometryKey?: string;
   isParentVisible?: boolean;
-  // eslint-disable-next-line react/require-default-props
   toggleParentVisible?: () => void;
 }
 /**
@@ -48,7 +57,7 @@ export interface TypeLegendIconListProps {
  * @returns {JSX.Element} the list of icons
  */
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, isParentVisible, toggleParentVisible } = props;
+  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, geometryKey, geoviewLayerInstance, layerConfig } = props;
   const allChecked = iconImages.map(() => true);
   const allUnChecked = iconImages.map(() => false);
   const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
@@ -78,7 +87,25 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       setCheckCount(isParentVisible === true ? allChecked.length : 0);
       setInitPV(isParentVisible);
     }
-  }, [isParentVisible, allChecked, allUnChecked, checkedCount, initPV]);
+    if (geoviewLayerInstance && layerConfig && layerConfig.style !== undefined && geometryKey) {
+      const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
+      if (geometryStyle !== undefined) {
+        isChecked.forEach((checked, i) => {
+          if (i < isChecked.length - 1) {
+            if (geometryStyle.styleType === 'classBreaks') {
+              (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            }
+            if (geometryStyle.styleType === 'uniqueValue') {
+              (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            }
+          } else {
+            (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
+          }
+        });
+        geoviewLayerInstance.applyViewFilter(layerConfig);
+      }
+    }
+  }, [isParentVisible, allChecked, allUnChecked, checkedCount, initPV, isChecked, geoviewLayerInstance, layerConfig, geometryKey]);
 
   return (
     <List>
