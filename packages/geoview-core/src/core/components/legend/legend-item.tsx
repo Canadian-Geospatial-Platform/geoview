@@ -166,7 +166,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const canCluster = geoviewLayerInstance.type in vectorLayers;
 
   const [isChecked, setChecked] = useState(true);
-  const [isOpacityOpen, setOpacityOpen] = useState(true);
+  const [isOpacityOpen, setOpacityOpen] = useState(false);
   const [isGroupOpen, setGroupOpen] = useState(true);
   const [isLegendOpen, setLegendOpen] = useState(true);
   const [groupItems, setGroupItems] = useState<TypeListOfLayerEntryConfig>([]);
