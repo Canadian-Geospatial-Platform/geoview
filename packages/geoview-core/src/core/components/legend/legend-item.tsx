@@ -73,6 +73,9 @@ const sxClasses = {
     border: '1px solid',
     borderColor: 'grey.600',
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    '&:focus': {
+      border: 'revert',
+    },
   },
   iconImg: {
     padding: 3,
@@ -177,6 +180,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [opacity, setOpacity] = useState<number>(1);
   const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
   const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
+  const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
   const menuOpen = Boolean(menuAnchorElement);
 
@@ -348,7 +352,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     api.map(mapId).layer.addGeoviewLayer(layerConfig!);
   };
   const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === 'Space' || e.key === 'Enter') {
+    if (e.key === 'Enter') {
       handleLegendClick();
     }
   };
@@ -359,6 +363,16 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       document.removeEventListener('keydown', (e) => disableScrolling(e, stackIconRef));
     };
   }, []);
+
+  useEffect(() => {
+    if (isLegendOpen && closeIconRef?.current) {
+      closeIconRef.current?.focus();
+    } else if (!isLegendOpen && stackIconRef?.current) {
+      stackIconRef.current.focus();
+    } else if (!isLegendOpen && iconType === 'simple' && maxIconRef?.current) {
+      maxIconRef.current.focus();
+    }
+  }, [isLegendOpen, iconType]);
 
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
@@ -371,19 +385,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && (
-              <IconButton
-                sx={sxClasses.iconPreview}
-                color="primary"
-                size="small"
-                onClick={handleLegendClick}
-                iconRef={closeIconRef}
-                className="keyboard-focused"
-              >
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={closeIconRef}>
                 <CloseIcon />
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={maxIconRef}>
                 <Box sx={sxClasses.legendIcon}>
                   <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
                 </Box>
@@ -396,7 +403,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                   onClick={handleLegendClick}
                   sx={sxClasses.stackIconsBox}
                   ref={stackIconRef}
-                  onKeyDown={(e) => handleStackIcon(e)}
+                  onKeyPress={(e) => handleStackIcon(e)}
                 >
                   <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
                     <Box sx={sxClasses.legendIconTransparent}>
