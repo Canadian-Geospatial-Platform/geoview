@@ -45,7 +45,7 @@ export interface TypeTabsProps {
  * @returns {JSX.Element} returns the tabs ui
  */
 export function Tabs(props: TypeTabsProps): JSX.Element {
-  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'hidden' } = props;
+  const { tabs, rightButtons, selectedTab, isCollapsed, handleCollapse, TabContentVisibilty = 'inherit' } = props;
   const [value, setValue] = useState(0);
 
   /**
