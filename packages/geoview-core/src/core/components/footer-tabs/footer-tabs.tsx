@@ -67,33 +67,29 @@ export function FooterTabs(): JSX.Element | null {
   /**
    * Handle a collapse, expand event for the tabs component
    */
-  const handleCollapse = useCallback(
-    (open?: boolean) => {
-      // check if tabs component is created
-      const collapseStatus = open !== undefined ? open : isCollapsed;
-      if (tabsContainerRef && tabsContainerRef.current) {
-        const tabsContainer = tabsContainerRef.current as HTMLDivElement;
-        const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
-        mapContainer.style.transition = 'height 0.2s ease-in-out';
-        // check if the tabs container is collapsed
-        if (!collapseStatus) {
-          tabsContainer.style.height = '55px';
-          mapContainer.style.height = 'calc( 100% - 55px)';
-        } else {
-          tabsContainer.style.height = '300px';
-          mapContainer.style.height = 'calc( 100% - 300px)';
-        }
+  const handleCollapse = () => {
+    // check if tabs component is created
+    if (tabsContainerRef && tabsContainerRef.current) {
+      const tabsContainer = tabsContainerRef.current as HTMLDivElement;
+      const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
+      mapContainer.style.transition = 'height 0.2s ease-out';
+      // check if the tabs container is collapsed
+      if (!isCollapsed) {
+        tabsContainer.style.height = '55px';
+        mapContainer.style.height = 'calc( 100% - 55px)';
+      } else {
+        tabsContainer.style.height = '300px';
+        mapContainer.style.height = 'calc( 100% - 300px)';
       }
-      setIsFullscreen(false);
-      setIsCollapsed(!collapseStatus);
+    }
+    setIsFullscreen(false);
+    setIsCollapsed(!isCollapsed);
 
-      // update map container size
-      setTimeout(() => {
-        api.map(mapId).map.updateSize();
-      }, 1000);
-    },
-    [isCollapsed, mapId]
-  );
+    // update map container size
+    setTimeout(() => {
+      api.map(mapId).map.updateSize();
+    }, 1000);
+  };
 
   const handleFullscreen = () => {
     // check if tabs component is created
@@ -181,7 +177,8 @@ export function FooterTabs(): JSX.Element | null {
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, mapId);
       api.event.off(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, mapId);
     };
-  }, [addTab, mapId, removeTab, handleCollapse]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addTab, mapId, removeTab]);
 
   return api.map(mapId).footerTabs.tabs.length > 0 ? (
     <div ref={tabsContainerRef as MutableRefObject<HTMLDivElement>} className={classes.tabsContainer}>
@@ -198,9 +195,7 @@ export function FooterTabs(): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         rightButtons={
           <>
-            {!isFullscreen && (
-              <IconButton onClick={() => handleCollapse()}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>
-            )}
+            {!isFullscreen && <IconButton onClick={handleCollapse}>{!isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}</IconButton>}
             <IconButton onClick={handleFullscreen}>{isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</IconButton>
           </>
         }
