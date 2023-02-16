@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import { createElement, ReactElement } from 'react';
 
 import { AbstractGeoViewVector, api } from '../../../app';
@@ -80,7 +81,7 @@ export class DataGridAPI {
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    const setLayerDataGridProps = (layerValues: {}[]) => {
+    const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
       // set columns
       const columnHeader = Object.keys(layerValues[0]);
 
@@ -100,6 +101,7 @@ export class DataGridAPI {
 
       return {
         key: `${layerId}-datagrid`,
+        layerKey,
         columns,
         rows,
         pageSize: 50,
@@ -116,19 +118,25 @@ export class DataGridAPI {
           'select',
           { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
           groupKeys.map((layerkey) => {
-            return createElement('option', {}, [layerkey]);
+            return createElement('option', { key: layerkey }, [layerkey]);
           })
         ),
         groupValues.map((groupValue, index) => {
           return createElement(
             'div',
-            { class: `${layerId}-layer-datagrid-table`, style: { display: index === 0 ? 'block' : 'none' } },
-            createElement(LayerDataGrid, setLayerDataGridProps(groupValue.layerValues))
+            {
+              key: `${layerId}-layer-datagrid-table-${index}`,
+              className: `${layerId}-layer-datagrid-table`,
+              style: { display: index === 0 ? 'block' : 'none' },
+            },
+            createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues))
           );
         }),
       ],
       values.length > 0 &&
-        createElement('div', { id: `${layerId}-layer-datagrid-table` }, [createElement(LayerDataGrid, setLayerDataGridProps(values))]),
+        createElement('div', { id: `${layerId}-layer-datagrid-table` }, [
+          createElement(LayerDataGrid, setLayerDataGridProps(layerId, values)),
+        ]),
     ]);
   };
 }
