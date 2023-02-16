@@ -1,9 +1,10 @@
+/* eslint-disable react/no-array-index-key */
 import { createElement, ReactElement } from 'react';
 
 import { AbstractGeoViewVector, api } from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../geo/map/map-schema-types';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
@@ -37,51 +38,116 @@ export class DataGridAPI {
    * @return {ReactElement} the data grid react element
    *
    */
+
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = layerDataGridProps;
-    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId] as AbstractGeoViewVector;
-    geoviewLayerInstance?.getAllFeatureInfo().then((arrayOfFeatureInfoEntries) => {
-      if (arrayOfFeatureInfoEntries?.length) {
-        // set values
-        const values = arrayOfFeatureInfoEntries.map((feature) => {
-          const { featureKey, fieldInfo } = feature;
-          return { featureKey, ...fieldInfo };
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    let values: {}[] = [];
+    const groupKeys: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    let groupValues: { layerkey: string; layerValues: {}[] }[] = [];
+    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+    if (geoviewLayerInstance.listOfLayerEntryConfig.length > 1) {
+      const setGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
+        listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
+          if (
+            LayerEntryConfig.entryType === 'group' &&
+            LayerEntryConfig.listOfLayerEntryConfig !== undefined &&
+            LayerEntryConfig.listOfLayerEntryConfig.length > 1
+          ) {
+            setGroupKeys(LayerEntryConfig.listOfLayerEntryConfig, `${parentLayerId}/${LayerEntryConfig.layerId}`);
+          } else if (LayerEntryConfig.entryType !== 'group') {
+            groupKeys.push(`${parentLayerId}/${LayerEntryConfig.layerId}`);
+          }
         });
+      };
+      setGroupKeys(geoviewLayerInstance.listOfLayerEntryConfig, layerId);
 
-        // set columns
-        const columnHeader = Object.keys(arrayOfFeatureInfoEntries[0].fieldInfo).map<string>((fieldName): string => {
-          return arrayOfFeatureInfoEntries[0].fieldInfo[fieldName]!.alias;
+      groupValues = groupKeys.map((layerkey) => {
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        let layerValues: {}[] = [];
+        (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
+          if (arrayOfFeatureInfoEntries?.length) {
+            // set values
+            layerValues = arrayOfFeatureInfoEntries.map((feature) => {
+              const { featureKey, fieldInfo } = feature;
+              const geometry = feature.geometry !== undefined ? feature.geometry : {};
+              return { featureKey, geometry, ...fieldInfo };
+            });
+          }
         });
-
-        const columns = [];
-        for (let i = 0; i < columnHeader.length; i++) {
-          columns.push({
-            field: columnHeader[i],
-            headerName: columnHeader[i],
-            width: 150,
-            type: 'string',
-            hide: columnHeader[i] === 'fieldKey',
+        return { layerkey, layerValues };
+      });
+    } else {
+      (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo().then((arrayOfFeatureInfoEntries) => {
+        if (arrayOfFeatureInfoEntries?.length) {
+          // set values
+          values = arrayOfFeatureInfoEntries.map((feature) => {
+            const { featureKey, fieldInfo } = feature;
+            const geometry = feature.geometry !== undefined ? feature.geometry : {};
+            return { featureKey, geometry, ...fieldInfo };
           });
         }
+      });
+    }
 
-        // set rows
-        const rows = values;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
+      // set columns
+      const columnHeader = Object.keys(layerValues[0]).filter((kn) => kn !== 'geometry');
 
-        return createElement('div', {}, [
-          createElement(LayerDataGrid, {
-            key: `${layerId}-datagrid`,
-            columns,
-            rows,
-            pageSize: 50,
-            rowsPerPageOptions: [25, 50, 100],
-            autoHeight: true,
-            rowId: 'featureKey',
-            displayLanguage: this.displayLanguage,
-          }),
-        ]);
+      const columns = [];
+      for (let i = 0; i < columnHeader.length; i++) {
+        columns.push({
+          field: columnHeader[i],
+          headerName: columnHeader[i],
+          width: 150,
+          type: 'string',
+          hide: columnHeader.length > 1 && columnHeader[i] === 'featureKey',
+        });
       }
-      return createElement('div', {}, []);
-    });
-    return createElement('div', {}, []);
+
+      // set rows
+      const rows = layerValues;
+
+      return {
+        key: `${layerId}-datagrid`,
+        layerKey,
+        columns,
+        rows,
+        pageSize: 50,
+        rowsPerPageOptions: [25, 50, 100],
+        autoHeight: true,
+        rowId: 'featureKey',
+        displayLanguage: this.displayLanguage,
+      };
+    };
+
+    return createElement('div', {}, [
+      groupKeys.length > 0 && [
+        createElement(
+          'select',
+          { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
+          groupKeys.map((layerkey) => {
+            return createElement('option', { key: layerkey }, [layerkey]);
+          })
+        ),
+        groupValues.map((groupValue, index) => {
+          return createElement(
+            'div',
+            {
+              key: `${layerId}-layer-datagrid-table-${index}`,
+              className: `${layerId}-layer-datagrid-table`,
+              style: { display: index === 0 ? 'block' : 'none' },
+            },
+            createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues))
+          );
+        }),
+      ],
+      values.length > 0 &&
+        createElement('div', { id: `${layerId}-layer-datagrid-table` }, [
+          createElement(LayerDataGrid, setLayerDataGridProps(layerId, values)),
+        ]),
+    ]);
   };
 }

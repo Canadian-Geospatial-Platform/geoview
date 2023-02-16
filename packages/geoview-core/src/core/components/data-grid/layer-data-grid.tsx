@@ -1,7 +1,29 @@
-import { DataGrid, DataGridProps, gridClasses, GridToolbar, GridCellParams, frFR, enUS } from '@mui/x-data-grid';
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable react/no-unstable-nested-components */
+import {
+  DataGrid,
+  DataGridProps,
+  gridClasses,
+  GridCellParams,
+  GridCsvExportOptions,
+  GridExportMenuItemProps,
+  frFR,
+  enUS,
+  GridToolbarExportContainer,
+  GridCsvExportMenuItem,
+  GridToolbarContainerProps,
+  GridToolbarContainer,
+  GridToolbarColumnsButton,
+  GridToolbarFilterButton,
+  GridToolbarDensitySelector,
+  GridPrintExportMenuItem,
+  GridPrintExportOptions,
+} from '@mui/x-data-grid';
 
+import { ButtonProps } from '@mui/material/Button';
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
-import { Tooltip } from '../../../ui';
+import { Tooltip, MenuItem } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -13,6 +35,7 @@ import { Tooltip } from '../../../ui';
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
   rowId: string;
+  layerKey: string;
   displayLanguage: TypeDisplayLanguage;
 }
 
@@ -65,7 +88,71 @@ const sxClasses = {
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
-  const { rowId, displayLanguage, columns } = props;
+  const { rowId, layerKey, displayLanguage, columns, rows } = props;
+
+  const getJson = () => {
+    // Stringify with some indentation
+    return JSON.stringify(rows, null, 2);
+  };
+
+  const exportBlob = (blob: Blob, filename: string) => {
+    // Save the blob in a json file
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    });
+  };
+
+  function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
+    const { hideMenu } = props;
+
+    return (
+      <MenuItem
+        onClick={() => {
+          const jsonString = getJson();
+          const blob = new Blob([jsonString], {
+            type: 'text/json',
+          });
+          exportBlob(blob, `DataGrid_${layerKey.replaceAll('/', '-').replaceAll('.', '-')}.json`);
+
+          // Hide the export menu after the export
+          hideMenu?.();
+        }}
+      >
+        Export GeoJSON
+      </MenuItem>
+    );
+  }
+
+  const csvOptions: GridCsvExportOptions = { delimiter: ';' };
+  const printOptions: GridPrintExportOptions = {};
+
+  function CustomExportButton(props: ButtonProps) {
+    return (
+      <GridToolbarExportContainer onResize={undefined} onResizeCapture={undefined} {...props}>
+        <GridCsvExportMenuItem options={csvOptions} />
+        <JsonExportMenuItem />
+        <GridPrintExportMenuItem options={printOptions} />
+      </GridToolbarExportContainer>
+    );
+  }
+
+  function CustomToolbar(props: GridToolbarContainerProps) {
+    return (
+      <GridToolbarContainer {...props}>
+        <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
+        <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
+        <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
+        <CustomExportButton />
+      </GridToolbarContainer>
+    );
+  }
 
   // tooltip implementation for column content
   // TODO: works only with hover and add tooltips even when not needed. need improvement
@@ -95,7 +182,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           disableSelectionOnClick
           rowsPerPageOptions={[50]}
           components={{
-            Toolbar: GridToolbar,
+            Toolbar: CustomToolbar,
           }}
           /**
            * logLevel={false} will suppress useResizeContainer warnings if the data grid is rendered in an un-selected tab
