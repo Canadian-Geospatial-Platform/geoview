@@ -10,8 +10,8 @@ import {
   ListItemText,
   Tooltip,
   IconButton,
-  VisibilityOffIcon,
-  VisibilityIcon,
+  CheckBoxOutIcon,
+  CheckBoxIcon,
 } from '../../../ui';
 import {
   AbstractGeoViewVector,
@@ -99,9 +99,23 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
               (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
             }
           } else {
-            (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
+            if (geometryStyle.styleType === 'classBreaks') {
+              if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length === isChecked.length) {
+                (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+              } else {
+                (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
+              }
+            }
+            if (geometryStyle.styleType === 'uniqueValue') {
+              if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length === isChecked.length) {
+                (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+              } else {
+                (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
+              }
+            }
           }
         });
+
         geoviewLayerInstance.applyViewFilter(layerConfig);
       }
     }
@@ -126,7 +140,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
                 </Tooltip>
                 <ListItemIcon>
                   <IconButton color="primary" onClick={() => handleToggleLayer(index)}>
-                    {isChecked[index] === true ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                    {isChecked[index] === true ? <CheckBoxIcon /> : <CheckBoxOutIcon />}
                   </IconButton>
                 </ListItemIcon>
               </ListItemButton>
