@@ -1,3 +1,4 @@
+import { MutableRefObject } from 'react';
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
@@ -249,3 +250,18 @@ export function exportPNG(mapId: string): void {
   document.body.style.cursor = 'auto';
   map.renderSync();
 }
+
+/**
+ * Disable scrolling, so that screen doesnt scroll down.
+ *  when focus is set to map and
+ * arrows and enter keys are used to navigate the map
+ * @param e - keybaord event like, tab, space
+ * @param elem - mutable reference object of html elements.
+ */
+export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void => {
+  if (elem.current === document.activeElement) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+    }
+  }
+};

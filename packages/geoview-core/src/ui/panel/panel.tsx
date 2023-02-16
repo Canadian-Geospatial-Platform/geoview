@@ -303,11 +303,12 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         }}
       >
         <Card
+          sx={{ display: panelStatus ? 'block' : 'none' }}
           ref={panelRef as React.MutableRefObject<null>}
           className={classes.panelContainer}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
-              closePanel();
+              panel.close();
             }
           }}
           {...{ 'data-id': button.id }}

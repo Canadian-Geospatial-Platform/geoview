@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import Grid from '@mui/material/Grid';
 import {
@@ -33,6 +33,7 @@ import {
   TypeDisplayLanguage,
   MapContext,
   AbstractGeoViewVector,
+  disableScrolling,
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
@@ -66,11 +67,15 @@ const sxClasses = {
     maxHeight: 24,
   },
   iconPreview: {
+    marginLeft: 8,
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
     borderColor: 'grey.600',
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    '&:focus': {
+      border: 'revert',
+    },
   },
   iconImg: {
     padding: 3,
@@ -80,8 +85,16 @@ const sxClasses = {
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
   },
+  stackIconsBox: {
+    position: 'relative',
+    marginLeft: 8,
+    '&:focus': {
+      outlineColor: 'grey',
+    },
+  },
   iconPreviewHoverable: {
-    left: -30,
+    position: 'absolute',
+    left: -3,
     top: -2,
     padding: 0,
     borderRadius: 0,
@@ -94,6 +107,7 @@ const sxClasses = {
     },
   },
   iconPreviewStacked: {
+    // marginLeft: 8,
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
@@ -164,6 +178,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
+  const closeIconRef = useRef() as RefObject<HTMLButtonElement>;
+  const stackIconRef = useRef() as MutableRefObject<HTMLDivElement | undefined>;
+  const maxIconRef = useRef() as RefObject<HTMLButtonElement>;
 
   const menuOpen = Boolean(menuAnchorElement);
 
@@ -334,6 +351,28 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     api.map(mapId).layer.removeGeoviewLayer(geoviewLayerInstance);
     api.map(mapId).layer.addGeoviewLayer(layerConfig!);
   };
+  const handleStackIcon = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter') {
+      handleLegendClick();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', (e) => disableScrolling(e, stackIconRef));
+    return () => {
+      document.removeEventListener('keydown', (e) => disableScrolling(e, stackIconRef));
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isLegendOpen && closeIconRef?.current) {
+      closeIconRef.current?.focus();
+    } else if (!isLegendOpen && stackIconRef?.current) {
+      stackIconRef.current.focus();
+    } else if (!isLegendOpen && iconType === 'simple' && maxIconRef?.current) {
+      maxIconRef.current.focus();
+    }
+  }, [isLegendOpen, iconType]);
 
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
@@ -346,12 +385,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={closeIconRef}>
                 <CloseIcon />
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={maxIconRef}>
                 <Box sx={sxClasses.legendIcon}>
                   <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
                 </Box>
@@ -359,13 +398,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
             )}
             {iconType === 'list' && !isLegendOpen && (
               <Tooltip title={t('legend.expand_legend')} placement="top" enterDelay={1000}>
-                <Box>
-                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small">
+                <Box
+                  tabIndex={0}
+                  onClick={handleLegendClick}
+                  sx={sxClasses.stackIconsBox}
+                  ref={stackIconRef}
+                  onKeyPress={(e) => handleStackIcon(e)}
+                >
+                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
                     <Box sx={sxClasses.legendIconTransparent}>
                       {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
                     </Box>
                   </IconButton>
-                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" onClick={handleLegendClick}>
+                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
                     <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
                   </IconButton>
                 </Box>
@@ -382,7 +427,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </Tooltip>
           <ListItemIcon>
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
-              <IconButton onClick={handleMoreClick}>
+              <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
               </IconButton>
             )}
@@ -396,7 +441,14 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           </ListItemIcon>
         </ListItemButton>
       </ListItem>
-      <Menu anchorEl={menuAnchorElement} open={menuOpen} onClose={handleCloseMenu}>
+      <Menu
+        anchorEl={menuAnchorElement}
+        open={menuOpen}
+        onClose={handleCloseMenu}
+        MenuListProps={{
+          'aria-labelledby': 'setOpacityBtn',
+        }}
+      >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
         {canSetOpacity && groupItems.length === 0 && <MenuItem onClick={handleOpacityOpen}>{t('legend.opacity')}</MenuItem>}

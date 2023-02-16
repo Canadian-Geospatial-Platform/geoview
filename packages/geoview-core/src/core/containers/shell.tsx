@@ -191,7 +191,9 @@ export function Shell(props: ShellProps): JSX.Element {
           {t('keyboardnav.start')}
         </a>
         <div className={classes.mapContainer}>
-          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && <Appbar />}
+          {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('app-bar') > -1 && (
+            <Appbar setActivetrap={setActivetrap} />
+          )}
           <Map {...mapFeaturesConfig} />
           {mapFeaturesConfig.components !== undefined && mapFeaturesConfig.components.indexOf('nav-bar') > -1 && <Navbar />}
         </div>
