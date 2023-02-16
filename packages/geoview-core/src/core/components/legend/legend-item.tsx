@@ -208,7 +208,6 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const getLegendDetails = () => {
     geoviewLayerInstance?.getLegend(subLayerId).then((layerLegend) => {
       const { geoviewLayerId } = geoviewLayerInstance;
-      // console.log(layerLegend, geoviewLayerInstance);
       if (layerLegend) {
         // WMS layers just return a string
         if (isWmsLegend(layerLegend)) {
