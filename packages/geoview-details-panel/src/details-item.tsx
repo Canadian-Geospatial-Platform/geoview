@@ -1,7 +1,16 @@
 /* eslint-disable react/require-default-props */
 import { ReactElement } from 'react';
 
-import { TypeWindow, payloadIsAllQueriesDone, payloadIsQueryLayer, TypeArrayOfLayerData, getLocalizedValue } from 'geoview-core';
+import {
+  TypeWindow,
+  payloadIsAMapSingleClick,
+  markerDefinitionPayload,
+  payloadIsAllQueriesDone,
+  TypeArrayOfLayerData,
+  TypeJsonObject,
+  getLocalizedValue,
+  Coordinate,
+} from 'geoview-core';
 
 interface Props {
   mapId: string;
@@ -22,8 +31,10 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   const { useState, useEffect } = react;
 
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
-  const [latlng, setLatLng] = useState<unknown>([]);
+  // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<ReactElement>();
+  const [latLng, setLatLng] = useState<Coordinate>([]);
+  const [handlerName, setHandlerName] = useState<string | null>(null);
 
   const panel = api.map(mapId).appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)?.panel;
 
@@ -56,29 +67,39 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
       mapId,
       `${mapId}-DetailsAPI`
     );
+    // get click info.
     api.event.on(
-      api.eventNames.GET_FEATURE_INFO.QUERY_LAYER,
+      api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
-        if (payloadIsQueryLayer(payload)) {
-          const { location } = payload;
-          setLatLng(location);
+        if (payloadIsAMapSingleClick(payload)) {
+          const { coordinates } = payload;
+          setHandlerName(payload.handlerName);
+          setLatLng(coordinates.lnglat);
         } else {
           setLatLng([]);
         }
       },
       mapId
     );
+
     return () => {
       api.event.off(api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE, mapId);
-      api.event.off(api.eventNames.GET_FEATURE_INFO.QUERY_LAYER, mapId);
+      api.event.off(api.eventNames.MAP.EVENT_MAP_SINGLE_CLICK, mapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latlng, backgroundStyle: 'dark', singleColumn: true }));
+    setList(
+      api
+        .map(mapId)
+        .details.createDetails(mapId, details, { mapId, location: latLng, backgroundStyle: 'dark', singleColumn: true, handlerName })
+    );
+    setTimeout(() => {
+      api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, latLng, {} as TypeJsonObject));
+    }, 800);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [details, latlng]);
+  }, [details, latLng]);
 
   return <div>{list}</div>;
 }
