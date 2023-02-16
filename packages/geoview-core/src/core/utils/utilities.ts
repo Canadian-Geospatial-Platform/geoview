@@ -255,7 +255,8 @@ export function exportPNG(mapId: string): void {
  * Disable scrolling, so that screen doesnt scroll down.
  *  when focus is set to map and
  * arrows and enter keys are used to navigate the map
- * @param e
+ * @param e - keybaord event like, tab, space
+ * @param elem - mutable reference object of html elements.
  */
 export const disableScrolling = (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>): void => {
   if (elem.current === document.activeElement) {

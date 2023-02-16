@@ -56,7 +56,7 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   const classes = useStyles();
 
   // get ref to div element
-  const mapElement = useRef<HTMLDivElement>();
+  const mapElement = useRef<HTMLDivElement | undefined>();
 
   // create a new map viewer instance
   const viewer: MapViewer = api.map(mapId);
