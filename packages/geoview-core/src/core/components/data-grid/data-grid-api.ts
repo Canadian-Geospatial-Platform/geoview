@@ -45,7 +45,7 @@ export class DataGridAPI {
     let values: {}[] = [];
     const groupKeys: string[] = [];
     // eslint-disable-next-line @typescript-eslint/ban-types
-    let groupValues: { layerValues: {}[] }[] = [];
+    let groupValues: { layerkey: string; layerValues: {}[] }[] = [];
     const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
     if (geoviewLayerInstance.listOfLayerEntryConfig.length > 1) {
       const setGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
@@ -66,7 +66,8 @@ export class DataGridAPI {
       groupValues = groupKeys.map((layerkey) => {
         const layerValues = (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).map((feature) => {
           const { featureKey, featureInfo } = feature;
-          return { featureKey, ...featureInfo };
+          const geometry = feature.geometry !== undefined ? feature.geometry : {};
+          return { featureKey, geometry, ...featureInfo };
         });
         return { layerkey, layerValues };
       });
@@ -75,7 +76,8 @@ export class DataGridAPI {
       if (Array.isArray(allFetureInfo)) {
         values = allFetureInfo.map((feature) => {
           const { featureKey, featureInfo } = feature;
-          return { featureKey, ...featureInfo };
+          const geometry = feature.geometry !== undefined ? feature.geometry : {};
+          return { featureKey, geometry, ...featureInfo };
         });
       }
     }
@@ -83,7 +85,7 @@ export class DataGridAPI {
     // eslint-disable-next-line @typescript-eslint/ban-types
     const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
       // set columns
-      const columnHeader = Object.keys(layerValues[0]);
+      const columnHeader = Object.keys(layerValues[0]).filter((kn) => kn !== 'geometry');
 
       const columns = [];
       for (let i = 0; i < columnHeader.length; i++) {

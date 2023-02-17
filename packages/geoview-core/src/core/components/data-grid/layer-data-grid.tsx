@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
@@ -104,8 +105,16 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const { rowId, layerKey, displayLanguage, columns, rows } = props;
 
   const getJson = () => {
+    const geoData = rows.map((row) => {
+      const { geometry, ...featureInfo } = row;
+      return {
+        type: 'Feature',
+        geometry,
+        properties: featureInfo,
+      };
+    });
     // Stringify with some indentation
-    return JSON.stringify(rows, null, 2);
+    return JSON.stringify(geoData, null, 2);
   };
 
   /**
