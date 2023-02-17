@@ -43,7 +43,7 @@ export default function ExportModal(props: ExportModalProps): JSX.Element {
       >
         <DialogTitle>Export Map as PNG</DialogTitle>
         <DialogActions>
-          <Button onClick={closeModal} size="small">
+          <Button onClick={closeModal} size="small" autoFocus>
             Cancel
           </Button>
           <Button type="submit" onClick={closeModal} size="small">
