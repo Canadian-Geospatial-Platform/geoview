@@ -448,7 +448,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         MenuListProps={{
           'aria-labelledby': 'setOpacityBtn',
         }}
-        autoFocus={menuOpen}
+        disablePortal
       >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
