@@ -22,6 +22,7 @@ import {
 } from '@mui/x-data-grid';
 
 import { ButtonProps } from '@mui/material/Button';
+import { toJsonObject } from '../../types/global-types';
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
 import { Tooltip, MenuItem } from '../../../ui';
 
@@ -87,6 +88,18 @@ const sxClasses = {
   },
 };
 
+/**
+ * translations object to inject to the viewer translations
+ */
+const translations = toJsonObject({
+  en: {
+    exportJson: 'Download GeoJSON',
+  },
+  fr: {
+    exportJson: 'Télécharger GeoJSON',
+  },
+});
+
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { rowId, layerKey, displayLanguage, columns, rows } = props;
 
@@ -95,6 +108,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     return JSON.stringify(rows, null, 2);
   };
 
+  /**
+   * export the blob to a file
+   *
+   * @param {Blob} blob the blob to save to file
+   * @param {string} filename file name
+   *
+   */
   const exportBlob = (blob: Blob, filename: string) => {
     // Save the blob in a json file
     const url = URL.createObjectURL(blob);
@@ -104,11 +124,15 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     a.download = filename;
     a.click();
 
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    });
+    URL.revokeObjectURL(url);
   };
-
+  /**
+   * the export Json item added in menu
+   *
+   * @param {GridExportMenuItemProps} props hideMenu
+   * @return {MenuItem} export json item in menu
+   *
+   */
   function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     const { hideMenu } = props;
 
@@ -125,14 +149,20 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           hideMenu?.();
         }}
       >
-        Export GeoJSON
+        {translations[displayLanguage].exportJson}
       </MenuItem>
     );
   }
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
-
+  /**
+   * customerize the export menu, add the export json button
+   *
+   * @param {ButtonProps} props pass the props
+   * @return {GridToolbarExportContainer} export menu
+   *
+   */
   function CustomExportButton(props: ButtonProps) {
     return (
       <GridToolbarExportContainer onResize={undefined} onResizeCapture={undefined} {...props}>
@@ -142,7 +172,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       </GridToolbarExportContainer>
     );
   }
-
+  /**
+   * Customerize the toolbar, replace the Export button menu with the customerized one
+   *
+   * @param {GridToolbarContainerProps} props pass the props
+   * @return {GridToolbarExportContainer} toolbar
+   *
+   */
   function CustomToolbar(props: GridToolbarContainerProps) {
     return (
       <GridToolbarContainer {...props}>
