@@ -47,6 +47,9 @@
     "expand_legend": "Expand Legend",
     "toggle_cluster": "Toggle Clustering"
   },
+  "datagrid": {
+    "exportJson": "Download GeoJSON"
+  },
   "keyboardnav": {
     "start": "Skip after map element",
     "end": "Skip before map element",

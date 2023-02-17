@@ -47,6 +47,9 @@
     "expand_legend": "Développer la légende",
     "toggle_cluster": "Basculer le groupement"
   },
+  "datagrid": {
+    "exportJson": "Télécharger GeoJSON"
+  },
   "keyboardnav": {
     "start": "Aller après l'élément carte",
     "end": "Aller avant l'élément carte",

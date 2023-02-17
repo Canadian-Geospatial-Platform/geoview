@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
+import { useTranslation } from 'react-i18next';
 import {
   DataGrid,
   DataGridProps,
@@ -23,7 +24,6 @@ import {
 } from '@mui/x-data-grid';
 
 import { ButtonProps } from '@mui/material/Button';
-import { toJsonObject } from '../../types/global-types';
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
 import { Tooltip, MenuItem } from '../../../ui';
 
@@ -89,21 +89,9 @@ const sxClasses = {
   },
 };
 
-/**
- * translations object to inject to the viewer translations
- */
-const translations = toJsonObject({
-  en: {
-    exportJson: 'Download GeoJSON',
-  },
-  fr: {
-    exportJson: 'Télécharger GeoJSON',
-  },
-});
-
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { rowId, layerKey, displayLanguage, columns, rows } = props;
-
+  const { t } = useTranslation<string>();
   const getJson = () => {
     const geoData = rows.map((row) => {
       const { geometry, ...featureInfo } = row;
@@ -158,7 +146,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           hideMenu?.();
         }}
       >
-        {translations[displayLanguage].exportJson}
+        {t('datagrid.exportJson')}
       </MenuItem>
     );
   }
@@ -166,7 +154,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
   /**
-   * customerize the export menu, add the export json button
+   * Customize the export menu, adding the export json button
    *
    * @param {ButtonProps} props pass the props
    * @return {GridToolbarExportContainer} export menu
@@ -182,7 +170,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     );
   }
   /**
-   * Customerize the toolbar, replace the Export button menu with the customerized one
+   * Customize the toolbar, replace the Export button menu with the customized one
    *
    * @param {GridToolbarContainerProps} props pass the props
    * @return {GridToolbarExportContainer} toolbar
