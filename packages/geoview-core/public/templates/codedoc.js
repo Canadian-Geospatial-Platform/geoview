@@ -26,9 +26,21 @@ function createConfigSnippet() {
     // check if JSON can be parsed, if not do nothing
     try {
       if (configSnippet !== undefined && el !== null) {
+        // Erase comments in the configSnippet.
+        const uncommentedConfigSnippet = configSnippet.value
+          .split(/(?<!\\)'/gm)
+          .map((fragment, index) => {
+            if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
+            return fragment; // .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '');
+          })
+          .join("'")
+          .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
+          .replaceAll(String.fromCharCode(1), '/*')
+          .replaceAll(String.fromCharCode(2), '*/');
+
         el.textContent = JSON.stringify(
           JSON.parse(
-            configSnippet.value
+            uncommentedConfigSnippet
               // remove CR and LF from the map config
               .replace(/(\r\n|\n|\r)/gm, '')
               // replace apostrophes not preceded by a backslash with quotes

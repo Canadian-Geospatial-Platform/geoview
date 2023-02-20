@@ -37,7 +37,11 @@ export function DataItem({ mapId }: Props): JSX.Element {
         return {
           value: index,
           label: labelValue !== undefined ? labelValue : `data-${index}`,
-          content: () => api.map(mapId).dataGrid.createDataGrid({ layerId }),
+          content: () =>
+            api
+              .map(mapId)
+              .dataGrid.createDataGrid({ layerId })
+              .then((content) => content),
         };
       })}
     />

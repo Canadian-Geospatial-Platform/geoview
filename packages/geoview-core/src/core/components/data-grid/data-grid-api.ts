@@ -1,7 +1,6 @@
 import { createElement, ReactElement } from 'react';
 
 import { AbstractGeoViewVector, api } from '../../../app';
-import { getLocalizedValue } from '../../utils/utilities';
 
 import { LayerDataGrid } from './layer-data-grid';
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
@@ -38,26 +37,31 @@ export class DataGridAPI {
    * @return {ReactElement} the data grid react element
    *
    */
-  createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
+  createDataGrid = async (layerDataGridProps: TypeLayerDataGridProps): Promise<ReactElement> => {
     const { layerId } = layerDataGridProps;
-    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-    const values = (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo().map((feature) => {
-      const { featureKey, featureInfo } = feature;
-      return { featureKey, ...featureInfo };
-    });
+    const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId] as AbstractGeoViewVector;
+    const arrayOfFeatureInfoEntries = await geoviewLayerInstance?.getAllFeatureInfo();
 
-    if (values !== undefined && values[0] !== undefined) {
+    if (arrayOfFeatureInfoEntries?.length) {
+      // set values
+      const values = arrayOfFeatureInfoEntries.map((feature) => {
+        const { featureKey, fieldInfo } = feature;
+        return { featureKey, ...fieldInfo };
+      });
+
       // set columns
-      const columnHeader = Object.keys(values[0]);
+      const columnHeader = Object.keys(arrayOfFeatureInfoEntries[0].fieldInfo).map<string>((fieldName): string => {
+        return arrayOfFeatureInfoEntries[0].fieldInfo[fieldName]!.alias;
+      });
 
       const columns = [];
-      for (let i = 0; i < columnHeader.length - 1; i++) {
+      for (let i = 0; i < columnHeader.length; i++) {
         columns.push({
           field: columnHeader[i],
           headerName: columnHeader[i],
           width: 150,
           type: 'string',
-          hide: columnHeader[i] === 'featureKey',
+          hide: columnHeader[i] === 'fieldKey',
         });
       }
 

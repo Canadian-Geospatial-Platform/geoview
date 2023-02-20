@@ -58,6 +58,10 @@
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "A comma separated list of attribute names (English/French) that should be requested on query (all by default)."
         },
+        "fieldTypes": {
+          "type": "string",
+          "description": "A comma separated list of types. Type at index i is associated to the variable at index i."
+        },
         "aliasFields": {
           "$ref": "#/definitions/TypeLocalizedString",
           "description": "A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set if not found."

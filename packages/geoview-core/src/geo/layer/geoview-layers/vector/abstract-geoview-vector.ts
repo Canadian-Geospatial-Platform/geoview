@@ -18,15 +18,13 @@ import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import {
   TypeBaseLayerEntryConfig,
   TypeBaseSourceVectorInitialConfig,
-  TypeFeatureInfoLayerConfig,
   TypeLayerEntryConfig,
   TypeListOfLayerEntryConfig,
   TypeVectorLayerEntryConfig,
   layerEntryIsGroupLayer,
 } from '../../../map/map-schema-types';
 import { api } from '../../../../app';
-import { getLocalizedValue } from '../../../../core/utils/utilities';
-import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { NodeType } from '../../../renderer/geoview-renderer-types';
 
 /* *******************************************************************************************************************************
@@ -210,61 +208,27 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
-   *
-   * @param {Feature<Geometry>[]} features The array of features to convert.
-   * @param {TypeFeatureInfoLayerConfig} featureInfo The featureInfo configuration.
-   *
-   * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
-   */
-  private formatFeatureInfoResult(features: Feature<Geometry>[], featureInfo?: TypeFeatureInfoLayerConfig): TypeArrayOfFeatureInfoEntries {
-    if (!features.length) return [];
-    const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
-    const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
-    const queryResult: TypeArrayOfFeatureInfoEntries = [];
-    let keyCounter = 0;
-
-    features.forEach((feature) => {
-      if (feature.get('features')) {
-        const clusterFeatureInfo = this.formatFeatureInfoResult(feature.get('features'), featureInfo);
-        queryResult.push(...clusterFeatureInfo);
-      } else {
-        const featureInfoEntry: TypeFeatureInfoEntry = {
-          // feature key for building the data-grid
-          featureKey: keyCounter++,
-          featureInfo: {},
-        };
-
-        // query feature info
-        const featureFields = feature.getKeys();
-        featureFields.forEach((fieldName) => {
-          if (fieldName !== 'geometry') {
-            if (outfields?.includes(fieldName)) {
-              const aliasfieldIndex = outfields.indexOf(fieldName);
-              featureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = feature.get(fieldName);
-            } else if (!outfields) featureInfoEntry.featureInfo[fieldName] = feature.get(fieldName);
-          }
-        });
-        queryResult.push(featureInfoEntry);
-      }
-    });
-    return queryResult;
-  }
-
-  /** ***************************************************************************************************************************
    * Return feature information for all the features stored in the layer.
    *
    * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  getAllFeatureInfo(layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer): TypeArrayOfFeatureInfoEntries {
-    const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
-    if (!layerConfig?.gvLayer) return [];
-    return this.formatFeatureInfoResult(
-      (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
-      (layerConfig.source as TypeBaseSourceVectorInitialConfig)?.featureInfo
-    );
+  getAllFeatureInfo(
+    layerPathOrConfig: string | TypeLayerEntryConfig | null | undefined = this.activeLayer
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      const layerConfig = typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig;
+      if (!layerConfig?.gvLayer) resolve([]);
+      else
+        this.formatFeatureInfoResult(
+          (layerConfig.gvLayer as VectorLayer<VectorSource<Geometry>>).getSource()!.getFeatures(),
+          layerConfig as TypeVectorLayerEntryConfig
+        ).then((arrayOfFeatureInfoEntries) => {
+          resolve(arrayOfFeatureInfoEntries);
+        });
+    });
+    return promisedQueryResult;
   }
 
   /** ***************************************************************************************************************************
@@ -285,8 +249,10 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       };
       const { map } = api.map(this.mapId);
       const features = map.getFeaturesAtPixel(location, { hitTolerance: 4, layerFilter });
-      resolve(
-        this.formatFeatureInfoResult(features as Feature<Geometry>[], (layerConfig as TypeVectorLayerEntryConfig).source?.featureInfo)
+      this.formatFeatureInfoResult(features as Feature<Geometry>[], layerConfig as TypeVectorLayerEntryConfig).then(
+        (arrayOfFeatureInfoEntries) => {
+          resolve(arrayOfFeatureInfoEntries);
+        }
       );
     });
     return promisedQueryResult;
@@ -302,11 +268,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtCoordinate(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const { map } = api.map(this.mapId);
-      resolve(this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerConfig));
-    });
-    return promisedQueryResult;
+    const { map } = api.map(this.mapId);
+    return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(location as Coordinate), layerConfig);
   }
 
   /** ***************************************************************************************************************************
@@ -319,12 +282,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getFeatureInfoAtLongLat(location: Coordinate, layerConfig: TypeLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries> {
-    const promisedQueryResult = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
-      const { map } = api.map(this.mapId);
-      const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
-      resolve(this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerConfig));
-    });
-    return promisedQueryResult;
+    const { map } = api.map(this.mapId);
+    const convertedLocation = transform(location, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
+    return this.getFeatureInfoAtPixel(map.getPixelFromCoordinate(convertedLocation as Coordinate), layerConfig);
   }
 
   /** ***************************************************************************************************************************

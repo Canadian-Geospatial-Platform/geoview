@@ -5,16 +5,16 @@ import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
 import LayerGroup, { Options as LayerGroupOptions } from 'ol/layer/Group';
 import { transformExtent } from 'ol/proj';
+import Feature from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
 
-import { generateId } from '../../../core/utils/utilities';
+import { generateId, getLocalizedValue } from '../../../core/utils/utilities';
 import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   TypeLocalizedString,
   TypeLayerEntryConfig,
   TypeBaseLayerEntryConfig,
-  TypeBaseSourceImageInitialConfig,
-  TypeBaseSourceVectorInitialConfig,
   layerEntryIsGroupLayer,
   TypeStyleConfig,
   TypeLayerGroupEntryConfig,
@@ -23,9 +23,12 @@ import {
   TypeStyleGeometry,
 } from '../../map/map-schema-types';
 import {
+  codedValueType,
   GetFeatureInfoPayload,
   payloadIsQueryLayer,
+  rangeDomainType,
   TypeArrayOfFeatureInfoEntries,
+  TypeFeatureInfoEntry,
   TypeQueryType,
 } from '../../../api/events/payloads/get-feature-info-payload';
 import { snackbarMessagePayload } from '../../../api/events/payloads/snackbar-message-payload';
@@ -41,7 +44,7 @@ export type TypeLegend = {
   layerName?: TypeLocalizedString;
   type: TypeGeoviewLayerType;
   styleConfig?: TypeStyleConfig;
-  legend: TypeLayerStyle | HTMLCanvasElement;
+  legend: TypeLayerStyles | HTMLCanvasElement;
 };
 
 /**
@@ -74,7 +77,7 @@ export const isVectorLegend = (verifyIfLegend: TypeLegend): verifyIfLegend is Ty
 };
 
 export interface TypeVectorLegend extends TypeLegend {
-  legend: TypeLayerStyle;
+  legend: TypeLayerStyles;
 }
 
 export type TypeStyleRepresentation = {
@@ -85,7 +88,7 @@ export type TypeStyleRepresentation = {
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyle = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
+export type TypeLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -192,6 +195,9 @@ export abstract class AbstractGeoViewLayer {
 
   // The service metadata.
   metadata: TypeJsonObject | null = null;
+
+  /** Layer metadata */
+  layerMetadata: Record<string, TypeJsonObject> = {};
 
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
@@ -703,6 +709,26 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
+   * Return the type of the specified field.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+
+  /** ***************************************************************************************************************************
+   * Return the domain of the specified field. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+
+  /** ***************************************************************************************************************************
    * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
    * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
    * will be used. This routine does nothing when no layerPathOrConfig is specified and the active layer is null.
@@ -863,23 +889,94 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /** ***************************************************************************************************************************
-   * Utility method use to add an entry to the outfields or aliasFields attribute of the layerEntryConfig.source.featureInfo.
+   * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
    *
-   * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration that contains the source.featureInfo.
-   * @param {outfields' | 'aliasFields} fieldName The field name to update.
-   * @param {string} fieldValue The value to append to the field name.
-   * @param {number} prefixEntryWithComa flag (0 = false) indicating that we must prefix the entry with a ','
+   * @param {Feature<Geometry>[]} features The array of features to convert.
+   * @param {TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
+   *
+   * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
    */
-  protected addFieldEntryToSourceFeatureInfo = (
-    layerEntryConfig: TypeLayerEntryConfig,
-    fieldName: 'outfields' | 'aliasFields',
-    fieldValue: string,
-    prefixEntryWithComa: number
-  ) => {
-    const layerEntrySourceConfig = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig | TypeBaseSourceImageInitialConfig;
-    if (prefixEntryWithComa) {
-      layerEntrySourceConfig.featureInfo![fieldName]!.en = `${layerEntrySourceConfig.featureInfo![fieldName]!.en},`;
-    }
-    layerEntrySourceConfig.featureInfo![fieldName]!.en = `${layerEntrySourceConfig.featureInfo![fieldName]!.en}${fieldValue}`;
-  };
+  protected formatFeatureInfoResult(
+    features: Feature<Geometry>[],
+    layerEntryConfig?: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig
+  ): Promise<TypeArrayOfFeatureInfoEntries> {
+    const promisedArrayOfFeatureInfo = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
+      if (!features.length) resolve([]);
+      else {
+        const featureInfo = layerEntryConfig?.source?.featureInfo;
+        const fieldTypes = featureInfo?.fieldTypes?.split(',');
+        const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+        const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
+        const queryResult: TypeArrayOfFeatureInfoEntries = [];
+        let featureKeyCounter = 0;
+        let fieldKeyCounter = 0;
+        const promisedAllCanvasFound: Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>[] = [];
+        features.forEach((featureNeedingItsCanvas) => {
+          promisedAllCanvasFound.push(
+            new Promise<{ feature: Feature<Geometry>; canvas: HTMLCanvasElement | undefined }>((resolveCanvas) => {
+              api
+                .map(this.mapId)
+                .geoviewRenderer.getFeatureCanvas(featureNeedingItsCanvas, layerEntryConfig as TypeVectorLayerEntryConfig)
+                .then((canvas) => {
+                  resolveCanvas({ feature: featureNeedingItsCanvas, canvas });
+                });
+            })
+          );
+        });
+        Promise.all(promisedAllCanvasFound).then((arrayOfFeatureInfo) => {
+          arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
+            if (canvas) {
+              const clusterFeatures = feature.get('features');
+              if (clusterFeatures) {
+                this.formatFeatureInfoResult(clusterFeatures, layerEntryConfig).then((clusterFeatureInfo) => {
+                  clusterFeatureInfo.forEach((element) => {
+                    // eslint-disable-next-line no-param-reassign
+                    element.featureKey = featureKeyCounter++;
+                  });
+                  queryResult.push(...clusterFeatureInfo);
+                });
+              } else {
+                const featureInfoEntry: TypeFeatureInfoEntry = {
+                  // feature key for building the data-grid
+                  // eslint-disable-next-line no-param-reassign
+                  featureKey: featureKeyCounter++,
+                  geoviewLayerType: this.type,
+                  extent: feature.getGeometry()!.getExtent(),
+                  geometry: feature,
+                  featureIcon: canvas,
+                  fieldInfo: {},
+                };
+                const featureFields = feature.getKeys();
+                featureFields.forEach((fieldName) => {
+                  if (fieldName !== 'geometry') {
+                    if (outfields?.includes(fieldName)) {
+                      const fieldIndex = outfields.indexOf(fieldName);
+                      featureInfoEntry.fieldInfo[fieldName] = {
+                        fieldKey: fieldKeyCounter++,
+                        value: feature.get(fieldName),
+                        dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
+                        alias: aliasFields![fieldIndex],
+                        domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                      };
+                    } else if (!outfields) {
+                      featureInfoEntry.fieldInfo[fieldName] = {
+                        fieldKey: fieldKeyCounter++,
+                        value: feature.get(fieldName),
+                        dataType: this.getFieldType(fieldName, layerEntryConfig!),
+                        alias: fieldName,
+                        domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                      };
+                    }
+                  }
+                });
+                queryResult.push(featureInfoEntry);
+              }
+            }
+          });
+          resolve(queryResult);
+        });
+      }
+    });
+    return promisedArrayOfFeatureInfo;
+  }
 }
