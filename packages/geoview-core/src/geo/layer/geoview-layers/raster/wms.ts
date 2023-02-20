@@ -29,7 +29,12 @@ import {
   TypeFeatureInfoLayerConfig,
   TypeSourceImageInitialConfig,
 } from '../../../map/map-schema-types';
-import { TypeFeatureInfoEntry, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import {
+  TypeFeatureInfoEntry,
+  TypeArrayOfFeatureInfoEntries,
+  rangeDomainType,
+  codedValueType,
+} from '../../../../api/events/payloads/get-feature-info-payload';
 import { getLocalizedValue, xmlToJson } from '../../../../core/utils/utilities';
 import { snackbarMessagePayload } from '../../../../api/events/payloads/snackbar-message-payload';
 import { EVENT_NAMES } from '../../../../api/events/event-types';
@@ -102,6 +107,30 @@ export class WMS extends AbstractGeoViewRaster {
    */
   constructor(mapId: string, layerConfig: TypeWMSLayerConfig) {
     super(CONST_LAYER_TYPES.WMS, layerConfig, mapId);
+  }
+
+  /** ***************************************************************************************************************************
+   * Extract the domain of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    return 'string';
+  }
+
+  /** ***************************************************************************************************************************
+   * Return the type of the specified field.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
   }
 
   /** ***************************************************************************************************************************
@@ -530,12 +559,13 @@ export class WMS extends AbstractGeoViewRaster {
   protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void> {
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (geoviewEntryIsWMS(layerEntryConfig)) {
-        const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId);
+        const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId)!;
+        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = layerCapabilities;
         if (layerCapabilities) {
           if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
           if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution as string);
           if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
-          // ! TODO: The solution implemented in the following 5 lines is not right. scale and zoom are not the same things.
+          // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
           // if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
           //   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
           // if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
@@ -656,7 +686,7 @@ export class WMS extends AbstractGeoViewRaster {
                 const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
                 if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
               } else featureMember = { plain_text: { '#text': response.data } };
-              if (featureMember) resolve(this.formatFeatureInfoAtCoordinateResult(featureMember, layerConfig.source.featureInfo));
+              if (featureMember) resolve(this.formatWmsFeatureInfoResult(featureMember, layerConfig));
             });
           } else resolve([]);
         }
@@ -802,25 +832,30 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
-   * Translate the get feature information at coordinate result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
+   * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-   * @param {TypeFeatureInfoLayerConfig} featureInfo Feature information describing the user's desired output format.
+   * @param {TypeWmsLayerEntryConfig} layerEntryConfig The layer configuration.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  private formatFeatureInfoAtCoordinateResult(
-    featureMember: TypeJsonObject,
-    featureInfo?: TypeFeatureInfoLayerConfig
-  ): TypeArrayOfFeatureInfoEntries {
+  formatWmsFeatureInfoResult(featureMember: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig): TypeArrayOfFeatureInfoEntries {
+    const featureInfo = layerEntryConfig?.source?.featureInfo;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
+    const fieldTypes = featureInfo?.fieldTypes?.split(',');
     const aliasFields = getLocalizedValue(featureInfo?.aliasFields, this.mapId)?.split(',');
     const queryResult: TypeArrayOfFeatureInfoEntries = [];
 
+    let featureKeyCounter = 0;
+    let fieldKeyCounter = 0;
     const featureInfoEntry: TypeFeatureInfoEntry = {
       // feature key for building the data-grid
-      featureKey: 0,
-      featureInfo: {},
+      featureKey: featureKeyCounter++,
+      geoviewLayerType: this.type,
+      extent: [0, 0, 0, 0],
+      geometry: null,
+      featureIcon: document.createElement('canvas'),
+      fieldInfo: {},
     };
     const createFieldEntries = (entry: TypeJsonObject, prefix = '') => {
       const keys = Object.keys(entry);
@@ -829,7 +864,13 @@ export class WMS extends AbstractGeoViewRaster {
           const splitedKey = key.split(':');
           const fieldName = splitedKey[splitedKey.length - 1];
           if ('#text' in entry[key])
-            featureInfoEntry.featureInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = entry[key]['#text'] as string;
+            featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
+              fieldKey: fieldKeyCounter++,
+              value: entry[key]['#text'] as string,
+              dataType: 'string',
+              alias: `${prefix}${prefix ? '.' : ''}${fieldName}`,
+              domain: null,
+            };
           else createFieldEntries(entry[key], fieldName);
         }
       });
@@ -838,18 +879,21 @@ export class WMS extends AbstractGeoViewRaster {
 
     if (!outfields) queryResult.push(featureInfoEntry);
     else {
-      const filteredFeatureInfoEntry: TypeFeatureInfoEntry = {
-        // feature key for building the data-grid
-        featureKey: 0,
-        featureInfo: {},
-      };
-      Object.keys(featureInfoEntry.featureInfo).forEach((fieldName) => {
+      fieldKeyCounter = 0;
+      const fieldsToDelete = Object.keys(featureInfoEntry.fieldInfo).filter((fieldName) => {
         if (outfields?.includes(fieldName)) {
-          const aliasfieldIndex = outfields.indexOf(fieldName);
-          filteredFeatureInfoEntry.featureInfo[aliasFields![aliasfieldIndex]] = featureInfoEntry.featureInfo[fieldName];
+          const fieldIndex = outfields.indexOf(fieldName);
+          featureInfoEntry.fieldInfo[fieldName]!.fieldKey = fieldKeyCounter++;
+          featureInfoEntry.fieldInfo[fieldName]!.alias = aliasFields![fieldIndex];
+          featureInfoEntry.fieldInfo[fieldName]!.dataType = fieldTypes![fieldIndex] as 'string' | 'date' | 'number';
+          return false; // keep this entry
         }
+        return true; // delete this entry
       });
-      queryResult.push(filteredFeatureInfoEntry);
+      fieldsToDelete.forEach((entryToDelete) => {
+        delete featureInfoEntry.fieldInfo[entryToDelete];
+      });
+      queryResult.push(featureInfoEntry);
     }
     return queryResult;
   }

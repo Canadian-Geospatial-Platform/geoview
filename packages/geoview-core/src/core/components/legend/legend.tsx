@@ -26,6 +26,7 @@ export function Legend(): JSX.Element | null {
       const newLayer = api.map(mapId).layer.geoviewLayers[geoviewLayerId];
       setOrderedMapLayers((orderedLayers) => [newLayer, ...orderedLayers]);
     } else {
+      // eslint-disable-next-line no-console
       console.error('geoviewLayerId is not in the layers list');
     }
   };
