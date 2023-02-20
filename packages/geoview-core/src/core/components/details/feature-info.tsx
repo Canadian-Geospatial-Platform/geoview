@@ -76,8 +76,8 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature, startOpen, backgroundStyle } = props;
   const featureId = `Feature Info ${feature.featureKey}`;
   const [isOpen, setOpen] = useState<boolean>(false);
-  const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
-    return { key: featureKey, value: feature.featureInfo[featureKey] };
+  const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
+    return { key: fieldName, value: feature.fieldInfo[fieldName]!.value };
   });
   const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
 

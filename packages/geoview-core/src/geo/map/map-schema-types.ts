@@ -95,6 +95,8 @@ export type TypeFeatureInfoLayerConfig = {
   nameField?: TypeLocalizedString;
   /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
   outfields?: TypeLocalizedString;
+  /** A comma separated list of types. Type at index i is associated to the variable at index i. */
+  fieldTypes?: string;
   /** A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set */
   aliasFields?: TypeLocalizedString;
 };

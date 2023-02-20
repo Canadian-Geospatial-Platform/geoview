@@ -24,6 +24,7 @@ import {
 import { getLocalizedValue, getXMLHttpRequest, xmlToJson } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
+import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'WFS';
@@ -87,9 +88,6 @@ export const geoviewEntryIsWFS = (verifyIfGeoViewEntry: TypeLayerEntryConfig): v
  */
 // ******************************************************************************************************************************
 export class WFS extends AbstractGeoViewVector {
-  /** Feature type description obtained by the DescribeFeatureType service call. */
-  featureTypeDescripion: Record<string, TypeJsonObject> = {};
-
   /** private varibale holding wfs version. */
   private version = '2.0.0';
 
@@ -100,6 +98,38 @@ export class WFS extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeWFSLayerConfig) {
     super(CONST_LAYER_TYPES.WFS, layerConfig, mapId);
+  }
+
+  /** ***************************************************************************************************************************
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)] as TypeJsonArray;
+    const fieldDefinition = fieldDefinitions.find((metadataEntry) => metadataEntry.name === fieldName);
+    if (!fieldDefinition) return 'string';
+    const fieldEntryType = (fieldDefinition.type as string).split(':').slice(-1)[0] as string;
+    if (fieldEntryType === 'date') return 'date';
+    if (['int', 'number'].includes(fieldEntryType)) return 'number';
+    return 'string';
+  }
+
+  /** ***************************************************************************************************************************
+   * Returns null. WFS services don't have domains.
+   *
+   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
   }
 
   /** ***************************************************************************************************************************
@@ -230,8 +260,10 @@ export class WFS extends AbstractGeoViewVector {
             return fetchResponse.json();
           })
           .then((layerMetadata) => {
-            if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties))
+            if (Array.isArray(layerMetadata.featureTypes) && Array.isArray(layerMetadata.featureTypes[0].properties)) {
+              this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = layerMetadata.featureTypes[0].properties;
               this.processFeatureInfoConfig(layerMetadata.featureTypes[0].properties as TypeJsonArray, layerEntryConfig);
+            }
             resolve();
           });
       } else resolve();
@@ -252,12 +284,28 @@ export class WFS extends AbstractGeoViewVector {
     if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
       const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
       const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
-      if (processOutField) layerEntryConfig.source.featureInfo.outfields = { en: '' };
+      if (processOutField) {
+        layerEntryConfig.source.featureInfo.outfields = { en: '' };
+        layerEntryConfig.source.featureInfo.fieldTypes = '';
+      }
       if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
-      fields.forEach((fieldEntry, i) => {
-        if (processOutField) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'outfields', fieldEntry.name as string, i);
-        if (processAliasFields) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'aliasFields', fieldEntry.name as string, i);
+      fields.forEach((fieldEntry) => {
+        const fieldEntryType = (fieldEntry.type as string).split(':').slice(-1)[0];
+        if (fieldEntryType === 'Geometry') return;
+        if (processOutField) {
+          layerEntryConfig.source!.featureInfo!.outfields!.en = `${layerEntryConfig.source!.featureInfo!.outfields!.en}${fieldEntry.name},`;
+          layerEntryConfig.source!.featureInfo!.fieldTypes = `${layerEntryConfig.source!.featureInfo!.fieldTypes}${this.getFieldType(
+            fieldEntry.name as string,
+            layerEntryConfig
+          )},`;
+        }
+        layerEntryConfig.source!.featureInfo!.aliasFields!.en = `${layerEntryConfig.source!.featureInfo!.aliasFields!.en}${
+          fieldEntry.name
+        },`;
       });
+      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
       layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
       layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
     }
