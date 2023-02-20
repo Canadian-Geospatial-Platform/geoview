@@ -19,11 +19,13 @@ import {
   layerEntryIsGroupLayer,
   TypeBaseSourceVectorInitialConfig,
   TypeBaseLayerEntryConfig,
+  TypeLocalizedString,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
+import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
   format: 'GeoJSON';
@@ -96,6 +98,35 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig) {
     super(CONST_LAYER_TYPES.GEOJSON, layerConfig, mapId);
+  }
+
+  /** ***************************************************************************************************************************
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
+    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    if (fieldIndex === -1) return 'string';
+    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  }
+
+  /** ***************************************************************************************************************************
+   * Returns null. GeoJSON services don't have domains.
+   *
+   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
   }
 
   /** ***************************************************************************************************************************
@@ -198,10 +229,13 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (!this.metadata) resolve();
       else {
         const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
-        layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);
-        layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerList[i].initialSettings);
-        layerEntryConfig.style = defaultsDeep(layerEntryConfig.style, metadataLayerList[i].style);
+        const layerMetadataFound = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerEntryConfig.layerId);
+        if (layerMetadataFound) {
+          this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = toJsonObject(layerMetadataFound);
+          layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, layerMetadataFound.source);
+          layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, layerMetadataFound.initialSettings);
+          layerEntryConfig.style = defaultsDeep(layerEntryConfig.style, layerMetadataFound.style);
+        }
 
         if (layerEntryConfig.initialSettings?.extent)
           layerEntryConfig.initialSettings.extent = transformExtent(
