@@ -62,7 +62,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const allUnChecked = iconImages.map(() => false);
   const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
   const [checkedCount, setCheckCount] = useState<number>(isParentVisible === true ? iconImages.length : 0);
-  const [initPV, setInitPV] = useState(isParentVisible);
+  const [initParentVisible, setInitParentVisible] = useState(isParentVisible);
   /**
    * Handle view/hide layers.
    */
@@ -74,7 +74,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
     if (isParentVisible !== undefined && toggleParentVisible !== undefined) {
       if ((count === 0 && isParentVisible === true) || (count > 0 && isParentVisible === false)) {
         if (isParentVisible === false) {
-          setInitPV(true);
+          setInitParentVisible(true);
         }
         toggleParentVisible();
       }
@@ -82,10 +82,10 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   };
 
   useEffect(() => {
-    if (isParentVisible !== initPV) {
+    if (isParentVisible !== initParentVisible) {
       setChecked(isParentVisible === true ? allChecked : allUnChecked);
       setCheckCount(isParentVisible === true ? allChecked.length : 0);
-      setInitPV(isParentVisible);
+      setInitParentVisible(isParentVisible);
     }
     if (geoviewLayerInstance && layerConfig && layerConfig.style !== undefined && geometryKey) {
       const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
@@ -119,7 +119,17 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
         geoviewLayerInstance.applyViewFilter(layerConfig);
       }
     }
-  }, [isParentVisible, allChecked, allUnChecked, checkedCount, initPV, isChecked, geoviewLayerInstance, layerConfig, geometryKey]);
+  }, [
+    isParentVisible,
+    allChecked,
+    allUnChecked,
+    checkedCount,
+    initParentVisible,
+    isChecked,
+    geoviewLayerInstance,
+    layerConfig,
+    geometryKey,
+  ]);
 
   return (
     <List>
