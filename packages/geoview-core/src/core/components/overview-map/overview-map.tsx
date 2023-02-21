@@ -1,6 +1,9 @@
 import { useContext, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
+import i18n from 'i18next';
+import { I18nextProvider } from 'react-i18next';
+
 import { ThemeProvider } from '@mui/material/styles';
 import makeStyles from '@mui/styles/makeStyles';
 
@@ -196,7 +199,7 @@ export function OverviewMap(): JSX.Element {
   }, [mapId]);
 
   useEffect(() => {
-    const { map } = api.map(mapId);
+    const { map, mapFeaturesConfig } = api.map(mapId);
 
     const defaultBasemap = api.map(mapId).basemap.activeBasemap;
 
@@ -225,10 +228,18 @@ export function OverviewMap(): JSX.Element {
 
     map.addControl(overviewMapControl);
 
+    // need to recreate the i18n instance as the overviewmap is a new map inside the main map
+    const i18nInstance = i18n.cloneInstance({
+      lng: mapFeaturesConfig.displayLanguage,
+      fallbackLng: mapFeaturesConfig.displayLanguage,
+    });
+
     ReactDOM.render(
-      <ThemeProvider theme={cgpvTheme}>
-        <OverviewMapToggle overviewMap={overviewMapControl} />
-      </ThemeProvider>,
+      <I18nextProvider i18n={i18nInstance}>
+        <ThemeProvider theme={cgpvTheme}>
+          <OverviewMapToggle overviewMap={overviewMapControl} />
+        </ThemeProvider>
+      </I18nextProvider>,
       toggleButton
     );
 
