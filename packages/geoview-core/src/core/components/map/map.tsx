@@ -50,7 +50,9 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   // make sure the id is not undefined
   // eslint-disable-next-line react/destructuring-assignment
   const mapId = mapFeaturesConfig.mapId ? mapFeaturesConfig.mapId : generateId('');
-
+  const {
+    map: { interaction: mapInteraction },
+  } = mapFeaturesConfig;
   const [isLoaded, setIsLoaded] = useState(false);
 
   const classes = useStyles();
@@ -100,16 +102,18 @@ export function Map(mapFeaturesConfig: TypeMapFeaturesConfig): JSX.Element {
   }
 
   function mapSingleClick(event: MapEvent): void {
-    const coordinates: TypeMapSingleClick = {
-      projected: (event as MapBrowserEvent<UIEvent>).coordinate,
-      pixel: (event as MapBrowserEvent<UIEvent>).pixel,
-      lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
-    };
+    if (mapInteraction !== 'static') {
+      const coordinates: TypeMapSingleClick = {
+        projected: (event as MapBrowserEvent<UIEvent>).coordinate,
+        pixel: (event as MapBrowserEvent<UIEvent>).pixel,
+        lnglat: toLonLat((event as MapBrowserEvent<UIEvent>).coordinate, `EPSG:${api.map(mapId).currentProjection}`),
+      };
 
-    api.map(mapId).singleClickedPosition = coordinates;
+      api.map(mapId).singleClickedPosition = coordinates;
 
-    // emit the singleclick map position
-    api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
+      // emit the singleclick map position
+      api.event.emit(mapSingleClickPayload(EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK, mapId, coordinates));
+    }
   }
 
   const initCGPVMap = (cgpvMap: OLMap) => {
