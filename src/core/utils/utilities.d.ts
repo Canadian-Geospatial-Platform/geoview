@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import { MutableRefObject } from 'react';
 import { TypeLocalizedString } from '../../geo/map/map-schema-types';
 import { TypeJsonObject } from '../types/global-types';
 /**
@@ -69,3 +69,11 @@ export declare function sanitizeHtmlContent(contentHtml: string): string;
  * @param {string} mapId Id of map to export
  */
 export declare function exportPNG(mapId: string): void;
+/**
+ * Disable scrolling, so that screen doesnt scroll down.
+ *  when focus is set to map and
+ * arrows and enter keys are used to navigate the map
+ * @param e - keybaord event like, tab, space
+ * @param elem - mutable reference object of html elements.
+ */
+export declare const disableScrolling: (e: KeyboardEvent, elem: MutableRefObject<HTMLElement | undefined>) => void;

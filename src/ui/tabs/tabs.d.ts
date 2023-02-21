@@ -21,6 +21,7 @@ export interface TypeTabsProps {
     rightButtons?: unknown;
     isCollapsed?: boolean;
     handleCollapse?: Function | undefined;
+    TabContentVisibilty?: string | undefined;
 }
 /**
  * Create a tabs ui
