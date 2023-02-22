@@ -3,7 +3,7 @@ import { i18n } from 'i18next';
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import OLMap from 'ol/Map';
-import View, { ViewOptions } from 'ol/View';
+import View, { FitOptions, ViewOptions } from 'ol/View';
 import { fromLonLat, ProjectionLike, toLonLat, transform as olTransform, transformExtent as olTransformExtent } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
@@ -386,6 +386,16 @@ export class MapViewer {
   getView = (): View => {
     return this.map.getView();
   };
+
+  /**
+   * Zoom to the specified extent.
+   *
+   * @param {Extent} extent The extent to zoom to.
+   * @param {FitOptions} zoomOptions The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+   */
+  zoomToExtent(extent: Extent, options: FitOptions = { padding: [100, 100, 100, 100], maxZoom: 11 }) {
+    this.map.getView().fit(extent, options);
+  }
 
   /**
    * Function called when the map has been rendered and ready to be customized

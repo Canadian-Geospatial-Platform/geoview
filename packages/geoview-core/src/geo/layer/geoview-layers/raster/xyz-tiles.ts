@@ -19,9 +19,10 @@ import {
   TypeGeoviewLayerConfig,
   TypeListOfLayerEntryConfig,
   layerEntryIsGroupLayer,
+  TypeLocalizedString,
 } from '../../../map/map-schema-types';
 import { getLocalizedValue, getXMLHttpRequest } from '../../../../core/utils/utilities';
-import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
+import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
 import { Cast, toJsonObject } from '../../../../core/types/global-types';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
@@ -112,6 +113,33 @@ export class XYZTiles extends AbstractGeoViewRaster {
   }
 
   /** ***************************************************************************************************************************
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
+    const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
+    if (fieldIndex === -1) return 'string';
+    return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
+  }
+
+  /** ***************************************************************************************************************************
+   * Returns null. XYZ services don't have domains.
+   *
+   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
+  }
+
+  /** ***************************************************************************************************************************
    * This method reads the service metadata from the metadataAccessPath.
    *
    * @returns {Promise<void>} A promise that the execution is completed.
@@ -172,7 +200,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         return true;
       }
 
-      // Note that geojson metadata as we defined it does not contains metadata layer group. If you need geogson layer group,
+      // Note that XYZ metadata as we defined it does not contains metadata layer group. If you need geogson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
         const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
@@ -248,10 +276,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const promiseOfExecution = new Promise<void>((resolve) => {
       if (!this.metadata) resolve();
       else {
-        const metadataLayerList = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
-        layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerList[i].source);
-        layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerList[i].initialSettings);
+        const metadataLayerConfigFound = Cast<TypeXYZTilesLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
+          (metadataLayerConfig) => metadataLayerConfig.layerId === layerEntryConfig.layerId
+        );
+        // metadataLayerConfigFound can not be undefined because we have already validated the config exist
+        this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = toJsonObject(metadataLayerConfigFound);
+        layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, metadataLayerConfigFound!.source);
+        layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, metadataLayerConfigFound!.initialSettings);
 
         if (layerEntryConfig.initialSettings?.extent)
           layerEntryConfig.initialSettings.extent = transformExtent(

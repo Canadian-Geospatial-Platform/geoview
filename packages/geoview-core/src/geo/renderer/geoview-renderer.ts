@@ -58,7 +58,7 @@ import {
   unaryKeywords,
 } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
-import { TypeLayerStyle, TypeStyleRepresentation } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStyles, TypeStyleRepresentation } from '../layer/geoview-layers/abstract-geoview-layers';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -193,15 +193,15 @@ export class GeoviewRenderer {
   loadImage(src: string): Promise<HTMLImageElement | null> {
     const promisedImage = new Promise<HTMLImageElement | null>((resolve) => {
       const image = new Image();
-      image.onload = () => {
-        resolve(image);
-      };
-      image.onerror = (reason) => {
-        // eslint-disable-next-line no-console
-        console.log('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src);
-        resolve(null);
-      };
-      image.src = src!;
+      image.src = src;
+      image
+        .decode()
+        .then(() => resolve(image))
+        .catch((reason) => {
+          // eslint-disable-next-line no-console
+          console.log('GeoviewRenderer.loadImage(src) - Error while loading the src image =', src);
+          resolve(null);
+        });
     });
     return promisedImage;
   }
@@ -323,16 +323,16 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * This method is used to process the array of point styles as described in the pointStyleConfig.
    *
-   * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
+   * @param {TypeLayerStyles} layerStyle The object that will receive the created canvas.
    * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]} arrayOfPointStyleConfig The array of point style
    * configuration.
-   * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
+   * @param {(value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void} resolve The function that will resolve the promise
    * of the calling methode.
    */
   private processArrayOfPointStyleConfig(
-    layerStyle: TypeLayerStyle,
+    layerStyle: TypeLayerStyles,
     arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
-    resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void
+    resolve: (value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void
   ) {
     // UniqueValue or ClassBreak point style configuration ============================================================
     const styleArray: (HTMLCanvasElement | null)[] = layerStyle.Point!.arrayOfCanvas!;
@@ -358,20 +358,20 @@ export class GeoviewRenderer {
   }
 
   /** ***************************************************************************************************************************
-   * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the style
-   * configuration.
+   * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the
+   * style configuration.
    *
-   * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
+   * @param {TypeLayerStyles} layerStyle The object that will receive the created canvas.
    * @param {TypeKindOfVectorSettings | undefined} defaultSettings The settings associated to simple styles or default style of
    * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
    * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[] | undefined} arrayOfPointStyleConfig The array of point style
    * configuration associated to unique value and class break styles. When this parameter is undefined, no arrayOfCanvas is
    * created.
-   * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
+   * @param {(value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void} resolve The function that will resolve the promise
    */
   private getPointStyleSubRoutine(
-    resolve: (value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void,
-    layerStyle: TypeLayerStyle,
+    resolve: (value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void,
+    layerStyle: TypeLayerStyles,
     defaultSettings?: TypeKindOfVectorSettings,
     arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
   ) {
@@ -404,11 +404,11 @@ export class GeoviewRenderer {
    *
    * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
    *
-   * @returns {Promise<TypeLayerStyle>} A promise that the layer style is processed.
+   * @returns {Promise<TypeLayerStyles>} A promise that the layer style is processed.
    */
-  getLegendStyles(styleConfig: TypeStyleConfig): Promise<TypeLayerStyle> {
-    const promisedLayerStyle = new Promise<TypeLayerStyle>((resolve) => {
-      const layerStyle: TypeLayerStyle = {};
+  getLegendStyles(styleConfig: TypeStyleConfig): Promise<TypeLayerStyles> {
+    const promisedLayerStyle = new Promise<TypeLayerStyles>((resolve) => {
+      const layerStyle: TypeLayerStyles = {};
       if (!styleConfig) resolve(layerStyle);
 
       if (styleConfig.Point) {
@@ -526,6 +526,57 @@ export class GeoviewRenderer {
       );
     }
     return undefined;
+  }
+
+  /** ***************************************************************************************************************************
+   * This method gets the canvas icon from the style of the feature using the layer entry config.
+   *
+   * @param {Feature<Geometry>} feature The feature that need its canvas icon to be defined.
+   * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
+   * entry config that may have a style configuration for the feature.
+   *
+   * @returns {Promise<HTMLCanvasElement | undefined>} The canvas icon associated to the feature or undefined if not found.
+   */
+  getFeatureCanvas(
+    feature: Feature<Geometry>,
+    layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
+  ): Promise<HTMLCanvasElement | undefined> {
+    const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
+      let geometryType = feature.getGeometry()?.getType() as TypeStyleGeometry;
+      geometryType = geometryType.startsWith('Multi') ? (geometryType.slice(5) as TypeStyleGeometry) : geometryType;
+      const { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
+      // Get the style accordingly to its type and geometry.
+      if (style![geometryType] !== undefined) {
+        const styleSettings = style![geometryType]!;
+        const { styleType } = styleSettings;
+        const featureStyle = this.processStyle[styleType][geometryType].call(
+          this,
+          styleSettings,
+          feature,
+          layerEntryConfig.gvLayer!.get('filterEquation'),
+          layerEntryConfig.gvLayer!.get('legendFilterIsOff')
+        );
+        if (featureStyle) {
+          feature.setStyle(featureStyle);
+          if (geometryType === 'Point') {
+            if (
+              (styleType === 'simple' && (styleSettings as TypeSimpleStyleConfig).settings.type === 'simpleSymbol') ||
+              (styleType === 'uniqueValue' &&
+                (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings.type === 'simpleSymbol') ||
+              (styleType === 'classBreaks' &&
+                (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings.type === 'simpleSymbol')
+            )
+              resolve(this.createPointCanvas(featureStyle));
+            else
+              this.createIconCanvas(featureStyle).then((canvas) => {
+                resolve(canvas || undefined);
+              });
+          } else if (geometryType === 'LineString') resolve(this.createLineStringCanvas(featureStyle));
+          else resolve(this.createPolygonCanvas(featureStyle));
+        } else resolve(undefined);
+      } else resolve(undefined);
+    });
+    return promisedCanvas;
   }
 
   /** ***************************************************************************************************************************
@@ -1175,14 +1226,18 @@ export class GeoviewRenderer {
     feature: FeatureLike
   ): number | undefined {
     for (let i = 0; i < uniqueValueStyleInfo.length; i++) {
-      for (let j = 0; j < fields.length; j++) {
+      for (let j = 0, isEqual = true; j < fields.length && isEqual; j++) {
         // For obscure reasons, it seems that sometimes the field names in the feature do not have the same case as those in the
         // unique value definition.
-        const featureKey = (feature as Feature).getKeys().filter((key) => {
+        const fieldName = (feature as Feature).getKeys().find((key) => {
           return key.toLowerCase() === fields[j].toLowerCase();
         });
-        // eslint-disable-next-line eqeqeq
-        if (featureKey.length && feature.get(featureKey[0]) == uniqueValueStyleInfo[i].values[j] && j + 1 === fields.length) return i;
+        if (fieldName) {
+          // eslint-disable-next-line eqeqeq
+          isEqual = feature.get(fieldName) == uniqueValueStyleInfo[i].values[j];
+          if (isEqual && j + 1 === fields.length) return i;
+          // eslint-disable-next-line no-console
+        } else console.log(`Can not find field ${fields[j]}`);
       }
     }
     return undefined;

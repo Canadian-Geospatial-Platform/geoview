@@ -1,9 +1,12 @@
+import { Extent } from 'ol/extent';
 import { Coordinate } from 'ol/coordinate';
+import { FeatureLike } from 'ol/Feature';
 import { Pixel } from 'ol/pixel';
 
 import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
+import { TypeGeoviewLayerType } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 
 /** Valid events that can create GetFeatureInfoPayload */
 const validEvents: EventStringId[] = [
@@ -14,10 +17,41 @@ const validEvents: EventStringId[] = [
 
 export type TypeQueryType = 'at pixel' | 'at coordinate' | 'at long lat' | 'using a bounding box' | 'using a polygon';
 
+export type codeValueEntryType = {
+  name: string;
+  code: unknown;
+};
+
+export type codedValueType = {
+  type: 'codedValue';
+  name: string;
+  description: string;
+  codedValues: codeValueEntryType[];
+};
+
+export type rangeDomainType = {
+  type: 'range';
+  name: string;
+  range: [minValue: unknown, maxValue: unknown];
+};
+
+export type TypeFieldEntry = {
+  fieldKey: number;
+  value: unknown;
+  dataType: 'string' | 'date' | 'number';
+  alias: string;
+  domain: null | codedValueType | rangeDomainType;
+};
+
 export type TypeFeatureInfoEntry = {
   featureKey: number;
-  featureInfo: Record<string, string | number | null>;
+  geoviewLayerType: TypeGeoviewLayerType;
+  extent: Extent;
+  geometry: FeatureLike | null;
+  featureIcon: HTMLCanvasElement;
+  fieldInfo: Partial<Record<string, TypeFieldEntry>>;
 };
+
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined };
 

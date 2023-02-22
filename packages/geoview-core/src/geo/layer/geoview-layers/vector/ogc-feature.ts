@@ -26,6 +26,7 @@ import {
 import { getLocalizedValue } from '../../../../core/utils/utilities';
 import { api } from '../../../../app';
 import { Layer } from '../../layer';
+import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 
 export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
   format: 'featureAPI';
@@ -104,6 +105,36 @@ export class OgcFeature extends AbstractGeoViewVector {
    */
   constructor(mapId: string, layerConfig: TypeOgcFeatureLayerConfig) {
     super(CONST_LAYER_TYPES.OGC_FEATURE, layerConfig, mapId);
+  }
+
+  /** ***************************************************************************************************************************
+   * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+   *
+   * @param {string} fieldName field name for which we want to get the type.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {'string' | 'date' | 'number'} The type of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
+    const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)];
+    const fieldEntryType = (fieldDefinitions[fieldName].type as string).split(':').slice(-1)[0] as string;
+    if (fieldEntryType === 'date') return 'date';
+    if (['int', 'number'].includes(fieldEntryType)) return 'number';
+    return 'string';
+  }
+
+  /** ***************************************************************************************************************************
+   * Returns null. OGC feature services don't have domains.
+   *
+   * @param {string} fieldName field name for which we want to get the domain.
+   * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+   *
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType {
+    return null;
   }
 
   /** ***************************************************************************************************************************
@@ -230,7 +261,10 @@ export class OgcFeature extends AbstractGeoViewVector {
           : `${metadataUrl}/collections/${layerEntryConfig.layerId}/queryables?f=json`;
         const queryResult = axios.get<TypeJsonObject>(queryUrl);
         queryResult.then((response) => {
-          if (response.data.properties) this.processFeatureInfoConfig(response.data.properties, layerEntryConfig);
+          if (response.data.properties) {
+            this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = response.data.properties;
+            this.processFeatureInfoConfig(response.data.properties, layerEntryConfig);
+          }
           resolve();
         });
       } else resolve();
@@ -251,12 +285,26 @@ export class OgcFeature extends AbstractGeoViewVector {
     if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
       const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
       const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
-      if (processOutField) layerEntryConfig.source.featureInfo.outfields = { en: '' };
+      if (processOutField) {
+        layerEntryConfig.source.featureInfo.outfields = { en: '' };
+        layerEntryConfig.source.featureInfo.fieldTypes = '';
+      }
       if (processAliasFields) layerEntryConfig.source.featureInfo.aliasFields = { en: '' };
-      Object.keys(fields).forEach((fieldEntry, i) => {
-        if (processOutField) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'outfields', fieldEntry, i);
-        if (processAliasFields) this.addFieldEntryToSourceFeatureInfo(layerEntryConfig, 'aliasFields', fieldEntry, i);
+      Object.keys(fields).forEach((fieldEntry) => {
+        if (fields[fieldEntry].type === 'Geometry') return;
+        if (processOutField) {
+          layerEntryConfig.source!.featureInfo!.outfields!.en = `${layerEntryConfig.source!.featureInfo!.outfields!.en}${fieldEntry},`;
+          let fieldType: 'string' | 'date' | 'number';
+          if (fields[fieldEntry].type === 'date') fieldType = 'date';
+          else if (['int', 'number'].includes(fields[fieldEntry].type as string)) fieldType = 'number';
+          else fieldType = 'string';
+          layerEntryConfig.source!.featureInfo!.fieldTypes = `${layerEntryConfig.source!.featureInfo!.fieldTypes}${fieldType},`;
+        }
+        layerEntryConfig.source!.featureInfo!.aliasFields!.en = `${layerEntryConfig.source!.featureInfo!.aliasFields!.en}${fieldEntry},`;
       });
+      layerEntryConfig.source.featureInfo!.outfields!.en = layerEntryConfig.source.featureInfo!.outfields?.en?.slice(0, -1);
+      layerEntryConfig.source.featureInfo!.fieldTypes = layerEntryConfig.source.featureInfo!.fieldTypes?.slice(0, -1);
+      layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
       layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
       layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
     }
