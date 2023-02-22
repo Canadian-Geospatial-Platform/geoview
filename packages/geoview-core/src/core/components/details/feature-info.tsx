@@ -92,15 +92,11 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
 
-  function handleZoomIn() {
-    // get map and set initial bounds to use in zoom home
-    let zoomCenter = null;
-
-    if (zoomCenter === null || currentZoom) {
-      zoomCenter = location as Coordinate;
-    }
+  function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    e.stopPropagation();
     if (!currentZoom) {
       api.map(mapId).zoomToExtent(feature.extent);
+      setOpen(true);
     } else {
       api
         .map(mapId)
@@ -112,7 +108,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
         });
     }
     setCurrentZoom(!currentZoom);
-    setOpen(true);
   }
 
   useEffect(() => {
@@ -141,7 +136,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
           </Tooltip>
           <ListItemIcon>
-            <IconButton color="primary" sx={fontColor} onClick={() => handleZoomIn()}>
+            <IconButton color="primary" sx={fontColor} onClick={(e) => handleZoomIn(e)}>
               {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
             </IconButton>
           </ListItemIcon>
