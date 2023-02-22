@@ -29,6 +29,7 @@ jobs:
           branch: gh-pages
           folder: packages/geoview-core/dist
           target-folder: ${{inputs.folder}}
+          single-commit: true
 
       - uses: actions/github-script@v6
         name: Post link to demo for PR's
