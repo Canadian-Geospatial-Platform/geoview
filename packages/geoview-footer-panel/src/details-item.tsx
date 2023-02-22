@@ -94,7 +94,7 @@ export function DetailsItem({ mapId }: Props): JSX.Element {
     setList(api.map(mapId).details.createDetails(mapId, details, { mapId, location: latLng, handlerName }));
     setTimeout(() => {
       api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, latLng, {} as TypeJsonObject));
-    }, 8000);
+    }, 1800);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details, latLng]);
 

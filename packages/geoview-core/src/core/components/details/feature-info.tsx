@@ -1,5 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
+import { fromLonLat } from 'ol/proj';
+import { Coordinate } from 'ol/coordinate';
 import {
   Collapse,
   List,
@@ -9,11 +11,15 @@ import {
   ListItemText,
   ExpandMoreIcon,
   ExpandLessIcon,
+  ZoomInSearchIcon,
+  ZoomOutSearchIcon,
   Tooltip,
   IconButton,
   Box,
 } from '../../../ui';
+import { api } from '../../../app';
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
+import { DetailsProps } from './details';
 
 const sxClasses = {
   details: {
@@ -59,12 +65,11 @@ const sxClasses = {
     width: '40%',
   },
 };
-
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   feature: TypeFeatureInfoEntry;
   startOpen?: boolean;
-  backgroundStyle?: string;
+  detailsSettings: DetailsProps;
 }
 
 /**
@@ -73,13 +78,42 @@ export interface TypeFeatureProps {
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
-  const { feature, startOpen, backgroundStyle } = props;
+  const { feature, startOpen, detailsSettings } = props;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { mapId, location, backgroundStyle, handlerName } = detailsSettings;
   const featureId = `Feature Info ${feature.featureKey}`;
   const [isOpen, setOpen] = useState<boolean>(false);
+  const [currentZoom, setCurrentZoom] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
     return { key: fieldName, value: feature.fieldInfo[fieldName]!.value };
   });
   const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
+  const { currentProjection } = api.map(mapId);
+  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
+  const projectionConfig = api.projection.projections[currentProjection];
+
+  function handleZoomIn() {
+    // get map and set initial bounds to use in zoom home
+    let zoomCenter = null;
+
+    if (zoomCenter === null || currentZoom) {
+      zoomCenter = location as Coordinate;
+    }
+    if (!currentZoom) {
+      api.map(mapId).zoomToExtent(feature.extent);
+    } else {
+      api
+        .map(mapId)
+        .map.getView()
+        .animate({
+          center: fromLonLat(center, projectionConfig),
+          duration: 500,
+          zoom,
+        });
+    }
+    setCurrentZoom(!currentZoom);
+    setOpen(true);
+  }
 
   useEffect(() => {
     // a list of FeatureInfo with only one element will pass down the startOpen prop
@@ -89,6 +123,11 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // todo keep the marker to be showing up
+  /*  useEffect(() => {
+    api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, location, {} as TypeJsonObject));
+  }, [currentZoom, location, handlerName]);
+  */
   return (
     <>
       <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
@@ -101,6 +140,11 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
           </Tooltip>
+          <ListItemIcon>
+            <IconButton color="primary" sx={fontColor} onClick={() => handleZoomIn()}>
+              {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
+            </IconButton>
+          </ListItemIcon>
         </ListItemButton>
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
