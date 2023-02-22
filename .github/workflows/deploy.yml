@@ -23,19 +23,12 @@ jobs:
           path: packages/geoview-core/dist
           key: dist-${{ inputs.cache_sha }}
 
-      ## - name: Deploy 🚀
-      ##  uses: JamesIves/github-pages-deploy-action@v4.4.0
-      ##  with:
-      ##    branch: gh-pages
-      ##    folder: packages/geoview-core/dist
-      ##    target-folder: ${{inputs.folder}}
-
       - name: Deploy 🚀
-        uses: peaceiris/actions-gh-pages@v3.9.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: packages/geoview-core/dist
-          publish_branch: ${{inputs.folder}}
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
+         with:
+          branch: gh-pages
+          folder: packages/geoview-core/dist
+          target-folder: ${{inputs.folder}}
 
       - uses: actions/github-script@v6
         name: Post link to demo for PR's
