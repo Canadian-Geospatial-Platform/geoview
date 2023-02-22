@@ -1,9 +1,5 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
-import { fromLonLat } from 'ol/proj';
-import { Coordinate } from 'ol/coordinate';
-import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-import { getCenter, Extent } from 'ol/extent';
 import {
   Collapse,
   List,
@@ -13,15 +9,11 @@ import {
   ListItemText,
   ExpandMoreIcon,
   ExpandLessIcon,
-  ZoomInSearchIcon,
-  ZoomOutSearchIcon,
   Tooltip,
   IconButton,
   Box,
 } from '../../../ui';
-import { api } from '../../../app';
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
-import { DetailsProps } from './details';
 
 const sxClasses = {
   details: {
@@ -72,7 +64,7 @@ export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   feature: TypeFeatureInfoEntry;
   startOpen?: boolean;
-  detailsSettings: DetailsProps;
+  backgroundStyle?: string;
 }
 
 /**
@@ -81,75 +73,13 @@ export interface TypeFeatureProps {
  * @returns {JSX.Element} the feature info
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
-  const { feature, startOpen, detailsSettings } = props;
-  const { mapId, location, backgroundStyle } = detailsSettings;
-
+  const { feature, startOpen, backgroundStyle } = props;
   const featureId = `Feature Info ${feature.featureKey}`;
-  const featureGeoMetry = feature.geometry;
-  const featureInfoList = Object.keys(feature.featureInfo).map((featureKey) => {
-    return { key: featureKey, value: feature.featureInfo[featureKey] };
+  const [isOpen, setOpen] = useState<boolean>(false);
+  const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
+    return { key: fieldName, value: feature.fieldInfo[fieldName]!.value };
   });
   const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
-
-  const { currentProjection } = api.map(mapId);
-  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
-  const projectionConfig = api.projection.projections[currentProjection];
-  // console.log(api.map(mapId).mapFeaturesConfig.map.viewSettings);
-  const [isOpen, setOpen] = useState<boolean>(false);
-  const [currentZoom, setCurrentZoom] = useState<boolean>(false);
-
-  const getFeatureZoomCenter = (geometry: Geometry) => {
-    let featurePoint = null;
-    let zoomCenter = null;
-    if (geometry instanceof Polygon) {
-      featurePoint = geometry.getInteriorPoint() !== undefined ? geometry.getInteriorPoint() : null;
-    }
-
-    if (geometry instanceof LineString) {
-      featurePoint = geometry.getCoordinateAt(0.5) !== undefined ? new Point(geometry.getCoordinateAt(0.5)) : null;
-    }
-
-    if (geometry instanceof Point) {
-      featurePoint = geometry !== undefined ? (geometry as Point) : null;
-    }
-
-    if (geometry instanceof MultiPoint) {
-      const mcenter = getCenter(geometry.getExtent() as Extent) as Coordinate;
-      featurePoint = mcenter !== undefined ? new Point(center) : null;
-    }
-    if (featurePoint !== null) {
-      zoomCenter = getCenter(featurePoint.getExtent() as Extent) as Coordinate;
-    }
-    return zoomCenter !== undefined ? zoomCenter : null;
-  };
-
-  function handleZoomIn() {
-    // get map and set initial bounds to use in zoom home
-    let zoomCenter = null;
-    if (featureGeoMetry !== undefined) {
-      // const geoviewLayers = api.map(mapId).layer.vector;
-      // console.log(geoviewLayers, featureGeoMetry);
-      zoomCenter = getFeatureZoomCenter(featureGeoMetry);
-      // console.log(location, featureGeoMetry, zoomCenter);
-    }
-
-    if (zoomCenter === null || currentZoom) {
-      zoomCenter = location as Coordinate;
-    }
-
-    api
-      .map(mapId)
-      .map.getView()
-      .animate({
-        center: fromLonLat(zoomCenter, projectionConfig),
-        duration: 500,
-        zoom: currentZoom ? zoom : zoom + 2,
-      });
-
-    // console.log(featureGeoMetry);
-    setCurrentZoom(!currentZoom);
-    setOpen(true);
-  }
 
   useEffect(() => {
     // a list of FeatureInfo with only one element will pass down the startOpen prop
@@ -161,21 +91,16 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
 
   return (
     <>
-      <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }}>
+      <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
-            <IconButton color="primary" sx={fontColor} onClick={() => setOpen(!isOpen)}>
-              {!isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            <IconButton color="primary" sx={fontColor}>
+              {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </ListItemIcon>
-          <Tooltip title={featureId} placement="top" enterDelay={1000} onClick={() => setOpen(!isOpen)}>
+          <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
           </Tooltip>
-          <ListItemIcon>
-            <IconButton color="primary" sx={fontColor} onClick={() => handleZoomIn()}>
-              {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
-            </IconButton>
-          </ListItemIcon>
         </ListItemButton>
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
