@@ -32,8 +32,8 @@ jobs:
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./
-          destination: ./_site
+          source: packages/geoview-core
+          destination: packages/geoview-core/dist
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
 
