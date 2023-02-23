@@ -24,11 +24,12 @@ jobs:
           key: dist-${{ inputs.cache_sha }}
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           branch: gh-pages
           folder: packages/geoview-core/dist
           target-folder: ${{inputs.folder}}
+          single-commit: true
 
       - uses: actions/github-script@v6
         name: Post link to demo for PR's

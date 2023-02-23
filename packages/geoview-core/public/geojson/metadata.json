@@ -7,9 +7,10 @@
       "source": {
         "featureInfo": {
           "queryable": "true",
-          "nameField": { "en": "number", "fr": "number" },
-          "outfields": { "en": "number", "fr": "number" },
-          "aliasFields": { "en": "number", "fr": "nombre" }
+          "nameField": { "en": "Province", "fr": "Province" },
+          "outfields": { "en": "Province", "fr": "Province" },
+          "fieldTypes": "string",
+          "aliasFields": { "en": "Province", "fr": "Province" }
         }
       },
       "initialSettings": {
@@ -77,8 +78,9 @@
       "source": {
         "featureInfo": {
           "queryable": "true",
-          "nameField": { "en": "Road Number", "fr": "Road Number" },
-          "outfields": { "en": "Road Number,Province", "fr": "Road Number,Province" },
+          "nameField": { "en": "Road_Number", "fr": "Road_Number" },
+          "outfields": { "en": "Road_Number,Province", "fr": "Road_Number,Province" },
+          "fieldTypes": "number,string",
           "aliasFields": { "en": "Road Number,Province", "fr": "Numéro de route,Province" }
         }
       },
@@ -106,7 +108,8 @@
         "featureInfo": {
           "queryable": "true",
           "nameField": { "en": "data", "fr": "data" },
-          "outfields": { "en": "data,label", "fr": "data, label" },
+          "outfields": { "en": "data,label", "fr": "data,label" },
+          "fieldTypes": "string,string",
           "aliasFields": { "en": "data,label", "fr": "données,étiquette" }
         }
       },
@@ -135,6 +138,7 @@
           "queryable": "true",
           "nameField": { "en": "Red", "fr": "Red" },
           "outfields": { "en": "Red,Green,Blue,Yellow,Orange", "fr": "Red,Green,Blue,Yellow,Orange" },
+          "fieldTypes": "number,number,number,number,number",
           "aliasFields": { "en": "Red,Green,Blue,Yellow,Orange", "fr": "Rouge,Vert,Bleu,Jaune,Orange" }
         }
       },

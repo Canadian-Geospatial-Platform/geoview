@@ -13,6 +13,20 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      table.info, th.info, td.info, th.infoCol1, td.infoCol1 {
+        border: 1px solid black;
+      }
+      th.info, td.info, th.infoCol1, td.infoCol1 {
+        padding: 15px;
+        width: 15%;
+      }
+      th.info, th.infoCol1, td.infoCol1 {
+        text-align: left;
+        font-weight: bold;
+        font-size: 15px;
+      }
+      </style>
   </head>
 
   <body>
@@ -62,6 +76,7 @@
     <div
       id="LYR1"
       class="llwp-map"
+      triggerReadyCallback="true"
       data-lang="en"
       data-config="{
             'map': {
@@ -79,7 +94,7 @@
               'listOfGeoviewLayerConfig': [
                 {
                   'geoviewLayerId': 'wmsLYR1-Root',
-                  'geoviewLayerName': { 'en': 'Root' },
+                  'geoviewLayerName': { 'en': 'Weather Group' },
                   'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet' },
                   'geoviewLayerType': 'ogcWms',
                   'initialSettings': { 'visible': true },
@@ -90,13 +105,20 @@
                       'layerName': { 'en': 'Group' },
                       'listOfLayerEntryConfig': [
                         {
-                          'layerId': 'CURRENT_CONDITIONS'
+                          'layerId': 'CURRENT_CONDITIONS',
+                          'source': {
+                            'featureInfo': {
+                              'queryable': true,
+                              'nameField': { 'en': 'plain_text', 'fr': 'plain_texte' },
+                              'fieldTypes': 'string',
+                              'outfields': { 'en': 'plain_text', 'fr': 'plain_texte' },
+                              'aliasFields':  { 'en': 'Forcast', 'fr': 'Prévision' }
+                            }
+                          }
                         },
                         {
-                          'layerId': 'METNOTES'
-                        },
-                        {
-                          'layerId': 'CGSL.ETA_ICEC'
+                          'layerId': 'CGSL.ETA_ICEC',
+                          'layerName': { 'en': 'Ice Cover' }
                         }
                       ]
                     }
@@ -110,10 +132,13 @@
                   'listOfLayerEntryConfig': [
                     {
                       'layerId': 'msi-94-or-more',
+                      'layerName': { 'en': 'Permanent Snow' },
                       'source': {
+                        'style': 'msi-binary',
                         'featureInfo': {
                           'queryable': true,
                           'nameField': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
+                          'fieldTypes': 'number',
                           'outfields': { 'en': 'band-0-pixel-value', 'fr': 'band-0-pixel-value' },
                           'aliasFields':  { 'en': 'Pixel value', 'fr': 'Valeur du pixel' }
                         }
@@ -129,8 +154,10 @@
             'suportedLanguages': ['en']
           }"
     ></div>
-    <button class="Get-wms-Legend">Get Legend</button>
-    <div id="wmsLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer1-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="wmsLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="wmsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -208,7 +235,7 @@
             'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
-              'projection': 3978
+              'projection': 3857
             },
             'basemapOptions': {
               'basemapId': 'transport',
@@ -216,6 +243,17 @@
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'HistoricalFlood',
+                'geoviewLayerName': { 'en': 'Historical Flood' },
+                'metadataAccessPath': { 'en': 'https://euclgis.reg.rw/server/rest/services/Electrical_Trans_Distr_Network/MapServer' },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '1'
+                  }
+                ]
+              },
               {
                 'geoviewLayerId': 'uniqueValueId',
                 'geoviewLayerName': { 'en': 'uniqueValue' },
@@ -399,13 +437,14 @@
                 'listOfLayerEntryConfig': [
                   {
                     'layerId': '8',
+                    'layerName': { 'en': 'CSO volume 2020' },
                     'layerFilter': 'Total_CSO_Volume > 5000000',
                     'initialSettings': { 'visible': true },
                     'style': {
                       'Point': {
                         'styleId': 'classBreaksId',
                         'styleType': 'classBreaks',
-                        'defaultLabel': 'Pas de données de volume / No volume data',
+                        'defaultLabel': 'No volume data',
                         'defaultSettings': {
                           'symbol': 'square',
                           'type': 'simpleSymbol',
@@ -607,11 +646,12 @@
           'suportedLanguages': ['en']
         }"
     ></div>
-    <div class="layer3-buttons-div"></div>
-    <button class="Get-esri-dynamic-Legend">Get Legend</button>
-    <div id="esriDynamicLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer3-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="esriDynamicLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="esriDynamicResultSetId" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll; overflow-x: scroll;" id="esriDynamicResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
     <p>This map has an Esri dynamic layer added from configuration.</p>
     <button type="button" class="collapsible">Configuration Snippet</button>
@@ -633,7 +673,7 @@
             'viewSettings': {
               'zoom': 4,
               'center': [-100, 60],
-              'projection': 3978
+              'projection': 3857
             },
             'basemapOptions': {
               'basemapId': 'transport',
@@ -642,16 +682,26 @@
             },
             'listOfGeoviewLayerConfig': [
               {
+                'geoviewLayerId': 'uniqueValueId',
+                'geoviewLayerName': { 'en': 'uniqueValue' },
+                'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
+                'geoviewLayerType': 'esriDynamic',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '1'
+                  }
+                ]
+              },
+              {
                 'geoviewLayerId': 'esriFeatureLYR4.1',
-                'geoviewLayerName': { 'en': 'Water quality at monitoring sites' },
+                'geoviewLayerName': { 'en': 'Electrical Network' },
                 'metadataAccessPath': {
-                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer'
+                  'en': 'https://euclgis.reg.rw/server/rest/services/Electrical_Trans_Distr_Network/MapServer'
                 },
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': '4',
-                    'layerFilter': 'province_territoire like \'British%bi_\' OR province_territoire = \'Ontario\' OR province_territoire = \'Nunavut\''
+                    'layerId': '1'
                   }
                 ]
               }
@@ -663,9 +713,10 @@
           'suportedLanguages': ['en']
         }"
     ></div>
-    <div class="layer4-buttons-div"></div>
-    <button class="Get-esri-feature-Legend">Get Legend</button>
-    <div id="esriFeatureLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer4-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="esriFeatureLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="esriFeatureResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -740,11 +791,13 @@
     'suportedLanguages': ['en']
     }"
     ></div>
-    <div class="layer5-buttons-div"></div>
-    <button class="Get-geojson-Legend">Get Legend</button>
-    <div id="geojsonLegendsId-table-div"></div>
-    <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
-    <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer5-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="geojsonLegendsId-table-div" class="panel">
+      <button id="add-geojson">Add GeoJSON Layer</button><button id="remove-geojson">Remove GeoJSON Layer</button> <br />
+      <label> Added Layer ID : </label><label id="new-layer-id-label"></label>
+    </pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="geoJsonResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -801,9 +854,10 @@
         'suportedLanguages': ['en']
       }"
     ></div>
-    <div class="layer6-buttons-div"></div>
-    <button class="Get-wfs-Legend">Get Legend</button>
-    <div id="wfsLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer6-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="wfsLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="wfsResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -859,9 +913,10 @@
           'suportedLanguages': ['en']
         }"
     ></div>
-    <div class="layer7-buttons-div"></div>
-    <button class="Get-ogcApi-Legend">Get Legend</button>
-    <div id="ogcApiLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer7-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="ogcApiLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="ogcFeatureResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -1040,9 +1095,10 @@
           'suportedLanguages': ['en']
         }"
     ></div>
-    <div class="layer8-buttons-div"></div>
-    <button class="Get-geocore-Legend">Get Legend</button>
-    <div id="geocoreLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer8-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="geocoreLegendsId-table-div" class="panel"></pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="geocoreResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -1102,9 +1158,12 @@
     'suportedLanguages': ['en']
   }"
     ></div>
-    <div class="layer9-buttons-div"></div>
-    <button class="Get-Geopackage-Legend">Get Legend</button>
-    <div id="geopackageLegendsId-table-div"></div>
+    <button type="button" class="collapsible">Visibility and filters</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="layer9-buttons-div" class="panel"></pre>
+    <button class="collapsible">Get Legend</button>
+    <pre style="height: 20pc; overflow-y: scroll" id="geopackageLegendsId-table-div" class="panel">
+      <button id="Get-Geopackage-Legend">Get Legend</button>
+    </pre>
     <button type="button" class="collapsible">Get Feature Info</button>
     <pre style="height: 20pc; overflow-y: scroll" id="geopackageResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
@@ -1118,8 +1177,151 @@
 
     <script src="codedoc.js"></script>
     <script>
+      const createInfoTable = (mapId, resultSetsId, resultSets) => {
+        var infoTable = document.getElementById(resultSetsId);
+        infoTable.textContent = '';
+        var oldContent = document.getElementById(`layer${mapId.slice(3)}-info`);
+        if (oldContent) oldContent.remove();
+        var content = document.createElement("div");
+        content.id = `layer${mapId.slice(3)}-info`;
+        infoTable.appendChild(content);
+        Object.keys(resultSets).forEach((layerPath) => {
+          const layerData = resultSets[layerPath];
+
+          // Header of the layer
+          infoH1 = document.createElement('h1');
+          infoH1.innerText = layerData.length ? layerPath : `${layerPath} (empty)`;
+          content.appendChild(infoH1);
+
+          if (layerData.length) {
+            infoH2 = document.createElement('h2');
+            infoH2.innerText = 'Aliases and types';
+            content.appendChild(infoH2);
+
+            // Header of the layer table that describe the aliases and the types
+            tableElement = document.createElement('table');
+            tableElement.classList.add('info');
+            content.appendChild(tableElement);
+
+            tableRow = document.createElement('tr');
+            tableRow.classList.add('info');
+            tableElement.appendChild(tableRow);
+            tableData = document.createElement('th');
+            tableData.classList.add('infoCol1');
+            tableRow.appendChild(tableData);
+            Object.keys(layerData[0].fieldInfo).forEach((fieldName) => {
+              tableData = document.createElement('th');
+              tableData.classList.add('info');
+              tableData.innerText = fieldName;
+              tableRow.appendChild(tableData);
+            });
+
+            // Row describing the aliases
+            tableRow = document.createElement('tr');
+            tableRow.classList.add('info');
+            tableElement.appendChild(tableRow);
+            tableData = document.createElement('td');
+            tableData.classList.add('infoCol1');
+            tableData.innerText = 'Aliases =>';
+            tableRow.appendChild(tableData);
+            Object.keys(layerData[0].fieldInfo).forEach((fieldName) => {
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableData.innerText = layerData[0].fieldInfo[fieldName].alias;
+              tableRow.appendChild(tableData);
+            });
+
+            // Row describing the types
+            tableRow = document.createElement('tr');
+            tableRow.classList.add('infoCol1');
+            tableElement.appendChild(tableRow);
+            tableData = document.createElement('td');
+            tableData.classList.add('infoCol1');
+            tableData.innerText = 'Types =>';
+            tableRow.appendChild(tableData);
+            Object.keys(layerData[0].fieldInfo).forEach((fieldName) => {
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableData.innerText = layerData[0].fieldInfo[fieldName].dataType;
+              tableRow.appendChild(tableData);
+            });
+
+            // Header of the data section
+            infoH2 = document.createElement('h2');
+            infoH2.innerText = 'Data';
+            content.appendChild(infoH2);
+
+            tableElement = document.createElement('table');
+            tableElement.classList.add('info');
+            content.appendChild(tableElement);
+            createHeaders = true;
+
+            layerData.forEach((row) => {
+            // Header of the data table
+            if (createHeaders) {
+                tableRow = document.createElement('tr');
+                tableRow.classList.add('info');
+                tableElement.appendChild(tableRow);
+
+                tableData = document.createElement('th');
+                tableData.classList.add('infoCol1');
+                tableData.innerText = 'Symbology';
+                tableRow.appendChild(tableData);
+
+                tableData = document.createElement('th');
+                tableData.classList.add('infoCol1');
+                tableData.innerText = 'Zoom To';
+                tableRow.appendChild(tableData);
+
+                Object.keys(row.fieldInfo).forEach((fieldName) => {
+                  tableData = document.createElement('th');
+                  tableData.classList.add('info');
+                  tableData.innerText = fieldName;
+                  tableRow.appendChild(tableData);
+                });
+                createHeaders = false;
+              }
+
+            // Data row (feature information)
+            tableRow = document.createElement('tr');
+              tableRow.classList.add('info');
+              tableElement.appendChild(tableRow);
+
+              // Feature icon
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableData.appendChild(row.featureIcon);
+              tableRow.appendChild(tableData);
+
+              // Zoom to button
+              tableData = document.createElement('td');
+              tableData.classList.add('info');
+              tableRow.appendChild(tableData);
+              tableZoomTo = document.createElement('button');
+              tableZoomTo.innerText = 'Zoom To Feature';
+              tableZoomTo.addEventListener('click', function (e) {
+                cgpv.api.map(mapId).zoomToExtent(row.extent);
+              });
+              tableData.appendChild(tableZoomTo);
+
+              // feature fields
+              Object.keys(row.fieldInfo).forEach((fieldName) => {
+                tableData = document.createElement('td');
+                tableData.classList.add('info');
+                tableData.innerText = row.fieldInfo[fieldName].value;
+                tableRow.appendChild(tableData);
+              });
+            });
+          } else {
+            content.appendChild(document.createElement('hr'));
+
+          }
+        });
+      };
+    </script>
+    <script>
       const createTableOfFilter = (mapId) => {
-        var mapButtonsDiv = document.getElementsByClassName(`layer${mapId.slice(3)}-buttons-div`)[0];
+        var mapButtonsDiv = document.getElementById(`layer${mapId.slice(3)}-buttons-div`);
         var oldTable = document.getElementById(`layer${mapId.slice(3)}-buttons-table`);
         if (oldTable) oldTable.remove();
         var tableElement = document.createElement("table");
@@ -1193,7 +1395,7 @@
                               layerConfig.style[geometry].defaultVisible = 'yes';
                               toggleUniqueValueDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
                             }
-                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                             const filterInput = document.getElementById(`filter-input-${mapId}`);
                             const filter = checkbox.value === 'true' ? filterInput.value : '';
                             geoviewLayer.applyViewFilter(layerConfig, filter);
@@ -1230,7 +1432,7 @@
                               uniqueValueStyleInfoEntry.visible = 'yes';
                               toggleUniqueValueFeature.innerText = `Hide ${uniqueValueStyleInfoEntry.label}`;
                             }
-                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                             const filterInput = document.getElementById(`filter-input-${mapId}`);
                             const filter = checkbox.value === 'true' ? filterInput.value : '';
                             geoviewLayer.applyViewFilter(layerConfig, filter);
@@ -1268,7 +1470,7 @@
                             layerConfig.style[geometry].defaultVisible = 'yes';
                             toggleClassBreakDefault.innerText = `Hide ${layerConfig.style[geometry].defaultLabel}`;
                           }
-                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                             const filterInput = document.getElementById(`filter-input-${mapId}`);
                             const filter = checkbox.value === 'true' ? filterInput.value : '';
                             geoviewLayer.applyViewFilter(layerConfig, filter);
@@ -1305,7 +1507,7 @@
                               classBreakStyleInfoEntry.visible = 'yes';
                               toggleClassBreakFeature.innerText = `Hide ${classBreakStyleInfoEntry.label}`;
                             }
-                            const checkbox = document.getElementById(`checkbox-${mapId}`);
+                            const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                             const filterInput = document.getElementById(`filter-input-${mapId}`);
                             const filter = checkbox.value === 'true' ? filterInput.value : '';
                             geoviewLayer.applyViewFilter(layerConfig, filter);
@@ -1330,7 +1532,7 @@
                       layerFilterInput.value = geoviewLayer.getLayerFilter(layerConfig) || '';
                       const layerFilterButton = document.createElement("button");
                       layerFilterButton.addEventListener('click', function (e) {
-                        const checkbox = document.getElementById(`checkbox-${mapId}`);
+                        const checkbox = document.getElementById(`checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`);
                         if (checkbox.value === 'true')
                           geoviewLayer.applyViewFilter(layerConfig, layerFilterInput.value);
                         else {
@@ -1344,7 +1546,7 @@
                       const checkboxInput = document.createElement("input");
                       checkboxInput.type='checkbox';
                       checkboxInput.value = 'false';
-                      checkboxInput.id = `checkbox-${mapId}`;
+                      checkboxInput.id = `checkbox-${mapId}-${geoviewLayer.geoviewLayerId}`;
                       checkboxInput.addEventListener('click', function (e) {
                         checkboxInput.value =checkboxInput.value === 'true' ? 'false' : 'true';
                         if (checkboxInput.value === 'true')
@@ -1372,12 +1574,20 @@
       cgpv.init(function (mapId) {
         console.log(`api is ready for ${mapId}`);
 
-      if (['LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR8', 'LYR9'].includes(mapId)) createTableOfFilter(mapId);
+      if (['LYR1', 'LYR3', 'LYR4', 'LYR5', 'LYR6', 'LYR7', 'LYR8', 'LYR9'].includes(mapId)) createTableOfFilter(mapId);
 
         if (mapId === 'allMaps') {
           //create snippets
           createCodeSnippet();
           createConfigSnippet();
+          cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriDynamicLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriFeatureLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geojsonLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'ogcApiLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geocoreLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR9', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geopackageLegendsId');
         }
       });
 
@@ -1447,7 +1657,7 @@
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR1', 'wmsResultSetId', resultSets);
         },
         'LYR1',
         'wmsResultSetId'
@@ -1464,18 +1674,13 @@
         'wmsLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wms-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
-      });
-
       // ESRI Dynamic =============================================================================================================
       const featureInfoEsriDynamicLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR3', 'esriDynamicResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR3', 'esriDynamicResultSetId', resultSets);
         },
         'LYR3',
         'esriDynamicResultSetId'
@@ -1492,18 +1697,13 @@
         'esriDynamicLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-dynamic-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriDynamicLegendsId');
-      });
-
       // ESRI Feature =============================================================================================================
       const featureInfoEsriFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR4', 'esriFeatureResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR4', 'esriFeatureResultSetId', resultSets);
         },
         'LYR4',
         'esriFeatureResultSetId'
@@ -1520,18 +1720,13 @@
         'esriFeatureLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-esri-feature-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriFeatureLegendsId');
-      });
-
       // GeoJson ==================================================================================================================
       const featureInfoGeoJsonLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR5', 'geoJsonResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR5', 'geoJsonResultSetId', resultSets);
         },
         'LYR5',
         'geoJsonResultSetId'
@@ -1548,18 +1743,13 @@
         'geojsonLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-geojson-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geojsonLegendsId');
-      });
-
       // WFS ======================================================================================================================
       const featureInfoWfsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR6', 'wfsResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR6', 'wfsResultSetId', resultSets);
         },
         'LYR6',
         'wfsResultSetId'
@@ -1576,18 +1766,13 @@
         'wfsLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-wfs-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
-      });
-
       // OGC Feature API ==========================================================================================================
       const featureInfoOgcFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR7', 'ogcFeatureResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR7', 'ogcFeatureResultSetId', resultSets);
         },
         'LYR7',
         'ogcFeatureResultSetId'
@@ -1604,18 +1789,13 @@
         'ogcApiLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-ogcApi-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'ogcApiLegendsId');
-      });
-
       // GeoCore ==================================================================================================================
       const featureInfoGeocoreFeatureLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR8', 'geocoreResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR8', 'geocoreResultSetId', resultSets);
         },
         'LYR8',
         'geocoreResultSetId'
@@ -1632,18 +1812,13 @@
         'geocoreLegendsId'
       );
 
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-geocore-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geocoreLegendsId');
-      });
-
       // GeoPackage =============================================================================================================
       const featureInfoGeopackageLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR9', 'geopackageResultSetId');
       cgpv.api.event.on(
         cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
         (payload) => {
           const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          createInfoTable('LYR9', 'geopackageResultSetId', resultSets);
         },
         'LYR9',
         'geopackageResultSetId'
@@ -1659,11 +1834,6 @@
         'LYR9',
         'geopackageLegendsId'
       );
-
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-Geopackage-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR9', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geopackageLegendsId');
-      });
 
       // ==========================================================================================================================
       // Test a refresh WMS from projection change
@@ -1696,8 +1866,10 @@
           const tableData = document.createElement('td');
           tableData.style.verticalAlign = 'middle';
           tableData.style.textAlign = 'center';
-          if (typeof data === 'string') tableData.innerHTML = data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-          else tableData.appendChild(data);
+          if (data)
+            if (typeof data === 'string') tableData.innerHTML = data.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+            else tableData.appendChild(data);
+          else tableData.innerHTML = 'NO LEGEND';
           container.appendChild(tableData);
         };
         var oldTable = document.getElementById(`${layerSetId}-table`);
@@ -1765,7 +1937,7 @@
                     for (let i = 0; i < resultSets[layerPath].legend[geometryKey].arrayOfCanvas.length; i++) {
                       addRow(
                         layerPath,
-                        resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfos[i].label,
+                        resultSets[layerPath].styleConfig[geometryKey].classBreakStyleInfo[i].label,
                         resultSets[layerPath].legend[geometryKey].arrayOfCanvas[i]
                       );
                     }
