@@ -41,7 +41,7 @@ export function DataItem({ mapId }: Props): JSX.Element {
         });
       }
     });
-  }, 100);
+  }, 1500);
   return (
     <Tabs
       tabsProps={{
