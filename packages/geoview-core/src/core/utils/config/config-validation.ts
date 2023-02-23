@@ -575,8 +575,23 @@ export class ConfigValidation {
         // Value for layerEntryConfig.source.format can only be GeoPackage.
         if (!layerEntryConfig.source) layerEntryConfig.source = { format: 'GeoPackage' };
         if (!layerEntryConfig?.source?.format) layerEntryConfig.source.format = 'GeoPackage';
-        if (!layerEntryConfig.source.dataAccessPath)
-          layerEntryConfig.source.dataAccessPath = { ...rootLayerConfig.metadataAccessPath } as TypeLocalizedString;
+        if (!layerEntryConfig.source.dataAccessPath) {
+          let { en, fr } = rootLayerConfig.metadataAccessPath!;
+          en = en!.split('/').length > 1 ? en!.split('/').slice(0, -1).join('/') : './';
+          fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
+          layerEntryConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
+        }
+        if (
+          !(layerEntryConfig.source.dataAccessPath!.en?.startsWith('blob') && !layerEntryConfig.source.dataAccessPath!.en?.endsWith('/')) &&
+          !layerEntryConfig.source.dataAccessPath!.en?.endsWith('.gpkg' || '.GPKG')
+        ) {
+          layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
+            ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
+            : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;
+          layerEntryConfig.source.dataAccessPath!.fr = layerEntryConfig.source.dataAccessPath!.fr!.endsWith('/')
+            ? `${layerEntryConfig.source.dataAccessPath!.fr}${layerEntryConfig.layerId}`
+            : `${layerEntryConfig.source.dataAccessPath!.fr}/${layerEntryConfig.layerId}`;
+        }
         if (!layerEntryConfig?.source?.dataProjection) layerEntryConfig.source.dataProjection = 'EPSG:4326';
       } else if (geoviewEntryIsGeocore(layerEntryConfig)) {
         // Default value for layerEntryConfig.entryType is vector
@@ -602,7 +617,10 @@ export class ConfigValidation {
           fr = fr!.split('/').length > 1 ? fr!.split('/').slice(0, -1).join('/') : './';
           layerEntryConfig.source.dataAccessPath = { en, fr } as TypeLocalizedString;
         }
-        if (!layerEntryConfig.source.dataAccessPath!.en?.endsWith('.json' || '.geojson' || '.JSON' || '.geoJSON' || '.GEOJSON')) {
+        if (
+          !(layerEntryConfig.source.dataAccessPath!.en?.startsWith('blob') && !layerEntryConfig.source.dataAccessPath!.en?.endsWith('/')) &&
+          !layerEntryConfig.source.dataAccessPath!.en?.endsWith('.json' || '.geojson' || '.JSON' || '.geoJSON' || '.GEOJSON')
+        ) {
           layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
             ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
             : `${layerEntryConfig.source.dataAccessPath!.en}/${layerEntryConfig.layerId}`;

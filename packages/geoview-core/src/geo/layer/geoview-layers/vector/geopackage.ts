@@ -254,7 +254,6 @@ export class GeoPackage extends AbstractGeoViewVector {
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
     sourceOptions.url = getLocalizedValue(layerEntryConfig.source!.dataAccessPath!, this.mapId);
-    sourceOptions.url = `${sourceOptions.url}/${layerEntryConfig.layerId}`;
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
