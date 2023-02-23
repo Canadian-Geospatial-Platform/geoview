@@ -11,6 +11,7 @@ import { Shell } from './containers/shell';
 import { getTheme, cgpvTheme } from '../ui/style/theme';
 import { MapViewer } from '../geo/map/map';
 import { TypeMapFeaturesConfig } from './types/global-types';
+import { TypeInteraction } from '../app';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -28,7 +29,7 @@ export const MapContext = React.createContext<TypeMapContext>({
  */
 type TypeMapContext = {
   mapId: string;
-  interaction: string;
+  interaction: TypeInteraction;
 };
 
 /**
