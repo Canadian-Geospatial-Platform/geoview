@@ -64,7 +64,8 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // the user escape the trap, remove it, put back skip link in focus cycle and zoom to top link
     callback(false);
     mapElement?.classList.remove('map-focus-trap');
-    mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.setAttribute('tabindex', '0'));
+
+    mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.removeAttribute('tabindex'));
     document.getElementById(`toplink-${focusTrapId}`)?.focus();
   }
 
@@ -77,8 +78,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // add a class to specify the viewer is in focus trap mode
     mapElement?.classList.add('map-focus-trap');
 
-    // remove the top and bottom link from focus cycle and start the FocusTrap
-    mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
     callback(true);
 
     // manage the exit of FocusTrap, remove the trap and focus the top link
@@ -90,12 +89,15 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     };
 
     mapElement?.addEventListener('keydown', manageExit);
+
+    api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, focusTrapId));
   }
 
   const handleEnable = () => {
     setOpen(false);
     setFocusTrap();
   };
+
   const handleSkip = () => {
     // because the process is about to focus the map, apply a timeout before shifting focus on bottom or top link
     setOpen(false);
@@ -116,9 +118,21 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       evt.stopPropagation();
       navigationLinkRef.current = linkId === 'toplink' ? `bottomlink-${focusTrapId}` : `toplink-${focusTrapId}`;
 
-      // focus the map element and emit the map keyboard focus event
-      (document.getElementById(`map-${focusTrapId}`) as HTMLElement).focus();
-      api.event.emit(inKeyfocusPayload(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, focusTrapId));
+      setOpen(true);
+      // when map element get focus and focus is not trap, show dialog window
+      const mapElement = document.getElementById(focusTrapId);
+      // if user move the mouse over the map, cancel the dialog
+
+      // remove the top and bottom link from focus cycle and start the FocusTrap
+      mapElement?.querySelectorAll(`a[id*="link-${focusTrapId}"]`).forEach((elem) => elem.setAttribute('tabindex', '-1'));
+      mapElement?.addEventListener(
+        'mousemove',
+        () => {
+          setOpen(false);
+          exitFocus();
+        },
+        { once: true }
+      );
     }
   }
 
@@ -132,32 +146,15 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       (payload) => {
         if (payloadIsAInKeyfocus(payload)) {
           if (payload.handlerName!.includes(focusTrapId)) {
-            // when mnap element get focus and focus is not trap, show dialog window
-            const mapElement = document.getElementById(focusTrapId);
-
-            if (mapElement && !mapElement.classList.contains('map-focus-trap')) {
-              setOpen(true);
-
-              // if user move the mouse over the map, cancel the dialog
-              mapElement.addEventListener(
-                'mousemove',
-                () => {
-                  setOpen(false);
-                  exitFocus();
-                },
-                { once: true }
-              );
-            }
+            setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
           }
         }
       },
       focusTrapId
     );
-
     return () => {
       document.getElementById(`bottomlink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
       document.getElementById(`toplink-${focusTrapId}`)?.removeEventListener('keydown', manageLinks);
-      api.event.off(EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS, focusTrapId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

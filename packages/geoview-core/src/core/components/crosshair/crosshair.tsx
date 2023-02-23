@@ -57,7 +57,7 @@ export function Crosshair(): JSX.Element {
   const { t } = useTranslation<string>();
 
   const mapConfig = useContext(MapContext);
-  const { mapId } = mapConfig;
+  const { mapId, interaction } = mapConfig;
 
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
   const [isCrosshairsActive, setCrosshairsActive] = useState(false);
@@ -108,7 +108,7 @@ export function Crosshair(): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payloadIsAInKeyfocus(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
+          if (payload.handlerName!.includes(mapId) && interaction !== 'static') {
             setCrosshairsActive(true);
             isCrosshairsActiveValue.current = true;
             api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));
