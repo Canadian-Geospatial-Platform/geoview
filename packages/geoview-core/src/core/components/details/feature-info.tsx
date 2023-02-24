@@ -1,7 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
 import { fromLonLat } from 'ol/proj';
-import { Coordinate } from 'ol/coordinate';
 import {
   Collapse,
   List,
