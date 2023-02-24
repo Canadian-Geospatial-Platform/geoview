@@ -1,4 +1,6 @@
 /* eslint-disable react/require-default-props */
+import React, { DragEvent } from 'react';
+
 import {
   TypeWindow,
   TypeJsonArray,
@@ -33,18 +35,35 @@ const w = window as TypeWindow;
 function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const { cgpv } = w;
   const { api, react, ui } = cgpv;
+  const { displayLanguage } = api.map(mapId);
 
   const { ESRI_DYNAMIC, ESRI_FEATURE, GEOJSON, GEOPACKAGE, WMS, WFS, OGC_FEATURE, XYZ_TILES, GEOCORE } = api.layerTypes;
   const { useState, useEffect } = react;
-  const { Select, Stepper, TextField, Button, ButtonGroup, Autocomplete, CircularProgressBase, Box, IconButton, CloseIcon } = ui.elements;
+  const {
+    Select,
+    Stepper,
+    TextField,
+    Button,
+    ButtonGroup,
+    Autocomplete,
+    CircularProgressBase,
+    Box,
+    IconButton,
+    CloseIcon,
+    FileUploadIcon,
+  } = ui.elements;
 
   const [activeStep, setActiveStep] = useState(0);
   const [layerURL, setLayerURL] = useState('');
+  const [displayURL, setDisplayURL] = useState('');
   const [layerType, setLayerType] = useState<TypeGeoviewLayerType | ''>('');
   const [layerList, setLayerList] = useState<TypeJsonArray[]>([]);
   const [layerName, setLayerName] = useState('');
   const [layerEntries, setLayerEntries] = useState<TypeListOfLayerEntryConfig>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [drag, setDrag] = useState<boolean>(false);
+
+  const dragPopover = React.useRef(null);
 
   const sxClasses = {
     buttonGroup: {
@@ -70,6 +89,60 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     [XYZ_TILES, 'XYZ Raster Tiles'],
     [GEOCORE, 'GeoCore'],
   ];
+
+  /**
+   * Translations object to inject to the viewer translations
+   */
+  const translations = {
+    en: {
+      finish: 'Finish',
+      continue: 'Continue',
+      back: 'Back',
+      or: 'or',
+      dropzone: 'Drop Here',
+      upload: 'Choose a File',
+      drop: 'Drop the file to upload',
+      url: 'Enter URL or UUID',
+      layer: 'Layer',
+      stepOne: 'Upload a File or enter URL/UUID',
+      stepTwo: 'Select format',
+      stepThree: 'Configure layer',
+      stepFour: 'Enter Name',
+      service: 'Service Type',
+      name: 'Name',
+      layerSelect: 'Select Layer',
+      errorEmpty: 'cannot be empty',
+      errorNone: 'No file or source added',
+      errorFile: 'Only geoJSON and GeoPackage files can be used',
+      errorServer: 'source is not valid',
+      errorProj: 'does not support current map projection',
+      only: 'only',
+    },
+    fr: {
+      finish: 'Finir',
+      continue: 'Continuer',
+      back: 'Retour',
+      or: 'ou',
+      dropzone: 'Déposez ici',
+      upload: 'Choisir un fichier',
+      drop: 'Déposez le fichier à télécharger',
+      url: "Entrer l'URL ou l'UUID",
+      layer: 'Couche',
+      stepOne: "Ajouter un fichier ou entrer l'URL/UUID",
+      stepTwo: 'Sélectionnez le format',
+      stepThree: 'Configurer la couche',
+      stepFour: 'Entrez le nom',
+      service: 'Type de service',
+      name: 'Nom',
+      layerSelect: 'Sélectionner la couche',
+      errorEmpty: 'ne peut être vide',
+      errorNone: 'Pas de fichier ou de source ajouté',
+      errorFile: 'Seuls les fichiers geoJSON et GeoPackage peuvent être utilisés',
+      errorServer: "source n'est pas valide",
+      errorProj: 'ne prend pas en charge la projection cartographique actuelle',
+      only: 'seulement',
+    },
+  };
 
   useEffect(() => {
     api.event.on(
@@ -116,7 +189,36 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `${textField} cannot be empty`,
+        value: `${textField} ${translations[displayLanguage].errorEmpty}`,
+      })
+    );
+  };
+
+  /**
+   * Emits an error dialogue when a text field is empty
+   *
+   * @param textField label for the TextField input that cannot be empty
+   */
+  const emitErrorNone = () => {
+    setIsLoading(false);
+    api.event.emit(
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+        type: 'string',
+        value: translations[displayLanguage].errorNone,
+      })
+    );
+  };
+
+  /**
+   * Emits an error dialogue when unsupported files are uploaded
+   *
+   * @param textField label for the TextField input that cannot be empty
+   */
+  const emitErrorFile = () => {
+    api.event.emit(
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+        type: 'string',
+        value: translations[displayLanguage].errorFile,
       })
     );
   };
@@ -131,7 +233,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `URL is not a valid ${serviceName} Server`,
+        value: `${serviceName} ${translations[displayLanguage].errorServer}`,
       })
     );
   };
@@ -147,7 +249,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `${serviceName} does not support current map projection ${proj}, only ${supportedProj.join(', ')}`,
+        value: `${serviceName} ${translations[displayLanguage].errorProj} ${proj}, ${
+          translations[displayLanguage].only
+        } ${supportedProj.join(', ')}`,
       })
     );
   };
@@ -394,7 +498,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       }
       const layerId = layerURL.split('/').pop() as string;
       const dataAccessPath = layerURL.replace(layerId, '');
-      setLayerName(layerId);
+      if (!layerName) setLayerName(layerId);
       setLayerEntries([
         {
           layerId,
@@ -418,18 +522,22 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    *
    * @returns {Promise<boolean>} True if layer passes validation
    */
-  const geoPackageValidation = async (): Promise<boolean> => {
-    try {
-      const sqlPromise = initSqlJs({
-        locateFile: (file) => `./node_modules/sql.js/dist/${file}`,
-      });
-      const dataPromise = fetch(layerURL).then((res) => res.arrayBuffer());
-      const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
-      const db = new SQL.Database(new Uint8Array(buf));
-    } catch (err) {
-      emitErrorServer('GeoPackage');
-      return false;
-    }
+  const geoPackageValidation = (): boolean => {
+    // TODO actual geopackage validation
+    const layerId = layerURL.split('/').pop() as string;
+    const dataAccessPath = layerURL.replace(layerId, '');
+    if (!layerName) setLayerName(layerId);
+    setLayerEntries([
+      {
+        layerId,
+        source: {
+          dataAccessPath: {
+            en: dataAccessPath,
+            fr: dataAccessPath,
+          },
+        },
+      },
+    ]);
     return true;
   };
 
@@ -437,26 +545,26 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
    * Attempt to determine the layer type based on the URL format
    */
   const bestGuessLayerType = () => {
-    const layerTokens = layerURL.toUpperCase().split('/');
+    const layerTokens = displayURL.toUpperCase().split('/');
     const layerId = parseInt(layerTokens[layerTokens.length - 1], 10);
-    if (layerURL.toUpperCase().endsWith('MAPSERVER') || layerURL.toUpperCase().endsWith('MAPSERVER/')) {
+    if (displayURL.toUpperCase().endsWith('MAPSERVER') || displayURL.toUpperCase().endsWith('MAPSERVER/')) {
       setLayerType(ESRI_DYNAMIC);
     } else if (
-      layerURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
-      (layerURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
+      displayURL.toUpperCase().indexOf('FEATURESERVER') !== -1 ||
+      (displayURL.toUpperCase().indexOf('MAPSERVER') !== -1 && !Number.isNaN(layerId))
     ) {
       setLayerType(ESRI_FEATURE);
     } else if (layerTokens.indexOf('WFS') !== -1) {
       setLayerType(WFS);
-    } else if (layerURL.toUpperCase().endsWith('.JSON') || layerURL.toUpperCase().endsWith('.GEOJSON')) {
+    } else if (displayURL.toUpperCase().endsWith('.JSON') || displayURL.toUpperCase().endsWith('.GEOJSON')) {
       setLayerType(GEOJSON);
-    } else if (layerURL.toUpperCase().endsWith('.GPKG')) {
+    } else if (displayURL.toUpperCase().endsWith('.GPKG')) {
       setLayerType(GEOPACKAGE);
-    } else if (layerURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || layerURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
+    } else if (displayURL.toUpperCase().indexOf('{Z}/{X}/{Y}') !== -1 || displayURL.toUpperCase().indexOf('{Z}/{Y}/{X}') !== -1) {
       setLayerType(XYZ_TILES);
-    } else if (layerURL.indexOf('/') === -1 && layerURL.replaceAll('-', '').length === 32) {
+    } else if (displayURL.indexOf('/') === -1 && displayURL.replaceAll('-', '').length === 32) {
       setLayerType(GEOCORE);
-    } else if (layerURL.toUpperCase().indexOf('WMS') !== -1) {
+    } else if (displayURL.toUpperCase().indexOf('WMS') !== -1) {
       setLayerType(WMS);
     }
   };
@@ -468,7 +576,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let valid = true;
     if (layerURL.trim() === '') {
       valid = false;
-      emitErrorEmpty('URL');
+      emitErrorNone();
     }
     if (valid) {
       bestGuessLayerType();
@@ -485,7 +593,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     if (layerType === undefined) {
       valid = false;
       setIsLoading(false);
-      emitErrorEmpty('Service Type');
+      emitErrorEmpty(translations[displayLanguage].service);
     } else if (layerType === WMS) valid = await wmsValidation();
     else if (layerType === WFS) valid = await wfsValidation();
     else if (layerType === OGC_FEATURE) valid = await ogcFeatureValidation();
@@ -508,7 +616,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let valid = true;
     if (layerEntries.length === 0) {
       valid = false;
-      emitErrorEmpty('Layer');
+      emitErrorEmpty(translations[displayLanguage].layer);
     }
     if (valid) setActiveStep(3);
   };
@@ -542,7 +650,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
     if (layerName === '') {
       valid = false;
-      emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
+      emitErrorEmpty(isMultiple() ? translations[displayLanguage].layer : translations[displayLanguage].name);
     }
     const layerConfig: TypeGeoviewLayerConfig = {
       geoviewLayerId,
@@ -558,8 +666,8 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       listOfLayerEntryConfig: layerEntries as TypeListOfLayerEntryConfig,
     };
 
-    if (layerType === GEOJSON || layerType === XYZ_TILES) {
-      // TODO probably want an option to add metadata if geojson
+    if (layerType === GEOJSON || layerType === XYZ_TILES || layerType === GEOPACKAGE) {
+      // TODO probably want an option to add metadata if geojson or geopackage
       // need to clear our metadata path or it will give errors trying to find it
       layerConfig.metadataAccessPath = {
         en: '',
@@ -597,11 +705,28 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   /**
+   * Set layer URL from file input
+   *
+   * @param {File} file uploaded file
+   */
+  const handleFile = (file: File) => {
+    const fileURL = URL.createObjectURL(file);
+    setDisplayURL(file.name);
+    setLayerURL(fileURL);
+    const fileName = file.name.split('.')[0];
+    setLayerType('');
+    setLayerList([]);
+    setLayerName(fileName);
+    setLayerEntries([]);
+  };
+
+  /**
    * Set layer URL from form input
    *
    * @param e TextField event
    */
   const handleInput = (event: Event) => {
+    setDisplayURL(event.target.value.trim());
     setLayerURL(event.target.value.trim());
     setLayerType('');
     setLayerList([]);
@@ -617,7 +742,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const handleSelectType = (event: SelectChangeEvent<unknown>) => {
     setLayerType(event.target.value as TypeGeoviewLayerType);
     setLayerList([]);
-    setLayerName('');
     setLayerEntries([]);
   };
 
@@ -651,6 +775,60 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   };
 
   /**
+   * Handle file dragged into dropzone
+   *
+   * @param {DragEvent<HTMLDivElement>} event Drag event
+   */
+  const handleDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.target !== dragPopover.current) {
+      setDrag(true);
+    }
+  };
+
+  /**
+   * Handle file dragged out of dropzone
+   *
+   * @param {DragEvent<HTMLDivElement>} event Drag event
+   */
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.target === dragPopover.current) setDrag(false);
+  };
+
+  /**
+   * Prevent default behaviour when file dragged over dropzone
+   *
+   * @param {DragEvent<HTMLDivElement>} event Drag event
+   */
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  /**
+   * Handle file drop
+   *
+   * @param {DragEvent<HTMLDivElement>} event Drag event
+   */
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDrag(false);
+    if (event.dataTransfer?.files) {
+      const file = event.dataTransfer.files[0];
+      const upFilename = file.name.toUpperCase();
+      if (upFilename.endsWith('.JSON') || upFilename.endsWith('.GEOJSON') || upFilename.endsWith('.GPKG')) {
+        handleFile(file);
+      } else {
+        emitErrorFile();
+      }
+    }
+  };
+
+  /**
    * Creates a set of Continue / Back buttons
    *
    * @param param0 specify if button is first or last in the list
@@ -665,11 +843,11 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     ) : (
       <ButtonGroup sx={sxClasses.buttonGroup}>
         <Button variant="contained" type="text" onClick={handleNext}>
-          {isLast ? 'Finish' : 'Continue'}
+          {isLast ? translations[displayLanguage].finish : translations[displayLanguage].continue}
         </Button>
         {!isFirst && (
           <Button variant="contained" type="text" onClick={handleBack}>
-            Back
+            {translations[displayLanguage].back}
           </Button>
         )}
       </ButtonGroup>
@@ -690,21 +868,77 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         steps={[
           {
             stepLabel: {
-              children: 'Enter URL / UUID',
+              children: translations[displayLanguage].stepOne,
             },
             stepContent: {
               children: (
-                <>
-                  <TextField sx={{ width: '100%' }} label="URL" variant="standard" value={layerURL} onChange={handleInput} multiline />
+                <div
+                  className="dropzone"
+                  style={{ position: 'relative' }}
+                  onDrop={(e) => handleDrop(e)}
+                  onDragOver={(e) => handleDragOver(e)}
+                  onDragEnter={(e) => handleDragEnter(e)}
+                  onDragLeave={(e) => handleDragLeave(e)}
+                >
+                  {drag && (
+                    <div
+                      ref={dragPopover}
+                      style={{
+                        backgroundColor: 'rgba(128,128,128,.95)',
+                        position: 'absolute',
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 9999,
+                        textAlign: 'center',
+                        color: 'black',
+                        fontSize: 24,
+                      }}
+                    >
+                      <h3>
+                        <br />
+                        <br />
+                        {translations[displayLanguage].dropzone}
+                      </h3>
+                    </div>
+                  )}
+                  <div>
+                    <input
+                      type="file"
+                      id="fileUpload"
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        if (e.target.files) handleFile(e.target.files[0]);
+                      }}
+                      accept=".gpkg, .json, .geojson"
+                    />
+                  </div>
+                  <Button type="text" onClick={() => document.getElementById('fileUpload')?.click()} className="">
+                    <FileUploadIcon />
+                    <span>{translations[displayLanguage].upload}</span>
+                  </Button>
+                  <p style={{ textAlign: 'center' }}>
+                    <small>{translations[displayLanguage].drop}</small>
+                  </p>
+                  <p style={{ textAlign: 'center' }}>{translations[displayLanguage].or}</p>
+                  <TextField
+                    sx={{ width: '100%' }}
+                    label={translations[displayLanguage].url}
+                    variant="standard"
+                    value={displayURL}
+                    onChange={handleInput}
+                    multiline
+                  />
                   <br />
                   <NavButtons isFirst handleNext={handleStep1} />
-                </>
+                </div>
               ),
             },
           },
           {
             stepLabel: {
-              children: 'Select format',
+              children: translations[displayLanguage].stepTwo,
             },
             stepContent: {
               children: (
@@ -714,7 +948,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                     labelId="service-type-label"
                     value={layerType}
                     onChange={handleSelectType}
-                    label="Service Type"
+                    label={translations[displayLanguage].service}
                     inputLabel={{
                       id: 'service-type-label',
                     }}
@@ -733,12 +967,14 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           },
           {
             stepLabel: {
-              children: 'Configure layer',
+              children: translations[displayLanguage].stepThree,
             },
             stepContent: {
               children: (
                 <>
-                  {layerList.length === 0 && <TextField label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />}
+                  {layerList.length === 0 && (
+                    <TextField label={translations[displayLanguage].name} variant="standard" value={layerName} onChange={handleNameLayer} />
+                  )}
                   {layerList.length > 1 && (
                     <Autocomplete
                       fullWidth
@@ -751,7 +987,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
                       renderOption={(props, option) => <span {...props}>{option[1]}</span>}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       onChange={handleSelectLayer as any}
-                      renderInput={(params) => <TextField {...params} label="Select Layer" />}
+                      renderInput={(params) => <TextField {...params} label={translations[displayLanguage].layerSelect} />}
                     />
                   )}
                   <br />
@@ -763,12 +999,18 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           isMultiple()
             ? {
                 stepLabel: {
-                  children: 'Enter Name',
+                  children: translations[displayLanguage].stepFour,
                 },
                 stepContent: {
                   children: (
                     <>
-                      <TextField sx={{ width: '100%' }} label="Name" variant="standard" value={layerName} onChange={handleNameLayer} />
+                      <TextField
+                        sx={{ width: '100%' }}
+                        label={translations[displayLanguage].name}
+                        variant="standard"
+                        value={layerName}
+                        onChange={handleNameLayer}
+                      />
                       <br />
                       <NavButtons isLast handleNext={handleStepLast} />
                     </>
