@@ -30,7 +30,7 @@ const sxClasses = {
   },
   listItem: {
     margin: 0,
-    padding: 0,
+    padding: '0 0 0 8px',
   },
   iconImg: {
     padding: 3,

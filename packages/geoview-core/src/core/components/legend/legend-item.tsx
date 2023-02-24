@@ -124,6 +124,7 @@ const sxClasses = {
     display: 'flex',
     alignItems: 'center',
     gap: '20px',
+    padding: '16px 24px',
   },
 };
 
