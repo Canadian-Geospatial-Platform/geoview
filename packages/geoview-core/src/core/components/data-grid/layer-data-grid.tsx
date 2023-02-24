@@ -102,7 +102,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       };
     });
     // Stringify with some indentation
-    return JSON.stringify(geoData, null, 2);
+    return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
   };
 
   /**
