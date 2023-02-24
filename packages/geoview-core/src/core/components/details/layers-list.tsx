@@ -18,9 +18,7 @@ import { TypeArrayOfLayerData, DetailsProps } from './details';
 import { FeatureInfo } from './feature-info';
 
 const sxClasses = {
-  expandableIconContainer: {
-    paddingLeft: 10,
-  },
+  expandableIconContainer: {},
 };
 interface TypeLayersListProps {
   arrayOfLayerData: TypeArrayOfLayerData;
@@ -52,7 +50,10 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
       {arrayOfLayerData.map((layerData) => {
         return (
           <div key={layerData.layerPath}>
-            <ListItem onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')} sx={fontColor}>
+            <ListItem
+              onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}
+              sx={{ padding: '8px 0', ...fontColor }}
+            >
               <ListItemButton>
                 <ListItemIcon>
                   <IconButton color="primary" sx={fontColor}>
@@ -69,7 +70,7 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
                 {layerData.features.map((feature, index: number) => (
                   // eslint-disable-next-line react/no-array-index-key
                   <Grid key={index} item sm={12} md={detailsSettings.singleColumn ? 12 : 6} lg={detailsSettings.singleColumn ? 12 : 4}>
-                    <FeatureInfo feature={feature} startOpen={layerData.features.length === 1} backgroundStyle={detailsSettings.backgroundStyle} />
+                    <FeatureInfo feature={feature} startOpen={layerData.features.length === 1} detailsSettings={detailsSettings} />
                   </Grid>
                 ))}
               </Grid>
