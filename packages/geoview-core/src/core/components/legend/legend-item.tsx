@@ -491,7 +491,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       >
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
-        {canSetOpacity && groupItems.length === 0 && <MenuItem onClick={handleOpacityOpen}>{t('legend.opacity')}</MenuItem>}
+        {canSetOpacity && groupItems.length === 0 && (
+          <MenuItem onClick={handleOpacityOpen}>{t(isOpacityOpen ? 'legend.close_opacity' : 'legend.open_opacity')}</MenuItem>
+        )}
         {canCluster && groupItems.length === 0 && <MenuItem onClick={handleClusterToggle}>{t('legend.toggle_cluster')}</MenuItem>}
       </Menu>
       <Collapse in={isOpacityOpen} timeout="auto">

@@ -45,7 +45,9 @@
     "remove_layer": "Supprimer le calque",
     "opacity": "Opacité",
     "expand_legend": "Développer la légende",
-    "toggle_cluster": "Basculer le groupement"
+    "toggle_cluster": "Basculer le groupement",
+    "open_opacity": "Ouvrir Opacité",
+    "close_opacity": "Fermer Opacité"
   },
   "keyboardnav": {
     "start": "Aller après l'élément carte",
