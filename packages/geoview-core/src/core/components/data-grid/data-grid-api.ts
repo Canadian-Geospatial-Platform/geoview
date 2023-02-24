@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/no-array-index-key */
 import { createElement, ReactElement, useState, useEffect } from 'react';
-
+import { toLonLat } from 'ol/proj';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries } from '../../../app';
 
@@ -48,6 +48,8 @@ export class DataGridAPI {
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
 
+    const { currentProjection } = api.map(this.mapId);
+    const projectionConfig = api.projection.projections[currentProjection];
     /**
      * Create a geometry json
      *
@@ -57,19 +59,24 @@ export class DataGridAPI {
      */
     const buildGeometry = (geometry: Geometry) => {
       if (geometry instanceof Polygon) {
-        return { type: 'Polygon', coordinates: geometry.getCoordinates() };
+        return {
+          type: 'Polygon',
+          coordinates: geometry.getCoordinates().map((coords) => {
+            return coords.map((coord) => toLonLat(coord, projectionConfig));
+          }),
+        };
       }
 
       if (geometry instanceof LineString) {
-        return { type: 'LineString', coordinates: geometry.getCoordinates() };
+        return { type: 'LineString', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
       }
 
       if (geometry instanceof Point) {
-        return { type: 'Point', coordinates: geometry.getCoordinates() };
+        return { type: 'Point', coordinates: toLonLat(geometry.getCoordinates(), projectionConfig) };
       }
 
       if (geometry instanceof MultiPoint) {
-        return { type: 'MultiPoint', coordinates: geometry.getCoordinates() };
+        return { type: 'MultiPoint', coordinates: geometry.getCoordinates().map((coord) => toLonLat(coord, projectionConfig)) };
       }
 
       return {};

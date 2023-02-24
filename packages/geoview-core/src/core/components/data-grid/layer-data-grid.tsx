@@ -95,6 +95,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const getJson = () => {
     const geoData = rows.map((row) => {
       const { geometry, ...featureInfo } = row;
+      delete featureInfo.featureKey;
       return {
         type: 'Feature',
         geometry,
