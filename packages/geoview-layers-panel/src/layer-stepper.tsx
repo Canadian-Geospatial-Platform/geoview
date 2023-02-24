@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { DragEvent } from 'react';
+import { DragEvent } from 'react';
 
 import {
   TypeWindow,
@@ -63,7 +63,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
 
-  const dragPopover = React.useRef(null);
+  const dragPopover = react.useRef(null);
 
   const sxClasses = {
     buttonGroup: {
