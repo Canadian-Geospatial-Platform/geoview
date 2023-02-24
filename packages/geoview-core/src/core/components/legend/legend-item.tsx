@@ -399,6 +399,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   }, [isLegendOpen, iconType]);
 
+  // close the legend when no child.
+  useEffect(() => {
+    if (iconType === 'simple' && (!iconList || !iconList.length)) {
+      setLegendOpen(false);
+    }
+  }, [iconList, iconType]);
+
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
       <ListItem>
@@ -409,13 +416,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 {isGroupOpen ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </IconButton>
             )}
-            {groupItems.length === 0 && isLegendOpen && (
+            {groupItems.length === 0 && isLegendOpen && iconList && (
               <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={closeIconRef}>
                 <CloseIcon />
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={maxIconRef}>
+              <IconButton
+                sx={sxClasses.iconPreview}
+                color="primary"
+                size="small"
+                {...(iconList?.length && { onClick: handleLegendClick })}
+                iconRef={maxIconRef}
+              >
                 <Box sx={sxClasses.legendIcon}>
                   <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
                 </Box>
