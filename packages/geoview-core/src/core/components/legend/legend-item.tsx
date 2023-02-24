@@ -22,6 +22,7 @@ import {
   ExpandLessIcon,
   OpacityIcon,
   SliderBase,
+  CheckIcon,
 } from '../../../ui';
 import {
   api,
@@ -39,7 +40,12 @@ import {
 } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import { isClassBreakStyleConfig, isUniqueValueStyleConfig, layerEntryIsGroupLayer } from '../../../geo/map/map-schema-types';
+import {
+  TypeVectorSourceInitialConfig,
+  isClassBreakStyleConfig,
+  isUniqueValueStyleConfig,
+  layerEntryIsGroupLayer,
+} from '../../../geo/map/map-schema-types';
 
 const sxClasses = {
   expandableGroup: {
@@ -123,9 +129,10 @@ const sxClasses = {
   opacityMenu: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px',
-    padding: '16px 24px',
+    gap: '15px',
+    padding: '0 62px 16px 62px',
   },
+  menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
 };
 
 export interface TypeLegendItemProps {
@@ -167,7 +174,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   // check if layer is a vectorlayer, so that clustering can be toggled
   const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
   const canCluster = geoviewLayerInstance.type in vectorLayers;
-
+  const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState(true);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
   const [isGroupOpen, setGroupOpen] = useState(true);
@@ -407,6 +414,13 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     }
   }, [iconList, iconType]);
 
+  useEffect(() => {
+    const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector).activeLayer
+      ?.source as TypeVectorSourceInitialConfig;
+    setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Grid item sm={12} md={subLayerId ? 12 : 6} lg={subLayerId ? 12 : 4}>
       <ListItem>
@@ -464,7 +478,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           <Tooltip title={layerName} placement="top" enterDelay={1000}>
             <ListItemText primary={layerName} onClick={handleExpandGroupClick} />
           </Tooltip>
-          <ListItemIcon>
+          <ListItemIcon style={{ justifyContent: 'right' }}>
             {(isRemoveable || (canSetOpacity && groupItems.length === 0)) && (
               <IconButton id="setOpacityBtn" onClick={handleMoreClick} aria-label="more" aria-haspopup="true">
                 <MoreVertIcon />
@@ -492,9 +506,25 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         {/* Add more layer options here - zoom to, reorder */}
         {isRemoveable && <MenuItem onClick={handleRemoveLayer}>{t('legend.remove_layer')}</MenuItem>}
         {canSetOpacity && groupItems.length === 0 && (
-          <MenuItem onClick={handleOpacityOpen}>{t(isOpacityOpen ? 'legend.close_opacity' : 'legend.open_opacity')}</MenuItem>
+          <MenuItem onClick={handleOpacityOpen}>
+            <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
+            {isOpacityOpen && (
+              <ListItemIcon style={sxClasses.menuListIcon}>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+          </MenuItem>
         )}
-        {canCluster && groupItems.length === 0 && <MenuItem onClick={handleClusterToggle}>{t('legend.toggle_cluster')}</MenuItem>}
+        {canCluster && groupItems.length === 0 && (
+          <MenuItem onClick={handleClusterToggle}>
+            <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
+            {isClusterToggleEnabled && (
+              <ListItemIcon style={sxClasses.menuListIcon}>
+                <CheckIcon fontSize="small" />
+              </ListItemIcon>
+            )}
+          </MenuItem>
+        )}
       </Menu>
       <Collapse in={isOpacityOpen} timeout="auto">
         <Box sx={sxClasses.opacityMenu}>

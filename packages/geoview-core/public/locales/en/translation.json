@@ -46,8 +46,7 @@
     "opacity": "Opacity",
     "expand_legend": "Expand Legend",
     "toggle_cluster": "Toggle Clustering",
-    "open_opacity": "Open Opacity",
-    "close_opacity": "Close Opacity"
+    "toggle_opacity" : "Toggle Opacity"
   },
   "keyboardnav": {
     "start": "Skip after map element",
