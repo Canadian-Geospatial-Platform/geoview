@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { DragEvent } from 'react';
+import { DragEvent } from 'react';
 
 import {
   TypeWindow,
@@ -63,7 +63,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [drag, setDrag] = useState<boolean>(false);
 
-  const dragPopover = React.useRef(null);
+  const dragPopover = react.useRef(null);
 
   const sxClasses = {
     buttonGroup: {
@@ -108,8 +108,15 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       stepThree: 'Configure layer',
       stepFour: 'Enter Name',
       service: 'Service Type',
+      layer: 'Layer',
       name: 'Name',
       layerSelect: 'Select Layer',
+      errorEmpty: 'cannot be empty',
+      errorNone: 'No file or service selected',
+      errorFile: 'Only geoJSON and GeoPackage files can be used',
+      errorServer: 'Provided source is not valid',
+      errorProj: 'does not support current map projection',
+      only: 'only',
     },
     fr: {
       finish: 'Finir',
@@ -125,8 +132,15 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       stepThree: 'Configurer la couche',
       stepFour: 'Entrez le nom',
       service: 'Type de service',
+      layer: 'Couche',
       name: 'Nom',
       layerSelect: 'Sélectionner la couche',
+      errorEmpty: 'ne peut être vide',
+      errorNone: 'Pas de fichier ou de service sélectionné',
+      errorFile: 'Seuls les fichiers geoJSON et GeoPackage peuvent être utilisés',
+      errorServer: "La source fournie n'est pas valide",
+      errorProj: 'ne prend pas en charge la projection cartographique actuelle',
+      only: 'seulement',
     },
   };
 
@@ -175,7 +189,22 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `${textField} cannot be empty`,
+        value: `${textField} ${translations[displayLanguage].errorEmpty}`,
+      })
+    );
+  };
+
+  /**
+   * Emits an error dialogue when no file or URL is inputted
+   *
+   * @param textField label for the TextField input that cannot be empty
+   */
+  const emitErrorNone = () => {
+    setIsLoading(false);
+    api.event.emit(
+      snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
+        type: 'string',
+        value: translations[displayLanguage].errorNone,
       })
     );
   };
@@ -189,7 +218,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `Only geoJSON and GeoPackage files can be used`,
+        value: translations[displayLanguage].errorFile,
       })
     );
   };
@@ -204,7 +233,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `URL is not a valid ${serviceName} Server`,
+        value: `${translations[displayLanguage].errorServer} ${serviceName}`,
       })
     );
   };
@@ -220,7 +249,9 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     api.event.emit(
       snackbarMessagePayload(api.eventNames.SNACKBAR.EVENT_SNACKBAR_OPEN, mapId, {
         type: 'string',
-        value: `${serviceName} does not support current map projection ${proj}, only ${supportedProj.join(', ')}`,
+        value: `${serviceName} ${translations[displayLanguage].errorProj} ${proj}, ${
+          translations[displayLanguage].only
+        } ${supportedProj.join(', ')}`,
       })
     );
   };
@@ -467,7 +498,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
       }
       const layerId = layerURL.split('/').pop() as string;
       const dataAccessPath = layerURL.replace(layerId, '');
-      setLayerName(layerId);
+      if (!layerName) setLayerName(layerId);
       setLayerEntries([
         {
           layerId,
@@ -495,7 +526,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     // TODO actual geopackage validation
     const layerId = layerURL.split('/').pop() as string;
     const dataAccessPath = layerURL.replace(layerId, '');
-    setLayerName(layerId);
+    if (!layerName) setLayerName(layerId);
     setLayerEntries([
       {
         layerId,
@@ -545,7 +576,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let valid = true;
     if (layerURL.trim() === '') {
       valid = false;
-      emitErrorEmpty('URL');
+      emitErrorNone();
     }
     if (valid) {
       bestGuessLayerType();
@@ -562,7 +593,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     if (layerType === undefined) {
       valid = false;
       setIsLoading(false);
-      emitErrorEmpty('Service Type');
+      emitErrorEmpty(translations[displayLanguage].service);
     } else if (layerType === WMS) valid = await wmsValidation();
     else if (layerType === WFS) valid = await wfsValidation();
     else if (layerType === OGC_FEATURE) valid = await ogcFeatureValidation();
@@ -585,7 +616,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     let valid = true;
     if (layerEntries.length === 0) {
       valid = false;
-      emitErrorEmpty('Layer');
+      emitErrorEmpty(translations[displayLanguage].layer);
     }
     if (valid) setActiveStep(3);
   };
@@ -619,7 +650,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
 
     if (layerName === '') {
       valid = false;
-      emitErrorEmpty(isMultiple() ? 'Name' : 'Layer');
+      emitErrorEmpty(isMultiple() ? translations[displayLanguage].layer : translations[displayLanguage].name);
     }
     const layerConfig: TypeGeoviewLayerConfig = {
       geoviewLayerId,
@@ -682,9 +713,10 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
     const fileURL = URL.createObjectURL(file);
     setDisplayURL(file.name);
     setLayerURL(fileURL);
+    const fileName = file.name.split('.')[0] as string;
     setLayerType('');
     setLayerList([]);
-    setLayerName('');
+    setLayerName(fileName);
     setLayerEntries([]);
   };
 
@@ -710,7 +742,6 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
   const handleSelectType = (event: SelectChangeEvent<unknown>) => {
     setLayerType(event.target.value as TypeGeoviewLayerType);
     setLayerList([]);
-    setLayerName('');
     setLayerEntries([]);
   };
 
