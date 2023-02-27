@@ -124,6 +124,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
     URL.revokeObjectURL(url);
   };
+
   /**
    * the export Json item added in menu
    *
@@ -134,26 +135,22 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     const { hideMenu } = props;
 
-    return (
-      <MenuItem
-        onClick={() => {
-          const jsonString = getJson();
-          const blob = new Blob([jsonString], {
-            type: 'text/json',
-          });
-          exportBlob(blob, `DataGrid_${layerKey.replaceAll('/', '-').replaceAll('.', '-')}.json`);
+    const onMenuItemClick = () => {
+      const jsonString = getJson();
+      const blob = new Blob([jsonString], {
+        type: 'text/json',
+      });
+      exportBlob(blob, `DataGrid_${layerKey.replaceAll('/', '-').replaceAll('.', '-')}.json`);
+      // Hide the export menu after the export
+      hideMenu?.();
+    };
 
-          // Hide the export menu after the export
-          hideMenu?.();
-        }}
-      >
-        {t('datagrid.exportJson')}
-      </MenuItem>
-    );
+    return <MenuItem onClick={() => onMenuItemClick()}>{t('datagrid.exportJson')}</MenuItem>;
   }
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
+
   /**
    * Customize the export menu, adding the export json button
    *
@@ -170,6 +167,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       </GridToolbarExportContainer>
     );
   }
+
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
    *
