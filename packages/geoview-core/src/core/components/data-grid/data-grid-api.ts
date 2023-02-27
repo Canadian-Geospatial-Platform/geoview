@@ -89,6 +89,7 @@ export class DataGridAPI {
      * @return {TypeJsonArray} the data grid rows
      *
      */
+
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
       return arrayOfFeatureInfoEntries.map((feature) => {
         const { featureKey, fieldInfo, geometry } = feature;
