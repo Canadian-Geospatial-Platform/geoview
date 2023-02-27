@@ -106,7 +106,6 @@ export class DataGridAPI {
     // eslint-disable-next-line @typescript-eslint/ban-types
     const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
       // set columns
-      // console.log(layerValues);
       const columnHeader = Object.keys(layerValues[0]).filter((kn) => kn !== 'geometry');
 
       const columns = [];
