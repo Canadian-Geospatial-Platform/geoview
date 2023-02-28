@@ -48,6 +48,9 @@
     "toggle_cluster": "Basculer le groupement",
     "toggle_opacity" : "Basculer le Opacité"
   },
+  "datagrid": {
+    "exportJson": "Télécharger GeoJSON"
+  },
   "keyboardnav": {
     "start": "Aller après l'élément carte",
     "end": "Aller avant l'élément carte",

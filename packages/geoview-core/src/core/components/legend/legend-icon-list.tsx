@@ -13,13 +13,7 @@ import {
   CheckBoxOutIcon,
   CheckBoxIcon,
 } from '../../../ui';
-import {
-  AbstractGeoViewVector,
-  TypeVectorLayerEntryConfig,
-  TypeStyleGeometry,
-  TypeClassBreakStyleConfig,
-  TypeUniqueValueStyleConfig,
-} from '../../../app';
+import { TypeVectorLayerEntryConfig, TypeStyleGeometry, TypeClassBreakStyleConfig, TypeUniqueValueStyleConfig } from '../../../app';
 
 const sxClasses = {
   listIconLabel: {
@@ -45,11 +39,12 @@ const sxClasses = {
 export interface TypeLegendIconListProps {
   iconImages: string[];
   iconLabels: string[];
-  geoviewLayerInstance: AbstractGeoViewVector;
+  // geoviewLayerInstance: AbstractGeoViewVector;
   layerConfig?: TypeVectorLayerEntryConfig;
   geometryKey?: string;
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
+  toggleMapVisible?: (layerConfig: TypeVectorLayerEntryConfig) => void;
 }
 /**
  * List of Icons to show in expanded Legend Item
@@ -57,7 +52,7 @@ export interface TypeLegendIconListProps {
  * @returns {JSX.Element} the list of icons
  */
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
-  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, geometryKey, geoviewLayerInstance, layerConfig } = props;
+  const { iconImages, iconLabels, isParentVisible, toggleParentVisible, toggleMapVisible, geometryKey, layerConfig } = props;
   const allChecked = iconImages.map(() => true);
   const allUnChecked = iconImages.map(() => false);
   const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
@@ -87,7 +82,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       setCheckCount(isParentVisible === true ? allChecked.length : 0);
       setInitParentVisible(isParentVisible);
     }
-    if (geoviewLayerInstance && layerConfig && layerConfig.style !== undefined && geometryKey) {
+    if (layerConfig && layerConfig.style !== undefined && geometryKey) {
       const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
       if (geometryStyle !== undefined) {
         isChecked.forEach((checked, i) => {
@@ -115,21 +110,12 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
             }
           }
         });
-
-        geoviewLayerInstance.applyViewFilter(layerConfig);
+        if (toggleMapVisible !== undefined) {
+          toggleMapVisible(layerConfig);
+        }
       }
     }
-  }, [
-    isParentVisible,
-    allChecked,
-    allUnChecked,
-    checkedCount,
-    initParentVisible,
-    isChecked,
-    geoviewLayerInstance,
-    layerConfig,
-    geometryKey,
-  ]);
+  }, [isParentVisible, allChecked, allUnChecked, checkedCount, initParentVisible, isChecked, layerConfig, geometryKey, toggleMapVisible]);
 
   return (
     <List>

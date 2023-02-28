@@ -2,6 +2,7 @@ import { Extent } from 'ol/extent';
 import { Coordinate } from 'ol/coordinate';
 import { FeatureLike } from 'ol/Feature';
 import { Pixel } from 'ol/pixel';
+import { Geometry } from 'ol/geom';
 
 import { PayloadBaseClass } from './payload-base-class';
 

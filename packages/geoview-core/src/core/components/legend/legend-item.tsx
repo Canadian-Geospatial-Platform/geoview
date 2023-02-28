@@ -549,7 +549,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 iconLabels={labelList}
                 isParentVisible={isChecked}
                 toggleParentVisible={() => setChecked(!isChecked)}
-                geoviewLayerInstance={geoviewLayerInstance as AbstractGeoViewVector}
+                toggleMapVisible={(sublayerConfig) => {
+                  (geoviewLayerInstance as AbstractGeoViewVector).applyViewFilter(sublayerConfig);
+                }}
                 layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
                 geometryKey={layerGeometryKey}
               />
