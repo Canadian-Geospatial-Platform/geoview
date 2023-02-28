@@ -44,8 +44,8 @@ export class DataGridAPI {
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = layerDataGridProps;
 
-    const [values, setValues] = useState<{}[]>([]);
-    const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
+    // const [values, setValues] = useState<{}[]>([]);
+    const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[]; fieldsType: Record<string, string> }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
 
     const { currentProjection } = api.map(this.mapId);
@@ -91,33 +91,42 @@ export class DataGridAPI {
      */
 
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
-      return arrayOfFeatureInfoEntries.map((feature) => {
+      const fieldsType: Record<string, string> = {};
+      const featureRows = arrayOfFeatureInfoEntries.map((feature, i) => {
         const { featureKey, fieldInfo, geometry } = feature;
         const featureInfo: Record<string, string> = {};
         Object.entries(fieldInfo).forEach(([fieldKey, fieldInfoEntry]) => {
           const featureInfoKey = (fieldInfoEntry?.alias ? fieldInfoEntry?.alias : fieldKey) as string;
           featureInfo[featureInfoKey] = fieldInfoEntry?.value as string;
+          if (i === 0) {
+            fieldsType[featureInfoKey] = fieldInfoEntry?.dataType as string;
+          }
         });
 
-        return { featureKey, geometry: buildGeometry(geometry?.getGeometry() as Geometry), ...featureInfo };
+        return {
+          featureKey,
+          geometry: buildGeometry(geometry?.getGeometry() as Geometry),
+          ...featureInfo,
+        };
       });
+      return { featureRows, fieldsType };
     };
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
+    const setLayerDataGridProps = (layerKey: string, layerValues: {}[], fieldsType: Record<string, string>) => {
+      const firstValue = layerValues[0];
       // set columns
-      const columnHeader = Object.keys(layerValues[0]).filter((kn) => kn !== 'geometry');
-
-      const columns = [];
-      for (let i = 0; i < columnHeader.length; i++) {
-        columns.push({
-          field: columnHeader[i],
-          headerName: columnHeader[i],
+      const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry');
+      // const fieldsType = layerValues[0].fieldType;
+      const columns = columnHeader.map((header) => {
+        return {
+          field: header,
+          headerName: header,
           width: 150,
-          type: 'string',
-          hide: columnHeader.length > 1 && columnHeader[i] === 'featureKey',
-        });
-      }
+          type: fieldsType[header] ? fieldsType[header] : 'string',
+          hide: columnHeader.length > 1 && header === 'featureKey',
+        };
+      });
 
       // set rows
       const rows = layerValues;
@@ -139,7 +148,7 @@ export class DataGridAPI {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
       if (geoviewLayerInstance.listOfLayerEntryConfig.length > 1) {
         const grouplayerKeys: string[] = [];
-        const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
+        const grouplayerValues: { layerkey: string; layerValues: {}[]; fieldsType: Record<string, string> }[] = [];
         const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
           listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
             if (
@@ -159,12 +168,14 @@ export class DataGridAPI {
         grouplayerKeys.forEach((layerkey) => {
           // eslint-disable-next-line @typescript-eslint/ban-types
           let layerValues: {}[] = [];
+          let fieldsType: Record<string, string> = {};
           (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
             if (arrayOfFeatureInfoEntries?.length > 0) {
               // set values
               count++;
-              layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);
-              grouplayerValues.push({ layerkey, layerValues });
+              layerValues = buildFeatureRows(arrayOfFeatureInfoEntries).featureRows;
+              fieldsType = buildFeatureRows(arrayOfFeatureInfoEntries).fieldsType;
+              grouplayerValues.push({ layerkey, layerValues, fieldsType });
             }
             if (count === grouplayerKeys.length) {
               setGroupKeys(grouplayerKeys);
@@ -176,22 +187,32 @@ export class DataGridAPI {
         (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo().then((arrayOfFeatureInfoEntries) => {
           if (arrayOfFeatureInfoEntries?.length > 0) {
             // set values
-            setValues(buildFeatureRows(arrayOfFeatureInfoEntries));
+            setGroupKeys([layerId]);
+            setGroupValues([
+              {
+                layerkey: layerId,
+                layerValues: buildFeatureRows(arrayOfFeatureInfoEntries).featureRows,
+                fieldsType: buildFeatureRows(arrayOfFeatureInfoEntries).fieldsType,
+              },
+            ]);
           }
         });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layerId]);
 
-    return createElement('div', {}, [
-      groupKeys.length > 0 && [
-        createElement(
-          'select',
-          { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
-          groupKeys.map((layerkey) => {
-            return createElement('option', { key: layerkey }, [layerkey]);
-          })
-        ),
+    return createElement(
+      'div',
+      {},
+      [
+        groupKeys.length > 1 &&
+          createElement(
+            'select',
+            { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
+            groupKeys.map((layerkey) => {
+              return createElement('option', { key: layerkey }, [layerkey]);
+            })
+          ),
         groupValues.map((groupValue, index) => {
           if (groupValue.layerValues.length > 0) {
             return createElement(
@@ -201,16 +222,16 @@ export class DataGridAPI {
                 className: `${layerId}-layer-datagrid-table`,
                 style: { display: index === 0 ? 'block' : 'none' },
               },
-              createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues))
+              createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues, groupValue.fieldsType))
             );
           }
           return null;
         }),
-      ],
-      values.length > 0 &&
-        createElement('div', { id: `${layerId}-layer-datagrid-table` }, [
-          createElement(LayerDataGrid, setLayerDataGridProps(layerId, values)),
-        ]),
-    ]);
+      ]
+      // values.length > 0 &&
+      //   createElement('div', { id: `${layerId}-layer-datagrid-table` }, [
+      //     createElement(LayerDataGrid, setLayerDataGridProps(layerId, values)),
+      //   ]),
+    );
   };
 }
