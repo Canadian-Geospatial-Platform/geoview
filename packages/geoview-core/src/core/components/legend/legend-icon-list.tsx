@@ -86,27 +86,22 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
       if (geometryStyle !== undefined) {
         isChecked.forEach((checked, i) => {
-          if (i < isChecked.length - 1) {
-            if (geometryStyle.styleType === 'classBreaks') {
+          if (geometryStyle.styleType === 'classBreaks') {
+            if (i < (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length - 1) {
               (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            } else if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length === isChecked.length) {
+              (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            } else {
+              (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
             }
-            if (geometryStyle.styleType === 'uniqueValue') {
+          }
+          if (geometryStyle.styleType === 'uniqueValue') {
+            if (i < (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length - 1) {
               (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-            }
-          } else {
-            if (geometryStyle.styleType === 'classBreaks') {
-              if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length === isChecked.length) {
-                (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-              } else {
-                (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
-              }
-            }
-            if (geometryStyle.styleType === 'uniqueValue') {
-              if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length === isChecked.length) {
-                (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-              } else {
-                (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
-              }
+            } else if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length === isChecked.length) {
+              (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            } else {
+              (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
             }
           }
         });
