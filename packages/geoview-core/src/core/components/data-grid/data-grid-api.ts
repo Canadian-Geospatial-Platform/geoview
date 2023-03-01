@@ -44,7 +44,7 @@ export class DataGridAPI {
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = layerDataGridProps;
 
-    const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[]; fieldsType: Record<string, string> }[]>([]);
+    const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
 
     const { currentProjection } = api.map(this.mapId);
@@ -88,46 +88,59 @@ export class DataGridAPI {
      * @return {TypeJsonArray} the data grid rows
      *
      */
-
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
-      const fieldsType: Record<string, string> = {};
-      const featureRows = arrayOfFeatureInfoEntries.map((feature, i) => {
+      return arrayOfFeatureInfoEntries.map((feature) => {
         const { featureKey, fieldInfo, geometry } = feature;
-        const featureInfo: Record<string, string> = {};
+        const featureInfo: Record<string, {}> = {};
         Object.entries(fieldInfo).forEach(([fieldKey, fieldInfoEntry]) => {
           const featureInfoKey = (fieldInfoEntry?.alias ? fieldInfoEntry?.alias : fieldKey) as string;
-          featureInfo[featureInfoKey] = fieldInfoEntry?.value as string;
-          if (i === 0) {
-            fieldsType[featureInfoKey] = fieldInfoEntry?.dataType as string;
-          }
+          const featureInfoValue = fieldInfoEntry?.value as string;
+          const fieldType = fieldInfoEntry?.dataType as string;
+          featureInfo[fieldKey] = { featureInfoKey, featureInfoValue, fieldType };
         });
 
         return {
-          featureKey,
+          featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
           geometry: buildGeometry(geometry?.getGeometry() as Geometry),
           ...featureInfo,
         };
       });
-      return { featureRows, fieldsType };
     };
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    const setLayerDataGridProps = (layerKey: string, layerValues: {}[], fieldsType: Record<string, string>) => {
-      const firstValue = layerValues[0];
+    const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
+      const firstValue: Record<string, { featureInfoKey: string; featureInfoValue: string; fieldType: string }> = layerValues[0];
       // set columns
       const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry');
       const columns = columnHeader.map((header) => {
         return {
           field: header,
-          headerName: header,
+          headerName: firstValue[header].featureInfoKey,
           width: 150,
-          type: fieldsType[header] ? fieldsType[header] : 'string',
+          type: firstValue[header].fieldType ? firstValue[header].fieldType : 'string',
           hide: columnHeader.length > 1 && header === 'featureKey',
         };
       });
 
       // set rows
-      const rows = layerValues;
+      const rows = layerValues.map((values) => {
+        let geometry = {};
+        const featureInfo: Record<string, string> = {};
+        Object.entries(values).forEach(([valueKey, valueInfoEntry]) => {
+          if (valueKey === 'geometry') {
+            geometry = valueInfoEntry as Geometry;
+          } else {
+            featureInfo[valueKey] = (
+              valueInfoEntry as { featureInfoKey: string; featureInfoValue: string; fieldType: string }
+            ).featureInfoValue;
+          }
+        });
+
+        return {
+          geometry,
+          ...featureInfo,
+        };
+      });
 
       return {
         key: `${layerId}-datagrid`,
@@ -146,7 +159,7 @@ export class DataGridAPI {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
       if (geoviewLayerInstance.listOfLayerEntryConfig.length > 1) {
         const grouplayerKeys: string[] = [];
-        const grouplayerValues: { layerkey: string; layerValues: {}[]; fieldsType: Record<string, string> }[] = [];
+        const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
         const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
           listOfLayerEntryConfig.forEach((LayerEntryConfig) => {
             if (
@@ -166,14 +179,12 @@ export class DataGridAPI {
         grouplayerKeys.forEach((layerkey) => {
           // eslint-disable-next-line @typescript-eslint/ban-types
           let layerValues: {}[] = [];
-          let fieldsType: Record<string, string> = {};
           (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo(layerkey).then((arrayOfFeatureInfoEntries) => {
             if (arrayOfFeatureInfoEntries?.length > 0) {
               // set values
               count++;
-              layerValues = buildFeatureRows(arrayOfFeatureInfoEntries).featureRows;
-              fieldsType = buildFeatureRows(arrayOfFeatureInfoEntries).fieldsType;
-              grouplayerValues.push({ layerkey, layerValues, fieldsType });
+              layerValues = buildFeatureRows(arrayOfFeatureInfoEntries);
+              grouplayerValues.push({ layerkey, layerValues });
             }
             if (count === grouplayerKeys.length) {
               setGroupKeys(grouplayerKeys);
@@ -189,8 +200,7 @@ export class DataGridAPI {
             setGroupValues([
               {
                 layerkey: layerId,
-                layerValues: buildFeatureRows(arrayOfFeatureInfoEntries).featureRows,
-                fieldsType: buildFeatureRows(arrayOfFeatureInfoEntries).fieldsType,
+                layerValues: buildFeatureRows(arrayOfFeatureInfoEntries),
               },
             ]);
           }
@@ -217,7 +227,7 @@ export class DataGridAPI {
               className: `${layerId}-layer-datagrid-table`,
               style: { display: index === 0 ? 'block' : 'none' },
             },
-            createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues, groupValue.fieldsType))
+            createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues))
           );
         }
         return null;
