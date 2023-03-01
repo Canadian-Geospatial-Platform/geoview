@@ -661,12 +661,7 @@ export class GeoviewRenderer {
       const originalFeature = clusterSize ? feature!.get('features')[0] : feature;
       const originalGeometryType = getGeometryType(originalFeature);
 
-      // If style does not exist for the geometryType, create it.
-      if (layerEntryConfig.style![originalGeometryType] === undefined) {
-        const defaultStyle = this.createDefaultStyle(originalGeometryType, layerEntryConfig);
-        if (defaultStyle) layerEntryConfig.style![originalGeometryType] = defaultStyle[originalGeometryType];
-      }
-
+      // If style does not exist for the geometryType, getFeatureStyle will create it.
       return this.getFeatureStyle(originalFeature, layerEntryConfig);
     }
 

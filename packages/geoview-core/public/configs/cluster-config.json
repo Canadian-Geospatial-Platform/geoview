@@ -15,8 +15,7 @@
       {
         "geoviewLayerId": "flood_cluster",
         "geoviewLayerName": {
-          "en": "Cluster test",
-          "fr": ""
+          "en": "Cluster test"
         },
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
@@ -24,8 +23,7 @@
             "layerId": "lines.json",
             "source": {
               "dataAccessPath": {
-                "en": "./geojson/",
-                "fr": "./geojson/"
+                "en": "./geojson/"
               },
               "cluster": {
                 "enable": true,
@@ -37,8 +35,7 @@
             "layerId": "polygons.json",
             "source": {
               "dataAccessPath": {
-                "en": "./geojson/",
-                "fr": "./geojson/"
+                "en": "./geojson/"
               },
               "cluster": {
                 "enable": true

@@ -31,7 +31,7 @@ export class InlineDivConfigReader {
 
     let configObjStr = mapElement.getAttribute('data-config');
 
-    if (configObjStr && configObjStr !== '') {
+    if (configObjStr) {
       // Erase comments in the config file.
       configObjStr = configObjStr
         .split(/(?<!\\)'/gm)
@@ -51,12 +51,10 @@ export class InlineDivConfigReader {
       configObjStr = configObjStr.replace(/\\'/gm, "'");
 
       if (!isJsonString(configObjStr)) {
-        console.log(`- Map: ${mapId} - Invalid JSON configuration object, using default -`);
+        console.log(`- Map: ${mapId} - Invalid JSON configuration object in div, a fallback strategy will be used -`);
       } else {
         mapConfig = { ...JSON.parse(configObjStr) };
       }
-    } else {
-      console.log(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
     }
 
     return mapConfig;
