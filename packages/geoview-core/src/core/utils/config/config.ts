@@ -166,6 +166,10 @@ export class Config {
     if (urlParamsConfig && shared === 'true') mapFeaturesConfig = { ...urlParamsConfig };
 
     // NOTE: URL config has precedence on JSON file config that has precedence on inline config
+    if (!mapFeaturesConfig) {
+      console.log(`- Map: ${mapId} - Empty JSON configuration object, using default -`);
+    }
+
     return this.configValidation.validateMapConfigAgainstSchema(mapFeaturesConfig);
   }
 }

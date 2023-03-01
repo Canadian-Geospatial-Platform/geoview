@@ -24,7 +24,7 @@ export class JsonConfigReader {
     const configUrl = mapElement.getAttribute('data-config-url');
 
     // check config url
-    if (configUrl && configUrl !== '') {
+    if (configUrl) {
       try {
         const res = await fetch(configUrl);
 

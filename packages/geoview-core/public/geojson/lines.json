@@ -10,6 +10,20 @@
       "geometry": {
         "type": "LineString",
         "coordinates": [
+          [-79, 49],
+          [-78, 46]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Road_Number": 55,
+        "Province": "Quebec"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
           [-78, 49],
           [-76, 46],
           [-77, 49]
