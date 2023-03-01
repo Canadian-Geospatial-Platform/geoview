@@ -84,7 +84,11 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const [isOpen, setOpen] = useState<boolean>(false);
   const [currentZoom, setCurrentZoom] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
-    return { key: fieldName, value: feature.fieldInfo[fieldName]!.value };
+    return {
+      key: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
+      type: feature.fieldInfo[fieldName]!.dataType,
+      value: feature.fieldInfo[fieldName]!.value,
+    };
   });
   const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
   const { currentProjection } = api.map(mapId);
