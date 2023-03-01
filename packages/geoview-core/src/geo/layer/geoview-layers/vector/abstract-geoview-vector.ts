@@ -4,7 +4,7 @@ import { Cluster, Vector as VectorSource } from 'ol/source';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { VectorImage as VectorLayer } from 'ol/layer';
 import { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
+import { Geometry, Point } from 'ol/geom';
 import { all } from 'ol/loadingstrategy';
 import { ReadOptions } from 'ol/format/Feature';
 import BaseLayer from 'ol/layer/Base';
@@ -100,6 +100,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions: SourceOptions = { strategy: all },
     readOptions: ReadOptions = {}
   ): VectorSource<Geometry> {
+    // The line below uses var because a var declaration has a wider scope than a let declaration.
     var vectorSource: VectorSource<Geometry>;
     if (this.attributions.length !== 0) sourceOptions.attributions = this.attributions;
 
@@ -161,26 +162,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             distance: configSource.cluster!.distance,
             minDistance: configSource.cluster!.minDistance,
             geometryFunction: ((feature): Point | null => {
-              if (feature.getGeometry() instanceof Polygon) {
-                const geometry = feature.getGeometry() as Polygon;
-                return geometry.getInteriorPoint() !== undefined ? geometry.getInteriorPoint() : null;
+              const geometryExtent = feature.getGeometry()?.getExtent();
+              if (geometryExtent) {
+                const center = getCenter(geometryExtent) as Coordinate;
+                return new Point(center);
               }
-
-              if (feature.getGeometry() instanceof LineString) {
-                const geometry = feature.getGeometry() as LineString;
-                return geometry.getCoordinateAt(0.5) !== undefined ? new Point(geometry.getCoordinateAt(0.5)) : null;
-              }
-
-              if (feature.getGeometry() instanceof Point) {
-                return feature.getGeometry() !== undefined ? (feature.getGeometry() as Point) : null;
-              }
-
-              if (feature.getGeometry() instanceof MultiPoint) {
-                const geometry = feature.getGeometry() as MultiPoint;
-                const center = getCenter(geometry.getExtent() as Extent) as Coordinate;
-                return center !== undefined ? new Point(center) : null;
-              }
-
               return null;
             }) as (arg0: Feature<Geometry>) => Point,
           })
@@ -189,7 +175,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const { geoviewRenderer } = api.map(this.mapId);
 
         if (configSource.cluster!.enable) {
-          return geoviewRenderer.getClusterStyle(feature, layerEntryConfig);
+          return geoviewRenderer.getClusterStyle(layerEntryConfig, feature);
         }
 
         if ('style' in layerEntryConfig) {
@@ -449,9 +435,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /** ***************************************************************************************************************************
    * Toggle cluster status.
+   *
+   * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
    */
-  toggleCluster() {
-    const config = this.activeLayer as TypeVectorLayerEntryConfig;
+  toggleCluster(layerPathOrConfig: string | TypeLayerEntryConfig | null = this.activeLayer) {
+    const config = (
+      typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
+    ) as TypeVectorLayerEntryConfig;
     config.source!.cluster!.enable = !config.source!.cluster!.enable;
   }
 }

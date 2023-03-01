@@ -20,7 +20,7 @@ import {
   TypeLayerGroupEntryConfig,
   TypeVectorLayerEntryConfig,
   TypeImageLayerEntryConfig,
-  TypeStyleGeometry,
+  layerEntryIsVector,
 } from '../../map/map-schema-types';
 import {
   codedValueType,
@@ -85,10 +85,12 @@ export type TypeStyleRepresentation = {
    * break styles.
    */
   defaultCanvas?: HTMLCanvasElement | null;
+  /** The clusterCanvas property is used when the layer clustering is active (layerConfig.source.cluster.enable = true). */
+  clusterCanvas?: HTMLCanvasElement | null;
   /** The arrayOfCanvas property is used by unique value and class break styles. */
   arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
+export type TypeLayerStyles = { Point?: TypeStyleRepresentation; LineString?: TypeStyleRepresentation; Polygon?: TypeStyleRepresentation };
 
 /** ******************************************************************************************************************************
  * GeoViewAbstractLayers types
@@ -880,7 +882,7 @@ export abstract class AbstractGeoViewLayer {
         } as TypeLegend);
       else {
         const { geoviewRenderer } = api.map(this.mapId);
-        geoviewRenderer.getLegendStyles(layerConfig.style as TypeStyleConfig).then((legendStyle) => {
+        geoviewRenderer.getLegendStyles(layerConfig).then((legendStyle) => {
           const legend: TypeLegend = {
             type: this.type,
             layerPath: Layer.getLayerPath(layerConfig),
@@ -905,7 +907,7 @@ export abstract class AbstractGeoViewLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature<Geometry>[],
-    layerEntryConfig?: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig
+    layerEntryConfig: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<TypeArrayOfFeatureInfoEntries> {
     const promisedArrayOfFeatureInfo = new Promise<TypeArrayOfFeatureInfoEntries>((resolve) => {
       if (!features.length) resolve([]);
@@ -933,54 +935,57 @@ export abstract class AbstractGeoViewLayer {
         Promise.all(promisedAllCanvasFound).then((arrayOfFeatureInfo) => {
           arrayOfFeatureInfo.forEach(({ canvas, feature }) => {
             if (canvas) {
-              const clusterFeatures = feature.get('features');
-              if (clusterFeatures) {
-                this.formatFeatureInfoResult(clusterFeatures, layerEntryConfig).then((clusterFeatureInfo) => {
-                  clusterFeatureInfo.forEach((element) => {
-                    // eslint-disable-next-line no-param-reassign
-                    element.featureKey = featureKeyCounter++;
-                  });
-                  queryResult.push(...clusterFeatureInfo);
-                });
-              } else {
-                const featureInfoEntry: TypeFeatureInfoEntry = {
-                  // feature key for building the data-grid
-                  // eslint-disable-next-line no-param-reassign
-                  featureKey: featureKeyCounter++,
-                  geoviewLayerType: this.type,
-                  extent: feature.getGeometry()!.getExtent(),
-                  geometry: feature,
-                  featureIcon: canvas,
-                  fieldInfo: {},
-                };
-                const featureFields = feature.getKeys();
-                featureFields.forEach((fieldName) => {
-                  if (fieldName !== 'geometry') {
-                    if (outfields?.includes(fieldName)) {
-                      const fieldIndex = outfields.indexOf(fieldName);
-                      featureInfoEntry.fieldInfo[fieldName] = {
-                        fieldKey: fieldKeyCounter++,
-                        value: feature.get(fieldName),
-                        dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
-                        alias: aliasFields![fieldIndex],
-                        domain: this.getFieldDomain(fieldName, layerEntryConfig!),
-                      };
-                    } else if (!outfields) {
-                      featureInfoEntry.fieldInfo[fieldName] = {
-                        fieldKey: fieldKeyCounter++,
-                        value: feature.get(fieldName),
-                        dataType: this.getFieldType(fieldName, layerEntryConfig!),
-                        alias: fieldName,
-                        domain: this.getFieldDomain(fieldName, layerEntryConfig!),
-                      };
-                    }
+              const extent =
+                layerEntryIsVector(layerEntryConfig) && layerEntryConfig.source?.cluster?.enable
+                  ? (feature.get('features') as Array<Feature<Geometry>>).reduce((resultingExtent, featureToProcess) => {
+                      const newExtent = featureToProcess.getGeometry()!.getExtent();
+                      return [
+                        Math.min(resultingExtent[0], newExtent[0]),
+                        Math.min(resultingExtent[1], newExtent[1]),
+                        Math.max(resultingExtent[2], newExtent[2]),
+                        Math.max(resultingExtent[3], newExtent[3]),
+                      ];
+                    }, feature.getGeometry()!.getExtent())
+                  : feature.getGeometry()!.getExtent();
+
+              const featureInfoEntry: TypeFeatureInfoEntry = {
+                // feature key for building the data-grid
+                // eslint-disable-next-line no-param-reassign
+                featureKey: featureKeyCounter++,
+                geoviewLayerType: this.type,
+                extent,
+                geometry: feature,
+                featureIcon: canvas,
+                fieldInfo: {},
+              };
+
+              const featureFields = feature.getKeys();
+              featureFields.forEach((fieldName) => {
+                if (fieldName !== 'geometry') {
+                  if (outfields?.includes(fieldName)) {
+                    const fieldIndex = outfields.indexOf(fieldName);
+                    featureInfoEntry.fieldInfo[fieldName] = {
+                      fieldKey: fieldKeyCounter++,
+                      value: feature.get(fieldName),
+                      dataType: fieldTypes![fieldIndex] as 'string' | 'date' | 'number',
+                      alias: aliasFields![fieldIndex],
+                      domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                    };
+                  } else if (!outfields) {
+                    featureInfoEntry.fieldInfo[fieldName] = {
+                      fieldKey: fieldKeyCounter++,
+                      value: feature.get(fieldName),
+                      dataType: this.getFieldType(fieldName, layerEntryConfig!),
+                      alias: fieldName,
+                      domain: this.getFieldDomain(fieldName, layerEntryConfig!),
+                    };
                   }
-                });
-                queryResult.push(featureInfoEntry);
-              }
+                }
+              });
+              queryResult.push(featureInfoEntry);
+              resolve(queryResult);
             }
           });
-          resolve(queryResult);
         });
       }
     });

@@ -466,9 +466,9 @@
           "type": "string",
           "description": "Color for the text showing the number of points in a cluster"
         },
-        "color": {
-          "type": "string",
-          "description": "Color for the cluster symbol and clustered geometries"
+        "settings": {
+          "$ref": "#/definitions/TypeSimpleSymbolVectorConfig",
+          "description": "settings for the cluster symbol and clustered geometries"
         }
       }
     },

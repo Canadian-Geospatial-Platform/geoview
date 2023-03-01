@@ -13,7 +13,13 @@ import {
   CheckBoxOutIcon,
   CheckBoxIcon,
 } from '../../../ui';
-import { TypeVectorLayerEntryConfig, TypeStyleGeometry, TypeClassBreakStyleConfig, TypeUniqueValueStyleConfig } from '../../../app';
+import {
+  TypeClassBreakStyleConfig,
+  TypeStyleGeometry,
+  TypeStyleSettings,
+  TypeUniqueValueStyleConfig,
+  TypeVectorLayerEntryConfig,
+} from '../../types/cgpv-types';
 
 const sxClasses = {
   listIconLabel: {
@@ -39,9 +45,8 @@ const sxClasses = {
 export interface TypeLegendIconListProps {
   iconImages: string[];
   iconLabels: string[];
-  // geoviewLayerInstance: AbstractGeoViewVector;
   layerConfig?: TypeVectorLayerEntryConfig;
-  geometryKey?: string;
+  geometryKey?: TypeStyleGeometry;
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
   toggleMapVisible?: (layerConfig: TypeVectorLayerEntryConfig) => void;
@@ -77,31 +82,39 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   };
 
   useEffect(() => {
+    const getStyleArraySize = (geometryStyle: TypeStyleSettings): number => {
+      if (geometryStyle.styleType === 'uniqueValue') return (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length;
+      if (geometryStyle.styleType === 'classBreaks') return (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length;
+      return 1;
+    };
+
     if (isParentVisible !== initParentVisible) {
       setChecked(isParentVisible === true ? allChecked : allUnChecked);
       setCheckCount(isParentVisible === true ? allChecked.length : 0);
       setInitParentVisible(isParentVisible);
     }
     if (layerConfig && layerConfig.style !== undefined && geometryKey) {
-      const geometryStyle = layerConfig.style[geometryKey as TypeStyleGeometry];
+      const geometryStyle = layerConfig.style[geometryKey];
       if (geometryStyle !== undefined) {
+        const styleArraySize = getStyleArraySize(geometryStyle);
         isChecked.forEach((checked, i) => {
-          if (geometryStyle.styleType === 'classBreaks') {
-            if (i < (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length - 1) {
-              (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-            } else if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo.length === isChecked.length) {
-              (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-            } else {
-              (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
-            }
-          }
           if (geometryStyle.styleType === 'uniqueValue') {
-            if (i < (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length - 1) {
-              (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-            } else if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.length === isChecked.length) {
-              (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
-            } else {
+            if (i < styleArraySize) {
+              if ((geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible !== 'always')
+                (geometryStyle as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            } else if (i === styleArraySize && (geometryStyle as TypeUniqueValueStyleConfig).defaultSettings) {
               (geometryStyle as TypeUniqueValueStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
+            } else if (layerConfig.entryType === 'vector' && layerConfig.source?.cluster) {
+              layerConfig.source.cluster.enable = checked;
+            }
+          } else if (geometryStyle.styleType === 'classBreaks') {
+            if (i < styleArraySize) {
+              if ((geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible !== 'always')
+                (geometryStyle as TypeClassBreakStyleConfig).classBreakStyleInfo[i].visible = checked === true ? 'yes' : 'no';
+            } else if (i === styleArraySize && (geometryStyle as TypeClassBreakStyleConfig).defaultSettings) {
+              (geometryStyle as TypeClassBreakStyleConfig).defaultVisible = checked === true ? 'yes' : 'no';
+            } else if (layerConfig.entryType === 'vector' && layerConfig.source?.cluster) {
+              layerConfig.source.cluster.enable = checked;
             }
           }
         });
