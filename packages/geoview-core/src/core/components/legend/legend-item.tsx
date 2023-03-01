@@ -24,28 +24,25 @@ import {
   SliderBase,
   CheckIcon,
 } from '../../../ui';
+import { api } from '../../../app';
+import { LegendIconList } from './legend-icon-list';
+import { AbstractGeoViewLayer, isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import {
-  api,
-  AbstractGeoViewLayer,
   TypeClassBreakStyleConfig,
   TypeListOfLayerEntryConfig,
   TypeUniqueValueStyleConfig,
   TypeLayerEntryConfig,
   TypeDisplayLanguage,
-  MapContext,
-  AbstractGeoViewVector,
-  disableScrolling,
   TypeVectorLayerEntryConfig,
   TypeStyleGeometry,
-} from '../../../app';
-import { LegendIconList } from './legend-icon-list';
-import { isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
-import {
   TypeVectorSourceInitialConfig,
   isClassBreakStyleConfig,
   isUniqueValueStyleConfig,
   layerEntryIsGroupLayer,
 } from '../../../geo/map/map-schema-types';
+import { MapContext } from '../../app-start';
+import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import { disableScrolling } from '../../utils/utilities';
 
 const sxClasses = {
   expandableGroup: {
@@ -186,7 +183,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const [iconList, setIconList] = useState<string[] | null>(null);
   const [labelList, setLabelList] = useState<string[] | null>(null);
   const [geometryLayerConfig, setLayerConfig] = useState<TypeLayerEntryConfig | null>(null);
-  const [layerGeometryKey, setGeometryKey] = useState<string | undefined>(undefined);
+  const [layerGeometryKey, setGeometryKey] = useState<TypeStyleGeometry | undefined>(undefined);
   const [layerName, setLayerName] = useState<string>('');
   const [menuAnchorElement, setMenuAnchorElement] = useState<null | HTMLElement>(null);
   const [opacity, setOpacity] = useState<number>(1);
@@ -231,26 +228,29 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               if (iconImageList.length > 0) setIconImg(iconImageList[0]);
               if (iconImageList.length > 1) setIconImgStacked(iconImageList[1]);
               if (styleRepresentation.defaultCanvas) iconImageList.push(styleRepresentation.defaultCanvas.toDataURL());
+              if (styleRepresentation.clusterCanvas) iconImageList.push(styleRepresentation.clusterCanvas.toDataURL());
               setIconList(iconImageList);
               if (layerLegend.styleConfig) {
                 // let uniqueValueStyleInfoEntry = layerConfig.style[geometry].uniqueValueStyleInfo[i]
-                let geometryKey: string | null = null;
+                let geometryKey: TypeStyleGeometry | null = null;
                 Object.entries(layerLegend.styleConfig).forEach(([key, styleSettings]) => {
                   if (isClassBreakStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo.map((styleInfo) => {
                       return styleInfo.label;
                     });
                     if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeClassBreakStyleConfig).defaultLabel!);
+                    if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
                     setLabelList(iconLabelList);
-                    geometryKey = key;
+                    geometryKey = key as TypeStyleGeometry;
                   }
                   if (isUniqueValueStyleConfig(styleSettings)) {
                     const iconLabelList = (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo.map((styleInfo) => {
                       return styleInfo.label;
                     });
                     if (styleRepresentation.defaultCanvas) iconLabelList.push((styleSettings as TypeUniqueValueStyleConfig).defaultLabel!);
+                    if (styleRepresentation.clusterCanvas) iconLabelList.push('Cluster');
                     setLabelList(iconLabelList);
-                    geometryKey = key;
+                    geometryKey = key as TypeStyleGeometry;
                   }
                 });
 
@@ -551,7 +551,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 toggleParentVisible={() => setChecked(!isChecked)}
                 geoviewLayerInstance={geoviewLayerInstance as AbstractGeoViewVector}
                 layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
-                geometryKey={layerGeometryKey}
+                geometryKey={layerGeometryKey!}
               />
             )}
           </Box>

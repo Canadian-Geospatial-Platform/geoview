@@ -690,7 +690,7 @@ export class WMS extends AbstractGeoViewRaster {
                 const featureInfoResult = this.formatWmsFeatureInfoResult(featureMember, layerConfig);
                 featureInfoResult[0].extent = [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]];
                 resolve(featureInfoResult);
-          }
+              }
             });
           } else resolve([]);
         }
