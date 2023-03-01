@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 import { asArray, asString } from 'ol/color';
 import { Text, Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
-import { Geometry, LineString, Point, Polygon } from 'ol/geom';
+import { Geometry, LineString, MultiLineString, Point, MultiPoint, Polygon, MultiPolygon } from 'ol/geom';
 import Icon, { Options as IconOptions } from 'ol/style/Icon';
 import { Options as CircleOptions } from 'ol/style/Circle';
 import { Options as RegularShapeOptions } from 'ol/style/RegularShape';
@@ -44,6 +44,7 @@ import {
   TypeUniqueValueStyleConfig,
   TypeClassBreakStyleConfig,
   TypeBaseSourceVectorInitialConfig,
+  layerEntryIsVector,
 } from '../map/map-schema-types';
 import {
   binaryKeywors,
@@ -66,6 +67,20 @@ type TypeStyleProcessor = (
   filterEquation?: FilterNodeArrayType,
   legendFilterIsOff?: boolean
 ) => Style | undefined;
+
+/** ***************************************************************************************************************************
+ * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
+ * the same behaviour than a Point.
+ *
+ * @param {FeatureLike} feature Optional feature. This method does not use it, it is there to have a homogeneous signature.
+ *
+ * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
+ */
+const getGeometryType = (feature: FeatureLike): TypeStyleGeometry => {
+  const geometryType = feature.getGeometry()?.getType();
+  if (!geometryType) throw new Error('Features must have a geometry type.');
+  return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
+};
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -330,12 +345,12 @@ export class GeoviewRenderer {
    * of the calling methode.
    */
   private processArrayOfPointStyleConfig(
-    layerStyle: TypeLayerStyles,
+    layerStyles: TypeLayerStyles,
     arrayOfPointStyleConfig: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[],
     resolve: (value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void
   ) {
     // UniqueValue or ClassBreak point style configuration ============================================================
-    const styleArray: (HTMLCanvasElement | null)[] = layerStyle.Point!.arrayOfCanvas!;
+    const styleArray: (HTMLCanvasElement | null)[] = layerStyles.Point!.arrayOfCanvas!;
     const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
     for (let i = 0; i < arrayOfPointStyleConfig.length; i++) {
       if (isIconSymbolVectorConfig(arrayOfPointStyleConfig[i].settings))
@@ -353,7 +368,7 @@ export class GeoviewRenderer {
       listOfCanvasCreated.forEach((canvas) => {
         styleArray.push(canvas);
       });
-      resolve(layerStyle);
+      resolve(layerStyles);
     });
   }
 
@@ -361,133 +376,148 @@ export class GeoviewRenderer {
    * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the
    * style configuration.
    *
-   * @param {TypeLayerStyles} layerStyle The object that will receive the created canvas.
    * @param {TypeKindOfVectorSettings | undefined} defaultSettings The settings associated to simple styles or default style of
    * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
    * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[] | undefined} arrayOfPointStyleConfig The array of point style
    * configuration associated to unique value and class break styles. When this parameter is undefined, no arrayOfCanvas is
    * created.
-   * @param {(value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void} resolve The function that will resolve the promise
+   *
+   * @returns {Promise<TypeLayerStyles>} A promise that the layer styles are processed.
    */
   private getPointStyleSubRoutine(
-    resolve: (value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void,
-    layerStyle: TypeLayerStyles,
     defaultSettings?: TypeKindOfVectorSettings,
     arrayOfPointStyleConfig?: TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]
-  ) {
-    if (defaultSettings) {
-      if (isIconSymbolVectorConfig(defaultSettings)) {
-        // Icon symbol ======================================================================================
-        this.createIconCanvas(this.processSimplePoint(defaultSettings)).then((canvas) => {
-          layerStyle.Point!.defaultCanvas = canvas;
+  ): Promise<TypeLayerStyles> {
+    const promisedLayerStyle = new Promise<TypeLayerStyles>((resolve) => {
+      const layerStyles: TypeLayerStyles = { Point: {} };
+      if (defaultSettings) {
+        if (isIconSymbolVectorConfig(defaultSettings)) {
+          // Icon symbol ======================================================================================
+          this.createIconCanvas(this.processSimplePoint(defaultSettings)).then((canvas) => {
+            layerStyles.Point!.defaultCanvas = canvas;
+            if (arrayOfPointStyleConfig) {
+              layerStyles.Point!.arrayOfCanvas = [];
+              this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig, resolve);
+            } else resolve(layerStyles);
+          });
+        } else {
+          // Simple vector symbol =============================================================================
+          layerStyles.Point!.defaultCanvas = this.createPointCanvas(this.processSimplePoint(defaultSettings));
           if (arrayOfPointStyleConfig) {
-            layerStyle.Point!.arrayOfCanvas = [];
-            this.processArrayOfPointStyleConfig(layerStyle, arrayOfPointStyleConfig, resolve);
-          } else resolve(layerStyle);
-        });
+            layerStyles.Point!.arrayOfCanvas = [];
+            this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig, resolve);
+          } else resolve(layerStyles);
+        }
       } else {
-        // Simple vector symbol =============================================================================
-        layerStyle.Point!.defaultCanvas = this.createPointCanvas(this.processSimplePoint(defaultSettings));
-        if (arrayOfPointStyleConfig) {
-          layerStyle.Point!.arrayOfCanvas = [];
-          this.processArrayOfPointStyleConfig(layerStyle, arrayOfPointStyleConfig, resolve);
-        } else resolve(layerStyle);
+        layerStyles.Point!.arrayOfCanvas = [];
+        this.processArrayOfPointStyleConfig(layerStyles, arrayOfPointStyleConfig!, resolve);
       }
-    } else {
-      layerStyle.Point!.arrayOfCanvas = [];
-      this.processArrayOfPointStyleConfig(layerStyle, arrayOfPointStyleConfig!, resolve);
-    }
+    });
+    return promisedLayerStyle;
   }
 
   /** ***************************************************************************************************************************
    * This method gets the legend styles used by the the layer as specified by the style configuration.
    *
-   * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
+   * @param {TypeBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerEntryConfig The layer configuration.
    *
-   * @returns {Promise<TypeLayerStyles>} A promise that the layer style is processed.
+   * @returns {Promise<TypeLayerStyles>} A promise that the layer styles are processed.
    */
-  getLegendStyles(styleConfig: TypeStyleConfig): Promise<TypeLayerStyles> {
+  getLegendStyles(
+    layerEntryConfig: TypeBaseLayerEntryConfig & {
+      style: TypeStyleConfig;
+    }
+  ): Promise<TypeLayerStyles> {
     const promisedLayerStyle = new Promise<TypeLayerStyles>((resolve) => {
-      const layerStyle: TypeLayerStyles = {};
-      if (!styleConfig) resolve(layerStyle);
+      const styleConfig: TypeStyleConfig = layerEntryConfig.style;
+      if (!styleConfig) resolve({});
+
+      const clusterCanvas =
+        layerEntryIsVector(layerEntryConfig) && (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
+          ? this.createPointCanvas(this.getClusterStyle(layerEntryConfig))
+          : undefined;
 
       if (styleConfig.Point) {
         // ======================================================================================================================
         // Point style configuration ============================================================================================
-        layerStyle.Point = {};
         if (isSimpleStyleConfig(styleConfig.Point)) {
-          this.getPointStyleSubRoutine(resolve, layerStyle, styleConfig.Point.settings);
+          this.getPointStyleSubRoutine(styleConfig.Point.settings).then((layerStyles) => {
+            layerStyles.Point!.clusterCanvas = clusterCanvas;
+            resolve(layerStyles);
+          });
         } else if (isUniqueValueStyleConfig(styleConfig.Point)) {
           this.getPointStyleSubRoutine(
-            resolve,
-            layerStyle,
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeUniqueValueStyleConfig).uniqueValueStyleInfo
-          );
+          ).then((layerStyles) => {
+            layerStyles.Point!.clusterCanvas = clusterCanvas;
+            resolve(layerStyles);
+          });
         } else if (isClassBreakStyleConfig(styleConfig.Point)) {
           this.getPointStyleSubRoutine(
-            resolve,
-            layerStyle,
             styleConfig.Point.defaultSettings,
             (styleConfig.Point as TypeClassBreakStyleConfig).classBreakStyleInfo
-          );
+          ).then((layerStyles) => {
+            layerStyles.Point!.clusterCanvas = clusterCanvas;
+            resolve(layerStyles);
+          });
         }
       }
 
       if (styleConfig.LineString) {
         // ======================================================================================================================
         // LineString style configuration =======================================================================================
-        layerStyle.LineString = {};
+        const layerStyles: TypeLayerStyles = { LineString: {} };
         if (isSimpleStyleConfig(styleConfig.LineString)) {
-          layerStyle.LineString.defaultCanvas = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
+          layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(this.processSimpleLineString(styleConfig.LineString));
         } else if (isUniqueValueStyleConfig(styleConfig.LineString)) {
           if (styleConfig.LineString.defaultSettings)
-            layerStyle.LineString.defaultCanvas = this.createLineStringCanvas(
+            layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(
               this.processSimpleLineString(styleConfig.LineString.defaultSettings)
             );
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.LineString.uniqueValueStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
           });
-          layerStyle.LineString.arrayOfCanvas = styleArray;
+          layerStyles.LineString!.arrayOfCanvas = styleArray;
         } else if (isClassBreakStyleConfig(styleConfig.LineString)) {
           if (styleConfig.LineString.defaultSettings)
-            layerStyle.LineString.defaultCanvas = this.createLineStringCanvas(
+            layerStyles.LineString!.defaultCanvas = this.createLineStringCanvas(
               this.processSimpleLineString(styleConfig.LineString.defaultSettings)
             );
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.LineString.classBreakStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createLineStringCanvas(this.processSimpleLineString(styleInfo.settings)));
           });
-          layerStyle.LineString.arrayOfCanvas = styleArray;
+          layerStyles.LineString!.arrayOfCanvas = styleArray;
         }
-        resolve(layerStyle);
+        resolve(layerStyles);
       }
 
       if (styleConfig.Polygon) {
         // ======================================================================================================================
         // Polygon style configuration ==========================================================================================
-        layerStyle.Polygon = {};
+        const layerStyles: TypeLayerStyles = { Polygon: {} };
         if (isSimpleStyleConfig(styleConfig.Polygon)) {
-          layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
+          layerStyles.Polygon!.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon));
         } else if (isUniqueValueStyleConfig(styleConfig.Polygon)) {
           if (styleConfig.Polygon.defaultSettings)
-            layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
+            layerStyles.Polygon!.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.Polygon.uniqueValueStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
           });
-          layerStyle.Polygon.arrayOfCanvas = styleArray;
+          layerStyles.Polygon!.arrayOfCanvas = styleArray;
         } else if (isClassBreakStyleConfig(styleConfig.Polygon)) {
           if (styleConfig.Polygon.defaultSettings)
-            layerStyle.Polygon.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
+            layerStyles.Polygon!.defaultCanvas = this.createPolygonCanvas(this.processSimplePolygon(styleConfig.Polygon.defaultSettings));
           const styleArray: HTMLCanvasElement[] = [];
           styleConfig.Polygon.classBreakStyleInfo.forEach((styleInfo) => {
             styleArray.push(this.createPolygonCanvas(this.processSimplePolygon(styleInfo.settings)));
           });
-          layerStyle.Polygon.arrayOfCanvas = styleArray;
+          layerStyles.Polygon!.arrayOfCanvas = styleArray;
         }
-        resolve(layerStyle);
+        resolve(layerStyles);
       }
     });
     return promisedLayerStyle;
@@ -507,8 +537,7 @@ export class GeoviewRenderer {
     feature: FeatureLike,
     layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Style | undefined {
-    let geometryType = feature.getGeometry()?.getType() as TypeStyleGeometry;
-    geometryType = geometryType.startsWith('Multi') ? (geometryType.slice(5) as TypeStyleGeometry) : geometryType;
+    const geometryType = getGeometryType(feature);
     // If style does not exist for the geometryType, create it.
     let { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
     if (style === undefined || style[geometryType] === undefined)
@@ -542,29 +571,30 @@ export class GeoviewRenderer {
     layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig
   ): Promise<HTMLCanvasElement | undefined> {
     const promisedCanvas = new Promise<HTMLCanvasElement | undefined>((resolve) => {
-      let geometryType = feature.getGeometry()?.getType() as TypeStyleGeometry;
-      geometryType = geometryType.startsWith('Multi') ? (geometryType.slice(5) as TypeStyleGeometry) : geometryType;
-      const { style } = layerEntryConfig as TypeVectorLayerEntryConfig;
+      const geometryType = getGeometryType(feature);
+      const { style, source } = layerEntryConfig as TypeVectorLayerEntryConfig;
       // Get the style accordingly to its type and geometry.
       if (style![geometryType] !== undefined) {
         const styleSettings = style![geometryType]!;
         const { styleType } = styleSettings;
-        const featureStyle = this.processStyle[styleType][geometryType].call(
-          this,
-          styleSettings,
-          feature,
-          layerEntryConfig.gvLayer!.get('filterEquation'),
-          layerEntryConfig.gvLayer!.get('legendFilterIsOff')
-        );
+        const featureStyle = source?.cluster?.enable
+          ? this.getClusterStyle(layerEntryConfig as TypeVectorLayerEntryConfig, feature)
+          : this.processStyle[styleType][geometryType].call(
+              this,
+              styleSettings,
+              feature,
+              layerEntryConfig.gvLayer!.get('filterEquation'),
+              layerEntryConfig.gvLayer!.get('legendFilterIsOff')
+            );
         if (featureStyle) {
-          feature.setStyle(featureStyle);
           if (geometryType === 'Point') {
             if (
-              (styleType === 'simple' && (styleSettings as TypeSimpleStyleConfig).settings.type === 'simpleSymbol') ||
-              (styleType === 'uniqueValue' &&
-                (styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings.type === 'simpleSymbol') ||
-              (styleType === 'classBreaks' &&
-                (styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings.type === 'simpleSymbol')
+              (isSimpleStyleConfig(styleSettings) && isSimpleSymbolVectorConfig((styleSettings as TypeSimpleStyleConfig).settings)) ||
+              (isUniqueValueStyleConfig(styleSettings) &&
+                isSimpleSymbolVectorConfig((styleSettings as TypeUniqueValueStyleConfig).uniqueValueStyleInfo[0].settings)) ||
+              (isClassBreakStyleConfig(styleSettings) &&
+                isSimpleSymbolVectorConfig((styleSettings as TypeClassBreakStyleConfig).classBreakStyleInfo[0].settings)) ||
+              (layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).cluster?.enable
             )
               resolve(this.createPointCanvas(featureStyle));
             else
@@ -583,138 +613,64 @@ export class GeoviewRenderer {
    * This method gets the style of the cluster feature using the layer entry config. If the style does not exist, create it using
    * the default style strategy.
    *
-   * @param {FeatureLike} feature The feature that need its style to be defined.
-   * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
-   * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
+   * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style
+   * configuration for the feature. If style does not exist for the geometryType, create it.
+   * @param {FeatureLike} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
+   * for the legend.
    *
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
-  getClusterStyle(feature: FeatureLike, layerEntryConfig: TypeVectorLayerEntryConfig): Style | undefined {
-    // If style does not exist for the geometryType, create it.
+  getClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: FeatureLike): Style | undefined {
     const configSource = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
-    const textColor = configSource.cluster?.textColor !== undefined ? configSource.cluster?.textColor : '';
-    let { style } = layerEntryConfig;
+    if (!configSource.cluster?.textColor) configSource.cluster!.textColor = '';
 
-    // If settings exist for Geometry styles, use that stroke color, prioritizing point.
-    if (style?.Point !== undefined) {
-      this.setClusterColor(layerEntryConfig, style!.Point);
-    }
+    const clusterSize = feature?.get('features')
+      ? (feature!.get('features') as Array<Feature<Geometry>>).reduce((numberOfFeatures, featureToTest) => {
+          const geometryType = featureToTest.getGeometry()?.getType();
+          if (geometryType === 'MultiPoint') return numberOfFeatures + (featureToTest.getGeometry() as MultiPoint).getPoints().length;
+          if (geometryType === 'MultiLineString')
+            return numberOfFeatures + (featureToTest.getGeometry() as MultiLineString).getLineStrings().length;
+          if (geometryType === 'MultiPolygon') return numberOfFeatures + (featureToTest.getGeometry() as MultiPolygon).getPolygons().length;
+          return numberOfFeatures + 1;
+        }, 0)
+      : 0;
 
-    if (style?.Polygon !== undefined) {
-      this.setClusterColor(layerEntryConfig, style!.Polygon);
-    }
-
-    if (style?.LineString !== undefined) {
-      this.setClusterColor(layerEntryConfig, style!.LineString);
-    }
-
-    if (style === undefined || style.Point === undefined) {
-      style = this.createDefaultClusterStyle(layerEntryConfig);
-    }
-
-    // Get the cluster point style if the feature is a cluster.
-    if (style.Point !== undefined && feature.get('features').length > 1) {
-      const styleSettings = (isSimpleStyleConfig(style.Point) ? style.Point.settings : style.Point) as TypeSimpleSymbolVectorConfig;
-
-      if (styleSettings?.color === undefined && styleSettings.stroke?.color === undefined) {
-        styleSettings.color =
-          layerEntryConfig.source!.cluster?.color !== undefined
-            ? asString(setAlphaColor(asArray(layerEntryConfig.source!.cluster!.color), 0.45))
-            : this.getDefaultColorAndIncrementIndex(0.45);
+    // Get the cluster point style to use when the features are clustered.
+    if (feature === undefined || clusterSize > 1) {
+      const styleSettings = layerEntryConfig.source!.cluster!.settings!;
+      if (!styleSettings.color || !styleSettings.stroke?.color) {
+        const color = this.getDefaultColor(0.45);
+        const strokeColor = this.getDefaultColorAndIncrementIndex(1);
+        if (!styleSettings.color) styleSettings.color = color;
+        if (!styleSettings.stroke) styleSettings.stroke = {};
+        if (!styleSettings.stroke.color) styleSettings.stroke.color = strokeColor;
       }
 
-      this.setClusterColor(layerEntryConfig, styleSettings);
-      const pointStyle = this.processClusterSymbol(styleSettings, feature, textColor);
-      return pointStyle;
+      const pointStyle = this.processClusterSymbol(layerEntryConfig, feature);
+      if (pointStyle?.getText().getText() !== '1') return pointStyle;
+      let styleFound: Style | undefined;
+      const theUniqueVisibleFeature = (feature!.get('features') as Array<Feature<Geometry>>).find((featureToTest) => {
+        styleFound = this.getFeatureStyle(featureToTest, layerEntryConfig);
+        return styleFound;
+      });
+      return styleFound;
     }
 
     // When there is only a single feature left, use that features original geometry
-    if (feature.get('features').length === 1) {
-      const originalFeature = feature.get('features')[0];
+    if (clusterSize < 2) {
+      const originalFeature = clusterSize ? feature!.get('features')[0] : feature;
+      const originalGeometryType = getGeometryType(originalFeature);
 
       // If style does not exist for the geometryType, create it.
-      if (originalFeature.getGeometry() instanceof LineString && style!.LineString === undefined) {
-        const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
-        let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
-        label = label !== undefined ? label : styleId;
-        const settings: TypeLineStringVectorConfig = {
-          type: 'lineString',
-          stroke: {
-            color: layerEntryConfig.source!.cluster!.color,
-          },
-        };
-        const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-        layerEntryConfig.style!.LineString = styleSettings;
-      }
-
-      if (originalFeature.getGeometry() instanceof Polygon && style!.Polygon === undefined) {
-        const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
-        let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
-        label = label !== undefined ? label : styleId;
-        const strokeColor = layerEntryConfig.source!.cluster?.color;
-        const fillColor = asString(setAlphaColor(asArray(strokeColor!), 0.25));
-        const settings: TypePolygonVectorConfig = {
-          type: 'filledPolygon',
-          color: fillColor,
-          stroke: { color: strokeColor },
-          fillStyle: 'solid',
-        };
-        const styleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-        layerEntryConfig.style!.Polygon = styleSettings;
+      if (layerEntryConfig.style![originalGeometryType] === undefined) {
+        const defaultStyle = this.createDefaultStyle(originalGeometryType, layerEntryConfig);
+        if (defaultStyle) layerEntryConfig.style![originalGeometryType] = defaultStyle[originalGeometryType];
       }
 
       return this.getFeatureStyle(originalFeature, layerEntryConfig);
     }
 
-    if ('style' in layerEntryConfig) {
-      return this.getFeatureStyle(feature, layerEntryConfig);
-    }
-
     return undefined;
-  }
-
-  /** ***************************************************************************************************************************
-   * Create a default style to use with a cluster feature that has no style configuration.
-   *
-   * @param { TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style configuration for the
-   * feature. If style does not exist for the geometryType, create it.
-   *
-   * @returns {TypeStyleConfig} The style applied to the feature.
-   */
-  private createDefaultClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig): TypeStyleConfig {
-    if (layerEntryConfig.style === undefined) layerEntryConfig.style = {};
-    const styleId = `${this.mapId}/${Layer.getLayerPath(layerEntryConfig)}`;
-    let label = getLocalizedValue(layerEntryConfig.layerName, this.mapId);
-    label = label !== undefined ? label : styleId;
-    const layerColor = layerEntryConfig.source?.cluster?.color ? layerEntryConfig.source?.cluster?.color : undefined;
-    const settings: TypeSimpleSymbolVectorConfig = {
-      type: 'simpleSymbol',
-      color: layerColor ? asString(setAlphaColor(asArray(layerColor!), 0.45)) : this.getDefaultColor(0.45),
-      stroke: {
-        color: layerColor || this.getDefaultColorAndIncrementIndex(1),
-        lineStyle: 'solid',
-        width: 1,
-      },
-      symbol: 'circle',
-    };
-    if (layerEntryConfig.source!.cluster!.color === undefined) layerEntryConfig.source!.cluster!.color = settings.stroke!.color;
-    const clusterStyleSettings: TypeSimpleStyleConfig = { styleId, styleType: 'simple', label, settings };
-    layerEntryConfig.style.Point = clusterStyleSettings;
-    return layerEntryConfig.style;
-  }
-
-  /** ***************************************************************************************************************************
-   * Set the color in the layer cluster settings for clustered elements.
-   *
-   * @param { TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config for the layer.
-   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the circle Style creation.
-   *
-   */
-  private setClusterColor(layerEntryConfig: TypeVectorLayerEntryConfig, styleSettings: TypeStyleSettings | TypeKindOfVectorSettings) {
-    const simpleSettings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeSimpleSymbolVectorConfig;
-    if (layerEntryConfig.source!.cluster!.color === undefined && simpleSettings.stroke?.color !== undefined) {
-      layerEntryConfig.source!.cluster!.color = simpleSettings.stroke!.color;
-    }
   }
 
   /** ***************************************************************************************************************************
@@ -947,27 +903,43 @@ export class GeoviewRenderer {
   /** ***************************************************************************************************************************
    * Process a cluster circle symbol using the settings.
    *
-   * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the circle Style creation.
-   * @param {FeatureLike} feature The feature that need its style to be defined.
-   * @param {string} textColor The color to use for the cluster feature count.
+   * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
+   * @param {FeatureLike} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
+   * for the legend.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
-  private processClusterSymbol(
-    styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
-    feature: FeatureLike,
-    textColor?: string
-  ): Style | undefined {
-    const settings = (isSimpleStyleConfig(styleSettings) ? styleSettings.settings : styleSettings) as TypeSimpleSymbolVectorConfig;
-    const fillOptions: FillOptions = { color: settings.color };
-    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-    const circleOptions: CircleOptions = { radius: settings.size !== undefined ? settings.size + 10 : 14 };
+  private processClusterSymbol(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: FeatureLike): Style | undefined {
+    const { settings } = layerEntryConfig.source!.cluster!;
+    const fillOptions: FillOptions = { color: settings!.color };
+    const strokeOptions: StrokeOptions = this.createStrokeOptions(settings!);
+    const circleOptions: CircleOptions = { radius: settings!.size !== undefined ? settings!.size + 10 : 14 };
     circleOptions.stroke = new Stroke(strokeOptions);
     circleOptions.fill = new Fill(fillOptions);
-    if (settings.offset !== undefined) circleOptions.displacement = settings.offset;
-    if (settings.rotation !== undefined) circleOptions.rotation = settings.rotation;
-    const textOptions: TextOptions = { text: feature.get('features').length.toString(), font: '12px sans-serif' };
-    const textFillOptions: FillOptions = { color: textColor !== '' ? textColor : '#fff' };
+    if (settings!.offset !== undefined) circleOptions.displacement = settings!.offset;
+    if (settings!.rotation !== undefined) circleOptions.rotation = settings!.rotation;
+    const text = feature
+      ? (feature.get('features') as Array<Feature<Geometry>>)
+          .reduce((numberOfVisibleFeature, featureToTest) => {
+            if (this.getFeatureStyle(featureToTest, layerEntryConfig)) {
+              const geometryType = featureToTest.getGeometry()?.getType();
+              let numberOfEmbededFeatures = 1;
+              if (geometryType === 'MultiPoint') numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiPoint).getPoints().length;
+              else if (geometryType === 'MultiLineString')
+                numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiLineString).getLineStrings().length;
+              else if (geometryType === 'MultiPolygon')
+                numberOfEmbededFeatures = (featureToTest.getGeometry() as MultiPolygon).getPolygons().length;
+              return numberOfVisibleFeature + numberOfEmbededFeatures;
+            }
+            return numberOfVisibleFeature;
+          }, 0)
+          .toString()
+      : 'num';
+    if (text === '0') return undefined;
+    const textOptions: TextOptions = { text, font: '12px sans-serif' };
+    const textFillOptions: FillOptions = {
+      color: layerEntryConfig.source?.cluster?.textColor !== '' ? layerEntryConfig.source!.cluster!.textColor : '#fff',
+    };
     textOptions.fill = new Fill(textFillOptions);
     const textStrokeOptions: StrokeOptions = { color: '#000', width: 2 };
     textOptions.stroke = new Stroke(textStrokeOptions);

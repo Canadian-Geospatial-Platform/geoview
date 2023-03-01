@@ -26,6 +26,7 @@ export function LegendItem({ mapId }: Props): JSX.Element {
     if (Object.keys(api.map(mapId).layer.geoviewLayers).includes(addGeoviewLayerId)) {
       setMapLayers((orderedLayers) => [addGeoviewLayerId, ...orderedLayers]);
     } else {
+      // eslint-disable-next-line no-console
       console.error('geoviewLayerId is not in the layers list');
     }
   };

@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { EventTypes } from 'ol/Observable';
 
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
@@ -298,6 +297,11 @@ export class Layer {
       clearTimeout(api.maps[this.mapId].layerLoadedTimeoutId[partialLayerPath]);
       this.geoviewLayers[partialLayerPath].gvLayers!.dispose();
       delete this.geoviewLayers[partialLayerPath];
+      const { mapFeaturesConfig } = api.map(this.mapId);
+      if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
+        mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
+          (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== partialLayerPath
+        );
     }
   };
 

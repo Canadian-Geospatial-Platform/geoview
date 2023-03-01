@@ -64,8 +64,8 @@ export type TypeSourceVectorClusterConfig = {
   minDistance?: number;
   /** Color for the text showing the number of points in a cluster */
   textColor?: string;
-  /** Color for the cluster symbol and clustered geometries */
-  color?: string;
+  /** settings for the cluster symbol and clustered geometries */
+  settings?: TypeSimpleSymbolVectorConfig;
 };
 
 /** ******************************************************************************************************************************
