@@ -581,7 +581,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const layerEntryConfig = (
       typeof layerPathOrConfig === 'string' ? this.getLayerConfig(layerPathOrConfig) : layerPathOrConfig
     ) as TypeEsriDynamicLayerEntryConfig;
-    if (layerEntryConfig) {
+    if ((layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()) {
       const source = (layerEntryConfig.gvLayer as ImageLayer<ImageArcGISRest>).getSource()!;
       source.updateParams({ layerDefs: `{"${layerEntryConfig.layerId}": "${filter || this.getViewFilter(layerEntryConfig)}"}` });
       layerEntryConfig.gvLayer!.set('legendFilterIsOff', !!filter);
