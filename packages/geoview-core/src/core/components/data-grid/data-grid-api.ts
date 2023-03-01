@@ -44,7 +44,6 @@ export class DataGridAPI {
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = layerDataGridProps;
 
-    // const [values, setValues] = useState<{}[]>([]);
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[]; fieldsType: Record<string, string> }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
 
@@ -117,7 +116,6 @@ export class DataGridAPI {
       const firstValue = layerValues[0];
       // set columns
       const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry');
-      // const fieldsType = layerValues[0].fieldType;
       const columns = columnHeader.map((header) => {
         return {
           field: header,
@@ -201,37 +199,29 @@ export class DataGridAPI {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [layerId]);
 
-    return createElement(
-      'div',
-      {},
-      [
-        groupKeys.length > 1 &&
-          createElement(
-            'select',
-            { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
-            groupKeys.map((layerkey) => {
-              return createElement('option', { key: layerkey }, [layerkey]);
-            })
-          ),
-        groupValues.map((groupValue, index) => {
-          if (groupValue.layerValues.length > 0) {
-            return createElement(
-              'div',
-              {
-                key: `${layerId}-layer-datagrid-table-${index}`,
-                className: `${layerId}-layer-datagrid-table`,
-                style: { display: index === 0 ? 'block' : 'none' },
-              },
-              createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues, groupValue.fieldsType))
-            );
-          }
-          return null;
-        }),
-      ]
-      // values.length > 0 &&
-      //   createElement('div', { id: `${layerId}-layer-datagrid-table` }, [
-      //     createElement(LayerDataGrid, setLayerDataGridProps(layerId, values)),
-      //   ]),
-    );
+    return createElement('div', {}, [
+      groupKeys.length > 1 &&
+        createElement(
+          'select',
+          { id: `${layerId}-groupLayerSelection`, style: { fontSize: '1em', margin: '1em', padding: '0.3em' } },
+          groupKeys.map((layerkey) => {
+            return createElement('option', { key: layerkey }, [layerkey]);
+          })
+        ),
+      groupValues.map((groupValue, index) => {
+        if (groupValue.layerValues.length > 0) {
+          return createElement(
+            'div',
+            {
+              key: `${layerId}-layer-datagrid-table-${index}`,
+              className: `${layerId}-layer-datagrid-table`,
+              style: { display: index === 0 ? 'block' : 'none' },
+            },
+            createElement(LayerDataGrid, setLayerDataGridProps(groupKeys[index], groupValue.layerValues, groupValue.fieldsType))
+          );
+        }
+        return null;
+      }),
+    ]);
   };
 }
