@@ -213,20 +213,13 @@ export class WFS extends AbstractGeoViewVector {
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
 
-        if (layerEntryConfig.initialSettings?.bounds)
-          layerEntryConfig.initialSettings.bounds = transformExtent(
-            layerEntryConfig.initialSettings.bounds,
-            'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
-          );
-        else {
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          if (metadataLayerList[i]['ows:WGS84BoundingBox']) {
-            const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
-            const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
-            const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-            layerEntryConfig.initialSettings.bounds = transformExtent(bounds, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`);
-          }
+        if (!layerEntryConfig.initialSettings?.bounds && metadataLayerList[i]['ows:WGS84BoundingBox']) {
+          const lowerCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'] as string).split(' ');
+          const upperCorner = (metadataLayerList[i]['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'] as string).split(' ');
+          const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
+          layerEntryConfig.initialSettings = {
+            bounds: transformExtent(bounds, 'EPSG:4326', `EPSG:${api.map(this.mapId).currentProjection}`),
+          };
         }
 
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);

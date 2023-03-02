@@ -280,19 +280,9 @@ export function commonProcessInitialSettings(
       `EPSG:${api.map(this.mapId).currentProjection}`
     );
 
-  if (layerEntryConfig.initialSettings?.bounds)
-    layerEntryConfig.initialSettings.bounds = transformExtent(
-      layerEntryConfig.initialSettings.bounds,
-      'EPSG:4326',
-      `EPSG:${api.map(this.mapId).currentProjection}`
-    );
-  else {
+  if (!layerEntryConfig.initialSettings?.bounds) {
     const layerExtent = [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
-    layerEntryConfig.initialSettings.bounds = transformExtent(
-      layerExtent,
-      `EPSG:${extent.spatialReference.wkid as number}`,
-      `EPSG:${api.map(this.mapId).currentProjection}`
-    );
+    layerEntryConfig.initialSettings = { bounds: layerExtent };
   }
 }
 
