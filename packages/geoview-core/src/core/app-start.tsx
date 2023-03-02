@@ -33,11 +33,6 @@ type TypeMapContext = {
 };
 
 /**
- * Type used for theme
- */
-type ThemeOptions = 'light' | 'dark' | undefined;
-
-/**
  * interface used when passing map features configuration
  */
 interface AppStartProps {
@@ -67,14 +62,10 @@ function AppStart(props: AppStartProps): JSX.Element {
     // eslint-disable-next-line no-new
     new MapViewer(mapFeaturesConfig, i18nInstance);
 
-    // set theme value
-    const mapElem = document.getElementById(mapContextValue.mapId);
-    const theme = (mapElem?.getAttribute('data-theme') || mapFeaturesConfig.theme) as ThemeOptions;
-
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(theme)}>
+          <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
             <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
           </ThemeProvider>
         </MapContext.Provider>

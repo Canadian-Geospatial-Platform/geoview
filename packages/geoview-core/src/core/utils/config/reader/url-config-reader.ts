@@ -110,7 +110,7 @@ export class URLmapConfigReader {
     const urlParams = this.getMapPropsFromUrlParams(locationSearch);
 
     // if user provided any url parameters update
-    if (Object.keys(urlParams).length && !urlParams.geoms && !urlParams.theme) {
+    if (Object.keys(urlParams).length && !urlParams.geoms) {
       // Ex: ?p=3857&z=4&c=40,-100&l=en&t=dark&b={basemapId:transport,shaded:false,labeled:true}&i=dynamic&cp=details-panel,layers-panel&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
       // update the language if provided from the map configuration.
