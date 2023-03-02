@@ -689,8 +689,7 @@ export abstract class AbstractGeoViewLayer {
     if (layerConfig) {
       if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
       else processGroupLayerBounds([layerConfig]);
-      if (projectionCode && bounds)
-        return transformExtent(bounds, `EPSG:${api.map(this.mapId).currentProjection}`, `EPSG:${projectionCode}`);
+      if (projectionCode && bounds) return transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
     return bounds;
   }
