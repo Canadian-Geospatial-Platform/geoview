@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 
 import './translation/i18n';
 import i18n from 'i18next';
@@ -33,6 +33,11 @@ type TypeMapContext = {
 };
 
 /**
+ * Type used for theme
+ */
+type ThemeOptions = 'light' | 'dark' | undefined;
+
+/**
  * interface used when passing map features configuration
  */
 interface AppStartProps {
@@ -62,10 +67,14 @@ function AppStart(props: AppStartProps): JSX.Element {
     // eslint-disable-next-line no-new
     new MapViewer(mapFeaturesConfig, i18nInstance);
 
+    // set theme value
+    const mapElem = document.getElementById(mapContextValue.mapId);
+    const theme = (mapElem?.getAttribute('data-theme') || mapFeaturesConfig.theme) as ThemeOptions;
+
     return (
       <I18nextProvider i18n={i18nInstance}>
         <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(mapFeaturesConfig.theme)}>
+          <ThemeProvider theme={getTheme(theme)}>
             <Shell shellId={mapFeaturesConfig.mapId as string} mapFeaturesConfig={mapFeaturesConfig} />
           </ThemeProvider>
         </MapContext.Provider>

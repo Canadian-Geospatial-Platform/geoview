@@ -111,3 +111,13 @@ td {
     margin-bottom: auto;
     margin-left: 20px;
 }
+
+.theme-selector {
+  padding: 1rem 0;
+}
+
+.theme-selector > select {
+  width: 120px;
+  height: 30px;
+  font-size: 1rem;
+}
