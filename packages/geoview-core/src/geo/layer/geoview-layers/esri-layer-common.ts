@@ -190,7 +190,9 @@ export function commonProcessTemporalDimension(
   layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
-    layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromESRI(Cast<TimeDimensionESRI>(esriTimeDimension));
+    this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromESRI(
+      Cast<TimeDimensionESRI>(esriTimeDimension)
+    );
   }
 }
 
