@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataGrid,
@@ -21,6 +22,9 @@ import {
   GridToolbarDensitySelector,
   GridPrintExportMenuItem,
   GridPrintExportOptions,
+  gridVisibleSortedRowIdsSelector,
+  useGridApiContext,
+  GridRowId,
 } from '@mui/x-data-grid';
 
 import { ButtonProps } from '@mui/material/Button';
@@ -92,9 +96,9 @@ const sxClasses = {
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { rowId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
-  const getJson = () => {
-    const geoData = rows.map((row) => {
-      const { geometry, ...featureInfo } = row;
+  const getJson = (gridRowId: GridRowId[]) => {
+    const geoData = gridRowId.map((rowId) => {
+      const { geometry, ...featureInfo } = rows[rowId as number];
       delete featureInfo.featureKey;
       return {
         type: 'Feature',
@@ -134,9 +138,10 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
   function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     const { hideMenu } = props;
+    const apiRef = useGridApiContext();
 
     const onMenuItemClick = () => {
-      const jsonString = getJson();
+      const jsonString = getJson(gridVisibleSortedRowIdsSelector(apiRef));
       const blob = new Blob([jsonString], {
         type: 'text/json',
       });
