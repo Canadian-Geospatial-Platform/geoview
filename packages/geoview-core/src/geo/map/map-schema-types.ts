@@ -31,7 +31,7 @@ export type TypeLayerInitialSettings = {
   opacity?: number;
   /** Initial visibility setting. Default = true. */
   visible?: boolean;
-  /** The bounding box that contains all the layer's features. */
+  /** The geographic bounding box that contains all the layer's features. */
   bounds?: Extent;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
   extent?: Extent;
