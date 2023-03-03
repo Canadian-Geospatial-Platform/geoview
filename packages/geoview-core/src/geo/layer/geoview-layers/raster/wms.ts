@@ -798,6 +798,9 @@ export class WMS extends AbstractGeoViewRaster {
         axios
           .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
           .then((response) => {
+            if (response.data.type === 'text/xml') {
+              resolve(null);
+            }
             resolve(readImage(Cast<Blob>(response.data)));
           })
           .catch((error) => resolve(null));
