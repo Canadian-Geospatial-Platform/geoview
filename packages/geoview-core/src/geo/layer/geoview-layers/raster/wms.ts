@@ -43,7 +43,6 @@ import { Layer } from '../../layer';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;
-  temporalDimension?: TimeDimension;
 }
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -601,7 +600,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
