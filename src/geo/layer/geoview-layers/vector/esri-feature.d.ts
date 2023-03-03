@@ -2,17 +2,17 @@ import { Vector as VectorSource } from 'ol/source';
 import { Geometry } from 'ol/geom';
 import { Options as SourceOptions } from 'ol/source/Vector';
 import { ReadOptions } from 'ol/format/Feature';
-import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
-import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TimeDimension } from '../../../../app';
+import { AbstractGeoViewVector } from './abstract-geoview-vector';
+import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { TypeEsriDynamicLayerEntryConfig } from '../raster/esri-dynamic';
+import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'EsriJSON';
 }
 export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
     source: TypeSourceEsriFeatureInitialConfig;
-    temporalDimension?: TimeDimension;
 }
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'esriFeature';
@@ -56,8 +56,6 @@ export declare const geoviewEntryIsEsriFeature: (verifyIfGeoViewEntry: TypeLayer
  * @class EsriFeature
  */
 export declare class EsriFeature extends AbstractGeoViewVector {
-    /** Layer metadata */
-    layerMetadata: Record<string, TypeJsonObject>;
     /** ***************************************************************************************************************************
      * Initialize layer.
      *
@@ -70,7 +68,7 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {Promise<void>} A promise that the execution is completed.
      */
-    protected getServiceMetadata(): Promise<void>;
+    getServiceMetadata(): Promise<void>;
     /** ***************************************************************************************************************************
      * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
      * with a numeric layerId and creates a group entry when a layer is a group.
@@ -79,26 +77,39 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      *
      * @returns {TypeListOfLayerEntryConfig} A new list of layer entries configuration with deleted error layers.
      */
-    protected validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
+    validateListOfLayerEntryConfig(listOfLayerEntryConfig: TypeListOfLayerEntryConfig): TypeListOfLayerEntryConfig;
     /** ***************************************************************************************************************************
-     * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
-     * initial settings, fields and aliases).
+     * This method perform specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     * @param {number} esriIndex The index of the current layer in the metadata.
      *
-     * @returns {Promise<void>} A promise that the vector layer configuration has its metadata processed.
+     * @returns {boolean} true if an error is detected.
      */
-    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
+    esriChildHasDetectedAnError(layerEntryConfig: TypeLayerEntryConfig, esriIndex: number): boolean;
     /** ***************************************************************************************************************************
-     * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
+     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
      *
-     * @param {boolean} visibility The metadata initial visibility of the layer.
-     * @param {number} minScale The metadata minScale of the layer.
-     * @param {number} maxScale The metadata maxScale of the layer.
-     * @param {TypeJsonObject} extent The metadata layer extent.
-     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     * @param {string} fieldName field name for which we want to get the type.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {'string' | 'date' | 'number'} The type of the field.
      */
-    private processInitialSettings;
+    getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    /** ***************************************************************************************************************************
+     * Return the domain of the specified field.
+     *
+     * @param {string} fieldName field name for which we want to get the domain.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+     */
+    getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+    /** ***************************************************************************************************************************
+     * This method will create a Geoview temporal dimension if it exist in the service metadata
+     * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure
+     */
+    processTemporalDimension(esriTimeDimension: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
      *
@@ -106,15 +117,29 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * @param {string} nameField The display field associated to the layer.
      * @param {string} geometryFieldName The field name of the geometry property.
      * @param {TypeJsonArray} fields An array of field names and its aliases.
-     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The vector layer entry to configure.
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
      */
-    private processFeatureInfoConfig;
+    processFeatureInfoConfig: (capabilities: string, nameField: string, geometryFieldName: string, fields: TypeJsonArray, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig) => void;
     /** ***************************************************************************************************************************
-     * This method will create a Geoview temporal dimension if it exist in the service metadata
-     * @param {TypeJsonObject} esriTimeDimension The ESRI time dimension object
-     * @param {TypeEsriFeatureLayerEntryConfig} layerEntryConfig The layer entry to configure
+     * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
+     *
+     * @param {string} mapId The map identifier.
+     * @param {boolean} visibility The metadata initial visibility of the layer.
+     * @param {number} minScale The metadata minScale of the layer.
+     * @param {number} maxScale The metadata maxScale of the layer.
+     * @param {TypeJsonObject} extent The metadata layer extent.
+     * @param {TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig} layerEntryConfig The layer entry to configure.
      */
-    private processTemporalDimension;
+    processInitialSettings(visibility: boolean, minScale: number, maxScale: number, extent: TypeJsonObject, layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig): void;
+    /** ***************************************************************************************************************************
+     * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+     * initial settings, fields and aliases).
+     *
+     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration to process.
+     *
+     * @returns {Promise<void>} A promise that the layer configuration has its metadata processed.
+     */
+    protected processLayerMetadata(layerEntryConfig: TypeLayerEntryConfig): Promise<void>;
     /** ***************************************************************************************************************************
      * Create a source configuration for the vector layer.
      *

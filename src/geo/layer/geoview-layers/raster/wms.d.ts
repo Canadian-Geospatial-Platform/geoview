@@ -1,13 +1,12 @@
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
+import { TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import { TypeImageLayerEntryConfig, TypeLayerEntryConfig, TypeSourceImageWmsInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig } from '../../../map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries } from '../../../../api/events/payloads/get-feature-info-payload';
-import { TimeDimension } from '../../../../app';
+import { TypeArrayOfFeatureInfoEntries, rangeDomainType, codedValueType } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
     source: TypeSourceImageWmsInitialConfig;
-    temporalDimension?: TimeDimension;
 }
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: 'ogcWms';
@@ -56,6 +55,24 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {TypeWMSLayerConfig} layerConfig the layer configuration
      */
     constructor(mapId: string, layerConfig: TypeWMSLayerConfig);
+    /** ***************************************************************************************************************************
+     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+     *
+     * @param {string} fieldName field name for which we want to get the type.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {'string' | 'date' | 'number'} The type of the field.
+     */
+    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    /** ***************************************************************************************************************************
+     * Returns null. WMS services don't have domains.
+     *
+     * @param {string} fieldName field name for which we want to get the domain.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+     */
+    protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *
@@ -235,21 +252,22 @@ export declare class WMS extends AbstractGeoViewRaster {
      */
     getLegend(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
-     * Translate the get feature information at coordinate result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
+     * Translate the get feature information result set to the TypeArrayOfFeatureInfoEntries used by GeoView.
      *
      * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
-     * @param {TypeFeatureInfoLayerConfig} featureInfo Feature information describing the user's desired output format.
+     * @param {TypeWmsLayerEntryConfig} layerEntryConfig The layer configuration.
+     * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
      *
      * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
-    private formatFeatureInfoAtCoordinateResult;
+    formatWmsFeatureInfoResult(featureMember: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig, clickCoordinate: Coordinate): TypeArrayOfFeatureInfoEntries;
     /** ***************************************************************************************************************************
      * Return the attribute of an object that ends with the specified ending string or null if not found.
      *
      * @param {TypeJsonObject} jsonObject The object that is supposed to have the needed attribute.
      * @param {string} attribute The attribute searched.
      *
-     * @returns {TypeJsonObject | null} The promised feature info table.
+     * @returns {TypeJsonObject | undefined} The promised feature info table.
      */
     private getAttribute;
 }

@@ -2,15 +2,18 @@ import BaseLayer from 'ol/layer/Base';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
 import { Extent } from 'ol/extent';
-import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeStyleGeometry } from '../../map/map-schema-types';
-import { TypeArrayOfFeatureInfoEntries, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
+import Feature from 'ol/Feature';
+import Geometry from 'ol/geom/Geometry';
+import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString, TypeLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig, TypeVectorLayerEntryConfig, TypeImageLayerEntryConfig } from '../../map/map-schema-types';
+import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
 import { TypeJsonObject } from '../../../core/types/global-types';
+import { TimeDimension } from '../../../core/utils/date-mgt';
 export type TypeLegend = {
     layerPath: string;
     layerName?: TypeLocalizedString;
     type: TypeGeoviewLayerType;
     styleConfig?: TypeStyleConfig;
-    legend: TypeLayerStyle | HTMLCanvasElement;
+    legend: TypeLayerStyles | HTMLCanvasElement | null;
 };
 /**
  * type guard function that redefines a TypeLegend as a TypeWmsLegend
@@ -34,17 +37,23 @@ export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
  */
 export declare const isVectorLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeVectorLegend;
 export interface TypeVectorLegend extends TypeLegend {
-    legend: TypeLayerStyle;
+    legend: TypeLayerStyles;
 }
 export type TypeStyleRepresentation = {
     /** The defaultCanvas property is used by WMS legends, Simple styles and default styles when defined in unique value and class
      * break styles.
      */
     defaultCanvas?: HTMLCanvasElement | null;
+    /** The clusterCanvas property is used when the layer clustering is active (layerConfig.source.cluster.enable = true). */
+    clusterCanvas?: HTMLCanvasElement | null;
     /** The arrayOfCanvas property is used by unique value and class break styles. */
     arrayOfCanvas?: (HTMLCanvasElement | null)[];
 };
-export type TypeLayerStyle = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
+export type TypeLayerStyles = {
+    Point?: TypeStyleRepresentation;
+    LineString?: TypeStyleRepresentation;
+    Polygon?: TypeStyleRepresentation;
+};
 type LayerTypesKey = 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'GEOJSON' | 'GEOCORE' | 'GEOPACKAGE' | 'XYZ_TILES' | 'OGC_FEATURE' | 'WFS' | 'WMS';
 /**
  * Type of GeoView layers
@@ -98,6 +107,10 @@ export declare abstract class AbstractGeoViewLayer {
     /** The layer Identifier that is used to get and set layer's settings. */
     activeLayer: TypeLayerEntryConfig | null;
     metadata: TypeJsonObject | null;
+    /** Layer metadata */
+    layerMetadata: Record<string, TypeJsonObject>;
+    /** Layer temporal dimension */
+    layerTemporalDimension: Record<string, TimeDimension>;
     /** Attribution used in the OpenLayer source. */
     attributions: string[];
     /** ***************************************************************************************************************************
@@ -299,6 +312,24 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getExtent(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Extent | undefined;
     /** ***************************************************************************************************************************
+     * Return the type of the specified field.
+     *
+     * @param {string} fieldName field name for which we want to get the type.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+     */
+    protected abstract getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
+    /** ***************************************************************************************************************************
+     * Return the domain of the specified field. If the type can not be found, return 'string'.
+     *
+     * @param {string} fieldName field name for which we want to get the domain.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {'string' | 'date' | 'number'} The type of the field.
+     */
+    protected abstract getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    /** ***************************************************************************************************************************
      * set the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
      * numbers representing an extent: [minx, miny, maxx, maxy]. If layerPathOrConfig is undefined, the activeLayer of the class
      * will be used. This routine does nothing when no layerPathOrConfig is specified and the active layer is null.
@@ -395,13 +426,13 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getLegend(layerPathOrConfig?: string | TypeLayerEntryConfig | null): Promise<TypeLegend | null>;
     /** ***************************************************************************************************************************
-     * Utility method use to add an entry to the outfields or aliasFields attribute of the layerEntryConfig.source.featureInfo.
+     * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
      *
-     * @param {TypeLayerEntryConfig} layerEntryConfig The layer entry configuration that contains the source.featureInfo.
-     * @param {outfields' | 'aliasFields} fieldName The field name to update.
-     * @param {string} fieldValue The value to append to the field name.
-     * @param {number} prefixEntryWithComa flag (0 = false) indicating that we must prefix the entry with a ','
+     * @param {Feature<Geometry>[]} features The array of features to convert.
+     * @param {TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
+     *
+     * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
      */
-    protected addFieldEntryToSourceFeatureInfo: (layerEntryConfig: TypeLayerEntryConfig, fieldName: 'outfields' | 'aliasFields', fieldValue: string, prefixEntryWithComa: number) => void;
+    protected formatFeatureInfoResult(features: Feature<Geometry>[], layerEntryConfig: TypeImageLayerEntryConfig | TypeVectorLayerEntryConfig): Promise<TypeArrayOfFeatureInfoEntries>;
 }
 export {};

@@ -1,8 +1,9 @@
 import { Style } from 'ol/style';
-import { FeatureLike } from 'ol/Feature';
+import { Geometry } from 'ol/geom';
+import Feature, { FeatureLike } from 'ol/Feature';
 import { TypeVectorLayerEntryConfig, TypeVectorTileLayerEntryConfig, TypeBaseLayerEntryConfig, TypeStyleConfig } from '../map/map-schema-types';
 import { FilterNodeArrayType } from './geoview-renderer-types';
-import { TypeLayerStyle } from '../layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerStyles } from '../layer/geoview-layers/abstract-geoview-layers';
 /** *****************************************************************************************************************************
  * A class to define the GeoView renderers.
  *
@@ -76,34 +77,36 @@ export declare class GeoviewRenderer {
     /** ***************************************************************************************************************************
      * This method is used to process the array of point styles as described in the pointStyleConfig.
      *
-     * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
+     * @param {TypeLayerStyles} layerStyle The object that will receive the created canvas.
      * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[]} arrayOfPointStyleConfig The array of point style
      * configuration.
-     * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
+     * @param {(value: TypeLayerStyles | PromiseLike<TypeLayerStyles>) => void} resolve The function that will resolve the promise
      * of the calling methode.
      */
     private processArrayOfPointStyleConfig;
     /** ***************************************************************************************************************************
-     * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the style
-     * configuration.
+     * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the
+     * style configuration.
      *
-     * @param {TypeLayerStyle} layerStyle The object that will receive the created canvas.
      * @param {TypeKindOfVectorSettings | undefined} defaultSettings The settings associated to simple styles or default style of
      * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
      * @param {TypeUniqueValueStyleInfo[] | TypeClassBreakStyleInfo[] | undefined} arrayOfPointStyleConfig The array of point style
      * configuration associated to unique value and class break styles. When this parameter is undefined, no arrayOfCanvas is
      * created.
-     * @param {(value: TypeLayerStyle | PromiseLike<TypeLayerStyle>) => void} resolve The function that will resolve the promise
+     *
+     * @returns {Promise<TypeLayerStyles>} A promise that the layer styles are processed.
      */
     private getPointStyleSubRoutine;
     /** ***************************************************************************************************************************
      * This method gets the legend styles used by the the layer as specified by the style configuration.
      *
-     * @param {TypeStyleConfig} styleConfig The style configuration associated to the layer.
+     * @param {TypeBaseLayerEntryConfig & {style: TypeStyleConfig;}} layerEntryConfig The layer configuration.
      *
-     * @returns {Promise<TypeLayerStyle>} A promise that the layer style is processed.
+     * @returns {Promise<TypeLayerStyles>} A promise that the layer styles are processed.
      */
-    getLegendStyles(styleConfig: TypeStyleConfig): Promise<TypeLayerStyle>;
+    getLegendStyles(layerEntryConfig: TypeBaseLayerEntryConfig & {
+        style: TypeStyleConfig;
+    }): Promise<TypeLayerStyles>;
     /** ***************************************************************************************************************************
      * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
      * create it using the default style strategy.
@@ -116,33 +119,27 @@ export declare class GeoviewRenderer {
      */
     getFeatureStyle(feature: FeatureLike, layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig): Style | undefined;
     /** ***************************************************************************************************************************
+     * This method gets the canvas icon from the style of the feature using the layer entry config.
+     *
+     * @param {Feature<Geometry>} feature The feature that need its canvas icon to be defined.
+     * @param {TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
+     * entry config that may have a style configuration for the feature.
+     *
+     * @returns {Promise<HTMLCanvasElement | undefined>} The canvas icon associated to the feature or undefined if not found.
+     */
+    getFeatureCanvas(feature: Feature<Geometry>, layerEntryConfig: TypeBaseLayerEntryConfig | TypeVectorTileLayerEntryConfig | TypeVectorLayerEntryConfig): Promise<HTMLCanvasElement | undefined>;
+    /** ***************************************************************************************************************************
      * This method gets the style of the cluster feature using the layer entry config. If the style does not exist, create it using
      * the default style strategy.
      *
-     * @param {FeatureLike} feature The feature that need its style to be defined.
-     * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer
-     * entry config that may have a style configuration for the feature. If style does not exist for the geometryType, create it.
+     * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style
+     * configuration for the feature. If style does not exist for the geometryType, create it.
+     * @param {FeatureLike} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
+     * for the legend.
      *
      * @returns {Style | undefined} The style applied to the feature or undefined if not found.
      */
-    getClusterStyle(feature: FeatureLike, layerEntryConfig: TypeVectorLayerEntryConfig): Style | undefined;
-    /** ***************************************************************************************************************************
-     * Create a default style to use with a cluster feature that has no style configuration.
-     *
-     * @param { TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config that may have a style configuration for the
-     * feature. If style does not exist for the geometryType, create it.
-     *
-     * @returns {TypeStyleConfig} The style applied to the feature.
-     */
-    private createDefaultClusterStyle;
-    /** ***************************************************************************************************************************
-     * Set the color in the layer cluster settings for clustered elements.
-     *
-     * @param { TypeVectorLayerEntryConfig} layerEntryConfig The layer entry config for the layer.
-     * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the circle Style creation.
-     *
-     */
-    private setClusterColor;
+    getClusterStyle(layerEntryConfig: TypeVectorLayerEntryConfig, feature?: FeatureLike): Style | undefined;
     /** ***************************************************************************************************************************
      * Increment the default color index.
      */
@@ -260,9 +257,9 @@ export declare class GeoviewRenderer {
     /** ***************************************************************************************************************************
      * Process a cluster circle symbol using the settings.
      *
-     * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings The settings to use for the circle Style creation.
-     * @param {FeatureLike} feature The feature that need its style to be defined.
-     * @param {string} textColor The color to use for the cluster feature count.
+     * @param {TypeBaseLayerEntryConfig | TypeVectorLayerEntryConfig} layerEntryConfig The layer configuration.
+     * @param {FeatureLike} feature The feature that need its style to be defined. When undefined, it's because we fetch the styles
+     * for the legend.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
      */

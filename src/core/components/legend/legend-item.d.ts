@@ -1,5 +1,6 @@
 /// <reference types="react" />
-import { AbstractGeoViewLayer, TypeLayerEntryConfig } from '../../../app';
+import { AbstractGeoViewLayer } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
+import { TypeLayerEntryConfig } from '../../../geo/map/map-schema-types';
 export interface TypeLegendItemProps {
     layerId: string;
     geoviewLayerInstance: AbstractGeoViewLayer;
