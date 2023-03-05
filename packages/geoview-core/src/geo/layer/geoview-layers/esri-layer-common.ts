@@ -190,7 +190,9 @@ export function commonProcessTemporalDimension(
   layerEntryConfig: TypeEsriFeatureLayerEntryConfig | TypeEsriDynamicLayerEntryConfig
 ) {
   if (esriTimeDimension !== undefined) {
-    layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromESRI(Cast<TimeDimensionESRI>(esriTimeDimension));
+    this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromESRI(
+      Cast<TimeDimensionESRI>(esriTimeDimension)
+    );
   }
 }
 
@@ -280,19 +282,9 @@ export function commonProcessInitialSettings(
       `EPSG:${api.map(this.mapId).currentProjection}`
     );
 
-  if (layerEntryConfig.initialSettings?.bounds)
-    layerEntryConfig.initialSettings.bounds = transformExtent(
-      layerEntryConfig.initialSettings.bounds,
-      'EPSG:4326',
-      `EPSG:${api.map(this.mapId).currentProjection}`
-    );
-  else {
+  if (!layerEntryConfig.initialSettings?.bounds) {
     const layerExtent = [extent.xmin, extent.ymin, extent.xmax, extent.ymax] as Extent;
-    layerEntryConfig.initialSettings.bounds = transformExtent(
-      layerExtent,
-      `EPSG:${extent.spatialReference.wkid as number}`,
-      `EPSG:${api.map(this.mapId).currentProjection}`
-    );
+    layerEntryConfig.initialSettings = { bounds: layerExtent };
   }
 }
 

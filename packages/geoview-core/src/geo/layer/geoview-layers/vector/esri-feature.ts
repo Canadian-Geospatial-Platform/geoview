@@ -27,7 +27,6 @@ import {
   commonProcessTemporalDimension,
   commonValidateListOfLayerEntryConfig,
 } from '../esri-layer-common';
-import { TimeDimension } from '../../../../core/utils/date-mgt';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { TypeEsriDynamicLayerEntryConfig } from '../raster/esri-dynamic';
@@ -40,7 +39,6 @@ export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourc
 
 export interface TypeEsriFeatureLayerEntryConfig extends Omit<TypeVectorLayerEntryConfig, 'source'> {
   source: TypeSourceEsriFeatureInitialConfig;
-  temporalDimension?: TimeDimension;
 }
 
 export interface TypeEsriFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {

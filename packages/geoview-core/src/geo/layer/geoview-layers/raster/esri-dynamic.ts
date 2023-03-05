@@ -52,7 +52,6 @@ import { TypeEsriFeatureLayerEntryConfig } from '../vector/esri-feature';
 
 export interface TypeEsriDynamicLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageEsriInitialConfig;
-  temporalDimension?: TimeDimension;
 }
 
 export interface TypeEsriDynamicLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {

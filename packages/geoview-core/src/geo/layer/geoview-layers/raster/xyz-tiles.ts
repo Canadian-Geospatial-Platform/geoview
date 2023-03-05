@@ -291,12 +291,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
 
-        if (layerEntryConfig.initialSettings?.bounds)
-          layerEntryConfig.initialSettings!.bounds = transformExtent(
-            layerEntryConfig.initialSettings.bounds,
-            'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
-          );
         resolve();
       }
     });

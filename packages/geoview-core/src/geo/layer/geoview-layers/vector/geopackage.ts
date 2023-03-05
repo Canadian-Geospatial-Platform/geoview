@@ -220,21 +220,18 @@ export class GeoPackage extends AbstractGeoViewVector {
             `EPSG:${api.map(this.mapId).currentProjection}`
           );
 
-        if (layerEntryConfig.initialSettings?.bounds)
-          layerEntryConfig.initialSettings.bounds = transformExtent(
-            layerEntryConfig.initialSettings.bounds,
-            'EPSG:4326',
-            `EPSG:${api.map(this.mapId).currentProjection}`
-          );
-        else {
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
-          if (this.metadata?.collections[i].extent?.spatial?.bbox && this.metadata?.collections[i].extent?.spatial?.crs) {
-            layerEntryConfig.initialSettings.bounds = transformExtent(
+        if (
+          !layerEntryConfig.initialSettings?.bounds &&
+          this.metadata?.collections[i].extent?.spatial?.bbox &&
+          this.metadata?.collections[i].extent?.spatial?.crs
+        ) {
+          layerEntryConfig.initialSettings = {
+            bounds: transformExtent(
               this.metadata.collections[i].extent.spatial.bbox[0] as number[],
               get(this.metadata.collections[i].extent.spatial.crs as string)!,
               `EPSG:${api.map(this.mapId).currentProjection}`
-            );
-          }
+            ),
+          };
         }
 
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);

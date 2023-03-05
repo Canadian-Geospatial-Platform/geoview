@@ -15,7 +15,7 @@ import { transform, transformExtent } from 'ol/proj';
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { Cast, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
+import { Cast, toJsonObject, TypeJsonArray, TypeJsonObject } from '../../../../core/types/global-types';
 import { AbstractGeoViewLayer, CONST_LAYER_TYPES, TypeLegend } from '../abstract-geoview-layers';
 import { AbstractGeoViewRaster, TypeBaseRasterLayer } from './abstract-geoview-raster';
 import {
@@ -43,7 +43,6 @@ import { Layer } from '../../layer';
 
 export interface TypeWmsLayerEntryConfig extends Omit<TypeImageLayerEntryConfig, 'source'> {
   source: TypeSourceImageWmsInitialConfig;
-  temporalDimension?: TimeDimension;
 }
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -577,18 +576,8 @@ export class WMS extends AbstractGeoViewRaster {
               `EPSG:${api.map(this.mapId).currentProjection}`
             );
 
-          if (layerEntryConfig.initialSettings?.bounds)
-            layerEntryConfig.initialSettings.bounds = transformExtent(
-              layerEntryConfig.initialSettings.bounds,
-              'EPSG:4326',
-              `EPSG:${api.map(this.mapId).currentProjection}`
-            );
-          else if (layerCapabilities.EX_GeographicBoundingBox) {
-            layerEntryConfig.initialSettings.bounds = transformExtent(
-              layerCapabilities.EX_GeographicBoundingBox as Extent,
-              'EPSG:4326',
-              `EPSG:${api.map(this.mapId).currentProjection}`
-            );
+          if (!layerEntryConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+            layerEntryConfig.initialSettings = { bounds: layerCapabilities.EX_GeographicBoundingBox as Extent };
           }
 
           if (layerCapabilities.Dimension) {
@@ -611,7 +600,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   private processTemporalDimension(wmsTimeDimension: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig) {
     if (wmsTimeDimension !== undefined) {
-      layerEntryConfig.temporalDimension = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
+      this.layerTemporalDimension[Layer.getLayerPath(layerEntryConfig)] = api.dateUtilities.createDimensionFromOGC(wmsTimeDimension);
     }
   }
 
@@ -660,10 +649,10 @@ export class WMS extends AbstractGeoViewRaster {
         const crs = `EPSG:${api.map(this.mapId).currentProjection}`;
         const clickCoordinate = transform(lnglat, 'EPSG:4326', crs);
         if (
-          clickCoordinate[0] < layerConfig.initialSettings!.bounds![0] ||
-          layerConfig.initialSettings!.bounds![2] < clickCoordinate[0] ||
-          clickCoordinate[1] < layerConfig.initialSettings!.bounds![1] ||
-          layerConfig.initialSettings!.bounds![3] < clickCoordinate[1]
+          lnglat[0] < layerConfig.initialSettings!.bounds![0] ||
+          layerConfig.initialSettings!.bounds![2] < lnglat[0] ||
+          lnglat[1] < layerConfig.initialSettings!.bounds![1] ||
+          layerConfig.initialSettings!.bounds![3] < lnglat[1]
         )
           resolve([]);
         else {
@@ -678,17 +667,38 @@ export class WMS extends AbstractGeoViewRaster {
             INFO_FORMAT: infoFormat,
           });
           if (featureInfoUrl) {
-            let featureMember: TypeJsonObject | null;
+            let featureMember: TypeJsonObject | undefined;
             axios(featureInfoUrl).then((response) => {
               if (infoFormat === 'text/xml') {
                 const xmlDomResponse = new DOMParser().parseFromString(response.data, 'text/xml');
                 const jsonResponse = xmlToJson(xmlDomResponse);
+                // ! TODO: We should use a WMS format setting in the schema to decide what feature info response interpreter to use
+                // ! For the moment, we try to guess the response format based on properties returned from the query
                 const featureCollection = this.getAttribute(jsonResponse, 'FeatureCollection');
                 if (featureCollection) featureMember = this.getAttribute(featureCollection, 'featureMember');
+                else {
+                  const featureInfoResponse = this.getAttribute(jsonResponse, 'GetFeatureInfoResponse');
+                  if (featureInfoResponse?.Layer) {
+                    featureMember = {};
+                    const layerName =
+                      featureInfoResponse.Layer['@attributes'] && featureInfoResponse.Layer['@attributes'].name
+                        ? (featureInfoResponse.Layer['@attributes'].name as string)
+                        : 'undefined';
+                    featureMember['Layer name'] = toJsonObject({ '#text': layerName });
+                    if (featureInfoResponse.Layer.Attribute && featureInfoResponse.Layer.Attribute['@attributes']) {
+                      const fieldName = featureInfoResponse.Layer.Attribute['@attributes'].name
+                        ? (featureInfoResponse.Layer.Attribute['@attributes'].name as string)
+                        : 'undefined';
+                      const fieldValue = featureInfoResponse.Layer.Attribute['@attributes'].value
+                        ? (featureInfoResponse.Layer.Attribute['@attributes'].value as string)
+                        : 'undefined';
+                      featureMember[fieldName] = toJsonObject({ '#text': fieldValue });
+                    }
+                  }
+                }
               } else featureMember = { plain_text: { '#text': response.data } };
               if (featureMember) {
-                const featureInfoResult = this.formatWmsFeatureInfoResult(featureMember, layerConfig);
-                featureInfoResult[0].extent = [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]];
+                const featureInfoResult = this.formatWmsFeatureInfoResult(featureMember, layerConfig, clickCoordinate);
                 resolve(featureInfoResult);
               }
             });
@@ -788,6 +798,9 @@ export class WMS extends AbstractGeoViewRaster {
         axios
           .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
           .then((response) => {
+            if (response.data.type === 'text/xml') {
+              resolve(null);
+            }
             resolve(readImage(Cast<Blob>(response.data)));
           })
           .catch((error) => resolve(null));
@@ -857,10 +870,15 @@ export class WMS extends AbstractGeoViewRaster {
    *
    * @param {TypeJsonObject} featureMember An object formatted using the query syntax.
    * @param {TypeWmsLayerEntryConfig} layerEntryConfig The layer configuration.
+   * @param {Coordinate} clickCoordinate The coordinate where the user has clicked.
    *
    * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
    */
-  formatWmsFeatureInfoResult(featureMember: TypeJsonObject, layerEntryConfig: TypeWmsLayerEntryConfig): TypeArrayOfFeatureInfoEntries {
+  formatWmsFeatureInfoResult(
+    featureMember: TypeJsonObject,
+    layerEntryConfig: TypeWmsLayerEntryConfig,
+    clickCoordinate: Coordinate
+  ): TypeArrayOfFeatureInfoEntries {
     const featureInfo = layerEntryConfig?.source?.featureInfo;
     const outfields = getLocalizedValue(featureInfo?.outfields, this.mapId)?.split(',');
     const fieldTypes = featureInfo?.fieldTypes?.split(',');
@@ -873,7 +891,7 @@ export class WMS extends AbstractGeoViewRaster {
       // feature key for building the data-grid
       featureKey: featureKeyCounter++,
       geoviewLayerType: this.type,
-      extent: [0, 0, 0, 0],
+      extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
       geometry: null,
       featureIcon: document.createElement('canvas'),
       fieldInfo: {},
@@ -883,7 +901,7 @@ export class WMS extends AbstractGeoViewRaster {
       keys.forEach((key) => {
         if (!key.endsWith('Geometry') && !key.startsWith('@')) {
           const splitedKey = key.split(':');
-          const fieldName = splitedKey[splitedKey.length - 1];
+          const fieldName = splitedKey.slice(-1)[0];
           if ('#text' in entry[key])
             featureInfoEntry.fieldInfo[`${prefix}${prefix ? '.' : ''}${fieldName}`] = {
               fieldKey: fieldKeyCounter++,
@@ -925,11 +943,10 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {TypeJsonObject} jsonObject The object that is supposed to have the needed attribute.
    * @param {string} attribute The attribute searched.
    *
-   * @returns {TypeJsonObject | null} The promised feature info table.
+   * @returns {TypeJsonObject | undefined} The promised feature info table.
    */
-  private getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | null {
-    const keys = Object.keys(jsonObject);
-    for (let i = 0; i < keys.length; i++) if (keys[i].endsWith(attributeEnding)) return jsonObject[keys[i]];
-    return null;
+  private getAttribute(jsonObject: TypeJsonObject, attributeEnding: string): TypeJsonObject | undefined {
+    const keyFound = Object.keys(jsonObject).find((key) => key.endsWith(attributeEnding));
+    return keyFound ? jsonObject[keyFound] : undefined;
   }
 }

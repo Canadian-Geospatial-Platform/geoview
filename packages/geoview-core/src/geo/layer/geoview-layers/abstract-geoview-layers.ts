@@ -38,6 +38,7 @@ import { TypeJsonObject } from '../../../core/types/global-types';
 import { Layer } from '../layer';
 import { LayerSetPayload, payloadIsRequestLayerInventory } from '../../../api/events/payloads/layer-set-payload';
 import { GetLegendsPayload, payloadIsQueryLegend } from '../../../api/events/payloads/get-legends-payload';
+import { TimeDimension } from '../../../core/utils/date-mgt';
 
 export type TypeLegend = {
   layerPath: string;
@@ -200,6 +201,9 @@ export abstract class AbstractGeoViewLayer {
 
   /** Layer metadata */
   layerMetadata: Record<string, TypeJsonObject> = {};
+
+  /** Layer temporal dimension */
+  layerTemporalDimension: Record<string, TimeDimension> = {};
 
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
@@ -689,8 +693,7 @@ export abstract class AbstractGeoViewLayer {
     if (layerConfig) {
       if (Array.isArray(layerConfig)) processGroupLayerBounds(layerConfig);
       else processGroupLayerBounds([layerConfig]);
-      if (projectionCode && bounds)
-        return transformExtent(bounds, `EPSG:${api.map(this.mapId).currentProjection}`, `EPSG:${projectionCode}`);
+      if (projectionCode && bounds) return transformExtent(bounds, `EPSG:4326`, `EPSG:${projectionCode}`);
     }
     return bounds;
   }

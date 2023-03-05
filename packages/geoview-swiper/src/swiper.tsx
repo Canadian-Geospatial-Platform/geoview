@@ -115,6 +115,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const [layersIds] = useState<string[]>(config.layers);
   const [geoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
   const [olLayers, setOlLayers] = useState<BaseLayer[]>([]);
+  const [offset, setOffset] = useState(0);
 
   const [orientation] = useState(config.orientation);
   const swiperValue = useRef(50);
@@ -181,7 +182,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
         : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-    swiperValue.current = (client / size) * 100;
+    swiperValue.current = ((client - offset) / size) * 100;
 
     // force VectorImage to refresh
     olLayers.forEach((layer: BaseLayer) => {
@@ -190,6 +191,21 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     map.render();
   }, 100);
+
+  /**
+   * On Click, calculate the offset between click location and swiper
+   * @param {MouseEvent} evt The mouse event to calculate the offset
+   */
+  const setMouseOffset = (evt: MouseEvent) => {
+    const position =
+      orientation === 'vertical'
+        ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
+        : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
+    mapSize.current = map.getSize() || [0, 0];
+    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
+    const offSetOnClick = position - (size * swiperValue.current) / 100;
+    setOffset(offSetOnClick);
+  };
 
   useEffect(() => {
     // set listener for layers in config array
@@ -222,6 +238,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
         axis={`${orientation === 'vertical' ? 'x' : 'y'}`}
         bounds="parent"
         defaultPosition={{ x: orientation === 'vertical' ? defaultX : 0, y: orientation === 'vertical' ? 0 : defaultY }}
+        onMouseDown={(e) => setMouseOffset(e)}
         onStop={(e) => {
           onStop(e as MouseEvent);
         }}
