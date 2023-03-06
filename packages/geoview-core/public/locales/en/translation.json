@@ -49,7 +49,9 @@
     "toggle_opacity" : "Toggle Opacity"
   },
   "datagrid": {
-    "exportJson": "Download GeoJSON"
+    "exportJson": "Download GeoJSON",
+    "filterMap": "Filter Map",
+    "removeFilterMap": "Remove Map Filter"
   },
   "keyboardnav": {
     "start": "Skip after map element",

@@ -49,7 +49,9 @@
     "toggle_opacity" : "Basculer le Opacité"
   },
   "datagrid": {
-    "exportJson": "Télécharger GeoJSON"
+    "exportJson": "Télécharger GeoJSON",
+    "filterMap": "Filtrer la carte",
+    "removeFilterMap": "Supprimer le filtre de la carte"
   },
   "keyboardnav": {
     "start": "Aller après l'élément carte",
