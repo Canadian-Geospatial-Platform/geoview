@@ -26,7 +26,7 @@ export type TypeLayerInitialSettings = {
     opacity?: number;
     /** Initial visibility setting. Default = true. */
     visible?: boolean;
-    /** The bounding box that contains all the layer's features. */
+    /** The geographic bounding box that contains all the layer's features. */
     bounds?: Extent;
     /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
     extent?: Extent;
@@ -57,8 +57,8 @@ export type TypeSourceVectorClusterConfig = {
     minDistance?: number;
     /** Color for the text showing the number of points in a cluster */
     textColor?: string;
-    /** Color for the cluster symbol and clustered geometries */
-    color?: string;
+    /** settings for the cluster symbol and clustered geometries */
+    settings?: TypeSimpleSymbolVectorConfig;
 };
 /** ******************************************************************************************************************************
  * Type used to configure a custom parser.
@@ -86,6 +86,8 @@ export type TypeFeatureInfoLayerConfig = {
     nameField?: TypeLocalizedString;
     /** A comma separated list of attribute names (English/French) that should be requested on query (all by default). */
     outfields?: TypeLocalizedString;
+    /** A comma separated list of types. Type at index i is associated to the variable at index i. */
+    fieldTypes?: string;
     /** A comma separated list of attribute names (English/French) that should be use for alias. If empty, no alias will be set */
     aliasFields?: TypeLocalizedString;
 };

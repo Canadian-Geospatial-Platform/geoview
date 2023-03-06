@@ -2,7 +2,7 @@
 /// <reference types="react" />
 import { i18n } from 'i18next';
 import OLMap from 'ol/Map';
-import View from 'ol/View';
+import View, { FitOptions } from 'ol/View';
 import { ProjectionLike } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { Extent } from 'ol/extent';
@@ -116,6 +116,13 @@ export declare class MapViewer {
      * @returns the map viewSettings
      */
     getView: () => View;
+    /**
+     * Zoom to the specified extent.
+     *
+     * @param {Extent} extent The extent to zoom to.
+     * @param {FitOptions} zoomOptions The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 }).
+     */
+    zoomToExtent(extent: Extent, options?: FitOptions): void;
     /**
      * Function called when the map has been rendered and ready to be customized
      */

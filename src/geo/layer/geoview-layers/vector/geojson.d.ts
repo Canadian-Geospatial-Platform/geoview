@@ -5,6 +5,7 @@ import { Geometry } from 'ol/geom';
 import { AbstractGeoViewLayer } from '../abstract-geoview-layers';
 import { AbstractGeoViewVector } from './abstract-geoview-vector';
 import { TypeLayerEntryConfig, TypeVectorLayerEntryConfig, TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeBaseLayerEntryConfig } from '../../../map/map-schema-types';
+import { codedValueType, rangeDomainType } from '../../../../api/events/payloads/get-feature-info-payload';
 export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
     format: 'GeoJSON';
 }
@@ -60,6 +61,24 @@ export declare class GeoJSON extends AbstractGeoViewVector {
      * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
      */
     constructor(mapId: string, layerConfig: TypeGeoJSONLayerConfig);
+    /** ***************************************************************************************************************************
+     * Extract the type of the specified field from the metadata. If the type can not be found, return 'string'.
+     *
+     * @param {string} fieldName field name for which we want to get the type.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {'string' | 'date' | 'number'} The type of the field.
+     */
+    protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number';
+    /** ***************************************************************************************************************************
+     * Returns null. GeoJSON services don't have domains.
+     *
+     * @param {string} fieldName field name for which we want to get the domain.
+     * @param {TypeLayerEntryConfig} layeConfig layer configuration.
+     *
+     * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+     */
+    protected getFieldDomain(fieldName: string, layerConfig: TypeLayerEntryConfig): null | codedValueType | rangeDomainType;
     /** ***************************************************************************************************************************
      * This method reads the service metadata from the metadataAccessPath.
      *

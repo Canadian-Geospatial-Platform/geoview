@@ -9,6 +9,7 @@ import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
  */
 interface CustomDataGridProps extends DataGridProps {
     rowId: string;
+    layerKey: string;
     displayLanguage: TypeDisplayLanguage;
 }
 export declare function LayerDataGrid(props: CustomDataGridProps): JSX.Element;

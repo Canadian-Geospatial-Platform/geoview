@@ -72,22 +72,13 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      */
     private createVectorLayer;
     /** ***************************************************************************************************************************
-     * Convert the feature information to an array of TypeArrayOfFeatureInfoEntries.
-     *
-     * @param {Feature<Geometry>[]} features The array of features to convert.
-     * @param {TypeFeatureInfoLayerConfig} featureInfo The featureInfo configuration.
-     *
-     * @returns {TypeArrayOfFeatureInfoEntries} The Array of feature information.
-     */
-    private formatFeatureInfoResult;
-    /** ***************************************************************************************************************************
      * Return feature information for all the features stored in the layer.
      *
      * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      *
      * @returns {TypeArrayOfFeatureInfoEntries} The feature info table.
      */
-    getAllFeatureInfo(layerPathOrConfig?: string | TypeLayerEntryConfig | null | undefined): TypeArrayOfFeatureInfoEntries;
+    getAllFeatureInfo(layerPathOrConfig?: string | TypeLayerEntryConfig | null | undefined): Promise<TypeArrayOfFeatureInfoEntries>;
     /** ***************************************************************************************************************************
      * Return feature information for all the features around the provided Pixel.
      *
@@ -177,6 +168,8 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     getLayerFilter(layerPathOrConfig?: string | TypeLayerEntryConfig | null): string | undefined;
     /** ***************************************************************************************************************************
      * Toggle cluster status.
+     *
+     * @param {string | TypeLayerEntryConfig | null} layerPathOrConfig Optional layer path or configuration.
      */
-    toggleCluster(): void;
+    toggleCluster(layerPathOrConfig?: string | TypeLayerEntryConfig | null): void;
 }
