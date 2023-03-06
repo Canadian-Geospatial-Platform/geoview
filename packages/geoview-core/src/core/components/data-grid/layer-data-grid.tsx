@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataGrid,
@@ -22,14 +22,14 @@ import {
   GridToolbarDensitySelector,
   GridPrintExportMenuItem,
   GridPrintExportOptions,
-  gridVisibleSortedRowIdsSelector,
   useGridApiContext,
   GridRowId,
+  gridFilteredSortedRowIdsSelector,
 } from '@mui/x-data-grid';
 
-import { ButtonProps } from '@mui/material/Button';
+import Button, { ButtonProps } from '@mui/material/Button';
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
-import { Tooltip, MenuItem } from '../../../ui';
+import { Tooltip, MenuItem, MapIcon } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -40,9 +40,11 @@ import { Tooltip, MenuItem } from '../../../ui';
 
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
+  layerId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
+  filterMap: () => void;
 }
 
 const sxClasses = {
@@ -93,12 +95,51 @@ const sxClasses = {
   },
 };
 
+const buttonBaseProps: ButtonProps = {
+  color: 'primary',
+  size: 'small',
+};
+
 export function LayerDataGrid(props: CustomDataGridProps) {
-  const { rowId, layerKey, displayLanguage, columns, rows } = props;
+  const { layerId, rowId, layerKey, displayLanguage, columns, rows, filterMap } = props;
   const { t } = useTranslation<string>();
-  const getJson = (gridRowId: GridRowId[]) => {
-    const geoData = gridRowId.map((rowId) => {
-      const { geometry, ...featureInfo } = rows[rowId as number];
+  const [selectedRows, setSelectedRows] = useState<GridRowId[]>([]);
+
+  /**
+   * Filer map
+   *
+   * @param {GridRowId} gridRowIds the array of the rowId
+   * @return {JSON.stringify} Json gile content
+   *
+   */
+  const onClickFilterMap = (gridRowIds: GridRowId[]) => {
+    const geoData = gridRowIds.map((gridRowId) => {
+      const { geometry, ...featureInfo } = rows[gridRowId as number];
+      delete featureInfo.featureKey;
+      return {
+        type: 'Feature',
+        geometry,
+        properties: featureInfo,
+      };
+    });
+
+    if (filterMap !== undefined) {
+      filterMap();
+    }
+    // Stringify with some indentation
+    // return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
+  };
+
+  /**
+   * build the JSON file
+   *
+   * @param {GridRowId} gridRowIds the array of the rowId
+   * @return {JSON.stringify} Json gile content
+   *
+   */
+  const getJson = (gridRowIds: GridRowId[]) => {
+    const geoData = gridRowIds.map((gridRowId) => {
+      const { geometry, ...featureInfo } = rows[gridRowId as number];
       delete featureInfo.featureKey;
       return {
         type: 'Feature',
@@ -139,9 +180,8 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     const { hideMenu } = props;
     const apiRef = useGridApiContext();
-
     const onMenuItemClick = () => {
-      const jsonString = getJson(gridVisibleSortedRowIdsSelector(apiRef));
+      const jsonString = getJson(gridFilteredSortedRowIdsSelector(apiRef));
       const blob = new Blob([jsonString], {
         type: 'text/json',
       });
@@ -185,6 +225,15 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       <GridToolbarContainer {...props}>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
         <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
+        <Button
+          {...buttonBaseProps}
+          id={`${layerId}-map-filter-button`}
+          startIcon={<MapIcon />}
+          onClick={() => onClickFilterMap(selectedRows)}
+          disabled={selectedRows.length === 0}
+        >
+          {t('datagrid.filterMap')}
+        </Button>
         <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
         <CustomExportButton />
       </GridToolbarContainer>
@@ -226,6 +275,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
            * You may wish to remove this line when working on the data grid
            */
           logLevel={false}
+          onSelectionModelChange={(newSelection) => {
+            setSelectedRows(newSelection);
+          }}
         />
       </div>
     </div>
