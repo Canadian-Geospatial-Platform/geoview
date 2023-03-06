@@ -18,8 +18,8 @@
     "listOfGeoviewLayerConfig": []
   },
   "theme": "dark",
-  "components": ["app-bar", "nav-bar", "north-arrow", "overview-map", "footer-bar"],
-  "corePackages": ["basemap-panel"],
+  "components": [],
+  "corePackages": [],
   "externalPackages": [],
   "serviceUrls": {
     "keys": "https://geocore.api.geo.ca"
