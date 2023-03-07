@@ -13,7 +13,7 @@ import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/p
 import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
 import Export from './buttons/export';
-import ExportModal from '../nav-bar/export-modal';
+import ExportModal from '../export-modal/export-modal';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
