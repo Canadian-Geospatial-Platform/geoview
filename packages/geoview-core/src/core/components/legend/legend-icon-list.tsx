@@ -15,6 +15,7 @@ import {
 } from '../../../ui';
 import {
   TypeClassBreakStyleConfig,
+  TypeLayerEntryConfig,
   TypeStyleGeometry,
   TypeStyleSettings,
   TypeUniqueValueStyleConfig,
@@ -49,7 +50,7 @@ export interface TypeLegendIconListProps {
   geometryKey?: TypeStyleGeometry;
   isParentVisible?: boolean;
   toggleParentVisible?: () => void;
-  toggleMapVisible?: (layerConfig: TypeVectorLayerEntryConfig) => void;
+  toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
 }
 /**
  * List of Icons to show in expanded Legend Item
@@ -119,7 +120,7 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
           }
         });
         if (toggleMapVisible !== undefined) {
-          toggleMapVisible(layerConfig);
+          toggleMapVisible(layerConfig as TypeLayerEntryConfig);
         }
       }
     }
