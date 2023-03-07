@@ -25,6 +25,7 @@ import {
   useGridApiContext,
   GridRowId,
   gridFilteredSortedRowIdsSelector,
+  GridFilterModel,
 } from '@mui/x-data-grid';
 
 import Button, { ButtonProps } from '@mui/material/Button';
@@ -44,7 +45,7 @@ interface CustomDataGridProps extends DataGridProps {
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
-  filterMap: () => void;
+  filterMap: (layerId: string, filter: string) => void;
 }
 
 const sxClasses = {
@@ -103,31 +104,41 @@ const buttonBaseProps: ButtonProps = {
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { layerId, rowId, layerKey, displayLanguage, columns, rows, filterMap } = props;
   const { t } = useTranslation<string>();
-  const [selectedRows, setSelectedRows] = useState<GridRowId[]>([]);
+  const [filterString, setFilterString] = useState<string>('');
 
   /**
-   * Filer map
+   * Convert the filter string from the Filter Model
    *
-   * @param {GridRowId} gridRowIds the array of the rowId
-   * @return {JSON.stringify} Json gile content
+   * @param {GridFilterModel} gridFilterModel
+   * @return {string} filter string
    *
    */
-  const onClickFilterMap = (gridRowIds: GridRowId[]) => {
-    const geoData = gridRowIds.map((gridRowId) => {
-      const { geometry, ...featureInfo } = rows[gridRowId as number];
-      delete featureInfo.featureKey;
-      return {
-        type: 'Feature',
-        geometry,
-        properties: featureInfo,
-      };
-    });
-
-    if (filterMap !== undefined) {
-      filterMap();
+  const buildFilterString = (gridFilterModel: GridFilterModel) => {
+    const filterObj = gridFilterModel.items[0];
+    if (filterObj === undefined || filterObj.value === undefined) {
+      return '';
     }
-    // Stringify with some indentation
-    // return JSON.stringify({ type: 'FeatureCollection', features: geoData }, null, 2);
+    switch (filterObj.operatorValue) {
+      case 'contains':
+        return `${filterObj.columnField} like '%${filterObj.value}%'`;
+      case 'equals':
+        return `${filterObj.columnField} = '%${filterObj.value}%'`;
+      case 'startsWith':
+        return `${filterObj.columnField} like '${filterObj.value}%'`;
+      case 'endsWith':
+        return `${filterObj.columnField} like '%${filterObj.value}'`;
+      case 'isEmpty':
+        return `${filterObj.columnField} = ''`;
+      case 'isNotEmpty':
+        return `${filterObj.columnField} <> ''`;
+      case 'isAnyOf':
+        if (filterObj.value.length === 0) {
+          return '';
+        }
+        return `${filterObj.columnField} in ${JSON.stringify(filterObj.value)}`;
+      default:
+        return `${filterObj.columnField}${filterObj.operatorValue}${filterObj.columnField}`;
+    }
   };
 
   /**
@@ -229,8 +240,8 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           {...buttonBaseProps}
           id={`${layerId}-map-filter-button`}
           startIcon={<MapIcon />}
-          onClick={() => onClickFilterMap(selectedRows)}
-          disabled={selectedRows.length === 0}
+          onClick={() => filterMap(layerKey, filterString)}
+          disabled={filterString === ''}
         >
           {t('datagrid.filterMap')}
         </Button>
@@ -275,8 +286,12 @@ export function LayerDataGrid(props: CustomDataGridProps) {
            * You may wish to remove this line when working on the data grid
            */
           logLevel={false}
-          onSelectionModelChange={(newSelection) => {
-            setSelectedRows(newSelection);
+          onFilterModelChange={(filterModel) => {
+            const filter = buildFilterString(filterModel);
+            setFilterString(filter);
+            if (filter === '') {
+              filterMap(layerKey, '');
+            }
           }}
         />
       </div>
