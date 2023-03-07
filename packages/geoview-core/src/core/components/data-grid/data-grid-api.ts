@@ -7,7 +7,7 @@ import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { AbstractGeoViewLayer, AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries } from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
-import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, TypeGeoviewLayerConfig } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '../../../geo/map/map-schema-types';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
@@ -47,8 +47,6 @@ export class DataGridAPI {
     const { t } = useTranslation<string>();
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
-    const [layerInstance, setLayerInstance] = useState<AbstractGeoViewLayer | undefined>(undefined);
-    const [layerConfig, setLayerConfig] = useState<TypeGeoviewLayerConfig | undefined>(undefined);
     const [mapfiltered, setMapFiltered] = useState<boolean>(true);
 
     const { currentProjection } = api.map(this.mapId);
@@ -111,21 +109,15 @@ export class DataGridAPI {
       });
     };
 
-    const filterMap = () => {
-      if (mapfiltered) {
-        api.map(this.mapId).layer.removeGeoviewLayer(layerInstance!);
-      } else {
-        api.map(this.mapId).layer.addGeoviewLayer(layerConfig!);
+    const filterMap = (filterLayerId: string, filter: string) => {
+      const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
+      const filterLayerConfig = api.map(this.mapId).layer.registeredLayers[filterLayerId] as TypeVectorLayerEntryConfig;
+      if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+        if ((filter === '' && !mapfiltered) || filter !== '') {
+          (geoviewLayerInstance as AbstractGeoViewVector)?.applyViewFilter(filterLayerConfig, mapfiltered ? filter : '');
+        }
       }
-
-      /* const filterMapButtonElement = document.querySelector(`#${layerId}-map-filter-button`) as HTMLButtonElement;
-      if (filterMapButtonElement) {
-        const buttonText = !mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap');
-        console.log(filterMapButtonElement.innerText, mapfiltered, buttonText);
-        filterMapButtonElement.innerText = buttonText;
-      } */
-
-      setMapFiltered(!mapfiltered);
+      setMapFiltered(filter === '' ? true : !mapfiltered);
     };
 
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -180,8 +172,6 @@ export class DataGridAPI {
 
     useEffect(() => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      setLayerInstance(geoviewLayerInstance);
-      setLayerConfig(geoviewLayerInstance?.activeLayer?.geoviewRootLayer);
       if (geoviewLayerInstance.listOfLayerEntryConfig.length > 1) {
         const grouplayerKeys: string[] = [];
         const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
