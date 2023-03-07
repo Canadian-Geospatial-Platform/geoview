@@ -4,10 +4,17 @@ import { createElement, ReactElement, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toLonLat } from 'ol/proj';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-import { AbstractGeoViewLayer, AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries } from '../../../app';
+import {
+  TypeLayerEntryConfig,
+  AbstractGeoViewVector,
+  EsriDynamic,
+  api,
+  TypeArrayOfFeatureInfoEntries,
+  TypeDisplayLanguage,
+  TypeListOfLayerEntryConfig,
+} from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
-import { TypeDisplayLanguage, TypeListOfLayerEntryConfig, TypeVectorLayerEntryConfig } from '../../../geo/map/map-schema-types';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
@@ -111,10 +118,10 @@ export class DataGridAPI {
 
     const filterMap = (filterLayerId: string, filter: string) => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      const filterLayerConfig = api.map(this.mapId).layer.registeredLayers[filterLayerId] as TypeVectorLayerEntryConfig;
+      const filterLayerConfig = api.map(this.mapId).layer.registeredLayers[filterLayerId] as TypeLayerEntryConfig;
       if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
         if ((filter === '' && !mapfiltered) || filter !== '') {
-          (geoviewLayerInstance as AbstractGeoViewVector)?.applyViewFilter(filterLayerConfig, mapfiltered ? filter : '');
+          (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, mapfiltered ? filter : '');
         }
       }
       setMapFiltered(filter === '' ? true : !mapfiltered);
