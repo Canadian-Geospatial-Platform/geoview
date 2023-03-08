@@ -52,9 +52,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
       EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
       (payload) => {
         if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
-            setExpanded(payload.status);
-          }
+          setExpanded(payload.status);
         }
       },
       mapId
@@ -64,7 +62,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload) => {
-        if (payload.handlerName === mapId && payloadIsAMapViewProjection(payload)) {
+        if (payloadIsAMapViewProjection(payload)) {
           setMapProjection(`EPSG:${payload.projection}`);
 
           // uncheck the control

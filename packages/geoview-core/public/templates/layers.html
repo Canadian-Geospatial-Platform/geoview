@@ -1612,14 +1612,15 @@
           //create snippets
           createCodeSnippet();
           createConfigSnippet();
-          cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR3', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriDynamicLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR4', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'esriFeatureLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR5', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geojsonLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR6', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wfsLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR7', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'ogcApiLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR8', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geocoreLegendsId');
-          cgpv.api.event.emit({ handlerName: 'LYR9', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'geopackageLegendsId');
+          cgpv.api.event.emit({ handlerName: 'LYR1/wmsLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR3/esriDynamicLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR4/esriFeatureLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR5/geojsonLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR6/wfsLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR7/ogcApiLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR8/geocoreLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.event.emit({ handlerName: 'LYR9/geopackageLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+          cgpv.api.maps['LYR1'].layer.removeLayersUsingPath('Hydro/hydro_network/nhn:nhn');
         }
       });
 
@@ -1664,8 +1665,7 @@
             (payload) => {
               createTableOfFilter('LYR5');
             },
-            'LYR5',
-            'geoJsonSample'
+            'LYR5/geoJsonSample'
           );
 
       });
@@ -1690,9 +1690,9 @@
         (payload) => {
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR1', 'wmsResultSetId', resultSets);
+          cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId2');
         },
-        'LYR1',
-        'wmsResultSetId'
+        'LYR1/wmsResultSetId'
       );
 
       const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
@@ -1702,8 +1702,7 @@
           const { resultSets } = payload;
           displayLegend('wmsLegendsId', resultSets);
         },
-        'LYR1',
-        'wmsLegendsId'
+        'LYR1/wmsLegendsId'
       );
 
       // ESRI Dynamic =============================================================================================================
@@ -1714,8 +1713,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR3', 'esriDynamicResultSetId', resultSets);
         },
-        'LYR3',
-        'esriDynamicResultSetId'
+        'LYR3/esriDynamicResultSetId'
       );
 
       const LegendsEsriDynamicLayerSet = cgpv.api.createLegendsLayerSet('LYR3', 'esriDynamicLegendsId');
@@ -1725,8 +1723,7 @@
           const { resultSets } = payload;
           displayLegend('esriDynamicLegendsId', resultSets);
         },
-        'LYR3',
-        'esriDynamicLegendsId'
+        'LYR3/esriDynamicLegendsId'
       );
 
       // ESRI Feature =============================================================================================================
@@ -1737,8 +1734,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR4', 'esriFeatureResultSetId', resultSets);
         },
-        'LYR4',
-        'esriFeatureResultSetId'
+        'LYR4/esriFeatureResultSetId'
       );
 
       const LegendsEsriFeatureLayerSet = cgpv.api.createLegendsLayerSet('LYR4', 'esriFeatureLegendsId');
@@ -1748,8 +1744,7 @@
           const { resultSets } = payload;
           displayLegend('esriFeatureLegendsId', resultSets);
         },
-        'LYR4',
-        'esriFeatureLegendsId'
+        'LYR4/esriFeatureLegendsId'
       );
 
       // GeoJson ==================================================================================================================
@@ -1760,8 +1755,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR5', 'geoJsonResultSetId', resultSets);
         },
-        'LYR5',
-        'geoJsonResultSetId'
+        'LYR5/geoJsonResultSetId'
       );
 
       const LegendsGeoJsonLayerSet = cgpv.api.createLegendsLayerSet('LYR5', 'geojsonLegendsId');
@@ -1771,8 +1765,7 @@
           const { resultSets } = payload;
           displayLegend('geojsonLegendsId', resultSets);
         },
-        'LYR5',
-        'geojsonLegendsId'
+        'LYR5/geojsonLegendsId'
       );
 
       // WFS ======================================================================================================================
@@ -1783,8 +1776,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR6', 'wfsResultSetId', resultSets);
         },
-        'LYR6',
-        'wfsResultSetId'
+        'LYR6/wfsResultSetId'
       );
 
       const LegendsWfsLayerSet = cgpv.api.createLegendsLayerSet('LYR6', 'wfsLegendsId');
@@ -1794,8 +1786,7 @@
           const { resultSets } = payload;
           displayLegend('wfsLegendsId', resultSets);
         },
-        'LYR6',
-        'wfsLegendsId'
+        'LYR6/wfsLegendsId'
       );
 
       // OGC Feature API ==========================================================================================================
@@ -1806,8 +1797,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR7', 'ogcFeatureResultSetId', resultSets);
         },
-        'LYR7',
-        'ogcFeatureResultSetId'
+        'LYR7/ogcFeatureResultSetId'
       );
 
       const LegendsOgcApiLayerSet = cgpv.api.createLegendsLayerSet('LYR7', 'ogcApiLegendsId');
@@ -1817,8 +1807,7 @@
           const { resultSets } = payload;
           displayLegend('ogcApiLegendsId', resultSets);
         },
-        'LYR7',
-        'ogcApiLegendsId'
+        'LYR7/ogcApiLegendsId'
       );
 
       // GeoCore ==================================================================================================================
@@ -1829,8 +1818,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR8', 'geocoreResultSetId', resultSets);
         },
-        'LYR8',
-        'geocoreResultSetId'
+        'LYR8/geocoreResultSetId'
       );
 
       const LegendsGeocoreLayerSet = cgpv.api.createLegendsLayerSet('LYR8', 'geocoreLegendsId');
@@ -1840,8 +1828,7 @@
           const { resultSets } = payload;
           displayLegend('geocoreLegendsId', resultSets);
         },
-        'LYR8',
-        'geocoreLegendsId'
+        'LYR8/geocoreLegendsId'
       );
 
       // GeoPackage =============================================================================================================
@@ -1852,8 +1839,7 @@
           const { layerSetId, resultSets } = payload;
           createInfoTable('LYR9', 'geopackageResultSetId', resultSets);
         },
-        'LYR9',
-        'geopackageResultSetId'
+        'LYR9/geopackageResultSetId'
       );
 
       const LegendsGeopackageLayerSet = cgpv.api.createLegendsLayerSet('LYR9', 'geopackageLegendsId');
@@ -1863,8 +1849,7 @@
           const { resultSets } = payload;
           displayLegend('geopackageLegendsId', resultSets);
         },
-        'LYR9',
-        'geopackageLegendsId'
+        'LYR9/geopackageLegendsId'
       );
 
       // ==========================================================================================================================

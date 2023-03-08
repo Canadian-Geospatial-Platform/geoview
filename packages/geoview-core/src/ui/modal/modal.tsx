@@ -242,7 +242,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_OPEN,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (modalId === payload.modalId && payload.handlerName === mapId) {
+          if (modalId === payload.modalId) {
             const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
             // eslint-disable-next-line react-hooks/exhaustive-deps
             openEvent = true;
@@ -259,7 +259,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_UPDATE,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (modalId === payload.modalId && payload.handlerName === mapId) {
+          if (modalId === payload.modalId) {
             const modal = api.map(mapId).modal.modals[payload.modalId] as TypeModalProps;
 
             setCreatedModal(ceatedModalJSXReturner(modal));
@@ -274,7 +274,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_CLOSE,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (modalId === payload.modalId && payload.handlerName === mapId) {
+          if (modalId === payload.modalId) {
             if (!payload.open) openEvent = false;
             setCreatedModal(<Dialog open={openEvent} className={dialogClasses.closedModal} />);
           }

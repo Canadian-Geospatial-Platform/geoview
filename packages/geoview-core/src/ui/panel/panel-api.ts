@@ -74,8 +74,7 @@ export class PanelApi {
     this.closeAll();
 
     api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, this.mapId, this.buttonId, this.type!),
-      this.buttonId
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
     );
   };
 
@@ -121,8 +120,7 @@ export class PanelApi {
     this.status = false;
 
     api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, this.mapId, this.buttonId, this.type!),
-      this.buttonId
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
     );
   };
 
@@ -130,8 +128,7 @@ export class PanelApi {
     this.status = false;
 
     api.event.emit(
-      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, this.mapId, this.buttonId, this.type!),
-      this.buttonId
+      PanelPayload.withButtonIdAndType(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, `${this.mapId}/${this.buttonId}`, this.buttonId, this.type!)
     );
   };
 
@@ -157,8 +154,12 @@ export class PanelApi {
       action,
     };
     api.event.emit(
-      PanelPayload.withButtonIdAndActionButton(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, this.mapId, this.buttonId, actionButton),
-      this.buttonId
+      PanelPayload.withButtonIdAndActionButton(
+        EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION,
+        `${this.mapId}/${this.buttonId}`,
+        this.buttonId,
+        actionButton
+      )
     );
 
     return this;
@@ -188,8 +189,12 @@ export class PanelApi {
     this.content = content;
 
     api.event.emit(
-      PanelPayload.withButtonIdAndContent(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, this.mapId, this.buttonId, content),
-      this.buttonId
+      PanelPayload.withButtonIdAndContent(
+        EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT,
+        `${this.mapId}/${this.buttonId}`,
+        this.buttonId,
+        content
+      )
     );
 
     return this;
@@ -206,8 +211,12 @@ export class PanelApi {
       actionButtonId: `${this.buttonId}_${actionButtonId}`,
     };
     api.event.emit(
-      PanelPayload.withButtonIdAndActionButton(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, this.mapId, this.buttonId, actionButton),
-      this.buttonId
+      PanelPayload.withButtonIdAndActionButton(
+        EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION,
+        `${this.mapId}/${this.buttonId}`,
+        this.buttonId,
+        actionButton
+      )
     );
 
     return this;
