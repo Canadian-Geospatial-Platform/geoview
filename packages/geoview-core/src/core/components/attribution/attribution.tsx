@@ -177,10 +177,9 @@ export function Attribution(): JSX.Element {
               }
             }
           }
-          if (payload.handlerName!.includes(mapId) && payload.status) {
+          if (payload.status) {
             attributionControl.formatAttribution();
-          }
-          if (!payload.status) {
+          } else {
             attributionTextRef.current.length = 0;
           }
           setAttribtuionTextOpacity(payload.status);

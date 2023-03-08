@@ -252,13 +252,11 @@ export function NorthArrow(props: NorthArrowProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_FIX_NORTH,
       (payload) => {
         if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
-            isNorthFixedValue.current = payload.status;
+          isNorthFixedValue.current = payload.status;
 
-            // if north is fix, trigger the map rotation
-            if (payload.status) {
-              manageArrow(api.map(mapId).map);
-            }
+          // if north is fix, trigger the map rotation
+          if (payload.status) {
+            manageArrow(api.map(mapId).map);
           }
         }
       },
@@ -328,7 +326,7 @@ export function NorthPoleFlag(props: NorthArrowProps): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload) => {
-        if (payload.handlerName === mapId && payloadIsAMapViewProjection(payload)) {
+        if (payloadIsAMapViewProjection(payload)) {
           setMapProjection(`EPSG:${payload.projection}`);
         }
       },

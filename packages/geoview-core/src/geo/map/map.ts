@@ -225,8 +225,7 @@ export class MapViewer {
                 }
               }
             },
-            this.mapId,
-            geoviewLayerConfig.geoviewLayerId
+            `${this.mapId}/${geoviewLayerConfig.geoviewLayerId}`
           );
         }
       });
