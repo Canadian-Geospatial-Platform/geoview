@@ -3,7 +3,7 @@ import { api } from '../../../app';
 import { EVENT_NAMES } from '../../../api/events/event-types';
 import { sanitizeHtmlContent } from '../../utils/utilities';
 
-import { tabPayload } from '../../../api/events/payloads/footer-tab-payload';
+import { footerTabPayload } from '../../../api/events/payloads/footer-tab-payload';
 
 import { TypeTabs } from '../../../ui/tabs/tabs';
 
@@ -49,7 +49,7 @@ export class FooterTabsApi {
         this.tabs.push(tabProps);
 
         // trigger an event that a new tab has been created
-        api.event.emit(tabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, this.mapId, tabProps));
+        api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE, this.mapId, tabProps));
       }
     }
   };
@@ -68,7 +68,7 @@ export class FooterTabsApi {
       this.tabs = this.tabs.filter((tab) => tab.value !== value);
 
       // trigger an event that a tab has been removed
-      api.event.emit(tabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, this.mapId, tabToRemove));
+      api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE, this.mapId, tabToRemove));
     }
   };
 
@@ -82,7 +82,7 @@ export class FooterTabsApi {
     const tabToSelect = this.tabs.find((tab) => tab.value === value);
     if (tabToSelect) {
       // trigger an event to select the tab
-      api.event.emit(tabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, this.mapId, tabToSelect));
+      api.event.emit(footerTabPayload(EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT, this.mapId, tabToSelect));
     }
   };
 }

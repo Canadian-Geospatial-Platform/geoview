@@ -2,7 +2,6 @@ import { Extent } from 'ol/extent';
 import { Coordinate } from 'ol/coordinate';
 import { FeatureLike } from 'ol/Feature';
 import { Pixel } from 'ol/pixel';
-import { Geometry } from 'ol/geom';
 
 import { PayloadBaseClass } from './payload-base-class';
 
@@ -54,7 +53,7 @@ export type TypeFeatureInfoEntry = {
 };
 
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
-export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined };
+export type TypeFeatureInfoResultSets = { [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined | null };
 
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload

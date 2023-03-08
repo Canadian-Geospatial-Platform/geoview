@@ -13,6 +13,7 @@ import { GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '../../api/even
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
+  TypeBaseLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
@@ -65,62 +66,60 @@ export class Layer {
       EVENT_NAMES.LAYER.EVENT_ADD_LAYER,
       (payload) => {
         if (payloadIsALayerConfig(payload)) {
-          if (payload.handlerName!.includes(this.mapId)) {
-            const { layerConfig } = payload;
+          const { layerConfig } = payload;
 
-            if (layerConfigIsGeoCore(layerConfig)) {
-              const geoCore = new GeoCore(this.mapId);
-              geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
-                arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
-                  // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
-                  // the list of geoview layer entries.
-                  api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
-                  listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-                    this.addGeoviewLayer(geoviewLayerConfig);
-                  });
+          if (layerConfigIsGeoCore(layerConfig)) {
+            const geoCore = new GeoCore(this.mapId);
+            geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
+              arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
+                // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
+                // the list of geoview layer entries.
+                api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
+                listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+                  this.addGeoviewLayer(geoviewLayerConfig);
                 });
               });
-            } else if (layerConfigIsGeoJSON(layerConfig)) {
-              const geoJSON = new GeoJSON(this.mapId, layerConfig);
-              geoJSON.createGeoViewLayers().then(() => {
-                this.addToMap(geoJSON);
-              });
-            } else if (layerConfigIsGeoPackage(layerConfig)) {
-              const geoPackage = new GeoPackage(this.mapId, layerConfig);
-              geoPackage.createGeoViewLayers().then(() => {
-                this.addToMap(geoPackage);
-              });
-            } else if (layerConfigIsWMS(layerConfig)) {
-              const wmsLayer = new WMS(this.mapId, layerConfig);
-              wmsLayer.createGeoViewLayers().then(() => {
-                this.addToMap(wmsLayer);
-              });
-            } else if (layerConfigIsEsriDynamic(layerConfig)) {
-              const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
-              esriDynamic.createGeoViewLayers().then(() => {
-                this.addToMap(esriDynamic);
-              });
-            } else if (layerConfigIsEsriFeature(layerConfig)) {
-              const esriFeature = new EsriFeature(this.mapId, layerConfig);
-              esriFeature.createGeoViewLayers().then(() => {
-                this.addToMap(esriFeature);
-              });
-            } else if (layerConfigIsWFS(layerConfig)) {
-              const wfsLayer = new WFS(this.mapId, layerConfig);
-              wfsLayer.createGeoViewLayers().then(() => {
-                this.addToMap(wfsLayer);
-              });
-            } else if (layerConfigIsOgcFeature(layerConfig)) {
-              const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
-              ogcFeatureLayer.createGeoViewLayers().then(() => {
-                this.addToMap(ogcFeatureLayer);
-              });
-            } else if (layerConfigIsXYZTiles(layerConfig)) {
-              const xyzTiles = new XYZTiles(this.mapId, layerConfig);
-              xyzTiles.createGeoViewLayers().then(() => {
-                this.addToMap(xyzTiles);
-              });
-            }
+            });
+          } else if (layerConfigIsGeoJSON(layerConfig)) {
+            const geoJSON = new GeoJSON(this.mapId, layerConfig);
+            geoJSON.createGeoViewLayers().then(() => {
+              this.addToMap(geoJSON);
+            });
+          } else if (layerConfigIsGeoPackage(layerConfig)) {
+            const geoPackage = new GeoPackage(this.mapId, layerConfig);
+            geoPackage.createGeoViewLayers().then(() => {
+              this.addToMap(geoPackage);
+            });
+          } else if (layerConfigIsWMS(layerConfig)) {
+            const wmsLayer = new WMS(this.mapId, layerConfig);
+            wmsLayer.createGeoViewLayers().then(() => {
+              this.addToMap(wmsLayer);
+            });
+          } else if (layerConfigIsEsriDynamic(layerConfig)) {
+            const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
+            esriDynamic.createGeoViewLayers().then(() => {
+              this.addToMap(esriDynamic);
+            });
+          } else if (layerConfigIsEsriFeature(layerConfig)) {
+            const esriFeature = new EsriFeature(this.mapId, layerConfig);
+            esriFeature.createGeoViewLayers().then(() => {
+              this.addToMap(esriFeature);
+            });
+          } else if (layerConfigIsWFS(layerConfig)) {
+            const wfsLayer = new WFS(this.mapId, layerConfig);
+            wfsLayer.createGeoViewLayers().then(() => {
+              this.addToMap(wfsLayer);
+            });
+          } else if (layerConfigIsOgcFeature(layerConfig)) {
+            const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
+            ogcFeatureLayer.createGeoViewLayers().then(() => {
+              this.addToMap(ogcFeatureLayer);
+            });
+          } else if (layerConfigIsXYZTiles(layerConfig)) {
+            const xyzTiles = new XYZTiles(this.mapId, layerConfig);
+            xyzTiles.createGeoViewLayers().then(() => {
+              this.addToMap(xyzTiles);
+            });
           }
         }
       },
@@ -202,7 +201,7 @@ export class Layer {
       pathEnding =
         layerEntryConfig.layerPathEnding === undefined
           ? layerEntryConfig.layerId
-          : `${layerEntryConfig.layerId}/${layerEntryConfig.layerPathEnding}`;
+          : `${layerEntryConfig.layerId}.${layerEntryConfig.layerPathEnding}`;
     if (layerEntryConfig.geoviewRootLayer === layerEntryConfig.parentLayerConfig)
       return `${layerEntryConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
     return this.getLayerPath(
@@ -262,7 +261,9 @@ export class Layer {
           const layerInterval = setInterval(() => {
             if (this.geoviewLayers[geoviewLayer.geoviewLayerId]) {
               clearInterval(layerInterval);
-              api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+              api.event.emit(
+                GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer)
+              );
             }
           }, 10);
         }
@@ -279,17 +280,33 @@ export class Layer {
    * @param {string} partialLayerPath the path of the layer to be removed
    */
   removeLayersUsingPath = (partialLayerPath: string): void => {
+    // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
+    const partialLayerPathNodes = partialLayerPath.split('/');
+
+    // initialize these two constant now because we will delete the information use to get their values.
+    const indexToDelete = this.registeredLayers[partialLayerPath]
+      ? this.registeredLayers[partialLayerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
+          (layerEntryConfig) => layerEntryConfig === this.registeredLayers?.[partialLayerPath]
+        )
+      : undefined;
+    const listOfLayerEntryConfigAffected = this.registeredLayers[partialLayerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
+
     Object.keys(this.registeredLayers).forEach((completeLayerPath) => {
-      if (completeLayerPath.startsWith(partialLayerPath)) {
-        this.registeredLayers[completeLayerPath]?.gvLayer!.dispose();
-        const layerId = partialLayerPath.split('/').slice(-1)[0];
-        const listOfLayerEntryConfig = this.registeredLayers[completeLayerPath].parentLayerConfig?.listOfLayerEntryConfig;
-        const layerIndex = listOfLayerEntryConfig!.findIndex((layerConfig) => layerConfig.layerId === layerId);
-        delete listOfLayerEntryConfig![layerIndex];
-        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, completeLayerPath, 'remove'));
+      const completeLayerPathNodes = completeLayerPath.split('/');
+      const pathBeginningAreEqual = partialLayerPathNodes.reduce<boolean>((areEqual, partialLayerPathNode, nodeIndex) => {
+        return areEqual && partialLayerPathNode === completeLayerPathNodes[nodeIndex];
+      }, true);
+      if (pathBeginningAreEqual) {
+        const layerEntryConfigToRemove = this.registeredLayers[completeLayerPath];
+        layerEntryConfigToRemove.gvLayer?.dispose();
+        if (layerEntryConfigToRemove.entryType !== 'group') {
+          this.geoviewLayers[partialLayerPathNodes[0]].unregisterFromLayerSets(layerEntryConfigToRemove as TypeBaseLayerEntryConfig);
+          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, completeLayerPath, 'remove'));
+        }
         delete this.registeredLayers[completeLayerPath];
       }
     });
+    if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
     if (this.geoviewLayers[partialLayerPath]) {
       // The clearTimeout is there for those rare extreme cases where you create a layer and then immediately destroy

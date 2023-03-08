@@ -17,9 +17,6 @@ export class FeatureInfoLayerSet {
   /** The map identifier the layer set belongs to. */
   mapId: string;
 
-  /** The layer set identifier. */
-  layerSetId: string;
-
   /** The layer set object. */
   layerSet: LayerSet;
 
@@ -42,7 +39,6 @@ export class FeatureInfoLayerSet {
       return false;
     };
     this.mapId = mapId;
-    this.layerSetId = layerSetId;
     this.layerSet = new LayerSet(mapId, layerSetId, this.resultSets, registrationConditionFunction);
 
     // Listen to map click and send a query layers event to queryable layers. These layers will return a result set if features
@@ -73,8 +69,11 @@ export class FeatureInfoLayerSet {
           }, true);
           if (allDone)
             api.event.emit(
-              GetFeatureInfoPayload.createAllQueriesDonePayload(this.mapId, this.layerSetId, this.resultSets),
-              this.layerSetId
+              GetFeatureInfoPayload.createAllQueriesDonePayload(
+                `${this.mapId}/${this.layerSet.layerSetId}`,
+                this.layerSet.layerSetId,
+                this.resultSets
+              )
             );
         }
       },

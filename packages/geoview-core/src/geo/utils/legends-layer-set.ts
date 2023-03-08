@@ -49,7 +49,7 @@ export class LegendsLayerSet {
     this.layerSet = new LayerSet(mapId, layerSetId, this.resultSets, registrationConditionFunction);
 
     // This listener receives the legend information returned by the a layer's getLegend call and store it in the resultSets
-    // if all the registered layers has received their legend information, a EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE event
+    // if all the registered layers has received their legend information, an EVENT_NAMES.GET_LEGENDS.ALL_LEGENDS_DONE event
     // is triggered.
     api.event.on(
       EVENT_NAMES.GET_LEGENDS.LEGEND_INFO,
@@ -57,7 +57,7 @@ export class LegendsLayerSet {
         if (payloadIsLegendInfo(payload)) {
           const { layerPath, legendInfo } = payload;
           if (layerPath in this.resultSets) this.resultSets[layerPath] = legendInfo;
-          if (isAllDone()) api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(this.mapId, this.resultSets), layerSetId);
+          if (isAllDone()) api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/${layerSetId}`, this.resultSets));
         }
       },
       this.mapId
@@ -72,28 +72,28 @@ export class LegendsLayerSet {
           const queryUndefinedLegend = () => {
             Object.keys(this.resultSets).forEach((layerPath) => {
               if (this.resultSets[layerPath] === undefined)
-                api.event.emit(GetLegendsPayload.createQueryLegendPayload(this.mapId, layerPath), layerPath);
+                api.event.emit(GetLegendsPayload.createQueryLegendPayload(`${this.mapId}/${layerPath}`, layerPath));
             });
           };
-
-          queryUndefinedLegend();
 
           api.event.on(
             EVENT_NAMES.LAYER_SET.UPDATED,
             (layerUpdatedPayload) => {
               if (payloadIsLayerSetUpdated(layerUpdatedPayload)) {
                 if (layerUpdatedPayload.layerSetId === layerSetId) {
-                  if (isAllDone()) api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(this.mapId, this.resultSets), layerSetId);
+                  if (isAllDone())
+                    api.event.emit(GetLegendsPayload.createAllQueriesDonePayload(`${this.mapId}/${layerSetId}`, this.resultSets));
                   else queryUndefinedLegend();
                 }
               }
             },
             mapId
           );
+
+          queryUndefinedLegend();
         }
       },
-      mapId,
-      layerSetId
+      `${mapId}/${layerSetId}`
     );
   }
 

@@ -12,7 +12,7 @@ import { EVENT_NAMES } from '../../../api/events/event-types';
 import { CrosshairIcon } from './crosshair-icon';
 
 import { Fade } from '../../../ui';
-import { lngLatPayload } from '../../../api/events/payloads/lat-long-payload';
+import { lngLatPayload } from '../../../api/events/payloads/lng-lat-payload';
 import { booleanPayload } from '../../../api/events/payloads/boolean-payload';
 import { payloadIsAInKeyfocus } from '../../../api/events/payloads/in-keyfocus-payload';
 
@@ -78,7 +78,7 @@ export function Crosshair(): JSX.Element {
       const lnglatPoint = map.getView().getCenter()!;
 
       if (isCrosshairsActiveValue.current) {
-        // emit an event with the latlng point
+        // emit an event with the lnglat point
         api.event.emit(lngLatPayload(EVENT_NAMES.DETAILS_PANEL.EVENT_DETAILS_PANEL_CROSSHAIR_ENTER, mapId, lnglatPoint));
       }
     }
@@ -108,7 +108,7 @@ export function Crosshair(): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payloadIsAInKeyfocus(payload)) {
-          if (payload.handlerName!.includes(mapId) && interaction !== 'static') {
+          if (interaction !== 'static') {
             setCrosshairsActive(true);
             isCrosshairsActiveValue.current = true;
             api.event.emit(booleanPayload(EVENT_NAMES.MAP.EVENT_MAP_CROSSHAIR_ENABLE_DISABLE, mapId, true));

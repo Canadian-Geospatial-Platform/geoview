@@ -39,6 +39,7 @@ import { Layer } from '../layer';
 import { LayerSetPayload, payloadIsRequestLayerInventory } from '../../../api/events/payloads/layer-set-payload';
 import { GetLegendsPayload, payloadIsQueryLegend } from '../../../api/events/payloads/get-legends-payload';
 import { TimeDimension } from '../../../core/utils/date-mgt';
+import { TypeEventHandlerFunction } from '../../../api/events/event';
 
 export type TypeLegend = {
   layerPath: string;
@@ -142,6 +143,12 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   WMS: 'ogcWms',
 };
 
+type TypeLayerSetHandlerFunctions = {
+  requestLayerInventory?: TypeEventHandlerFunction;
+  queryLegend?: TypeEventHandlerFunction;
+  queryLayer?: TypeEventHandlerFunction;
+};
+
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
 /** ******************************************************************************************************************************
@@ -202,11 +209,14 @@ export abstract class AbstractGeoViewLayer {
   /** Layer metadata */
   layerMetadata: Record<string, TypeJsonObject> = {};
 
-  /** Layer temporal dimension */
+  /** Layer temporal dimension indexed by layerPath. */
   layerTemporalDimension: Record<string, TimeDimension> = {};
 
   /** Attribution used in the OpenLayer source. */
   attributions: string[] = [];
+
+  /** LayerSet handler functions indexed by layerPath. This property is used to deactivate (off) events attached to a layer. */
+  registerToLayerSetListenerFunctions: Record<string, TypeLayerSetHandlerFunctions> = {};
 
   /** ***************************************************************************************************************************
    * The class constructor saves parameters and common configuration parameters in attributes.
@@ -557,51 +567,78 @@ export abstract class AbstractGeoViewLayer {
    */
   protected registerToLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
     const layerPath = Layer.getLayerPath(layerEntryConfig);
+    if (!this.registerToLayerSetListenerFunctions[layerPath]) this.registerToLayerSetListenerFunctions[layerPath] = {};
 
     // Listen to events that request a layer inventory and emit a register payload event.
     // This will register all existing layers to a newly created layer set.
+    this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory = (payload) => {
+      if (payloadIsRequestLayerInventory(payload)) {
+        const { layerSetId } = payload;
+        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
+      }
+    };
+
     api.event.on(
       EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
-      (payload) => {
-        if (payloadIsRequestLayerInventory(payload)) {
-          const { layerSetId } = payload;
-          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add', layerSetId));
-        }
-      },
+      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory!,
       this.mapId
     );
 
+    this.registerToLayerSetListenerFunctions[layerPath].queryLegend = (payload) => {
+      if (payloadIsQueryLegend(payload)) {
+        this.getLegend(layerPath).then((queryResult) => {
+          api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
+        });
+      }
+    };
+
     api.event.on(
       EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
-      (payload) => {
-        if (payloadIsQueryLegend(payload)) {
-          this.getLegend(layerPath).then((queryResult) => {
-            api.event.emit(GetLegendsPayload.createLegendInfoPayload(this.mapId, layerPath, queryResult));
-          });
-        }
-      },
-      this.mapId,
-      layerPath
+      this.registerToLayerSetListenerFunctions[layerPath].queryLegend!,
+      `${this.mapId}/${layerPath}`
     );
 
     if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
       // Listen to events that request to query a layer and return the resultset to the requester.
-      api.event.on(
-        EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER,
-        (payload) => {
-          if (payloadIsQueryLayer(payload)) {
-            const { queryType, location } = payload;
-            this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
-              api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
-            });
-          }
-        },
-        this.mapId
-      );
+      this.registerToLayerSetListenerFunctions[layerPath].queryLayer = (payload) => {
+        if (payloadIsQueryLayer(payload)) {
+          const { queryType, location } = payload;
+          this.getFeatureInfo(location, layerPath, queryType).then((queryResult) => {
+            api.event.emit(GetFeatureInfoPayload.createQueryResultPayload(this.mapId, layerPath, queryResult));
+          });
+        }
+      };
+
+      api.event.on(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.registerToLayerSetListenerFunctions[layerPath].queryLayer!, this.mapId);
     }
 
     // Register to layer sets that are already created.
     api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, layerPath, 'add'));
+  }
+
+  /** ***************************************************************************************************************************
+   * This method unregisters the layer from the layer sets.
+   *
+   * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
+   */
+  unregisterFromLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig) {
+    const layerPath = Layer.getLayerPath(layerEntryConfig);
+
+    api.event.off(
+      EVENT_NAMES.LAYER_SET.REQUEST_LAYER_INVENTORY,
+      this.mapId,
+      this.registerToLayerSetListenerFunctions[layerPath].requestLayerInventory
+    );
+
+    api.event.off(
+      EVENT_NAMES.GET_LEGENDS.QUERY_LEGEND,
+      `${this.mapId}/${layerPath}`,
+      this.registerToLayerSetListenerFunctions[layerPath].queryLegend
+    );
+
+    if ('featureInfo' in layerEntryConfig.source! && layerEntryConfig.source.featureInfo?.queryable) {
+      api.event.off(EVENT_NAMES.GET_FEATURE_INFO.QUERY_LAYER, this.mapId, this.registerToLayerSetListenerFunctions[layerPath].queryLayer);
+    }
   }
 
   /** ***************************************************************************************************************************

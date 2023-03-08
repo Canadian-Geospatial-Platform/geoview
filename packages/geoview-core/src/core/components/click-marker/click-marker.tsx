@@ -70,9 +70,7 @@ export function ClickMarker(): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_SINGLE_CLICK,
       (payload) => {
         if (payloadIsAMapSingleClick(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
-            showMarkerIcon(payload.coordinates.lnglat);
-          }
+          showMarkerIcon(payload.coordinates.lnglat);
         }
       },
       mapId
@@ -82,10 +80,8 @@ export function ClickMarker(): JSX.Element {
       EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_SHOW,
       (payload) => {
         if (payloadIsAMarkerDefinition(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
-            // TODO: Also implement a symbology define by the payload for feature details item selection.
-            showMarkerIcon(payload.lnglat);
-          }
+          // TODO: Also implement a symbology define by the payload for feature details item selection.
+          showMarkerIcon(payload.lnglat);
         }
       },
       mapId
@@ -93,12 +89,8 @@ export function ClickMarker(): JSX.Element {
 
     api.event.on(
       EVENT_NAMES.MARKER_ICON.EVENT_MARKER_ICON_HIDE,
-      (payload) => {
-        // we do not need to verify the payload as no marker are pass
-        // we only need to validate if we have handler name (map id)
-        if (payload.handlerName!.includes(mapId)) {
-          setShowMarker(false);
-        }
+      () => {
+        setShowMarker(false);
       },
       mapId
     );

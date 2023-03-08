@@ -54,10 +54,9 @@ export function LegendItem({ mapId }: Props): JSX.Element {
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
               addLayer(payload.layerConfig.geoviewLayerId);
-              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
             },
-            mapId,
-            payload.layerConfig.geoviewLayerId
+            `${mapId}/${payload.layerConfig.geoviewLayerId}`
           );
         }
       },
