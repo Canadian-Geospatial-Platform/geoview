@@ -156,9 +156,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            addButtonPanel(payload);
-          }
+          addButtonPanel(payload);
         }
       },
       mapId
@@ -169,9 +167,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            removeButtonPanel(payload);
-          }
+          removeButtonPanel(payload);
         }
       },
       mapId

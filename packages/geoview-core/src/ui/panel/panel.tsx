@@ -165,8 +165,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         }
       }
     },
-    mapId,
-    button.id!
+    `${mapId}/${button.id!}`
   );
 
   useEffect(() => {
@@ -181,44 +180,35 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
       EVENT_NAMES.PANEL.EVENT_PANEL_OPEN,
       (payload) => {
         if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.buttonId === button.id! && payload.handlerName === mapId) {
-            // set focus on close button on panel open
-            setPanelStatus(true);
+          // set focus on close button on panel open
+          setPanelStatus(true);
 
-            if (closeBtnRef && closeBtnRef.current) {
-              (closeBtnRef.current as HTMLElement).focus();
-            }
+          if (closeBtnRef && closeBtnRef.current) {
+            (closeBtnRef.current as HTMLElement).focus();
           }
         }
       },
-      mapId,
-      button.id!
+      `${mapId}/${button.id!}`
     );
 
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE,
       (payload) => {
         if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.buttonId === button.id! && payload.handlerName === mapId) {
-            closePanel();
-          }
+          closePanel();
         }
       },
-      mapId,
-      button.id!
+      `${mapId}/${button.id!}`
     );
 
     api.event.on(
       EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL,
       (payload) => {
         if (payloadHasAButtonIdAndType(payload)) {
-          if (payload.handlerName === mapId) {
-            setPanelStatus(false);
-          }
+          setPanelStatus(false);
         }
       },
-      mapId,
-      button.id!
+      `${mapId}/${button.id!}`
     );
 
     // listen to add action button event
@@ -255,8 +245,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           }
         }
       },
-      mapId,
-      button.id!
+      `${mapId}/${button.id!}`
     );
 
     // listen to remove action button event
@@ -273,17 +262,16 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
           }
         }
       },
-      mapId,
-      button.id!
+      `${mapId}/${button.id!}`
     );
 
     return () => {
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, mapId, button.id!);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, mapId, button.id!);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, mapId, button.id!);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, mapId, button.id!);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, mapId, button.id!);
-      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, mapId, button.id!);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_OPEN, `${mapId}/${button.id!}`);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${button.id!}`);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CLOSE_ALL, `${mapId}/${button.id!}`);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_ADD_ACTION, `${mapId}/${button.id!}`);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_REMOVE_ACTION, `${mapId}/${button.id!}`);
+      api.event.off(EVENT_NAMES.PANEL.EVENT_PANEL_CHANGE_CONTENT, `${mapId}/${button.id!}`);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -128,10 +128,9 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
               addLayer(payload.layerConfig.geoviewLayerId);
-              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
             },
-            mapId,
-            payload.layerConfig.geoviewLayerId
+            `${mapId}/${payload.layerConfig.geoviewLayerId}`
           );
         }
       },
@@ -155,12 +154,11 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
       () => {
         setAddLayerVisible(false);
       },
-      mapId,
-      buttonPanel.buttonPanelId
+      `${mapId}/${buttonPanel.buttonPanelId}`
     );
 
     return () => {
-      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, mapId, buttonPanel.buttonPanelId);
+      api.event.off(api.eventNames.PANEL.EVENT_PANEL_CLOSE, `${mapId}/${buttonPanel.buttonPanelId}`);
     };
   }, [api, buttonPanel.buttonPanelId, mapId]);
 

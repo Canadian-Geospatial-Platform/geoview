@@ -19,8 +19,7 @@ Once the project matures, these docs can be the basis of official public docs, h
 ## How the application works
 
 - [Theme](./app/ui/theming.md)
-- [Events API](./app/event/events-api.md)
-- [Events and Payloads](./app/event/event-payloads.md)
+- [Events documentation](./app/event/README.md)
 - [Components vs Core Packages vs External Packages](./app/components-packages.md)
 - [Packages](./app/packages.md)
 - [Load maps](./app/loading-maps.md)

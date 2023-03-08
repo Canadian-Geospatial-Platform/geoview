@@ -145,9 +145,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_IN_KEYFOCUS,
       (payload) => {
         if (payloadIsAInKeyfocus(payload)) {
-          if (payload.handlerName!.includes(focusTrapId)) {
-            setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
-          }
+          setTimeout(() => document.getElementById(`map-${focusTrapId}`)?.focus(), 0);
         }
       },
       focusTrapId

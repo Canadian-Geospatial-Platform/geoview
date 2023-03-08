@@ -121,11 +121,10 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_ADD_COMPONENT,
       (payload) => {
         if (payloadIsAMapComponent(payload)) {
-          if (payload.handlerName === shellId)
-            setComponents((tempComponents) => ({
-              ...tempComponents,
-              [payload.mapComponentId]: payload.component!,
-            }));
+          setComponents((tempComponents) => ({
+            ...tempComponents,
+            [payload.mapComponentId]: payload.component!,
+          }));
         }
       },
       shellId
@@ -136,14 +135,12 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_REMOVE_COMPONENT,
       (payload) => {
         if (payloadIsAMapComponent(payload)) {
-          if (payload.handlerName === shellId) {
-            const tempComponents: Record<string, JSX.Element> = { ...components };
-            delete tempComponents[payload.mapComponentId];
+          const tempComponents: Record<string, JSX.Element> = { ...components };
+          delete tempComponents[payload.mapComponentId];
 
-            setComponents(() => ({
-              ...tempComponents,
-            }));
-          }
+          setComponents(() => ({
+            ...tempComponents,
+          }));
         }
       },
       shellId
@@ -153,10 +150,8 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_LOADED,
       (payload) => {
         if (payloadIsAMap(payload)) {
-          if (payload.handlerName!.includes(shellId)) {
-            // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
-            setIsLoaded(true);
-          }
+          // even if the map loads some layers (basemap) are not finish rendering. Same for north arrow
+          setIsLoaded(true);
         }
       },
       shellId
@@ -167,9 +162,7 @@ export function Shell(props: ShellProps): JSX.Element {
       EVENT_NAMES.MODAL.EVENT_MODAL_CREATE,
       (payload) => {
         if (payloadIsAModal(payload)) {
-          if (payload.handlerName === shellId) {
-            updateShell();
-          }
+          updateShell();
         }
       },
       shellId
