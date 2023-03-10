@@ -29,7 +29,7 @@ import {
 } from '@mui/x-data-grid';
 
 import Button, { ButtonProps } from '@mui/material/Button';
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
 import { Tooltip, MenuItem, MapIcon } from '../../../ui';
 
 /**
@@ -41,11 +41,12 @@ import { Tooltip, MenuItem, MapIcon } from '../../../ui';
 
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
+  mapId: string;
   layerId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
-  filterMap: (layerId: string, filter: string) => void;
+  // filterMap: (layerId: string, filter: string) => void;
 }
 
 const sxClasses = {
@@ -102,9 +103,10 @@ const buttonBaseProps: ButtonProps = {
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
-  const { layerId, rowId, layerKey, displayLanguage, columns, rows, filterMap } = props;
+  const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
   const [filterString, setFilterString] = useState<string>('');
+  const [mapfiltered, setMapFiltered] = useState<boolean>(true);
 
   /**
    * Convert the filter string from the Filter Model
@@ -115,29 +117,35 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
   const buildFilterString = (gridFilterModel: GridFilterModel) => {
     const filterObj = gridFilterModel.items[0];
-    if (filterObj === undefined || filterObj.value === undefined) {
+    const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
+    if (
+      filterObj === undefined ||
+      (filterObj.value === undefined && filterObj.operatorValue !== 'isEmpty' && filterObj.operatorValue !== 'isNotEmpty')
+    ) {
       return '';
     }
     switch (filterObj.operatorValue) {
       case 'contains':
-        return `${filterObj.columnField} like '%${filterObj.value}%'`;
+        return `${filterObj.columnField} like '%${filterObj.value as string}%'`;
       case 'equals':
-        return `${filterObj.columnField} = '%${filterObj.value}%'`;
+        return `${filterObj.columnField} = '${filterObj.value as string}'`;
       case 'startsWith':
-        return `${filterObj.columnField} like '${filterObj.value}%'`;
+        return `${filterObj.columnField} like '${filterObj.value as string}%'`;
       case 'endsWith':
-        return `${filterObj.columnField} like '%${filterObj.value}'`;
+        return `${filterObj.columnField} like '%${filterObj.value as string}'`;
       case 'isEmpty':
-        return `${filterObj.columnField} = ''`;
+        return `${filterObj.columnField} is null`;
       case 'isNotEmpty':
-        return `${filterObj.columnField} <> ''`;
+        return `${filterObj.columnField}<>''`;
       case 'isAnyOf':
         if (filterObj.value.length === 0) {
           return '';
         }
-        return `${filterObj.columnField} in ${JSON.stringify(filterObj.value)}`;
+        return `${filterObj.columnField} in ${
+          fieldType === 'number' ? `(${filterObj.value.join(',')})` : `('${filterObj.value.join("','")}')`
+        }`;
       default:
-        return `${filterObj.columnField}${filterObj.operatorValue}${filterObj.columnField}`;
+        return `${filterObj.columnField} ${filterObj.operatorValue} ${filterObj.value}`;
     }
   };
 
@@ -224,6 +232,17 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     );
   }
 
+  const filterMap = () => {
+    const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+    const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+    if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+      if ((filterString === '' && !mapfiltered) || filterString !== '') {
+        (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, mapfiltered ? filterString : '');
+      }
+    }
+    setMapFiltered(filterString === '' ? true : !mapfiltered);
+  };
+
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
    *
@@ -235,15 +254,19 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     return (
       <GridToolbarContainer {...props}>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
-        <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
+        <GridToolbarFilterButton
+          onResize={undefined}
+          onResizeCapture={undefined}
+          componentsProps={{ button: { disabled: !mapfiltered } }}
+        />
         <Button
           {...buttonBaseProps}
           id={`${layerId}-map-filter-button`}
           startIcon={<MapIcon />}
-          onClick={() => filterMap(layerKey, filterString)}
+          onClick={() => filterMap()}
           disabled={filterString === ''}
         >
-          {t('datagrid.filterMap')}
+          {mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
         </Button>
         <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
         <CustomExportButton />
@@ -290,7 +313,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
             const filter = buildFilterString(filterModel);
             setFilterString(filter);
             if (filter === '') {
-              filterMap(layerKey, '');
+              filterMap();
             }
           }}
         />
