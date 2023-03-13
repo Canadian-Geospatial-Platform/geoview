@@ -101,7 +101,7 @@ export class DataGridAPI {
 
         return {
           featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
-          featureIcon: { featureInfoKey: 'icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
+          featureIcon: { featureInfoKey: 'Icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
           geometry: buildGeometry(geometry?.getGeometry() as Geometry),
           ...featureInfo,
         };
