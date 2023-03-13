@@ -98,6 +98,14 @@ const sxClasses = {
       },
     },
   },
+  iconImg: {
+    padding: 3,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'grey.600',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    background: '#fff',
+  },
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
@@ -160,6 +168,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     const geoData = gridRowIds.map((gridRowId) => {
       const { geometry, ...featureInfo } = rows[gridRowId as number];
       delete featureInfo.featureKey;
+      delete featureInfo.featureIcon;
       return {
         type: 'Feature',
         geometry,
@@ -281,12 +290,15 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   // tooltip implementation for column content
   // TODO: works only with hover and add tooltips even when not needed. need improvement
   columns.forEach((column) => {
-    // eslint-disable-next-line no-param-reassign
-    column.renderCell = (params: GridCellParams) => (
-      <Tooltip title={params.value}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
-      </Tooltip>
-    );
+    column.renderCell = (params: GridCellParams) => {
+      return column.field === 'featureIcon' ? (
+        <img alt="" src={params.value} style={sxClasses.iconImg} />
+      ) : (
+        <Tooltip title={params.value}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
+        </Tooltip>
+      );
+    };
   });
 
   // set locale from display language
