@@ -120,7 +120,8 @@ export class DataGridAPI {
           width: 150,
           type: firstValue[header].fieldType ? firstValue[header].fieldType : 'string',
           hide: columnHeader.length > 1 && header === 'featureKey',
-          filterable: header !== 'featureKey',
+          hideable: header !== 'featureIcon',
+          filterable: header !== 'featureKey' && header !== 'featureIcon',
         };
       });
 
