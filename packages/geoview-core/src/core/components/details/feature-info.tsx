@@ -63,6 +63,14 @@ const sxClasses = {
     fontSize: '0.7em',
     width: '40%',
   },
+  iconImg: {
+    padding: 3,
+    borderRadius: 0,
+    border: '1px solid',
+    borderColor: 'grey.600',
+    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
+    background: '#fff',
+  },
 };
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -81,6 +89,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { mapId, location, backgroundStyle, handlerName } = detailsSettings;
   const featureId = `Feature Info ${feature.featureKey}`;
+  const featureIconSrc = feature.featureIcon.toDataURL();
   const [isOpen, setOpen] = useState<boolean>(false);
   const [currentZoom, setCurrentZoom] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
@@ -134,6 +143,9 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
             <IconButton color="primary" sx={fontColor}>
               {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
+          </ListItemIcon>
+          <ListItemIcon>
+            <img alt={featureId} src={featureIconSrc} style={sxClasses.iconImg} />
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
