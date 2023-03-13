@@ -334,8 +334,8 @@ const themeOptions: ThemeOptions = {
     },
   },
   appBar: {
-    background: '#1E1E1E',
-    border: '#444444',
+    background: '#fff',
+    border: '#fff',
     btnActiveBg: '#000000e6',
     btnDefaultBg: '#222222',
     btnFocusBg: '#333333',
