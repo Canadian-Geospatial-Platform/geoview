@@ -90,7 +90,7 @@ export class DataGridAPI {
      */
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
       return arrayOfFeatureInfoEntries.map((feature) => {
-        const { featureKey, fieldInfo, geometry } = feature;
+        const { featureKey, fieldInfo, geometry, featureIcon } = feature;
         const featureInfo: Record<string, {}> = {};
         Object.entries(fieldInfo).forEach(([fieldKey, fieldInfoEntry]) => {
           const featureInfoKey = (fieldInfoEntry?.alias ? fieldInfoEntry?.alias : fieldKey) as string;
@@ -101,6 +101,7 @@ export class DataGridAPI {
 
         return {
           featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
+          featureIcon: { featureInfoKey: 'icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
           geometry: buildGeometry(geometry?.getGeometry() as Geometry),
           ...featureInfo,
         };
