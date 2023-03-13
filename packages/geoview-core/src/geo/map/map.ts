@@ -13,7 +13,7 @@ import queryString from 'query-string';
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
 
-import { api } from '../../app';
+import { AbstractGeoViewLayer, api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
 
 import { Config } from '../../core/utils/config/config';
@@ -32,7 +32,7 @@ import { mapComponentPayload } from '../../api/events/payloads/map-component-pay
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '../../api/events/payloads/geoview-layer-payload';
 import { generateId } from '../../core/utils/utilities';
-import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
+import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings, TypeListOfLayerEntryConfig } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
 import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
@@ -83,6 +83,9 @@ export class MapViewer {
 
   // used to access layers functions
   layer!: Layer;
+
+  // order to load layers
+  layerOrder: string[];
 
   // get used language
   displayLanguage: TypeDisplayLanguage;
@@ -160,6 +163,20 @@ export class MapViewer {
     // extract the number of layers to load and listen to added layers event to decrease the number of expected layer
     const listOfGeoviewLayerConfig: TypeListOfGeoviewLayerConfig = this.mapFeaturesConfig.map.listOfGeoviewLayerConfig || [];
     this.setEventListenerAndTimeout4ThisListOfLayer(listOfGeoviewLayerConfig);
+
+    // set order for layers to appear on the map according to config
+    this.layerOrder = [];
+    listOfGeoviewLayerConfig.forEach((layer) => {
+      if (layer.geoviewLayerId) {
+        // layer order reversed so highest index is top layer
+        this.layerOrder.unshift(layer.geoviewLayerId);
+        // layers without id uses sublayer ids
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layer.listOfLayerEntryConfig.forEach((subLayer) => {
+          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
+        });
+      }
+    });
   }
 
   /**
@@ -216,6 +233,8 @@ export class MapViewer {
             (payload) => {
               if (payloadIsGeoViewLayerAdded(payload)) {
                 const { geoviewLayer } = payload;
+                geoviewLayer.layerOrder = this.orderSubLayers(geoviewLayer.listOfLayerEntryConfig);
+                this.setLayerZIndices(geoviewLayer);
                 geoviewLayer!.isLoaded = true;
                 if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime()) {
                   clearTimeout(this.layerLoadedTimeoutId[geoviewLayerConfig.geoviewLayerId]);
@@ -570,5 +589,65 @@ export class MapViewer {
     for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
     for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
     return coordinates;
+  };
+
+  /**
+   * Function used to order the sublayers based on their position in the config.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerConfig List of layer configs to order
+   */
+  orderSubLayers(listOfLayerConfig: TypeListOfLayerEntryConfig): string[] {
+    const layers: string[] = [];
+    listOfLayerConfig.forEach((layer) => {
+      if (layer.layerId) {
+        layers.unshift(layer.layerId);
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layers.unshift(...this.orderSubLayers(layer.listOfLayerEntryConfig));
+      }
+    });
+    return layers;
+  }
+
+  /**
+   * Set Z index for layer and it's sublayers
+   *
+   * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
+   */
+  setLayerZIndices = (geoviewLayer: AbstractGeoViewLayer) => {
+    const zIndex =
+      this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) !== -1 ? this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) * 100 : 0;
+    geoviewLayer.gvLayers!.setZIndex(zIndex);
+    geoviewLayer.listOfLayerEntryConfig.forEach((subLayer) => {
+      const subLayerZIndex =
+        geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
+      subLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+    });
+  };
+
+  /**
+   * Move layer one level in the given direction.
+   *
+   * @param {string} layerId ID of layer to be moved
+   * @param {string} parentLayerId ID of parent layer if layer is a sublayer
+   */
+  moveLayer = (layerId: string, destination: number, parentLayerId?: string) => {
+    const orderOfLayers: string[] = parentLayerId
+      ? api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId)!.layerOrder
+      : this.layerOrder;
+    orderOfLayers.reverse(); // layer order in legend is reversed from layerOrder
+    const location = orderOfLayers.indexOf(layerId);
+    const [removed] = orderOfLayers.splice(location, 1);
+    orderOfLayers.splice(destination, 0, removed);
+    orderOfLayers.reverse();
+
+    if (!parentLayerId) {
+      orderOfLayers.forEach((movedLayerId) => {
+        const movedLayer = api.maps[this.mapId].layer.getGeoviewLayerById(movedLayerId);
+        if (movedLayer) this.setLayerZIndices(movedLayer);
+      });
+    } else {
+      const parentLayer = api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId);
+      if (parentLayer) this.setLayerZIndices(parentLayer);
+    }
   };
 }

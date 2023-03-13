@@ -693,6 +693,15 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
           setAddLayerVisible(false);
         }, 3000);
       }
+
+      if (layerConfig.geoviewLayerId) {
+        api.map(mapId).layerOrder.push(layerConfig.geoviewLayerId);
+      } else if (layerConfig.listOfLayerEntryConfig !== undefined) {
+        layerConfig.listOfLayerEntryConfig.forEach((subLayer) => {
+          if (subLayer.layerId) api.map(mapId).layerOrder.unshift(subLayer.layerId);
+        });
+      }
+
       api.map(mapId).layer.addGeoviewLayer(layerConfig);
     }
   };

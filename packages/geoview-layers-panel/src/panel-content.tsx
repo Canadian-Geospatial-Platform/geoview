@@ -110,7 +110,7 @@ function PanelContent(props: TypePanelContentProps): JSX.Element {
   };
 
   useEffect(() => {
-    if (api.map(mapId!).layer !== undefined) setMapLayers(Object.keys(api.map(mapId!).layer.geoviewLayers));
+    if (api.map(mapId!).layerOrder !== undefined) setMapLayers([...api.map(mapId!).layerOrder].reverse());
     api.event.on(
       api.eventNames.LAYER.EVENT_REMOVE_LAYER,
       (payload) => {

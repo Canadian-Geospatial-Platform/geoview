@@ -1,5 +1,6 @@
 import { EventTypes } from 'ol/Observable';
 
+import { indexOf } from 'lodash';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
@@ -338,6 +339,7 @@ export class Layer {
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
+    api.map(this.mapId).layerOrder.splice(indexOf(api.map(this.mapId).layerOrder, geoviewLayer.geoviewLayerId), 1);
 
     return geoviewLayer.geoviewLayerId;
   };

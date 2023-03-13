@@ -57,7 +57,7 @@ function ReorderLayersList({ mapId, title, layerIds, setReorderLayersVisible, se
     const reorderedLayerIds = [...layerIds];
     const [removed] = reorderedLayerIds.splice(source.index, 1);
     reorderedLayerIds.splice(destination.index, 0, removed);
-    // TODO waiting on issue #736, need to emit an event or api call here to make the map change the layer order
+    api.map(mapId).moveLayer(removed, destination.index);
     setMapLayers(reorderedLayerIds);
   };
 
