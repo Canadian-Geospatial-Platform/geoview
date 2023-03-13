@@ -10,7 +10,7 @@ import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Export from './buttons/export';
 
-import ExportModal from '../export-modal/export-modal';
+import ExportModal from '../export/export-modal';
 
 import { api, payloadIsABoolean } from '../../../app';
 import { Panel, ButtonGroup, IconButton, Box } from '../../../ui';
