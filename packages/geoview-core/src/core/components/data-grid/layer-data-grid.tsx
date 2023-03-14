@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataGrid,
@@ -104,8 +105,14 @@ const sxClasses = {
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
-  const { rowId, layerKey, displayLanguage, columns, rows, currentZoom, handleZoomIn } = props;
+  const { rowId, mapId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
+
+  const [currentZoom, setCurrentZoom] = useState('');
+
+  const { currentProjection } = api.map(mapId);
+  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
+  const projectionConfig = api.projection.projections[currentProjection];
 
   const getJson = () => {
     const geoData = rows.map((row) => {
