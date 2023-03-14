@@ -3,6 +3,7 @@
 import { createElement, ReactElement, useState, useEffect } from 'react';
 // import { useTranslation } from 'react-i18next';
 import { toLonLat } from 'ol/proj';
+import { Extent } from 'ol/extent';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries, TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../app';
 
@@ -46,9 +47,9 @@ export class DataGridAPI {
     // const { t } = useTranslation<string>();
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
-
     const { currentProjection } = api.map(this.mapId);
     const projectionConfig = api.projection.projections[currentProjection];
+
     /**
      * Create a geometry json
      *
@@ -90,7 +91,7 @@ export class DataGridAPI {
      */
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
       return arrayOfFeatureInfoEntries.map((feature) => {
-        const { featureKey, fieldInfo, geometry, featureIcon } = feature;
+        const { featureKey, fieldInfo, geometry, featureIcon, extent } = feature;
         const featureInfo: Record<string, {}> = {};
         Object.entries(fieldInfo).forEach(([fieldKey, fieldInfoEntry]) => {
           const featureInfoKey = (fieldInfoEntry?.alias ? fieldInfoEntry?.alias : fieldKey) as string;
@@ -103,6 +104,7 @@ export class DataGridAPI {
           featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
           featureIcon: { featureInfoKey: 'Icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
           geometry: buildGeometry(geometry?.getGeometry() as Geometry),
+          extent,
           ...featureInfo,
         };
       });
@@ -112,7 +114,7 @@ export class DataGridAPI {
     const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
       const firstValue: Record<string, { featureInfoKey: string; featureInfoValue: string; fieldType: string }> = layerValues[0];
       // set columns
-      const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry');
+      const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry' && kn !== 'extent');
       const columns = columnHeader.map((header) => {
         return {
           field: header,
@@ -128,10 +130,13 @@ export class DataGridAPI {
       // set rows
       const rows = layerValues.map((values) => {
         let geometry = {};
+        let extent = [] as Extent;
         const featureInfo: Record<string, string> = {};
         Object.entries(values).forEach(([valueKey, valueInfoEntry]) => {
           if (valueKey === 'geometry') {
             geometry = valueInfoEntry as Geometry;
+          } else if (valueKey === 'extent') {
+            extent = valueInfoEntry as Extent;
           } else {
             featureInfo[valueKey] = (
               valueInfoEntry as { featureInfoKey: string; featureInfoValue: string; fieldType: string }
@@ -141,6 +146,7 @@ export class DataGridAPI {
 
         return {
           geometry,
+          extent,
           ...featureInfo,
         };
       });

@@ -27,10 +27,11 @@ import {
   gridFilteredSortedRowIdsSelector,
   GridFilterModel,
 } from '@mui/x-data-grid';
-
+import { fromLonLat } from 'ol/proj';
 import Button, { ButtonProps } from '@mui/material/Button';
+import { Extent } from 'ol/extent';
 import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, Switch } from '../../../ui';
+import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -116,7 +117,26 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const { t } = useTranslation<string>();
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
+  const [currentZoom, setCurrentZoom] = useState<number>(-1);
+  const { currentProjection } = api.map(mapId);
+  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
+  const projectionConfig = api.projection.projections[currentProjection];
 
+  const handleZoomIn = (zoomid: number, extent: Extent) => {
+    if (currentZoom !== zoomid) {
+      api.map(mapId).zoomToExtent(extent);
+    } else {
+      api
+        .map(mapId)
+        .map.getView()
+        .animate({
+          center: fromLonLat(center, projectionConfig),
+          duration: 500,
+          zoom,
+        });
+    }
+    setCurrentZoom(currentZoom !== zoomid ? zoomid : -1);
+  };
   /**
    * Convert the filter string from the Filter Model
    *
@@ -172,6 +192,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       const { geometry, ...featureInfo } = rows[gridRowId as number];
       delete featureInfo.featureKey;
       delete featureInfo.featureIcon;
+      delete featureInfo.extent;
       return {
         type: 'Feature',
         geometry,
@@ -295,7 +316,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   columns.forEach((column) => {
     column.renderCell = (params: GridCellParams) => {
       return column.field === 'featureIcon' ? (
-        <img alt="" src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
+        <>
+          <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
+          <IconButton color="primary" onClick={() => handleZoomIn(params.id as number, rows[params.id as number].extent)}>
+            <ZoomInSearchIcon style={{ display: currentZoom !== params.id ? 'block' : 'none' }} />
+            <ZoomOutSearchIcon style={{ display: currentZoom !== params.id ? 'none' : 'block' }} />
+          </IconButton>
+        </>
       ) : (
         <Tooltip title={params.value}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
