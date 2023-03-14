@@ -26,8 +26,9 @@ import {
 
 import { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { fromLonLat } from 'ol/proj';
 import { Tooltip, MenuItem, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
+import { TypeDisplayLanguage, api } from '../../../app';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -38,11 +39,10 @@ import { Tooltip, MenuItem, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } fr
 
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
+  mapId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
-  currentZoom: string;
-  handleZoomIn: (zoomid: string, extent: Extent) => void;
 }
 
 const sxClasses = {
@@ -108,11 +108,30 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const { rowId, mapId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
 
-  const [currentZoom, setCurrentZoom] = useState('');
+  const [currentZoom, setCurrentZoom] = useState(-1);
 
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
+
+  const handleZoomIn = (zoomid: number, extent: Extent) => {
+    console.log(zoomid, currentZoom, zoom, center);
+    if (currentZoom !== zoomid) {
+      api.map(mapId).zoomToExtent(extent);
+      setCurrentZoom(zoomid);
+    } else {
+      console.log(mapId);
+      api
+        .map(mapId)
+        .map.getView()
+        .animate({
+          center: fromLonLat(center, projectionConfig),
+          duration: 500,
+          zoom,
+        });
+      setCurrentZoom(-1);
+    }
+  };
 
   const getJson = () => {
     const geoData = rows.map((row) => {
@@ -217,7 +236,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       return column.field === 'featureIcon' ? (
         <>
           <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
-          <IconButton color="primary" onClick={() => handleZoomIn(params.id.toString(), rows[params.id as number].extent)}>
+          <IconButton color="primary" onClick={() => handleZoomIn(params.id as number, rows[params.id as number].extent)}>
             <ZoomInSearchIcon style={{ display: currentZoom !== params.id ? 'block' : 'none' }} />
             <ZoomOutSearchIcon style={{ display: currentZoom !== params.id ? 'none' : 'block' }} />
           </IconButton>

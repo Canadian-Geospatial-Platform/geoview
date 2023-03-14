@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/no-array-index-key */
 import { createElement, ReactElement, useState, useEffect } from 'react';
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
 import { Extent } from 'ol/extent';
 import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries } from '../../../app';
@@ -47,27 +47,9 @@ export class DataGridAPI {
 
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
-    const [currentZoom, setCurrentZoom] = useState('');
 
     const { currentProjection } = api.map(this.mapId);
-    const { zoom, center } = api.map(this.mapId).mapFeaturesConfig.map.viewSettings;
     const projectionConfig = api.projection.projections[currentProjection];
-
-    const handleZoomIn = (zoomid: string, extent: Extent) => {
-      if (currentZoom !== zoomid) {
-        api.map(this.mapId).zoomToExtent(extent);
-      } else {
-        api
-          .map(this.mapId)
-          .map.getView()
-          .animate({
-            center: fromLonLat(center, projectionConfig),
-            duration: 500,
-            zoom,
-          });
-      }
-      setCurrentZoom(currentZoom !== zoomid ? zoomid : '');
-    };
 
     /**
      * Create a geometry json
@@ -172,6 +154,7 @@ export class DataGridAPI {
 
       return {
         key: `${layerId}-datagrid`,
+        mapId: this.mapId,
         layerKey,
         columns,
         rows,
@@ -180,8 +163,6 @@ export class DataGridAPI {
         autoHeight: true,
         rowId: 'featureKey',
         displayLanguage: this.displayLanguage,
-        currentZoom,
-        handleZoomIn,
       };
     };
 
