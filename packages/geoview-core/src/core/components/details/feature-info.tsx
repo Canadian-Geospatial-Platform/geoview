@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, CSSProperties } from 'react';
 import { fromLonLat } from 'ol/proj';
 import {
   Collapse,
@@ -70,6 +70,9 @@ const sxClasses = {
     borderColor: 'grey.600',
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
+    width: '35px',
+    height: '35px',
+    objectFit: 'scale-down',
   },
 };
 export interface TypeFeatureProps {
@@ -145,7 +148,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
             </IconButton>
           </ListItemIcon>
           <ListItemIcon>
-            <img alt={featureId} src={featureIconSrc} style={sxClasses.iconImg} />
+            <img alt={featureId} src={featureIconSrc} style={sxClasses.iconImg as CSSProperties} />
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />

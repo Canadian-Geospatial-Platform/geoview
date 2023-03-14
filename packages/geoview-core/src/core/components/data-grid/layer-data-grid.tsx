@@ -94,6 +94,9 @@ const sxClasses = {
     borderColor: 'grey.600',
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     background: '#fff',
+    width: '35px',
+    height: '35px',
+    objectFit: 'scale-down',
   },
 };
 
@@ -200,7 +203,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   columns.forEach((column) => {
     column.renderCell = (params: GridCellParams) => {
       return column.field === 'featureIcon' ? (
-        <img alt="" src={params.value} style={sxClasses.iconImg} />
+        <img alt="" src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
       ) : (
         <Tooltip title={params.value}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
