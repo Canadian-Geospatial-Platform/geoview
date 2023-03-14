@@ -30,8 +30,8 @@ import {
 import { fromLonLat } from 'ol/proj';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
+import { Tooltip, MenuItem, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
+import { TypeDisplayLanguage, api } from '../../../app';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -43,7 +43,6 @@ import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconBut
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
   mapId: string;
-  layerId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
@@ -118,6 +117,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
   const [currentZoom, setCurrentZoom] = useState<number>(-1);
+
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
