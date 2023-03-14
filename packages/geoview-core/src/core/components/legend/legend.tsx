@@ -16,7 +16,7 @@ export function Legend(): JSX.Element | null {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  const configLayerIds = api.map(mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig?.map((element) => element.geoviewLayerId) || [];
+  const configLayerIds = api.map(mapId).layer.layerOrder || [];
 
   const [mapLayers, setMapLayers] = useState<{ [geoviewLayerId: string]: AbstractGeoViewLayer }>({});
   const [orderedMapLayers, setOrderedMapLayers] = useState<AbstractGeoViewLayer[]>([]);

@@ -1,5 +1,6 @@
 import { EventTypes } from 'ol/Observable';
 
+import { indexOf } from 'lodash';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
@@ -16,6 +17,7 @@ import {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
+  TypeListOfLayerEntryConfig,
   TypeListOfLocalizedLanguages,
 } from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
@@ -44,6 +46,9 @@ export class Layer {
   // used to access vector API to create and manage geometries
   vector: Vector | undefined;
 
+  // order to load layers
+  layerOrder: string[];
+
   /** used to reference the map id */
   private mapId: string;
 
@@ -57,6 +62,20 @@ export class Layer {
     this.mapId = mapId;
 
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
+
+    // set order for layers to appear on the map according to config
+    this.layerOrder = [];
+    validGeoviewLayerConfigs.forEach((layer) => {
+      if (layer.geoviewLayerId) {
+        // layer order reversed so highest index is top layer
+        this.layerOrder.unshift(layer.geoviewLayerId);
+        // layers without id uses sublayer ids
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layer.listOfLayerEntryConfig.forEach((subLayer) => {
+          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
+        });
+      }
+    });
 
     this.vector = new Vector(this.mapId);
 
@@ -338,6 +357,7 @@ export class Layer {
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
+    this.layerOrder.splice(indexOf(api.map(this.mapId).layer.layerOrder, geoviewLayer.geoviewLayerId), 1);
 
     return geoviewLayer.geoviewLayerId;
   };
@@ -350,5 +370,65 @@ export class Layer {
    */
   getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
     return this.geoviewLayers[geoviewLayerId];
+  };
+
+  /**
+   * Function used to order the sublayers based on their position in the config.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerConfig List of layer configs to order
+   */
+  orderSubLayers(listOfLayerConfig: TypeListOfLayerEntryConfig): string[] {
+    const layers: string[] = [];
+    listOfLayerConfig.forEach((layer) => {
+      if (layer.layerId) {
+        layers.unshift(layer.layerId);
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layers.unshift(...this.orderSubLayers(layer.listOfLayerEntryConfig));
+      }
+    });
+    return layers;
+  }
+
+  /**
+   * Set Z index for layer and it's sublayers
+   *
+   * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
+   */
+  setLayerZIndices = (geoviewLayer: AbstractGeoViewLayer) => {
+    const zIndex =
+      this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) !== -1 ? this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) * 100 : 0;
+    geoviewLayer.gvLayers!.setZIndex(zIndex);
+    geoviewLayer.listOfLayerEntryConfig.forEach((subLayer) => {
+      const subLayerZIndex =
+        geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
+      subLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+    });
+  };
+
+  /**
+   * Move layer one level in the given direction.
+   *
+   * @param {string} layerId ID of layer to be moved
+   * @param {string} parentLayerId ID of parent layer if layer is a sublayer
+   */
+  moveLayer = (layerId: string, destination: number, parentLayerId?: string) => {
+    const orderOfLayers: string[] = parentLayerId
+      ? api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId)!.layerOrder
+      : this.layerOrder;
+    orderOfLayers.reverse(); // layer order in legend is reversed from layerOrder
+    const location = orderOfLayers.indexOf(layerId);
+    const [removed] = orderOfLayers.splice(location, 1);
+    orderOfLayers.splice(destination, 0, removed);
+    orderOfLayers.reverse();
+
+    if (!parentLayerId) {
+      orderOfLayers.forEach((movedLayerId) => {
+        const movedLayer = api.maps[this.mapId].layer.getGeoviewLayerById(movedLayerId);
+        if (movedLayer) this.setLayerZIndices(movedLayer);
+      });
+    } else {
+      const parentLayer = api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId);
+      if (parentLayer) this.setLayerZIndices(parentLayer);
+    }
   };
 }
