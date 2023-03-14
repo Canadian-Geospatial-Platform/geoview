@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/no-array-index-key */
 import { createElement, ReactElement, useState, useEffect } from 'react';
-import { toLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
+import { Extent } from 'ol/extent';
 import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries } from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
@@ -46,9 +47,28 @@ export class DataGridAPI {
 
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
+    const [currentZoom, setCurrentZoom] = useState('');
 
     const { currentProjection } = api.map(this.mapId);
+    const { zoom, center } = api.map(this.mapId).mapFeaturesConfig.map.viewSettings;
     const projectionConfig = api.projection.projections[currentProjection];
+
+    const handleZoomIn = (zoomid: string, extent: Extent) => {
+      if (currentZoom !== zoomid) {
+        api.map(this.mapId).zoomToExtent(extent);
+      } else {
+        api
+          .map(this.mapId)
+          .map.getView()
+          .animate({
+            center: fromLonLat(center, projectionConfig),
+            duration: 500,
+            zoom,
+          });
+      }
+      setCurrentZoom(currentZoom !== zoomid ? zoomid : '');
+    };
+
     /**
      * Create a geometry json
      *
@@ -90,7 +110,7 @@ export class DataGridAPI {
      */
     const buildFeatureRows = (arrayOfFeatureInfoEntries: TypeArrayOfFeatureInfoEntries) => {
       return arrayOfFeatureInfoEntries.map((feature) => {
-        const { featureKey, fieldInfo, geometry, featureIcon } = feature;
+        const { featureKey, fieldInfo, geometry, featureIcon, extent } = feature;
         const featureInfo: Record<string, {}> = {};
         Object.entries(fieldInfo).forEach(([fieldKey, fieldInfoEntry]) => {
           const featureInfoKey = (fieldInfoEntry?.alias ? fieldInfoEntry?.alias : fieldKey) as string;
@@ -103,6 +123,7 @@ export class DataGridAPI {
           featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
           featureIcon: { featureInfoKey: 'Icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
           geometry: buildGeometry(geometry?.getGeometry() as Geometry),
+          extent,
           ...featureInfo,
         };
       });
@@ -112,7 +133,7 @@ export class DataGridAPI {
     const setLayerDataGridProps = (layerKey: string, layerValues: {}[]) => {
       const firstValue: Record<string, { featureInfoKey: string; featureInfoValue: string; fieldType: string }> = layerValues[0];
       // set columns
-      const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry');
+      const columnHeader = Object.keys(firstValue).filter((kn) => kn !== 'geometry' && kn !== 'extent');
       const columns = columnHeader.map((header) => {
         return {
           field: header,
@@ -128,10 +149,13 @@ export class DataGridAPI {
       // set rows
       const rows = layerValues.map((values) => {
         let geometry = {};
+        let extent = [] as Extent;
         const featureInfo: Record<string, string> = {};
         Object.entries(values).forEach(([valueKey, valueInfoEntry]) => {
           if (valueKey === 'geometry') {
             geometry = valueInfoEntry as Geometry;
+          } else if (valueKey === 'extent') {
+            extent = valueInfoEntry as Extent;
           } else {
             featureInfo[valueKey] = (
               valueInfoEntry as { featureInfoKey: string; featureInfoValue: string; fieldType: string }
@@ -141,6 +165,7 @@ export class DataGridAPI {
 
         return {
           geometry,
+          extent,
           ...featureInfo,
         };
       });
@@ -155,6 +180,8 @@ export class DataGridAPI {
         autoHeight: true,
         rowId: 'featureKey',
         displayLanguage: this.displayLanguage,
+        currentZoom,
+        handleZoomIn,
       };
     };
 

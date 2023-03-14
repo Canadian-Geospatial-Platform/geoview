@@ -24,8 +24,9 @@ import {
 } from '@mui/x-data-grid';
 
 import { ButtonProps } from '@mui/material/Button';
+import { Extent } from 'ol/extent';
 import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
-import { Tooltip, MenuItem } from '../../../ui';
+import { Tooltip, MenuItem, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -39,6 +40,8 @@ interface CustomDataGridProps extends DataGridProps {
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
+  currentZoom: string;
+  handleZoomIn: (zoomid: string, extent: Extent) => void;
 }
 
 const sxClasses = {
@@ -101,13 +104,15 @@ const sxClasses = {
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
-  const { rowId, layerKey, displayLanguage, columns, rows } = props;
+  const { rowId, layerKey, displayLanguage, columns, rows, currentZoom, handleZoomIn } = props;
   const { t } = useTranslation<string>();
+
   const getJson = () => {
     const geoData = rows.map((row) => {
       const { geometry, ...featureInfo } = row;
       delete featureInfo.featureKey;
       delete featureInfo.featureIcon;
+      delete featureInfo.extent;
       return {
         type: 'Feature',
         geometry,
@@ -203,7 +208,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   columns.forEach((column) => {
     column.renderCell = (params: GridCellParams) => {
       return column.field === 'featureIcon' ? (
-        <img alt="" src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
+        <>
+          <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
+          <IconButton color="primary" onClick={() => handleZoomIn(params.id.toString(), rows[params.id as number].extent)}>
+            <ZoomInSearchIcon style={{ display: currentZoom !== params.id ? 'block' : 'none' }} />
+            <ZoomOutSearchIcon style={{ display: currentZoom !== params.id ? 'none' : 'block' }} />
+          </IconButton>
+        </>
       ) : (
         <Tooltip title={params.value}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
