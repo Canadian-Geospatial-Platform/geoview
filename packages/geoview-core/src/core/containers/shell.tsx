@@ -195,7 +195,7 @@ export function Shell(props: ShellProps): JSX.Element {
             <Appbar setActivetrap={setActivetrap} />
           )}
           <Map {...mapFeaturesConfig} />
-          {mapFeaturesConfig?.components && mapFeaturesConfig?.components.includes('nav-bar') && <Navbar />}
+          {mapFeaturesConfig?.components && mapFeaturesConfig?.components.includes('nav-bar') && <Navbar setActivetrap={setActivetrap} />}
         </div>
         <FooterTabs />
         {Object.keys(api.map(shellId).modal.modals).map((modalId) => (

@@ -46,7 +46,7 @@
     "opacity": "Opacité",
     "expand_legend": "Développer la légende",
     "toggle_cluster": "Basculer le groupement",
-    "toggle_opacity" : "Basculer le Opacité"
+    "toggle_opacity": "Basculer le Opacité"
   },
   "datagrid": {
     "exportJson": "Télécharger GeoJSON"
@@ -70,5 +70,10 @@
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la carte __param__",
       "usedtwice": "Utilisation en double de l'identifiant de couche geoview [__param__] sur la carte __param__"
     }
+  },
+  "exportModal": {
+    "title": "Exporter la carte en PNG",
+    "cancelBtn": "Annuler",
+    "exportBtn": "Exporter"
   }
 }
