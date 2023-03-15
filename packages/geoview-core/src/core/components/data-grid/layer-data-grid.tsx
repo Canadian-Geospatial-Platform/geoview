@@ -30,7 +30,7 @@ import {
 
 import Button, { ButtonProps } from '@mui/material/Button';
 import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, MapIcon } from '../../../ui';
+import { Tooltip, MenuItem, MapIcon, Switch } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -254,7 +254,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       <GridToolbarContainer {...props}>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
         <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} componentsProps={{ button: { disabled: mapfiltered } }} />
-        <Button
+        {/* <Button
           {...buttonBaseProps}
           id={`${layerId}-map-filter-button`}
           startIcon={<MapIcon />}
@@ -262,7 +262,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           disabled={filterString === ''}
         >
           {!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
-        </Button>
+        </Button> */}
+        <Switch
+          size="small"
+          onChange={() => filterMap()}
+          title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
+          checked={mapfiltered}
+        />
         <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
         <CustomExportButton />
       </GridToolbarContainer>
