@@ -13,6 +13,7 @@ export * from './fade/fade';
 export * from './icon-button/icon-button';
 export * from './icons';
 export * from './list';
+export * from './list/checkbox-list/checkbox-list-alex';
 export * from './modal';
 export * from './panel';
 export * from './select/select';

@@ -138,7 +138,7 @@ export class Vector {
     // create a line geometry
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
-        'EPSG:4326',
+        'EPSG:3978',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -154,9 +154,9 @@ export class Vector {
         });
       }
 
-      if (polylineOptions.style.strokeColor) {
+      if (polylineOptions.style.strokeColor || polylineOptions.style.strokeOpacity || polylineOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(polylineOptions.style.strokeColor), polylineOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(polylineOptions.style.strokeColor || 'blue'), polylineOptions.style.strokeOpacity || 1)),
           width: polylineOptions.style.strokeWidth || 1,
         });
       }
@@ -225,9 +225,9 @@ export class Vector {
         });
       }
 
-      if (polygonOptions.style.strokeColor) {
+      if (polygonOptions.style.strokeColor || polygonOptions.style.strokeOpacity || polygonOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(polygonOptions.style.strokeColor), polygonOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(polygonOptions.style.strokeColor || 'blue'), polygonOptions.style.strokeOpacity || 1)),
           width: polygonOptions.style.strokeWidth || 1,
         });
       }
@@ -298,9 +298,9 @@ export class Vector {
         });
       }
 
-      if (circleOptions.style.strokeColor) {
+      if (circleOptions.style.strokeColor || circleOptions.style.strokeOpacity || circleOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(circleOptions.style.strokeColor), circleOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(circleOptions.style.strokeColor || 'blue'), circleOptions.style.strokeOpacity || 1)),
           width: circleOptions.style.strokeWidth || 1,
         });
       }
@@ -371,9 +371,11 @@ export class Vector {
         });
       }
 
-      if (circleMarkerOptions.style.strokeColor) {
+      if (circleMarkerOptions.style.strokeColor || circleMarkerOptions.style.strokeOpacity || circleMarkerOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(circleMarkerOptions.style.strokeColor), circleMarkerOptions.style.strokeOpacity || 1)),
+          color: asString(
+            setAlphaColor(asArray(circleMarkerOptions.style.strokeColor || 'blue'), circleMarkerOptions.style.strokeOpacity || 1)
+          ),
           width: circleMarkerOptions.style.strokeWidth || 1,
         });
       }
@@ -426,7 +428,7 @@ export class Vector {
     // create a line geometry
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:4326',
+        'EPSG:3978',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -442,9 +444,9 @@ export class Vector {
         });
       }
 
-      if (markerOptions.style.strokeColor) {
+      if (markerOptions.style.strokeColor || markerOptions.style.strokeOpacity || markerOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(markerOptions.style.strokeColor), markerOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(markerOptions.style.strokeColor || 'blue'), markerOptions.style.strokeOpacity || 1)),
           width: markerOptions.style.strokeWidth || 1,
         });
       }
