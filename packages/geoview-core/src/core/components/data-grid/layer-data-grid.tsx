@@ -256,7 +256,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
         <Button disabled={filterString === ''}>
           <Switch
             size="small"
-            color="info"
             onChange={() => filterMap()}
             title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
             checked={mapfiltered}
