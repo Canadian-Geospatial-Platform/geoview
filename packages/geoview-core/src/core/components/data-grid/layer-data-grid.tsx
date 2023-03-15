@@ -30,7 +30,7 @@ import {
 
 import Button, { ButtonProps } from '@mui/material/Button';
 import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, MapIcon, Switch } from '../../../ui';
+import { Tooltip, MenuItem, Switch } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -55,6 +55,10 @@ const sxClasses = {
     borderColor: 'primary.light',
     '& .MuiDataGrid-cell:hover': {
       color: 'text.primary',
+    },
+    '& .MuiFormControlLabel-root > .MuiFormControlLabel-label': {
+      fontSize: '0.93rem',
+      color: 'primary.main',
     },
     [`& div.even.${gridClasses.row}`]: {
       backgroundColor: 'grey.200',
@@ -94,11 +98,6 @@ const sxClasses = {
       },
     },
   },
-};
-
-const buttonBaseProps: ButtonProps = {
-  color: 'primary',
-  size: 'small',
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
@@ -254,21 +253,16 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       <GridToolbarContainer {...props}>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
         <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} componentsProps={{ button: { disabled: mapfiltered } }} />
-        {/* <Button
-          {...buttonBaseProps}
-          id={`${layerId}-map-filter-button`}
-          startIcon={<MapIcon />}
-          onClick={() => filterMap()}
-          disabled={filterString === ''}
-        >
-          {!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
-        </Button> */}
-        <Switch
-          size="small"
-          onChange={() => filterMap()}
-          title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
-          checked={mapfiltered}
-        />
+        <Button disabled={filterString === ''}>
+          <Switch
+            size="small"
+            color="info"
+            onChange={() => filterMap()}
+            title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
+            checked={mapfiltered}
+            disabled={filterString === ''}
+          />
+        </Button>
         <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
         <CustomExportButton />
       </GridToolbarContainer>
