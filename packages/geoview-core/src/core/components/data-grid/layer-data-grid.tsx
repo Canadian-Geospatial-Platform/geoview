@@ -122,21 +122,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
 
-  const handleZoomIn = (zoomid: number, extent: Extent) => {
-    if (currentZoom !== zoomid) {
-      api.map(mapId).zoomToExtent(extent);
-    } else {
-      api
-        .map(mapId)
-        .map.getView()
-        .animate({
-          center: fromLonLat(center, projectionConfig),
-          duration: 500,
-          zoom,
-        });
-    }
-    setCurrentZoom(currentZoom !== zoomid ? zoomid : -1);
-  };
   /**
    * Convert the filter string from the Filter Model
    *
@@ -247,6 +232,23 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
+  let currentZoomId = -1;
+
+  const handleZoomIn = (zoomid: number, extent: Extent) => {
+    currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
+    if (currentZoomId === zoomid) {
+      api.map(mapId).zoomToExtent(extent);
+    } else {
+      api
+        .map(mapId)
+        .map.getView()
+        .animate({
+          center: fromLonLat(center, projectionConfig),
+          duration: 500,
+          zoom,
+        });
+    }
+  };
 
   /**
    * Customize the export menu, adding the export json button
@@ -319,8 +321,8 @@ export function LayerDataGrid(props: CustomDataGridProps) {
         <>
           <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
           <IconButton color="primary" onClick={() => handleZoomIn(params.id as number, rows[params.id as number].extent)}>
-            <ZoomInSearchIcon style={{ display: currentZoom !== params.id ? 'block' : 'none' }} />
-            <ZoomOutSearchIcon style={{ display: currentZoom !== params.id ? 'none' : 'block' }} />
+            <ZoomInSearchIcon style={{ display: currentZoomId !== params.id ? 'block' : 'none' }} />
+            <ZoomOutSearchIcon style={{ display: currentZoomId !== params.id ? 'none' : 'block' }} />
           </IconButton>
         </>
       ) : (
