@@ -57,7 +57,6 @@ export type TypeCGPV = {
   ui: TypeCGPVUI;
   useTranslation: typeof useTranslation;
   types: typeof import('./cgpv-types');
-  ol: typeof import('ol');
 };
 
 /** ******************************************************************************************************************************
