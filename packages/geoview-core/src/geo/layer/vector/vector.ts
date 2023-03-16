@@ -138,7 +138,7 @@ export class Vector {
     // create a line geometry
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -209,7 +209,7 @@ export class Vector {
     // create a line geometry
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -283,7 +283,7 @@ export class Vector {
     // create a line geometry
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -350,6 +350,7 @@ export class Vector {
     optionalFeatureId?: string
   ): Feature => {
     // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
+    // TODO: Refactoring - Based on the test page, addCircleMarker and addCircle seem to provide the exact same results? Should addCircleMarker be removed?
     const circleMarkerOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -357,7 +358,7 @@ export class Vector {
     // create a line geometry
     const circleMarker = new Feature({
       geometry: new Circle(coordinate, radius, circleMarkerOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -430,7 +431,7 @@ export class Vector {
     // create a line geometry
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -494,8 +495,14 @@ export class Vector {
     },
     optionalFeatureId?: string
   ): Feature => {
+    // Read the params and set defaults when needed
     const markerOptions = options || {
       style: {
+        anchor: [0.5, 256],
+        size: [256, 256],
+        scale: 0.1,
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'pixels',
         src: './img/Marker.png',
       },
     };
@@ -505,7 +512,7 @@ export class Vector {
     // create a point feature
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });

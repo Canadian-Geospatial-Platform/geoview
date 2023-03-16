@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
     '&:last-child': {
       paddingBottom: 0,
     },
-    height: 'calc(100% - 64px)',
+    height: '100%',
   },
 }));
 
