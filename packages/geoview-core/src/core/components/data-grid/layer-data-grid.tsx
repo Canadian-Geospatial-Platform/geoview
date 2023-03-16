@@ -107,11 +107,11 @@ const sxClasses = {
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { rowId, mapId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
-  // const [currentZoomId, setCurrentZoomId] = useState<number>(-1);
 
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
+  let currentZoomId = -1;
 
   const getJson = () => {
     const geoData = rows.map((row) => {
@@ -174,7 +174,15 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
-  let currentZoomId = -1;
+
+  /**
+   * featureinfo data grid Zoom in/out handling
+   *
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
+   * @param {number} zoomid in of zoom incon button clicking
+   * @param {Extent} extent feature exten
+   *
+   */
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
     currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
@@ -189,6 +197,11 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           duration: 500,
           zoom,
         });
+
+      const zoomButtonElement = e.target as HTMLElement;
+      const zoomInIconElement = zoomButtonElement.parentElement?.children[0] as HTMLElement;
+      zoomButtonElement.style.display = 'none';
+      zoomInIconElement.style.display = 'block';
     }
   };
 
