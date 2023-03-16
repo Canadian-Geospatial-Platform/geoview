@@ -104,6 +104,7 @@ export class DataGridAPI {
         return {
           featureKey: { featureInfoKey: 'featureKey', featureInfoValue: featureKey, fieldType: 'string' },
           featureIcon: { featureInfoKey: 'Icon', featureInfoValue: featureIcon.toDataURL(), fieldType: 'string' },
+          featureActions: { featureInfoKey: 'Zoom', featureInfoValue: '', fieldType: 'string' },
           geometry: buildGeometry(geometry?.getGeometry() as Geometry),
           extent,
           ...featureInfo,
@@ -120,11 +121,13 @@ export class DataGridAPI {
         return {
           field: header,
           headerName: firstValue[header].featureInfoKey,
-          width: 150,
+          width: header !== 'featureIcon' && header !== 'featureActions' ? 150 : 80,
           type: firstValue[header].fieldType ? firstValue[header].fieldType : 'string',
           hide: columnHeader.length > 1 && header === 'featureKey',
-          hideable: header !== 'featureIcon',
-          filterable: header !== 'featureKey' && header !== 'featureIcon',
+          hideable: header !== 'featureIcon' && header !== 'featureActions',
+          filterable: header !== 'featureKey' && header !== 'featureIcon' && header !== 'featureActions',
+          sortable: header !== 'featureIcon' && header !== 'featureActions',
+          disableColumnMenu: header === 'featureIcon' || header === 'featureActions',
         };
       });
 

@@ -118,6 +118,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       const { geometry, ...featureInfo } = row;
       delete featureInfo.featureKey;
       delete featureInfo.featureIcon;
+      delete featureInfo.featureActions;
       delete featureInfo.extent;
       return {
         type: 'Feature',
@@ -175,7 +176,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const printOptions: GridPrintExportOptions = {};
   let currentZoomId = -1;
 
-  const handleZoomIn = (zoomid: number, extent: Extent) => {
+  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
     currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
     if (currentZoomId === zoomid) {
       api.map(mapId).zoomToExtent(extent);
@@ -230,15 +231,20 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   // TODO: works only with hover and add tooltips even when not needed. need improvement
   columns.forEach((column) => {
     column.renderCell = (params: GridCellParams) => {
-      return column.field === 'featureIcon' ? (
-        <>
-          <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />
-          <IconButton color="primary" onClick={() => handleZoomIn(params.id as number, rows[params.id as number].extent)}>
+      if (column.field === 'featureIcon') {
+        return <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />;
+      }
+
+      if (column.field === 'featureActions') {
+        return (
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e, params.id as number, rows[params.id as number].extent)}>
             <ZoomInSearchIcon style={{ display: currentZoomId !== params.id ? 'block' : 'none' }} />
             <ZoomOutSearchIcon style={{ display: currentZoomId !== params.id ? 'none' : 'block' }} />
           </IconButton>
-        </>
-      ) : (
+        );
+      }
+
+      return (
         <Tooltip title={params.value}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
         </Tooltip>
