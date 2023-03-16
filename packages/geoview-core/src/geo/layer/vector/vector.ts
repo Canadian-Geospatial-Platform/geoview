@@ -138,7 +138,7 @@ export class Vector {
     // create a line geometry
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -209,7 +209,7 @@ export class Vector {
     // create a line geometry
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -283,7 +283,7 @@ export class Vector {
     // create a line geometry
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -357,7 +357,7 @@ export class Vector {
     // create a line geometry
     const circleMarker = new Feature({
       geometry: new Circle(coordinate, radius, circleMarkerOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -430,7 +430,7 @@ export class Vector {
     // create a line geometry
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -505,7 +505,7 @@ export class Vector {
     // create a point feature
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
-        'EPSG:3978',
+        'EPSG:4326',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
