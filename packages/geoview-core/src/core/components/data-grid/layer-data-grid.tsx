@@ -118,7 +118,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
     if (
       filterObj === undefined ||
-      (filterObj.value === undefined && filterObj.operatorValue !== 'isEmpty' && filterObj.operatorValue !== 'isNotEmpty')
+      ((filterObj.value === undefined || filterObj.value === '') &&
+        filterObj.operatorValue !== 'isEmpty' &&
+        filterObj.operatorValue !== 'isNotEmpty')
     ) {
       return '';
     }
