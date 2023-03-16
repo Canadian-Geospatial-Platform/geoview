@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
 import {
   Box,
@@ -44,7 +45,7 @@ import { MapContext } from '../../app-start';
 import { AbstractGeoViewVector } from '../../../geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { disableScrolling } from '../../utils/utilities';
 
-const sxClasses = {
+const useStyles = makeStyles((theme) => ({
   expandableGroup: {
     paddingRight: 0,
     paddingLeft: 28,
@@ -76,19 +77,14 @@ const sxClasses = {
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: 'grey.600',
+    borderColor: theme.palette.grey['600'],
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     '&:focus': {
       border: 'revert',
     },
   },
   iconImg: {
-    padding: 3,
-    borderRadius: 0,
-    border: '1px solid',
-    borderColor: 'grey.600',
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
+    ...theme.iconImg,
   },
   stackIconsBox: {
     position: 'relative',
@@ -104,7 +100,7 @@ const sxClasses = {
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: 'grey.600',
+    borderColor: theme.palette.grey['600'],
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     transition: 'transform .3s ease-in-out',
     '&:hover': {
@@ -116,11 +112,8 @@ const sxClasses = {
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: 'grey.600',
+    borderColor: theme.palette.grey['600'],
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
-  },
-  solidBackground: {
     background: '#fff',
   },
   opacityMenu: {
@@ -130,7 +123,7 @@ const sxClasses = {
     padding: '0 62px 16px 62px',
   },
   menuListIcon: { justifyContent: 'right', 'min-width': '56px' },
-};
+}));
 
 export interface TypeLegendItemProps {
   layerId: string;
@@ -165,7 +158,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   } = props;
 
   const { t, i18n } = useTranslation<string>();
-
+  const classes = useStyles();
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
   // check if layer is a vectorlayer, so that clustering can be toggled
@@ -432,20 +425,20 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
             {groupItems.length === 0 && isLegendOpen && iconList && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={closeIconRef}>
+              <IconButton className={classes.iconPreview} color="primary" size="small" onClick={handleLegendClick} iconRef={closeIconRef}>
                 <CloseIcon />
               </IconButton>
             )}
             {iconType === 'simple' && iconImg !== null && !isLegendOpen && (
               <IconButton
-                sx={sxClasses.iconPreview}
+                className={classes.iconPreview}
                 color="primary"
                 size="small"
                 {...(iconList?.length && { onClick: handleLegendClick })}
                 iconRef={maxIconRef}
               >
-                <Box sx={sxClasses.legendIcon}>
-                  <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />
+                <Box className={classes.legendIcon}>
+                  <img alt="icon" src={iconImg} className={classes.maxIconImg} />
                 </Box>
               </IconButton>
             )}
@@ -454,23 +447,23 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 <Box
                   tabIndex={0}
                   onClick={handleLegendClick}
-                  sx={sxClasses.stackIconsBox}
+                  className={classes.stackIconsBox}
                   ref={stackIconRef}
                   onKeyPress={(e) => handleStackIcon(e)}
                 >
-                  <IconButton sx={sxClasses.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
-                    <Box sx={sxClasses.legendIconTransparent}>
-                      {iconImgStacked && <img alt="icon" src={iconImgStacked} style={sxClasses.maxIconImg} />}
+                  <IconButton className={classes.iconPreviewStacked} color="primary" size="small" tabIndex={-1}>
+                    <Box className={classes.legendIconTransparent}>
+                      {iconImgStacked && <img alt="icon" src={iconImgStacked} className={classes.maxIconImg} />}
                     </Box>
                   </IconButton>
-                  <IconButton sx={sxClasses.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
-                    <Box sx={sxClasses.legendIcon}>{iconImg && <img alt="icon" src={iconImg} style={sxClasses.maxIconImg} />}</Box>
+                  <IconButton className={classes.iconPreviewHoverable} color="primary" size="small" tabIndex={-1}>
+                    <Box className={classes.legendIcon}>{iconImg && <img alt="icon" src={iconImg} className={classes.maxIconImg} />}</Box>
                   </IconButton>
                 </Box>
               </Tooltip>
             )}
             {groupItems.length === 0 && !iconType && !isLegendOpen && (
-              <IconButton sx={sxClasses.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
+              <IconButton className={classes.iconPreview} color="primary" size="small" onClick={handleLegendClick}>
                 <TodoIcon />
               </IconButton>
             )}
@@ -509,7 +502,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           <MenuItem onClick={handleOpacityOpen}>
             <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
             {isOpacityOpen && (
-              <ListItemIcon style={sxClasses.menuListIcon}>
+              <ListItemIcon className={classes.menuListIcon}>
                 <CheckIcon fontSize="small" />
               </ListItemIcon>
             )}
@@ -519,7 +512,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           <MenuItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
             {isClusterToggleEnabled && (
-              <ListItemIcon style={sxClasses.menuListIcon}>
+              <ListItemIcon className={classes.menuListIcon}>
                 <CheckIcon fontSize="small" />
               </ListItemIcon>
             )}
@@ -527,7 +520,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
         )}
       </Menu>
       <Collapse in={isOpacityOpen} timeout="auto">
-        <Box sx={sxClasses.opacityMenu}>
+        <Box className={classes.opacityMenu}>
           <Tooltip title={t('legend.opacity')}>
             <OpacityIcon />
           </Tooltip>
@@ -539,10 +532,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       </Collapse>
       <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
-          <Box sx={sxClasses.expandableIconContainer}>
-            {iconType === 'simple' && iconImg !== null && (
-              <img alt="" style={{ ...sxClasses.solidBackground, ...sxClasses.iconImg }} src={iconImg} />
-            )}
+          <Box className={classes.expandableIconContainer}>
+            {iconType === 'simple' && iconImg !== null && <img alt="" className={classes.iconImg} src={iconImg} />}
             {iconType === 'list' && iconList !== null && labelList !== null && (
               <LegendIconList
                 iconImages={iconList}
@@ -561,7 +552,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       </Collapse>
       <Collapse in={isGroupOpen} timeout="auto">
         <Box>
-          <Box sx={sxClasses.expandableIconContainer}>
+          <Box className={classes.expandableIconContainer}>
             {groupItems.map((subItem) => (
               <LegendItem
                 key={`sub-${subItem.layerId}`}
