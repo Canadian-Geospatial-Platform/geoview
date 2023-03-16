@@ -136,7 +136,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       case 'isEmpty':
         return `${filterObj.columnField} is null`;
       case 'isNotEmpty':
-        return `${filterObj.columnField}<>''`;
+        return `${filterObj.columnField} is not null`;
       case 'isAnyOf':
         if (filterObj.value.length === 0) {
           return '';
@@ -232,18 +232,24 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     );
   }
 
-  const filterMap = (reset?: boolean) => {
+  const filterMap = (filter?: string) => {
+    let applyFilterString = '';
     const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
     const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
     if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
-      if (reset || filterString !== '') {
-        (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(
-          filterLayerConfig,
-          !reset && !mapfiltered ? filterString : ''
-        );
+      if (filter !== undefined) {
+        if (mapfiltered) {
+          applyFilterString = filter;
+        }
+      } else if (!mapfiltered) {
+        applyFilterString = filterString;
       }
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, applyFilterString);
     }
-    setMapFiltered(reset ? false : !mapfiltered);
+
+    if (filter === undefined) {
+      setMapFiltered(!mapfiltered);
+    }
   };
 
   /**
@@ -257,14 +263,13 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     return (
       <GridToolbarContainer {...props}>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
-        <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} componentsProps={{ button: { disabled: mapfiltered } }} />
-        <Button disabled={filterString === ''}>
+        <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
+        <Button>
           <Switch
             size="small"
             onChange={() => filterMap()}
-            title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.removeFilterMap')}
+            title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap')}
             checked={mapfiltered}
-            disabled={filterString === ''}
           />
         </Button>
         <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
@@ -311,9 +316,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
           onFilterModelChange={(filterModel) => {
             const filter = filterModel.items.length > 0 ? buildFilterString(filterModel) : '';
             setFilterString(filter);
-            if (filter === '') {
-              filterMap(true);
-            }
+            filterMap(filter);
           }}
         />
       </div>

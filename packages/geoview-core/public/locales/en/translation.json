@@ -51,7 +51,7 @@
   "datagrid": {
     "exportJson": "Download GeoJSON",
     "filterMap": "Filter Map",
-    "removeFilterMap": "Remove Map Filter"
+    "stopFilterMap": "Stop Map Filter"
   },
   "keyboardnav": {
     "start": "Skip after map element",
