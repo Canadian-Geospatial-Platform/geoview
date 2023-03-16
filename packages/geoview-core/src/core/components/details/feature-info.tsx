@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
-import React, { useEffect, useState, CSSProperties } from 'react';
+import React, { useEffect, useState } from 'react';
+import makeStyles from '@mui/styles/makeStyles';
 import { fromLonLat } from 'ol/proj';
 import {
   Collapse,
@@ -20,28 +21,17 @@ import { api } from '../../../app';
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
 import { DetailsProps } from './details';
 
-const sxClasses = {
-  details: {
-    width: '100%',
-  },
+const useStyles = makeStyles((theme) => ({
   layerItem: {
-    color: 'text.primary',
+    color: theme.palette.text.primary,
     padding: 0,
   },
-  expandableGroup: {
-    paddingRight: 0,
-    paddingLeft: 28,
+  itemText: {
+    fontSize: 14,
+    noWrap: true,
   },
   expandableIconContainer: {
     paddingLeft: 10,
-  },
-  legendIcon: {
-    width: 24,
-    height: 24,
-    background: '#fff',
-  },
-  solidBackground: {
-    background: '#fff',
   },
   featureInfoItem: {
     display: 'flex',
@@ -64,17 +54,11 @@ const sxClasses = {
     width: '40%',
   },
   iconImg: {
-    padding: 3,
-    borderRadius: 0,
-    border: '1px solid',
-    borderColor: 'grey.600',
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
+    ...theme.iconImg,
     width: '35px',
     height: '35px',
-    objectFit: 'scale-down',
   },
-};
+}));
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   feature: TypeFeatureInfoEntry;
@@ -89,8 +73,8 @@ export interface TypeFeatureProps {
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature, startOpen, detailsSettings } = props;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { mapId, location, backgroundStyle, handlerName } = detailsSettings;
+  const classes = useStyles();
+  const { mapId, backgroundStyle } = detailsSettings;
   const featureId = `Feature Info ${feature.featureKey}`;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const [isOpen, setOpen] = useState<boolean>(false);
@@ -140,7 +124,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   */
   return (
     <>
-      <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
+      <ListItem className={classes.layerItem} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
             <IconButton color="primary" sx={fontColor}>
@@ -148,13 +132,13 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
             </IconButton>
           </ListItemIcon>
           <ListItemIcon>
-            <img alt={featureId} src={featureIconSrc} style={sxClasses.iconImg as CSSProperties} />
+            <img alt={featureId} src={featureIconSrc} className={classes.iconImg} />
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
-            <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
+            <ListItemText className={classes.itemText} sx={fontColor} primary={featureId} />
           </Tooltip>
           <ListItemIcon>
-            <IconButton color="primary" sx={fontColor} onClick={(e) => handleZoomIn(e)}>
+            <IconButton sx={fontColor} onClick={(e) => handleZoomIn(e)}>
               {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
             </IconButton>
           </ListItemIcon>
@@ -162,15 +146,19 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
         <Box>
-          <List sx={sxClasses.expandableIconContainer}>
+          <List className={classes.expandableIconContainer}>
             {
               // loop through each layer in the map server
               featureInfoList.map((featureInfoItem, index) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <ListItem key={index} sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
-                    <Box sx={sxClasses.featureInfoItemKey}>{featureInfoItem.key}</Box>
-                    <Box sx={sxClasses.featureInfoItemValue}>{featureInfoItem.value}</Box>
+                  <ListItem key={index} className={index % 2 > 0 ? classes.featureInfoItem : classes.featureInfoItemOdd}>
+                    <Box sx={fontColor} className={classes.featureInfoItemKey}>
+                      {featureInfoItem.key}
+                    </Box>
+                    <Box sx={fontColor} className={classes.featureInfoItemValue}>
+                      {featureInfoItem.value}
+                    </Box>
                   </ListItem>
                 );
               })

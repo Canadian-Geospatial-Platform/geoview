@@ -4,6 +4,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import makeStyles from '@mui/styles/makeStyles';
 import {
   DataGrid,
   DataGridProps,
@@ -27,11 +28,12 @@ import {
   gridFilteredSortedRowIdsSelector,
   GridFilterModel,
 } from '@mui/x-data-grid';
-import { fromLonLat } from 'ol/proj';
+
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { Tooltip, MenuItem, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
-import { TypeDisplayLanguage, api } from '../../../app';
+import { fromLonLat } from 'ol/proj';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
+import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -43,84 +45,80 @@ import { TypeDisplayLanguage, api } from '../../../app';
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
   mapId: string;
+  layerId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
 }
 
-const sxClasses = {
+const useStyles = makeStyles((theme) => ({
   DataGrid: {
-    boxShadow: 2,
-    border: 2,
-    borderColor: 'primary.light',
+    boxShadow: '2',
+    border: '2',
+    borderColor: theme.palette.primary.light,
     '& .MuiDataGrid-cell:hover': {
-      color: 'text.primary',
+      color: theme.palette.text.primary,
     },
     '& .MuiFormControlLabel-root > .MuiFormControlLabel-label': {
       fontSize: '0.93rem',
-      color: 'primary.main',
+      color: theme.palette.primary.main,
     },
     [`& div.even.${gridClasses.row}`]: {
-      backgroundColor: 'grey.200',
+      backgroundColor: theme.palette.grey['200'],
       '&:hover, &.Mui-hovered': {
-        backgroundColor: 'action.hoverRow',
+        backgroundColor: theme.hoverRow,
         '@media (hover: none)': {
           backgroundColor: 'transparent',
         },
       },
       '&.Mui-selected': {
-        backgroundColor: 'action.selectedRow',
+        backgroundColor: theme.selectedRow,
         '&:hover, &.Mui-hovered': {
-          backgroundColor: 'action.hoverRow',
+          backgroundColor: theme.hoverRow,
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
-            backgroundColor: 'action.selectedRow',
+            backgroundColor: theme.selectedRow,
           },
         },
       },
     },
     [`& .${gridClasses.row}`]: {
       '&:hover, &.Mui-hovered': {
-        backgroundColor: 'action.hoverRow',
+        backgroundColor: theme.hoverRow,
         '@media (hover: none)': {
           backgroundColor: 'transparent',
         },
       },
       '&.Mui-selected': {
-        backgroundColor: 'action.selectedRow',
+        backgroundColor: theme.selectedRow,
         '&:hover, &.Mui-hovered': {
-          backgroundColor: 'action.hoverRow',
+          backgroundColor: theme.hoverRow,
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
-            backgroundColor: 'action.selectedRow',
+            backgroundColor: theme.selectedRow,
           },
         },
       },
     },
   },
   iconImg: {
-    padding: 3,
-    borderRadius: 0,
-    border: '1px solid',
-    borderColor: 'grey.600',
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
+    ...theme.iconImg,
     width: '35px',
     height: '35px',
-    objectFit: 'scale-down',
   },
-};
+}));
 
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
+  const classes = useStyles();
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
-  const [currentZoom, setCurrentZoom] = useState<number>(-1);
 
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
+  let currentZoomId = -1;
 
   /**
    * Convert the filter string from the Filter Model
@@ -233,10 +231,25 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
-  let currentZoomId = -1;
+
+  /**
+   * featureinfo data grid Zoom in/out handling
+   *
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
+   * @param {number} zoomid in of zoom incon button clicking
+   * @param {Extent} extent feature exten
+   *
+   */
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
     currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
+
+    const zoomButtonElement = e.target as HTMLElement;
+    const zoomInIconElement = zoomButtonElement.parentElement?.children[0] as HTMLElement;
+    const zoomOutIconElement = zoomButtonElement.parentElement?.children[1] as HTMLElement;
+    zoomInIconElement.style.display = currentZoomId !== zoomid ? 'block' : 'none';
+    zoomOutIconElement.style.display = currentZoomId === zoomid ? 'block' : 'none';
+
     if (currentZoomId === zoomid) {
       api.map(mapId).zoomToExtent(extent);
     } else {
@@ -319,14 +332,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   columns.forEach((column) => {
     column.renderCell = (params: GridCellParams) => {
       if (column.field === 'featureIcon') {
-        return <img alt={params.value} src={params.value} style={sxClasses.iconImg as React.CSSProperties} />;
+        return <img alt={params.value} src={params.value} className={classes.iconImg} />;
       }
 
       if (column.field === 'featureActions') {
         return (
           <IconButton color="primary" onClick={(e) => handleZoomIn(e, params.id as number, rows[params.id as number].extent)}>
-            <ZoomInSearchIcon style={{ display: currentZoomId !== params.id ? 'block' : 'none' }} />
-            <ZoomOutSearchIcon style={{ display: currentZoomId !== params.id ? 'none' : 'block' }} />
+            <ZoomInSearchIcon style={{ display: currentZoomId !== Number(params.id) ? 'block' : 'none' }} />
+            <ZoomOutSearchIcon style={{ display: currentZoomId === Number(params.id) ? 'block' : 'none' }} />
           </IconButton>
         );
       }
@@ -348,7 +361,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       <div style={{ flexGrow: 1 }}>
         <DataGrid
           localeText={locale}
-          sx={sxClasses.DataGrid}
+          className={classes.DataGrid}
           {...props}
           getRowId={(row) => row[rowId]}
           getRowClassName={(params) => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
