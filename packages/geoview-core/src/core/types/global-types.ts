@@ -58,6 +58,10 @@ export type TypeCGPV = {
   useTranslation: typeof useTranslation;
   types: typeof import('./cgpv-types');
   ol: typeof import('ol');
+  olGeometry: typeof import('ol/geom');
+  olFormat: typeof import('ol/format');
+  olStyle: typeof import('ol/style');
+  olInteraction: typeof import('ol/interaction');
 };
 
 /** ******************************************************************************************************************************

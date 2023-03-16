@@ -3,7 +3,7 @@ import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Circle, LineString, Point, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
-import { Fill, Stroke, Style } from 'ol/style';
+import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
@@ -20,7 +20,7 @@ import {
   payloadIsAVectorConfig,
 } from '../../../api/events/payloads/vector-config-payload';
 import { VectorPayload } from '../../../api/events/payloads/vector-payload';
-import { TypeFeatureCircleStyle, TypeFeatureStyle } from './vector-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
 
 /**
  * Store a group of features
@@ -209,7 +209,7 @@ export class Vector {
     // create a line geometry
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
-        'EPSG:4326',
+        'EPSG:3978',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -275,6 +275,7 @@ export class Vector {
     },
     optionalFeatureId?: string
   ): Feature => {
+    // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
     const circleOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -282,7 +283,7 @@ export class Vector {
     // create a line geometry
     const circle = new Feature({
       geometry: new Circle(coordinate, radius, circleOptions.geometryLayout).transform(
-        'EPSG:4326',
+        'EPSG:3978',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -348,6 +349,7 @@ export class Vector {
     },
     optionalFeatureId?: string
   ): Feature => {
+    // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
     const circleMarkerOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -355,7 +357,7 @@ export class Vector {
     // create a line geometry
     const circleMarker = new Feature({
       geometry: new Circle(coordinate, radius, circleMarkerOptions.geometryLayout).transform(
-        'EPSG:4326',
+        'EPSG:3978',
         api.projection.projections[api.map(this.#mapId).currentProjection]
       ),
     });
@@ -458,6 +460,62 @@ export class Vector {
         })
       );
     }
+
+    // set a feature id and a geometry group index for this geometry
+    marker.set('featureId', featureId);
+    marker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
+
+    // add the geometry to the geometries array
+    this.geometries.push(marker);
+
+    // emit an event that a marker vector has been added
+    api.event.emit(VectorPayload.forMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, marker));
+
+    return marker;
+  };
+
+  /**
+   * Create a new marker icon
+   *
+   * @param {Coordinate} coordinate the long lat position of the marker
+   * @param options marker options including styling
+   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
+   *
+   * @returns {Feature} a geometry containing the id and the created geometry
+   */
+  addMarkerIcon = (
+    coordinate: Coordinate,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeIconStyle;
+    },
+    optionalFeatureId?: string
+  ): Feature => {
+    const markerOptions = options || {
+      style: {
+        src: './img/Marker.png',
+      },
+    };
+
+    const featureId = generateId(optionalFeatureId);
+
+    // create a point feature
+    const marker = new Feature({
+      geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
+        'EPSG:3978',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
+    });
+
+    marker.setStyle(
+      new Style({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        image: new Icon(markerOptions.style as any),
+      })
+    );
 
     // set a feature id and a geometry group index for this geometry
     marker.set('featureId', featureId);
