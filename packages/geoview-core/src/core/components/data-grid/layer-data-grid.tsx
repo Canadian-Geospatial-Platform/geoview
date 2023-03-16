@@ -306,7 +306,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
            */
           logLevel={false}
           onFilterModelChange={(filterModel) => {
-            const filter = buildFilterString(filterModel);
+            const filter = filterModel.items.length > 0 ? buildFilterString(filterModel) : '';
             setFilterString(filter);
             if (filter === '') {
               filterMap(true);
