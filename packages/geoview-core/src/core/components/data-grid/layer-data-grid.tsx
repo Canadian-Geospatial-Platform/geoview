@@ -237,7 +237,10 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
     if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
       if (reset || filterString !== '') {
-        (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, !reset ? filterString : '');
+        (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(
+          filterLayerConfig,
+          !reset && !mapfiltered ? filterString : ''
+        );
       }
     }
     setMapFiltered(reset ? false : !mapfiltered);
