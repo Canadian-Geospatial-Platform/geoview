@@ -27,11 +27,12 @@ import {
   gridFilteredSortedRowIdsSelector,
   GridFilterModel,
 } from '@mui/x-data-grid';
-import { fromLonLat } from 'ol/proj';
+
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { Tooltip, MenuItem, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
-import { TypeDisplayLanguage, api } from '../../../app';
+import { fromLonLat } from 'ol/proj';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
+import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -43,6 +44,7 @@ import { TypeDisplayLanguage, api } from '../../../app';
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
   mapId: string;
+  layerId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
@@ -116,11 +118,11 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   const { t } = useTranslation<string>();
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
-  const [currentZoom, setCurrentZoom] = useState<number>(-1);
 
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
+  let currentZoomId = -1;
 
   /**
    * Convert the filter string from the Filter Model
@@ -233,10 +235,25 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
-  let currentZoomId = -1;
+
+  /**
+   * featureinfo data grid Zoom in/out handling
+   *
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
+   * @param {number} zoomid in of zoom incon button clicking
+   * @param {Extent} extent feature exten
+   *
+   */
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
     currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
+
+    const zoomButtonElement = e.target as HTMLElement;
+    const zoomInIconElement = zoomButtonElement.parentElement?.children[0] as HTMLElement;
+    const zoomOutIconElement = zoomButtonElement.parentElement?.children[1] as HTMLElement;
+    zoomInIconElement.style.display = currentZoomId !== zoomid ? 'block' : 'none';
+    zoomOutIconElement.style.display = currentZoomId === zoomid ? 'block' : 'none';
+
     if (currentZoomId === zoomid) {
       api.map(mapId).zoomToExtent(extent);
     } else {
@@ -325,8 +342,8 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       if (column.field === 'featureActions') {
         return (
           <IconButton color="primary" onClick={(e) => handleZoomIn(e, params.id as number, rows[params.id as number].extent)}>
-            <ZoomInSearchIcon style={{ display: currentZoomId !== params.id ? 'block' : 'none' }} />
-            <ZoomOutSearchIcon style={{ display: currentZoomId !== params.id ? 'none' : 'block' }} />
+            <ZoomInSearchIcon style={{ display: currentZoomId !== Number(params.id) ? 'block' : 'none' }} />
+            <ZoomOutSearchIcon style={{ display: currentZoomId === Number(params.id) ? 'block' : 'none' }} />
           </IconButton>
         );
       }
