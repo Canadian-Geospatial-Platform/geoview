@@ -1,6 +1,6 @@
 import { TypeJsonObject, TypeWindow } from 'geoview-core';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, RefObject, MutableRefObject } from 'react';
 import Draggable from 'react-draggable';
 
 import { getRenderPixel } from 'ol/render';
@@ -109,8 +109,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const [map] = useState<Map>(api.map(mapId).map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
-  const defaultX = mapSize.current[0] / 2;
-  const defaultY = mapSize.current[1] / 2;
+  let defaultX = mapSize.current[0] / 2;
+  let defaultY = mapSize.current[1] / 2;
 
   const [layersIds] = useState<string[]>(config.layers);
   const [geoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
@@ -118,7 +118,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
   const [offset, setOffset] = useState(0);
 
   const [orientation] = useState(config.orientation);
+
   const swiperValue = useRef(50);
+  const swiperRef = useRef() as RefObject<HTMLElement>;
+  const swiperPositionVertical = useRef(orientation === 'vertical' ? defaultX : 0);
+  const swiperPositionHorizontal = useRef(orientation === 'vertical' ? 0 : defaultY);
 
   /**
    * Pre compose, Pre render event callback
@@ -182,7 +186,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
         ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
         : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
+    console.log('client', -map.getTargetElement().getBoundingClientRect().left, evt.clientX);
     swiperValue.current = ((client - offset) / size) * 100;
+
+    // if (orientation === 'vertical') {
+    //   swiperPositionVertical.current = client;
+    // }
+    // if (orientation !== 'vertical') {
+    //   swiperPositionHorizontal.current = client;
+    // }
 
     // force VectorImage to refresh
     olLayers.forEach((layer: BaseLayer) => {
@@ -202,9 +214,57 @@ export function Swiper(props: SwiperProps): JSX.Element {
         ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
         : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
     mapSize.current = map.getSize() || [0, 0];
+
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
     const offSetOnClick = position - (size * swiperValue.current) / 100;
     setOffset(offSetOnClick);
+  };
+
+  const updateSwiperVerticalPosition = debounce((evt: KeyboardEvent) => {
+    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
+    if (evt.key === 'ArrowLeft' && swiperPositionVertical.current > 5) {
+      swiperPositionVertical.current -= 5;
+    }
+
+    if (evt.key === 'ArrowRight' && swiperPositionVertical.current < size - 5) {
+      swiperPositionVertical.current += 5;
+    }
+
+    const styles = {
+      transform: `translate(${swiperPositionVertical.current}px, 0px)`,
+    };
+    if (swiperRef?.current && swiperPositionVertical.current > 0 && swiperPositionVertical.current < size) {
+      defaultX = swiperPositionVertical.current;
+      swiperRef.current.style.transform = styles.transform;
+    }
+    onStop({ clientX: swiperPositionVertical.current, clientY: 0 } as MouseEvent);
+  }, 100);
+
+  const updateSwiperHorizontalPosition = debounce((evt: KeyboardEvent) => {
+    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
+    if (evt.key === 'ArrowUp' && swiperPositionHorizontal.current > 5) {
+      swiperPositionHorizontal.current -= 5;
+    }
+    if (evt.key === 'ArrowDown' && swiperPositionHorizontal.current < size - 5) {
+      swiperPositionHorizontal.current += 5;
+    }
+
+    const styles = {
+      transform: `translate(0px, ${swiperPositionHorizontal.current}px)`,
+    };
+
+    if (swiperRef?.current && swiperPositionHorizontal.current > 0 && swiperPositionHorizontal.current < size) {
+      defaultY = swiperPositionHorizontal.current;
+      swiperRef.current.style.transform = styles.transform;
+    }
+    onStop({ clientX: 0, clientY: swiperPositionHorizontal.current } as MouseEvent);
+  }, 100);
+
+  // prevent scrolling of page when swiper position is not in vertical position.
+  const disableScrolling = (e: KeyboardEvent, elem: RefObject<HTMLElement>): void => {
+    if (elem.current === document.activeElement && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
+      e.preventDefault();
+    }
   };
 
   useEffect(() => {
@@ -214,7 +274,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
       setOlLayers((prevArray) => [...prevArray, olLayer!]);
       olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
       olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
-
       // force VectorImage to refresh
       if (typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
     });
@@ -232,6 +291,19 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoviewLayers]);
 
+  useEffect(() => {
+    if (swiperRef?.current && orientation === 'vertical') {
+      swiperRef.current.addEventListener('keydown', updateSwiperVerticalPosition);
+    }
+    if (swiperRef?.current && orientation !== 'vertical') {
+      swiperRef.current.addEventListener('keydown', updateSwiperHorizontalPosition);
+      document.addEventListener('keydown', (e) => disableScrolling(e, swiperRef));
+    }
+    return () => {
+      document.removeEventListener('keydown', (e) => disableScrolling(e, swiperRef));
+    };
+  }, [orientation, updateSwiperHorizontalPosition, updateSwiperVerticalPosition]);
+
   return (
     <Box sx={sxClasses.layerSwipe}>
       <Draggable
@@ -245,8 +317,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
         onDrag={(e) => {
           onStop(e as MouseEvent);
         }}
+        nodeRef={swiperRef}
       >
-        <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0}>
+        <Box sx={[orientation === 'vertical' ? sxClasses.vertical : sxClasses.horizontal, sxClasses.bar]} tabIndex={0} ref={swiperRef}>
           <Tooltip title={translations[displayLanguage].tooltip}>
             <Box className="handleContainer">
               <HandleIcon sx={sxClasses.handle} className="handleL" />
