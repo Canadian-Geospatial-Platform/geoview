@@ -75,7 +75,7 @@ export function FooterbarRotationButton(): JSX.Element {
     api.event.on(
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload) => {
-        if (payload.handlerName === mapId && payloadIsAMapViewProjection(payload)) {
+        if (payloadIsAMapViewProjection(payload)) {
           // reset icon rotation to 0 because the new view rotation is 0
           // will be set again by proper function if needed (i.e. if fix north switch is checked)
           if (iconRef && iconRef.current) {

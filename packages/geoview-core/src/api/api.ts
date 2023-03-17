@@ -13,7 +13,7 @@ import { CONST_LAYER_TYPES } from '../geo/layer/geoview-layers/abstract-geoview-
 import * as MarkerDefinitions from '../core/types/marker-definitions';
 import { generateId, addUiComponent } from '../core/utils/utilities';
 import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
-import { LegendsLayerSet } from '../geo/utils/legend-layer-set';
+import { LegendsLayerSet } from '../geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
 
 /**

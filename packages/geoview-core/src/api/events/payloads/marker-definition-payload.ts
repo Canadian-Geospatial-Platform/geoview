@@ -41,11 +41,11 @@ export class MarkerDefinitionPayload extends PayloadBaseClass {
    * @param {Coordinate} lnglat the marker coordinate
    * @param {TypeJsonObject} symbology the marker symbology
    */
-  constructor(event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology: TypeJsonObject) {
+  constructor(event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology?: TypeJsonObject) {
     if (!validEvents.includes(event)) throw new Error(`MarkerIconPayload can't be instanciated for event of type ${event}`);
     super(event, handlerName);
     this.lnglat = lnglat;
-    this.symbology = symbology;
+    this.symbology = symbology || ({} as TypeJsonObject);
   }
 }
 
@@ -64,7 +64,7 @@ export const markerDefinitionPayload = (
   event: EventStringId,
   handlerName: string | null,
   lnglat: Coordinate,
-  symbology: TypeJsonObject
+  symbology?: TypeJsonObject
 ): MarkerDefinitionPayload => {
   return new MarkerDefinitionPayload(event, handlerName, lnglat, symbology);
 };

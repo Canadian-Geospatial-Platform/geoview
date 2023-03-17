@@ -137,9 +137,7 @@ export function Scale(): JSX.Element {
       EVENT_NAMES.FOOTERBAR.EVENT_FOOTERBAR_EXPAND_COLLAPSE,
       (payload) => {
         if (payloadIsABoolean(payload)) {
-          if (payload.handlerName!.includes(mapId)) {
-            setExpanded(payload.status);
-          }
+          setExpanded(payload.status);
         }
       },
       mapId

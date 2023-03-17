@@ -10,7 +10,7 @@ import { get as getOLProjection, Projection as OLProjection, getPointResolution 
 export const PROJECTION_NAMES = {
   LCC: 'EPSG:3978',
   WM: 'EPSG:3857',
-  LATLNG: 'EPSG:4326',
+  LNGLAT: 'EPSG:4326',
 };
 
 /**
@@ -110,21 +110,21 @@ export class Projection {
   };
 
   /**
-   * Convert points from LATLNG EPSG:4326 to LCC EPSG:3978
+   * Convert points from LNGLAT EPSG:4326 to LCC EPSG:3978
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  latLngToLCC = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LATLNG, PROJECTION_NAMES.LCC);
+  lngLatToLCC = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LNGLAT, PROJECTION_NAMES.LCC);
   };
 
   /**
-   * Convert points from LATLNG EPSG:4326 to WM EPSG:3857
+   * Convert points from LNGLAT EPSG:4326 to WM EPSG:3857
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  latLngToWm = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LATLNG, PROJECTION_NAMES.WM);
+  LngLatToWm = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LNGLAT, PROJECTION_NAMES.WM);
   };
 
   /**
@@ -137,21 +137,21 @@ export class Projection {
   };
 
   /**
-   * Convert points from LCC EPSG:3978 to LATLNG EPSG:4326
+   * Convert points from LCC EPSG:3978 to LNGLAT EPSG:4326
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  lccToLatLng = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.LCC, PROJECTION_NAMES.LATLNG);
+  lccToLngLat = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.LCC, PROJECTION_NAMES.LNGLAT);
   };
 
   /**
-   * Convert points from WM EPSG:3857 to LATLNG EPSG:4326
+   * Convert points from WM EPSG:3857 to LNGLAT EPSG:4326
    *
    * @param {Array<number | Array<number>>} points array of passed in points to convert
    */
-  wmToLatLng = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
-    return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LATLNG);
+  wmToLngLat = (points: Array<number | Array<number>>): Array<Array<number> | number> => {
+    return this.transformPoints(points, PROJECTION_NAMES.WM, PROJECTION_NAMES.LNGLAT);
   };
 
   /**
