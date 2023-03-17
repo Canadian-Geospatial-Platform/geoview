@@ -8,6 +8,7 @@ import { TypeGeoviewLayerConfig, TypeListOfLayerEntryConfig, TypeLocalizedString
 import { codedValueType, rangeDomainType, TypeArrayOfFeatureInfoEntries, TypeQueryType } from '../../../api/events/payloads/get-feature-info-payload';
 import { TypeJsonObject } from '../../../core/types/global-types';
 import { TimeDimension } from '../../../core/utils/date-mgt';
+import { TypeEventHandlerFunction } from '../../../api/events/event';
 export type TypeLegend = {
     layerPath: string;
     layerName?: TypeLocalizedString;
@@ -63,6 +64,11 @@ export type TypeGeoviewLayerType = 'esriDynamic' | 'esriFeature' | 'GeoJSON' | '
  * Definition of the GeoView layer constants
  */
 export declare const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType>;
+type TypeLayerSetHandlerFunctions = {
+    requestLayerInventory?: TypeEventHandlerFunction;
+    queryLegend?: TypeEventHandlerFunction;
+    queryLayer?: TypeEventHandlerFunction;
+};
 /** ******************************************************************************************************************************
  * The AbstractGeoViewLayer class is normally used for creating subclasses and is not instantiated (using the new operator) in the
  * app. It registers the configuration options and defines the methods shared by all its descendant. The class constructor has
@@ -89,6 +95,7 @@ export declare abstract class AbstractGeoViewLayer {
     geoviewLayerName: TypeLocalizedString;
     /** The GeoView layer metadataAccessPath. The name attribute is optional */
     metadataAccessPath: TypeLocalizedString;
+    layerOrder: string[];
     /**
      * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
      * configuration does not provide a value, we use an empty array instead of an undefined attribute.
@@ -109,10 +116,12 @@ export declare abstract class AbstractGeoViewLayer {
     metadata: TypeJsonObject | null;
     /** Layer metadata */
     layerMetadata: Record<string, TypeJsonObject>;
-    /** Layer temporal dimension */
+    /** Layer temporal dimension indexed by layerPath. */
     layerTemporalDimension: Record<string, TimeDimension>;
     /** Attribution used in the OpenLayer source. */
     attributions: string[];
+    /** LayerSet handler functions indexed by layerPath. This property is used to deactivate (off) events attached to a layer. */
+    registerToLayerSetListenerFunctions: Record<string, TypeLayerSetHandlerFunctions>;
     /** ***************************************************************************************************************************
      * The class constructor saves parameters and common configuration parameters in attributes.
      *
@@ -264,6 +273,12 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
      */
     protected registerToLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig): void;
+    /** ***************************************************************************************************************************
+     * This method unregisters the layer from the layer sets.
+     *
+     * @param {TypeBaseLayerEntryConfig} layerEntryConfig The layer entry to register.
+     */
+    unregisterFromLayerSets(layerEntryConfig: TypeBaseLayerEntryConfig): void;
     /** ***************************************************************************************************************************
      * This method create a layer group. it uses the layer initial settings of the GeoView layer configuration.
      *

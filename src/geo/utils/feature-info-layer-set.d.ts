@@ -11,8 +11,6 @@ import { LayerSet } from './layer-set';
 export declare class FeatureInfoLayerSet {
     /** The map identifier the layer set belongs to. */
     mapId: string;
-    /** The layer set identifier. */
-    layerSetId: string;
     /** The layer set object. */
     layerSet: LayerSet;
     /** An object containing the result sets indexed using the layer path */

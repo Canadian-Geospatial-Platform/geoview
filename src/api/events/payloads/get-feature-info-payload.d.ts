@@ -38,7 +38,7 @@ export type TypeFeatureInfoEntry = {
 };
 export type TypeArrayOfFeatureInfoEntries = TypeFeatureInfoEntry[];
 export type TypeFeatureInfoResultSets = {
-    [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined;
+    [layerPath: string]: TypeArrayOfFeatureInfoEntries | undefined | null;
 };
 /**
  * type guard function that redefines a PayloadBaseClass as a TypeQueryLayerPayload

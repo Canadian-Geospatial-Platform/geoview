@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { EventStringId } from './event-types';
 import { PayloadBaseClass } from './payloads/payload-base-class';
+export type TypeEventHandlerFunction = (payload: PayloadBaseClass) => void;
 /**
  * Class used to handle event emitting and subscribing for the API
  *
@@ -9,7 +10,7 @@ import { PayloadBaseClass } from './payloads/payload-base-class';
  */
 export declare class Event {
     eventEmitter: EventEmitter;
-    events: Record<string, Record<string, PayloadBaseClass>>;
+    events: Record<string, string>;
     /**
      * Initiate the event emitter
      */
@@ -20,48 +21,38 @@ export declare class Event {
      * @param {string} eventName the event name to listen to
      * @param {function} listener the callback function
      * @param {string} [handlerName] the handler name to return data from
-     * @param {string[]} args optional additional arguments
+     *
+     * @returns {TypeEventHandlerFunction} The event handler listener function associated to the event created.
      */
-    on: (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string, ...args: string[]) => void;
+    on: (eventName: EventStringId, listener: TypeEventHandlerFunction, handlerName?: string) => TypeEventHandlerFunction;
     /**
      * Listen to emitted events once
      *
      * @param {string} eventName the event name to listen to
      * @param {function} listener the callback function
      * @param {string} [handlerName] the handler name to return data from
-     * @param {string[]} args optional additional arguments
+     *
+     * @returns {TypeEventHandlerFunction} The event handler listener function associated to the event created.
      */
-    once: (eventName: EventStringId, listener: (payload: PayloadBaseClass) => void, handlerName?: string, ...args: string[]) => void;
+    once: (eventName: EventStringId, listener: TypeEventHandlerFunction, handlerName?: string) => TypeEventHandlerFunction;
     /**
      * Will remove the specified @listener from @eventname list
      *
      * @param {string} eventName the event name of the event to be removed
      * @param {string} handlerName the name of the handler an event needs to be removed from
-     * @param {string[]} args optional additional arguments
+     * @param {TypeEventHandlerFunction} listener The event handler listener function associated to the event created.
      */
-    off: (eventName: EventStringId, handlerName?: string, ...args: string[]) => void;
+    off: (eventName: EventStringId, handlerName?: string, listener?: TypeEventHandlerFunction) => void;
     /**
-     * Unsubscribe from all events on the map
+     * Unregister all events whose handler names start with the string passed in parameter.
      *
-     * @param {string} handlerName the id of the map to turn unsubscribe the event from
+     * @param {string} handlerNamePrefix the handler name prefix for which you need to unregister from the event
      */
-    offAll: (handlerName: string) => void;
+    offAll: (handlerNamePrefix: string) => void;
     /**
      * Will emit the event on the event name with the @payload
      *
      * @param {object} payload a payload (data) to be emitted for the event
-     * @param {string[]} args optional additional arguments
      */
-    emit: (payload: PayloadBaseClass, ...args: string[]) => void;
-    /**
-     * Get all the event handler names on a specified event
-     * @param eventName the event name to get all it's handler names
-     * @returns an array of all the event handler names
-     */
-    getHandlerNames: (eventName: string) => Array<string>;
-    /**
-     * Get all events with their data and event handler names
-     * @returns all the events with their data and handler names
-     */
-    getEvents: () => Record<string, Record<string, PayloadBaseClass>>;
+    emit: (payload: PayloadBaseClass) => void;
 }

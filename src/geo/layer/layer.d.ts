@@ -1,6 +1,6 @@
 import { Vector } from './vector/vector';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
-import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLocalizedLanguages } from '../map/map-schema-types';
+import { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeListOfLayerEntryConfig, TypeListOfLocalizedLanguages } from '../map/map-schema-types';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  *
@@ -16,6 +16,7 @@ export declare class Layer {
         [geoviewLayerId: string]: AbstractGeoViewLayer;
     };
     vector: Vector | undefined;
+    layerOrder: string[];
     /** used to reference the map id */
     private mapId;
     /**
@@ -91,4 +92,23 @@ export declare class Layer {
      * @returns the found layer data object
      */
     getGeoviewLayerById: (geoviewLayerId: string) => AbstractGeoViewLayer | null;
+    /**
+     * Function used to order the sublayers based on their position in the config.
+     *
+     * @param {TypeListOfLayerEntryConfig} listOfLayerConfig List of layer configs to order
+     */
+    orderSubLayers(listOfLayerConfig: TypeListOfLayerEntryConfig): string[];
+    /**
+     * Set Z index for layer and it's sublayers
+     *
+     * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
+     */
+    setLayerZIndices: (geoviewLayer: AbstractGeoViewLayer) => void;
+    /**
+     * Move layer one level in the given direction.
+     *
+     * @param {string} layerId ID of layer to be moved
+     * @param {string} parentLayerId ID of parent layer if layer is a sublayer
+     */
+    moveLayer: (layerId: string, destination: number, parentLayerId?: string) => void;
 }

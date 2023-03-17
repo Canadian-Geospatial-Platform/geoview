@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage } from '../../../app';
 export interface TypeLayerDataGridProps {
     layerId: string;
 }

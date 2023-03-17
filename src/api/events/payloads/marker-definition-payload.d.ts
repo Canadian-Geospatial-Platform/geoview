@@ -28,7 +28,7 @@ export declare class MarkerDefinitionPayload extends PayloadBaseClass {
      * @param {Coordinate} lnglat the marker coordinate
      * @param {TypeJsonObject} symbology the marker symbology
      */
-    constructor(event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology: TypeJsonObject);
+    constructor(event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology?: TypeJsonObject);
 }
 /**
  * Helper function used to instanciate a MarkerDefinitionPayload object. This function
@@ -41,4 +41,4 @@ export declare class MarkerDefinitionPayload extends PayloadBaseClass {
  *
  * @returns {MarkerDefinitionPayload} the MarkerDefinitionPayload object created
  */
-export declare const markerDefinitionPayload: (event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology: TypeJsonObject) => MarkerDefinitionPayload;
+export declare const markerDefinitionPayload: (event: EventStringId, handlerName: string | null, lnglat: Coordinate, symbology?: TypeJsonObject) => MarkerDefinitionPayload;

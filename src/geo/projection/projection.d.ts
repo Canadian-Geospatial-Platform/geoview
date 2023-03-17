@@ -6,7 +6,7 @@ import { Projection as OLProjection } from 'ol/proj';
 export declare const PROJECTION_NAMES: {
     LCC: string;
     WM: string;
-    LATLNG: string;
+    LNGLAT: string;
 };
 /**
  * Class used to handle functions for trasforming projections
@@ -44,17 +44,17 @@ export declare class Projection {
      */
     transformPoints: (points: unknown, fromProj: string, toProj: string) => Array<Array<number>>;
     /**
-     * Convert points from LATLNG EPSG:4326 to LCC EPSG:3978
+     * Convert points from LNGLAT EPSG:4326 to LCC EPSG:3978
      *
      * @param {Array<number | Array<number>>} points array of passed in points to convert
      */
-    latLngToLCC: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    lngLatToLCC: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
     /**
-     * Convert points from LATLNG EPSG:4326 to WM EPSG:3857
+     * Convert points from LNGLAT EPSG:4326 to WM EPSG:3857
      *
      * @param {Array<number | Array<number>>} points array of passed in points to convert
      */
-    latLngToWm: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    LngLatToWm: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
     /**
      * Convert points from LCC EPSG:3978 to WM EPSG:3857
      *
@@ -62,17 +62,17 @@ export declare class Projection {
      */
     lccToWm: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
     /**
-     * Convert points from LCC EPSG:3978 to LATLNG EPSG:4326
+     * Convert points from LCC EPSG:3978 to LNGLAT EPSG:4326
      *
      * @param {Array<number | Array<number>>} points array of passed in points to convert
      */
-    lccToLatLng: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    lccToLngLat: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
     /**
-     * Convert points from WM EPSG:3857 to LATLNG EPSG:4326
+     * Convert points from WM EPSG:3857 to LNGLAT EPSG:4326
      *
      * @param {Array<number | Array<number>>} points array of passed in points to convert
      */
-    wmToLatLng: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
+    wmToLngLat: (points: Array<number | Array<number>>) => Array<Array<number> | number>;
     /**
      * Convert points from WM EPSG:3857 to LCC EPSG:3978
      *
