@@ -1,3 +1,4 @@
+export * from './accordion/accordion';
 export * from './autocomplete/autocomplete';
 export * from './avatar/avatar';
 export * from './button';
