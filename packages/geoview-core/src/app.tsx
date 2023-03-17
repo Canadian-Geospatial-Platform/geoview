@@ -10,11 +10,6 @@ import makeStyles from '@mui/styles/makeStyles';
 import 'ol/ol.css';
 import './ui/style/style.css';
 import './ui/style/vendor.css';
-import * as OL from 'ol';
-import * as OLInteraction from 'ol/interaction';
-import * as OLGeometry from 'ol/geom';
-import * as OLFormat from 'ol/format';
-import * as OLStyle from 'ol/style';
 
 import * as UI from './ui';
 
@@ -124,11 +119,6 @@ export const cgpv: types.TypeCGPV = {
   },
   useTranslation,
   types,
-  ol: OL,
-  olStyle: OLStyle,
-  olGeometry: OLGeometry,
-  olFormat: OLFormat,
-  olInteraction: OLInteraction,
   // ? Do we realy need the constants attribute?
   // constants: {
   //   options: {},
