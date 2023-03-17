@@ -99,9 +99,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
       EVENT_NAMES.DRAWER.EVENT_DRAWER_OPEN_CLOSE,
       (payload) => {
         if (payloadIsABoolean(payload)) {
-          if (payload.handlerName === mapId) {
-            setOpen(payload.status);
-          }
+          setOpen(payload.status);
         }
       },
       mapId

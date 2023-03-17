@@ -634,8 +634,7 @@ function LayerStepper({ mapId, setAddLayerVisible }: Props): JSX.Element {
         setIsLoading(false);
         setAddLayerVisible(false);
       },
-      mapId,
-      geoviewLayerId
+      `${mapId}/${geoviewLayerId}`
     );
 
     let valid = true;
