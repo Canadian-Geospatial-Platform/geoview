@@ -24,7 +24,7 @@ import {
   SliderBase,
   CheckIcon,
 } from '../../../ui';
-import { api } from '../../../app';
+import { api, EsriDynamic } from '../../../app';
 import { LegendIconList } from './legend-icon-list';
 import { AbstractGeoViewLayer, isVectorLegend, isWmsLegend } from '../../../geo/layer/geoview-layers/abstract-geoview-layers';
 import {
@@ -550,7 +550,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
                 isParentVisible={isChecked}
                 toggleParentVisible={() => setChecked(!isChecked)}
                 toggleMapVisible={(sublayerConfig) => {
-                  (geoviewLayerInstance as AbstractGeoViewVector).applyViewFilter(sublayerConfig);
+                  (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic).applyViewFilter(sublayerConfig);
                 }}
                 layerConfig={geometryLayerConfig as TypeVectorLayerEntryConfig}
                 geometryKey={layerGeometryKey!}

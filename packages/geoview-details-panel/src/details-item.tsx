@@ -7,7 +7,6 @@ import {
   markerDefinitionPayload,
   payloadIsAllQueriesDone,
   TypeArrayOfLayerData,
-  TypeJsonObject,
   getLocalizedValue,
   Coordinate,
 } from 'geoview-core';
@@ -33,7 +32,7 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
   const [details, setDetails] = useState<TypeArrayOfLayerData>([]);
   // eslint-disable-next-line @typescript-eslint/ban-types
   const [list, setList] = useState<ReactElement>();
-  const [latLng, setLatLng] = useState<Coordinate>([]);
+  const [LngLat, setLngLat] = useState<Coordinate>([]);
   const [handlerName, setHandlerName] = useState<string | null>(null);
 
   const panel = api.map(mapId).appBarButtons.getAppBarButtonPanelById(buttonId === undefined ? '' : buttonId)?.panel;
@@ -64,8 +63,7 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
           setDetails([]);
         }
       },
-      mapId,
-      `${mapId}-DetailsAPI`
+      `${mapId}/${mapId}-DetailsAPI`
     );
     // get click info.
     api.event.on(
@@ -74,9 +72,9 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
         if (payloadIsAMapSingleClick(payload)) {
           const { coordinates } = payload;
           setHandlerName(payload.handlerName);
-          setLatLng(coordinates.lnglat);
+          setLngLat(coordinates.lnglat);
         } else {
-          setLatLng([]);
+          setLngLat([]);
         }
       },
       mapId
@@ -93,13 +91,13 @@ export function DetailsItem({ mapId, buttonId }: Props): JSX.Element {
     setList(
       api
         .map(mapId)
-        .details.createDetails(mapId, details, { mapId, location: latLng, backgroundStyle: 'dark', singleColumn: true, handlerName })
+        .details.createDetails(mapId, details, { mapId, location: LngLat, backgroundStyle: 'dark', singleColumn: true, handlerName })
     );
     setTimeout(() => {
-      api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, latLng, {} as TypeJsonObject));
+      api.event.emit(markerDefinitionPayload(api.eventNames.MARKER_ICON.EVENT_MARKER_ICON_SHOW, handlerName, LngLat));
     }, 800);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [details, latLng]);
+  }, [details, LngLat]);
 
   return <div>{list}</div>;
 }

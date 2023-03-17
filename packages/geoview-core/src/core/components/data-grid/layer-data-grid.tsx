@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/no-unstable-nested-components */
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataGrid,
@@ -21,11 +22,15 @@ import {
   GridToolbarDensitySelector,
   GridPrintExportMenuItem,
   GridPrintExportOptions,
+  useGridApiContext,
+  GridRowId,
+  gridFilteredSortedRowIdsSelector,
+  GridFilterModel,
 } from '@mui/x-data-grid';
 
-import { ButtonProps } from '@mui/material/Button';
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
-import { Tooltip, MenuItem } from '../../../ui';
+import Button, { ButtonProps } from '@mui/material/Button';
+import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
+import { Tooltip, MenuItem, Switch } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -36,6 +41,8 @@ import { Tooltip, MenuItem } from '../../../ui';
 
 // extend the DataGridProps to include the key row element
 interface CustomDataGridProps extends DataGridProps {
+  mapId: string;
+  layerId: string;
   rowId: string;
   layerKey: string;
   displayLanguage: TypeDisplayLanguage;
@@ -48,6 +55,10 @@ const sxClasses = {
     borderColor: 'primary.light',
     '& .MuiDataGrid-cell:hover': {
       color: 'text.primary',
+    },
+    '& .MuiFormControlLabel-root > .MuiFormControlLabel-label': {
+      fontSize: '0.93rem',
+      color: 'primary.main',
     },
     [`& div.even.${gridClasses.row}`]: {
       backgroundColor: 'grey.200',
@@ -90,11 +101,64 @@ const sxClasses = {
 };
 
 export function LayerDataGrid(props: CustomDataGridProps) {
-  const { rowId, layerKey, displayLanguage, columns, rows } = props;
+  const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
-  const getJson = () => {
-    const geoData = rows.map((row) => {
-      const { geometry, ...featureInfo } = row;
+  const [filterString, setFilterString] = useState<string>('');
+  const [mapfiltered, setMapFiltered] = useState<boolean>(false);
+
+  /**
+   * Convert the filter string from the Filter Model
+   *
+   * @param {GridFilterModel} gridFilterModel
+   * @return {string} filter string
+   *
+   */
+  const buildFilterString = (gridFilterModel: GridFilterModel) => {
+    const filterObj = gridFilterModel.items[0];
+    const fieldType = columns.find((column) => column.field === filterObj.columnField)?.type;
+    if (
+      filterObj === undefined ||
+      ((filterObj.value === undefined || filterObj.value === '') &&
+        filterObj.operatorValue !== 'isEmpty' &&
+        filterObj.operatorValue !== 'isNotEmpty')
+    ) {
+      return '';
+    }
+    switch (filterObj.operatorValue) {
+      case 'contains':
+        return `${filterObj.columnField} like '%${filterObj.value as string}%'`;
+      case 'equals':
+        return `${filterObj.columnField} = '${filterObj.value as string}'`;
+      case 'startsWith':
+        return `${filterObj.columnField} like '${filterObj.value as string}%'`;
+      case 'endsWith':
+        return `${filterObj.columnField} like '%${filterObj.value as string}'`;
+      case 'isEmpty':
+        return `${filterObj.columnField} is null`;
+      case 'isNotEmpty':
+        return `${filterObj.columnField} is not null`;
+      case 'isAnyOf':
+        if (filterObj.value.length === 0) {
+          return '';
+        }
+        return `${filterObj.columnField} in ${
+          fieldType === 'number' ? `(${filterObj.value.join(',')})` : `('${filterObj.value.join("','")}')`
+        }`;
+      default:
+        return `${filterObj.columnField} ${filterObj.operatorValue} ${filterObj.value}`;
+    }
+  };
+
+  /**
+   * build the JSON file
+   *
+   * @param {GridRowId} gridRowIds the array of the rowId
+   * @return {JSON.stringify} Json gile content
+   *
+   */
+  const getJson = (gridRowIds: GridRowId[]) => {
+    const geoData = gridRowIds.map((gridRowId) => {
+      const { geometry, ...featureInfo } = rows[gridRowId as number];
       delete featureInfo.featureKey;
       return {
         type: 'Feature',
@@ -134,9 +198,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
   function JsonExportMenuItem(props: GridExportMenuItemProps<{}>) {
     const { hideMenu } = props;
-
+    const apiRef = useGridApiContext();
     const onMenuItemClick = () => {
-      const jsonString = getJson();
+      const jsonString = getJson(gridFilteredSortedRowIdsSelector(apiRef));
       const blob = new Blob([jsonString], {
         type: 'text/json',
       });
@@ -168,6 +232,26 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     );
   }
 
+  const filterMap = (filter?: string) => {
+    let applyFilterString = '';
+    const geoviewLayerInstance = api.map(mapId).layer.geoviewLayers[layerId];
+    const filterLayerConfig = api.map(mapId).layer.registeredLayers[layerKey] as TypeLayerEntryConfig;
+    if (geoviewLayerInstance !== undefined && filterLayerConfig !== undefined) {
+      if (filter !== undefined) {
+        if (mapfiltered) {
+          applyFilterString = filter;
+        }
+      } else if (!mapfiltered) {
+        applyFilterString = filterString;
+      }
+      (geoviewLayerInstance as AbstractGeoViewVector | EsriDynamic)?.applyViewFilter(filterLayerConfig, applyFilterString);
+    }
+
+    if (filter === undefined) {
+      setMapFiltered(!mapfiltered);
+    }
+  };
+
   /**
    * Customize the toolbar, replace the Export button menu with the customized one
    *
@@ -180,6 +264,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       <GridToolbarContainer {...props}>
         <GridToolbarColumnsButton onResize={undefined} onResizeCapture={undefined} />
         <GridToolbarFilterButton onResize={undefined} onResizeCapture={undefined} />
+        <Button>
+          <Switch
+            size="small"
+            onChange={() => filterMap()}
+            title={!mapfiltered ? t('datagrid.filterMap') : t('datagrid.stopFilterMap')}
+            checked={mapfiltered}
+          />
+        </Button>
         <GridToolbarDensitySelector onResize={undefined} onResizeCapture={undefined} />
         <CustomExportButton />
       </GridToolbarContainer>
@@ -221,6 +313,11 @@ export function LayerDataGrid(props: CustomDataGridProps) {
            * You may wish to remove this line when working on the data grid
            */
           logLevel={false}
+          onFilterModelChange={(filterModel) => {
+            const filter = filterModel.items.length > 0 ? buildFilterString(filterModel) : '';
+            setFilterString(filter);
+            filterMap(filter);
+          }}
         />
       </div>
     </div>

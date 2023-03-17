@@ -130,9 +130,7 @@
       // set min max
       function setSliderMinMax() {
         cgpv.api.event.emit(
-          // null instead of mapId, "mySliderId" additional parameter to control a specefic slider
-          cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, null, { min: 2, max: 16 }),
-          'UI1-slider1'
+          cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, 'UI1-slider1', { min: 2, max: 16 })
         );
       }
       document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
@@ -140,9 +138,7 @@
       // set values
       function setSliderValues() {
         cgpv.api.event.emit(
-          // null instead of mapId, "mySliderId" additional parameter to control a specefic slider
-          cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, null, { value: 8 }),
-          'UI1-slider1'
+          cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, 'UI1-slider1', { value: 8 })
         );
       }
       document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
