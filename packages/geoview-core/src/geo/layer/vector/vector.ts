@@ -350,6 +350,7 @@ export class Vector {
     optionalFeatureId?: string
   ): Feature => {
     // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
+    // TODO: Refactoring - Based on the test page, addCircleMarker and addCircle seem to provide the exact same results? Should addCircleMarker be removed?
     const circleMarkerOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -494,8 +495,14 @@ export class Vector {
     },
     optionalFeatureId?: string
   ): Feature => {
+    // Read the params and set defaults when needed
     const markerOptions = options || {
       style: {
+        anchor: [0.5, 256],
+        size: [256, 256],
+        scale: 0.1,
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'pixels',
         src: './img/Marker.png',
       },
     };
