@@ -118,7 +118,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
     };
 
     // emit the slider values change event to the api
-    api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.sliderId);
+    api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
   };
 
   // remove overlapping labels
@@ -163,7 +163,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
             value,
             activeThumb,
           };
-          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.sliderId);
+          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
         }
       },
       properties.id
@@ -186,7 +186,7 @@ export function Slider(props: TypeSliderProps): JSX.Element {
             value: payload.sliderValues.value,
             activeThumb,
           };
-          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, null, sliderValues), properties.sliderId);
+          api.event.emit(sliderPayload(EVENT_NAMES.SLIDER.EVENT_SLIDER_CHANGE, properties.sliderId, sliderValues));
         }
       },
       properties.id
