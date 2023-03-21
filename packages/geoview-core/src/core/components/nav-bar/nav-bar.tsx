@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,7 @@ import Fullscreen from './buttons/fullscreen';
 import Home from './buttons/home';
 import Export from './buttons/export';
 
-import ExportModal from './export-modal';
+import ExportModal from '../export/export-modal';
 
 import { api, payloadIsABoolean } from '../../../app';
 import { Panel, ButtonGroup, IconButton, Box } from '../../../ui';
@@ -90,10 +90,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+type NavbarProps = {
+  setActivetrap: Dispatch<SetStateAction<boolean>>;
+};
+
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
  */
-export function Navbar(): JSX.Element {
+export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<Record<string, Record<string, TypeButtonPanel>>>({});
   const [ModalIsShown, setModalIsShown] = useState(false);
   const [footerBarExpanded, setFooterBarExpanded] = useState<boolean>(false);
@@ -138,10 +142,12 @@ export function Navbar(): JSX.Element {
 
   const openModal = () => {
     setModalIsShown(true);
+    setActivetrap(false);
   };
 
   const closeModal = () => {
     setModalIsShown(false);
+    setActivetrap(true);
   };
 
   useEffect(() => {
@@ -150,9 +156,7 @@ export function Navbar(): JSX.Element {
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_CREATE,
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            addButtonPanel(payload);
-          }
+          addButtonPanel(payload);
         }
       },
       mapId
@@ -163,9 +167,7 @@ export function Navbar(): JSX.Element {
       EVENT_NAMES.NAVBAR.EVENT_NAVBAR_BUTTON_PANEL_REMOVE,
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            removeButtonPanel(payload);
-          }
+          removeButtonPanel(payload);
         }
       },
       mapId

@@ -58,6 +58,6 @@ export class FooterTabPayload extends PayloadBaseClass {
  *
  * @returns {FooterTabPayload} the FooterTabPayload object created
  */
-export const tabPayload = (event: EventStringId, handlerName: string | null, tab: TypeTabs): FooterTabPayload => {
+export const footerTabPayload = (event: EventStringId, handlerName: string | null, tab: TypeTabs): FooterTabPayload => {
   return new FooterTabPayload(event, handlerName, tab);
 };

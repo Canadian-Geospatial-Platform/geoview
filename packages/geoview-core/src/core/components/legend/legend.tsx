@@ -16,7 +16,7 @@ export function Legend(): JSX.Element | null {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
 
-  const configLayerIds = api.map(mapId).mapFeaturesConfig.map.listOfGeoviewLayerConfig?.map((element) => element.geoviewLayerId) || [];
+  const configLayerIds = api.map(mapId).layer.layerOrder || [];
 
   const [mapLayers, setMapLayers] = useState<{ [geoviewLayerId: string]: AbstractGeoViewLayer }>({});
   const [orderedMapLayers, setOrderedMapLayers] = useState<AbstractGeoViewLayer[]>([]);
@@ -53,10 +53,9 @@ export function Legend(): JSX.Element | null {
             api.eventNames.LAYER.EVENT_LAYER_ADDED,
             () => {
               addLayer(payload.layerConfig.geoviewLayerId);
-              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, mapId, payload.layerConfig.geoviewLayerId);
+              api.event.off(api.eventNames.LAYER.EVENT_LAYER_ADDED, `${mapId}/${payload.layerConfig.geoviewLayerId}`);
             },
-            mapId,
-            payload.layerConfig.geoviewLayerId
+            `${mapId}/${payload.layerConfig.geoviewLayerId}`
           );
         }
       },

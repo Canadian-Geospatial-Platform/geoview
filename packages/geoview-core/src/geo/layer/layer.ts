@@ -1,5 +1,6 @@
 import { EventTypes } from 'ol/Observable';
 
+import { indexOf } from 'lodash';
 import { GeoCore, layerConfigIsGeoCore } from './other/geocore';
 import { Vector } from './vector/vector';
 
@@ -13,9 +14,11 @@ import { GeoViewLayerPayload, payloadIsRemoveGeoViewLayer } from '../../api/even
 import { snackbarMessagePayload } from '../../api/events/payloads/snackbar-message-payload';
 import { AbstractGeoViewLayer } from './geoview-layers/abstract-geoview-layers';
 import {
+  TypeBaseLayerEntryConfig,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
   TypeLayerGroupEntryConfig,
+  TypeListOfLayerEntryConfig,
   TypeListOfLocalizedLanguages,
 } from '../map/map-schema-types';
 import { GeoJSON, layerConfigIsGeoJSON } from './geoview-layers/vector/geojson';
@@ -44,6 +47,9 @@ export class Layer {
   // used to access vector API to create and manage geometries
   vector: Vector | undefined;
 
+  // order to load layers
+  layerOrder: string[];
+
   /** used to reference the map id */
   private mapId: string;
 
@@ -58,6 +64,20 @@ export class Layer {
 
     const validGeoviewLayerConfigs = this.deleteDuplicatGeoviewLayerConfig(geoviewLayerConfigs);
 
+    // set order for layers to appear on the map according to config
+    this.layerOrder = [];
+    validGeoviewLayerConfigs.forEach((layer) => {
+      if (layer.geoviewLayerId) {
+        // layer order reversed so highest index is top layer
+        this.layerOrder.unshift(layer.geoviewLayerId);
+        // layers without id uses sublayer ids
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layer.listOfLayerEntryConfig.forEach((subLayer) => {
+          if (subLayer.layerId) this.layerOrder.unshift(subLayer.layerId);
+        });
+      }
+    });
+
     this.vector = new Vector(this.mapId);
 
     // listen to outside events to add layers
@@ -65,62 +85,60 @@ export class Layer {
       EVENT_NAMES.LAYER.EVENT_ADD_LAYER,
       (payload) => {
         if (payloadIsALayerConfig(payload)) {
-          if (payload.handlerName!.includes(this.mapId)) {
-            const { layerConfig } = payload;
+          const { layerConfig } = payload;
 
-            if (layerConfigIsGeoCore(layerConfig)) {
-              const geoCore = new GeoCore(this.mapId);
-              geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
-                arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
-                  // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
-                  // the list of geoview layer entries.
-                  api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
-                  listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
-                    this.addGeoviewLayer(geoviewLayerConfig);
-                  });
+          if (layerConfigIsGeoCore(layerConfig)) {
+            const geoCore = new GeoCore(this.mapId);
+            geoCore.createLayers(layerConfig).then((arrayOfListOfGeoviewLayerConfig) => {
+              arrayOfListOfGeoviewLayerConfig.forEach((listOfGeoviewLayerConfig) => {
+                // the -1 applied is because each geocore UUID config count for one. We want to replace the geocore entry by
+                // the list of geoview layer entries.
+                api.maps[this.mapId].remainingLayersThatNeedToBeLoaded += listOfGeoviewLayerConfig.length - 1;
+                listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => {
+                  this.addGeoviewLayer(geoviewLayerConfig);
                 });
               });
-            } else if (layerConfigIsGeoJSON(layerConfig)) {
-              const geoJSON = new GeoJSON(this.mapId, layerConfig);
-              geoJSON.createGeoViewLayers().then(() => {
-                this.addToMap(geoJSON);
-              });
-            } else if (layerConfigIsGeoPackage(layerConfig)) {
-              const geoPackage = new GeoPackage(this.mapId, layerConfig);
-              geoPackage.createGeoViewLayers().then(() => {
-                this.addToMap(geoPackage);
-              });
-            } else if (layerConfigIsWMS(layerConfig)) {
-              const wmsLayer = new WMS(this.mapId, layerConfig);
-              wmsLayer.createGeoViewLayers().then(() => {
-                this.addToMap(wmsLayer);
-              });
-            } else if (layerConfigIsEsriDynamic(layerConfig)) {
-              const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
-              esriDynamic.createGeoViewLayers().then(() => {
-                this.addToMap(esriDynamic);
-              });
-            } else if (layerConfigIsEsriFeature(layerConfig)) {
-              const esriFeature = new EsriFeature(this.mapId, layerConfig);
-              esriFeature.createGeoViewLayers().then(() => {
-                this.addToMap(esriFeature);
-              });
-            } else if (layerConfigIsWFS(layerConfig)) {
-              const wfsLayer = new WFS(this.mapId, layerConfig);
-              wfsLayer.createGeoViewLayers().then(() => {
-                this.addToMap(wfsLayer);
-              });
-            } else if (layerConfigIsOgcFeature(layerConfig)) {
-              const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
-              ogcFeatureLayer.createGeoViewLayers().then(() => {
-                this.addToMap(ogcFeatureLayer);
-              });
-            } else if (layerConfigIsXYZTiles(layerConfig)) {
-              const xyzTiles = new XYZTiles(this.mapId, layerConfig);
-              xyzTiles.createGeoViewLayers().then(() => {
-                this.addToMap(xyzTiles);
-              });
-            }
+            });
+          } else if (layerConfigIsGeoJSON(layerConfig)) {
+            const geoJSON = new GeoJSON(this.mapId, layerConfig);
+            geoJSON.createGeoViewLayers().then(() => {
+              this.addToMap(geoJSON);
+            });
+          } else if (layerConfigIsGeoPackage(layerConfig)) {
+            const geoPackage = new GeoPackage(this.mapId, layerConfig);
+            geoPackage.createGeoViewLayers().then(() => {
+              this.addToMap(geoPackage);
+            });
+          } else if (layerConfigIsWMS(layerConfig)) {
+            const wmsLayer = new WMS(this.mapId, layerConfig);
+            wmsLayer.createGeoViewLayers().then(() => {
+              this.addToMap(wmsLayer);
+            });
+          } else if (layerConfigIsEsriDynamic(layerConfig)) {
+            const esriDynamic = new EsriDynamic(this.mapId, layerConfig);
+            esriDynamic.createGeoViewLayers().then(() => {
+              this.addToMap(esriDynamic);
+            });
+          } else if (layerConfigIsEsriFeature(layerConfig)) {
+            const esriFeature = new EsriFeature(this.mapId, layerConfig);
+            esriFeature.createGeoViewLayers().then(() => {
+              this.addToMap(esriFeature);
+            });
+          } else if (layerConfigIsWFS(layerConfig)) {
+            const wfsLayer = new WFS(this.mapId, layerConfig);
+            wfsLayer.createGeoViewLayers().then(() => {
+              this.addToMap(wfsLayer);
+            });
+          } else if (layerConfigIsOgcFeature(layerConfig)) {
+            const ogcFeatureLayer = new OgcFeature(this.mapId, layerConfig);
+            ogcFeatureLayer.createGeoViewLayers().then(() => {
+              this.addToMap(ogcFeatureLayer);
+            });
+          } else if (layerConfigIsXYZTiles(layerConfig)) {
+            const xyzTiles = new XYZTiles(this.mapId, layerConfig);
+            xyzTiles.createGeoViewLayers().then(() => {
+              this.addToMap(xyzTiles);
+            });
           }
         }
       },
@@ -202,7 +220,7 @@ export class Layer {
       pathEnding =
         layerEntryConfig.layerPathEnding === undefined
           ? layerEntryConfig.layerId
-          : `${layerEntryConfig.layerId}/${layerEntryConfig.layerPathEnding}`;
+          : `${layerEntryConfig.layerId}.${layerEntryConfig.layerPathEnding}`;
     if (layerEntryConfig.geoviewRootLayer === layerEntryConfig.parentLayerConfig)
       return `${layerEntryConfig.geoviewRootLayer!.geoviewLayerId!}/${pathEnding}`;
     return this.getLayerPath(
@@ -262,7 +280,9 @@ export class Layer {
           const layerInterval = setInterval(() => {
             if (this.geoviewLayers[geoviewLayer.geoviewLayerId]) {
               clearInterval(layerInterval);
-              api.event.emit(GeoViewLayerPayload.createGeoviewLayerAddedPayload(this.mapId, geoviewLayer), geoviewLayer.geoviewLayerId);
+              api.event.emit(
+                GeoViewLayerPayload.createGeoviewLayerAddedPayload(`${this.mapId}/${geoviewLayer.geoviewLayerId}`, geoviewLayer)
+              );
             }
           }, 10);
         }
@@ -279,17 +299,33 @@ export class Layer {
    * @param {string} partialLayerPath the path of the layer to be removed
    */
   removeLayersUsingPath = (partialLayerPath: string): void => {
+    // A layer path is a slash seperated string made of the GeoView layer Id followed by the layer Ids
+    const partialLayerPathNodes = partialLayerPath.split('/');
+
+    // initialize these two constant now because we will delete the information use to get their values.
+    const indexToDelete = this.registeredLayers[partialLayerPath]
+      ? this.registeredLayers[partialLayerPath].parentLayerConfig?.listOfLayerEntryConfig.findIndex(
+          (layerEntryConfig) => layerEntryConfig === this.registeredLayers?.[partialLayerPath]
+        )
+      : undefined;
+    const listOfLayerEntryConfigAffected = this.registeredLayers[partialLayerPath]?.parentLayerConfig?.listOfLayerEntryConfig;
+
     Object.keys(this.registeredLayers).forEach((completeLayerPath) => {
-      if (completeLayerPath.startsWith(partialLayerPath)) {
-        this.registeredLayers[completeLayerPath]?.gvLayer!.dispose();
-        const layerId = partialLayerPath.split('/').slice(-1)[0];
-        const listOfLayerEntryConfig = this.registeredLayers[completeLayerPath].parentLayerConfig?.listOfLayerEntryConfig;
-        const layerIndex = listOfLayerEntryConfig!.findIndex((layerConfig) => layerConfig.layerId === layerId);
-        delete listOfLayerEntryConfig![layerIndex];
-        api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, completeLayerPath, 'remove'));
+      const completeLayerPathNodes = completeLayerPath.split('/');
+      const pathBeginningAreEqual = partialLayerPathNodes.reduce<boolean>((areEqual, partialLayerPathNode, nodeIndex) => {
+        return areEqual && partialLayerPathNode === completeLayerPathNodes[nodeIndex];
+      }, true);
+      if (pathBeginningAreEqual) {
+        const layerEntryConfigToRemove = this.registeredLayers[completeLayerPath];
+        layerEntryConfigToRemove.gvLayer?.dispose();
+        if (layerEntryConfigToRemove.entryType !== 'group') {
+          this.geoviewLayers[partialLayerPathNodes[0]].unregisterFromLayerSets(layerEntryConfigToRemove as TypeBaseLayerEntryConfig);
+          api.event.emit(LayerSetPayload.createLayerRegistrationPayload(this.mapId, completeLayerPath, 'remove'));
+        }
         delete this.registeredLayers[completeLayerPath];
       }
     });
+    if (listOfLayerEntryConfigAffected) listOfLayerEntryConfigAffected.splice(indexToDelete!, 1);
 
     if (this.geoviewLayers[partialLayerPath]) {
       // The clearTimeout is there for those rare extreme cases where you create a layer and then immediately destroy
@@ -338,6 +374,7 @@ export class Layer {
    */
   removeGeoviewLayer = (geoviewLayer: AbstractGeoViewLayer): string => {
     api.event.emit(GeoViewLayerPayload.createRemoveGeoviewLayerPayload(this.mapId, geoviewLayer));
+    this.layerOrder.splice(indexOf(api.map(this.mapId).layer.layerOrder, geoviewLayer.geoviewLayerId), 1);
 
     return geoviewLayer.geoviewLayerId;
   };
@@ -350,5 +387,65 @@ export class Layer {
    */
   getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
     return this.geoviewLayers[geoviewLayerId];
+  };
+
+  /**
+   * Function used to order the sublayers based on their position in the config.
+   *
+   * @param {TypeListOfLayerEntryConfig} listOfLayerConfig List of layer configs to order
+   */
+  orderSubLayers(listOfLayerConfig: TypeListOfLayerEntryConfig): string[] {
+    const layers: string[] = [];
+    listOfLayerConfig.forEach((layer) => {
+      if (layer.layerId) {
+        layers.unshift(layer.layerId);
+      } else if (layer.listOfLayerEntryConfig !== undefined) {
+        layers.unshift(...this.orderSubLayers(layer.listOfLayerEntryConfig));
+      }
+    });
+    return layers;
+  }
+
+  /**
+   * Set Z index for layer and it's sublayers
+   *
+   * @param {AbstractGeoViewLayer} geoviewLayer layer to set Z index for
+   */
+  setLayerZIndices = (geoviewLayer: AbstractGeoViewLayer) => {
+    const zIndex =
+      this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) !== -1 ? this.layerOrder.indexOf(geoviewLayer.geoviewLayerId) * 100 : 0;
+    geoviewLayer.gvLayers!.setZIndex(zIndex);
+    geoviewLayer.listOfLayerEntryConfig.forEach((subLayer) => {
+      const subLayerZIndex =
+        geoviewLayer.layerOrder.indexOf(subLayer.layerId) !== -1 ? geoviewLayer.layerOrder.indexOf(subLayer.layerId) : 0;
+      subLayer.gvLayer?.setZIndex(subLayerZIndex + zIndex);
+    });
+  };
+
+  /**
+   * Move layer one level in the given direction.
+   *
+   * @param {string} layerId ID of layer to be moved
+   * @param {string} parentLayerId ID of parent layer if layer is a sublayer
+   */
+  moveLayer = (layerId: string, destination: number, parentLayerId?: string) => {
+    const orderOfLayers: string[] = parentLayerId
+      ? api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId)!.layerOrder
+      : this.layerOrder;
+    orderOfLayers.reverse(); // layer order in legend is reversed from layerOrder
+    const location = orderOfLayers.indexOf(layerId);
+    const [removed] = orderOfLayers.splice(location, 1);
+    orderOfLayers.splice(destination, 0, removed);
+    orderOfLayers.reverse();
+
+    if (!parentLayerId) {
+      orderOfLayers.forEach((movedLayerId) => {
+        const movedLayer = api.maps[this.mapId].layer.getGeoviewLayerById(movedLayerId);
+        if (movedLayer) this.setLayerZIndices(movedLayer);
+      });
+    } else {
+      const parentLayer = api.maps[this.mapId].layer.getGeoviewLayerById(parentLayerId);
+      if (parentLayer) this.setLayerZIndices(parentLayer);
+    }
   };
 }

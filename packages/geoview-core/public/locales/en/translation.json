@@ -46,10 +46,12 @@
     "opacity": "Opacity",
     "expand_legend": "Expand Legend",
     "toggle_cluster": "Toggle Clustering",
-    "toggle_opacity" : "Toggle Opacity"
+    "toggle_opacity": "Toggle Opacity"
   },
   "datagrid": {
-    "exportJson": "Download GeoJSON"
+    "exportJson": "Download GeoJSON",
+    "filterMap": "Filter Map",
+    "stopFilterMap": "Stop Map Filter"
   },
   "keyboardnav": {
     "start": "Skip after map element",
@@ -70,5 +72,10 @@
       "createtwice": "Can not execute twice the createGeoViewRasterLayers method for the map __param__",
       "usedtwice": "Duplicate use of geoview layer identifier [__param__] on map __param__"
     }
+  },
+  "exportModal": {
+    "title": "Export Map as PNG",
+    "cancelBtn": "Cancel",
+    "exportBtn": "Export"
   }
 }

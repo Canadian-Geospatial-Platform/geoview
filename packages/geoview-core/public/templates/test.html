@@ -209,8 +209,7 @@
           const { layerSetId, resultSets } = payload;
           document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
         },
-        'LYR1',
-        'wmsResultSetId'
+        'LYR1/wmsResultSetId'
       );
 
       const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
@@ -220,13 +219,12 @@
           const { resultSets } = payload;
           displayLegend('wmsLegendsId', resultSets);
         },
-        'LYR1',
-        'wmsLegendsId'
+       'LYR1/wmsLegendsId'
       );
 
       var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
       addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR1', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER }, 'wmsLegendsId');
+        cgpv.api.event.emit({ handlerName: 'LYR1/wmsLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
       });
 
       // ==========================================================================================================================

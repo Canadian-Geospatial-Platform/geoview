@@ -13,7 +13,7 @@ import { payloadIsAButtonPanel, ButtonPanelPayload } from '../../../api/events/p
 import { TypeButtonPanel } from '../../../ui/panel/panel-types';
 
 import Export from './buttons/export';
-import ExportModal from '../nav-bar/export-modal';
+import ExportModal from '../export/export-modal';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -150,9 +150,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
       EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_CREATE,
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            addButtonPanel(payload);
-          }
+          addButtonPanel(payload);
         }
       },
       mapId
@@ -163,9 +161,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
       EVENT_NAMES.APPBAR.EVENT_APPBAR_PANEL_REMOVE,
       (payload) => {
         if (payloadIsAButtonPanel(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            removeButtonPanel(payload);
-          }
+          removeButtonPanel(payload);
         }
       },
       mapId
@@ -176,8 +172,7 @@ export function Appbar({ setActivetrap }: AppbarProps): JSX.Element {
       () => {
         setSelectedAppbarButtonId('');
       },
-      mapId,
-      selectedAppBarButtonId
+      `${mapId}/${selectedAppBarButtonId}`
     );
 
     return () => {

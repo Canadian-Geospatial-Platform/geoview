@@ -216,6 +216,8 @@ export class MapViewer {
             (payload) => {
               if (payloadIsGeoViewLayerAdded(payload)) {
                 const { geoviewLayer } = payload;
+                geoviewLayer.layerOrder = this.layer.orderSubLayers(geoviewLayer.listOfLayerEntryConfig);
+                this.layer.setLayerZIndices(geoviewLayer);
                 geoviewLayer!.isLoaded = true;
                 if (this.remainingLayersThatNeedToBeLoadedIsDecrementedToZero4TheFirstTime()) {
                   clearTimeout(this.layerLoadedTimeoutId[geoviewLayerConfig.geoviewLayerId]);
@@ -223,8 +225,7 @@ export class MapViewer {
                 }
               }
             },
-            this.mapId,
-            geoviewLayerConfig.geoviewLayerId
+            `${this.mapId}/${geoviewLayerConfig.geoviewLayerId}`
           );
         }
       });
