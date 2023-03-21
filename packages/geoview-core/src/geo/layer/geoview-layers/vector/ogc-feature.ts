@@ -278,7 +278,8 @@ export class OgcFeature extends AbstractGeoViewVector {
   private processFeatureInfoConfig(fields: TypeJsonObject, layerEntryConfig: TypeVectorLayerEntryConfig) {
     if (!layerEntryConfig.source) layerEntryConfig.source = {};
     if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: true };
-    // Process undefined outfields or aliasFields ('' = false and !'' = true)
+    // Process undefined outfields or aliasFields ('' = false and !'' = true). Also, if en is undefined, then fr is also undefined.
+    // when en and fr are undefined, we set both en and fr to the same value.
     if (!layerEntryConfig.source.featureInfo.outfields?.en || !layerEntryConfig.source.featureInfo.aliasFields?.en) {
       const processOutField = !layerEntryConfig.source.featureInfo.outfields?.en;
       const processAliasFields = !layerEntryConfig.source.featureInfo.aliasFields?.en;
@@ -304,6 +305,13 @@ export class OgcFeature extends AbstractGeoViewVector {
       layerEntryConfig.source.featureInfo!.aliasFields!.en = layerEntryConfig.source.featureInfo!.aliasFields?.en?.slice(0, -1);
       layerEntryConfig.source!.featureInfo!.outfields!.fr = layerEntryConfig.source!.featureInfo!.outfields?.en;
       layerEntryConfig.source!.featureInfo!.aliasFields!.fr = layerEntryConfig.source!.featureInfo!.aliasFields?.en;
+    }
+    if (!layerEntryConfig.source.featureInfo.nameField) {
+      const en =
+        layerEntryConfig.source.featureInfo!.outfields!.en?.split(',')[0] ||
+        layerEntryConfig.source.featureInfo!.outfields!.fr?.split(',')[0];
+      const fr = en;
+      if (en) layerEntryConfig.source.featureInfo.nameField = { en, fr };
     }
   }
 

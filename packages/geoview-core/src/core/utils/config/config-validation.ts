@@ -584,7 +584,7 @@ export class ConfigValidation {
         }
         if (
           !(layerEntryConfig.source.dataAccessPath!.en?.startsWith('blob') && !layerEntryConfig.source.dataAccessPath!.en?.endsWith('/')) &&
-          !layerEntryConfig.source.dataAccessPath!.en?.endsWith('.gpkg' || '.GPKG')
+          !layerEntryConfig.source.dataAccessPath!.en?.toLowerCase().endsWith('.gpkg')
         ) {
           layerEntryConfig.source.dataAccessPath!.en = layerEntryConfig.source.dataAccessPath!.en!.endsWith('/')
             ? `${layerEntryConfig.source.dataAccessPath!.en}${layerEntryConfig.layerId}`
@@ -675,7 +675,23 @@ export class ConfigValidation {
     suportedLanguages: TypeListOfLocalizedLanguages,
     listOfGeoviewLayerConfig?: TypeListOfGeoviewLayerConfig
   ): void {
-    if (suportedLanguages.includes('en') && suportedLanguages.includes('fr')) return;
+    if (suportedLanguages.includes('en') && suportedLanguages.includes('fr') && listOfGeoviewLayerConfig) {
+      const validateLocalizedString = (config: TypeJsonObject) => {
+        if (typeof config === 'object') {
+          Object.keys(config).forEach((key) => {
+            if (typeof config[key] === 'object') {
+              if (('en' in config[key] || 'fr' in config[key]) && (!config[key].en || !config[key].fr))
+                throw new Error('When you support both languages, you must set all en and fr properties of localized strings.');
+              // Avoid the 'geoviewRootLayer' and 'parentLayerConfig' properties because they loop on themself and cause a
+              // stack overflow error.
+              else if (!['geoviewRootLayer', 'parentLayerConfig'].includes(key)) validateLocalizedString(config[key]);
+            }
+          });
+        }
+      };
+      listOfGeoviewLayerConfig.forEach((geoviewLayerConfig) => validateLocalizedString(toJsonObject(geoviewLayerConfig)));
+      return;
+    }
 
     let sourceKey: TypeDisplayLanguage;
     let destinationKey: TypeDisplayLanguage;
@@ -694,7 +710,9 @@ export class ConfigValidation {
             if (typeof config[key] === 'object') {
               if ('en' in config[key] || 'fr' in config[key])
                 this.SynchronizeLocalizedString(Cast<TypeLocalizedString>(config[key]), sourceKey, destinationKey);
-              else propagateLocalizedString(config[key]);
+              // Avoid the 'geoviewRootLayer' and 'parentLayerConfig' properties because they loop on themself and cause a
+              // stack overflow error.
+              else if (!['geoviewRootLayer', 'parentLayerConfig'].includes(key)) propagateLocalizedString(config[key]);
             }
           });
         }
