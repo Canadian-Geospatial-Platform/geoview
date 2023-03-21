@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useState, useEffect } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import { useTheme, Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import {
   List,
@@ -22,7 +22,7 @@ import {
   TypeVectorLayerEntryConfig,
 } from '../../types/cgpv-types';
 
-const useStyles = makeStyles((theme) => ({
+const sxClasses = {
   listIconLabel: {
     color: 'text.primary',
     fontSize: 14,
@@ -33,10 +33,7 @@ const useStyles = makeStyles((theme) => ({
     margin: 0,
     padding: '0 0 0 8px',
   },
-  iconImg: {
-    ...theme.iconImg,
-  },
-}));
+};
 
 export interface TypeLegendIconListProps {
   iconImages: string[];
@@ -54,7 +51,10 @@ export interface TypeLegendIconListProps {
  */
 export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
   const { iconImages, iconLabels, isParentVisible, toggleParentVisible, toggleMapVisible, geometryKey, layerConfig } = props;
-  const classes = useStyles();
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
+
   const allChecked = iconImages.map(() => true);
   const allUnChecked = iconImages.map(() => false);
   const [isChecked, setChecked] = useState<boolean[]>(isParentVisible === true ? allChecked : allUnChecked);
@@ -127,14 +127,14 @@ export function LegendIconList(props: TypeLegendIconListProps): JSX.Element {
       {iconImages.map((icon, index) => {
         return (
           <Box key={iconLabels[index]}>
-            <ListItem className={classes.listItem}>
+            <ListItem sx={sxClasses.listItem}>
               <ListItemButton>
                 <ListItemIcon>
-                  <img alt={iconLabels[index]} src={icon} className={classes.iconImg} />
+                  <img alt={iconLabels[index]} src={icon} style={theme.iconImg} />
                 </ListItemIcon>
                 <Tooltip title={iconLabels[index]} placement="top" enterDelay={1000}>
                   <ListItemText
-                    className={classes.listIconLabel}
+                    sx={sxClasses.listIconLabel}
                     primaryTypographyProps={{ fontSize: 14, noWrap: true }}
                     primary={iconLabels[index]}
                   />

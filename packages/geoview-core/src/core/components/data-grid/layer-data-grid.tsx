@@ -4,7 +4,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import makeStyles from '@mui/styles/makeStyles';
 import {
   DataGrid,
   DataGridProps,
@@ -28,7 +27,7 @@ import {
   gridFilteredSortedRowIdsSelector,
   GridFilterModel,
 } from '@mui/x-data-grid';
-
+import { useTheme, Theme } from '@mui/material/styles';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
 import { fromLonLat } from 'ol/proj';
@@ -51,67 +50,65 @@ interface CustomDataGridProps extends DataGridProps {
   displayLanguage: TypeDisplayLanguage;
 }
 
-const useStyles = makeStyles((theme) => ({
+const sxClasses = {
   DataGrid: {
-    boxShadow: '2',
-    border: '2',
-    borderColor: theme.palette.primary.light,
+    boxShadow: 2,
+    border: 2,
+    borderColor: 'primary.light',
     '& .MuiDataGrid-cell:hover': {
-      color: theme.palette.text.primary,
+      color: 'text.primary',
     },
     '& .MuiFormControlLabel-root > .MuiFormControlLabel-label': {
       fontSize: '0.93rem',
-      color: theme.palette.primary.main,
+      color: 'primary.main',
     },
     [`& div.even.${gridClasses.row}`]: {
-      backgroundColor: theme.palette.grey['200'],
+      backgroundColor: 'grey.200',
       '&:hover, &.Mui-hovered': {
-        backgroundColor: theme.hoverRow,
+        backgroundColor: 'action.hoverRow',
         '@media (hover: none)': {
           backgroundColor: 'transparent',
         },
       },
       '&.Mui-selected': {
-        backgroundColor: theme.selectedRow,
+        backgroundColor: 'action.selectedRow',
         '&:hover, &.Mui-hovered': {
-          backgroundColor: theme.hoverRow,
+          backgroundColor: 'action.hoverRow',
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
-            backgroundColor: theme.selectedRow,
+            backgroundColor: 'action.selectedRow',
           },
         },
       },
     },
     [`& .${gridClasses.row}`]: {
       '&:hover, &.Mui-hovered': {
-        backgroundColor: theme.hoverRow,
+        backgroundColor: 'action.hoverRow',
         '@media (hover: none)': {
           backgroundColor: 'transparent',
         },
       },
       '&.Mui-selected': {
-        backgroundColor: theme.selectedRow,
+        backgroundColor: 'action.selectedRow',
         '&:hover, &.Mui-hovered': {
-          backgroundColor: theme.hoverRow,
+          backgroundColor: 'action.hoverRow',
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
-            backgroundColor: theme.selectedRow,
+            backgroundColor: 'action.selectedRow',
           },
         },
       },
     },
   },
-  iconImg: {
-    ...theme.iconImg,
-    width: '35px',
-    height: '35px',
-  },
-}));
+};
 
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
-  const classes = useStyles();
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
+
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
 
@@ -332,7 +329,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   columns.forEach((column) => {
     column.renderCell = (params: GridCellParams) => {
       if (column.field === 'featureIcon') {
-        return <img alt={params.value} src={params.value} className={classes.iconImg} />;
+        return <img alt={params.value} src={params.value} style={{ ...theme.iconImg, width: '35px', height: '35px' }} />;
       }
 
       if (column.field === 'featureActions') {
@@ -361,7 +358,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       <div style={{ flexGrow: 1 }}>
         <DataGrid
           localeText={locale}
-          className={classes.DataGrid}
+          sx={sxClasses.DataGrid}
           {...props}
           getRowId={(row) => row[rowId]}
           getRowClassName={(params) => (params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd')}
