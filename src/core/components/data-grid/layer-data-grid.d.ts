@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import { DataGridProps } from '@mui/x-data-grid';
-import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
+import { TypeDisplayLanguage } from '../../../app';
 /**
  * Create a data grid (table) component for a lyer features all request
  *
@@ -8,6 +8,8 @@ import { TypeDisplayLanguage } from '../../../geo/map/map-schema-types';
  * @returns {JSX.Element} returns table component
  */
 interface CustomDataGridProps extends DataGridProps {
+    mapId: string;
+    layerId: string;
     rowId: string;
     layerKey: string;
     displayLanguage: TypeDisplayLanguage;

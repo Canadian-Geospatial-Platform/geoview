@@ -1,5 +1,5 @@
 /// <reference types="react" />
-import { TypeStyleGeometry, TypeVectorLayerEntryConfig } from '../../types/cgpv-types';
+import { TypeLayerEntryConfig, TypeStyleGeometry, TypeVectorLayerEntryConfig } from '../../types/cgpv-types';
 export interface TypeLegendIconListProps {
     iconImages: string[];
     iconLabels: string[];
@@ -7,7 +7,7 @@ export interface TypeLegendIconListProps {
     geometryKey?: TypeStyleGeometry;
     isParentVisible?: boolean;
     toggleParentVisible?: () => void;
-    toggleMapVisible?: (layerConfig: TypeVectorLayerEntryConfig) => void;
+    toggleMapVisible?: (layerConfig: TypeLayerEntryConfig) => void;
 }
 /**
  * List of Icons to show in expanded Legend Item

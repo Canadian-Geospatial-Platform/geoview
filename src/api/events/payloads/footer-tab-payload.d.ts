@@ -38,4 +38,4 @@ export declare class FooterTabPayload extends PayloadBaseClass {
  *
  * @returns {FooterTabPayload} the FooterTabPayload object created
  */
-export declare const tabPayload: (event: EventStringId, handlerName: string | null, tab: TypeTabs) => FooterTabPayload;
+export declare const footerTabPayload: (event: EventStringId, handlerName: string | null, tab: TypeTabs) => FooterTabPayload;
