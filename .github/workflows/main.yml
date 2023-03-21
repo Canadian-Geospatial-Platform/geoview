@@ -35,7 +35,7 @@ jobs:
         uses: JamesSingleton/is-organization-member@1.0.1
         with:
           organization: Canadian-Geospatial-Platform
-          username: ${{ github.event.pull_request.head.user.login }}
+          username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Output comment and end build if not org member
