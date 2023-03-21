@@ -16,12 +16,9 @@ import { TypeInteraction } from '../app';
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme {
-    hoverRow?: string;
-    selectedRow?: string;
     iconImg: React.CSSProperties;
   }
 }
-
 // create a state that will hold map config information
 export const MapContext = React.createContext<TypeMapContext>({
   mapId: '',

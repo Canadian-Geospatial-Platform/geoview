@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
+import { useTheme, Theme } from '@mui/material/styles';
 import { fromLonLat } from 'ol/proj';
 import {
   Collapse,
@@ -21,9 +21,9 @@ import { api } from '../../../app';
 import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-info-payload';
 import { DetailsProps } from './details';
 
-const useStyles = makeStyles((theme) => ({
+const sxClasses = {
   layerItem: {
-    color: theme.palette.text.primary,
+    color: 'text.primary',
     padding: 0,
   },
   itemText: {
@@ -53,12 +53,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '0.7em',
     width: '40%',
   },
-  iconImg: {
-    ...theme.iconImg,
-    width: '35px',
-    height: '35px',
-  },
-}));
+};
 export interface TypeFeatureProps {
   // eslint-disable-next-line react/no-unused-prop-types
   feature: TypeFeatureInfoEntry;
@@ -73,7 +68,6 @@ export interface TypeFeatureProps {
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature, startOpen, detailsSettings } = props;
-  const classes = useStyles();
   const { mapId, backgroundStyle } = detailsSettings;
   const featureId = `Feature Info ${feature.featureKey}`;
   const featureIconSrc = feature.featureIcon.toDataURL();
@@ -90,6 +84,10 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
+
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
 
   function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
@@ -124,7 +122,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   */
   return (
     <>
-      <ListItem className={classes.layerItem} onClick={() => setOpen(!isOpen)}>
+      <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
             <IconButton color="primary" sx={fontColor}>
@@ -132,10 +130,10 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
             </IconButton>
           </ListItemIcon>
           <ListItemIcon>
-            <img alt={featureId} src={featureIconSrc} className={classes.iconImg} />
+            <img alt={featureId} src={featureIconSrc} style={{ ...theme.iconImg, width: '35px', height: '35px' }} />
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
-            <ListItemText className={classes.itemText} sx={fontColor} primary={featureId} />
+            <ListItemText sx={{ ...sxClasses.itemText, ...fontColor }} primary={featureId} />
           </Tooltip>
           <ListItemIcon>
             <IconButton sx={fontColor} onClick={(e) => handleZoomIn(e)}>
@@ -146,19 +144,15 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       </ListItem>
       <Collapse in={isOpen} timeout="auto" unmountOnExit>
         <Box>
-          <List className={classes.expandableIconContainer}>
+          <List sx={sxClasses.expandableIconContainer}>
             {
               // loop through each layer in the map server
               featureInfoList.map((featureInfoItem, index) => {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
-                  <ListItem key={index} className={index % 2 > 0 ? classes.featureInfoItem : classes.featureInfoItemOdd}>
-                    <Box sx={fontColor} className={classes.featureInfoItemKey}>
-                      {featureInfoItem.key}
-                    </Box>
-                    <Box sx={fontColor} className={classes.featureInfoItemValue}>
-                      {featureInfoItem.value}
-                    </Box>
+                  <ListItem key={index} sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
+                    <Box sx={{ ...fontColor, ...sxClasses.featureInfoItemKey }}>{featureInfoItem.key}</Box>
+                    <Box sx={{ ...fontColor, ...sxClasses.featureInfoItemValue }}>{featureInfoItem.value}</Box>
                   </ListItem>
                 );
               })

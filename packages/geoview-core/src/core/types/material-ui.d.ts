@@ -24,8 +24,6 @@ declare module '@mui/material/styles' {
         size: { width: string | number; height: string | number };
       };
     };
-    hoverRow?: string;
-    selectedRow?: string;
     iconImg?: {
       padding: number | string;
       borderRadius: number | string;
