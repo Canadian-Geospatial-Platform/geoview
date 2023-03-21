@@ -31,6 +31,18 @@ export type TypeFeatureStyle = {
 };
 
 /** ******************************************************************************************************************************
+ * Marker icon styles.
+ */
+export type TypeIconStyle = {
+  anchor?: number[];
+  size?: number[];
+  scale?: number;
+  anchorXUnits?: string;
+  anchorYUnits?: string;
+  src: string;
+};
+
+/** ******************************************************************************************************************************
  * Circle and Circle marker styles.
  */
 export interface TypeFeatureCircleStyle extends TypeFeatureStyle {
