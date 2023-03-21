@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/no-array-index-key */
 import { createElement, ReactElement, useState, useEffect } from 'react';
+// import { useTranslation } from 'react-i18next';
 import { toLonLat } from 'ol/proj';
 import { Geometry, Point, Polygon, LineString, MultiPoint } from 'ol/geom';
-import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries } from '../../../app';
+import { AbstractGeoViewVector, api, TypeArrayOfFeatureInfoEntries, TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../app';
 
 import { LayerDataGrid } from './layer-data-grid';
-import { TypeDisplayLanguage, TypeListOfLayerEntryConfig } from '../../../geo/map/map-schema-types';
 
 export interface TypeLayerDataGridProps {
   layerId: string;
@@ -43,7 +43,7 @@ export class DataGridAPI {
 
   createDataGrid = (layerDataGridProps: TypeLayerDataGridProps): ReactElement => {
     const { layerId } = layerDataGridProps;
-
+    // const { t } = useTranslation<string>();
     const [groupValues, setGroupValues] = useState<{ layerkey: string; layerValues: {}[] }[]>([]);
     const [groupKeys, setGroupKeys] = useState<string[]>([]);
 
@@ -119,6 +119,7 @@ export class DataGridAPI {
           width: 150,
           type: firstValue[header].fieldType ? firstValue[header].fieldType : 'string',
           hide: columnHeader.length > 1 && header === 'featureKey',
+          filterable: header !== 'featureKey',
         };
       });
 
@@ -144,12 +145,14 @@ export class DataGridAPI {
 
       return {
         key: `${layerId}-datagrid`,
+        mapId: this.mapId,
         layerKey,
         columns,
         rows,
         pageSize: 50,
         rowsPerPageOptions: [25, 50, 100],
         autoHeight: true,
+        layerId,
         rowId: 'featureKey',
         displayLanguage: this.displayLanguage,
       };
@@ -157,7 +160,7 @@ export class DataGridAPI {
 
     useEffect(() => {
       const geoviewLayerInstance = api.map(this.mapId).layer.geoviewLayers[layerId];
-      if (geoviewLayerInstance.listOfLayerEntryConfig.length > 1) {
+      if (geoviewLayerInstance.listOfLayerEntryConfig.length > 0) {
         const grouplayerKeys: string[] = [];
         const grouplayerValues: { layerkey: string; layerValues: {}[] }[] = [];
         const getGroupKeys = (listOfLayerEntryConfig: TypeListOfLayerEntryConfig, parentLayerId: string) => {
@@ -191,19 +194,6 @@ export class DataGridAPI {
               setGroupValues(grouplayerValues);
             }
           });
-        });
-      } else {
-        (geoviewLayerInstance as AbstractGeoViewVector)?.getAllFeatureInfo().then((arrayOfFeatureInfoEntries) => {
-          if (arrayOfFeatureInfoEntries?.length > 0) {
-            // set values
-            setGroupKeys([layerId]);
-            setGroupValues([
-              {
-                layerkey: layerId,
-                layerValues: buildFeatureRows(arrayOfFeatureInfoEntries),
-              },
-            ]);
-          }
         });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps

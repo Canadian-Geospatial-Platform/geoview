@@ -122,19 +122,17 @@ export function FooterTabs(): JSX.Element | null {
       EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_CREATE,
       (payload) => {
         if (payloadIsAFooterTab(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            addTab(payload);
-            // Check if footer-panel is collapsed or not, and size accordingly
-            if (tabsContainerRef && tabsContainerRef.current) {
-              const tabsContainer = tabsContainerRef.current as HTMLDivElement;
-              const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
-              if (mapContainer.style.height === 'calc(100% - 300px)') {
-                setIsCollapsed(false);
-                tabsContainer.style.height = '300px';
-              } else {
-                setIsCollapsed(true);
-                tabsContainer.style.height = '55px';
-              }
+          addTab(payload);
+          // Check if footer-panel is collapsed or not, and size accordingly
+          if (tabsContainerRef && tabsContainerRef.current) {
+            const tabsContainer = tabsContainerRef.current as HTMLDivElement;
+            const mapContainer = tabsContainer.previousElementSibling as HTMLDivElement;
+            if (mapContainer.style.height === 'calc(100% - 300px)') {
+              setIsCollapsed(false);
+              tabsContainer.style.height = '300px';
+            } else {
+              setIsCollapsed(true);
+              tabsContainer.style.height = '55px';
             }
           }
         }
@@ -147,9 +145,7 @@ export function FooterTabs(): JSX.Element | null {
       EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_REMOVE,
       (payload) => {
         if (payloadIsAFooterTab(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            removeTab(payload);
-          }
+          removeTab(payload);
         }
       },
       mapId
@@ -160,14 +156,12 @@ export function FooterTabs(): JSX.Element | null {
       EVENT_NAMES.FOOTER_TABS.EVENT_FOOTER_TABS_TAB_SELECT,
       (payload) => {
         if (payloadIsAFooterTab(payload)) {
-          if (payload.handlerName && payload.handlerName === mapId) {
-            // for details tab, extand the tab
-            if (payload.tab.value === 1) {
-              handleCollapse();
-            }
-            setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
-            setSelectedTab(payload.tab.value);
+          // for details tab, extand the tab
+          if (payload.tab.value === 1) {
+            handleCollapse();
           }
+          setSelectedTab(undefined); // this will always trigger the tab change, needed in case user changes selection
+          setSelectedTab(payload.tab.value);
         }
       },
       mapId

@@ -43,7 +43,7 @@ jobs:
         run: |
             result=${{ steps.is_organization_member.outputs.result }}
             if [ $result == false ]; then
-              user=${{ github.event.pull_request.head.user.login }}
+              user=${{ github.actor }}
               echo Either ${user} is not part of the Canadian-Geospatial-Platform organization
               echo or ${user} has its Organization Visibility set to Private at
               echo https://github.com/orgs/Canadian-Geospatial-Platform/people?query=${user}

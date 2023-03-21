@@ -113,49 +113,47 @@ export function OverviewMap(): JSX.Element {
       EVENT_NAMES.BASEMAP.EVENT_BASEMAP_LAYERS_UPDATE,
       (payload) => {
         if (payloadIsABasemapLayerArray(payload)) {
-          if (payload.handlerName === mapId) {
-            const overviewMap = api
-              .map(mapId)
-              .map.getControls()
-              .getArray()
-              .filter((item) => {
-                return item instanceof OLOverviewMap;
-              })[0] as OLOverviewMap;
+          const overviewMap = api
+            .map(mapId)
+            .map.getControls()
+            .getArray()
+            .filter((item) => {
+              return item instanceof OLOverviewMap;
+            })[0] as OLOverviewMap;
 
-            // remove previous basemaps
-            const layers = overviewMap.getOverviewMap().getAllLayers();
+          // remove previous basemaps
+          const layers = overviewMap.getOverviewMap().getAllLayers();
 
-            // loop through all layers on the map
-            for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
-              const layer = layers[layerIndex];
+          // loop through all layers on the map
+          for (let layerIndex = 0; layerIndex < layers.length; layerIndex++) {
+            const layer = layers[layerIndex];
 
-              // get group id that this layer belongs to
-              const layerMapId = layer.get('mapId');
+            // get group id that this layer belongs to
+            const layerMapId = layer.get('mapId');
 
-              // check if the group id matches basemap
-              if (layerMapId && layerMapId === 'basemap') {
-                // remove the basemap layer
-                overviewMap.getOverviewMap().removeLayer(layer);
-              }
+            // check if the group id matches basemap
+            if (layerMapId && layerMapId === 'basemap') {
+              // remove the basemap layer
+              overviewMap.getOverviewMap().removeLayer(layer);
             }
-
-            // add basemap layers
-            payload.layers.forEach((layer) => {
-              const basemapLayer = new TileLayer({
-                opacity: layer.opacity,
-                source: layer.source,
-              });
-
-              // set this basemap's group id to basemap
-              basemapLayer.set('mapId', 'basemap');
-
-              // add the basemap layer
-              overviewMap.getOverviewMap().addLayer(basemapLayer);
-
-              // render the layer
-              basemapLayer.changed();
-            });
           }
+
+          // add basemap layers
+          payload.layers.forEach((layer) => {
+            const basemapLayer = new TileLayer({
+              opacity: layer.opacity,
+              source: layer.source,
+            });
+
+            // set this basemap's group id to basemap
+            basemapLayer.set('mapId', 'basemap');
+
+            // add the basemap layer
+            overviewMap.getOverviewMap().addLayer(basemapLayer);
+
+            // render the layer
+            basemapLayer.changed();
+          });
         }
       },
       mapId
@@ -166,27 +164,25 @@ export function OverviewMap(): JSX.Element {
       EVENT_NAMES.MAP.EVENT_MAP_VIEW_PROJECTION_CHANGE,
       (payload) => {
         if (payloadIsAMapViewProjection(payload)) {
-          if (payload.handlerName === mapId) {
-            const overviewMap = api
-              .map(mapId)
-              .map.getControls()
-              .getArray()
-              .filter((item) => {
-                return item instanceof OLOverviewMap;
-              })[0] as OLOverviewMap;
+          const overviewMap = api
+            .map(mapId)
+            .map.getControls()
+            .getArray()
+            .filter((item) => {
+              return item instanceof OLOverviewMap;
+            })[0] as OLOverviewMap;
 
-            // collapse the overview map, if not projection throw an error
-            overviewMap.setCollapsed(true);
-            overviewMap.setMap(null);
+          // collapse the overview map, if not projection throw an error
+          overviewMap.setCollapsed(true);
+          overviewMap.setMap(null);
 
-            // wait for the view change then set the map and open the overview
-            // TODO: look for better options then Timeout
-            setTimeout(() => {
-              overviewMap.setMap(api.map(mapId).map);
+          // wait for the view change then set the map and open the overview
+          // TODO: look for better options then Timeout
+          setTimeout(() => {
+            overviewMap.setMap(api.map(mapId).map);
 
-              setTimeout(() => overviewMap.setCollapsed(false), 500);
-            }, 2000);
-          }
+            setTimeout(() => overviewMap.setCollapsed(false), 500);
+          }, 2000);
         }
       },
       mapId
