@@ -116,7 +116,7 @@
             },
           }
         );
-        
+
         // call an api function to draw a polyline with all styles
         const polyline3 = cgpv.api.map(map).layer.vector.addPolyline(
           [
@@ -132,12 +132,12 @@
           }
         );
 
-        
+
       }
 
       function addPolygon(map) {
         cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-        
+
         // call an api function to draw a polygon with default styles
         const polygon1 = cgpv.api.map(map).layer.vector.addPolygon(
           [
@@ -167,7 +167,7 @@
             },
           }
         );
-        
+
         // call an api function to draw a polygon with all styles
         const polygon3 = cgpv.api.map(map).layer.vector.addPolygon(
           [
@@ -190,7 +190,7 @@
 
       function addCircle(map) {
         cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-        
+
         // call an api function to draw a circle with default style
         const circle1 = cgpv.api.map(map).layer.vector.addCircle([-100, 50], 1, undefined);
 
@@ -209,7 +209,7 @@
             fillOpacity: 0.5,
           },
         });
-        
+
         // call an api function to draw a circle with all styles
         const circle4 = cgpv.api.map(map).layer.vector.addCircle([-80, 50], 1, {
           style: {
@@ -222,7 +222,7 @@
 
       function addCircleMarker(map) {
         cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-        
+
         // call an api function to draw a circle marker with default styles
         const circleMarker1 = cgpv.api.map(map).layer.vector.addCircleMarker([-100, 55], 1, undefined);
 
@@ -232,7 +232,7 @@
             strokeColor: 'red',
           },
         });
-        
+
         // call an api function to draw a circle marker with some styles
         const circleMarker3 = cgpv.api.map(map).layer.vector.addCircleMarker([-80, 55], 1, {
           style: {
@@ -253,7 +253,7 @@
 
       function addMarkerIcon(map) {
         cgpv.api.map(map).layer.vector.setActiveGeometryGroup(document.getElementById('groupname').value);
-        
+
         // call an api function to draw a marker icon with default styles
         const markerIcon1 = cgpv.api.map(map).layer.vector.addMarkerIcon([-100, 60], undefined);
 
