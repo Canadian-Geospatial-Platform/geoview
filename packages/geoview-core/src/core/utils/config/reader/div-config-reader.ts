@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { TypeMapFeaturesConfig } from '../../../types/global-types';
-import { isJsonString } from '../../utilities';
+import { isJsonString, removeCommentsFromJSON } from '../../utilities';
 
 // ******************************************************************************************************************************
 // ******************************************************************************************************************************
@@ -33,16 +33,8 @@ export class InlineDivConfigReader {
 
     if (configObjStr) {
       // Erase comments in the config file.
-      configObjStr = configObjStr
-        .split(/(?<!\\)'/gm)
-        .map((fragment, index) => {
-          if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
-          return fragment; // .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '');
-        })
-        .join("'")
-        .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
-        .replaceAll(String.fromCharCode(1), '/*')
-        .replaceAll(String.fromCharCode(2), '*/');
+
+      configObjStr = removeCommentsFromJSON(configObjStr);
 
       // If you want to use quotes in your JSON string, write \&quot or escape it using a backslash;
       // First, replace apostrophes not preceded by a backslash with quotes
