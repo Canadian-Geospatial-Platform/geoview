@@ -85,10 +85,24 @@
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
+            {
+                'geoviewLayerId': 'historical-flood',
+                'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)', 'fr': 'Événements historiques d inondation (EHI)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                  'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_fr/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              }
             ]
           },
           'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
-          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
+          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel', 'footer-panel'],
           'theme': 'dark',
           'suportedLanguages': ['fr', 'en']
         }`;
