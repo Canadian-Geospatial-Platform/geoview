@@ -443,6 +443,8 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
+    const targetDiv = this.map.getTargetElement();
+
     // Erase comments in the config file.
     const configObjStr = mapConfig
       .split(/(?<!\\)'/gm)
@@ -467,9 +469,12 @@ export class MapViewer {
     );
 
     // create a new config for this map element
-    const config = new Config(this.map.getTargetElement());
+    const config = new Config(targetDiv);
 
     const configObj = config.getMapConfigFromFunc(parsedMapConfig);
+    if (this.displayLanguage) {
+      configObj!.displayLanguage = this.displayLanguage;
+    }
 
     // emit an event to reload the map with the new config
     api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', configObj!));
