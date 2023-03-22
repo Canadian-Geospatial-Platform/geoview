@@ -794,7 +794,8 @@ export class WMS extends AbstractGeoViewRaster {
           this.mapId
         )!}service=WMS&version=1.3.0&request=GetLegendGraphic&FORMAT=image/png&layer=${layerConfig.layerId}`;
 
-      if (queryUrl)
+      if (queryUrl) {
+        queryUrl = queryUrl.toLowerCase().startsWith('http:') ? `https${queryUrl.slice(4)}` : queryUrl;
         axios
           .get<TypeJsonObject>(queryUrl, { responseType: 'blob' })
           .then((response) => {
@@ -804,7 +805,7 @@ export class WMS extends AbstractGeoViewRaster {
             resolve(readImage(Cast<Blob>(response.data)));
           })
           .catch((error) => resolve(null));
-      else resolve(null);
+      } else resolve(null);
     });
     return promisedImage;
   }

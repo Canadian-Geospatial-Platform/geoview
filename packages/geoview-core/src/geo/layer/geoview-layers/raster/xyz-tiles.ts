@@ -123,7 +123,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
     const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
-    if (fieldIndex === -1) return 'string';
+    if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
 

@@ -112,7 +112,7 @@ export class GeoJSON extends AbstractGeoViewVector {
   protected getFieldType(fieldName: string, layerConfig: TypeLayerEntryConfig): 'string' | 'date' | 'number' {
     const fieldDefinitions = this.layerMetadata[Layer.getLayerPath(layerConfig)].source.featureInfo;
     const fieldIndex = getLocalizedValue(Cast<TypeLocalizedString>(fieldDefinitions.outfields), this.mapId)?.split(',').indexOf(fieldName);
-    if (fieldIndex === -1) return 'string';
+    if (!fieldIndex || fieldIndex === -1) return 'string';
     return (fieldDefinitions.fieldTypes as string).split(',')[fieldIndex!] as 'string' | 'date' | 'number';
   }
 
@@ -193,9 +193,12 @@ export class GeoJSON extends AbstractGeoViewVector {
       // Note that geojson metadata as we defined it does not contains layer group. If you need geogson layer group,
       // you can define them in the configuration section.
       if (Array.isArray(this.metadata?.listOfLayerEntryConfig)) {
-        const metadataLayerList = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        for (var i = 0; i < metadataLayerList.length; i++) if (metadataLayerList[i].layerId === layerEntryConfig.layerId) break;
-        if (i === metadataLayerList.length) {
+        const layerIdFound = Cast<TypeLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig).find(
+          (nextLayerEntryConfig) =>
+            nextLayerEntryConfig.layerId === layerEntryConfig.layerId &&
+            nextLayerEntryConfig.layerPathEnding === layerEntryConfig.layerPathEnding
+        );
+        if (!layerIdFound) {
           this.layerLoadError.push({
             layer: Layer.getLayerPath(layerEntryConfig),
             consoleMessage: `GeoJSON layer not found (mapId:  ${this.mapId}, layerPath: ${Layer.getLayerPath(layerEntryConfig)})`,
@@ -229,12 +232,32 @@ export class GeoJSON extends AbstractGeoViewVector {
       if (!this.metadata) resolve();
       else {
         const metadataLayerList = Cast<TypeVectorLayerEntryConfig[]>(this.metadata?.listOfLayerEntryConfig);
-        const layerMetadataFound = metadataLayerList.find((layerMetadata) => layerMetadata.layerId === layerEntryConfig.layerId);
+        const layerMetadataFound = metadataLayerList.find(
+          (layerMetadata) =>
+            layerMetadata.layerId === layerEntryConfig.layerId && layerMetadata.layerPathEnding === layerEntryConfig.layerPathEnding
+        );
         if (layerMetadataFound) {
           this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = toJsonObject(layerMetadataFound);
+          layerEntryConfig.layerName = layerEntryConfig.layerName || layerMetadataFound.layerName;
           layerEntryConfig.source = defaultsDeep(layerEntryConfig.source, layerMetadataFound.source);
           layerEntryConfig.initialSettings = defaultsDeep(layerEntryConfig.initialSettings, layerMetadataFound.initialSettings);
           layerEntryConfig.style = defaultsDeep(layerEntryConfig.style, layerMetadataFound.style);
+          // When the dataAccessPath stored in the layerEntryConfig.source objet is equal to the root of the metadataAccessPath with a
+          // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
+          // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
+          // config dataAccessPath value.
+          let metadataAccessPathRoot = getLocalizedValue(layerEntryConfig.geoviewRootLayer?.metadataAccessPath, this.mapId);
+          if (metadataAccessPathRoot) {
+            metadataAccessPathRoot =
+              metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';
+            const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerEntryConfig.layerId}`;
+            if (
+              metadataAccessPathRootPlusLayerId === getLocalizedValue(layerEntryConfig.source?.dataAccessPath, this.mapId) &&
+              getLocalizedValue(layerMetadataFound.source?.dataAccessPath, this.mapId)
+            ) {
+              layerEntryConfig.source!.dataAccessPath = { ...layerMetadataFound.source!.dataAccessPath } as TypeLocalizedString;
+            }
+          }
         }
 
         if (layerEntryConfig.initialSettings?.extent)
