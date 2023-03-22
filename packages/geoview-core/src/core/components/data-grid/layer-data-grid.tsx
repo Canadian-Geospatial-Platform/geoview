@@ -240,6 +240,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
     currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
+    document.querySelectorAll('svg.MuiSvgIcon-root>path').forEach((path) => {
+      (path as HTMLElement).style.display = 'block';
+    });
 
     const zoomButtonElement = e.target as HTMLElement;
     const zoomInIconElement = zoomButtonElement.parentElement?.children[0] as HTMLElement;
