@@ -85,10 +85,38 @@
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'wmsLYR1-Root',
+                'geoviewLayerName': { 'en': 'Weather Group', 'fr': 'Groupe Météo' },
+                'metadataAccessPath': { 'en': 'https://geo.weather.gc.ca/geomet', 'fr': 'https://geo.weather.gc.ca/geomet' },
+                'geoviewLayerType': 'ogcWms',
+                'initialSettings': { 'visible': true },
+                'listOfLayerEntryConfig': [
+                  {
+                    'entryType': 'group',
+                    'layerId': 'wmsLYR1-Group',
+                    'layerName': { 'en': 'Group', 'fr': 'Groupe' },
+                    'listOfLayerEntryConfig': [
+                      {
+                        'layerId': 'CURRENT_CONDITIONS',
+                        'source': {
+                          'featureInfo': {
+                            'queryable': true,
+                            'nameField': { 'en': 'plain_text', 'fr': 'plain_texte' },
+                            'fieldTypes': 'string',
+                            'outfields': { 'en': 'plain_text', 'fr': 'plain_texte' },
+                            'aliasFields':  { 'en': 'Forcast', 'fr': 'Prévision' }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
             ]
           },
           'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
-          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
+          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel', 'footer-panel'],
           'theme': 'dark',
           'suportedLanguages': ['fr', 'en']
         }`;
