@@ -205,6 +205,15 @@ const darkAppBar = {
   btnHoverBg: '#666666',
 };
 
+const darkPanel = {
+  background: '#1E1E1E',
+  border: '#393939',
+  borderLight: '#4f4f4f',
+  defaultBg: '#232323',
+  hoverBg: '#393939',
+  activeBg: '#4f4f4f',
+};
+
 const themeOptions: ThemeOptions = {
   palette: lightPalette,
   typography: {
@@ -353,7 +362,7 @@ const themeOptions: ThemeOptions = {
     btnHoverColor: '#393939',
   },
   panel: {
-    background: '#232323',
+    background: '#fff',
     border: '#393939',
     borderLight: '#4f4f4f',
     defaultBg: '#232323',
@@ -376,6 +385,7 @@ export const getTheme = (mode: 'light' | 'dark' | undefined) => {
   if (mode === 'dark') {
     optionClone.palette = darkPalette;
     optionClone.appBar = darkAppBar;
+    optionClone.panel = darkPanel;
   }
   return createTheme(optionClone);
 };
