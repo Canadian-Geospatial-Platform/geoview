@@ -1,6 +1,6 @@
 import { TypeJsonObject, TypeWindow } from 'geoview-core';
 
-import { useEffect, useState, useRef, RefObject, MutableRefObject } from 'react';
+import { useEffect, useState, useRef, RefObject } from 'react';
 import Draggable from 'react-draggable';
 
 import { getRenderPixel } from 'ol/render';
@@ -109,8 +109,8 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const [map] = useState<Map>(api.map(mapId).map);
   const mapSize = useRef<number[]>(map?.getSize() || [0, 0]);
-  let defaultX = mapSize.current[0] / 2;
-  let defaultY = mapSize.current[1] / 2;
+  const defaultX = mapSize.current[0] / 2;
+  const defaultY = mapSize.current[1] / 2;
 
   const [layersIds] = useState<string[]>(config.layers);
   const [geoviewLayers] = useState(api.map(mapId).layer.geoviewLayers);
@@ -121,8 +121,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
   const swiperValue = useRef(50);
   const swiperRef = useRef() as RefObject<HTMLElement>;
-  const swiperPositionVertical = useRef(orientation === 'vertical' ? defaultX : 0);
-  const swiperPositionHorizontal = useRef(orientation === 'vertical' ? 0 : defaultY);
 
   /**
    * Pre compose, Pre render event callback
@@ -173,10 +171,21 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }
 
   /**
+   * Calculate the computed style to return values of x and y position
+   * @returns {Number[]} the array of value for x and y position fot the swiper bar
+   */
+  const getSwiperStyle = (): number[] => {
+    const style = window.getComputedStyle(swiperRef!.current!);
+    const matrix = new DOMMatrixReadOnly(style.transform);
+    return [matrix.m41, matrix.m42];
+  };
+
+  /**
    * On Drag and Drag Stop, calculate the clipping extent
    * @param {MouseEvent} evt The mouse event to calculate the clipping
+   * @param {Boolean} keyboard true if functio is called from keyboard event
    */
-  const onStop = debounce((evt: MouseEvent) => {
+  const onStop = debounce((evt: MouseEvent, keyboard = false) => {
     // get map size
     mapSize.current = map.getSize() || [0, 0];
 
@@ -186,15 +195,15 @@ export function Swiper(props: SwiperProps): JSX.Element {
         ? -map.getTargetElement().getBoundingClientRect().left + evt.clientX
         : -map.getTargetElement().getBoundingClientRect().top + evt.clientY;
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-    console.log('client', -map.getTargetElement().getBoundingClientRect().left, evt.clientX);
-    swiperValue.current = ((client - offset) / size) * 100;
 
-    // if (orientation === 'vertical') {
-    //   swiperPositionVertical.current = client;
-    // }
-    // if (orientation !== 'vertical') {
-    //   swiperPositionHorizontal.current = client;
-    // }
+    // offset is only used when event is triggered from the mouse event. When triggered from keyboard, we use
+    // the swiper bar computed style
+    if (!keyboard) {
+      swiperValue.current = ((client - offset) / size) * 100;
+    } else {
+      const position = orientation === 'vertical' ? getSwiperStyle()[0] : getSwiperStyle()[1];
+      swiperValue.current = (position / size) * 100;
+    }
 
     // force VectorImage to refresh
     olLayers.forEach((layer: BaseLayer) => {
@@ -217,65 +226,21 @@ export function Swiper(props: SwiperProps): JSX.Element {
 
     const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
     const offSetOnClick = position - (size * swiperValue.current) / 100;
+
     setOffset(offSetOnClick);
-  };
-
-  const updateSwiperVerticalPosition = debounce((evt: KeyboardEvent) => {
-    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-    if (evt.key === 'ArrowLeft' && swiperPositionVertical.current > 5) {
-      swiperPositionVertical.current -= 5;
-    }
-
-    if (evt.key === 'ArrowRight' && swiperPositionVertical.current < size - 5) {
-      swiperPositionVertical.current += 5;
-    }
-
-    const styles = {
-      transform: `translate(${swiperPositionVertical.current}px, 0px)`,
-    };
-    if (swiperRef?.current && swiperPositionVertical.current > 0 && swiperPositionVertical.current < size) {
-      defaultX = swiperPositionVertical.current;
-      swiperRef.current.style.transform = styles.transform;
-    }
-    onStop({ clientX: swiperPositionVertical.current, clientY: 0 } as MouseEvent);
-  }, 100);
-
-  const updateSwiperHorizontalPosition = debounce((evt: KeyboardEvent) => {
-    const size = orientation === 'vertical' ? mapSize.current[0] : mapSize.current[1];
-    if (evt.key === 'ArrowUp' && swiperPositionHorizontal.current > 5) {
-      swiperPositionHorizontal.current -= 5;
-    }
-    if (evt.key === 'ArrowDown' && swiperPositionHorizontal.current < size - 5) {
-      swiperPositionHorizontal.current += 5;
-    }
-
-    const styles = {
-      transform: `translate(0px, ${swiperPositionHorizontal.current}px)`,
-    };
-
-    if (swiperRef?.current && swiperPositionHorizontal.current > 0 && swiperPositionHorizontal.current < size) {
-      defaultY = swiperPositionHorizontal.current;
-      swiperRef.current.style.transform = styles.transform;
-    }
-    onStop({ clientX: 0, clientY: swiperPositionHorizontal.current } as MouseEvent);
-  }, 100);
-
-  // prevent scrolling of page when swiper position is not in vertical position.
-  const disableScrolling = (e: KeyboardEvent, elem: RefObject<HTMLElement>): void => {
-    if (elem.current === document.activeElement && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
-      e.preventDefault();
-    }
   };
 
   useEffect(() => {
     // set listener for layers in config array
     layersIds.forEach((layer: string) => {
-      const olLayer = geoviewLayers[`${layer}`].gvLayers;
-      setOlLayers((prevArray) => [...prevArray, olLayer!]);
-      olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
-      olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
-      // force VectorImage to refresh
-      if (typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
+      if (geoviewLayers[`${layer}`] !== undefined) {
+        const olLayer = geoviewLayers[`${layer}`].gvLayers;
+        setOlLayers((prevArray) => [...prevArray, olLayer!]);
+        olLayer?.on(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
+        olLayer?.on(['postcompose' as EventTypes, 'postrender' as EventTypes], postcompose);
+        // force VectorImage to refresh
+        if (typeof (olLayer as VectorImage<VectorSource>).getImageRatio === 'function') olLayer?.changed();
+      }
     });
 
     return () => {
@@ -291,18 +256,47 @@ export function Swiper(props: SwiperProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geoviewLayers]);
 
-  useEffect(() => {
-    if (swiperRef?.current && orientation === 'vertical') {
-      swiperRef.current.addEventListener('keydown', updateSwiperVerticalPosition);
+  /**
+   * Update swiper and layers from keyboard CTRL + Arrow key
+   * @param {KeyboardEvent} evt The keyboard event to calculate the swiper position
+   */
+  const updateSwiper = debounce((evt: KeyboardEvent): void => {
+    // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not experctin to face this
+    // * offset from mouse method is not working properly anymore
+
+    if (evt.ctrlKey && 'ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(evt.key)) {
+      // get swiper bar style then set the move
+      const styleValues = getSwiperStyle();
+      const move = evt.key === 'ArrowLeft' || evt.key === 'ArrowUp' ? -10 : 10;
+
+      // check if value is outside the window and apply modification
+      // eslint-disable-next-line no-nested-ternary
+      styleValues[0] = styleValues[0] <= 10 ? 10 : styleValues[0] >= mapSize.current[0] - 10 ? mapSize.current[0] - 10 : styleValues[0];
+      // eslint-disable-next-line no-nested-ternary
+      styleValues[1] = styleValues[1] <= 10 ? 10 : styleValues[1] >= mapSize.current[1] - 10 ? mapSize.current[1] - 10 : styleValues[1];
+
+      const mouse =
+        orientation === 'vertical' ? { clientX: styleValues[0] + move, clientY: 0 } : { clientX: 0, clientY: styleValues[1] + move };
+
+      // apply new style to the bar
+      swiperRef!.current!.style.transform =
+        orientation === 'vertical' ? `translate(${styleValues[0] + move}px, 0px)` : `translate(0px, ${styleValues[1] + move}px)`;
+
+      // send the onStop event to update layers
+      setTimeout(() => onStop(mouse as MouseEvent, true), 75);
     }
-    if (swiperRef?.current && orientation !== 'vertical') {
-      swiperRef.current.addEventListener('keydown', updateSwiperHorizontalPosition);
-      document.addEventListener('keydown', (e) => disableScrolling(e, swiperRef));
+  }, 100);
+
+  // set listener for the focus in on swiper bar when on WCAG mode
+  // unset listener when focus is out of swiper bar
+  swiperRef?.current?.addEventListener('focusin', () => {
+    if (document.getElementById(mapId)!.classList.contains('map-focus-trap')) {
+      swiperRef?.current?.addEventListener('keydown', updateSwiper);
     }
-    return () => {
-      document.removeEventListener('keydown', (e) => disableScrolling(e, swiperRef));
-    };
-  }, [orientation, updateSwiperHorizontalPosition, updateSwiperVerticalPosition]);
+  });
+  swiperRef?.current?.addEventListener('focusout', () => {
+    swiperRef?.current?.removeEventListener('keydown', updateSwiper);
+  });
 
   return (
     <Box sx={sxClasses.layerSwipe}>
