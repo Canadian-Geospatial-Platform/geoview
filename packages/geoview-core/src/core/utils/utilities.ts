@@ -188,6 +188,38 @@ export function sanitizeHtmlContent(contentHtml: string) {
 }
 
 /**
+ * Removes comments and parses JSON config
+ *
+ * @param {string} config Map config to parse
+ * @returns {any} cleaned and parsed config object
+ */
+export function removeCommentsAndParseJSON(config: string): any {
+  // Erase comments in the config file.
+  const configObjStr = config
+    .split(/(?<!\\)'/gm)
+    .map((fragment, index) => {
+      if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
+      return fragment;
+    })
+    .join("'")
+    .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
+    .replaceAll(String.fromCharCode(1), '/*')
+    .replaceAll(String.fromCharCode(2), '*/');
+
+  // parse the config
+  const parsedMapConfig = JSON.parse(
+    configObjStr
+      // remove CR and LF from the map config
+      .replace(/(\r\n|\n|\r)/gm, '')
+      // replace apostrophes not preceded by a backslash with quotes
+      .replace(/(?<!\\)'/gm, '"')
+      // replace apostrophes preceded by a backslash with a single apostrophe
+      .replace(/\\'/gm, "'")
+  );
+  return parsedMapConfig;
+}
+
+/**
  * Export the map as a PNG
  * @param {string} mapId Id of map to export
  */

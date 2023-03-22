@@ -31,7 +31,7 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '../../api/events/payloads/geoview-layer-payload';
-import { generateId } from '../../core/utils/utilities';
+import { generateId, removeCommentsAndParseJSON } from '../../core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
 import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
@@ -445,28 +445,7 @@ export class MapViewer {
   loadMapConfig = (mapConfig: string) => {
     const targetDiv = this.map.getTargetElement();
 
-    // Erase comments in the config file.
-    const configObjStr = mapConfig
-      .split(/(?<!\\)'/gm)
-      .map((fragment, index) => {
-        if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
-        return fragment; // .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '');
-      })
-      .join("'")
-      .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
-      .replaceAll(String.fromCharCode(1), '/*')
-      .replaceAll(String.fromCharCode(2), '*/');
-
-    // parse the config
-    const parsedMapConfig = JSON.parse(
-      configObjStr
-        // remove CR and LF from the map config
-        .replace(/(\r\n|\n|\r)/gm, '')
-        // replace apostrophes not preceded by a backslash with quotes
-        .replace(/(?<!\\)'/gm, '"')
-        // replace apostrophes preceded by a backslash with a single apostrophe
-        .replace(/\\'/gm, "'")
-    );
+    const parsedMapConfig = removeCommentsAndParseJSON(mapConfig);
 
     // create a new config for this map element
     const config = new Config(targetDiv);
