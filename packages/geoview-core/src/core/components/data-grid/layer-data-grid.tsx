@@ -27,10 +27,12 @@ import {
   gridFilteredSortedRowIdsSelector,
   GridFilterModel,
 } from '@mui/x-data-grid';
-
+import { useTheme, Theme } from '@mui/material/styles';
 import Button, { ButtonProps } from '@mui/material/Button';
+import { Extent } from 'ol/extent';
+import { fromLonLat } from 'ol/proj';
 import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, Switch } from '../../../ui';
+import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -103,8 +105,17 @@ const sxClasses = {
 export function LayerDataGrid(props: CustomDataGridProps) {
   const { mapId, layerId, rowId, layerKey, displayLanguage, columns, rows } = props;
   const { t } = useTranslation<string>();
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
+
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
+
+  const { currentProjection } = api.map(mapId);
+  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
+  const projectionConfig = api.projection.projections[currentProjection];
+  let currentZoomId = -1;
 
   /**
    * Convert the filter string from the Filter Model
@@ -160,6 +171,9 @@ export function LayerDataGrid(props: CustomDataGridProps) {
     const geoData = gridRowIds.map((gridRowId) => {
       const { geometry, ...featureInfo } = rows[gridRowId as number];
       delete featureInfo.featureKey;
+      delete featureInfo.featureIcon;
+      delete featureInfo.featureActions;
+      delete featureInfo.extent;
       return {
         type: 'Feature',
         geometry,
@@ -214,6 +228,41 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const csvOptions: GridCsvExportOptions = { delimiter: ';' };
   const printOptions: GridPrintExportOptions = {};
+
+  /**
+   * featureinfo data grid Zoom in/out handling
+   *
+   * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
+   * @param {number} zoomid in of zoom incon button clicking
+   * @param {Extent} extent feature exten
+   *
+   */
+
+  const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
+    currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
+    document.querySelectorAll('svg.MuiSvgIcon-root>path').forEach((path) => {
+      (path as HTMLElement).style.display = 'block';
+    });
+
+    const zoomButtonElement = e.target as HTMLElement;
+    const zoomInIconElement = zoomButtonElement.parentElement?.children[0] as HTMLElement;
+    const zoomOutIconElement = zoomButtonElement.parentElement?.children[1] as HTMLElement;
+    zoomInIconElement.style.display = currentZoomId !== zoomid ? 'block' : 'none';
+    zoomOutIconElement.style.display = currentZoomId === zoomid ? 'block' : 'none';
+
+    if (currentZoomId === zoomid) {
+      api.map(mapId).zoomToExtent(extent);
+    } else {
+      api
+        .map(mapId)
+        .map.getView()
+        .animate({
+          center: fromLonLat(center, projectionConfig),
+          duration: 500,
+          zoom,
+        });
+    }
+  };
 
   /**
    * Customize the export menu, adding the export json button
@@ -281,12 +330,26 @@ export function LayerDataGrid(props: CustomDataGridProps) {
   // tooltip implementation for column content
   // TODO: works only with hover and add tooltips even when not needed. need improvement
   columns.forEach((column) => {
-    // eslint-disable-next-line no-param-reassign
-    column.renderCell = (params: GridCellParams) => (
-      <Tooltip title={params.value}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
-      </Tooltip>
-    );
+    column.renderCell = (params: GridCellParams) => {
+      if (column.field === 'featureIcon') {
+        return <img alt={params.value} src={params.value} style={{ ...theme.iconImg, width: '35px', height: '35px' }} />;
+      }
+
+      if (column.field === 'featureActions') {
+        return (
+          <IconButton color="primary" onClick={(e) => handleZoomIn(e, params.id as number, rows[params.id as number].extent)}>
+            <ZoomInSearchIcon style={{ display: currentZoomId !== Number(params.id) ? 'block' : 'none' }} />
+            <ZoomOutSearchIcon style={{ display: currentZoomId === Number(params.id) ? 'block' : 'none' }} />
+          </IconButton>
+        );
+      }
+
+      return (
+        <Tooltip title={params.value}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{params.value}</span>
+        </Tooltip>
+      );
+    };
   });
 
   // set locale from display language

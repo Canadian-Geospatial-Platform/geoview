@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
+import { useTheme, Theme } from '@mui/material/styles';
 import { fromLonLat } from 'ol/proj';
 import {
   Collapse,
@@ -21,27 +22,16 @@ import { TypeFeatureInfoEntry } from '../../../api/events/payloads/get-feature-i
 import { DetailsProps } from './details';
 
 const sxClasses = {
-  details: {
-    width: '100%',
-  },
   layerItem: {
     color: 'text.primary',
     padding: 0,
   },
-  expandableGroup: {
-    paddingRight: 0,
-    paddingLeft: 28,
+  itemText: {
+    fontSize: 14,
+    noWrap: true,
   },
   expandableIconContainer: {
     paddingLeft: 10,
-  },
-  legendIcon: {
-    width: 24,
-    height: 24,
-    background: '#fff',
-  },
-  solidBackground: {
-    background: '#fff',
   },
   featureInfoItem: {
     display: 'flex',
@@ -78,9 +68,9 @@ export interface TypeFeatureProps {
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature, startOpen, detailsSettings } = props;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { mapId, location, backgroundStyle, handlerName } = detailsSettings;
+  const { mapId, backgroundStyle } = detailsSettings;
   const featureId = `Feature Info ${feature.featureKey}`;
+  const featureIconSrc = feature.featureIcon.toDataURL();
   const [isOpen, setOpen] = useState<boolean>(false);
   const [currentZoom, setCurrentZoom] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
@@ -94,6 +84,10 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
+
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
 
   function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
@@ -128,18 +122,21 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   */
   return (
     <>
-      <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
+      <ListItem sx={sxClasses.layerItem} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
             <IconButton color="primary" sx={fontColor}>
               {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </IconButton>
           </ListItemIcon>
+          <ListItemIcon>
+            <img alt={featureId} src={featureIconSrc} style={{ ...theme.iconImg, width: '35px', height: '35px' }} />
+          </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
-            <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
+            <ListItemText sx={{ ...sxClasses.itemText, ...fontColor }} primary={featureId} />
           </Tooltip>
           <ListItemIcon>
-            <IconButton color="primary" sx={fontColor} onClick={(e) => handleZoomIn(e)}>
+            <IconButton sx={fontColor} onClick={(e) => handleZoomIn(e)}>
               {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
             </IconButton>
           </ListItemIcon>
@@ -154,8 +151,8 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
                   <ListItem key={index} sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
-                    <Box sx={sxClasses.featureInfoItemKey}>{featureInfoItem.key}</Box>
-                    <Box sx={sxClasses.featureInfoItemValue}>{featureInfoItem.value}</Box>
+                    <Box sx={{ ...fontColor, ...sxClasses.featureInfoItemKey }}>{featureInfoItem.key}</Box>
+                    <Box sx={{ ...fontColor, ...sxClasses.featureInfoItemValue }}>{featureInfoItem.value}</Box>
                   </ListItem>
                 );
               })
