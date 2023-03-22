@@ -1,4 +1,4 @@
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useMemo } from 'react';
 
 import './translation/i18n';
 import i18n from 'i18next';
@@ -15,9 +15,10 @@ import { TypeInteraction } from '../app';
 
 declare module '@mui/styles/defaultTheme' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DefaultTheme extends Theme {}
+  interface DefaultTheme extends Theme {
+    iconImg: React.CSSProperties;
+  }
 }
-
 // create a state that will hold map config information
 export const MapContext = React.createContext<TypeMapContext>({
   mapId: '',
