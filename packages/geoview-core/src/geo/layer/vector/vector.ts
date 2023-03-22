@@ -3,7 +3,7 @@ import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Circle, LineString, Point, Polygon } from 'ol/geom';
 import { Coordinate } from 'ol/coordinate';
-import { Fill, Stroke, Style } from 'ol/style';
+import { Fill, Stroke, Style, Icon } from 'ol/style';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
 import { asArray, asString } from 'ol/color';
 
@@ -20,7 +20,7 @@ import {
   payloadIsAVectorConfig,
 } from '../../../api/events/payloads/vector-config-payload';
 import { VectorPayload } from '../../../api/events/payloads/vector-payload';
-import { TypeFeatureCircleStyle, TypeFeatureStyle } from './vector-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
 
 /**
  * Store a group of features
@@ -154,9 +154,9 @@ export class Vector {
         });
       }
 
-      if (polylineOptions.style.strokeColor) {
+      if (polylineOptions.style.strokeColor || polylineOptions.style.strokeOpacity || polylineOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(polylineOptions.style.strokeColor), polylineOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(polylineOptions.style.strokeColor || 'blue'), polylineOptions.style.strokeOpacity || 1)),
           width: polylineOptions.style.strokeWidth || 1,
         });
       }
@@ -225,9 +225,9 @@ export class Vector {
         });
       }
 
-      if (polygonOptions.style.strokeColor) {
+      if (polygonOptions.style.strokeColor || polygonOptions.style.strokeOpacity || polygonOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(polygonOptions.style.strokeColor), polygonOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(polygonOptions.style.strokeColor || 'blue'), polygonOptions.style.strokeOpacity || 1)),
           width: polygonOptions.style.strokeWidth || 1,
         });
       }
@@ -275,6 +275,7 @@ export class Vector {
     },
     optionalFeatureId?: string
   ): Feature => {
+    // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
     const circleOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -298,9 +299,9 @@ export class Vector {
         });
       }
 
-      if (circleOptions.style.strokeColor) {
+      if (circleOptions.style.strokeColor || circleOptions.style.strokeOpacity || circleOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(circleOptions.style.strokeColor), circleOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(circleOptions.style.strokeColor || 'blue'), circleOptions.style.strokeOpacity || 1)),
           width: circleOptions.style.strokeWidth || 1,
         });
       }
@@ -348,6 +349,8 @@ export class Vector {
     },
     optionalFeatureId?: string
   ): Feature => {
+    // TODO: Refactoring - TypeFeatureCircleStyle already has a "radius" property, it's redundant with the radius parameter received in this function. The extra parameter also unbalances the signature with the other "addShapes" functions.
+    // TODO: Refactoring - Based on the test page, addCircleMarker and addCircle seem to provide the exact same results? Should addCircleMarker be removed?
     const circleMarkerOptions = options || {};
 
     const featureId = generateId(optionalFeatureId);
@@ -371,9 +374,11 @@ export class Vector {
         });
       }
 
-      if (circleMarkerOptions.style.strokeColor) {
+      if (circleMarkerOptions.style.strokeColor || circleMarkerOptions.style.strokeOpacity || circleMarkerOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(circleMarkerOptions.style.strokeColor), circleMarkerOptions.style.strokeOpacity || 1)),
+          color: asString(
+            setAlphaColor(asArray(circleMarkerOptions.style.strokeColor || 'blue'), circleMarkerOptions.style.strokeOpacity || 1)
+          ),
           width: circleMarkerOptions.style.strokeWidth || 1,
         });
       }
@@ -442,9 +447,9 @@ export class Vector {
         });
       }
 
-      if (markerOptions.style.strokeColor) {
+      if (markerOptions.style.strokeColor || markerOptions.style.strokeOpacity || markerOptions.style.strokeWidth) {
         stroke = new Stroke({
-          color: asString(setAlphaColor(asArray(markerOptions.style.strokeColor), markerOptions.style.strokeOpacity || 1)),
+          color: asString(setAlphaColor(asArray(markerOptions.style.strokeColor || 'blue'), markerOptions.style.strokeOpacity || 1)),
           width: markerOptions.style.strokeWidth || 1,
         });
       }
@@ -456,6 +461,68 @@ export class Vector {
         })
       );
     }
+
+    // set a feature id and a geometry group index for this geometry
+    marker.set('featureId', featureId);
+    marker.set('GeometryGroupIndex', this.activeGeometryGroupIndex);
+
+    // add geometry to feature collection
+    this.geometryGroups[this.activeGeometryGroupIndex].vectorSource.addFeature(marker);
+
+    // add the geometry to the geometries array
+    this.geometries.push(marker);
+
+    // emit an event that a marker vector has been added
+    api.event.emit(VectorPayload.forMarker(EVENT_NAMES.VECTOR.EVENT_VECTOR_ADDED, this.#mapId, marker));
+
+    return marker;
+  };
+
+  /**
+   * Create a new marker icon
+   *
+   * @param {Coordinate} coordinate the long lat position of the marker
+   * @param options marker options including styling
+   * @param {string} optionalFeatureId an optional id to be used to manage this geometry
+   *
+   * @returns {Feature} a geometry containing the id and the created geometry
+   */
+  addMarkerIcon = (
+    coordinate: Coordinate,
+    options?: {
+      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+      style?: TypeIconStyle;
+    },
+    optionalFeatureId?: string
+  ): Feature => {
+    // Read the params and set defaults when needed
+    const markerOptions = options || {
+      style: {
+        anchor: [0.5, 256],
+        size: [256, 256],
+        scale: 0.1,
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'pixels',
+        src: './img/Marker.png',
+      },
+    };
+
+    const featureId = generateId(optionalFeatureId);
+
+    // create a point feature
+    const marker = new Feature({
+      geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
+        'EPSG:4326',
+        api.projection.projections[api.map(this.#mapId).currentProjection]
+      ),
+    });
+
+    marker.setStyle(
+      new Style({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        image: new Icon(markerOptions.style as any),
+      })
+    );
 
     // set a feature id and a geometry group index for this geometry
     marker.set('featureId', featureId);
