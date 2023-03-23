@@ -77,13 +77,14 @@ export enum NodeType {
   variable,
   string,
   number,
+  null,
   unary,
   binary,
   group,
 }
 export type FilterNodeType = { nodeType: NodeType; nodeValue: string | number | boolean | string[] | number[] };
 export type FilterNodeArrayType = FilterNodeType[];
-export const binaryKeywors = ['in', 'like', 'and', 'or', '<', '<=', '=', '!=', '>', '>=', '||', '/', '*', ','];
+export const binaryKeywors = ['is', 'is not', 'in', 'like', 'and', 'or', '<', '<=', '=', '<>', '>', '>=', '||', '/', '*', ','];
 export const unaryKeywords = ['not'];
 export const groupKeywords = ['(', ')'];
 export const operatorPriority = [
@@ -100,8 +101,9 @@ export const operatorPriority = [
   { key: '>', priority: 9 },
   { key: '<=', priority: 8 },
   { key: '>=', priority: 7 },
-  { key: '!=', priority: 6 },
-  { key: 'is null', priority: 5 },
+  { key: '<>', priority: 6 },
+  { key: 'is not', priority: 5 },
+  { key: 'is', priority: 5 },
   { key: 'like', priority: 4 },
   { key: 'in', priority: 3 },
   { key: 'not', priority: 2 },

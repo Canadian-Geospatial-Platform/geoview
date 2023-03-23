@@ -1504,7 +1504,7 @@ export class GeoviewRenderer {
       for (let i = 0; i < filterEquation.length; i++) {
         if (filterEquation[i].nodeType === NodeType.variable)
           dataStack.push({ nodeType: NodeType.variable, nodeValue: feature.get(filterEquation[i].nodeValue as string) });
-        else if ([NodeType.string, NodeType.number].includes(filterEquation[i].nodeType)) dataStack.push(filterEquation[i]);
+        else if ([NodeType.string, NodeType.number, NodeType.null].includes(filterEquation[i].nodeType)) dataStack.push(filterEquation[i]);
         else if (filterEquation[i].nodeType === NodeType.group)
           if (filterEquation[i].nodeValue === '(') {
             operatorStack.push(filterEquation[i]);
@@ -1562,6 +1562,14 @@ export class GeoviewRenderer {
         const operande1 = dataStack.pop()!;
         let valueToPush;
         switch (operator.nodeValue) {
+          case 'is not':
+            if (operande2.nodeValue !== null) throw new Error(`Invalid is not null operator syntaxe`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue !== null });
+            break;
+          case 'is':
+            if (operande2.nodeValue !== null) throw new Error(`Invalid is null operator syntaxe`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === null });
+            break;
           case '=':
             if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === operande2.nodeValue });
@@ -1582,7 +1590,7 @@ export class GeoviewRenderer {
             if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`>= operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue >= operande2.nodeValue });
             break;
-          case '!=':
+          case '<>':
             if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`!= operator error, must compare same types`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue !== operande2.nodeValue });
             break;
@@ -1689,6 +1697,7 @@ export class GeoviewRenderer {
    */
   analyzeLayerFilter(filterNodeArrayType: FilterNodeArrayType): FilterNodeArrayType {
     let resultingKeywordArray = filterNodeArrayType;
+    resultingKeywordArray[0].nodeValue = (resultingKeywordArray[0].nodeValue as string).replaceAll(/\s{2,}/g, ' ').trim();
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, "'");
     resultingKeywordArray = this.extractStrings(resultingKeywordArray);
 
@@ -1701,13 +1710,15 @@ export class GeoviewRenderer {
     )
       throw new Error(`unbalanced parentheses`);
 
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'is not', /^is not\b| is not\b| is not$|^is not$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'is', /^is\b| is\b| is$|^is$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'in', /^in\b| in\b| in$|^in$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, ',');
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'not', /^not\b| not\b| not$|^not$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'and', /^and\b| and\b| and$|^and$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'or', /^or\b| or\b| or$|^or$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'like', /^like\b| like\b| like$|^like$\//gi);
-    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '!=');
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '<>');
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '<');
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '>');
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, '<=');
@@ -1836,6 +1847,7 @@ export class GeoviewRenderer {
               node.nodeType = NodeType.unary;
               node.nodeValue = `u${node.nodeValue}`;
             }
+          else if (node.nodeValue === 'null') node.nodeType = NodeType.null;
           else {
             node.nodeType = NodeType.variable;
           }
