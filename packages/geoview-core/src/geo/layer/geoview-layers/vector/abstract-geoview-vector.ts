@@ -107,7 +107,14 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     sourceOptions.loader = (extent, resolution, projection, success, failure) => {
       const url = vectorSource.getUrl();
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', url as string);
+      if ((layerEntryConfig?.source as TypeBaseSourceVectorInitialConfig)?.postSettings) {
+        const { postSettings } = layerEntryConfig.source as TypeBaseSourceVectorInitialConfig;
+        xhr.open('POST', url as string);
+        if (postSettings!.header)
+          Object.keys(postSettings!.header).forEach((headerParameter) => {
+            xhr.setRequestHeader(headerParameter, postSettings!.header![headerParameter]);
+          });
+      } else xhr.open('GET', url as string);
       const onError = () => {
         vectorSource.removeLoadedExtent(extent);
         if (failure) failure();
@@ -126,7 +133,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
           onError();
         }
       };
-      xhr.send();
+      xhr.send(JSON.stringify((layerEntryConfig.source as TypeBaseSourceVectorInitialConfig).postSettings?.data));
     };
 
     vectorSource = new VectorSource(sourceOptions);

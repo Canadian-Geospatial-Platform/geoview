@@ -24,6 +24,17 @@ declare module '@mui/material/styles' {
         size: { width: string | number; height: string | number };
       };
     };
+    iconImg?: {
+      padding: number | string;
+      borderRadius: number | string;
+      border: string;
+      borderColor: string;
+      boxShadow: string;
+      background: string;
+      objectFit: string;
+      width?: string;
+      height?: string;
+    };
     appBar?: {
       background?: string;
       border?: string;
@@ -61,7 +72,6 @@ declare module '@mui/material/styles' {
       overlayActive?: string;
     };
   }
-
   interface Theme {
     overrides: {
       button: {

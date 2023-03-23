@@ -13,30 +13,6 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "swipe0",
-        "geoviewLayerName": {
-          "en": "statmen toner"
-        },
-        "geoviewLayerType": "xyzTiles",
-        "initialSettings": {
-          "visible": true
-        },
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "toner",
-            "initialSettings": {
-              "minZoom": 3,
-              "maxZoom": 8
-            },
-            "source": {
-              "dataAccessPath": {
-                "en": "https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"
-              }
-            }
-          }
-        ]
-      },
-      {
         "geoviewLayerId": "swipe1",
         "geoviewLayerName": {
           "en": "MSI"
@@ -119,6 +95,30 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "swipe0",
+        "geoviewLayerName": {
+          "en": "statmen toner"
+        },
+        "geoviewLayerType": "xyzTiles",
+        "initialSettings": {
+          "visible": true
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "toner",
+            "initialSettings": {
+              "minZoom": 3,
+              "maxZoom": 8
+            },
+            "source": {
+              "dataAccessPath": {
+                "en": "https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"
+              }
+            }
           }
         ]
       }

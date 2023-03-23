@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState, useContext, useRef, MutableRefObject, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme, Theme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
 import {
   Box,
@@ -76,19 +77,11 @@ const sxClasses = {
     padding: 0,
     borderRadius: 0,
     border: '1px solid',
-    borderColor: 'grey.600',
+    borderColor: 'palette.grey.600',
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
     '&:focus': {
       border: 'revert',
     },
-  },
-  iconImg: {
-    padding: 3,
-    borderRadius: 0,
-    border: '1px solid',
-    borderColor: 'grey.600',
-    boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
   },
   stackIconsBox: {
     position: 'relative',
@@ -118,9 +111,6 @@ const sxClasses = {
     border: '1px solid',
     borderColor: 'grey.600',
     boxShadow: 'rgb(0 0 0 / 20%) 0px 3px 1px -2px, rgb(0 0 0 / 14%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px',
-    background: '#fff',
-  },
-  solidBackground: {
     background: '#fff',
   },
   opacityMenu: {
@@ -165,6 +155,9 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   } = props;
 
   const { t, i18n } = useTranslation<string>();
+  const theme: Theme & {
+    iconImg: React.CSSProperties;
+  } = useTheme();
 
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
@@ -509,7 +502,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           <MenuItem onClick={handleOpacityOpen}>
             <ListItemText>{t('legend.toggle_opacity')}</ListItemText>
             {isOpacityOpen && (
-              <ListItemIcon style={sxClasses.menuListIcon}>
+              <ListItemIcon sx={sxClasses.menuListIcon}>
                 <CheckIcon fontSize="small" />
               </ListItemIcon>
             )}
@@ -519,7 +512,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
           <MenuItem onClick={handleClusterToggle}>
             <ListItemText> {t('legend.toggle_cluster')}</ListItemText>
             {isClusterToggleEnabled && (
-              <ListItemIcon style={sxClasses.menuListIcon}>
+              <ListItemIcon sx={sxClasses.menuListIcon}>
                 <CheckIcon fontSize="small" />
               </ListItemIcon>
             )}
@@ -540,9 +533,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       <Collapse in={isLegendOpen} timeout={iconType === 'list' ? { enter: 800, exit: 800 } : 'auto'}>
         <Box>
           <Box sx={sxClasses.expandableIconContainer}>
-            {iconType === 'simple' && iconImg !== null && (
-              <img alt="" style={{ ...sxClasses.solidBackground, ...sxClasses.iconImg }} src={iconImg} />
-            )}
+            {iconType === 'simple' && iconImg !== null && <img alt="" style={theme.iconImg} src={iconImg} />}
             {iconType === 'list' && iconList !== null && labelList !== null && (
               <LegendIconList
                 iconImages={iconList}
