@@ -279,12 +279,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         source: new ImageArcGISRest(sourceOptions),
         properties: { layerEntryConfig },
       };
-      if (layerEntryConfig.initialSettings?.className !== undefined)
-        imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
-      if (layerEntryConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-      if (layerEntryConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-      if (layerEntryConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-      if (layerEntryConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
+      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+      if (layerEntryConfig.initialSettings!.className !== undefined)
+        imageLayerOptions.className = layerEntryConfig.initialSettings!.className;
+      if (layerEntryConfig.initialSettings!.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings!.extent;
+      if (layerEntryConfig.initialSettings!.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings!.maxZoom;
+      if (layerEntryConfig.initialSettings!.minZoom !== undefined) imageLayerOptions.minZoom = layerEntryConfig.initialSettings!.minZoom;
+      if (layerEntryConfig.initialSettings!.opacity !== undefined) imageLayerOptions.opacity = layerEntryConfig.initialSettings!.opacity;
       // If all layers on the map have an initialSettings.visible set to false, a loading error occurs because nothing is drawn on the
       // map and the 'change' or 'prerender' events are never sent to the addToMap method of the layer.ts file. The workaround is to
       // postpone the setVisible action until all layers have been loaded on the map.

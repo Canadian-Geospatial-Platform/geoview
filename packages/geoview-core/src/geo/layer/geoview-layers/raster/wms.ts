@@ -520,16 +520,14 @@ export class WMS extends AbstractGeoViewRaster {
           source: new ImageWMS(sourceOptions),
           properties: { layerCapabilities, layerEntryConfig },
         };
-        if (!layerEntryConfig.initialSettings && layerEntryConfig.geoviewRootLayer?.initialSettings)
-          // eslint-disable-next-line no-param-reassign
-          layerEntryConfig.initialSettings = layerEntryConfig.geoviewRootLayer?.initialSettings;
-        if (layerEntryConfig.initialSettings?.className !== undefined)
-          imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
-        if (layerEntryConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
-        if (layerEntryConfig.initialSettings?.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-        if (layerEntryConfig.initialSettings?.minZoom !== undefined) imageLayerOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-        if (layerEntryConfig.initialSettings?.opacity !== undefined) imageLayerOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-        if (layerEntryConfig.initialSettings?.visible !== undefined) imageLayerOptions.visible = layerEntryConfig.initialSettings?.visible;
+        // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+        if (layerEntryConfig.initialSettings!.className !== undefined)
+          imageLayerOptions.className = layerEntryConfig.initialSettings!.className;
+        if (layerEntryConfig.initialSettings!.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings!.extent;
+        if (layerEntryConfig.initialSettings!.maxZoom !== undefined) imageLayerOptions.maxZoom = layerEntryConfig.initialSettings!.maxZoom;
+        if (layerEntryConfig.initialSettings!.minZoom !== undefined) imageLayerOptions.minZoom = layerEntryConfig.initialSettings!.minZoom;
+        if (layerEntryConfig.initialSettings!.opacity !== undefined) imageLayerOptions.opacity = layerEntryConfig.initialSettings!.opacity;
+        if (layerEntryConfig.initialSettings!.visible !== undefined) imageLayerOptions.visible = layerEntryConfig.initialSettings!.visible;
 
         layerEntryConfig.gvLayer = new ImageLayer(imageLayerOptions);
         resolve(layerEntryConfig.gvLayer);
@@ -561,13 +559,12 @@ export class WMS extends AbstractGeoViewRaster {
         const layerCapabilities = this.getLayerMetadataEntry(layerEntryConfig.layerId)!;
         this.layerMetadata[Layer.getLayerPath(layerEntryConfig)] = layerCapabilities;
         if (layerCapabilities) {
-          if (!layerEntryConfig.initialSettings) layerEntryConfig.initialSettings = {};
           if (layerCapabilities.Attribution) this.attributions.push(layerCapabilities.Attribution as string);
           if (!layerEntryConfig.source.featureInfo) layerEntryConfig.source.featureInfo = { queryable: !!layerCapabilities.queryable };
           // ! TODO: The solution implemented in the following lines is not right. scale and zoom are not the same things.
-          // if (layerEntryConfig.initialSettings?.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
+          // if (layerEntryConfig.initialSettings!.minZoom === undefined && layerCapabilities.MinScaleDenominator !== undefined)
           //   layerEntryConfig.initialSettings.minZoom = layerCapabilities.MinScaleDenominator as number;
-          // if (layerEntryConfig.initialSettings?.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
+          // if (layerEntryConfig.initialSettings!.maxZoom === undefined && layerCapabilities.MaxScaleDenominator !== undefined)
           //   layerEntryConfig.initialSettings.maxZoom = layerCapabilities.MaxScaleDenominator as number;
           if (layerEntryConfig.initialSettings?.extent)
             layerEntryConfig.initialSettings.extent = transformExtent(
@@ -576,8 +573,8 @@ export class WMS extends AbstractGeoViewRaster {
               `EPSG:${api.map(this.mapId).currentProjection}`
             );
 
-          if (!layerEntryConfig.initialSettings?.bounds && layerCapabilities.EX_GeographicBoundingBox) {
-            layerEntryConfig.initialSettings = { bounds: layerCapabilities.EX_GeographicBoundingBox as Extent };
+          if (!layerEntryConfig.initialSettings!.bounds && layerCapabilities.EX_GeographicBoundingBox) {
+            layerEntryConfig.initialSettings!.bounds = layerCapabilities.EX_GeographicBoundingBox as Extent;
           }
 
           if (layerCapabilities.Dimension) {

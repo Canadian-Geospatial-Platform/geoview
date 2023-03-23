@@ -655,11 +655,12 @@ export abstract class AbstractGeoViewLayer {
       layers: new Collection(),
       properties: { layerEntryConfig },
     };
-    if (layerEntryConfig.initialSettings?.extent !== undefined) layerGroupOptions.extent = layerEntryConfig.initialSettings?.extent;
-    if (layerEntryConfig.initialSettings?.maxZoom !== undefined) layerGroupOptions.maxZoom = layerEntryConfig.initialSettings?.maxZoom;
-    if (layerEntryConfig.initialSettings?.minZoom !== undefined) layerGroupOptions.minZoom = layerEntryConfig.initialSettings?.minZoom;
-    if (layerEntryConfig.initialSettings?.opacity !== undefined) layerGroupOptions.opacity = layerEntryConfig.initialSettings?.opacity;
-    if (layerEntryConfig.initialSettings?.visible !== undefined) layerGroupOptions.visible = layerEntryConfig.initialSettings?.visible;
+    // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+    if (layerEntryConfig.initialSettings!.extent !== undefined) layerGroupOptions.extent = layerEntryConfig.initialSettings!.extent;
+    if (layerEntryConfig.initialSettings!.maxZoom !== undefined) layerGroupOptions.maxZoom = layerEntryConfig.initialSettings!.maxZoom;
+    if (layerEntryConfig.initialSettings!.minZoom !== undefined) layerGroupOptions.minZoom = layerEntryConfig.initialSettings!.minZoom;
+    if (layerEntryConfig.initialSettings!.opacity !== undefined) layerGroupOptions.opacity = layerEntryConfig.initialSettings!.opacity;
+    if (layerEntryConfig.initialSettings!.visible !== undefined) layerGroupOptions.visible = layerEntryConfig.initialSettings!.visible;
     // eslint-disable-next-line no-param-reassign
     layerEntryConfig.gvLayer = new LayerGroup(layerGroupOptions);
     return layerEntryConfig.gvLayer as LayerGroup;
