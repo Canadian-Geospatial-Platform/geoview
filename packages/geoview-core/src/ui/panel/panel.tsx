@@ -37,7 +37,6 @@ type TypePanelAppProps = {
 const useStyles = makeStyles((theme) => ({
   panelContainer: {
     backgroundColor: theme.panel.background,
-    color: theme.palette.primary.light,
     height: '100%',
     borderRadius: 0,
     flexDirection: 'column',
@@ -51,7 +50,6 @@ const useStyles = makeStyles((theme) => ({
     borderBottomColor: theme.panel.border,
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
-    color: theme.palette.primary.main,
     height: 64,
   },
   panelHeaderTitle: {
@@ -62,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
   panelHeaderAction: {
     '& .MuiButtonBase-root': {
       border: `1px solid ${theme.appBar.btnDefaultBg}`,
-      color: theme.palette.primary.main,
       height: 44,
       width: 44,
       marginRight: 8,
@@ -324,7 +321,6 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                     onClick={panel.close}
                     iconRef={closeBtnRef}
                     className="cgpv-panel-close"
-                    classes={classes.panelHeaderAction}
                   >
                     <CloseIcon />
                   </IconButton>

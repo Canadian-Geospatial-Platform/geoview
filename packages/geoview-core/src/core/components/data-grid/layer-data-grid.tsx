@@ -61,7 +61,7 @@ const sxClasses = {
       color: 'primary.main',
     },
     [`& div.even.${gridClasses.row}`]: {
-      backgroundColor: 'grey.200',
+      backgroundColor: 'background.grey',
       '&:hover, &.Mui-hovered': {
         backgroundColor: 'action.hoverRow',
         '@media (hover: none)': {

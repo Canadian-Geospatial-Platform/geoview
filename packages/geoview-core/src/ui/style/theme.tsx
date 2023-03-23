@@ -88,6 +88,7 @@ const lightPalette = {
   background: {
     paper: '#fff',
     default: '#fff',
+    grey: '#eeeeee',
   },
   action: {
     active: 'rgba(0, 0, 0, 0.54)',
@@ -180,6 +181,7 @@ const darkPalette = {
   background: {
     paper: '#121212',
     default: '#232323',
+    grey: '#121212',
   },
   action: {
     active: '#fff',
@@ -343,7 +345,7 @@ const themeOptions: ThemeOptions = {
     },
   },
   appBar: {
-    background: '#fff',
+    background: '#1E1E1E',
     border: '#fff',
     btnActiveBg: '#000000e6',
     btnDefaultBg: '#222222',

@@ -90,7 +90,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       value: feature.fieldInfo[fieldName]!.value,
     };
   });
-  const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
+
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
@@ -128,18 +128,16 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   */
   return (
     <>
-      <ListItem sx={{ ...sxClasses.layerItem, ...fontColor }} onClick={() => setOpen(!isOpen)}>
+      <ListItem sx={{ ...sxClasses.layerItem }} onClick={() => setOpen(!isOpen)}>
         <ListItemButton>
           <ListItemIcon>
-            <IconButton color="primary" sx={fontColor}>
-              {isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </IconButton>
+            <IconButton color="primary">{isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
           </ListItemIcon>
           <Tooltip title={featureId} placement="top" enterDelay={1000}>
             <ListItemText primaryTypographyProps={{ fontSize: 14, noWrap: true }} primary={featureId} />
           </Tooltip>
           <ListItemIcon>
-            <IconButton color="primary" sx={fontColor} onClick={(e) => handleZoomIn(e)}>
+            <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
               {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
             </IconButton>
           </ListItemIcon>
