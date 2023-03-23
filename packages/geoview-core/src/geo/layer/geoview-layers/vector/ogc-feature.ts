@@ -218,13 +218,12 @@ export class OgcFeature extends AbstractGeoViewVector {
           this.metadata?.collections[i].extent?.spatial?.bbox &&
           this.metadata?.collections[i].extent?.spatial?.crs
         ) {
-          layerEntryConfig.initialSettings = {
-            bounds: transformExtent(
-              this.metadata.collections[i].extent.spatial.bbox[0] as number[],
-              get(this.metadata.collections[i].extent.spatial.crs as string)!,
-              `EPSG:${api.map(this.mapId).currentProjection}`
-            ),
-          };
+          // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
+          layerEntryConfig.initialSettings!.bounds = transformExtent(
+            this.metadata.collections[i].extent.spatial.bbox[0] as number[],
+            get(this.metadata.collections[i].extent.spatial.crs as string)!,
+            `EPSG:${api.map(this.mapId).currentProjection}`
+          );
         }
 
         api.map(this.mapId).layer.registerLayerConfig(layerEntryConfig);

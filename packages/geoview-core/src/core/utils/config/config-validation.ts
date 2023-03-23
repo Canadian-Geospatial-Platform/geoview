@@ -680,8 +680,13 @@ export class ConfigValidation {
         if (typeof config === 'object') {
           Object.keys(config).forEach((key) => {
             if (typeof config[key] === 'object') {
-              if (('en' in config[key] || 'fr' in config[key]) && (!config[key].en || !config[key].fr))
-                throw new Error('When you support both languages, you must set all en and fr properties of localized strings.');
+              if ('en' in config[key] || 'fr' in config[key]) {
+                // delete empty localized strings
+                if (!config[key].en && !config[key].fr) delete config[key];
+                else if (!config[key].en || !config[key].fr) {
+                  throw new Error('When you support both languages, you must set all en and fr properties of localized strings.');
+                }
+              }
               // Avoid the 'geoviewRootLayer' and 'parentLayerConfig' properties because they loop on themself and cause a
               // stack overflow error.
               else if (!['geoviewRootLayer', 'parentLayerConfig'].includes(key)) validateLocalizedString(config[key]);
