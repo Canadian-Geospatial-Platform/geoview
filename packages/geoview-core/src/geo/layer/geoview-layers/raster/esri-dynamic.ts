@@ -279,6 +279,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
         source: new ImageArcGISRest(sourceOptions),
         properties: { layerEntryConfig },
       };
+      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerEntryConfig.initialSettings?.className !== undefined)
         imageLayerOptions.className = layerEntryConfig.initialSettings?.className;
       if (layerEntryConfig.initialSettings?.extent !== undefined) imageLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
