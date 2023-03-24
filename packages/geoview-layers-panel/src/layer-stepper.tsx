@@ -1,6 +1,5 @@
 /* eslint-disable react/require-default-props */
 import React, { DragEvent } from 'react';
-
 import {
   TypeWindow,
   TypeJsonArray,

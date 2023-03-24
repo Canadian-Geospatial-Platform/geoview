@@ -1,5 +1,13 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
+declare module '@mui/material/styles/createPalette' {
+  interface Palette {
+    border: {
+      primary: string;
+    };
+  }
+}
+
 const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 
 const headingStyles = {
@@ -88,6 +96,7 @@ const lightPalette = {
   background: {
     paper: '#fff',
     default: '#fff',
+    grey: '#eeeeee',
   },
   action: {
     active: 'rgba(0, 0, 0, 0.54)',
@@ -103,6 +112,9 @@ const lightPalette = {
     focus: `rgba(0, 0, 0, ${opacity.focusOpacity})`,
     focusOpacity: opacity.focusOpacity,
     activatedOpacity: opacity.activatedOpacity,
+  },
+  border: {
+    primary: 'rgba(0, 0, 0, 0.87)',
   },
 };
 
@@ -180,6 +192,7 @@ const darkPalette = {
   background: {
     paper: '#121212',
     default: '#232323',
+    grey: '#121212',
   },
   action: {
     active: '#fff',
@@ -196,6 +209,9 @@ const darkPalette = {
     focusOpacity: opacity.focusOpacity,
     activatedOpacity: opacity.activatedOpacity,
   },
+  border: {
+    primary: '#fff',
+  },
 };
 
 const darkAppBar = {
@@ -205,6 +221,15 @@ const darkAppBar = {
   btnDefaultBg: '#222222',
   btnFocusBg: '#333333',
   btnHoverBg: '#666666',
+};
+
+const darkPanel = {
+  background: '#1E1E1E',
+  border: '#393939',
+  borderLight: '#4f4f4f',
+  defaultBg: '#232323',
+  hoverBg: '#393939',
+  activeBg: '#4f4f4f',
 };
 
 const themeOptions: ThemeOptions = {
@@ -346,7 +371,7 @@ const themeOptions: ThemeOptions = {
   },
   appBar: {
     background: '#1E1E1E',
-    border: '#444444',
+    border: '#fff',
     btnActiveBg: '#000000e6',
     btnDefaultBg: '#222222',
     btnFocusBg: '#333333',
@@ -364,7 +389,7 @@ const themeOptions: ThemeOptions = {
     btnHoverColor: '#393939',
   },
   panel: {
-    background: '#232323',
+    background: '#fff',
     border: '#393939',
     borderLight: '#4f4f4f',
     defaultBg: '#232323',
@@ -387,6 +412,8 @@ export const getTheme = (mode: 'light' | 'dark' | undefined) => {
   if (mode === 'dark') {
     optionClone.palette = darkPalette;
     optionClone.appBar = darkAppBar;
+    optionClone.panel = darkPanel;
+    optionClone.palette.mode = mode;
   }
   return createTheme(optionClone);
 };

@@ -37,7 +37,6 @@ type TypePanelAppProps = {
 const useStyles = makeStyles((theme) => ({
   panelContainer: {
     backgroundColor: theme.panel.background,
-    color: theme.palette.primary.light,
     height: '100%',
     borderRadius: 0,
     flexDirection: 'column',
@@ -47,11 +46,10 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   panelHeader: {
-    backgroundColor: theme.appBar.background,
+    backgroundColor: theme.panel.background,
     borderBottomColor: theme.panel.border,
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
-    color: theme.palette.primary.light,
     height: 64,
   },
   panelHeaderTitle: {
@@ -62,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
   panelHeaderAction: {
     '& .MuiButtonBase-root': {
       border: `1px solid ${theme.appBar.btnDefaultBg}`,
-      color: theme.palette.primary.light,
       height: 44,
       width: 44,
       marginRight: 8,
