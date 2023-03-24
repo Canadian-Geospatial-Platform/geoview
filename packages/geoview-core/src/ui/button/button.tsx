@@ -3,7 +3,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import makeStyles from '@mui/styles/makeStyles';
-
+import { useTheme } from '@mui/styles';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
 import MaterialButton from '@mui/material/Button';
@@ -31,6 +31,8 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     textTransform: 'none',
     marginLeft: 20,
+    display: 'flex',
+    justifyContent: 'center',
     '& $buttonClass': {
       justifyContent: 'flex-start',
     },
@@ -76,9 +78,16 @@ export function Button(props: TypeButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const buttonRef = useRef<HTMLElement>(null);
-
+  const theme = useTheme();
   const classes = useStyles();
-
+  const sxProps = {
+    ...sx,
+    ...(theme.palette.mode === 'light' && {
+      backgroundColor: 'primary.light',
+      color: 'primary.dark',
+      '&:hover': { backgroundColor: 'primary.main', color: 'white' },
+    }),
+  };
   /**
    * Get text container with provided text content
    *
@@ -86,7 +95,6 @@ export function Button(props: TypeButtonProps): JSX.Element {
    */
   const getText = useCallback((): React.ReactNode => {
     let textContent: React.ReactNode;
-
     if (children === undefined) {
       textContent = <div />;
     } else if (typeof children === 'string') {
@@ -181,7 +189,7 @@ export function Button(props: TypeButtonProps): JSX.Element {
   return (
     <Tooltip title={t((tooltip as string) || '') as string} placement={tooltipPlacement} TransitionComponent={Fade} ref={buttonRef}>
       <MaterialButton
-        sx={sx}
+        sx={sxProps}
         variant={variant || 'text'}
         className={`${classes.buttonClass} ${className || ''}`}
         style={style}

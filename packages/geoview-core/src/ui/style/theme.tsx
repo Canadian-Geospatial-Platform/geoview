@@ -399,6 +399,7 @@ export const getTheme = (mode: 'light' | 'dark' | undefined) => {
     optionClone.palette = darkPalette;
     optionClone.appBar = darkAppBar;
     optionClone.panel = darkPanel;
+    optionClone.palette.mode = mode;
   }
   return createTheme(optionClone);
 };

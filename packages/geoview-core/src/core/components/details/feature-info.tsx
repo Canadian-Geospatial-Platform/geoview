@@ -68,7 +68,7 @@ export interface TypeFeatureProps {
  */
 export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const { feature, startOpen, detailsSettings } = props;
-  const { mapId, backgroundStyle } = detailsSettings;
+  const { mapId } = detailsSettings;
   const featureId = `Feature Info ${feature.featureKey}`;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const [isOpen, setOpen] = useState<boolean>(false);
@@ -80,7 +80,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       value: feature.fieldInfo[fieldName]!.value,
     };
   });
-  const fontColor = backgroundStyle === 'dark' ? { color: '#fff' } : {};
+
   const { currentProjection } = api.map(mapId);
   const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
   const projectionConfig = api.projection.projections[currentProjection];
@@ -149,8 +149,8 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
                 return (
                   // eslint-disable-next-line react/no-array-index-key
                   <ListItem key={index} sx={index % 2 > 0 ? sxClasses.featureInfoItem : sxClasses.featureInfoItemOdd}>
-                    <Box sx={{ ...fontColor, ...sxClasses.featureInfoItemKey }}>{featureInfoItem.key}</Box>
-                    <Box sx={{ ...fontColor, ...sxClasses.featureInfoItemValue }}>{featureInfoItem.value}</Box>
+                    <Box sx={sxClasses.featureInfoItemKey}>{featureInfoItem.key}</Box>
+                    <Box sx={sxClasses.featureInfoItemValue}>{featureInfoItem.value}</Box>
                   </ListItem>
                 );
               })
