@@ -250,6 +250,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       }
 
       const tileLayerOptions: TileOptions<XYZ> = { source: new XYZ(sourceOptions) };
+      // layerEntryConfig.initialSettings cannot be undefined because config-validation set it to {} if it is undefined.
       if (layerEntryConfig.initialSettings?.className !== undefined)
         tileLayerOptions.className = layerEntryConfig.initialSettings?.className;
       if (layerEntryConfig.initialSettings?.extent !== undefined) tileLayerOptions.extent = layerEntryConfig.initialSettings?.extent;
