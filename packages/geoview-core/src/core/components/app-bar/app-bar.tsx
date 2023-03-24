@@ -29,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
     width: 60,
     '& li': {
       backgroundColor: 'transparent',
-      color: theme.palette.primary.light,
       justifyContent: 'center',
       margin: '16px 0',
       padding: 0,

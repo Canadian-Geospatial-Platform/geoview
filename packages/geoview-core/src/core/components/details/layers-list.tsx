@@ -34,8 +34,6 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
   const { arrayOfLayerData, detailsSettings } = props;
   const [layerSetOpen, setLayerSetOpen] = useState<string>('');
 
-  const fontColor = detailsSettings.backgroundStyle === 'dark' ? { color: '#fff' } : {};
-
   useEffect(() => {
     // if there is only one layer in the list, open it
     if (arrayOfLayerData.length === 1) {
@@ -46,19 +44,17 @@ export function LayersList(props: TypeLayersListProps): JSX.Element {
   }, [arrayOfLayerData]);
 
   return (
-    <List>
+    <List sx={{ color: 'text.primary' }}>
       {arrayOfLayerData.map((layerData) => {
         return (
           <div key={layerData.layerPath}>
             <ListItem
               onClick={() => setLayerSetOpen(layerSetOpen !== layerData.layerPath ? layerData.layerPath : '')}
-              sx={{ padding: '8px 0', ...fontColor }}
+              sx={{ padding: '8px 0' }}
             >
               <ListItemButton>
                 <ListItemIcon>
-                  <IconButton color="primary" sx={fontColor}>
-                    {layerSetOpen === layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                  </IconButton>
+                  <IconButton color="primary">{layerSetOpen === layerData.layerPath ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
                 </ListItemIcon>
                 <Tooltip title={layerData.layerPath} placement="top" enterDelay={1000}>
                   <ListItemText primary={layerData.layerPath ? layerData.layerName : 'Click on map'} />
