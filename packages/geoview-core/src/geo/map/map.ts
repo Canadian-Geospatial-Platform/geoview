@@ -31,7 +31,7 @@ import { mapPayload } from '../../api/events/payloads/map-payload';
 import { mapComponentPayload } from '../../api/events/payloads/map-component-payload';
 import { mapConfigPayload } from '../../api/events/payloads/map-config-payload';
 import { GeoViewLayerPayload, payloadIsGeoViewLayerAdded } from '../../api/events/payloads/geoview-layer-payload';
-import { generateId } from '../../core/utils/utilities';
+import { generateId, parseJSONConfig, removeCommentsFromJSON } from '../../core/utils/utilities';
 import { TypeListOfGeoviewLayerConfig, TypeDisplayLanguage, TypeViewSettings } from './map-schema-types';
 import { TypeMapFeaturesConfig, TypeHTMLElement } from '../../core/types/global-types';
 import { TypeMapSingleClick } from '../../api/events/payloads/map-slingle-click-payload';
@@ -443,33 +443,18 @@ export class MapViewer {
    * @param {string} mapConfig a new config passed in from the function call
    */
   loadMapConfig = (mapConfig: string) => {
-    // Erase comments in the config file.
-    const configObjStr = mapConfig
-      .split(/(?<!\\)'/gm)
-      .map((fragment, index) => {
-        if (index % 2) return fragment.replaceAll(/\/\*/gm, String.fromCharCode(1)).replaceAll(/\*\//gm, String.fromCharCode(2));
-        return fragment; // .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '');
-      })
-      .join("'")
-      .replaceAll(/\/\*(?<=\/\*)((?:.|\n|\r)*?)(?=\*\/)\*\//gm, '')
-      .replaceAll(String.fromCharCode(1), '/*')
-      .replaceAll(String.fromCharCode(2), '*/');
+    const targetDiv = this.map.getTargetElement();
 
-    // parse the config
-    const parsedMapConfig = JSON.parse(
-      configObjStr
-        // remove CR and LF from the map config
-        .replace(/(\r\n|\n|\r)/gm, '')
-        // replace apostrophes not preceded by a backslash with quotes
-        .replace(/(?<!\\)'/gm, '"')
-        // replace apostrophes preceded by a backslash with a single apostrophe
-        .replace(/\\'/gm, "'")
-    );
+    const configObjString = removeCommentsFromJSON(mapConfig);
+    const parsedMapConfig = parseJSONConfig(configObjString);
 
     // create a new config for this map element
-    const config = new Config(this.map.getTargetElement());
+    const config = new Config(targetDiv);
 
     const configObj = config.getMapConfigFromFunc(parsedMapConfig);
+    if (this.displayLanguage) {
+      configObj!.displayLanguage = this.displayLanguage;
+    }
 
     // emit an event to reload the map with the new config
     api.event.emit(mapConfigPayload(EVENT_NAMES.MAP.EVENT_MAP_RELOAD, 'all', configObj!));

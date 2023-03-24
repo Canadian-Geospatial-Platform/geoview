@@ -15,6 +15,7 @@ import { generateId, addUiComponent, showMessage } from '../core/utils/utilities
 import { FeatureInfoLayerSet } from '../geo/utils/feature-info-layer-set';
 import { LegendsLayerSet } from '../geo/utils/legends-layer-set';
 import { GeoViewLayerPayload, payloadIsTestGeoViewLayers } from './events/payloads/geoview-layer-payload';
+import { createMapFromConfig } from '../core/utils/create-map-from-config';
 
 /**
  * Class used to handle api calls (events, functions etc...)
@@ -61,6 +62,9 @@ export class API {
 
   // generateId function
   generateId = generateId;
+
+  // create map in a chosen div
+  createMapFromConfig = createMapFromConfig;
 
   // add ui component to a custom div
   addUiComponent = addUiComponent;
