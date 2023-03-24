@@ -50,32 +50,7 @@
       <h4 id="HLNG1">1. French</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div
-      id="LNG1"
-      class="llwp-map"
-      data-lang="fr"
-      data-config="{
-      'map': {
-        'interaction': 'dynamic',
-        'viewSettings': {
-          'zoom': 6,
-          'center': [-100, 60],
-          'projection': 3978
-        },
-        'basemapOptions': {
-          'basemapId': 'transport',
-          'shaded': false,
-          'labeled': true
-        },
-        'listOfGeoviewLayerConfig': [
-        ]
-      },
-      'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
-      'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
-      'theme': 'dark',
-      'suportedLanguages': ['fr', 'en']
-    }"
-    ></div>
+    <div id="LNG1" data-lang="fr"></div>
     <p>This map is in French.</p>
     <hr />
 
@@ -83,27 +58,7 @@
       <h4 id="HLNG2">2. English</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="LNG2" class="llwp-map" data-lang="en" data-config="{
-      'map': {
-        'interaction': 'dynamic',
-        'viewSettings': {
-          'zoom': 6,
-          'center': [-100, 60],
-          'projection': 3978
-        },
-        'basemapOptions': {
-          'basemapId': 'transport',
-          'shaded': false,
-          'labeled': true
-        },
-        'listOfGeoviewLayerConfig': [
-        ]
-      },
-      'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
-      'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
-      'theme': 'dark',
-      'suportedLanguages': ['fr', 'en']
-    }"></div>
+    <div id="LNG2" class="llwp-map" data-lang="en"></div>
     <p>This map is in English.</p>
     <hr />
 
@@ -130,17 +85,32 @@
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
+            {
+                'geoviewLayerId': 'historical-flood',
+                'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)', 'fr': 'Événements historiques d inondation (EHI)' },
+                'metadataAccessPath': {
+                  'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+                  'fr': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_fr/MapServer'
+                },
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0'
+                  }
+                ]
+              }
             ]
           },
           'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
-          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
+          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel', 'footer-panel'],
           'theme': 'dark',
           'suportedLanguages': ['fr', 'en']
         }`;
 
-        // TODO: Make it work from function call as output of issue #905.
-        // cgpv.api.map('LNG1').loadMapConfig(config);
-        // cgpv.api.map('LNG2').loadMapConfig(config);
+        // creates map in empty div
+        cgpv.api.createMapFromConfig('LNG1', config);
+        // loads config in blank map
+        cgpv.api.map('LNG2').loadMapConfig(config);
 
         //create snippet
         createConfigSnippet();
