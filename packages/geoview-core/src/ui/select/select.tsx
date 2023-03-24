@@ -35,15 +35,15 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: 16,
     color: theme.palette.text.primary,
     '& .MuiOutlinedInput-notchedOutline': {
-      border: `1px solid ${theme.palette.text.primary}`,
+      border: `1px solid ${theme.palette.border.primary}`,
       padding: '0 12px 0 8px',
       '&[aria-hidden="true"]': {
-        border: `1px solid ${theme.palette.text.primary}`,
+        border: `1px solid ${theme.palette.border.primary}`,
       },
     },
     '&:hover': {
       '& .MuiOutlinedInput-notchedOutline': {
-        border: `1px solid ${theme.palette.text.primary}`,
+        border: `1px solid ${theme.palette.border.primary}`,
       },
     },
     '& .MuiFormLabel-root.Mui-focused': {

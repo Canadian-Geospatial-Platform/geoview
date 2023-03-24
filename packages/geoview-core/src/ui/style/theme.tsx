@@ -1,5 +1,13 @@
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
+declare module '@mui/material/styles/createPalette' {
+  interface Palette {
+    border: {
+      primary: string;
+    };
+  }
+}
+
 const font = "'Roboto', 'Helvetica', 'Arial', sans-serif";
 
 const headingStyles = {
@@ -105,6 +113,9 @@ const lightPalette = {
     focusOpacity: opacity.focusOpacity,
     activatedOpacity: opacity.activatedOpacity,
   },
+  border: {
+    primary: 'rgba(0, 0, 0, 0.87)',
+  },
 };
 
 /**
@@ -197,6 +208,9 @@ const darkPalette = {
     focus: `rgba(255, 255, 255, ${opacity.focusOpacity})`,
     focusOpacity: opacity.focusOpacity,
     activatedOpacity: opacity.activatedOpacity,
+  },
+  border: {
+    primary: '#fff',
   },
 };
 
