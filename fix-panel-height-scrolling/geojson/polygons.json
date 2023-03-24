@@ -1,0 +1,69 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "Province": "Ontario" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-89, 54],
+            [-85, 55],
+            [-85, 52],
+            [-89, 52],
+            [-89, 54]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "Province": "Ontario" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-90, 52],
+            [-84, 53],
+            [-84, 50],
+            [-90, 50],
+            [-90, 52]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "Province": "Quebec" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73, 50],
+            [-73, 45.5],
+            [-74.25, 45.5],
+            [-74.25, 50],
+            [-73, 50]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "Province": "Alberta" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-115, 55],
+            [-110.25, 55],
+            [-111, 49.5],
+            [-114, 49.6],
+            [-115, 55]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>UI Components</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#SLIDER">1. Slider MUI Component</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different Core UI components</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="SLIDER">1. Slider MUI Component</h4><a class="ref-link" href="#top">Top</a></div><div id="UI1" class="llwp-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 4,
+              'center': [-100, 60],
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonHistoFlood',
+                'geoviewLayerName': {
+                  'en': 'GeoJSON Line',
+                  'fr': 'GeoJSON Line'
+                },
+                'geoviewLayerType': 'GeoJSON',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'historical_flood_0.geojson',
+                    'source': {
+                      'dataAccessPath': {
+                        'en': './geojson/'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          'theme': 'dark',
+          'corePackages': [],
+          'suportedLanguages': ['en']
+        }"></div><p></p><button type="button" class="collapsible">Configuration Snippet</button><pre id="UI1CS" class="panel"></pre><hr/><h4 style="display:none; padding-top: 10px; width: 75%; padding-left: 25%">Filter GeoJSON from slider</h4><div id="UI1-slider-flood" class="Panel" style="padding-top: 20px; width: 75%; padding-left: 25%"></div><div id="UI1-slider1" class="Panel" style="padding-top: 20px; width: 75%; padding-left: 25%"></div><div class="toolbar"><button type="button" id="sliderminmax">Set Slider Min/Max</button> <button type="button" id="slidervalues">Set Slider Values</button></div><hr/><div id="UI1-slider2" class="Panel" style="padding-top: 20px; width: 50%; padding-left: 25%"></div><div class="panel" style="display:block;"><h3>Accessing slider value from outside of the core viewer using api event listeners</h3><div class="slider-position2"></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(function () {
+      console.log('api is ready');
+
+      /**
+       * SLIDER UI SECTION START
+       */
+      // set min max
+      function setSliderMinMax() {
+        cgpv.api.event.emit(
+          // null instead of mapId, "mySliderId" additional parameter to control a specefic slider
+          cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_MINMAX, null, { min: 2, max: 16 }),
+          'UI1-slider1'
+        );
+      }
+      document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax, false);
+
+      // set values
+      function setSliderValues() {
+        cgpv.api.event.emit(
+          // null instead of mapId, "mySliderId" additional parameter to control a specefic slider
+          cgpv.types.sliderPayload(cgpv.api.eventNames.SLIDER.EVENT_SLIDER_SET_VALUES, null, { value: 8 }),
+          'UI1-slider1'
+        );
+      }
+      document.getElementById('slidervalues').addEventListener('click', setSliderValues, false);
+
+      // add a slider component and link it to a map with mapId props
+      cgpv.api.addUiComponent(
+        'UI1-slider1',
+        cgpv.react.createElement(cgpv.ui.elements.Slider, {
+          mapId: 'UI1',
+          id: 'UI1-slider1',
+          min: 0,
+          max: 18,
+          value: 5,
+          marks: [
+            { value: 0, label: 'Min Level 0' },
+            { value: 4, label: 'Level 4' },
+            { value: 8, label: 'Level 8' },
+            { value: 18, label: 'Max Level 18' },
+          ],
+          track: false,
+          // TODO: setting the view zoom level create bugs with the overview map
+          customOnChange: (zoomLevel) => {
+            const lat = 50;
+            const lng = -95;
+            cgpv.api.map('UI1').getView().animate({ zoom: zoomLevel });
+          },
+        })
+      )
+
+      // listen to slider value change event
+      const sliderPosition2 = document.getElementsByClassName('slider-position2');
+      cgpv.api.event.on(
+        cgpv.api.eventNames.SLIDER.EVENT_SLIDER_CHANGE,
+        (payload) => {
+          if (cgpv.types.payloadIsASlider(payload)) {
+            sliderPosition2[0].innerHTML = `<p>Slider min ${payload.sliderValues.min}, max ${payload.sliderValues.max}, values ${payload.sliderValues.value
+              } and active thumb ${payload.sliderValues.activeThumb === 0 ? 'left' : 'right'}</p>`;
+          }
+        },
+        'UI1-slider2'
+      );
+
+      // add a slider component and DO NOT link it to a map
+      cgpv.api.addUiComponent(
+        'UI1-slider2',
+        cgpv.react.createElement(cgpv.ui.elements.Slider, {
+          id: 'UI1-slider2',
+          min: 0,
+          max: 18,
+          value: [5, 10],
+          marks: [
+            { value: 0, label: 'Min Level 0' },
+            { value: 2 },
+            { value: 4, label: 'Level 4' },
+            { value: 5, label: 'Level 5' },
+            { value: 6, label: 'Level 6' },
+            { value: 8, label: 'Level 8' },
+            { value: 18, label: 'Max Level 18' },
+          ],
+        })
+      );
+      /**
+       * SLIDER UI SECTION END
+       */
+
+      //create snippets
+      createCodeSnippet();
+      createConfigSnippet();
+    });
+
+    // document.addEventListener('DOMContentLoaded', async () => {
+      // get map
+      // let map = cgpv.api.map('UI1');
+
+      // zoom event to show hide layers
+      // cgpv.api.event.on(
+      //   cgpv.api.eventNames.MAP.EVENT_MAP_ZOOM_END,
+      //   (payload) => {
+      //     let map = cgpv.api.map('UI1');
+      //     if (payload.value > 9) {
+      //       document.getElementsByClassName('leaflet-heatmap-layer')[0].style.visibility = 'hidden';
+      //       //document.getElementsByClassName('leaflet-zoom-animated')[0].style.visibility = 'visible';
+      //     } else {
+      //       document.getElementsByClassName('leaflet-heatmap-layer')[0].style.visibility = 'visible';
+      //       //document.getElementsByClassName('leaflet-zoom-animated')[0].style.visibility = 'hidden';
+      //     }
+      //   },
+      //   'UI1'
+      // );
+
+      // add a slider component and link it to a map with mapId props
+      // TODO: add the bind popup to link to details panel....
+      // TODO: Repair whern filters are done
+      // cgpv.api.addUiComponent(
+      //   'UI1-slider-flood',
+      //   cgpv.react.createElement(cgpv.ui.elements.Slider, {
+      //     mapId: 'UI1',
+      //     id: 'UI1-slider-flood',
+      //     min: 1696,
+      //     max: 2022,
+      //     value: [1696, 2022],
+      //     marks: [
+      //       { value: 1696, label: '1696' },
+      //       { value: 1700, label: '1700' },
+      //       { value: 1800, label: '1800' },
+      //       { value: 1900, label: '1900' },
+      //       { value: 20800, label: '2000' },
+      //       { value: 2022, label: '2022' },
+      //     ],
+      //     track: 'normal',
+      //     customOnChange: (dates) => {
+      //       const result = cgpv.api.maps.UI1.layer.geoviewLayers.geojsonHistoFlood.filterFeatures([
+      //         { field: 'year', operator: '>=', value: dates[0] },
+      //         { connector: '&&', field: 'year', operator: '<=', value: dates[1] },
+      //       ]);
+
+      //       for (let feature of result.pass) {
+      //         feature.layer.setStyle(feature.layer.defaultOptions);
+      //       }
+      //       for (let feature of result.fail) {
+      //         feature.layer.setStyle({ opacity: 0, fillOpacity: 0 });
+      //       }
+      //     },
+      //   })
+      // );
+
+    //   // create heatmap layer
+    //   setTimeout(() => {
+    //     cgpv.leaflet
+    //       .heatLayer(
+    //         cgpv.api.maps.UI1.layer.geoviewLayers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
+    //         { radius: 20, blur: 15, maxZoom: 10 }
+    //       )
+    //       .addTo(map.map);
+    //   }, 1000);
+
+      // create heatmap layer
+        // TODO: repair with OpenLayers
+        // setTimeout(() => {
+          // Check how to acccess OL library from our API like this for Leaflet
+          // cgpv.leaflet
+          //   .heatLayer(
+          //     cgpv.api.maps.UI1.layer.geoviewLayers.geojsonHistoFlood.features.map((item) => item.layer.feature.geometry.coordinates.reverse()),
+          //     { radius: 20, blur: 15, maxZoom: 10 }
+          //   )
+          //   .addTo(map.map);
+        // }, 1000);
+    // });</script></body></html>

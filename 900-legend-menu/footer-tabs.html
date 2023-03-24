@@ -1,0 +1,229 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="stylesheet" href="css/style.css"/><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Footer tabs - Vanilla JavaScript</strong></h1></td></tr><tr><td><a href="./index.html">Main</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase using the footer tabsuse in plain vanilla JavaScript.</td></tr></tbody></table></div><div id="mapWM" class="llwp-map" data-lang="en" data-config-url="./configs/footer-tabs-config.json"></div><p>The map will show how you can add footer tabs using GeoView core component and <strong>Vanilla JavaScript</strong> using the <strong>React</strong> <u>createElement</u> to access and create UI components from GeoView. You should do the same using an external package that uses JSX.</p><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init(async function () {
+      createCodeSnippet();
+      createConfigSnippet();
+
+      // define the map id
+      const mapId = 'mapWM';
+
+      // import react and api from the core
+      const { react, api, ui } = cgpv;
+
+      // import the createElement function from React to create UI components, define it as h for short
+      const { createElement: h, useState, useEffect, useCallback } = react;
+
+      // !! Keep for reference
+      // // create a component that will be used as content for a footer tab
+      // // the content will be the legend for enabled layers (demo only supports WMS and esriDynamic)
+      // function LegendComponent() {
+      //   const [layers, setLayers] = useState([]);
+
+      //   async function getWMSLegend(geoviewLayerId) {
+      //     const res = await api.map(mapId).layer.geoviewLayers[layerId].getLegendGraphic();
+
+      //     return res;
+      //   }
+
+      //   async function getEsriDynamicLegend(layerId) {
+      //     const res = await api.map(mapId).layer.geoviewLayers[layerId].getLegendJson();
+
+      //     return res;
+      //   }
+
+      //   useEffect(() => {
+      //     async function getLayers() {
+      //       // get layers added to the map
+      //       const { layers: mapLayers } = api.map(mapId).layer;
+
+      //       // loop through added layers
+      //       for (let layerIndex = 0; layerIndex < Object.keys(mapLayers).length; layerIndex++) {
+      //         let legend = null;
+
+      //         const layer = mapLayers[Object.keys(mapLayers)[layerIndex]];
+      //         if (layer.type === 'esriDynamic') {
+      //           legend = await getEsriDynamicLegend(layer.id);
+      //         } else if (layer.type === 'ogcWms') {
+      //           legend = await getWMSLegend(layer.id);
+      //         }
+
+      //         setLayers((prevArray) => [
+      //           ...prevArray,
+      //           {
+      //             layer,
+      //             legend,
+      //           },
+      //         ]);
+      //       }
+      //     }
+
+      //     getLayers();
+      //   }, []);
+
+      //   return h(
+      //     'div',
+      //     {},
+      //     layers.map((layerData) => {
+      //       const { layer, legend } = layerData;
+
+      //       if (layer.type === 'ogcWms') {
+      //         return h(
+      //           'div',
+      //           {
+      //             key: layer.id,
+      //           },
+      //           h('h4', {}, layer.name),
+      //           h(
+      //             'div',
+      //             {
+      //               key: layer.id,
+      //               style: {
+      //                 display: 'flex',
+      //                 overflow: 'hidden',
+      //                 fontSize: '14px',
+      //                 alignItems: 'center',
+      //                 marginLeft: '10px',
+      //                 whiteSpace: 'nowrap',
+      //                 textOverflow: 'ellipsis',
+      //               },
+      //             },
+      //             h('img', {
+      //               src: legend,
+      //               alt: layer.name,
+      //             }),
+      //             h('span', {}, layer.name)
+      //           )
+      //         );
+      //       } else if (layer.type === 'esriDynamic') {
+      //         return h(
+      //           'div',
+      //           {
+      //             key: layer.id,
+      //           },
+      //           h('h4', {}, layer.name),
+      //           h(
+      //             'div',
+      //             {},
+      //             legend.map((legendLayer) => {
+      //               return h(
+      //                 'div',
+      //                 {
+      //                   key: legendLayer.layerId,
+      //                   style: {
+      //                     marginBottom: '10px',
+      //                   },
+      //                 },
+      //                 h('span', {}, legendLayer.layerName),
+      //                 legendLayer.legend.map((legendData, legendDataIndex) => {
+      //                   return h(
+      //                     'div',
+      //                     {
+      //                       key: legendDataIndex,
+      //                       style: {
+      //                         display: 'flex',
+      //                         overflow: 'hidden',
+      //                         fontSize: '14px',
+      //                         alignItems: 'center',
+      //                         marginLeft: '10px',
+      //                         whiteSpace: 'nowrap',
+      //                         textOverflow: 'ellipsis',
+      //                       },
+      //                     },
+      //                     h('img', {
+      //                       src: `data:${legendData.contentType};base64,${legendData.imageData}`,
+      //                       alt: legendData.label,
+      //                     }),
+      //                     h('span', {}, legendData.label)
+      //                   );
+      //                 })
+      //               );
+      //             })
+      //           )
+      //         );
+      //       }
+
+      //       return h(
+      //         'div',
+      //         {
+      //           key: layer.id,
+      //         },
+      //         h('h4', {}, layer.name),
+      //         h('div', {}, layer.type)
+      //       );
+      //     })
+      //   );
+      // }
+
+      function TableComponent() {
+        const { Table } = ui.elements;
+
+        const columns = [
+          { field: 'id', headerName: 'ID', width: 90 },
+          {
+            field: 'firstName',
+            headerName: 'First name',
+            width: 150,
+            editable: true,
+          },
+          {
+            field: 'lastName',
+            headerName: 'Last name',
+            width: 150,
+            editable: true,
+          },
+          {
+            field: 'age',
+            headerName: 'Age',
+            type: 'number',
+            width: 110,
+            editable: true,
+          },
+          {
+            field: 'fullName',
+            headerName: 'Full name',
+            description: 'This column has a value getter and is not sortable.',
+            sortable: false,
+            width: 160,
+            valueGetter: (params) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+          },
+        ];
+
+        const rows = [
+          { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
+          { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
+          { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
+          { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
+          { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
+          { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
+          { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
+          { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
+          { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
+        ];
+
+        return h(
+          'div',
+          {
+            style: {
+              width: '100%',
+              height: 'auto',
+            },
+          },
+          h(Table, { columns, rows, pageSize: 5, rowsPerPageOptions: [5], autoHeight: true })
+        );
+      }
+
+      // import footerTabs from the core for the current map
+      const { footerTabs } = api.map(mapId);
+
+      // create new tab and add the LegendComponent to the footer tab
+      footerTabs.createFooterTab({
+        value: 0,
+        label: 'Legend',
+        content: () => api.map(mapId).legend.createLegend({layerIds: ['wmsLYR1', 'esriDynamicLYR2', 'esriFeatureLYR4']})
+      });
+
+      footerTabs.createFooterTab({
+        value: 1,
+        label: 'Table',
+        content: TableComponent,
+      });
+    });</script></body></html>

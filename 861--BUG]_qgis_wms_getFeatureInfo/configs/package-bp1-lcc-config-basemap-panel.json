@@ -1,0 +1,125 @@
+{
+  "isOpen": true,
+  "canSwichProjection": true,
+  "supportedProjections": [
+    {
+      "projectionCode": 3978,
+      "coreBasemaps": [
+        {
+          "basemapId": "transport",
+          "shaded": true,
+          "labeled": true
+        },
+        {
+          "basemapId": "transport",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "osm",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "simple",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "shaded",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "nogeom",
+          "shaded": false,
+          "labeled": false
+        }
+      ],
+      "customBasemaps": [
+        {
+          "basemapId": "simpletestlabel",
+          "name": {
+            "en": "Custom simple with labels",
+            "fr": "Perso simple avec étiquettes"
+          },
+          "description": {
+            "en": "This is a custom province basemap in LCC projection.",
+            "fr": "Ceci est une carte de base personnalisée en projection ccl."
+          },
+          "thumbnailUrl": {
+            "en": [
+              "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/8/285/268.jpg"
+            ],
+            "fr": [
+              "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/8/285/268.jpg"
+            ]
+          },
+          "layers": [
+            {
+              "basemapId": "simple2",
+              "url": {
+                "en": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg",
+                "fr": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/Simple/MapServer/WMTS/tile/1.0.0/Simple/default/default028mm/{z}/{y}/{x}.jpg"
+              },
+              "opacity": 0.5
+            },
+            {
+              "basemapId": "label2",
+              "url": {
+                "en": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBMT_TXT_3978/MapServer/WMTS/tile/1.0.0/BaseMaps_CBMT_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg",
+                "fr": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBCT_TXT_3978/MapServer/WMTS/tile/1.0.0/BaseMaps_CBCT_TXT_3978/default/default028mm/{z}/{y}/{x}.jpg"
+              },
+              "opacity": 1
+            }
+          ],
+          "attribution": {
+            "en": "test attribution",
+            "fr": "test attribution"
+          },
+          "zoomLevels": {
+            "min": 0,
+            "max": 17
+          }
+        }
+      ]
+    },
+    {
+      "projectionCode": 3857,
+      "coreBasemaps": [
+        {
+          "basemapId": "transport",
+          "shaded": true,
+          "labeled": true
+        },
+        {
+          "basemapId": "transport",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "osm",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "simple",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "shaded",
+          "shaded": true,
+          "labeled": false
+        },
+        {
+          "basemapId": "nogeom",
+          "shaded": false,
+          "labeled": false
+        }
+      ],
+      "customBasemaps": []
+    }
+  ],
+  "suportedLanguages": ["en", "fr"]
+}

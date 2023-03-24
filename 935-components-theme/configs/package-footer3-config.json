@@ -1,0 +1,37 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "zoom": 3,
+      "center": [-100, 50],
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": { "en": "Historical Flood Events (HFE)" },
+        "metadataAccessPath": {
+          "en": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer"
+        },
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "source": {
+              "cluster": { "enable": true }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "light",
+  "components": ["nav-bar", "north-arrow", "overview-map", "footer-bar"],
+  "corePackages": ["footer-panel"],
+  "suportedLanguages": ["en"]
+}

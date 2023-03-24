@@ -1,0 +1,62 @@
+{
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "execution",
+      "layerName": { "en": "Downstream Analysis" },
+      "source": {
+        "dataAccessPath": {
+          "en": "https://132.156.9.48:30102/processes/downstream-analysis/execution",
+          "fr": "https://132.156.9.48:30102/processes/downstream-analysis/execution"
+        },
+        "postSettings": {
+          "header": {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "data": {
+            "inputs": {
+              "inSRID": 4326,
+              "lat": 45.1823,
+              "long": -72.0556,
+              "outSRID": 4326
+            }
+          }
+        },
+        "featureInfo": {
+          "queryable": "true",
+          "nameField": {
+            "en": "gnis_name",
+            "fr": "gnis_name"
+          },
+          "outfields": {
+            "en": "enable,fcade,fdate,flowdir,ftype,gnis_id,gnis_name,inntwork,lengthkm,mainpath,nhdplusflowlinevaa_arbolatesu,nhdplusflowlinevaa_areasqkm,nhdplusflowlinevaa_divdasqkm,nhdplusflowlinevaa_divergence,nhdplusflowlinevaa_dndraincou,nhdplusflowlinevaa_dnhydroseq,nhdplusflowlinevaa_dnlevel,nhdplusflowlinevaa_dnlevelpat,nhdplusflowlinevaa_dnminorhyd,nhdplusflowlinevaa_elevfixed,nhdplusflowlinevaa_frommea,nhdplusflowlinevaa_fromnode,nhdplusflowlinevaa_hwnodesqkm,nhdplusflowlinevaa_hwtype,nhdplusflowlinevaa_hydroseq,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_maxelevsmo,nhdplusflowlinevaa_minelevraw,nhdplusflowlinevaa_minelevsmo,nhdplusflowlinevaa_objectid,nhdplusflowlinevaa_pathlength,nhdplusflowlinevaa_reachcode,nhdplusflowlinevaa_rtndiv,nhdplusflowlinevaa_slope,nhdplusflowlinevaa_slopelenkm,nhdplusflowlinevaa_startflag,nhdplusflowlinevaa_statusflag,nhdplusflowlinevaa_streamcalc,nhdplusflowlinevaa_streamleve,nhdplusflowlinevaa_streamorde,nhdplusflowlinevaa_terminalfl,nhdplusflowlinevaa_terminalpa,nhdplusflowlinevaa_thinner,nhdplusflowlinevaa_tomeas,nhdplusflowlinevaa_tonode,nhdplusflowlinevaa_totdasqkm,nhdplusflowlinevaa_uphydroseq,nhdplusflowlinevaa_uplevelpat,nhdplusflowlinevaa_vpuid,nhdplusflowlinevaa_vpuin,nhdplusflowlinevaa_vpuout,nhdplusid,objectid,permanent_identifier,reachcode,resolution,shape_length,visibilityfilter,vpuid,wbarea_permanent_identifier",
+            "fr": "enable,fcade,fdate,flowdir,ftype,gnis_id,gnis_name,inntwork,lengthkm,mainpath,nhdplusflowlinevaa_arbolatesu,nhdplusflowlinevaa_areasqkm,nhdplusflowlinevaa_divdasqkm,nhdplusflowlinevaa_divergence,nhdplusflowlinevaa_dndraincou,nhdplusflowlinevaa_dnhydroseq,nhdplusflowlinevaa_dnlevel,nhdplusflowlinevaa_dnlevelpat,nhdplusflowlinevaa_dnminorhyd,nhdplusflowlinevaa_elevfixed,nhdplusflowlinevaa_frommea,nhdplusflowlinevaa_fromnode,nhdplusflowlinevaa_hwnodesqkm,nhdplusflowlinevaa_hwtype,nhdplusflowlinevaa_hydroseq,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_maxelevsmo,nhdplusflowlinevaa_minelevraw,nhdplusflowlinevaa_minelevsmo,nhdplusflowlinevaa_objectid,nhdplusflowlinevaa_pathlength,nhdplusflowlinevaa_reachcode,nhdplusflowlinevaa_rtndiv,nhdplusflowlinevaa_slope,nhdplusflowlinevaa_slopelenkm,nhdplusflowlinevaa_startflag,nhdplusflowlinevaa_statusflag,nhdplusflowlinevaa_streamcalc,nhdplusflowlinevaa_streamleve,nhdplusflowlinevaa_streamorde,nhdplusflowlinevaa_terminalfl,nhdplusflowlinevaa_terminalpa,nhdplusflowlinevaa_thinner,nhdplusflowlinevaa_tomeas,nhdplusflowlinevaa_tonode,nhdplusflowlinevaa_totdasqkm,nhdplusflowlinevaa_uphydroseq,nhdplusflowlinevaa_uplevelpat,nhdplusflowlinevaa_vpuid,nhdplusflowlinevaa_vpuin,nhdplusflowlinevaa_vpuout,nhdplusid,objectid,permanent_identifier,reachcode,resolution,shape_length,visibilityfilter,vpuid,wbarea_permanent_identifier"
+          },
+          "fieldTypes": "number,number,date,number,number,string,string,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,number,string,number,number,number,number,string,number,number,number,number,number,number,number,number,number,number,number,string,number,number,number,number,string,string,number,number,number,string,string",
+          "aliasFields": {
+            "en": "enable,fcade,fdate,flowdir,ftype.gnis_id,gnis_name,inntwork,lengthkm,mainpath,nhdplusflowlinevaa_arbolatesu,nhdplusflowlinevaa_areasqkm,nhdplusflowlinevaa_divdasqkm,nhdplusflowlinevaa_divergence,nhdplusflowlinevaa_dndraincou,nhdplusflowlinevaa_dnhydroseq,nhdplusflowlinevaa_dnlevel,nhdplusflowlinevaa_dnlevelpat,nhdplusflowlinevaa_dnminorhyd,nhdplusflowlinevaa_elevfixed,nhdplusflowlinevaa_frommea,nhdplusflowlinevaa_fromnode,nhdplusflowlinevaa_hwnodesqkm,nhdplusflowlinevaa_hwtype,nhdplusflowlinevaa_hydroseq,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_maxelevsmo,nhdplusflowlinevaa_minelevraw,nhdplusflowlinevaa_minelevsmo,nhdplusflowlinevaa_objectid,nhdplusflowlinevaa_pathlength,nhdplusflowlinevaa_reachcode,nhdplusflowlinevaa_rtndiv,nhdplusflowlinevaa_slope,nhdplusflowlinevaa_slopelenkm,nhdplusflowlinevaa_startflag,nhdplusflowlinevaa_statusflag,nhdplusflowlinevaa_streamcalc,nhdplusflowlinevaa_streamleve,nhdplusflowlinevaa_streamorde,nhdplusflowlinevaa_terminalfl,nhdplusflowlinevaa_terminalpa,nhdplusflowlinevaa_thinner,nhdplusflowlinevaa_tomeas,nhdplusflowlinevaa_tonode,nhdplusflowlinevaa_totdasqkm,nhdplusflowlinevaa_uphydroseq,nhdplusflowlinevaa_uplevelpat,nhdplusflowlinevaa_vpuid,nhdplusflowlinevaa_vpuin,nhdplusflowlinevaa_vpuout,nhdplusid,objectid,permanent_identifier,reachcode,resolution,shape_length,visibilityfilter,vpuid,wbarea_permanent_identifier",
+            "fr": "enable,fcade,fdate,flowdir,ftype.gnis_id,gnis_name,inntwork,lengthkm,mainpath,nhdplusflowlinevaa_arbolatesu,nhdplusflowlinevaa_areasqkm,nhdplusflowlinevaa_divdasqkm,nhdplusflowlinevaa_divergence,nhdplusflowlinevaa_dndraincou,nhdplusflowlinevaa_dnhydroseq,nhdplusflowlinevaa_dnlevel,nhdplusflowlinevaa_dnlevelpat,nhdplusflowlinevaa_dnminorhyd,nhdplusflowlinevaa_elevfixed,nhdplusflowlinevaa_frommea,nhdplusflowlinevaa_fromnode,nhdplusflowlinevaa_hwnodesqkm,nhdplusflowlinevaa_hwtype,nhdplusflowlinevaa_hydroseq,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_levelpathi,nhdplusflowlinevaa_maxelevsmo,nhdplusflowlinevaa_minelevraw,nhdplusflowlinevaa_minelevsmo,nhdplusflowlinevaa_objectid,nhdplusflowlinevaa_pathlength,nhdplusflowlinevaa_reachcode,nhdplusflowlinevaa_rtndiv,nhdplusflowlinevaa_slope,nhdplusflowlinevaa_slopelenkm,nhdplusflowlinevaa_startflag,nhdplusflowlinevaa_statusflag,nhdplusflowlinevaa_streamcalc,nhdplusflowlinevaa_streamleve,nhdplusflowlinevaa_streamorde,nhdplusflowlinevaa_terminalfl,nhdplusflowlinevaa_terminalpa,nhdplusflowlinevaa_thinner,nhdplusflowlinevaa_tomeas,nhdplusflowlinevaa_tonode,nhdplusflowlinevaa_totdasqkm,nhdplusflowlinevaa_uphydroseq,nhdplusflowlinevaa_uplevelpat,nhdplusflowlinevaa_vpuid,nhdplusflowlinevaa_vpuin,nhdplusflowlinevaa_vpuout,nhdplusid,objectid,permanent_identifier,reachcode,resolution,shape_length,visibilityfilter,vpuid,wbarea_permanent_identifier"
+          }
+        }
+      },
+      "initialSettings": {
+        "visible": true,
+        "extent": [-177.29275972275843, 34.301384132573055, -9.977229778239453, 84.400481529465]
+      },
+      "style": {
+        "LineString": {
+          "styleType": "simple",
+          "label": "Downstream Analysis",
+          "settings": {
+            "type": "lineString",
+            "stroke": {
+              "color": "rgba(255,0,0,1)",
+              "lineStyle": "shortDash-dot-dot"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

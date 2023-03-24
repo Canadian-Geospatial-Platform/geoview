@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Languages</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/><a href="#HLNG1">1. French</a><br/><a href="#HLNG2">2. English</a><br/></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase how the viewer may show different languages</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLNG1">1. French</h4><a class="ref-link" href="#top">Top</a></div><div id="LNG1" class="llwp-map" data-lang="fr" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 6,
+          'center': [-100, 60],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+        ]
+      },
+      'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
+      'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
+      'theme': 'dark',
+      'suportedLanguages': ['fr', 'en']
+    }"></div><p>This map is in French.</p><hr/><div class="map-title-holder"><h4 id="HLNG2">2. English</h4><a class="ref-link" href="#top">Top</a></div><div id="LNG2" class="llwp-map" data-lang="en" data-config="{
+      'map': {
+        'interaction': 'dynamic',
+        'viewSettings': {
+          'zoom': 6,
+          'center': [-100, 60],
+          'projection': 3978
+        },
+        'basemapOptions': {
+          'basemapId': 'transport',
+          'shaded': false,
+          'labeled': true
+        },
+        'listOfGeoviewLayerConfig': [
+        ]
+      },
+      'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
+      'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
+      'theme': 'dark',
+      'suportedLanguages': ['fr', 'en']
+    }"></div><p>This map is in English.</p><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+      cgpv.init(function () {
+        console.log('api is ready');
+
+        const config = `{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'zoom': 6,
+              'center': [-100, 60],
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+            ]
+          },
+          'components': ['overview-map', 'nav-bar', 'app-bar', 'north-arrow', 'footer-bar'],
+          'corePackages': ['layers-panel', 'details-panel', 'basemap-panel'],
+          'theme': 'dark',
+          'suportedLanguages': ['fr', 'en']
+        }`;
+
+        // TODO: Make it work from function call as output of issue #905.
+        // cgpv.api.map('LNG1').loadMapConfig(config);
+        // cgpv.api.map('LNG2').loadMapConfig(config);
+
+        //create snippet
+        createConfigSnippet();
+        createCodeSnippet();
+      });</script></body></html>
