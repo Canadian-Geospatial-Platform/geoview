@@ -60,6 +60,7 @@ import {
 } from './geoview-renderer-types';
 import { Layer } from '../layer/layer';
 import { TypeLayerStyles, TypeStyleRepresentation } from '../layer/geoview-layers/abstract-geoview-layers';
+import { api } from '../../app';
 
 type TypeStyleProcessor = (
   styleSettings: TypeStyleSettings | TypeKindOfVectorSettings,
@@ -1502,9 +1503,10 @@ export class GeoviewRenderer {
 
     try {
       for (let i = 0; i < filterEquation.length; i++) {
-        if (filterEquation[i].nodeType === NodeType.variable)
-          dataStack.push({ nodeType: NodeType.variable, nodeValue: feature.get(filterEquation[i].nodeValue as string) });
-        else if ([NodeType.string, NodeType.number, NodeType.null].includes(filterEquation[i].nodeType)) dataStack.push(filterEquation[i]);
+        if (filterEquation[i].nodeType === NodeType.variable) {
+          const fieldValue = feature.get(filterEquation[i].nodeValue as string);
+          dataStack.push({ nodeType: NodeType.variable, nodeValue: fieldValue || null });
+        } else if ([NodeType.string, NodeType.number].includes(filterEquation[i].nodeType)) dataStack.push(filterEquation[i]);
         else if (filterEquation[i].nodeType === NodeType.group)
           if (filterEquation[i].nodeValue === '(') {
             operatorStack.push(filterEquation[i]);
@@ -1521,6 +1523,14 @@ export class GeoviewRenderer {
             }
           }
         else {
+          // Validate the UPPER and LOWER syntaxe (i.e.: must be followed by an opening parenthesis)
+          if (
+            ['upper', 'lower'].includes(filterEquation[i].nodeValue as string) &&
+            (filterEquation.length === i + 1 ||
+              (filterEquation[i + 1].nodeType !== NodeType.group && filterEquation[i + 1].nodeValue !== '('))
+          )
+            throw new Error(`Invalid vector layer filter (${(filterEquation[i].nodeValue as string).toUpperCase()} syntax error).`);
+
           for (
             let operatorOnTop2 = operatorAt(-1, operatorStack);
             operatorOnTop2 && operatorOnTop2.nodeValue !== '(' && findPriority(operatorOnTop2) > findPriority(filterEquation[i]);
@@ -1571,35 +1581,63 @@ export class GeoviewRenderer {
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === null });
             break;
           case '=':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`= operator error, must compare same types`);
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === operande2.nodeValue });
+            if (operande1.nodeValue === null || operande2.nodeValue === null)
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue === operande2.nodeValue });
             break;
           case '<':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`< operator error, must compare same types`);
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue < operande2.nodeValue });
+            if (operande1.nodeValue === null || operande2.nodeValue === null)
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue < operande2.nodeValue });
             break;
           case '>':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`> operator error, must compare same types`);
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue > operande2.nodeValue });
+            if (operande1.nodeValue === null || operande2.nodeValue === null)
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue > operande2.nodeValue });
             break;
           case '<=':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`<= operator error, must compare same types`);
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue <= operande2.nodeValue });
+            if (operande1.nodeValue === null || operande2.nodeValue === null)
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue <= operande2.nodeValue });
             break;
           case '>=':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`>= operator error, must compare same types`);
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue >= operande2.nodeValue });
+            if (operande1.nodeValue === null || operande2.nodeValue === null)
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue >= operande2.nodeValue });
             break;
           case '<>':
-            if (typeof operande1.nodeValue !== typeof operande2.nodeValue) throw new Error(`!= operator error, must compare same types`);
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue !== operande2.nodeValue });
+            if (operande1.nodeValue === null || operande2.nodeValue === null)
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue !== operande2.nodeValue });
             break;
           case 'and':
-            if (typeof operande1.nodeValue !== 'boolean' || typeof operande2.nodeValue !== 'boolean') throw new Error(`and operator error`);
+            if (
+              (operande1.nodeValue === null && (operande2.nodeValue === null || operande2.nodeValue === true)) ||
+              (operande1.nodeValue === true && operande2.nodeValue === null)
+            )
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else if (
+              (operande1.nodeValue === null && operande2.nodeValue === false) ||
+              (operande1.nodeValue === false && operande2.nodeValue === null)
+            )
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: false });
+            else if (typeof operande1.nodeValue !== 'boolean' || typeof operande2.nodeValue !== 'boolean')
+              throw new Error(`and operator error`);
             else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue && operande2.nodeValue });
             break;
           case 'or':
-            if (typeof operande1.nodeValue !== 'boolean' || typeof operande2.nodeValue !== 'boolean') throw new Error(`or operator error`);
+            if (
+              (operande1.nodeValue === null && (operande2.nodeValue === null || operande2.nodeValue === false)) ||
+              (operande1.nodeValue === false && operande2.nodeValue === null)
+            )
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+            else if (
+              (operande1.nodeValue === null && operande2.nodeValue === true) ||
+              (operande1.nodeValue === true && operande2.nodeValue === null)
+            )
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: true });
+            else if (typeof operande1.nodeValue !== 'boolean' || typeof operande2.nodeValue !== 'boolean')
+              throw new Error(`or operator error`);
             else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande1.nodeValue || operande2.nodeValue });
             break;
           case '+':
@@ -1673,11 +1711,23 @@ export class GeoviewRenderer {
             if (typeof operande.nodeValue !== 'boolean') throw new Error(`not operator error`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: !operande.nodeValue });
             break;
+          case 'u-':
+            if (typeof operande.nodeValue !== 'number') throw new Error(`unary - operator error`);
+            dataStack.push({ nodeType: NodeType.variable, nodeValue: -operande.nodeValue });
+            break;
           case 'u+':
+            if (typeof operande.nodeValue !== 'number') throw new Error(`unary + operator error`);
             dataStack.push({ nodeType: NodeType.variable, nodeValue: operande.nodeValue });
             break;
-          case 'u-':
-            dataStack.push({ nodeType: NodeType.variable, nodeValue: -operande.nodeValue });
+          case 'upper':
+            if (operande.nodeValue === null) dataStack.push(operande);
+            else if (typeof operande.nodeValue !== 'string') throw new Error(`UPPER operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande.nodeValue.toUpperCase() });
+            break;
+          case 'lower':
+            if (operande.nodeValue === null) dataStack.push(operande);
+            else if (typeof operande.nodeValue !== 'string') throw new Error(`LOWER operator error`);
+            else dataStack.push({ nodeType: NodeType.variable, nodeValue: operande.nodeValue.toLowerCase() });
             break;
           default:
             throw new Error(`unknoown operator error`);
@@ -1710,6 +1760,8 @@ export class GeoviewRenderer {
     )
       throw new Error(`unbalanced parentheses`);
 
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'upper', /^upper\b| upper\b| upper$|^upper$\//gi);
+    resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'lower', /^lower\b| lower\b| lower$|^lower$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'is not', /^is not\b| is not\b| is not$|^is not$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'is', /^is\b| is\b| is$|^is$\//gi);
     resultingKeywordArray = this.extractKeyword(resultingKeywordArray, 'in', /^in\b| in\b| in$|^in$\//gi);
@@ -1847,8 +1899,10 @@ export class GeoviewRenderer {
               node.nodeType = NodeType.unary;
               node.nodeValue = `u${node.nodeValue}`;
             }
-          else if (node.nodeValue === 'null') node.nodeType = NodeType.null;
-          else {
+          else if (typeof node.nodeValue === 'string' && node.nodeValue.toLowerCase() === 'null') {
+            node.nodeType = NodeType.variable;
+            node.nodeValue = null;
+          } else {
             node.nodeType = NodeType.variable;
           }
           return node;
