@@ -386,7 +386,7 @@ export class Layer {
    * @returns the found layer data object
    */
   getGeoviewLayerById = (geoviewLayerId: string): AbstractGeoViewLayer | null => {
-    return this.geoviewLayers[geoviewLayerId];
+    return this.geoviewLayers?.[geoviewLayerId] || null;
   };
 
   /**
