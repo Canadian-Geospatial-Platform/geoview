@@ -162,8 +162,8 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   const mapConfig = useContext(MapContext);
   const { mapId } = mapConfig;
   // check if layer is a vectorlayer, so that clustering can be toggled
-  const vectorLayers = { esriFeature: '', GeoJSON: '', GeoPackage: '', ogcFeature: '', ogcWfs: '' };
-  const canCluster = geoviewLayerInstance.type in vectorLayers;
+  const vectorLayers = ['esriFeature', 'GeoJSON', 'GeoPackage', 'ogcFeature', 'ogcWfs'];
+  const canCluster = vectorLayers.includes(geoviewLayerInstance?.type);
   const [isClusterToggleEnabled, setIsClusterToggleEnabled] = useState(false);
   const [isChecked, setChecked] = useState(true);
   const [isOpacityOpen, setOpacityOpen] = useState(false);
@@ -195,18 +195,19 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       }
     } else if (
       geoviewLayerInstance?.listOfLayerEntryConfig &&
-      (geoviewLayerInstance?.listOfLayerEntryConfig.length > 1 || layerEntryIsGroupLayer(geoviewLayerInstance.listOfLayerEntryConfig[0]))
+      (geoviewLayerInstance?.listOfLayerEntryConfig.length > 1 || layerEntryIsGroupLayer(geoviewLayerInstance?.listOfLayerEntryConfig[0]))
     ) {
-      setGroupItems(geoviewLayerInstance.listOfLayerEntryConfig);
+      setGroupItems(geoviewLayerInstance?.listOfLayerEntryConfig);
       isGroup = true;
     }
     return isGroup;
   };
 
   const getLegendDetails = () => {
-    geoviewLayerInstance?.getLegend(subLayerId).then((layerLegend) => {
+    if (!geoviewLayerInstance) return;
+    geoviewLayerInstance.getLegend(subLayerId).then((layerLegend) => {
       const { geoviewLayerId } = geoviewLayerInstance;
-      if (layerLegend) {
+      if (layerLegend?.legend) {
         // WMS layers just return a string
         if (isWmsLegend(layerLegend)) {
           setIconType('simple');
@@ -286,7 +287,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       } else if (t('legend.unknown')) {
         setLayerName(t('legend.unknown')!);
       }
-    } else if (geoviewLayerInstance && geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
+    } else if (geoviewLayerInstance?.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
       setLayerName(geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
     } else if (t('legend.unknown')) {
       setLayerName(t('legend.unknown')!);
@@ -299,7 +300,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     if (!isGroup) {
       getLegendDetails();
     }
-    setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
+    if (geoviewLayerInstance) setOpacity(geoviewLayerInstance.getOpacity() ?? 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -312,6 +313,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   }, [hideAll]);
 
   useEffect(() => {
+    if (!geoviewLayerInstance) return;
     if (layerConfigEntry) {
       if (isParentVisible && isChecked) {
         geoviewLayerInstance.setVisible(true, layerConfigEntry);
@@ -368,6 +370,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
     handleCloseMenu();
   };
   const handleSetOpacity = (opacityValue: number | number[]) => {
+    if (!geoviewLayerInstance) return;
     if (subLayerId) geoviewLayerInstance.setOpacity((opacityValue as number) / 100, subLayerId);
     else geoviewLayerInstance.setOpacity((opacityValue as number) / 100);
   };
@@ -408,7 +411,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
   }, [iconList, iconType]);
 
   useEffect(() => {
-    const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector).activeLayer
+    const source = (api.map(mapId).layer.getGeoviewLayerById(layerId) as AbstractGeoViewVector)?.activeLayer
       ?.source as TypeVectorSourceInitialConfig;
     setIsClusterToggleEnabled(source?.cluster?.enable ?? false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
