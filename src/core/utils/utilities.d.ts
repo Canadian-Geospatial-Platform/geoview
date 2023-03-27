@@ -65,6 +65,20 @@ export declare function addUiComponent(targetDivId: string, component: React.Rea
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
 /**
+ * Removes comments from JSON config
+ *
+ * @param {string} config Map config to clean
+ * @returns {string} cleaned config object
+ */
+export declare function removeCommentsFromJSON(config: string): string;
+/**
+ * Parses JSON config
+ *
+ * @param {string} configObjStr Map config to parse
+ * @returns {any} cleaned and parsed config object
+ */
+export declare function parseJSONConfig(configObjStr: string): any;
+/**
  * Export the map as a PNG
  * @param {string} mapId Id of map to export
  */
