@@ -16,177 +16,69 @@
   </head>
   <body>
     <div
-      id="LYR1"
-      class="llwp-map"
-      data-lang="en"
-      data-config="{
-      'map': {
-        'interaction': 'dynamic',
-        'viewSettings': {
-          'zoom': 4,
-          'center': [-100, 60],
-          'projection': 3978
-        },
-        'basemapOptions': {
-          'basemapId': 'transport',
-          'shaded': false,
-          'labeled': true
-        },
-        'listOfGeoviewLayerConfig': [
-          {
-            'geoviewLayerId': 'wmsLYR1-Root',
-            'geoviewLayerName': { 'en': 'QGis Test' },
-            'metadataAccessPath': { 'en': 'https://qgis-stage.services.geo.ca/dev/nrcan/landcover_2010_15_20_en' },
-            'geoviewLayerType': 'ogcWms',
-            'listOfLayerEntryConfig': [
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=1',
-                'source': {
-                  'style': '1',
-                  'serverType': 'qgis'
+    id="LYR1"
+    class="llwp-map"
+    style='height:100vh'
+    data-lang="en"
+    data-config="{
+        'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+                'zoom': 4,
+                'minZoom': 2,
+                'maxZoom': 12,
+                'center': [-100, 60],
+                'projection': 3978
+            },
+            'basemapOptions': {
+                'basemapId': 'simple',
+                'shaded': true,
+                'labeled': false
+            },
+            'listOfGeoviewLayerConfig': [
+                {
+                    'geoviewLayerId': 'ogcFeatureLYR1',
+                    'geoviewLayerName': {
+                        'en': 'MProjects Inv Points'
+                    },
+                    'metadataAccessPath': {
+                        'en': 'https://demo.pygeoapi.io/master'
+                    },
+                    'geoviewLayerType': 'ogcFeature',
+                    'listOfLayerEntryConfig': [
+                        {
+                            'layerId': 'obs'
+                        }
+                    ]
+                },
+                {
+                    'geoviewLayerId': 'ogcFeatureLYR2',
+                    'geoviewLayerName': {
+                        'en': 'MProjects Inv Lines'
+                    },
+                    'metadataAccessPath': {
+                        'en': 'https://demo.pygeoapi.io/master'
+                    },
+                    'geoviewLayerType': 'ogcFeature',
+                    'listOfLayerEntryConfig': [
+                        {
+                            'layerId': 'obs'
+                        }
+                    ]
                 }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=2',
-                'source': {
-                  'style': '2'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=3',
-                'source': {
-                  'style': '3'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=4',
-                'source': {
-                  'style': '4'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=5',
-                'source': {
-                  'style': '5'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=6',
-                'source': {
-                  'style': '6'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=7',
-                'source': {
-                  'style': '7'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=8',
-                'source': {
-                  'style': '8'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=9',
-                'source': {
-                  'style': '9'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=10',
-                'source': {
-                  'style': '10'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=11',
-                'source': {
-                  'style': '11'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=12',
-                'source': {
-                  'style': '12'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=13',
-                'source': {
-                  'style': '13'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=14',
-                'source': {
-                  'style': '14'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=15',
-                'source': {
-                  'style': '15'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=16',
-                'source': {
-                  'style': '16'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=17',
-                'source': {
-                  'style': '17'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=18',
-                'source': {
-                  'style': '18'
-                }
-              },
-              {
-                'layerId': 'landcover_2015_19classes',
-                'layerPathEnding': 'style=19',
-                'source': {
-                  'style': '19'
-                }
-              }
             ]
-          }
-        ]
-      },
-      'components': ['overview-map', 'nav-bar', 'footer-bar'],
-      'corePackages': [],
-      'theme': 'dark',
-      'suportedLanguages': ['en']
-    }"
-    ></div>
+        },
+        'theme': 'dark',
+        'components': ['app-bar', 'nav-bar', 'north-arrow', 'overview-map', 'footer-bar'],
+        'corePackages': ['layers-panel'],
+        'suportedLanguages': ['en']
+        }"
+    >
+    </div>
     <button class="Get-Legend">Get Legend</button>
     <div id="legend-table-div"></div>
     <button type="button" class="collapsible">Get Feature Info</button>
-    <pre style="height: 20pc; overflow-y: scroll" id="wmsResultSetId" class="panel">Click on feature on the map</pre>
+    <pre style="height: 20pc; overflow-y: scroll" id="ResultSetId" class="panel">Click on feature on the map</pre>
     <hr />
     <button type="button" class="collapsible">Configuration Snippet</button>
     <pre id="LYR1CS" class="panel"></pre>
@@ -200,34 +92,33 @@
         createCodeSnippet();
         createConfigSnippet();
         // showBoundsFunction();
+        // ======================================================================================================================
+        const featureInfoLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'ResultSetId');
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
+          (payload) => {
+            const { layerSetId, resultSets } = payload;
+            document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
+          },
+          'LYR1/ResultSetId'
+        );
+
+        const LegendsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'LegendsId');
+        cgpv.api.event.on(
+          cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
+          (payload) => {
+            const { resultSets } = payload;
+            displayLegend('LegendsId', resultSets);
+          },
+        'LYR1/LegendsId'
+        );
+
+        var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
+        addGeoJsonLegendButton.addEventListener('click', function (e) {
+          cgpv.api.event.emit({ handlerName: 'LYR1/LegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
+        });
       });
-      // WMS ======================================================================================================================
-      const featureInfoWmsLayerSet = cgpv.api.createFeatureInfoLayerSet('LYR1', 'wmsResultSetId');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_FEATURE_INFO.ALL_QUERIES_DONE,
-        (payload) => {
-          const { layerSetId, resultSets } = payload;
-          document.getElementById(layerSetId).textContent = JSON.stringify(resultSets, undefined, 2);
-        },
-        'LYR1/wmsResultSetId'
-      );
-
-      const LegendsWmsLayerSet = cgpv.api.createLegendsLayerSet('LYR1', 'wmsLegendsId');
-      cgpv.api.event.on(
-        cgpv.api.eventNames.GET_LEGENDS.ALL_LEGENDS_DONE,
-        (payload) => {
-          const { resultSets } = payload;
-          displayLegend('wmsLegendsId', resultSets);
-        },
-       'LYR1/wmsLegendsId'
-      );
-
-      var addGeoJsonLegendButton = document.getElementsByClassName('Get-Legend')[0];
-      addGeoJsonLegendButton.addEventListener('click', function (e) {
-        cgpv.api.event.emit({ handlerName: 'LYR1/wmsLegendsId', event: cgpv.api.eventNames.GET_LEGENDS.TRIGGER });
-      });
-
-      // ==========================================================================================================================
+      // ========================================================================================================================
       function displayLegend(layerSetId, resultSets) {
         const addHeader = (title, container) => {
           const tableHeader = document.createElement('th');
@@ -269,10 +160,10 @@
             const visibilityFlag = true;
             showHideButton.innerText = 'Hide';
             showHideButton.addEventListener('click', function (e) {
-              const visibilityFlag = !cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-Root'].getVisible(layerPath);
+              const visibilityFlag = !cgpv.api.maps.LYR1.layer.geoviewLayers['LYR1-Root'].getVisible(layerPath);
               if (visibilityFlag) showHideButton.innerText = 'Hide';
               else showHideButton.innerText = 'Show';
-              cgpv.api.maps.LYR1.layer.geoviewLayers['wmsLYR1-Root'].setVisible(visibilityFlag, layerPath);
+              cgpv.api.maps.LYR1.layer.geoviewLayers['LYR1-Root'].setVisible(visibilityFlag, layerPath);
             });
             addData(showHideButton, tableRow);
             table.appendChild(tableRow);

@@ -508,9 +508,19 @@
           "description": "The type of the remote WMS server. The default value is mapserver."
         },
         "style": {
-          "type": "string",
-          "default": "",
-          "description": "Style to apply"
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Single style to apply"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of style to choose."
+            }
+          ]
         }
       }
     },
@@ -1156,7 +1166,8 @@
           "type": "string",
           "description": "An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server or an absolute path on a server which sets CORS headers."
         }
-      }
+      },
+      "required": ["keys"]
     },
 
     "TypeDisplayLanguage": {
@@ -1201,7 +1212,7 @@
         "externalPackages": { "$ref": "#/definitions/TypeExternalPackages" },
         "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
         "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
-        "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
+        "schemaVersionUsed": { "$ref": "#/definitions/TypeValidVersions" }
       },
       "required": ["map", "suportedLanguages"]
     }
@@ -1221,7 +1232,7 @@
     "externalPackages": { "$ref": "#/definitions/TypeExternalPackages" },
     "serviceUrls": { "$ref": "#/definitions/TypeServiceUrls" },
     "suportedLanguages": { "$ref": "#/definitions/TypeListOfLocalizedLanguages" },
-    "versionUsed": { "$ref": "#/definitions/TypeValidVersions" }
+    "schemaVersionUsed": { "$ref": "#/definitions/TypeValidVersions" }
   },
   "required": ["map", "suportedLanguages"]
 }
