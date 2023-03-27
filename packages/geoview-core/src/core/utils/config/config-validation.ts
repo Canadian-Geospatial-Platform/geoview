@@ -81,7 +81,7 @@ export class ConfigValidation {
     displayLanguage: 'en',
     triggerReadyCallback: false,
     suportedLanguages: ['en', 'fr'],
-    versionUsed: '1.0',
+    schemaVersionUsed: '1.0',
   };
 
   // valid basemap ids
@@ -210,7 +210,7 @@ export class ConfigValidation {
    * @returns {TypeValidVersions} A valid version.
    */
   validateVersion(version?: TypeValidVersions): TypeValidVersions {
-    return version && VALID_VERSIONS.includes(version) ? version : this._defaultMapFeaturesConfig.versionUsed!;
+    return version && VALID_VERSIONS.includes(version) ? version : this._defaultMapFeaturesConfig.schemaVersionUsed!;
   }
 
   /** ***************************************************************************************************************************
@@ -744,7 +744,7 @@ export class ConfigValidation {
     const center = this.validateCenter(projection, tempMapFeaturesConfig?.map?.viewSettings?.center);
     const zoom = this.validateZoom(tempMapFeaturesConfig?.map?.viewSettings?.zoom);
     const basemapOptions = this.validateBasemap(projection, tempMapFeaturesConfig?.map?.basemapOptions);
-    const versionUsed = this.validateVersion(tempMapFeaturesConfig.versionUsed);
+    const schemaVersionUsed = this.validateVersion(tempMapFeaturesConfig.schemaVersionUsed);
     const minZoom = this.validateMinZoom(tempMapFeaturesConfig?.map?.viewSettings?.minZoom);
     const maxZoom = this.validateMaxZoom(tempMapFeaturesConfig?.map?.viewSettings?.maxZoom);
 
@@ -771,7 +771,7 @@ export class ConfigValidation {
       displayLanguage: this._displayLanguage,
       appBar: tempMapFeaturesConfig.appBar,
       externalPackages: tempMapFeaturesConfig.externalPackages,
-      versionUsed,
+      schemaVersionUsed,
     };
     this.logModifs(tempMapFeaturesConfig, validMapFeaturesConfig);
 
