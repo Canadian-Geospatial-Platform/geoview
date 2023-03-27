@@ -872,17 +872,13 @@ export type TypeMapFeaturesInstance = {
   /** List of external packages. */
   externalPackages?: TypeExternalPackages;
   /** Service URLs. */
+  // ?: Is this attribute realy needed, it is used nowhere in our code. If you delete it, update the doc (docs\app\map-config\README.md)
   serviceUrls?: TypeServiceUrls;
   /**
    * ISO 639-1 code indicating the languages supported by the configuration file. It will use value(s) provided here to
-   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value..
+   * access bilangual configuration nodes. For value(s) provided here, each bilingual configuration node MUST provide a value.
    * */
   suportedLanguages: TypeListOfLocalizedLanguages;
-  /**
-   * The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by
-   * this version of the viewer.
-   */
-  versionUsed?: '1.0';
 };
 
 /* *******************************************************************************************************************************
@@ -923,7 +919,7 @@ export type TypeMapConfig = {
 };
 
 /** ******************************************************************************************************************************
- *  Definition of the valid map interactiom valuess. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
+ *  Definition of the valid map interactiom values. If map is dynamic (pan/zoom) or static to act as a thumbnail (no nav bar).
  */
 export type TypeInteraction = 'static' | 'dynamic';
 /** Constante mainly use for interaction validation. */
@@ -1018,7 +1014,7 @@ export type TypeAppBarProps = {
 };
 
 /** ******************************************************************************************************************************
- * Controls availalbe on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
+ * Controls available on the navigation bar. Default = ['zoom', 'fullscreen', 'fullextent'].
  */
 export type TypeNavBarProps = Array<'zoom' | 'fullscreen' | 'fullextent'>;
 
@@ -1047,6 +1043,7 @@ export type TypeExternalPackages = {
   configUrl?: string;
 }[];
 
+// ?: Is this type realy needed, it is used nowhere in our code.
 /** ******************************************************************************************************************************
  * Service endpoint urls. Default = 'https://geocore.api.geo.ca'.
  */
@@ -1055,10 +1052,11 @@ export type TypeServiceUrls = {
    * Service end point to access API for layers specification (loading and plugins parameters). By default it is GeoCore but can
    * be another endpoint with similar output.
    */
+  // ?: key or keys - The description only talk about a single service endpoint and the type is not an array but a string.
   keys: string;
   /**
    * An optional proxy to be used for dealing with same-origin issues.  URL must either be a relative path on the same server
    * or an absolute path on a server which sets CORS headers.
    */
-  proxyUrl: string;
+  proxyUrl?: string;
 };

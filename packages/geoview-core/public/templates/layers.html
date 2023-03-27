@@ -253,400 +253,44 @@
               'labeled': true
             },
             'listOfGeoviewLayerConfig': [
-              {
-                'geoviewLayerId': 'HistoricalFlood',
-                'geoviewLayerName': { 'en': 'Historical Flood' },
-                'metadataAccessPath': { 'en': 'https://euclgis.reg.rw/server/rest/services/Electrical_Trans_Distr_Network/MapServer' },
-                'geoviewLayerType': 'esriDynamic',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '1'
-                  }
-                ]
+            {
+              'geoviewLayerId': 'uniqueValueId',
+              'geoviewLayerName': { 'en': 'uniqueValue' },
+              'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '1'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'historical-flood',
+              'geoviewLayerName': { 'en': 'Historical Flood Events (HFE)' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer'
               },
-              {
-                'geoviewLayerId': 'uniqueValueId',
-                'geoviewLayerName': { 'en': 'uniqueValue' },
-                'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/' },
-                'geoviewLayerType': 'esriDynamic',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '1',
-                    'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\'',
-                    'style': {
-                      'Point': {
-                        'styleId': 'uniqueValueId',
-                        'defaultLabel': 'Regulated, Yearly, Normal',
-                        'styleType': 'uniqueValue',
-                        'defaultSettings': {
-                          'mimeType': 'image/png',
-                          'offset': [0, 0],
-                          'opacity': 1,
-                          'rotation': 0,
-                          'src': 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAUhJREFUOI2d0z1Lw1AUBuD3hppCLSo4iLg6dFZBEYtZQgeFgB+jrSIEQXSxFUIFg1jTYhBHyWITEVwDOhXUSVz8Bf4DcahgBxtvrkNrIbamSd/tXM557llOBAGiGQtxRb779OuJdEOUm9UY+6o+6KYkZDN2rWdooF7dZ6BTdXzsATjqCSpaqTGXOblGxeVUc/JCzby8hYZc5pwAiDXLOM8GDwFsh4KOy8kJAGueRwK5cDl7nt94eg0MEdJ3BoC09XO8BmAlEFQwhSUCzHf8ANyyVhZnlPXKsy+0a4An4Er/bQoAjNBTAElfaCQq7gB03A8CMKdZgqSkH+2OUMmaHqaMHnRBGlsxrmgYuJVl0DboG/0qAYaCQAAS71FxE6gYHki7SiWY62wFRJqhqm5K19mMXWtBLnN0EuBk/mT093Rag/n0/WJIxJMfY79g/IvbH/IAAAAASUVORK5CYII=',
-                          'type': 'iconSymbol'
-                        },
-                        'defaultVisible': 'always',
-                        'fields': ['E_Regulated', 'E_SampleType', 'E_Overall_Condition'],
-                        'uniqueValueStyleInfo': [
-                          {
-                            'label': 'Natural, Seasonal, High',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/Tp8+fwO/cf273/+FmckZHxn6iQwBMVJbldXJyc27Bq/P//v8jVm3cmtUxf7rX+3nN+ZEVJ+srhd+8/3KikIFfMyMj4Fa7x////zBeu3JjuXDM55Ou//xjOmnfxrsS+8t7Uze1FLAwMDClwjU+fv0irmLzYH5smGHjw/TdTz7yVIe/ef9wiJMi/gYWBgYHhxp2HXgeev2dFVtjhb8Pw7dtPhqbdp+FiCy894E+4cz+IgYEBovHDp88qyJpmxngwxIf5wfnImt+9f68Ed+rff3/ZkTVycnDA2dxcHMhSDH/+/WeHa+Tm5HzJwMCgCJMsW7SZgYmZkeHHj18M5RsPo2jk4eJ+DdcoKSZyQoeX0+LK5+8MDAwMDC9+/WWImbkeI4D85MUZJMWED8A1qirKVjUlBvgETVqugqEa5mQmRoacKO9zWurKPXCNfHx8389evha5Njd8bfPCLXIXPn1F0eQgLshQGut7XUREOJCRkfEfXCMDAwODsa7WmQOnT+t150VMevn6ne33bz+kGBgZ/3FzcTyUEBXZxcb4p0RbTek3TD1KWnUwNf3IwMAQj8u5yAAAupehfivnXOEAAAAASUVORK5CYII=',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Natural', 'Seasonal', 'High'],
-                            'visible': 'yes'
-                          },
-                          {
-                            'label': 'Natural, Seasonal, Low',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcNJREFUKJFjYSATsCBz/v//z/T986fw1w/u2n379EGckZHxH7eg8BMxRZVd7Jxc27Bq/P//v8izW9cmHZ/Z5vX14RF+ZEVC2j7hLx/c3Sgmr1TMyMj4Fa7x////zI+vXpp+oDE45P+/3xjOend1i8Su6hOprs3LWRgYGFLgGj88f5p2fFqNPzZNMPDvxxumU/MnhHx5/24Lj6DQBhYGBgaGF3dvev14eYkVWaGCVxHD7+/fGJ7unwEXe39tK/+re3FBDAwMEI3fP71XQdakEd7MYBYay8DAwMCwl4EBRfOXd2+UEH78958dJcQ4OeBsVi5uFCf///uXHa6RjYPrJQMDgyJM8trSRgZGJiaGPz9+MDzY2ouikZ2H9zVcI6+YxAkWHjmLP18eQQLi9xeGy/OKMQKIW86SgVdU/ABco5CiapVebKXPuemZKhiqoYCRiZVBLyzrnJSaVg9cIx8f3/cHly9EGmZMW3tlabfc78/3UTRxiOkx6EUWXOcVFg5kZGT8B9fIwMDAoKBrcObe6QN6ppnNkz6/fmn7+8d3KUYGhn+sXNwPeUUldnEzsJZIqmnDIxolrSqZOnxkYGCIx+VcZAAA8GKiZ9d12dAAAAAASUVORK5CYII=',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Natural', 'Seasonal', 'Low'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Natural, Seasonal, Normal',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAcdJREFUKJFjYSATsCBz/v//z/Tt++fwZ6/v2X359lGckZHxHx+34BNJMZVdnOyc27Bq/P//v8iDZzcm7Tg+yev915v8yIokhMzCn768v1FKTKGYkZHxK1zj////me8+vjx99YHikP///2I468W7UxJLd11NjXTtZ2FgYEiBa3zz4WnaluO9/tg0wcCff1+Zdp+aFfLpy/stfDyCG1gYGBgYnry46/Xtx2NWZIW6CmEMP39/Y7j1dAvC5vdn+J+8uh3EwMAA0fjl+0cVZE1mGqkMzmYRDAwMDAxr9zKgaP785Z0Skh//siNrZGPhgLPZWblRnPz3/z92uEZ2Ns6XDAwMijDJo9dmMTAyMjH8/vOD4fKDlSgaOdm5X8M1CvJKnGBl4bf4/ecjAwMDA8P/fz8ZDl+eiBFAAtyqDIK84gfgGiWElKrs9TJ99pzrUMFQDQWMjMwMNnpx5+Sl1HvgGvn4+L7ffnA50tmwbO3hK7Plfv1+j6KJi0OawV4v+bogr2ggIyPjP7hGBgYGBlUF3TNX7x3QczMtnvTh82vb37+/STEwMv7jYOV+KMArtusbN1OJrKTab5h6lLSqreTwkYGBIR6Xc5EBAG+8pa3DWR79AAAAAElFTkSuQmCC',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Natural', 'Seasonal', 'Normal'],
-                            'visible': 'always'
-                          },
-                          {
-                            'label': 'Natural, Yearly, High',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAARhJREFUKJGNjzFLQlEYhp8OR45xaUgiIqcgEhpqb2toaFAbpTEuQTch15qD5ooEwR/QrnDr+gPammsMg7hgDsHBjtm5DXrFwbo948fzvnyvJKZUms305g/1gCKCLNABGxhHXXN71Y01CbBaPFppa3wNOcS4Yg3EltJfZfJewTSqD8OA66p2ONOEKMd0FiBqsuNu0qq/ykyYOtBE67/IMRnSqTPAkxoKCTIACvYMeBLI/icALAFCYulMDP2LLmAl2ADEdpLtwJ0BpOl/V1ValBNe+1R9ew4gadU/nN3jgpbWBxanyD2D3X+7rz0NA0DXv3kkf7KhbP/UCIoKloF3BxvMDcTFi197jtNy3NO4DA1UgIoZncxo6SQ//xRZVbXMk6kAAAAASUVORK5CYII=',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Natural', 'Yearly', 'High'],
-                            'visible': 'yes'
-                          },
-                          {
-                            'label': 'Natural, Yearly, Low',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAASFJREFUKJGNkb1KA0EURs8Mw0YRLUREDLgIYsBCezsLSxMbgwSUJYiFpLDVWvABBAsLiVaSYGUgIXkAO7E0vbAIyUaMouyQGQt3u/x44MKF73zc4ioirnYZd7R7KCQZDEkIW9ZQdxL+Re6OIPYUwE1maRGtq0AKE0fOspCsa+0WbrNj6f1S8xFA3R+Q+OzoCpCiPzO216sUs6k1r9R8Vd22mxeSlQFyhJ6WVp8CR0pI0sPlPyxsx4WkNSN9MMw1QCoLrf9cgDDYBKMEYd3ibIwuTNQAlHn3L8WUWwCSQ+wfKb/OAJTX4KO4000LM1kFZvvI31aGub2y/wLR47xy8HS9tbCqnM6JhQwwj6RtCevgnHtlvxm3VbzkH57fgONoBvILJileSF2zp2AAAAAASUVORK5CYII=',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Natural', 'Yearly', 'Low'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Natural, Yearly, Normal',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAARxJREFUKJGNkS1IQ2EUQM/99u2vioj4ksWBQbuwoLDoZpSB8lgwyIJN3hBEnA6TQTAYZNpNDqZ7UdBm1m5QmQsqvjF57zNsr21uBy5cLuekq+mxe7aajMVeN0RUDgILVNOYoNGJdU728vet0NMABxfpaeG9DirVPSuAGRG1EP9NFA8vM9nSuvsAoI+viHvf0RqQoj/jGL9WqWbmHdt90d7XUgFhdoAcMmaUXwI2NUJ2iNzFsBIGFmakZBIXpTE0R9KhRYZAi9AwhsVhtsANgP4JIqdJ8YuA9Y/fRkXLAHrfdj/L1XRWSaIO/kQf2RMT5J212yfoPW7Hvns8Ol+eC3TbMcbPAVPAh5hIA3TFsevPYa3DZbtw/QZs9WYgf/xmWAwLz4rrAAAAAElFTkSuQmCC',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Natural', 'Yearly', 'Normal'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Regulated, Seasonal, High',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAABMAAAAQCAYAAAD0xERiAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAf5JREFUOI2t01tI02EYBvDnrT+EmC6KYCRBglFRmJ02VlgRSqAUHUCQZY68GQ2vJGdIkHiRdNE06DAG9u8gxoJpRxJ3EQqaMYpS2VAqaqsVxGyWOmXu6WoyXbFmPXffw8vve/ngU/Afo6QaICnR6Ox1RVlqFhH+EzY9M1P1qLunuKSosBKAumiMpGbIN1putLtyX67PrSDpFJHJRWE/Jybr6mw3DQDQcKVN33rhTA2AxrQxkhvdPf2F7mAoAwDuv/+S+XrYV0zyhogE0sJCY+Hak81tuxM7y6Xbhmf2PCuA6r/GSB5qaW0vCEVjkth7JyKKu3dgB0m9iAykxEgu838KGq2dvdu2ZGXgak0l1uZo0ed5A6PdBaPdZdhn2HkaQGpsNhYzn2tR9QBw3nQYuu35AIDjpUXwDI7A1jcER3tnPskyEXH+ESOZ82rQu/euz78OALKXZ867aPUqDQCgoetFwYmjB4+QfCgiU7/FpiLT1aeaHAfi51sP3Ni6eQM02VkYffcBl7uez83WN6u71CarGYAtCSO5597j7k3eH5EV8e7O8Ec8MZ2FTrsSTwPf5m3p9Pnzakfe6kiuEZHPcxjJJd/D4+UV9o6ShW8YisaSoHhMjdf296sXLQDqEzerCgS/ljotZSn/6oJox8Ljx0h2iIhHAQARcQBwpAkl5ReILNJbf8Z/egAAAABJRU5ErkJggg==',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Regulated', 'Seasonal', 'High'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Regulated, Seasonal, Low',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAABMAAAAQCAYAAAD0xERiAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAf1JREFUOI2t009Ik2EcB/Dvr15o/dOikNKIJA+KJZOwtaKQwkNWJB4KsfAg1SglcJFBhAeRCIqoJhivTA8eQpAOZhCMkQ4Ra2nN0mrQPzdrHZyTNt9qr99OjumKNet7e378+DxfHngU/McoyRZIih6NtixVFIuI8J8w/cf36hFHT0n+gYNVANoXjZFM9795VeGx12Vn5OSeJNkpIpFFYVokfKn/1hUzAAzcbTIdblStABpTxkjmjvU59mpfh5YDQPhj/0rf6IsSkm0i4ksJ+xacvOhurtkdPxu8fcG8sflhPYDav8ZIHnG124zUNYmfRyN+5a3LsYOkSUQGk2Ikl036xyvfP7heqKzaDPP5G1ibuQkfng3AY6+Dx241b91VfBZAcmx2Vrf02RpMALD9RD2yC4sAAMbScgReDiHwpANP76kFJI+JSOcfMZJZn0aG9017nVsAwLA6bd5FhnXrAQA+Z4sxWFZZRrJbRGZ+i/3UtFrXtZr9c+fR7g5k5RVgRVo6Au+8GHe0xnZ77zQUHW1qtQC4mYCR3PO8pytP1/xr5mah14/QdaoXhoxtmPnsntdy2uvMmfCO7SSZKSITMYzkknBoqsLTZi1d+IbUtQQo1u7q6eLj6uNzAC7HN6ue+uI7ZDxjS/pXF2RDOBQsJ3lfRNwKAIiICkBNEUrIL56h1pnX6ksDAAAAAElFTkSuQmCC',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Regulated', 'Seasonal', 'Low'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Regulated, Seasonal, Normal',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAABMAAAAQCAYAAAD0xERiAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAftJREFUOI2t011I01EYBvDnzX80a2UFRbWKRgVGGQvJsUZSgV2UUkQYEhFh0Ci8iOgDBt10YxG5ootgFwndlCGlq6CCaFsRfiA6RdMoXa7Bhtk+29iHT1eT6Yo167k7Dy+/83LgKPiPUfINkJR0OnWvqEgxiQj/CUukE/Wd/S+rKrbuPwmgec4YyZKxb0N1TpdFu27l5hMkW0Tk55ywWDx6xfb+ugEAXny4oz9VffMCgGsFYyRLe4be7o7Ex4sBIBAdXvTFM1BF8r6IeArCQpHJS6+6G3dld887Gg3rVzdfBtDw1xjJmmdOq45MSnafSgWVvhF7OUm9iHTkxUgu8E96jvePPtwxXylBtcGMFcs0+DjWBYfLAofLYijbaDwLID82NZU2tTlu6QGgsuwMSrXlAACjrgZunwtu3xu87nqwnWStiLT8ESOp+fTVVTkR6tsAAMWqxTMuUquWAwBGPO06/4+jh0naRCT2WyyRjDc8dV7dlzl3DrZCq9kG9cIl8Pg+Y3DcNj3bZr+x8/ShJhOAphyMpPFdb/uWVDq8NNP5g72421oLtWotwrHRGVtOhAY2ub3DFSTXiIh3GiM5LxwN1jldtw/MfkMymQNl8thu3nP+2KNzAMzZm9V/D3gP7tVdzPtXZ2VVJBo4QvKJiHQrACAiVgDWAqGc/ALxctoeg0TwJAAAAABJRU5ErkJggg==',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Regulated', 'Seasonal', 'Normal'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Regulated, Yearly, High',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAATxJREFUOI2d079LAnEYx/F3p9yFOMS1JK0NztHQUNQmYXHQr61JyPLIwTAIgqShHxQSghZBY3/AF3Ju7X9okLZoOAr6Uhf5vYYTyUo9/WzPl+f7ep7lCRMkyWyUaumtU0u4K7KyGzE+X+5cKzeLKMq+IePjdQeYMJDbLhz0ByXSo+Dl/ULLY6UuEdfPPUOmHjqUeJFGGUXp+4DdE2TO2eMStfbzzYD1kaR9/lgtPwSGpK6KKAZ+9z9p6ghYDgYtZBZR3kybGUumZU86onzfGcpmdWruCWjtlkUqdQpMd4SM2tcWaGNtFT9TWJsW4kL8D61mhnn39rog/kA4duEWqP+F3HoBtKEgEIq4aWVSjqhctUCxRDruKG0jENKIVF4BK3eDKMom5AyGzlBe99trTcxQ/uk0P7qiMt8j0pJvr8JggMSSoswAAAAASUVORK5CYII=',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Regulated', 'Yearly', 'High'],
-                            'visible': 'no'
-                          },
-                          {
-                            'label': 'Regulated, Yearly, Low',
-                            'settings': {
-                              'mimeType': 'image/png',
-                              'offset': [0, 0],
-                              'opacity': 1,
-                              'rotation': 0,
-                              'src': 'iVBORw0KGgoAAAANSUhEUgAAABIAAAAPCAYAAADphp8SAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAURJREFUOI2d079LAmEcx/H3HfIIYhA1HQ0tBzpXUENRe8FBduGSFoEEUUvYFCQN/aCIxrglzwgEaTioubWlPyByEQclmiLBOrxrqKQ09fSzPQ/f5/V8lq8PDzFmCSZueWs34+uEZHUC7456Z2r5mbhFpWfoA3Ub7DFkZQtKez1BmWhoyLWrSQBkkTS10fO49fDcNeTar/sgAt/HoCtedoH1rqC0PjCCI5Z+30kOiYvo8NlKtvDkGZKcvlNAapyXbQ6ABU+QGVHmgekWf0TSWmhi2Xq8bwsZmwiK4gi5VVeQfNVjYKot5C8ObyCjtmYAmMzoihbLlax/oczi+KBbK+90QABwHXFowE0Cas2N7HIKmX4vEBD2R9RVrvPGH+hSV8KOw5pH5CuynTI1ruIWlTrkIk6aGnaKg/KzOvWHsVxhriukIZ8czlrxD/361gAAAABJRU5ErkJggg==',
-                              'type': 'iconSymbol'
-                            },
-                            'values': ['Regulated', 'Yearly', 'Low'],
-                            'visible': 'no'
-                          }
-                        ]
-                      }
-                    }
-                  }
-                ]
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'esriFeatureLYR4.1',
+              'geoviewLayerName': { 'en': 'Temporal_Test_Bed_en' },
+              'metadataAccessPath': {
+                'en': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/'
               },
-              {
-                'geoviewLayerId': 'classBreaksId',
-                'geoviewLayerName': { 'en': 'classBreaks' },
-                'metadataAccessPath': { 'en': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/DEU_CSO_Volume/MapServer/' },
-                'geoviewLayerType': 'esriDynamic',
-                'listOfLayerEntryConfig': [
-                  {
-                    'layerId': '8',
-                    'layerName': { 'en': 'CSO volume 2020' },
-                    'layerFilter': 'Total_CSO_Volume > 5000000',
-                    'style': {
-                      'Point': {
-                        'styleId': 'classBreaksId',
-                        'styleType': 'classBreaks',
-                        'defaultLabel': 'No volume data',
-                        'defaultSettings': {
-                          'symbol': 'square',
-                          'type': 'simpleSymbol',
-                          'color': 'rgba(255,127,127,1)',
-                          'offset': [0, 0],
-                          'rotation': 0,
-                          'size': 2.0010000000000003,
-                          'stroke': {
-                            'color': 'rgba(0,0,0,1)',
-                            'lineStyle': 'solid',
-                            'width': 0.5
-                          }
-                        },
-                        'defaultVisible': 'always',
-                        'field': 'Total_CSO_Volume',
-                        'classBreakStyleInfo': [
-                          {
-                            'label': '0 m3',
-                            'minValue': 0,
-                            'maxValue': 0,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(76,230,0,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 2.6679999999999997,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '0.0001 - ≤ 5,000,000 m3',
-                            'minValue': 0,
-                            'maxValue': 5000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 5.114407777777778,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 5,000,000 - ≤ 10,000,000 m3',
-                            'minValue': 5000000,
-                            'maxValue': 10000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 7.560815555555555,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 10,000,000 - ≤ 15,000,000 m3',
-                            'minValue': 10000000,
-                            'maxValue': 15000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 10.007223333333332,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 15,000,000 - ≤ 20,000,000 m3',
-                            'minValue': 15000000,
-                            'maxValue': 20000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 12.453631111111111,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 20,000,000 - ≤ 25,000,000 m3',
-                            'minValue': 20000000,
-                            'maxValue': 25000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 14.90003888888889,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 25,000,000 - ≤ 30,000,000 m3',
-                            'minValue': 25000000,
-                            'maxValue': 30000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 17.346446666666665,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 30,000,000 - ≤ 35,000,000 m3',
-                            'minValue': 30000000,
-                            'maxValue': 35000000,
-                            'visible': 'yes',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 19.792854444444444,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          },
-                          {
-                            'label': '> 35,000,000 m3',
-                            'minValue': 35000000,
-                            'maxValue': 999000000,
-                            'visible': 'always',
-                            'settings': {
-                              'symbol': 'circle',
-                              'type': 'simpleSymbol',
-                              'color': 'rgba(196,97,255,1)',
-                              'offset': [0, 0],
-                              'rotation': 0,
-                              'size': 22.239262222222223,
-                              'stroke': {
-                                'color': 'rgba(0,0,0,1)',
-                                'lineStyle': 'solid',
-                                'width': 0.5
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
-                ]
-              }
-            ]
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0'
+                }
+              ]
+            }
+          ]
           },
           'components': ['overview-map', 'nav-bar', 'north-arrow', 'footer-bar'],
           'corePackages': [],
@@ -709,13 +353,7 @@
                 'geoviewLayerType': 'esriFeature',
                 'listOfLayerEntryConfig': [
                   {
-                    'layerId': '0',
-                    'source': {
-                      'cluster': {
-                        'enable': true,
-                        'distance': 30
-                      }
-                    }
+                    'layerId': '0'
                   }
                 ]
               },
@@ -1000,94 +638,7 @@
                     'listOfLayerEntryConfig': [
                       {
                         'layerId': '0',
-                        'layerName': { 'en': 'Map' },
-                        'style': {
-                          'Point': {
-                            'styleId': 'uniqueValueId',
-                            'styleType': 'uniqueValue',
-                           'fields': ['SYMBOL_EN'],
-                            'uniqueValueStyleInfo': [
-                              {
-                                'label': 'Confederation to 1914',
-                                'settings': {
-                                  'mimeType': 'image/png',
-                                  'offset': [0, 0],
-                                  'opacity': 1,
-                                  'rotation': 0,
-                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAahJREFUKJGd0ksoRFEcBvDvjMvci3E9GkxMxttYIIQo8igWHkmsRikLoSxlbSVZjKasyIIFmhQa5JmFZOGxMHYjeSQLxsw05ozhHgtcMWYWvjqbU7/zP9/pcPhnuN8blDqiGSONBCQHYG8gOPV62ZooijQgpB5XtySxsZvLu+j72weEcApoUzVQJ8TeejyuHkFQWfwgpc6BpwfH+PToCs4Xrn/com6oIKm1q26ZUmc7z0ctypBSZ7qX+sZMg3O42nn067M1cgoffVUYBpomKXXs8rxo5wCAMfQc7VtD/0Jf2TOeoaq5OEabmmgAYOIAgABlZ4e2wE/4GZv1ClqdpkyGAAl/dtGg6KPSCwAWLndkgE2bpS6y4joojE+KAwi5kCEBzKXVeR3rw8cBkSqbhz4/DYzBLEMlH2lOTtHsd07UVsz0bfuhsIQQ9BvbwAv8vCCoDr4nEsJe3O62yoaSVY0lvnB36QjWzUsoxVAU1megpqUU6sTYDUlSdH8dJn+AsIiIe8bs5Zm5ut5Mvc6AIegBvAE4AcGUUhk5SwiR/ODH5BgvAOPnCpp3ofqRTtNnzMYAAAAASUVORK5CYII=',
-                                  'type': 'iconSymbol'
-                                },
-                                'values': ['Confederation to 1914'],
-                                'visible': 'no'
-                              },
-                              {
-                                'label': 'First World War',
-                                'settings': {
-                                  'mimeType': 'image/png',
-                                  'offset': [0, 0],
-                                  'opacity': 1,
-                                  'rotation': 0,
-                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZ5JREFUKJGd0ssvA1EUBvDvjqmZelUH7UwkbZQFQSKqImw8dtLEomFlZ9HY+EssiC07G1IWBInEYyMWgiZeG7owI6lE23REemdavRZqhCqJLzmbm/zuOefm8vhn+O8HlKZrGSNBAtIKsFcQRA2D7TgcDloS0szzFMuz2Xg8XvuUSILjOCiyDElyPmQyz2G7vXqrCFKqz+hpfX5jcweapn2Zoqurs3FkeGiDUn1cFGvWLUip3mwY2dmV1TUkEsmifaLRC+SyOS4YHF2kNH0gio4UDwCMIXx9fWP7CX3k8uoG/p5up6K4JwEs8ABAgL6721jpJyzk/l6FIst9FgRIhWGaf0LTNAGwCmtHBty5XPV+VdV+hXV1EkBIzIIEiHR0tE+cnkZLIkEQ4PM1gTFELCiIVRFFlo9GhgcH9vYPi5DNxiMUGoMgiCt2e/XxZ0dCmPnyEgoE/Nsud0P3yckZVFUDz5ehpcWH3t4AJMm5m89zUx+XWR+gvLLykbFUv9frmfZ6PJMA2gC8AjgHwZIgVC0TQvJF8L2z0wAwV6hf8waIeZGd6U5WcwAAAABJRU5ErkJggg==',
-                                  'type': 'iconSymbol'
-                                },
-                                'values': ['First World War'],
-                                'visible': 'no'
-                              },
-                              {
-                                'label': 'Second World War',
-                                'settings': {
-                                  'mimeType': 'image/png',
-                                  'offset': [0, 0],
-                                  'opacity': 1,
-                                  'rotation': 0,
-                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAZ5JREFUKJGd0EsoRFEYB/D/GZe511zzyhhiMTMiQxI2YsPKMylRSkqKlFhpSspGSRSSjcdOpAalPGJhpUkWrFiI2RiSzDTX454rc48FrhiP8q9TX6d+fQ8O/wz39YPSsJkxUkNAsgAWAcGRorBNk8lEf4RUvmtjqjoa8vvN94FL6LgYmF0uiHZ7QJbvOgQhYT0KUip1y7fBicOhEUgzC5+mSBnuT81pbVmjVGrgeeOKBimV0p+pMnrQ68Hj8nbUPleeQahU0eX3dM1SGt7leVOIAwDG0HGx54v9Dr3nemAEwdpqi9XlaAYwyQEAAYpufPs/n/AtweMTWJ3OIg0CJP5ZCv8JI7IMgMVrOzLgTMzKLPyLGtJSAULONUgAb1pZaWPgF8QV5iApLxeMwatBPS96LQ7nXsbidMlpU3sUinHYkDc1hljBsCQICb6PjoSwp4eH+vTK8g2jb6vAv7oGaWMHxGpEYlUFXHW1EJPt26qqa9MmeC/iDIZrxkLFtmx3p83tbkafxw0gAuAQBHN6vThPCFGj4GtniwJg/O39mhf/K5CfkLtGyAAAAABJRU5ErkJggg==',
-                                  'type': 'iconSymbol'
-                                },
-                                'values': ['Second World War'],
-                                'visible': 'always'
-                              },
-                              {
-                                'label': 'Korean War',
-                                'settings': {
-                                  'mimeType': 'image/png',
-                                  'offset': [0, 0],
-                                  'opacity': 1,
-                                  'rotation': 0,
-                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAYtJREFUKJGdz79rU2EUxvHvSa+5N2libixtwEpTEYkZjKBLsItQapfiInYKXTIEQd0U/AdcTKG2a91cxCCoVEEonSTiYkEIVKiIYCQdDEkoeW+09zioVzTGgg+8cHjhc35Y/GesPz+MabmqMifICdA9hE3P02eJRMIMhKbbKeL7Zdl572qzDkNDMHoU20197HY7pUgkvtYHjWlfo/P5jr++CI0Hv6+RuT4uUwuPjWlfcpyDDwNoTPsYPa/sr92E1kbfPbp1G756IZm+smpMa8NxEk0LQJUSb6sH/oYCvL0MJ+eSkkoXgBULQCCvH14NREHqNRibzAcQJKq99v7wiwE0GtyosC0jx89oYx/oHgaRdwEUqGjm3Dy1W4ORnYF0DlUqAbSdWMUbnXxBfmVKX17tR9YhZKYM4ej9SCRe/TVRRHu7uxf93OxTRh6d1jdP4NM6WHFk4jycugBu6rnvh4pBr59FeHi4odo86x3JXpbxbAFuZIE94DXCXduO3RMRvw9+n5z0gKUf75/5BuXZh6Fohy1dAAAAAElFTkSuQmCC',
-                                  'type': 'iconSymbol'
-                                },
-                                'values': ['Korean War'],
-                                'visible': 'yes'
-                              },
-                              {
-                                'label': 'Peacekeeping',
-                                'settings': {
-                                  'mimeType': 'image/png',
-                                  'offset': [0, 0],
-                                  'opacity': 1,
-                                  'rotation': 0,
-                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAatJREFUKJGd0jFoE1Ecx/HvP7kmd03iJSElwaLYq4OpRSQKFgUFt0IpFNGpkx2Ki1hcHNxdCio6OOjmoBAiiFZwEYTSrRYpioNBtLYErUlzxHuJ5p6D7YnGVPAH/+XB5/3//8cz+M8Yfx4otZHUWsYE2Qe6jbDUbOontm2rrlB57pTv69l3lVpyZb1BOCwMZm1yqfhHz3OnLSvxuAMqVT+/Xv96/crcMjfX3N+muDqc7T97Iv9Qqfpp09xRCqBS9UHVas9eLC1xr+p17DOzXKH5zQ9dGD1wW6mNZ6ZpVw0ArZmef73a8ze0lUtvPjFeqKWcnD0J3DAABEYWyp+7P+FmXn34gpNNjgQQpLfW+v5P6LXagO4NdtTwNp+JH2LV3Rb2p2MgUg6gQPHk/p1neLnWFR2JGBx0+tCaYgCjZrw4kGX+wXHn2MTzcgfaGw5xa3wYK9Jz37ISC786iuhWo3FqtDAwt9iXKJQW3/NoxSVtCGNOmonDe8ilYk99PzS1dVnwASKxWEXr6tGh3ZlzQ7syk5chD7SBFwh3otH4XRHxO+DPzqkmcG2zts0PBFWRZ33W55YAAAAASUVORK5CYII=',
-                                  'type': 'iconSymbol'
-                                },
-                                'values': ['Peacekeeping'],
-                                'visible': 'no'
-                              },
-                              {
-                                'label': 'Afghanistan',
-                                'settings': {
-                                  'mimeType': 'image/png',
-                                  'offset': [0, 0],
-                                  'opacity': 1,
-                                  'rotation': 0,
-                                  'src': 'iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAadJREFUKJGd0ksoRFEYB/D/MZe5dzzGlccUxjOZsRksyLBRkkghVlZmISWRzSzsWShkFhQ7CzKNyCsbG1KTmBSJvMpzYYaZpjl35B4L44oxlH99m1O/833f6XD4Z7jvB5Q+JzJGGghIIcBeQeCSJLam1WppREgDPossy8OXD1eJ1+57qFQq5KVmQyem3AQCvk5BiF8Jg5R6ex59nrHB9UnY7pxfphgpak7vqGpbotTbyvMJDgVS6s2jweBw/+IQZt2nYfv0HTogvUhRvbWWKUqfN3le6+EAgDF0bh87o39CH7GerKDRVCPm6jLbAYxzAECA8p0LV+QnDOXo5gS5afpyBQJE8/Ti/xMGghQA0yg7MuDMkJxVilvnrzBd1AGEnCuQAPZqg7kNB/MRUZlahCnHCMZgV6Caj7PnpOq3Fyq7zU1btjCUz/GYqLdCiNHMCUL8zmdHQljQ72+pK65e3UvOKHG4NrB8u4skjkdDthlNJbXQiSkbshxl+bhM+QAxsbEPjHkqjPqCLmNmQfsAYADwCmAfBNNqddwMIUQOg++dRQnAaKh+zRtAE5CN4Z5HEQAAAABJRU5ErkJggg==',
-                                  'type': 'iconSymbol'
-                                },
-                                'values': ['Afghanistan'],
-                                'visible': 'no'
-                              }
-                            ]
-                          }
-                        }
+                        'layerName': { 'en': 'Map' }
                       }
                     ]
                   },
@@ -1336,7 +887,11 @@
               Object.keys(row.fieldInfo).forEach((fieldName) => {
                 tableData = document.createElement('td');
                 tableData.classList.add('info');
-                tableData.innerText = row.fieldInfo[fieldName].value;
+                if (row.fieldInfo[fieldName].dataType === 'date') {
+                  const dateUtilities = cgpv.api.dateUtilities;
+                  // tableData.innerText = dateUtilities.convertToDate(row.fieldInfo[fieldName].value);
+                  tableData.innerText = dateUtilities.format(dateUtilities.convertToUTC(row.fieldInfo[fieldName].value), 'day', 'second');
+                } else tableData.innerText = row.fieldInfo[fieldName].value;
                 tableRow.appendChild(tableData);
               });
             });
