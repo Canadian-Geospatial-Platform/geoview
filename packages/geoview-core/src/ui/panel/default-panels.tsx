@@ -21,7 +21,7 @@ export const DefaultPanel: TypeButtonPanelProps = {
         This is a placeholder panel for the panel components
       </Typography>
     ),
-    width: 300,
+    width: 350,
     status: false,
   },
 };
