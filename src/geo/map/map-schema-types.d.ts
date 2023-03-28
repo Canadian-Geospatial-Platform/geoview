@@ -3,6 +3,13 @@ import BaseLayer from 'ol/layer/Base';
 import { TypeBasemapOptions } from '../layer/basemap/basemap-types';
 import { TypeGeoviewLayerType } from '../layer/geoview-layers/abstract-geoview-layers';
 /** ******************************************************************************************************************************
+ *  Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET.
+ */
+export type TypePostSettings = {
+    header?: Record<string, string>;
+    data: any;
+};
+/** ******************************************************************************************************************************
  *  Definition of a bilingual string.
  */
 export type TypeLocalizedString = TypeLocalizedStringEnAndFr | TypeLocalizedStringFr | TypeLocalizedStringEn;
@@ -97,6 +104,8 @@ export type TypeFeatureInfoLayerConfig = {
 export type TypeBaseSourceVectorInitialConfig = {
     /** Path used to access the data. */
     dataAccessPath?: TypeLocalizedString;
+    /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
+    postSettings?: TypePostSettings;
     /** The feature format used by the XHR feature loader when url is set. */
     format?: TypeVectorSourceFormats | 'MVT';
     /** The projection code of the source. Default value is EPSG:4326. */

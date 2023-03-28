@@ -3,7 +3,7 @@ import VectorSource, { Options as VectorSourceOptions } from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { Options as VectorLayerOptions } from 'ol/layer/BaseVector';
-import { TypeFeatureCircleStyle, TypeFeatureStyle } from './vector-types';
+import { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from './vector-types';
 /**
  * Store a group of features
  */
@@ -96,6 +96,19 @@ export declare class Vector {
     addMarker: (coordinate: Coordinate, options?: {
         geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
         style?: TypeFeatureStyle;
+    }, optionalFeatureId?: string) => Feature;
+    /**
+     * Create a new marker icon
+     *
+     * @param {Coordinate} coordinate the long lat position of the marker
+     * @param options marker options including styling
+     * @param {string} optionalFeatureId an optional id to be used to manage this geometry
+     *
+     * @returns {Feature} a geometry containing the id and the created geometry
+     */
+    addMarkerIcon: (coordinate: Coordinate, options?: {
+        geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
+        style?: TypeIconStyle;
     }, optionalFeatureId?: string) => Feature;
     /**
      * Find a feature using it's id
