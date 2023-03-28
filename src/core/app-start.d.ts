@@ -5,6 +5,7 @@ import { TypeMapFeaturesConfig } from './types/global-types';
 import { TypeInteraction } from '../app';
 declare module '@mui/styles/defaultTheme' {
     interface DefaultTheme extends Theme {
+        iconImg: React.CSSProperties;
     }
 }
 export declare const MapContext: React.Context<TypeMapContext>;

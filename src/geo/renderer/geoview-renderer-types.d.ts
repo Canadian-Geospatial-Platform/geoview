@@ -11,9 +11,10 @@ export declare enum NodeType {
     variable = 2,
     string = 3,
     number = 4,
-    unary = 5,
-    binary = 6,
-    group = 7
+    null = 5,
+    unary = 6,
+    binary = 7,
+    group = 8
 }
 export type FilterNodeType = {
     nodeType: NodeType;
