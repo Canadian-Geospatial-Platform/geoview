@@ -100,7 +100,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panelStyles } = panel;
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
-  console.log('panel', panel);
+
   const panelWidth = panel?.width ?? 350;
   const panelContainerStyles = {
     ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
