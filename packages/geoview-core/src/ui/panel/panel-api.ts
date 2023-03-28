@@ -7,7 +7,7 @@ import { CheckboxListAPI } from '../list/checkbox-list/checkbox-list-api';
 
 import { PanelPayload, TypeActionButton } from '../../api/events/payloads/panel-payload';
 import { generateId } from '../../core/utils/utilities';
-import { TypePanelProps } from './panel-types';
+import { PanelStyles, TypePanelProps } from './panel-types';
 
 /**
  * Class used to handle creating a new panel
@@ -45,6 +45,8 @@ export class PanelApi {
 
   checkboxListAPI?: CheckboxListAPI;
 
+  panelStyles?: PanelStyles;
+
   /**
    * Initialize a new panel
    *
@@ -61,7 +63,8 @@ export class PanelApi {
     this.icon = panel.icon;
     this.content = panel.content !== undefined && panel.content !== null ? panel.content : createElement('div');
     this.status = panel.status !== undefined && panel.status !== null ? panel.status : false;
-    this.width = panel.width || 300;
+    this.width = panel.width || 350;
+    this.panelStyles = panel.panelStyles ?? {};
   }
 
   /**
