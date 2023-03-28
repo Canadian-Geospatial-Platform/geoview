@@ -86,7 +86,7 @@ class LayersPanelPlugin extends AbstractPlugin {
     const panel: TypePanelProps = {
       title: this.translations[displayLanguage].layersPanel,
       icon: '<i class="material-icons">layers</i>',
-      width: 200,
+      width: 350,
       status: panelStatus,
     };
 

@@ -84,13 +84,12 @@ class BasemapPanelPlugin extends AbstractPlugin {
       const panel: TypePanelProps = {
         title: this.translations[displayLanguage].basemapPanel,
         icon: '<i class="material-icons">map</i>',
-        width: 200,
+        width: 350,
         status: configObj?.isOpen as boolean,
       };
 
       // create a new button panel on the app-bar
       this.buttonPanel = api.map(mapId).appBarButtons.createAppbarPanel(button, panel, null);
-
       // set panel content
       this.buttonPanel?.panel?.changeContent(<BasemapPanel mapId={mapId} config={configObj || {}} />);
     }

@@ -97,9 +97,16 @@ const useStyles = makeStyles((theme) => ({
  */
 export function Panel(props: TypePanelAppProps): JSX.Element {
   const { panel, button } = props;
-
+  const { panelStyles } = panel;
   // set the active trap value for FocusTrap
   const [panelStatus, setPanelStatus] = useState(false);
+  console.log('panel', panel);
+  const panelWidth = panel?.width ?? 350;
+  const panelContainerStyles = {
+    ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
+    width: panelStatus ? panelWidth : 0,
+    transition: 'width 300ms ease',
+  };
 
   const [actionButtons, setActionButtons] = useState<JSX.Element[] & React.ReactNode[]>([]);
   const [, updatePanelContent] = useState(0);
@@ -279,7 +286,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
   }, [button, closeBtnRef]);
 
   return (
-    <Box sx={{ width: panelStatus ? 350 : 0, transition: 'width 300ms ease' }}>
+    <Box sx={panelContainerStyles}>
       <FocusTrap
         active={panelStatus}
         focusTrapOptions={{
@@ -288,7 +295,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
         }}
       >
         <Card
-          sx={{ display: panelStatus ? 'block' : 'none' }}
+          sx={{ display: panelStatus ? 'block' : 'none', ...(panelStyles?.panelCard && { ...panelStyles.panelCard }) }}
           ref={panelRef as React.MutableRefObject<null>}
           className={classes.panelContainer}
           onKeyDown={(e) => {
@@ -304,6 +311,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
               title: classes.panelHeaderTitle,
               action: classes.panelHeaderAction,
             }}
+            sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
             title={t(panel.title)}
             titleTypographyProps={{
@@ -331,7 +339,7 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
             }
           />
 
-          <CardContent className={classes.panelContentContainer}>
+          <CardContent className={classes.panelContentContainer} sx={panelStyles?.panelCardContent ?? {}}>
             {typeof panel.content === 'string' ? <HtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>

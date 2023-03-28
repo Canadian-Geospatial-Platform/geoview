@@ -89,7 +89,7 @@ class DetailsPlugin extends AbstractPlugin {
     const panel: TypePanelProps = {
       title: this.translations[displayLanguage].detailsPanel,
       icon: '<i class="material-icons">details</i>',
-      width: 300,
+      width: 350,
     };
 
     // create a new button panel on the app-bar
