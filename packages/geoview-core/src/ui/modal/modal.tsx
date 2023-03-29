@@ -198,7 +198,7 @@ export function Modal(props: TypeDialogProps): JSX.Element {
             ) : null}
             <IconButton
               id={`${modalId}-close-button`}
-              tooltip={t('close')}
+              tooltip={t('close')!}
               tooltipPlacement="right"
               onClick={modal.close}
               className={classes.headerActionsContainer}

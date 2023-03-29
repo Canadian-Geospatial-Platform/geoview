@@ -126,11 +126,9 @@ importers:
       '@mui/styles': ^5.4.2
       '@mui/system': ^5.4.1
       '@mui/x-data-grid': ^5.13.1
-      '@types/axios': ^0.14.0
       '@types/create-react-class': ^15.6.3
       '@types/flux': ^3.1.11
       '@types/glob': ^7.2.0
-      '@types/i18next': ^13.0.0
       '@types/jest': ^27.4.0
       '@types/lodash': ^4.14.188
       '@types/lodash-webpack-plugin': ^0.11.6
@@ -138,14 +136,13 @@ importers:
       '@types/proj4': ^2.5.2
       '@types/react': ^17.0.39
       '@types/react-dom': ^17.0.11
-      '@types/react-i18next': ^8.1.0
       '@types/react-router-dom': ^5.3.3
       '@types/sanitize-html': ^2.6.2
       '@types/sql.js': ^1.4.4
       '@typescript-eslint/eslint-plugin': ^5.10.2
       '@typescript-eslint/parser': ^5.10.2
       ajv: ^8.12.0
-      axios: ^0.25.0
+      axios: ^1.3.4
       babel-jest: ^27.4.6
       babel-loader: ^8.2.3
       babel-plugin-import: ^1.13.3
@@ -171,7 +168,7 @@ importers:
       glob: ^7.2.0
       html-react-parser: ^1.4.6
       html-webpack-plugin: ^5.5.0
-      i18next: ^19.8.4
+      i18next: ^22.4.13
       i18next-http-backend: ^1.0.21
       immutable: ^4.0.0
       jest: ^27.4.7
@@ -185,7 +182,7 @@ importers:
       query-string: ^7.1.0
       react: ^17.0.2
       react-dom: ^17.0.2
-      react-i18next: ^11.8.0
+      react-i18next: ^12.2.0
       react-test-renderer: ^17.0.2
       sanitize-html: ^2.7.3
       sass: ^1.49.7
@@ -210,13 +207,13 @@ importers:
       '@mui/system': 5.11.5_tt6tbcqzrys2qrveq7llkyxu6e
       '@mui/x-data-grid': 5.17.20_4ibgmbmzghieftdq7ihfdhu5vu
       ajv: 8.12.0
-      axios: 0.25.0
+      axios: 1.3.4
       dayjs: 1.11.7
       domhandler: 4.3.1
       eventemitter3: 4.0.7
       focus-trap-react: 8.11.3_oxfzelaz5ynxsop2v2nu2h2m64
       html-react-parser: 1.4.14_react@17.0.2
-      i18next: 19.9.2
+      i18next: 22.4.13
       i18next-http-backend: 1.4.5
       immutable: 4.2.2
       lodash: 4.17.21
@@ -227,7 +224,7 @@ importers:
       query-string: 7.1.3
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
-      react-i18next: 11.18.6_r4vbf6j3grmryggditgyffazwe
+      react-i18next: 12.2.0_ffdbohwx3htqpx4tpuhghjrmkq
       react-test-renderer: 17.0.2_react@17.0.2
       sanitize-html: 2.8.1
       sql.js: 1.8.0
@@ -258,11 +255,9 @@ importers:
       '@babel/preset-typescript': 7.18.6_@babel+core@7.20.12
       '@babel/runtime': 7.20.13
       '@babel/runtime-corejs3': 7.20.13
-      '@types/axios': 0.14.0
       '@types/create-react-class': 15.6.3
       '@types/flux': 3.1.11
       '@types/glob': 7.2.0
-      '@types/i18next': 13.0.0
       '@types/jest': 27.5.2
       '@types/lodash': 4.14.191
       '@types/lodash-webpack-plugin': 0.11.6
@@ -270,7 +265,6 @@ importers:
       '@types/proj4': 2.5.2
       '@types/react': 17.0.53
       '@types/react-dom': 17.0.18
-      '@types/react-i18next': 8.1.0_r4vbf6j3grmryggditgyffazwe
       '@types/react-router-dom': 5.3.3
       '@types/sanitize-html': 2.8.0
       '@types/sql.js': 1.4.4
@@ -2723,15 +2717,6 @@ packages:
     resolution: {integrity: sha512-MhpTj3aaURIFhK6pBRF50yCHW5TpbeuC1E81juovfNesSOshsQnCzludhpBhIr2pNzplTBlfzrT7RKiLZ5F3Tw==}
     dev: true
 
-  /@types/axios/0.14.0:
-    resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
-    deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
-    dependencies:
-      axios: 0.25.0
-    transitivePeerDependencies:
-      - debug
-    dev: true
-
   /@types/babel__core/7.20.0:
     resolution: {integrity: sha512-+n8dL/9GWblDO0iU6eZAwEIJVr5DWigtle+Q6HLOrh/pdbXOhOtqzq8VPPE2zvNJzSKY4vH/z3iT3tn0A3ypiQ==}
     dependencies:
@@ -2881,13 +2866,6 @@ packages:
       '@types/node': 18.11.18
     dev: true
 
-  /@types/i18next/13.0.0:
-    resolution: {integrity: sha512-gp/SIShAuf4WOqi8ey0nuI7qfWaVpMNCcs/xLygrh/QTQIXmlDC1E0TtVejweNW+7SGDY7g0lyxyKZIJuCKIJw==}
-    deprecated: This is a stub types definition. i18next provides its own type definitions, so you do not need this installed.
-    dependencies:
-      i18next: 19.9.2
-    dev: true
-
   /@types/istanbul-lib-coverage/2.0.4:
     resolution: {integrity: sha512-z/QT1XN4K4KYuslS23k62yDIDLwLFkzxOuMplDtObz0+y7VqJCaO2o+SPwHCvLFZh7xazvvoor2tA/hPz9ee7g==}
     dev: true
@@ -2987,18 +2965,6 @@ packages:
     resolution: {integrity: sha512-rLVtIfbwyur2iFKykP2w0pl/1unw26b5td16d5xMgp7/yjTHomkyxPYChFoCr/FtEX1lN9wY6lFj1qvKdS5kDw==}
     dependencies:
       '@types/react': 17.0.53
-    dev: true
-
-  /@types/react-i18next/8.1.0_r4vbf6j3grmryggditgyffazwe:
-    resolution: {integrity: sha512-d4xhcjX5b3roNMObRNMfb1HinHQlQLPo8xlDj60dnHeeAw2bBymR2cy/l1giJpHzo/ZFgSvgVUvIWr4kCrenCg==}
-    deprecated: This is a stub types definition. react-i18next provides its own type definitions, so you do not need this installed.
-    dependencies:
-      react-i18next: 11.18.6_r4vbf6j3grmryggditgyffazwe
-    transitivePeerDependencies:
-      - i18next
-      - react
-      - react-dom
-      - react-native
     dev: true
 
   /@types/react-is/17.0.3:
@@ -3675,7 +3641,6 @@ packages:
 
   /asynckit/0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
-    dev: true
 
   /available-typed-arrays/1.0.5:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
@@ -3687,12 +3652,15 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /axios/0.25.0:
-    resolution: {integrity: sha512-cD8FOb0tRH3uuEe6+evtAbgJtfxr7ly3fQjYcMcuPlgkwVS9xboaVIpcDV+cYQe+yGykgwZCs1pzjntcGa6l5g==}
+  /axios/1.3.4:
+    resolution: {integrity: sha512-toYm+Bsyl6VC5wSkfkbbNB6ROv7KY93PEBBL6xyDczaIHasAiv4wPqQ/c4RjoQzipxRD2W5g21cOqQulZ7rHwQ==}
     dependencies:
       follow-redirects: 1.15.2
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
+    dev: false
 
   /axobject-query/3.1.1:
     resolution: {integrity: sha512-goKlv8DZrK9hUh975fnHzhNIO4jUnFCfv/dszV5VwUGDFjI6vQ2VwoyjYjYNEbBE8AH87TduWP5uyDR1D+Iteg==}
@@ -4100,7 +4068,6 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
-    dev: true
 
   /commander/2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
@@ -4442,7 +4409,6 @@ packages:
   /delayed-stream/1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
-    dev: true
 
   /depd/1.1.2:
     resolution: {integrity: sha512-7emPTl6Dpo6JRXOXjLRxck+FlLRX5847cLKEn00PLAgc3g2hTZZgr+e4c2v6QpSmLeFP3n5yUo7ft6avBK/5jQ==}
@@ -5406,6 +5372,15 @@ packages:
       mime-types: 2.1.35
     dev: true
 
+  /form-data/4.0.0:
+    resolution: {integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==}
+    engines: {node: '>= 6'}
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      mime-types: 2.1.35
+    dev: false
+
   /forwarded/0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
@@ -5733,6 +5708,7 @@ packages:
     resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
     dependencies:
       void-elements: 3.1.0
+    dev: false
 
   /html-react-parser/1.4.14_react@17.0.2:
     resolution: {integrity: sha512-pxhNWGie8Y+DGDpSh8cTa0k3g8PsDcwlfolA+XxYo1AGDeB6e2rdlyv4ptU9bOTiZ2i3fID+6kyqs86MN0FYZQ==}
@@ -5887,10 +5863,11 @@ packages:
       - encoding
     dev: false
 
-  /i18next/19.9.2:
-    resolution: {integrity: sha512-0i6cuo6ER6usEOtKajUUDj92zlG+KArFia0857xxiEHAQcUwh/RtOQocui1LPJwunSYT574Pk64aNva1kwtxZg==}
+  /i18next/22.4.13:
+    resolution: {integrity: sha512-GX7flMHRRqQA0I1yGLmaZ4Hwt1JfLqagk8QPDPZsqekbKtXsuIngSVWM/s3SLgNkrEXjA+0sMGNuOEkkmyqmWg==}
     dependencies:
       '@babel/runtime': 7.20.13
+    dev: false
 
   /iconv-lite/0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
@@ -7118,14 +7095,12 @@ packages:
   /mime-db/1.52.0:
     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
     engines: {node: '>= 0.6'}
-    dev: true
 
   /mime-types/2.1.35:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
     dependencies:
       mime-db: 1.52.0
-    dev: true
 
   /mime/1.6.0:
     resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==}
@@ -7734,6 +7709,10 @@ packages:
       ipaddr.js: 1.9.1
     dev: true
 
+  /proxy-from-env/1.1.0:
+    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+    dev: false
+
   /psl/1.9.0:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
     dev: true
@@ -7835,6 +7814,7 @@ packages:
       object-assign: 4.1.1
       react: 17.0.2
       scheduler: 0.20.2
+    dev: false
 
   /react-draggable/4.4.5_sfoxds7t5ydpegc3knd667wn6m:
     resolution: {integrity: sha512-OMHzJdyJbYTZo4uQE393fHcqqPYsEtkjfMgvCHr6rejT+Ezn4OZbNyGH50vv+SunC1RMvwOTSWkEODQLzw1M9g==}
@@ -7848,8 +7828,8 @@ packages:
       react-dom: 17.0.2_react@17.0.2
     dev: false
 
-  /react-i18next/11.18.6_r4vbf6j3grmryggditgyffazwe:
-    resolution: {integrity: sha512-yHb2F9BiT0lqoQDt8loZ5gWP331GwctHz9tYQ8A2EIEUu+CcEdjBLQWli1USG3RdWQt3W+jqQLg/d4rrQR96LA==}
+  /react-i18next/12.2.0_ffdbohwx3htqpx4tpuhghjrmkq:
+    resolution: {integrity: sha512-5XeVgSygaGfyFmDd2WcXvINRw2WEC1XviW1LXY/xLOEMzsCFRwKqfnHN+hUjla8ZipbVJR27GCMSuTr0BhBBBQ==}
     peerDependencies:
       i18next: '>= 19.0.0'
       react: '>= 16.8.0'
@@ -7863,9 +7843,10 @@ packages:
     dependencies:
       '@babel/runtime': 7.20.13
       html-parse-stringify: 3.0.1
-      i18next: 19.9.2
+      i18next: 22.4.13
       react: 17.0.2
       react-dom: 17.0.2_react@17.0.2
+    dev: false
 
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -7945,6 +7926,7 @@ packages:
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
+    dev: false
 
   /readable-stream/2.3.7:
     resolution: {integrity: sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw==}
@@ -8229,6 +8211,7 @@ packages:
     dependencies:
       loose-envify: 1.4.0
       object-assign: 4.1.1
+    dev: false
 
   /schema-utils/2.7.1:
     resolution: {integrity: sha512-SHiNtMOUGWBQJwzISiVYKu82GiV4QYGePp3odlY1tuKO7gPtphAT5R/py0fA6xtbgLL/RvtJZnU9b8s0F1q0Xg==}
@@ -9030,8 +9013,9 @@ packages:
     dev: true
 
   /void-elements/3.1.0:
-    resolution: {integrity: sha1-YU9/v42AHwu18GYfWy9XhXUOTwk=}
+    resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
     engines: {node: '>=0.10.0'}
+    dev: false
 
   /vscode-oniguruma/1.7.0:
     resolution: {integrity: sha512-L9WMGRfrjOhgHSdOYgCt/yRMsXzLDJSL7BPrOZt73gU0iWO4mpqzqQzOz5srxqTvMBaR0XZTSrVWo4j55Rc6cA==}

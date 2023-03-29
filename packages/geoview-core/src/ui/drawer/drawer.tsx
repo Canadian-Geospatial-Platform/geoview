@@ -121,7 +121,7 @@ export function Drawer(props: TypeDrawerProps): JSX.Element {
     >
       <div className={classes.toolbar}>
         <IconButton
-          tooltip={open ? t('general.close') : t('general.open')}
+          tooltip={open ? t('general.close')! : t('general.open')!}
           tooltipPlacement="right"
           onClick={() => {
             openCloseDrawer(!open);

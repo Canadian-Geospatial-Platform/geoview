@@ -100,8 +100,8 @@ export function FooterbarRotationButton(): JSX.Element {
     <IconButton
       sx={sxClasses.rotationButton}
       tooltipPlacement="bottom"
-      tooltip={t('mapctrl.rotation.resetRotation')}
-      title={t('mapctrl.rotation.resetRotation')}
+      tooltip={t('mapctrl.rotation.resetRotation')!}
+      title={t('mapctrl.rotation.resetRotation')!}
       onClick={() => resetRotation()}
     >
       <ArrowUpIcon ref={iconRef} sx={sxClasses.rotationIcon} />

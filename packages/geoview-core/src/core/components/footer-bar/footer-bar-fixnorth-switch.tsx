@@ -82,7 +82,7 @@ export function FooterbarFixNorthSwitch(): JSX.Element {
   return (
     <div>
       {expanded && mapProjection === PROJECTION_NAMES.LCC && isNorthEnable ? (
-        <Switch size="small" onChange={fixNorth} title={t('mapctrl.rotation.fixedNorth')} checked={switchChecked} />
+        <Switch size="small" onChange={fixNorth} title={t('mapctrl.rotation.fixedNorth')!} checked={switchChecked} />
       ) : null}
     </div>
   );
