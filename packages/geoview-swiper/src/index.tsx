@@ -4,7 +4,7 @@ import { Cast, AbstractPlugin, TypePluginOptions, TypeWindow, toJsonObject, Type
 
 import schema from '../schema.json';
 import defaultConfig from '../default-config-swiper.json';
-import { Swiper, unsetListener } from './swiper';
+import { Swiper } from './swiper';
 
 const w = window as TypeWindow;
 
@@ -79,11 +79,8 @@ class SwiperPlugin extends AbstractPlugin {
     const { cgpv } = w;
 
     if (cgpv) {
-      // access the api calls
-      const { api } = cgpv;
-
       // TODO: Enable swiper removal
-      cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`));
+      cgpv.reactDOM.unmountComponentAtNode(document.getElementById(`${mapId}-swiper`)! as Element);
     }
   }
 }

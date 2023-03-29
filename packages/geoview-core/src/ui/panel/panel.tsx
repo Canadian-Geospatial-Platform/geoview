@@ -322,9 +322,9 @@ export function Panel(props: TypePanelAppProps): JSX.Element {
                 <>
                   {actionButtons}
                   <IconButton
-                    tooltip={t('general.close')}
+                    tooltip={t('general.close')!}
                     tooltipPlacement="right"
-                    aria-label={t('general.close')}
+                    aria-label={t('general.close')!}
                     size="small"
                     onClick={panel.close}
                     iconRef={closeBtnRef}

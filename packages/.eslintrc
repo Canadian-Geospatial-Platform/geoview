@@ -1,16 +1,20 @@
 {
   "extends": [
     "airbnb",
+    "prettier",
     "airbnb/hooks",
+    "eslint:recommended",
+    "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
-    "plugin:jsx-a11y/recommended"
+    "plugin:jsx-a11y/recommended",
+    "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "env": {
     "browser": true
   },
-  "plugins": ["prettier", "jsx-a11y", "@typescript-eslint", "react-hooks"],
+  "plugins": ["prettier", "@typescript-eslint", "react-hooks", "jsx-a11y"],
+  "root": true,
   "settings": {
     "import/resolver": {
       "node": {

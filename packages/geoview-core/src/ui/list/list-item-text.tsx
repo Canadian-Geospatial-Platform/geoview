@@ -13,6 +13,7 @@ const typographyProps = {
  * @param {ListItemTextProps} props the properties passed to the List Item element
  * @returns {JSX.Element} the created List Item element
  */
+// eslint-disable-next-line react/display-name
 export const ListItemText = React.forwardRef((props: ListItemTextProps, ref): JSX.Element => {
   return <MaterialListItemText ref={ref} {...props} primaryTypographyProps={typographyProps} />;
 });

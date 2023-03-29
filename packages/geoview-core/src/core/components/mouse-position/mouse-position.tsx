@@ -108,12 +108,11 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
    * @returns {Object} an object containing formatted Longitude and Latitude values
    */
   function formatCoordinates(lnglat: Coordinate, DMS: boolean) {
-    const lng = `${DMS ? coordFormnatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${
-      lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east')
-    }`;
-    const lat = `${DMS ? coordFormnatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${
-      lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north')
-    }`;
+    const labelX = lnglat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
+    const labelY = lnglat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
+
+    const lng = `${DMS ? coordFormnatDMS(lnglat[0]) : Math.abs(lnglat[0]).toFixed(4)} ${labelX}`;
+    const lat = `${DMS ? coordFormnatDMS(lnglat[1]) : Math.abs(lnglat[1]).toFixed(4)} ${labelY}`;
 
     return { lng, lat };
   }
@@ -232,7 +231,7 @@ export function MousePosition(props: MousePositionProps): JSX.Element {
   }, []);
 
   return (
-    <Tooltip title={t('mapnav.coordinates')}>
+    <Tooltip title={t('mapnav.coordinates')!}>
       <button type="button" onClick={() => switchPositionMode()} className={classes.mousePositionContainer}>
         <Box className={classes.mousePositionTextContainer}>
           <Box id="mousePositionWrapper" sx={{ display: !expanded ? 'none' : 'block', transition: 'display 1ms ease-in 300ms' }}>
