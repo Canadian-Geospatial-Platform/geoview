@@ -284,12 +284,12 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
       if (layerConfigEntry.layerName && layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage]) {
         setLayerName(layerConfigEntry.layerName[i18n.language as TypeDisplayLanguage] ?? '');
       } else if (t('legend.unknown')) {
-        setLayerName(t('legend.unknown'));
+        setLayerName(t('legend.unknown')!);
       }
     } else if (geoviewLayerInstance && geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage]) {
       setLayerName(geoviewLayerInstance.geoviewLayerName[i18n.language as TypeDisplayLanguage] ?? '');
     } else if (t('legend.unknown')) {
-      setLayerName(t('legend.unknown'));
+      setLayerName(t('legend.unknown')!);
     }
   };
 
@@ -443,7 +443,7 @@ export function LegendItem(props: TypeLegendItemProps): JSX.Element {
               </IconButton>
             )}
             {iconType === 'list' && !isLegendOpen && (
-              <Tooltip title={t('legend.expand_legend')} placement="top" enterDelay={1000}>
+              <Tooltip title={t('legend.expand_legend')!} placement="top" enterDelay={1000}>
                 <Box
                   tabIndex={0}
                   onClick={handleLegendClick}

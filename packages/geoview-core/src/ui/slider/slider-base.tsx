@@ -27,10 +27,12 @@ export function SliderBase(props: TypeSliderProps): JSX.Element {
   const { ...properties } = props;
 
   const [sliderValue, setValue] = useState<number[] | number | undefined>(properties.value);
+  const [activeThumb, setActiveThumb] = useState<number>(0);
 
   // handle constant change on the slider to set active thumb and instant values
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number) => {
     setValue(newValue);
+    setActiveThumb(newActiveThumb);
   };
 
   // handle the commit change event when mouseup is fired

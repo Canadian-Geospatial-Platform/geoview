@@ -218,7 +218,7 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
               <ButtonGroup
                 key={groupName}
                 orientation="vertical"
-                aria-label={t('mapnav.arianavbar')}
+                aria-label={t('mapnav.arianavbar')!}
                 variant="contained"
                 classes={{ root: classes.navBtnGroup }}
               >
@@ -262,11 +262,21 @@ export function Navbar({ setActivetrap }: NavbarProps): JSX.Element {
           }
           return null;
         })}
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" classes={{ root: classes.navBtnGroup }}>
+        <ButtonGroup
+          orientation="vertical"
+          aria-label={t('mapnav.arianavbar')!}
+          variant="contained"
+          classes={{ root: classes.navBtnGroup }}
+        >
           <ZoomIn className={classes.navBarButton} />
           <ZoomOut className={classes.navBarButton} />
         </ButtonGroup>
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.arianavbar')} variant="contained" classes={{ root: classes.navBtnGroup }}>
+        <ButtonGroup
+          orientation="vertical"
+          aria-label={t('mapnav.arianavbar')!}
+          variant="contained"
+          classes={{ root: classes.navBtnGroup }}
+        >
           <Fullscreen className={classes.navBarButton} />
           <Home className={classes.navBarButton} />
           <Export className={classes.navBarButton} openModal={openModal} />
