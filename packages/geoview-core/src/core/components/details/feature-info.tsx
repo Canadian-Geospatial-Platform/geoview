@@ -91,19 +91,8 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
 
   function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
-    if (!currentZoom) {
-      api.map(mapId).zoomToExtent(feature.extent);
-      setOpen(true);
-    } else {
-      api
-        .map(mapId)
-        .map.getView()
-        .animate({
-          center: fromLonLat(center, projectionConfig),
-          duration: 500,
-          zoom,
-        });
-    }
+    api.map(mapId).zoomToExtent(feature.extent);
+    setOpen(true);
     setCurrentZoom(!currentZoom);
   }
 
@@ -135,7 +124,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           </Tooltip>
           <ListItemIcon>
             <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
-              {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
+              <ZoomInSearchIcon />
             </IconButton>
           </ListItemIcon>
         </ListItemButton>
