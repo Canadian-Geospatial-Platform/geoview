@@ -1,7 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
-import { fromLonLat } from 'ol/proj';
 import {
   Collapse,
   List,
@@ -12,7 +11,6 @@ import {
   ExpandMoreIcon,
   ExpandLessIcon,
   ZoomInSearchIcon,
-  ZoomOutSearchIcon,
   Tooltip,
   IconButton,
   Box,
@@ -72,7 +70,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const featureId = `Feature Info ${feature.featureKey}`;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const [isOpen, setOpen] = useState<boolean>(false);
-  const [currentZoom, setCurrentZoom] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
       key: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
@@ -81,30 +78,14 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
     };
   });
 
-  const { currentProjection } = api.map(mapId);
-  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
-  const projectionConfig = api.projection.projections[currentProjection];
-
   const theme: Theme & {
     iconImg: React.CSSProperties;
   } = useTheme();
 
   function handleZoomIn(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
-    if (!currentZoom) {
-      api.map(mapId).zoomToExtent(feature.extent);
-      setOpen(true);
-    } else {
-      api
-        .map(mapId)
-        .map.getView()
-        .animate({
-          center: fromLonLat(center, projectionConfig),
-          duration: 500,
-          zoom,
-        });
-    }
-    setCurrentZoom(!currentZoom);
+    api.map(mapId).zoomToExtent(feature.extent);
+    setOpen(true);
   }
 
   useEffect(() => {
@@ -135,7 +116,7 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
           </Tooltip>
           <ListItemIcon>
             <IconButton color="primary" onClick={(e) => handleZoomIn(e)}>
-              {!currentZoom ? <ZoomInSearchIcon /> : <ZoomOutSearchIcon />}
+              <ZoomInSearchIcon />
             </IconButton>
           </ListItemIcon>
         </ListItemButton>
