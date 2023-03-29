@@ -30,9 +30,8 @@ import {
 import { useTheme, Theme } from '@mui/material/styles';
 import Button, { ButtonProps } from '@mui/material/Button';
 import { Extent } from 'ol/extent';
-import { fromLonLat } from 'ol/proj';
 import { TypeLayerEntryConfig, AbstractGeoViewVector, EsriDynamic, api, TypeDisplayLanguage } from '../../../app';
-import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, ZoomOutSearchIcon, IconButton } from '../../../ui';
+import { Tooltip, MenuItem, Switch, ZoomInSearchIcon, IconButton } from '../../../ui';
 
 /**
  * Create a data grid (table) component for a lyer features all request
@@ -111,12 +110,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
 
   const [filterString, setFilterString] = useState<string>('');
   const [mapfiltered, setMapFiltered] = useState<boolean>(false);
-
-  const { currentProjection } = api.map(mapId);
-  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
-  const projectionConfig = api.projection.projections[currentProjection];
-  let currentZoomId = -1;
-
   /**
    * Convert the filter string from the Filter Model
    *
@@ -239,7 +232,6 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    */
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
-    currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
     api.map(mapId).zoomToExtent(extent);
   };
 

@@ -1,7 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React, { useEffect, useState } from 'react';
 import { useTheme, Theme } from '@mui/material/styles';
-import { fromLonLat } from 'ol/proj';
 import {
   Collapse,
   List,
@@ -12,7 +11,6 @@ import {
   ExpandMoreIcon,
   ExpandLessIcon,
   ZoomInSearchIcon,
-  ZoomOutSearchIcon,
   Tooltip,
   IconButton,
   Box,
@@ -72,7 +70,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
   const featureId = `Feature Info ${feature.featureKey}`;
   const featureIconSrc = feature.featureIcon.toDataURL();
   const [isOpen, setOpen] = useState<boolean>(false);
-  const [currentZoom, setCurrentZoom] = useState<boolean>(false);
   const featureInfoList = Object.keys(feature.fieldInfo).map((fieldName) => {
     return {
       key: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
@@ -80,10 +77,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
       value: feature.fieldInfo[fieldName]!.value,
     };
   });
-
-  const { currentProjection } = api.map(mapId);
-  const { zoom, center } = api.map(mapId).mapFeaturesConfig.map.viewSettings;
-  const projectionConfig = api.projection.projections[currentProjection];
 
   const theme: Theme & {
     iconImg: React.CSSProperties;
@@ -93,7 +86,6 @@ export function FeatureInfo(props: TypeFeatureProps): JSX.Element {
     e.stopPropagation();
     api.map(mapId).zoomToExtent(feature.extent);
     setOpen(true);
-    setCurrentZoom(!currentZoom);
   }
 
   useEffect(() => {
