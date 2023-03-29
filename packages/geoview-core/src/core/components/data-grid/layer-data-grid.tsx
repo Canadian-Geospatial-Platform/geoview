@@ -233,35 +233,14 @@ export function LayerDataGrid(props: CustomDataGridProps) {
    * featureinfo data grid Zoom in/out handling
    *
    * @param {React.MouseEvent<HTMLButtonElement, MouseEvent>} e mouse clicking event
-   * @param {number} zoomid in of zoom incon button clicking
+   *  @param {number} zoomid in of zoom incon button clicking
    * @param {Extent} extent feature exten
    *
    */
 
   const handleZoomIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, zoomid: number, extent: Extent) => {
     currentZoomId = currentZoomId !== zoomid ? zoomid : -1;
-    document.querySelectorAll('svg.MuiSvgIcon-root>path').forEach((path) => {
-      (path as HTMLElement).style.display = 'block';
-    });
-
-    const zoomButtonElement = e.target as HTMLElement;
-    const zoomInIconElement = zoomButtonElement.parentElement?.children[0] as HTMLElement;
-    const zoomOutIconElement = zoomButtonElement.parentElement?.children[1] as HTMLElement;
-    zoomInIconElement.style.display = currentZoomId !== zoomid ? 'block' : 'none';
-    zoomOutIconElement.style.display = currentZoomId === zoomid ? 'block' : 'none';
-
-    if (currentZoomId === zoomid) {
-      api.map(mapId).zoomToExtent(extent);
-    } else {
-      api
-        .map(mapId)
-        .map.getView()
-        .animate({
-          center: fromLonLat(center, projectionConfig),
-          duration: 500,
-          zoom,
-        });
-    }
+    api.map(mapId).zoomToExtent(extent);
   };
 
   /**
@@ -338,8 +317,7 @@ export function LayerDataGrid(props: CustomDataGridProps) {
       if (column.field === 'featureActions') {
         return (
           <IconButton color="primary" onClick={(e) => handleZoomIn(e, params.id as number, rows[params.id as number].extent)}>
-            <ZoomInSearchIcon style={{ display: currentZoomId !== Number(params.id) ? 'block' : 'none' }} />
-            <ZoomOutSearchIcon style={{ display: currentZoomId === Number(params.id) ? 'block' : 'none' }} />
+            <ZoomInSearchIcon />
           </IconButton>
         );
       }
