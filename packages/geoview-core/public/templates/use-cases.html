@@ -301,9 +301,9 @@
         });
       }
 
-      function addCircleMarker(map) {
+      function addCircle(map) {
         // call an api function to draw a polygon
-        const circleMarker = cgpv.api.map(map).layer.vector.addCircleMarker([-109, 70], 20.0, {
+        const circle = cgpv.api.map(map).layer.vector.addCircle([-109, 70], 20.0, {
           style: {
             strokeColor: 'red',
             strokeWidth: 1,
@@ -326,7 +326,7 @@
           addPolyline('UC1');
           addPolygon('UC1');
           addCircle('UC1');
-          addCircleMarker('UC1');
+          addCircle('UC1');
         }
       });
     </script>
