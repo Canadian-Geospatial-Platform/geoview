@@ -45,7 +45,6 @@ Below you will find a list of some available functions and payload types/interfa
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsASnackbarMessage.html">payloadIsASnackbarMessage</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAVectorConfig.html">payloadIsAVectorConfig</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsACircleConfig.html">payloadIsACircleConfig</a></li>
-  <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsACircleMarkerConfig.html">payloadIsACircleMarkerConfig</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAMarkerConfig.html">payloadIsAMarkerConfig</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAPolygonConfig.html">payloadIsAPolygonConfig</a></li>
   <li><a href="https://canadian-geospatial-platform.github.io/geoview/public/docs/functions/payloadIsAPolylineConfig.html">payloadIsAPolylineConfig</a></li>
