@@ -30,6 +30,7 @@ export class Draw extends Interaction {
 
   /**
    * Initialize Draw component
+   * @param {DrawOptions} options the essential options for the drawing interaction
    */
   constructor(options: DrawOptions) {
     super(options);
@@ -73,6 +74,7 @@ export class Draw extends Interaction {
 
   /**
    * Handle when the drawing has started
+   * @param {OLDrawEvent} e the drawing started event as received from the Open Layers interaction
    */
   onDrawStart = (e: OLDrawEvent) => {
     // Raises EVENT_DRAW_STARTED event via the api
@@ -81,6 +83,7 @@ export class Draw extends Interaction {
 
   /**
    * Handles when the drawing has ended
+   * @param {OLDrawEvent} e the drawing ended event as received from the Open Layers interaction
    */
   onDrawEnd = (e: OLDrawEvent) => {
     // Raises EVENT_DRAW_ENDED event via the api
@@ -89,6 +92,7 @@ export class Draw extends Interaction {
 
   /**
    * Handles when the drawing has aborted
+   * @param {OLDrawEvent} e the drawing aborted event as received from the Open Layers interaction
    */
   onDrawAbort = (e: OLDrawEvent) => {
     // Raises EVENT_DRAW_ABORTED event via the api

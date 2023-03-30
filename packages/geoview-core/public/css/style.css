@@ -132,13 +132,13 @@ td {
 }
 
 .logs-container {
-  position:absolute;
-  top:0px;
-  right:0px;
-  width:200px;
-  height:100%;
-  background-color:lightgrey;
-  z-index:1;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 200px;
+  height: 100%;
+  background-color: lightgrey;
+  z-index: 1;
   overflow: auto;
   font-size: smaller;
 }

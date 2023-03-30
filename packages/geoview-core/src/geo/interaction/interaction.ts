@@ -1,6 +1,6 @@
 import { Interaction as OLInteraction } from 'ol/interaction';
-// import OLBaseEvent from 'ol/events/Event';
 import { MapViewer } from '../map/map';
+// import OLBaseEvent from 'ol/events/Event'; Uncomment this line to start handling core interaction events
 
 /**
  * Options for interactions
@@ -20,7 +20,8 @@ export abstract class Interaction {
   public mapViewer: MapViewer;
 
   /**
-   * initialize modify component
+   * Initializes the abstract interaction component
+   * @param {InteractionOptions} options the essential options for all GeoView interaction components
    */
   constructor(public options: InteractionOptions) {
     // Keep reference
@@ -28,7 +29,8 @@ export abstract class Interaction {
   }
 
   /**
-   * Starts the drawing interaction on the map
+   * Starts the specified interaction on the map
+   * @param {OLInteraction} olInteraction the Open Layer interaction module to effectively add interaction on the map with.
    */
   protected startInteraction(olInteraction: OLInteraction) {
     // Add modifier interaction on the map
@@ -36,7 +38,8 @@ export abstract class Interaction {
   }
 
   /**
-   * Stops the drawing interaction on the map
+   * Stops the specified interaction on the map
+   * @param {OLInteraction} olInteraction the Open Layer interaction module to effectively remove interaction on the map with.
    */
   protected stopInteraction(olInteraction: OLInteraction) {
     // Stop modifier interaction on the map
