@@ -12,6 +12,7 @@ import queryString from 'query-string';
 
 import { Basemap } from '../layer/basemap/basemap';
 import { Layer } from '../layer/layer';
+import { TypeFeatureStyle } from '../layer/vector/vector-types';
 
 import { api } from '../../app';
 import { EVENT_NAMES } from '../../api/events/event-types';
@@ -25,6 +26,11 @@ import { LegendApi } from '../../core/components/legend/legend-api';
 import { DetailsAPI } from '../../core/components/details/details-api';
 import { DataGridAPI } from '../../core/components/data-grid/data-grid-api';
 import { GeoviewRenderer } from '../renderer/geoview-renderer';
+import { Select } from '../interaction/select';
+import { Draw } from '../interaction/draw';
+import { Modify } from '../interaction/modify';
+import { Snap } from '../interaction/snap';
+import { Translate } from '../interaction/translate';
 
 import { ModalApi } from '../../ui';
 import { mapPayload } from '../../api/events/payloads/map-payload';
@@ -556,5 +562,80 @@ export class MapViewer {
     for (let i = 0; i < stops; ++i) coordinates.push([extent[0], extent[3] - (height * i) / stops]);
     for (let i = 0; i < coordinates.length; i++) coordinates[i] = olTransform(coordinates[i], source, destination);
     return coordinates;
+  };
+
+  /**
+   * Initializes selection interactions
+   */
+  initSelectInteractions = () => {
+    // Create selecting capabilities
+    const select = new Select({
+      mapViewer: this,
+      hitTolerance: 5,
+    });
+    select.startInteraction();
+    return select;
+  };
+
+  /**
+   * Initializes translation interactions
+   */
+  initTranslateInteractions = () => {
+    // Create selecting capabilities
+    const features = this.initSelectInteractions().ol_select.getFeatures();
+
+    // Create translating capabilities
+    const translate = new Translate({
+      mapViewer: this,
+      features,
+    });
+    translate.startInteraction();
+    return translate;
+  };
+
+  /**
+   * Initializes drawing interactions on the given vector source
+   * @param geomGroupKey the geometry group key in which to hold the geometries
+   * @param type the type of geometry to draw (Polygon, LineString, Circle, etc)
+   * @param styles the styles for the drawing
+   */
+  initDrawInteractions = (geomGroupKey: string, type: string, style: TypeFeatureStyle) => {
+    // Create the Draw component
+    const draw = new Draw({
+      mapViewer: this,
+      geometryGroupKey: geomGroupKey,
+      type,
+      style,
+    });
+    draw.startInteraction();
+    return draw;
+  };
+
+  /**
+   * Initializes modifying interactions on the given vector source
+   * @param geomGroupKey the geometry group key in which to hold the geometries
+   */
+  initModifyInteractions = (geomGroupKey: string) => {
+    // Create the modify component
+    const modify = new Modify({
+      mapViewer: this,
+      geometryGroupKey: geomGroupKey,
+    });
+    modify.startInteraction();
+    return modify;
+  };
+
+  /**
+   * Initializes snapping interactions on the given vector source
+   * @param geomGroupKey the geometry group key in which to hold the geometries
+   */
+  initSnapInteractions = (geomGroupKey: string) => {
+    // Create snapping capabilities
+    const snap = new Snap({
+      mapViewer: this,
+      geometryGroupKey: geomGroupKey,
+    });
+    snap.startInteraction();
+    return snap;
   };
 }
