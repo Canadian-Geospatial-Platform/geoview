@@ -21,6 +21,9 @@ interface TypeCSSStyleDeclaration extends CSSStyleDeclaration {
 
 export class GeoUtilities {
   /**
+   * Default drawing style for GeoView
+   * @returns an Open Layers styling for drawing on a map
+   */
   defaultDrawingStyle = (strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style => {
     // TODO: Refactoring - This method should be static, but since it goes through the api instance to be importable afterwards it loses non static methods. For this reason, I've left it like this. See api.constructor: this.geoUtilities = new GeoUtilities();
     return new Style({

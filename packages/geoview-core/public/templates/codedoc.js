@@ -122,7 +122,7 @@ function addDefaultShapes(map, groupKey) {
   map.layer.vector.setActiveGeometryGroup(groupKey);
 
   // Add dummy shapes
-  map.layer.vector.addCircleMarker([-227383, 988630], 40000, { style: { strokeColor: 'purple', strokeWidth: 2 } });
+  map.layer.vector.addCircle([-227383, 988630], { style: { strokeColor: 'purple', strokeWidth: 2, radius: 40000 } });
 
   // Add dummy shapes
   map.layer.vector.addMarkerIcon([-627383, 988630]);
