@@ -4,7 +4,13 @@ import { PayloadBaseClass } from './payload-base-class';
 
 import { EventStringId, EVENT_NAMES } from '../event-types';
 
-import { CONST_VECTOR_TYPES, TypeFeatureStyle, TypeFeatureCircleStyle, TypeOfVector } from '../../../geo/layer/vector/vector-types';
+import {
+  CONST_VECTOR_TYPES,
+  TypeFeatureStyle,
+  TypeIconStyle,
+  TypeFeatureCircleStyle,
+  TypeOfVector,
+} from '../../../geo/layer/vector/vector-types';
 
 /** Valid events that can create VectorConfigPayload */
 const validEvents: EventStringId[] = [EVENT_NAMES.VECTOR.EVENT_VECTOR_ADD, EVENT_NAMES.VECTOR.EVENT_VECTOR_REMOVE];
@@ -51,35 +57,6 @@ export interface CircleConfigPayload extends VectorConfigPayload {
 }
 
 /**
- * type guard function that redefines a PayloadBaseClass as a CircleMarkerConfigPayload
- * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsACircleMarkerConfig = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleMarkerConfigPayload => {
-  if (payloadIsAVectorConfig(verifyIfPayload)) {
-    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE_MARKER;
-  }
-  return false;
-};
-
-/**
- * Additional attributes needed to define a CircleMarkerConfigPayload
- */
-export interface CircleMarkerConfigPayload extends VectorConfigPayload {
-  coordinate: Coordinate;
-
-  radius?: number;
-
-  options?: {
-    geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-    style?: TypeFeatureCircleStyle;
-  };
-}
-
-/**
  * type guard function that redefines a PayloadBaseClass as a MarkerConfigPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
@@ -102,7 +79,7 @@ export interface MarkerConfigPayload extends VectorConfigPayload {
 
   options?: {
     geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-    style?: TypeFeatureStyle;
+    style?: TypeIconStyle;
   };
 }
 
@@ -218,41 +195,6 @@ export class VectorConfigPayload extends PayloadBaseClass {
   };
 
   /**
-   * Static method used to create a CircleMarkerConfigPayload
-   *
-   * @param {EventStringId} event the event identifier for which the payload is constructed
-   * @param {string | null} handlerName the handler Name
-   * @param {Coordinate} coordinate the circle marker long lat position
-   * @param {number} radius optional circle marker radius
-   * @param options the circle marker options
-   * @param {string} id optional circle marker identifier
-   *
-   * @returns {CircleMarkerConfigPayload} the CircleMarkerConfigPayload object created
-   */
-  static forCircleMarker = (
-    event: EventStringId,
-    handlerName: string | null,
-    coordinate: Coordinate,
-    radius?: number,
-    options?: {
-      geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-      style?: TypeFeatureCircleStyle;
-    },
-    id?: string
-  ): CircleMarkerConfigPayload => {
-    const circleMarkerConfigPayload = new VectorConfigPayload(
-      event,
-      handlerName,
-      CONST_VECTOR_TYPES.CIRCLE_MARKER,
-      id
-    ) as CircleMarkerConfigPayload;
-    circleMarkerConfigPayload.coordinate = coordinate;
-    circleMarkerConfigPayload.radius = radius;
-    circleMarkerConfigPayload.options = options;
-    return circleMarkerConfigPayload;
-  };
-
-  /**
    * Static method used to create a MarkerConfigPayload
    *
    * @param {EventStringId} event the event identifier for which the payload is constructed
@@ -269,7 +211,7 @@ export class VectorConfigPayload extends PayloadBaseClass {
     coordinate: Coordinate,
     options?: {
       geometryLayout?: 'XY' | 'XYZ' | 'XYM' | 'XYZM';
-      style?: TypeFeatureStyle;
+      style?: TypeIconStyle;
     },
     id?: string
   ): MarkerConfigPayload => {

@@ -6,8 +6,8 @@
       "layerName": { "en": "Downstream Analysis" },
       "source": {
         "dataAccessPath": {
-          "en": "https://132.156.9.48:30102/processes/downstream-analysis/execution",
-          "fr": "https://132.156.9.48:30102/processes/downstream-analysis/execution"
+          "en": "https://132.156.9.48:30102/api/processes/downstream-analysis/execution",
+          "fr": "https://132.156.9.48:30102/api/processes/downstream-analysis/execution"
         },
         "postSettings": {
           "header": {

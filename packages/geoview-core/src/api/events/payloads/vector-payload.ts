@@ -43,28 +43,6 @@ export interface CirclePayload extends VectorPayload {
 }
 
 /**
- * type guard function that redefines a PayloadBaseClass as a CircleMarkerPayload
- * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {PayloadBaseClass} verifyIfPayload object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export const payloadIsACircleMarker = (verifyIfPayload: PayloadBaseClass): verifyIfPayload is CircleMarkerPayload => {
-  if (payloadIsAVector(verifyIfPayload)) {
-    return verifyIfPayload?.type === CONST_VECTOR_TYPES.CIRCLE_MARKER;
-  }
-  return false;
-};
-
-/**
- * Additional attributes needed to define a CircleMarkerPayload
- */
-export interface CircleMarkerPayload extends VectorPayload {
-  circleMarker: Feature;
-}
-
-/**
  * type guard function that redefines a PayloadBaseClass as a MarkerPayload
  * if the type attribute of the verifyIfPayload parameter is valid. The type ascention
  * applies only to the true block of the if clause.
@@ -166,21 +144,6 @@ export class VectorPayload extends PayloadBaseClass {
     const circlePayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.CIRCLE) as CirclePayload;
     circlePayload.circle = circle;
     return circlePayload;
-  };
-
-  /**
-   * Static method used to create a CircleMarkerPayload
-   *
-   * @param {EventStringId} event the event identifier for which the payload is constructed
-   * @param {string | null} handlerName the handler Name
-   * @param {Feature} circleMarker the circle marker payload
-   *
-   * @returns {CircleMarkerPayload} the CircleMarkerPayload object created
-   */
-  static forCircleMarker = (event: EventStringId, handlerName: string | null, circleMarker: Feature): CircleMarkerPayload => {
-    const circleMarkerPayload = new VectorPayload(event, handlerName, CONST_VECTOR_TYPES.CIRCLE_MARKER) as CircleMarkerPayload;
-    circleMarkerPayload.circleMarker = circleMarker;
-    return circleMarkerPayload;
   };
 
   /**
